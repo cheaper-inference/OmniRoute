@@ -395,7 +395,7 @@ type FakeCommand = {
   command: () => FakeCommand;
   description: () => FakeCommand;
   option: (flags: string, description?: string, defaultValue?: unknown) => FakeCommand;
-  action: () => FakeCommand;
+  action: (fn?: unknown) => FakeCommand;
 };
 
 function tmp(prefix: string) {
@@ -983,3 +983,255 @@ test("without the option, runUpdateCommand never touches the managed path", asyn
     fs.rmSync(fakeBin, { recursive: true, force: true });
   }
 });
+
+// ---------------------------------------------------------------------------------------
+// runUpdateCommand / runManagedUpdateFromCli branches
+// ---------------------------------------------------------------------------------------
+
+// A fake `npm` first on PATH: `view` reports a newer release, `root -g` fails (so the real
+// pre-flight of this checkout is "not a global install"), and `install` fails without
+// changing anything, so the standard flow can run to its end with no side effect.
+function withFakeNpm<T>(fn: (calls: string) => Promise<T>) {
+  return async () => {
+    const fakeBin = tmp("omni-tx-cmd-npm-");
+    const calls = path.join(fakeBin, "calls");
+    fs.writeFileSync(
+      path.join(fakeBin, "npm"),
+      `#!/bin/sh\necho "$@" >> "${calls}"\nif [ "$1" = "view" ]; then echo "99.0.0"; exit 0; fi\nexit 1\n`,
+      { mode: 0o755 }
+    );
+    const origPath = process.env.PATH;
+    process.env.PATH = fakeBin + path.delimiter + (origPath ?? "");
+    try {
+      return await fn(calls);
+    } finally {
+      if (origPath === undefined) delete process.env.PATH;
+      else process.env.PATH = origPath;
+      fs.rmSync(fakeBin, { recursive: true, force: true });
+    }
+  };
+}
+
+test(
+  "--rollback-on-failure with --dry-run only announces the snapshot and changes nothing",
+  withFakeNpm(async (calls) => {
+    const out = captureConsole();
+    try {
+      const code = await update.runUpdateCommand({ rollbackOnFailure: true, dryRun: true });
+      assert.equal(code, 0);
+      assert.match(out.lines.join("\n"), /--rollback-on-failure: would snapshot/);
+      assert.doesNotMatch(fs.readFileSync(calls, "utf8"), /install/);
+    } finally {
+      out.restore();
+    }
+  })
+);
+
+test(
+  "--rollback-on-failure on an unsupported host warns and continues with the standard update",
+  withFakeNpm(async (calls) => {
+    const out = captureConsole();
+    try {
+      const code = await update.runUpdateCommand({
+        rollbackOnFailure: true,
+        yes: true,
+        backup: false,
+      });
+      const text = out.lines.join("\n");
+      assert.match(text, /--rollback-on-failure is not available here/);
+      assert.match(text, /Continuing with the standard update, without automatic rollback/);
+      // The standard flow ran: it asked npm to install and reported its failure.
+      assert.match(fs.readFileSync(calls, "utf8"), /install -g omniroute@latest/);
+      assert.match(text, /Update failed/);
+      assert.equal(code, 1);
+    } finally {
+      out.restore();
+    }
+  })
+);
+
+test(
+  "without --rollback-on-failure the standard flow never asks the managed pre-flight",
+  withFakeNpm(async () => {
+    const out = captureConsole();
+    try {
+      await update.runUpdateCommand({ yes: true, backup: false });
+      assert.doesNotMatch(out.lines.join("\n"), /rollback-on-failure|automatic recovery/);
+    } finally {
+      out.restore();
+    }
+  })
+);
+
+test("runManagedUpdateFromCli refuses a version that is not an exact release number", async () => {
+  const out = captureConsole();
+  try {
+    for (const [current, latest] of [
+      ["3.8.54", "latest"],
+      ["", "3.8.55"],
+      ["3.8.54", "3.8.55; id"],
+    ]) {
+      const result = await update.runManagedUpdateFromCli({ current, latest });
+      assert.deepEqual(result, { handled: true, exitCode: 1 });
+    }
+    assert.match(out.lines.join("\n"), /not an exact release number/);
+  } finally {
+    out.restore();
+  }
+});
+
+test("runManagedUpdateFromCli follows a launched operation through the real state file", async () => {
+  const dataDir = process.env.DATA_DIR as string;
+  const phases: string[] = [];
+  const launched: Array<{ plan: { operationId: string; targetVersion: string } }> = [];
+  const out = captureConsole();
+  try {
+    const result = await update.runManagedUpdateFromCli({
+      current: "3.8.54",
+      latest: "3.8.55",
+      deps: {
+        preflight: async () => ({ kind: "ok", runtime: { dataDir }, environment: {} }),
+        // The coordinator is not spawned: the fake launch writes the verdicts it would write.
+        launch: async (input: { plan: { operationId: string; targetVersion: string } }) => {
+          launched.push(input);
+          const store = tx.createStateStore(dataDir, input.plan.operationId);
+          const base = {
+            operationId: input.plan.operationId,
+            previousVersion: "3.8.54",
+            targetVersion: "3.8.55",
+          };
+          store.record({ ...base, status: "running", phase: "installing" });
+          setTimeout(
+            () =>
+              store.record({
+                ...base,
+                status: "updated",
+                phase: "finished",
+                runningVersion: "3.8.55",
+              }),
+            50
+          );
+        },
+      },
+    });
+    assert.deepEqual(result, { handled: true, exitCode: 0 });
+    assert.equal(launched.length, 1);
+    assert.equal(launched[0].plan.targetVersion, "3.8.55");
+    for (const line of out.lines) {
+      const match = line.match(/phase: (\w+)/);
+      if (match) phases.push(match[1]);
+    }
+    assert.ok(phases.includes("installing"));
+  } finally {
+    out.restore();
+  }
+});
+
+test("runManagedUpdateFromCli reports a coordinator that could not start, an unsupported verdict and a wait that ran out", async () => {
+  const out = captureConsole();
+  const ok = async () => ({ kind: "ok", runtime: {}, environment: {} });
+  try {
+    const failedLaunch = await update.runManagedUpdateFromCli({
+      current: "3.8.54",
+      latest: "3.8.55",
+      deps: {
+        preflight: ok,
+        launch: async () => {
+          throw new Error("EACCES: /secret/path");
+        },
+      },
+    });
+    assert.deepEqual(failedLaunch, { handled: true, exitCode: 1 });
+    assert.match(out.lines.join("\n"), /Could not start the update coordinator/);
+    assert.doesNotMatch(out.lines.join("\n"), /secret/);
+
+    out.lines.length = 0;
+    const unsupported = await update.runManagedUpdateFromCli({
+      current: "3.8.54",
+      latest: "3.8.55",
+      deps: {
+        preflight: ok,
+        launch: async () => ({}),
+        wait: async () => ({ status: "unsupported", reason: "target-unavailable" }),
+      },
+    });
+    assert.equal(unsupported.exitCode, 1);
+    assert.match(out.lines.join("\n"), /Update not applied: target-unavailable/);
+
+    out.lines.length = 0;
+    const timedOut = await update.runManagedUpdateFromCli({
+      current: "3.8.54",
+      latest: "3.8.55",
+      deps: {
+        preflight: ok,
+        launch: async () => ({}),
+        wait: async () => ({ status: "running", phase: "installing", timedOut: true }),
+      },
+    });
+    assert.equal(timedOut.exitCode, 1);
+    assert.match(out.lines.join("\n"), /Still waiting for the update to finish/);
+    assert.match(out.lines.join("\n"), /state\.json/);
+  } finally {
+    out.restore();
+  }
+});
+
+test("runManagedUpdateFromCli explains each refusal and each unsupported reason in words", async () => {
+  const out = captureConsole();
+  try {
+    for (const [kind, reason, pattern] of [
+      ["unsupported", "container", /this is a container/],
+      ["unsupported", "other-supervisor", /systemd, pm2/],
+      ["unsupported", "never-heard-of-it", /never-heard-of-it/],
+      ["refused", "update-in-progress", /another managed update is already running/],
+      ["refused", "insufficient-disk-space", /not enough free disk space/],
+    ] as const) {
+      out.lines.length = 0;
+      const result = await update.runManagedUpdateFromCli({
+        current: "3.8.54",
+        latest: "3.8.55",
+        deps: { preflight: async () => ({ kind, reason }) },
+      });
+      assert.equal(result.handled, kind === "refused", reason);
+      assert.match(out.lines.join("\n"), pattern, reason);
+    }
+  } finally {
+    out.restore();
+  }
+});
+
+test(
+  "the registered update action forwards --rollback-on-failure and exits only on a non-zero code",
+  withFakeNpm(async () => {
+    type Action = (opts: Record<string, unknown>, cmd: unknown) => Promise<void>;
+    let action: Action | undefined;
+    const fakeCommand: FakeCommand = {
+      command: () => fakeCommand,
+      description: () => fakeCommand,
+      option: () => fakeCommand,
+      action: (fn?: unknown) => {
+        action = fn as Action;
+        return fakeCommand;
+      },
+    };
+    update.registerUpdate({ command: () => fakeCommand });
+    assert.ok(action);
+    const exits: number[] = [];
+    const realExit = process.exit;
+    process.exit = ((code?: number) => {
+      exits.push(code ?? 0);
+    }) as typeof process.exit;
+    const out = captureConsole();
+    try {
+      const cmd = { optsWithGlobals: () => ({ output: "text" }) };
+      await action({ rollbackOnFailure: true, dryRun: true }, cmd);
+      assert.deepEqual(exits, [], "a dry run succeeds without exiting");
+      assert.match(out.lines.join("\n"), /--rollback-on-failure: would snapshot/);
+      await action({ check: true }, cmd);
+      assert.deepEqual(exits, [1], "an outdated install exits 1 for scripts");
+    } finally {
+      process.exit = realExit;
+      out.restore();
+    }
+  })
+);

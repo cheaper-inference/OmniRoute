@@ -33,6 +33,7 @@ const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const tx = await import("../../bin/cli/updateTransaction.mjs");
 const managed = await import("../../src/lib/system/managedUpdate.ts");
+const http = await import("../../src/lib/system/managedUpdateHttp.ts");
 const route = await import("../../src/app/api/system/version/route.ts");
 const { APP_CONFIG } = await import("../../src/shared/constants/appConfig.ts");
 
@@ -367,4 +368,123 @@ test("readManagedUpdateOutcome returns the verdict for a finished operation and 
     runningVersion: "3.8.54",
   });
   assert.equal(await managed.readManagedUpdateOutcome("not-a-uuid"), null);
+});
+
+// -----------------------------------------------------------------------------------------
+// The HTTP answers of POST /api/system/version, in process
+// -----------------------------------------------------------------------------------------
+
+test("managedUpdateResponse answers 202 with the operation id when the launch is accepted", async () => {
+  const response = await http.managedUpdateResponse("npm", "3.8.54", "3.8.55", {
+    enabled: () => true,
+    preflight: okPreflight(),
+    launch: async (input: LaunchInput) => ({ operationId: input.plan.operationId }),
+    currentVersion: () => "3.8.54",
+  });
+  assert.ok(response);
+  assert.equal(response.status, 202);
+  const body = await response.json();
+  assert.equal(body.success, true);
+  assert.equal(body.status, "accepted");
+  assert.match(body.operationId, /^[0-9a-f-]{36}$/);
+  assert.equal(body.from, "3.8.54");
+  assert.equal(body.to, "3.8.55");
+  assert.equal(body.channel, "npm-managed");
+});
+
+test("managedUpdateResponse answers 409 with a fixed message when the launch is refused", async () => {
+  const response = await http.managedUpdateResponse("npm", "3.8.54", "3.8.55", {
+    enabled: () => true,
+    preflight: async () => ({ kind: "refused", reason: "update-in-progress" }),
+    launch: async () => ({ operationId: "x" }),
+    currentVersion: () => "3.8.54",
+  });
+  assert.ok(response);
+  assert.equal(response.status, 409);
+  const body = await response.json();
+  assert.equal(body.success, false);
+  assert.equal(body.code, "update-in-progress");
+  assert.match(body.error, /already running/);
+  assert.equal(body.channel, "npm-managed");
+});
+
+test("managedUpdateResponse gives an unknown refusal code a generic message, never the raw reason", async () => {
+  const response = await http.managedUpdateResponse("npm", "3.8.54", "3.8.55", {
+    enabled: () => true,
+    preflight: async () => ({ kind: "refused", reason: "some-new-reason" }),
+    launch: async () => ({ operationId: "x" }),
+    currentVersion: () => "3.8.54",
+  });
+  assert.ok(response);
+  const body = await response.json();
+  assert.equal(body.code, "some-new-reason");
+  assert.match(body.error, /refused before any change/);
+});
+
+test("managedUpdateResponse is null (today's flow) for the flag off, other modes and unsupported hosts", async () => {
+  const hooks = (kind: string) => ({
+    enabled: () => true,
+    preflight: async () => ({ kind, reason: "container" }),
+    launch: async () => ({ operationId: "x" }),
+    currentVersion: () => "3.8.54",
+  });
+  assert.equal(
+    await http.managedUpdateResponse("npm", "3.8.54", "3.8.55", {
+      ...hooks("unsupported"),
+      enabled: () => false,
+    }),
+    null
+  );
+  assert.equal(
+    await http.managedUpdateResponse("source", "3.8.54", "3.8.55", hooks("refused")),
+    null
+  );
+  assert.equal(
+    await http.managedUpdateResponse("npm", "3.8.54", "3.8.55", hooks("unsupported")),
+    null
+  );
+});
+
+test("managedUpdateStateResponse: 400 for a malformed id, 404 for an unknown one, 200 with the state", async () => {
+  const bad = http.managedUpdateStateResponse("../../etc/passwd");
+  assert.equal(bad.status, 400);
+  assert.equal(bad.headers.get("cache-control"), "no-store");
+  const unknown = http.managedUpdateStateResponse("11111111-2222-4333-8444-555555555555");
+  assert.equal(unknown.status, 404);
+  seedState();
+  const known = http.managedUpdateStateResponse(OPERATION_ID);
+  assert.equal(known.status, 200);
+  assert.equal((await known.json()).status, "rolled-back");
+});
+
+test("launchManagedUpdate with the real pre-flight refuses to touch a host that is not a managed global install", async () => {
+  // Nothing here installs, stops or spawns: the pre-flight of this checkout is "unsupported",
+  // and the launch is never reached.
+  let launches = 0;
+  await assert.rejects(
+    managed.launchManagedUpdate("3.8.55", {
+      launch: async () => {
+        launches += 1;
+        return { operationId: "x" };
+      },
+      currentVersion: () => "3.8.54",
+    }),
+    (err: { kind?: string }) => err.kind === "unsupported" || err.kind === "refused"
+  );
+  assert.equal(launches, 0);
+});
+
+test("readManagedUpdateState drops a state that does not match the public contract", () => {
+  assert.equal(managed.readManagedUpdateState("not-a-uuid"), null);
+  seedState({ status: "exploded" });
+  assert.equal(managed.readManagedUpdateState(OPERATION_ID), null);
+});
+
+test("the flag reads as off by default and as on when set", () => {
+  process.env.MANAGED_UPDATE_ROLLBACK_ENABLED = "true";
+  assert.equal(managed.isManagedUpdateRollbackEnabled(), true);
+  process.env.MANAGED_UPDATE_ROLLBACK_ENABLED = "false";
+  assert.equal(managed.isManagedUpdateRollbackEnabled(), false);
+  delete process.env.MANAGED_UPDATE_ROLLBACK_ENABLED;
+  assert.equal(managed.isManagedUpdateRollbackEnabled(), false);
 });

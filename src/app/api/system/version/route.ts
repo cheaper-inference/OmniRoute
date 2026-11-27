@@ -32,12 +32,8 @@ import { resolveGlobalOmniroutePath } from "@/lib/system/globalPackagePath";
 import { restartRunningServer } from "@/lib/system/processManagerRestart";
 import { formatUpdateInstallError } from "@/lib/system/updateInstallError";
 import { APP_CONFIG } from "@/shared/constants/appConfig";
-import {
-  isManagedUpdateRollbackEnabled,
-  managedUpdateOperationIdSchema,
-  maybeLaunchManagedUpdate,
-  readManagedUpdateState,
-} from "@/lib/system/managedUpdate";
+import { isManagedUpdateRollbackEnabled } from "@/lib/system/managedUpdate";
+import { managedUpdateResponse, managedUpdateStateResponse } from "@/lib/system/managedUpdateHttp";
 // #5542 — On Windows npm is `npm.cmd`; Node ≥24 refuses to execFile a `.cmd` without
 // a shell (nodejs/node#52554 → "spawn npm ENOENT"). buildNpmExecOptions enables the
 // shell on win32 only; SERVICE_VERSION_PATTERN keeps the shell-joined version safe.
@@ -63,47 +59,6 @@ async function sendRestartStep(send: (data: Record<string, unknown>) => void): P
   send({ step: "restart", status: "running", message: "Restarting service..." });
   const outcome = await restartRunningServer();
   send({ step: "restart", status: outcome.status, message: outcome.message });
-}
-
-async function managedUpdateResponse(mode: string, current: string, latest: string) {
-  const managed = await maybeLaunchManagedUpdate({ mode, latest });
-  if (managed.kind === "accepted") {
-    clearLatestVersionCache();
-    return NextResponse.json(
-      {
-        success: true,
-        operationId: managed.operationId,
-        status: "accepted",
-        message: `Update to v${latest} started. The service stops briefly while it is swapped and checked.`,
-        from: current,
-        to: latest,
-        channel: "npm-managed",
-      },
-      { status: 202 }
-    );
-  }
-  if (managed.kind === "refused") {
-    return NextResponse.json(
-      { success: false, error: managed.message, code: managed.code, channel: "npm-managed" },
-      { status: 409 }
-    );
-  }
-  return null;
-}
-
-function managedUpdateStateResponse(operationId: string) {
-  const noStore = { "Cache-Control": "no-store" };
-  if (!managedUpdateOperationIdSchema.safeParse(operationId).success) {
-    return NextResponse.json({ error: "Invalid operationId" }, { status: 400, headers: noStore });
-  }
-  const state = readManagedUpdateState(operationId);
-  if (!state) {
-    return NextResponse.json(
-      { error: "Unknown update operation" },
-      { status: 404, headers: noStore }
-    );
-  }
-  return NextResponse.json(state, { headers: noStore });
 }
 
 async function getNews() {
