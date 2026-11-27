@@ -1365,26 +1365,17 @@ async function handleGeminiImageGeneration({ model, providerConfig, body, creden
   }
 }
 
-/**
- * Handle OpenAI-compatible image generation (standard providers + Nebius fallback)
- */
-function prepareOpenAIJpegAlias(provider: string, body: Record<string, unknown>) {
+function normalizeOpenAIJpegAlias(provider: string, body: Record<string, unknown>) {
   const format = body.output_format;
   if (
     provider !== "openai" ||
     typeof format !== "string" ||
     format.trim().toLowerCase() !== "jpg"
   ) {
-    return undefined;
+    return body;
   }
 
-  const compression = body.output_compression;
-  return {
-    output_format: "jpeg",
-    ...(typeof compression === "number" && Number.isFinite(compression)
-      ? { output_compression: compression }
-      : {}),
-  };
+  return { ...body, output_format: "jpeg" };
 }
 
 function buildAgnesImageRequestBody(model, body) {
@@ -1425,8 +1416,7 @@ async function handleOpenAIImageGeneration({
   longJobs,
 }) {
   const startTime = Date.now();
-  const jpegAlias = prepareOpenAIJpegAlias(provider, body);
-  if (jpegAlias) body = { ...body, output_format: jpegAlias.output_format };
+  body = normalizeOpenAIJpegAlias(provider, body);
 
   // Summarized request for call log
   const logRequestBody = {
@@ -1444,11 +1434,7 @@ async function handleOpenAIImageGeneration({
   const upstreamBody: Record<string, unknown> =
     providerConfig.format === "agnes-image"
       ? buildAgnesImageRequestBody(model, body)
-      : {
-          model,
-          prompt: body.prompt,
-          ...jpegAlias,
-        };
+      : { model, prompt: body.prompt };
 
   if (providerConfig.format === "xai-image") {
     const request = buildXaiImageRequest(model, body);
