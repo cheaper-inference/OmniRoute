@@ -338,6 +338,14 @@ export async function getSettings() {
     // Opt-in: the public /v1/models listing advertises only combos (user combos +
     // auto/*). Catalog-only — explicit provider/model ids still route.
     exposeCombosOnly: false,
+    // Opt-in per-provider default: mark a whole provider "combos only". Every model of that
+    // provider with no explicit visibility override is hidden from `/v1/models` and rejected
+    // on a direct call, but stays dispatchable from a stored combo. An explicit `visible`
+    // override on one model is the positive exception over this default. Entries accept a
+    // canonical provider id, an alias, or a compatible-provider node id/prefix — same forms
+    // as `blockedProviders`. Empty by default (Hard Rule #20 spirit: never hide on the
+    // operator's behalf).
+    combosOnlyProviders: [],
     // #11481: Opt-in explicit model exposure allow/deny list, mirrored into the
     // auto/* combo candidate pool (open-sse/services/autoCombo/modelExposureFilter.ts)
     // so a denied model can't sneak back in via combo routing — the same trap

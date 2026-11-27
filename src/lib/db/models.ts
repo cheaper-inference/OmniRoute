@@ -23,6 +23,15 @@ import {
 } from "./models/syncedAvailableModelPersistence";
 import { finishModelCatalogWriteWithBackup } from "./models/modelCatalogWriteSignals";
 import {
+  MODEL_VISIBILITY_MODES,
+  isHiddenForModality,
+  normalizeVisibilityMode,
+  resolveExplicitVisibility,
+  type ModelVisibilityFlags,
+  type ModelVisibilityMode,
+} from "@/shared/utils/modelVisibility";
+import { getModelVisibilityMap } from "./models/visibility";
+import {
   readCompatList,
   writeCompatList,
   deepMergeCompatByProtocol,
@@ -31,7 +40,6 @@ import {
   sanitizeUpstreamHeadersMap,
   removeModelCompatOverride,
   mergeModelCompatOverride,
-  isOverrideHiddenForModality,
   type CompatByProtocolMap,
   type ModelCompatProtocolKey,
   type ModelCompatOverride,
@@ -41,6 +49,7 @@ import {
 export {
   sanitizeUpstreamHeadersMap,
   getModelCompatOverrides,
+  getOverrideVisibilityForModality,
   mergeModelCompatOverride,
   removeModelCompatOverride,
   MODEL_COMPAT_PROTOCOL_KEYS,
@@ -59,6 +68,13 @@ export {
   unmarkManagedModelAlias,
 } from "./models/aliases";
 export { getMitmAlias, setMitmAliasAll } from "./models/mitmAlias";
+export {
+  getModelVisibilityMap,
+  readStoredVisibility,
+  setCompatModelVisibility,
+  getCompatListVisibility,
+  type ModelVisibilityMap,
+} from "./models/visibility";
 export type { SyncedAvailableModel } from "./models/synced";
 export {
   admitConnectionModels,
@@ -850,6 +866,15 @@ export async function updateCustomModel(
       : {}),
     ...(updates.isHidden !== undefined ? { isHidden: Boolean(updates.isHidden) } : {}),
   };
+  // Three-state visibility on the operator-declared row: `hidden` mirrors into the legacy
+  // `isHidden` flag (so pre-three-state readers agree), `combos_only` / `visible` clear it.
+  if (Object.prototype.hasOwnProperty.call(updates, "visibilityMode")) {
+    const mode = normalizeVisibilityMode(updates.visibilityMode);
+    if (!mode) delete next.visibilityMode;
+    else next.visibilityMode = mode;
+    if (mode === "hidden") next.isHidden = true;
+    else delete next.isHidden;
+  }
   applyTriStateBooleanOverride(next, updates, "preserveOpenAIDeveloperRole");
   // #1904: manual vision-capability override — `null` clears back to the
   // id-based heuristic in getCustomVisionCapabilityFields().
@@ -1081,11 +1106,49 @@ export function getModelIsHidden(
   modality: string = "chat"
 ): boolean {
   const m = getCustomModelRow(providerId, modelId);
-  if (m && Object.prototype.hasOwnProperty.call(m, "isHidden")) {
-    return Boolean(m.isHidden);
+  if (m) {
+    // A custom row is the operator-declared winner. Resolve it through the shared
+    // three-state rule so an explicit `combos_only`/`visible` entry is never read as hidden.
+    const explicit = resolveExplicitVisibility(m as ModelVisibilityFlags, modality);
+    if (explicit) return explicit === "hidden";
   }
   const co = readCompatList(providerId).find((e) => e.id === modelId);
-  return isOverrideHiddenForModality(co, modality);
+  return isHiddenForModality(co, modality);
+}
+
+/**
+ * True when a model's own override says `combos_only` — a model reachable from a stored combo
+ * but not from `/v1/models` or a direct call. Provider-level `combosOnlyProviders` inheritance
+ * is resolved by the callers that have the settings in hand (`getModelVisibilityMap` + the
+ * shared `resolveEffectiveVisibility`), so this helper stays a pure per-model read.
+ */
+export function isModelCombosOnly(
+  providerId: string,
+  modelId: string,
+  modality: string = "chat"
+): boolean {
+  return getModelStoredVisibility(providerId, modelId, modality) === "combos_only";
+}
+
+/**
+ * The explicit visibility one model states, without resolving it against the provider-level
+ * default — that resolution needs `settings.combosOnlyProviders`, which the caller has.
+ *
+ * Per-model read (custom-model row first, then the compat-override list). Prefer
+ * `getModelVisibilityMap(modality)` when resolving more than a handful of models.
+ */
+export function getModelStoredVisibility(
+  providerId: string,
+  modelId: string,
+  modality: string = "chat"
+): ModelVisibilityMode | null {
+  const m = getCustomModelRow(providerId, modelId);
+  if (m) {
+    const explicit = resolveExplicitVisibility(m as ModelVisibilityFlags, modality);
+    if (explicit) return explicit;
+  }
+  const co = readCompatList(providerId).find((e) => e.id === modelId);
+  return resolveExplicitVisibility(co as ModelVisibilityFlags | undefined, modality);
 }
 
 /**
@@ -1093,73 +1156,56 @@ export function getModelIsHidden(
  * and customModels, scoped to one `modality` (default "chat", matching every
  * pre-#12172 caller's original chat-only intent). Used by auto-combo candidate
  * building to skip user-hidden models. Single bulk DB query — not N+1 per model.
+ *
+ * `combos_only` models are deliberately NOT in this map: combo execution must keep reaching
+ * them. Use `getModelVisibilityMap(modality).combosOnly` for the direct-use/catalog filter.
  */
 export function getHiddenModelsByProvider(modality: string = "chat"): Map<string, Set<string>> {
-  const db = getDbInstance();
-  const visibilityByProvider = new Map<string, Map<string, boolean>>();
-  const rows = db
-    .prepare(
-      "SELECT namespace, key, value FROM key_value WHERE namespace IN ('modelCompatOverrides', 'customModels')"
-    )
-    .all() as Array<{ namespace: string; key: string; value: string | null }>;
+  return getModelVisibilityMap(modality).hidden;
+}
 
-  for (const namespace of ["modelCompatOverrides", "customModels"]) {
-    for (const row of rows) {
-      if (row.namespace !== namespace || !row.value) continue;
-      try {
-        const parsed = JSON.parse(row.value);
-        if (!Array.isArray(parsed)) continue;
-        for (const entry of parsed) {
-          if (!entry || typeof entry !== "object") continue;
-          const modelId = (entry as { id?: unknown }).id;
-          if (typeof modelId !== "string" || modelId.length === 0) continue;
-          const record = entry as { isHidden?: unknown; hiddenModalities?: unknown };
-          const hasHiddenInfo =
-            Object.prototype.hasOwnProperty.call(record, "isHidden") ||
-            (namespace === "modelCompatOverrides" &&
-              record.hiddenModalities &&
-              typeof record.hiddenModalities === "object");
-          if (!hasHiddenInfo) continue;
-          // #12172: customModels rows have no modality scope (single user-managed
-          // entry) — legacy global isHidden applies to every modality unchanged.
-          const isHidden =
-            namespace === "modelCompatOverrides"
-              ? isOverrideHiddenForModality(
-                  {
-                    isHidden: Boolean(record.isHidden),
-                    hiddenModalities: record.hiddenModalities as
-                      Record<string, boolean> | undefined,
-                  },
-                  modality
-                )
-              : Boolean(record.isHidden);
-          let visibility = visibilityByProvider.get(row.key);
-          if (!visibility) {
-            visibility = new Map<string, boolean>();
-            visibilityByProvider.set(row.key, visibility);
-          }
-          visibility.set(modelId, isHidden);
-        }
-      } catch {
-        // Skip malformed entries
-      }
-    }
+/**
+ * Persist one model's three-state visibility.
+ *
+ * Stores the override on the operator-declared custom-model row when one exists (that row is
+ * global — a single user-managed entry, so it always means "every modality"), otherwise on the
+ * compat-override list, where `modality` scopes the write to one endpoint/registry.
+ *
+ * `mode === null` clears the override and falls back to the provider default. `hidden` is
+ * mirrored into the legacy `isHidden` flags; `combos_only` is deliberately not, so a stored
+ * combo can keep dispatching the model.
+ */
+export function setModelVisibility(
+  providerId: string,
+  modelId: string,
+  mode: ModelVisibilityMode | null,
+  modality?: string
+): void {
+  if (mode !== null && !MODEL_VISIBILITY_MODES.includes(mode)) return;
+  const customRow = getCustomModelRow(providerId, modelId);
+  if (customRow) {
+    // The operator-declared row is global (one entry per model), so a modality never scopes
+    // this write. Only `visibilityMode` is passed: `updateCustomModel` mirrors `hidden` into
+    // the legacy `isHidden` flag and deletes that flag for the other modes, including `null`
+    // (cleared back to the provider default). Sending `isHidden: false` on a clear would be an
+    // explicit `visible` statement and would keep outranking the provider default.
+    updateCustomModel(providerId, modelId, { visibilityMode: mode });
+    return;
   }
-
-  return new Map(
-    [...visibilityByProvider].flatMap(([providerId, visibility]) => {
-      const hiddenModels = [...visibility].flatMap(([modelId, isHidden]) =>
-        isHidden ? [modelId] : []
-      );
-      return hiddenModels.length > 0 ? [[providerId, new Set(hiddenModels)] as const] : [];
-    })
-  );
+  mergeModelCompatOverride(providerId, modelId, { visibilityMode: mode, modality });
 }
 
 /**
  * Persist the hidden flag for a model. Stores the override on the custom-model
  * row when one exists, otherwise on the compat-override list. Setting
  * `hidden = false` is a no-op when the model is already visible.
+ *
+ * The legacy `isHidden` flag alone is not enough once three-state visibility exists: an
+ * explicit `visibilityMode: "combos_only"` outranks it, so a health check that hides a
+ * `combos_only` model would be silently ignored. Hiding therefore also writes
+ * `visibilityMode: "hidden"`. Un-hiding clears the mode only when it still says `hidden` —
+ * clearing it unconditionally would erase an operator's own `combos_only`/`visible` choice,
+ * which this health-check path has no business deciding.
  */
 export function setModelIsHidden(
   providerId: string,
@@ -1169,10 +1215,16 @@ export function setModelIsHidden(
 ): void {
   const customRow = getCustomModelRow(providerId, modelId);
   if (customRow) {
+    const hasLegacyFlag = Object.prototype.hasOwnProperty.call(customRow, "isHidden");
     if (hidden) {
-      updateCustomModel(providerId, modelId, { isHidden: true });
-    } else if (Object.prototype.hasOwnProperty.call(customRow, "isHidden")) {
-      updateCustomModel(providerId, modelId, { isHidden: false });
+      updateCustomModel(providerId, modelId, { isHidden: true, visibilityMode: "hidden" });
+    } else if (hasLegacyFlag || customRow.visibilityMode !== undefined) {
+      // Keep an explicit `combos_only`/`visible` statement; only drop a `hidden` one.
+      const clearsStoredMode = normalizeVisibilityMode(customRow.visibilityMode) === "hidden";
+      updateCustomModel(providerId, modelId, {
+        isHidden: false,
+        ...(clearsStoredMode ? { visibilityMode: null } : {}),
+      });
     }
     return;
   }
@@ -1181,7 +1233,14 @@ export function setModelIsHidden(
   // `isHidden` flag — it only sets/clears that one modality's override, so an
   // identically-ID'd model in a different modality's registry is unaffected.
   if (modality) {
-    mergeModelCompatOverride(providerId, modelId, { isHidden: hidden, modality });
+    const existing = readCompatList(providerId).find((entry) => entry.id === modelId);
+    const storedMode = existing?.visibilityModalities?.[modality];
+    const clearsStoredMode = normalizeVisibilityMode(storedMode) === "hidden";
+    mergeModelCompatOverride(providerId, modelId, {
+      isHidden: hidden,
+      visibilityMode: hidden ? "hidden" : clearsStoredMode ? null : storedMode,
+      modality,
+    });
     return;
   }
 
@@ -1189,7 +1248,12 @@ export function setModelIsHidden(
   const idx = list.findIndex((e) => e.id === modelId);
   if (hidden) {
     const prev = idx >= 0 ? list[idx] : { id: modelId };
-    const next: ModelCompatOverride = { ...prev, id: modelId, isHidden: true };
+    const next: ModelCompatOverride = {
+      ...prev,
+      id: modelId,
+      isHidden: true,
+      visibilityMode: "hidden",
+    };
     if (idx >= 0) list[idx] = next;
     else list.push(next);
     writeCompatList(providerId, list);
@@ -1204,6 +1268,10 @@ export function setModelIsHidden(
     return;
   }
   delete list[idx].isHidden;
+  // Keep an explicit `combos_only`/`visible` statement; only drop a `hidden` one.
+  if (normalizeVisibilityMode(list[idx].visibilityMode) === "hidden") {
+    delete list[idx].visibilityMode;
+  }
   writeCompatList(providerId, list);
 }
 

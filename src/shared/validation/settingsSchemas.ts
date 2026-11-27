@@ -236,6 +236,12 @@ export const updateSettingsSchema = z.object({
   hideAutoCombos: z.boolean().optional(),
   hideNoThinkVariants: z.boolean().optional(),
   exposeCombosOnly: z.boolean().optional(),
+  // Opt-in per-provider default visibility (`combos_only`): accepts a canonical provider id,
+  // an alias, or a compatible-provider node id/prefix — the same forms `blockedProviders`
+  // accepts. A model with no explicit override inherits it; an explicit `visible` override on
+  // the model is the positive exception. Independent of `exposeCombosOnly`, which only trims
+  // the public catalog listing.
+  combosOnlyProviders: z.array(z.string().max(100)).max(500).optional(),
   // STRICT_ZERO_COST (opt-in, default "off"): stricter than hidePaidModels — a
   // candidate must be keyless (no credential exists, so no request against it
   // can ever be billed) OR pass a live, fresh, hard-stop-guaranteed quota
