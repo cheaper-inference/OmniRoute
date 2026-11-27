@@ -21,6 +21,7 @@ export const vertexProvider: RegistryEntry = {
   authHeader: "bearer",
   models: [
     { id: "gemini-4-argon", name: "Gemini 4 Argon (Vertex)" },
+    { id: "gemini-4-hydrogen", name: "Gemini 4 Hydrogen (Vertex)" },
     { id: "gemini-3.7-flash", name: "Gemini 3.7 Flash (Vertex)" },
     { id: "gemini-3.6-flash", name: "Gemini 3.6 Flash (Vertex)" },
     { id: "gemini-3.5-flash", name: "Gemini 3.5 Flash (Vertex)" },
@@ -48,6 +49,7 @@ export const vertexProvider: RegistryEntry = {
     },
     { id: "zai-org/glm-5-maas", name: "GLM 5 (Vertex MaaS)", targetFormat: "openai" },
     ...VERTEX_XAI_MODELS,
+    { id: "claude-fable-5-2", name: "Claude Fable 5.2 (Vertex)", targetFormat: "claude" },
     { id: "claude-fable-5-1", name: "Claude Fable 5.1 (Vertex)", targetFormat: "claude" },
     { id: "claude-fable-5", name: "Claude Fable 5 (Vertex)", targetFormat: "claude" },
     { id: "claude-opus-5-5", name: "Claude Opus 5.5 (Vertex)", targetFormat: "claude" },

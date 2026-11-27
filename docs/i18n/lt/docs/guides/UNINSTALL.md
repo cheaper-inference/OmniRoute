@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Pasirinktinai) Pašalinkite atvaizdą
+docker rmi cheaperinference/omniroute:latest
+# Senesni diegimai ištraukė seną pavadinimą:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

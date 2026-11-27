@@ -63,11 +63,11 @@ test("usage of zeros on every chunk does not freeze the final usage at zero", as
   assert.equal(completed(events)?.usage?.input_tokens, 100);
 });
 
-test("an empty usage object does not become the response usage", async () => {
+test("an empty normalized usage object becomes the explicit usage fallback", async () => {
   const events = await run([textChunk(), finishChunk({ usage: {} }), "data: [DONE]\n\n"]);
   const response = completed(events);
   assert.ok(response, "response.completed must be sent");
-  assert.equal(response.usage, undefined, JSON.stringify(response.usage));
+  assert.equal(response.usage, null);
 });
 
 test("usage made only of cache writes kept out of input_tokens is not a placeholder", async () => {

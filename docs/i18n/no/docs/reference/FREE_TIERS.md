@@ -24,7 +24,7 @@ Disse tallene beskriver separate tredjepartskontoer og kvalifikasjonsbetingelser
 | **+ bak en regional identitetssjekk**           | **+~ 6M**             | `modelscope` (Alibaba Cloud binding + fastlands-Kina verifisering av ekte navn). Ekte tilbakevendende kvote, eksponert som `gatedRecurringTokens` / `gatedProviders` og på dashbordet. Aldri oppsummert i overskriften: +~ 6M bak regional identitetsverifisering. |
 | Teoretisk tak (alle takstgrenser, 24/7)         | ~ 10B                 | Summen av hver leverandørtakstgrense ekstrapolert til uavbrutt bruk.** Ikke en garanti** — ikke overskrift dette.                                                                                                                                                  |
 
-**Ærlig overskrift:** _OmniRoute-aggregater**~ 1.62B dokumenterte gratis tokens per måned** (opptil ~ 2,22B i den første måneden med registreringskreditter) over 34 frilagspooler — pluss en lang hale av permanent-frie, no-cap-leverandører — og RTK + Caveman-komprimering (15–95 % token-sparing) strekker seg lenger._
+**Ærlig overskrift:** _OmniRoute-aggregater**~ 1.62B dokumenterte gratis tokens per måned** (opptil ~ 2,22B i den første måneden med registreringskreditter) over 26 frilagspooler — pluss en lang hale av permanent-frie, no-cap-leverandører — og RTK + Caveman-komprimering (15–95 % token-sparing) strekker seg lenger._
 
 > **Hvorfor dette falt fra forrige ~ 1.94B.** Oppdateringen fra 2026-06-17 er en ærlighetskorrigering, ikke et tap: `gemini` er nå pool-deduped (ble oppblåst ved å telle hver Flash-variant separat, 462M → 60M), `cloudflare-ai` korrigert til dens reelle 10k-Neurons/day (122M → 30M), `doubao` reklassifisert på nytt som en kredittring og én kredittnedgang, - (ikke-nedregistrering) nivåer fjernet (`chutes`/`phind`/`kluster` avviklet). Delvis oppveid av `llm7` (riktig 5M/day → 150M) og nye gratisleverandører (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
@@ -38,7 +38,7 @@ Disse tallene beskriver separate tredjepartskontoer og kvalifikasjonsbetingelser
 >
 > **Rettet 2026-09-03 (#11773):** `cerebras` ble omklassifisert fra en 30M/mo gjentakende bevilgning (gammel 1M tokens/day prøveversjon uten kort) til en engangsregistreringskreditt på $5 som krever en betalingsmetode. Samme ærlighetsregel som LongCat.
 >
-> **Pluss xKiro (2026-09-03):** den nye `xkiro-free` poolen (150M/mo) legger til en 35. gjentakende poolnøkkel. Felo Web forblir ekskludert mens dens GPL-avledede provenance/licensing forblir på HOLD. Kilden melder nå** 34 gjentakende bassengnøkler** og**~ 1.62B stabil** — det levende, CI-gatede nummeret (`check:docs-counts` mislykkes i byggingen hvis dette driver fra `computeFreeModelTotals()`).
+> **Pluss xKiro (2026-09-03):** den nye `xkiro-free` poolen (150M/mo) legger til en 35. gjentakende poolnøkkel. Felo Web forblir ekskludert mens dens GPL-avledede provenance/licensing forblir på HOLD. Kilden melder nå** 26 gjentakende bassengnøkler** og**~ 1.62B stabil** — det levende, CI-gatede nummeret (`check:docs-counts` mislykkes i byggingen hvis dette driver fra `computeFreeModelTotals()`).
 
 Størst** dokumentert** bidragsytere: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (fem per-modell caps), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` er ekskludert — dets 10M LongCat-2.0-tilskudd er en engangs, KYC-gated registreringskreditt, ikke et tilbakevendende månedlig budsjett.)
 

@@ -13,8 +13,9 @@
 
 import { getApiKeyMetadata, isModelAllowedForKey } from "@/lib/db/apiKeys";
 import { intersectAllowedConnectionIds } from "@/sse/handlers/chat/connectionConstraints.ts";
-import { checkApiKeyAuthorization, resolvePolicyApiKey } from "./apiKeyPolicy";
+import { checkApiKeyAuthorization, resolvePolicyApiKey, type ApiKeyMetadata } from "./apiKeyPolicy";
 import { checkResolvedModelPermission } from "./resolvedModelAccess";
+import { resolveRequiredApiKey } from "./requiredApiKeyContext";
 
 export type ApiKeyUpstreamScope =
   /** The key may not reach any upstream for this target. */
@@ -36,12 +37,16 @@ export async function resolveApiKeyUpstreamScope(
   requestedModel: string,
   target: { provider: string; model: string }
 ): Promise<ApiKeyUpstreamScope> {
-  const apiKey = await resolvePolicyApiKey(request);
+  const requiredKey = resolveRequiredApiKey();
+  const resolved = await requiredKey;
+  if (requiredKey && !resolved) return DENIED;
+
+  const apiKey = resolved?.apiKey ?? (await resolvePolicyApiKey(request));
   if (!apiKey) return UNSCOPED;
 
-  let apiKeyInfo: Awaited<ReturnType<typeof getApiKeyMetadata>>;
+  let apiKeyInfo: ApiKeyMetadata | null;
   try {
-    apiKeyInfo = await getApiKeyMetadata(apiKey);
+    apiKeyInfo = resolved?.apiKeyInfo ?? (await getApiKeyMetadata(apiKey));
   } catch {
     return DENIED;
   }

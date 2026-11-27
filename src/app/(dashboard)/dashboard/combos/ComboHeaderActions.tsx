@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
+import { FileTrigger } from "@/shared/components/FileInput";
 import Modal from "@/shared/components/Modal";
 import { useNotificationStore } from "@/store/notificationStore";
 
@@ -68,9 +69,8 @@ function useComboImport(onImported: () => void | Promise<void>) {
   const [pending, setPending] = useState<PendingImport | null>(null);
   const [importing, setImporting] = useState(false);
 
-  const handleFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
+  const handleFiles = async (files: File[]) => {
+    const file = files[0];
     if (!file) return;
     try {
       const parsed = JSON.parse(await file.text());
@@ -118,7 +118,7 @@ function useComboImport(onImported: () => void | Promise<void>) {
     }
   };
 
-  return { pending, setPending, importing, handleFile, runImport };
+  return { pending, setPending, importing, handleFiles, runImport };
 }
 
 function ImportConfirmModal({
@@ -180,8 +180,7 @@ function ImportConfirmModal({
 export default function ComboHeaderActions({ onCreate, onImported }: ComboHeaderActionsProps) {
   const t = useTranslations("combos");
   const notify = useNotificationStore();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { pending, setPending, importing, handleFile, runImport } = useComboImport(onImported);
+  const { pending, setPending, importing, handleFiles, runImport } = useComboImport(onImported);
 
   const handleExport = async () => {
     try {
@@ -197,25 +196,16 @@ export default function ComboHeaderActions({ onCreate, onImported }: ComboHeader
       <Button size="sm" variant="secondary" icon="download" onClick={handleExport}>
         {t("exportCombos")}
       </Button>
-      <Button
-        size="sm"
-        variant="secondary"
-        icon="upload"
-        onClick={() => fileInputRef.current?.click()}
-      >
-        {t("importCombos")}
-      </Button>
-      {/* kit-exception: Hidden picker behind the header Import button: the pick opens the confirm modal
-          at once, and a kit FileInput status line would break the Export / Import / Create row. */}
-      <input
-        ref={fileInputRef}
-        type="file"
+      {/* The pick opens the confirm modal at once; a file that is not JSON is reported, not ignored. */}
+      <FileTrigger
         accept="application/json,.json"
-        onChange={handleFile}
-        className="hidden"
-        aria-hidden="true"
-        tabIndex={-1}
-      />
+        onFilesChange={(files) => void handleFiles(files)}
+        onFilesRejected={() => notify.error(t("importCombosInvalidFile"))}
+      >
+        <Button size="sm" variant="secondary" icon="upload">
+          {t("importCombos")}
+        </Button>
+      </FileTrigger>
       <Button icon="add" onClick={onCreate}>
         {t("createCombo")}
       </Button>

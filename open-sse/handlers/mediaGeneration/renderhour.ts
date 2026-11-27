@@ -302,7 +302,7 @@ async function pollRenderhourJob({
         error: `RenderHour job ${job.id} did not finish within ${Math.round(timeoutMs / 1000)} s`,
       };
     }
-    await sleep(delay);
+    await sleep(delay, signal);
     delay = pollIntervalMs;
     // Asking about a job also moves it forward on RenderHour's side.
     const response = await fetch(`${baseUrl}/v1/generations/${encodeURIComponent(job.id)}`, {
@@ -363,11 +363,6 @@ export async function runRenderhourJob({
   }
   log?.info?.("RENDERHOUR", `job ${job.id} ${job.status} (${String(request.model)})`);
   return pollRenderhourJob({ baseUrl, token, job, timeoutMs, pollIntervalMs, log, signal });
-}
-
-/** A positive number from the request (e.g. `timeout_ms`), else the fallback. */
-export function renderhourNumber(value: unknown, fallback: number): number {
-  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : fallback;
 }
 
 /** Turns a thrown upload / network error into the handlers' failure shape. */

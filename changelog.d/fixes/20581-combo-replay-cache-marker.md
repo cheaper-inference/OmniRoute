@@ -1,0 +1,1 @@
+- **fix(sse):** combo failover no longer adds a fifth `cache_control` breakpoint — hoisting a marked system or developer message wrote the moved marker into the caller's request body, so the next combo target received 5 breakpoints and returned 400 "A maximum of 4 blocks with cache_control may be provided" (#20581).

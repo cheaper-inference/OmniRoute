@@ -157,6 +157,13 @@ function deriveLiveWsPath() {
 
 const LIVE_WS_PATH = deriveLiveWsPath();
 
+// This wrapper relays `/live-ws` upgrades on the main HTTP port (proxyLiveWs below), so the
+// dashboard can dial its own origin behind a reverse proxy that exposes only that port. The
+// handshake (`/api/v1/ws?handshake=1` → `live.sameOrigin`) reads this flag; `next dev` and
+// `npm start` never set it (KEA-9514). Name: LIVE_WS_SAME_ORIGIN_RELAY_FLAG in
+// src/shared/utils/wsPath.ts.
+globalThis.__omnirouteLiveWsSameOriginRelay = true;
+
 function proxyLiveWs(req, socket, head) {
   const targetPort = parseInt(process.env.LIVE_WS_PORT || "20132", 10);
   const targetSocket = net.connect(targetPort, "127.0.0.1", () => {

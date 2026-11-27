@@ -38,7 +38,7 @@ test.after(() => {
 test("getModelLatencyStats aggregates avgTtftMs/avgE2ELatencyMs/avgTokensPerSecond over successful rows", async () => {
   const now = Date.now();
   // #13130: tokens/sec is GENERATION throughput — tokens / (latency - ttft).
-  // 50/(0.9s)=55.56, 100/(1.8s)=55.56, 300/(3.7s)=81.08 -> mean 64.06.
+  // (50 + 100 + 300) tok / (0.9 + 1.8 + 3.7) s = 70.31.
   // (The pre-#13130 wall-clock formula yielded 58.33 for these same rows.)
   const rows = [
     { latencyMs: 1000, ttftMs: 100, tokensOutput: 50 },
@@ -71,7 +71,7 @@ test("getModelLatencyStats aggregates avgTtftMs/avgE2ELatencyMs/avgTokensPerSeco
   // column exists in usage_history beyond latency_ms/ttft_ms).
   assert.equal(entry.avgE2ELatencyMs, entry.avgLatencyMs);
   assert.equal(entry.avgE2ELatencyMs, 2333);
-  assert.equal(Math.round(entry.avgTokensPerSecond * 100) / 100, 64.06);
+  assert.equal(Math.round(entry.avgTokensPerSecond * 100) / 100, 70.31);
 });
 
 test("getModelLatencyStats guards divide-by-zero when latency_ms <= 0 for tokens/sec", async () => {

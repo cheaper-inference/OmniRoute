@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import { Input } from "@/shared/components";
 import { getProviderConnectionFamilyIds } from "@/shared/constants/providers";
 import { providerText, type ProviderMessageTranslator } from "../../providerPageHelpers";
@@ -38,7 +39,7 @@ function ZedHostedBillingPortalField({
   editMode = false,
 }: QuotaScrapingFieldsProps) {
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
+    <Card.Section className="flex flex-col gap-3">
       <Input
         label={providerText(
           t,
@@ -61,7 +62,7 @@ function ZedHostedBillingPortalField({
         spellCheck={false}
         autoCapitalize="off"
       />
-    </div>
+    </Card.Section>
   );
 }
 
@@ -74,7 +75,7 @@ function ConsoleSessionQuotaFields({
 }: QuotaScrapingFieldsProps) {
   if (provider === "ollama-cloud") {
     return (
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
+      <Card.Section className="flex flex-col gap-3">
         <Input
           label={providerText(t, "ollamaCloudUsageCookieLabel", "Ollama Cloud usage cookie")}
           name="ollamaCloudUsageCookie"
@@ -93,13 +94,13 @@ function ConsoleSessionQuotaFields({
           spellCheck={false}
           autoCapitalize="off"
         />
-      </div>
+      </Card.Section>
     );
   }
 
   if (getProviderConnectionFamilyIds("alibaba").includes(provider)) {
     return (
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
+      <Card.Section className="flex flex-col gap-3">
         <Input
           label={providerText(
             t,
@@ -142,13 +143,13 @@ function ConsoleSessionQuotaFields({
           spellCheck={false}
           autoCapitalize="off"
         />
-      </div>
+      </Card.Section>
     );
   }
 
   if (QWEN_TOKEN_PLAN_PROVIDERS.has(provider ?? "")) {
     return (
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
+      <Card.Section className="flex flex-col gap-3">
         <Input
           label={providerText(t, "qwenCloudCookieLabel", "Qwen / Model Studio console cookie")}
           name="qwenCloudCookie"
@@ -187,13 +188,13 @@ function ConsoleSessionQuotaFields({
           spellCheck={false}
           autoCapitalize="off"
         />
-      </div>
+      </Card.Section>
     );
   }
 
   if (VOLCENGINE_PLAN_PROVIDERS.has(provider ?? "")) {
     return (
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
+      <Card.Section className="flex flex-col gap-3">
         <Input
           label={providerText(t, "volcConsoleCookieLabel", "Volcano Engine console cookie")}
           name="volcConsoleCookie"
@@ -215,13 +216,13 @@ function ConsoleSessionQuotaFields({
           spellCheck={false}
           autoCapitalize="off"
         />
-      </div>
+      </Card.Section>
     );
   }
 
   if (XIAOMI_MIMO_PROVIDERS.has(provider ?? "")) {
     return (
-      <div className="flex flex-col gap-3 rounded-lg border border-border bg-bg-subtle p-4">
+      <Card.Section className="flex flex-col gap-3">
         <Input
           label={providerText(t, "xiaomiMimoConsoleCookieLabel", "Xiaomi MiMo console cookie")}
           name="xiaomiMimoConsoleCookie"
@@ -244,7 +245,7 @@ function ConsoleSessionQuotaFields({
           spellCheck={false}
           autoCapitalize="off"
         />
-      </div>
+      </Card.Section>
     );
   }
 

@@ -96,7 +96,7 @@ function BandLegend({
   amount: number;
 }) {
   return (
-    <div className="min-w-0 text-[11px] text-text-main">
+    <div className="min-w-0 text-2xs text-text-main">
       <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5 leading-4">
         <span
           className={`inline-block size-2 shrink-0 rounded-full ${dotClassName}`}
@@ -192,7 +192,7 @@ export default function KiloPassMeter({
         animate={false}
       />
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-text-main">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-2xs text-text-main">
         <div className="flex items-center gap-1.5">
           <Icon name="account_balance_wallet" size={13} className="text-text-muted" />
           <span>{translateUsageOrFallback(t, "kiloPassRemaining", "Remaining")}</span>
@@ -202,7 +202,7 @@ export default function KiloPassMeter({
 
       {/* Renewal info */}
       {daysUntilRenewal !== null && renewalDate && (
-        <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+        <div className="flex items-center gap-1.5 text-2xs text-text-muted">
           <Icon name="schedule" size={13} />
           <span>
             {translateUsageOrFallback(t, "kiloPassRenews", "Renews in {count} days", {
@@ -215,7 +215,7 @@ export default function KiloPassMeter({
 
       {/* Account Balance (separate from Kilo Pass) */}
       {balance !== null && balance !== undefined && (
-        <div className="flex items-center justify-between gap-2 border-t border-border/40 pt-2 text-[11px]">
+        <div className="flex items-center justify-between gap-2 border-t border-border/40 pt-2 text-2xs">
           <div className="flex items-center gap-1.5">
             <Icon name="payments" size={13} className="text-text-muted" />
             <span className="text-text-main">

@@ -470,7 +470,7 @@ v3.8.0 ਤੋਂ _ਪਹਿਲਾਂ_ ਇੰਪੋਰਟ ਕੀਤੇ ਕਨੈ�
 2. **ਸਥਾਈ ਹੱਲ:** ਆਪਣੀ `docker run` ਕਮਾਂਡ ਵਿੱਚ `-p 127.0.0.1:20128:20128` ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਸਪਸ਼ਟ ਤੌਰ ਉੱਤੇ IPv4 ਨਾਲ ਬਾਈਂਡ ਕਰੋ:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    ਇਹ IPv4 ਬਾਈਂਡ ਨੂੰ ਲਾਜ਼ਮੀ ਬਣਾਉਂਦਾ ਹੈ ਅਤੇ ਪ੍ਰੌਕਸੀ ਨੂੰ ਹੋਸਟ ਦੇ ਸਾਰੇ ਇੰਟਰਫੇਸਾਂ ਉੱਤੇ ਉਪਲਬਧ ਕਰਵਾਉਣ ਤੋਂ ਵੀ ਬਚਾਉਂਦਾ ਹੈ।
 

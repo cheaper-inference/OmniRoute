@@ -122,6 +122,7 @@ function useCreateDraftValues() {
   const [newKeySelfUsageEnabled, setNewKeySelfUsageEnabled] = useState(true);
   const [newKeyAccountQuotaEnabled, setNewKeyAccountQuotaEnabled] = useState(false);
   const [newKeyAllowUsageCommand, setNewKeyAllowUsageCommand] = useState(false);
+  const [newKeyExpiryEndOfDay, setNewKeyExpiryEndOfDay] = useState(false);
   const [nameError, setNameError] = useState<string | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
@@ -164,6 +165,8 @@ function useCreateDraftValues() {
     setNewKeyAccountQuotaEnabled,
     newKeyAllowUsageCommand,
     setNewKeyAllowUsageCommand,
+    newKeyExpiryEndOfDay,
+    setNewKeyExpiryEndOfDay,
     nameError,
     setNameError,
     createError,
@@ -189,29 +192,71 @@ function useCreateDraftValues() {
   };
 }
 
-function useCreatePolicyDraft() {
-  const values = useCreateDraftValues();
+type CreateDraftValues = ReturnType<typeof useCreateDraftValues>;
+
+function useResetCreateKeyModal(
+  values: CreateDraftValues,
+  syncCreateKeyFormState: (nextFormState: PolicyEditorFormState) => void
+) {
   const {
     setNewKeyName,
-    setNewKeyManageEnabled,
-    setNewKeySelfUsageEnabled,
-    setNewKeyAccountQuotaEnabled,
-    setNewKeyAllowUsageCommand,
+    setNewKeyExpiryEndOfDay,
     setNameError,
     setCreateError,
     setSelectedTemplateId,
     setSelectedTemplateRef,
-    createKeyFormState,
-    setCreateKeyFormState,
-    createKeyBaselineFormJson,
     setCreateKeyBaselineFormJson,
-    createKeyRefIssues,
     setCreateKeyRefIssues,
     setLoadingTemplatePolicy,
-    editorBlockingRefs,
     setEditorBlockingRefs,
     setShowFullPolicyEditor,
     templateLoadGenerationRef,
+  } = values;
+  return useCallback(() => {
+    templateLoadGenerationRef.current++;
+    setEditorBlockingRefs(null);
+    const defaultForm = createDefaultPolicyEditorFormState();
+    setNewKeyName("");
+    setNewKeyExpiryEndOfDay(false);
+    syncCreateKeyFormState(defaultForm);
+    setCreateKeyBaselineFormJson(JSON.stringify(defaultForm));
+    setSelectedTemplateId("");
+    setSelectedTemplateRef(null);
+    setCreateKeyRefIssues([]);
+    setLoadingTemplatePolicy(false);
+    setShowFullPolicyEditor(false);
+    setNameError(null);
+    setCreateError(null);
+  }, [
+    syncCreateKeyFormState,
+    setCreateError,
+    setCreateKeyBaselineFormJson,
+    setCreateKeyRefIssues,
+    setEditorBlockingRefs,
+    setLoadingTemplatePolicy,
+    setNameError,
+    setNewKeyExpiryEndOfDay,
+    setNewKeyName,
+    setSelectedTemplateId,
+    setSelectedTemplateRef,
+    setShowFullPolicyEditor,
+    templateLoadGenerationRef,
+  ]);
+}
+
+function useCreatePolicyDraft() {
+  const values = useCreateDraftValues();
+  const {
+    setNewKeyManageEnabled,
+    setNewKeySelfUsageEnabled,
+    setNewKeyAccountQuotaEnabled,
+    setNewKeyAllowUsageCommand,
+    createKeyFormState,
+    setCreateKeyFormState,
+    createKeyBaselineFormJson,
+    createKeyRefIssues,
+    setCreateKeyRefIssues,
+    editorBlockingRefs,
   } = values;
   const syncCreateKeyFormState = useCallback(
     (nextFormState: PolicyEditorFormState) => {
@@ -232,34 +277,7 @@ function useCreatePolicyDraft() {
     ]
   );
 
-  const resetCreateKeyModalState = useCallback(() => {
-    templateLoadGenerationRef.current++;
-    setEditorBlockingRefs(null);
-    const defaultForm = createDefaultPolicyEditorFormState();
-    setNewKeyName("");
-    syncCreateKeyFormState(defaultForm);
-    setCreateKeyBaselineFormJson(JSON.stringify(defaultForm));
-    setSelectedTemplateId("");
-    setSelectedTemplateRef(null);
-    setCreateKeyRefIssues([]);
-    setLoadingTemplatePolicy(false);
-    setShowFullPolicyEditor(false);
-    setNameError(null);
-    setCreateError(null);
-  }, [
-    syncCreateKeyFormState,
-    setCreateError,
-    setCreateKeyBaselineFormJson,
-    setCreateKeyRefIssues,
-    setEditorBlockingRefs,
-    setLoadingTemplatePolicy,
-    setNameError,
-    setNewKeyName,
-    setSelectedTemplateId,
-    setSelectedTemplateRef,
-    setShowFullPolicyEditor,
-    templateLoadGenerationRef,
-  ]);
+  const resetCreateKeyModalState = useResetCreateKeyModal(values, syncCreateKeyFormState);
 
   const validation = useCreatePolicyValidation(
     createKeyFormState,

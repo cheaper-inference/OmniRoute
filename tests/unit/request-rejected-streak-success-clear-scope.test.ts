@@ -38,7 +38,7 @@ test("chatHelpers onRequestSuccess clears the streak for the succeeded model onl
   const end = helpers.indexOf("onStreamFailure:", start);
   assert.match(
     helpers.slice(start, end),
-    /clearRequestRejectedStreak\(\s*credentials\.connectionId,\s*model\s*\)/,
+    /clearRequestRejectedStreak\(\s*(?:credentials|served)\.connectionId,\s*model\s*\)/,
     "the success hook must scope the clear to the model that succeeded"
   );
 });

@@ -12,11 +12,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 vi.mock("next-intl", () => ({
   // identity translator with no `has`, so translateOrFallback uses the English fallbacks
   useTranslations: () => (key: string) => key,
+  useLocale: () => "en",
 }));
 
-const { default: ComboDefaultsTab } = await import(
-  "../../../src/app/(dashboard)/dashboard/settings/components/ComboDefaultsTab"
-);
+const { default: ComboDefaultsTab } =
+  await import("../../../src/app/(dashboard)/dashboard/settings/components/ComboDefaultsTab");
 
 function okJson(data: unknown) {
   return Promise.resolve({ ok: true, json: () => Promise.resolve(data) } as Response);

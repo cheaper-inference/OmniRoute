@@ -1,7 +1,8 @@
 "use client";
 
-import { forwardRef, useId, useRef, useState } from "react";
-import type { ChangeEvent, DragEvent, InputHTMLAttributes, ReactNode } from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cloneElement, forwardRef, useId, useImperativeHandle, useRef, useState } from "react";
+import type { ChangeEvent, DragEvent, InputHTMLAttributes, MouseEvent, ReactElement, ReactNode } from "react";
 import { FileUp, Upload } from "lucide-react";
 import { cn } from "./lib/utils";
 
@@ -171,6 +172,74 @@ export const FileInput = forwardRef<HTMLInputElement, FileInputProps>(function F
         {chosen.length ? selectedLabel(chosen) : emptyLabel}
       </span>
     </div>
+  );
+});
+
+export interface FileTriggerProps
+  extends Pick<NativeFileProps, "accept" | "multiple" | "capture" | "id">,
+    Pick<FileSelectionProps, "maxSize" | "onFilesChange" | "onFilesRejected"> {
+  /**
+   * Keeps the picker closed. Also passed to the child as `disabled`, unless the child sets its
+   * own. A child that is disabled, `aria-disabled` or `aria-busy` (a loading `Button`) never
+   * opens the picker either.
+   */
+  disabled?: boolean;
+  /**
+   * One control that forwards its ref and click handler, usually a `Button`. It keeps its own
+   * accessible name, look, focus ring and loading state, and gets `type="button"` unless it
+   * sets a `type`.
+   */
+  children: ReactElement;
+}
+
+/**
+ * Opens the native file picker from any control, with the filtering of `FileInput` and nothing
+ * else on screen: no "Choose file" control and no status line. For actions that start as soon
+ * as a file is picked (a toolbar "Import"). The ref and any other attribute (`data-*`) go to the
+ * hidden native input, rendered right after the child. Keep the trigger mounted until the picker
+ * closes: a menu item that unmounts on select loses the selection.
+ */
+export const FileTrigger = forwardRef<HTMLInputElement, FileTriggerProps>(function FileTrigger(
+  { accept, multiple = false, maxSize, disabled = false, onFilesChange, onFilesRejected, children, ...props },
+  ref,
+) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  // Hands the input to the forwarded ref once, and keeps a callback ref's cleanup (React 19).
+  useImperativeHandle(ref, () => inputRef.current as HTMLInputElement, []);
+  const select = createFileSelector({ accept, maxSize, multiple, onFilesChange, onFilesRejected });
+  // Button defaults for the child. A value the child sets wins; a prop passed as `undefined` does not.
+  const child = children as ReactElement<{ type?: unknown; disabled?: unknown }>;
+  const defaults: { type?: "button"; disabled?: true } = {};
+  if (child.props.type === undefined) defaults.type = "button";
+  if (disabled && child.props.disabled === undefined) defaults.disabled = true;
+  const open = (event: MouseEvent<HTMLElement>) => {
+    const control = event.currentTarget;
+    if (event.defaultPrevented || disabled) return;
+    if (control.getAttribute("aria-disabled") === "true" || control.getAttribute("aria-busy") === "true") return;
+    inputRef.current?.click();
+  };
+
+  return (
+    <>
+      <Slot onClick={open}>{cloneElement(child, defaults)}</Slot>
+      <input
+        {...props}
+        ref={inputRef}
+        type="file"
+        // Out of sight, the tab order and the accessibility tree: the child is the only control.
+        hidden
+        tabIndex={-1}
+        style={{ display: "none" }}
+        accept={accept}
+        multiple={multiple}
+        disabled={disabled}
+        onChange={(event) => {
+          select(event.currentTarget.files);
+          // Clear the native value so picking the same file again fires `change`.
+          event.currentTarget.value = "";
+        }}
+      />
+    </>
   );
 });
 

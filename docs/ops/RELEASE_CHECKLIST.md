@@ -98,7 +98,14 @@ to the organization repository. It needs the `DOCKERHUB_ORG_USERNAME` /
 mirror skipped" warning and the other registries publish normally. To publish a released
 version there later, run **Actions → Mirror Docker image to the Docker Hub org → Run
 workflow** with `version=X.Y.Z` (and `promote_latest` for the highest stable version): it
-copies the existing images, no rebuild.
+copies the existing images, no rebuild. That repository's Docker Hub overview is set by hand:
+the API that edits it rejects Organization Access Tokens.
+
+The same workflow also copies every release to the legacy GHCR package
+`ghcr.io/diegosouzapw/omniroute` until 2027-06-30, so installs still pinned to it keep updating;
+its index carries a "moved to `ghcr.io/cheaper-inference/omniroute`" description. It needs the
+`GHCR_LEGACY_TOKEN` secret (a classic personal access token of `diegosouzapw` with
+`write:packages`); without it that job skips with a "Legacy GHCR mirror skipped" warning.
 
 ## Hotfix Fast-Lane (label `hotfix`)
 
@@ -420,8 +427,8 @@ grafted parent, so cut from a full clone or `git fetch --unshallow origin` first
 tag exists, `package.json` is the target version, a `release-freeze` issue is open, no open
 `Release branch not green` issue
 on an existing release branch — a branch that does not exist reports `?` unknown, never
-green — the Mergify `release` queue is configured (G11: `queue_rules`, `checks_timeout`,
-label `queue`), the `release/*` ruleset still blocks deletion and force-push, and
+green — omni-queue lands the release PRs (G11: `config/merge-queue/config.json` valid, its
+`bases` manage the release branch, `mode` `live`, its label exists), the `release/*` ruleset still blocks deletion and force-push, and
 `stable/v3` and `develop` do not exist yet), the two branch steps, which dormant-workflow
 triggers and `if:` conditions turn true (and which stay gated by a repository variable or
 pinned to the canonical repository), the expected dist-tags (`latest` → 3.9.0, `next` and
@@ -466,7 +473,7 @@ validates that exact build (#8084 slice (a)). Same-repository PRs only; nothing 
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

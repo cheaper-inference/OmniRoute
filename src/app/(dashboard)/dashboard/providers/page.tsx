@@ -311,7 +311,7 @@ function ProvidersPageContent() {
         if (data.expirations) setExpirations(data.expirations);
         if (data.blockedProviders) setBlockedProviders(data.blockedProviders);
         setCodexGlobalServiceMode(getCodexGlobalServiceMode(data.settings));
-        setOpenRouterProviderStats(data.openRouterProviderStats);
+        void data.openRouterProviderStats.then(setOpenRouterProviderStats);
       } catch (error) {
         console.log("Error fetching data:", error);
       } finally {
@@ -1350,7 +1350,7 @@ function ProvidersPageContent() {
                 />
                 {llmProviderEntries.length > 0 && (
                   <div className="flex flex-col gap-3">
-                    <h3 className="text-xs uppercase text-text-muted">{t("llmProviders")}</h3>
+                    <h3 className="ci-eyebrow">{t("llmProviders")}</h3>
                     <ProviderCardGrid>
                       {llmProviderEntries.map(
                         ({ providerId, provider, stats, displayAuthType, toggleAuthType }) => (

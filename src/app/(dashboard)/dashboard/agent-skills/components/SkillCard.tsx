@@ -6,6 +6,8 @@ import Icon from "@/shared/components/Icon";
 import Badge from "@/shared/components/Badge";
 import type { AgentSkill } from "@/lib/agentSkills/types";
 import type { JSX } from "react";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
+import IconChip from "@/shared/components/IconChip";
 
 interface SkillCardProps {
   skill: AgentSkill;
@@ -47,17 +49,9 @@ export function SkillCard({ skill, selected, onClick }: SkillCardProps): JSX.Ele
           : "border-border bg-bg hover:bg-bg-subtle hover:border-border"
       }`}
     >
-      <div
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-          selected ? "bg-primary/15" : "bg-bg-subtle"
-        }`}
-      >
-        <Icon
-          name={skill.icon ?? "article"}
-          size={18}
-          className={selected ? "text-primary" : "text-text-muted"}
-        />
-      </div>
+      <IconChip tone={selected ? "accent" : "neutral"} size="sm" className="shrink-0">
+        <Icon name={skill.icon ?? "article"} />
+      </IconChip>
 
       <div className="min-w-0 flex-1">
         <div className="mb-0.5 flex flex-wrap items-center gap-1.5">
@@ -95,12 +89,7 @@ export function SkillCard({ skill, selected, onClick }: SkillCardProps): JSX.Ele
         {previewItems.length > 0 && (
           <div className="mt-1.5 flex flex-wrap gap-1">
             {previewItems.map((item) => (
-              <code
-                key={item}
-                className="rounded bg-bg-subtle px-1.5 py-0.5 font-mono text-[10px] text-text-muted border border-border/50"
-              >
-                {item}
-              </code>
+              <InlineCode key={item}>{item}</InlineCode>
             ))}
           </div>
         )}

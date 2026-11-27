@@ -117,6 +117,9 @@ export function buildClaudePassthroughBody({
     provider
   );
   translatedBody._disableToolPrefix = true;
+  // A combo replays the caller's body on its next step, and the rewrites below (system-role
+  // hoisting re-anchors cache_control onto a preceding block) write into blocks: copy them first.
+  detachClaudeCodeRewriteTargets(translatedBody);
 
   if (!acceptsInlineToolAdditions(provider) && !/claude/i.test(effectiveModel)) {
     dropBillingLine(translatedBody);
@@ -182,10 +185,8 @@ export function buildClaudePassthroughBody({
     // breakpoints through pure passthrough, re-billing the full prefix
     // every turn (678M uncached prompt tokens/week observed). Inject the
     // standard breakpoints ONLY when the body carries none anywhere —
-    // a client that manages its own markers stays byte-untouched. A combo
-    // replays the caller's body on its next step, so write into copies only.
+    // a client that manages its own markers stays byte-untouched.
     if (acceptsInjectedCacheBreakpoints(provider, connectionCacheOverride)) {
-      detachClaudeCodeRewriteTargets(translatedBody);
       ensurePassthroughCacheBreakpoints(translatedBody as ClaudeRequestBody, provider);
     }
   }

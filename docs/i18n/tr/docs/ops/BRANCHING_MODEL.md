@@ -42,24 +42,23 @@ flowchart LR
 `main`, günlük entegrasyon dalı değildir. `main` hedef alınarak açılan PR'ların
 genellikle birleştirilmeden önce başka bir dalı hedefleyecek şekilde değiştirilmesi gerekir.
 
-## Yayın dondurma (paralel döngüler)
+## Dondurmayı serbest bırakma (paralel döngüler)
 
-Bir yayın uzlaştırılırken `release-freeze` etiketli bir işaretleyici issue
-açılır. Bu, **geliştirmeyi durdurmaz**:
+Bir yayın mutabakatı yapılırken `release-freeze` etiketli bir işaretleyici sorunu açılır. O** gelişimi durdurmaz** :
 
-- Dondurulmuş `release/vX.Y.Z`, ilgili yayından sorumlu yayın yöneticisine aittir.
-- Katkıda bulunanların çalışmalarını birleştirmeye devam edebilmesi için sonraki döngünün `release/vX+1` dalı dondurulmuş uç noktadan oluşturulur.
-- Hâlâ dondurulmuş dalı hedefleyen açık PR'lar, etkin (en yüksek) `release/v*`
-  dalını **hedefleyecek şekilde değiştirilmelidir**.
+- Dondurulan `release/vX.Y.Z` o geminin tahliye kaptanına ait.
+- Bir sonraki döngünün `release/vX+1` donmuş uçtan kesilir, böylece katkıda bulunanlar iniş çalışmalarına devam eder.
+- Hala donmuş dalı hedef alan açık PRs olmalıdır** yeniden hedeflenmiş** aktif (en yüksek) `release/v*` dalına.
 
-İstediğiniz dalın birleştirilebilir olduğunu varsaymadan önce açık bir dondurma olup olmadığını kontrol edin:
+İstediğiniz dalın birleştirilebilir olduğunu varsaymadan önce açık donma olup olmadığını kontrol edin:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Birleştirme mekanizmaları (sahibin eklediği `queue` etiketi → Mergify)
-[MERGE_TRAIN.md](./MERGE_TRAIN.md) belgesinde açıklanmıştır.
+Birleştirme mekaniği ( `queue` etiketi → Mergify'ın sahibi) [MERGE_TRAIN.md](./MERGE_TRAIN.md) dosyasında belgelenmiştir.
+
+> **2026-11-19: Birleştirme birleştirme sırası kullanımdan kaldırıldı** (sahibin kararı). `.mergify.yml` artık bir kuyruk tanımlamıyor ve bir çekme isteğini birleştiren veya yeniden yazan Birleştir komutlarını reddediyor. PRs sürümü, omni-queue canlı modda çalışana kadar ve bundan sonra omni-queue aracılığıyla ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ) "Aktif sürümde yeşil kapılar gerektir" (`Gate / CI` + `Gate / Quality`) depo kural seti altında elle birleştirilir. `queue` etiketi artık hiçbir şeyi birleştirmemektedir.
 
 ## Neden hem dal hem de etiket var?
 

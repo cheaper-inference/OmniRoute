@@ -50,7 +50,10 @@ test("--plan prints the full step plan without touching anything and exits 0", a
   // (--test-concurrency=20), never the two sequential 4-core CI shards that ran the
   // dominant phase at ~25% of the box.
   assert.ok(!stdout.includes("TEST_SHARD="), "full mode must not use the sequential CI shards");
-  assert.match(stdout, /--admin evidence/);
+  assert.match(
+    stdout,
+    /^\[merge-train\] \d+\. green → print diagnostic evidence per PR for the owner's dossier only\. red → exit 2 \(operator bisects and ejects\)$/m
+  );
   assert.match(stdout, /teardown: git worktree remove/);
 });
 

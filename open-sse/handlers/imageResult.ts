@@ -13,6 +13,7 @@ export function saveImageSuccessResult({
   responseBody = null,
   created = null,
   images,
+  outputFormat = undefined,
   path = "/v1/images/generations",
 }) {
   saveCallLog({
@@ -31,6 +32,7 @@ export function saveImageSuccessResult({
     data: {
       created: created || Math.floor(Date.now() / 1000),
       data: images,
+      ...(outputFormat ? { output_format: outputFormat } : {}),
     },
   };
 }
