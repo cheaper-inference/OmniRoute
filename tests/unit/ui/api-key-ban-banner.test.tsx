@@ -61,6 +61,7 @@ describe("API key ban banner", () => {
     expect(container.textContent).toContain("Existing key · No reason recorded");
     expect(container.textContent).toContain("1 more banned key");
     expect(container.querySelector('a[href="/dashboard/api-manager"]')).not.toBeNull();
+    expect(container.querySelector('button[aria-label="Close"]')).not.toBeNull();
   });
 
   it("removes the notice when a later read is unauthorized", async () => {

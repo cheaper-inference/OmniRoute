@@ -59,6 +59,7 @@ export default function ApiKeyBanBanner() {
       className="mb-4"
       icon={<Icon name="security" size={18} />}
       title={t("apiKeyBanTitle", { count: summary.total })}
+      dismissLabel={common("close")}
       description={
         <>
           <ul className="mt-1.5 space-y-0.5 break-words">
