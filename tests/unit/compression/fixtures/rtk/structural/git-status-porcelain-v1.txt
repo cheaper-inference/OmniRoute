@@ -1,0 +1,55 @@
+## feature/render...origin/feature/render [ahead 2, behind 1]
+M  src/a.ts
+M  src/b.ts
+A  src/new1.ts
+A  src/new2.ts
+D  src/old1.ts
+R  old.ts -> new.ts
+MM src/c.ts
+M  docs/readme.md
+ M src/d.ts
+ M src/e.ts
+ D src/f.ts
+UU src/conflict.ts
+?? build/gen/out01.js
+?? build/gen/out02.js
+?? build/gen/out03.js
+?? build/gen/out04.js
+?? build/gen/out05.js
+?? build/gen/out06.js
+?? build/gen/out07.js
+?? build/gen/out08.js
+?? build/gen/out09.js
+?? build/gen/out10.js
+?? build/gen/out11.js
+?? build/gen/out12.js
+?? build/gen/out13.js
+?? build/gen/out14.js
+?? build/gen/out15.js
+?? build/gen/out16.js
+?? build/gen/out17.js
+?? build/gen/out18.js
+?? build/gen/out19.js
+?? build/gen/out20.js
+?? build/gen/out21.js
+?? build/gen/out22.js
+?? build/gen/out23.js
+?? build/gen/out24.js
+?? build/gen/out25.js
+?? build/gen/out26.js
+?? build/gen/out27.js
+?? build/gen/out28.js
+?? build/gen/out29.js
+?? build/gen/out30.js
+?? tmp/scratch1.log
+?? tmp/scratch2.log
+?? tmp/scratch3.log
+?? tmp/scratch4.log
+?? notes.txt
+?? "my file.txt"
+!! dist/bundle1.js
+!! dist/bundle2.js
+!! dist/bundle3.js
+!! dist/bundle4.js
+!! dist/bundle5.js
+!! dist/bundle6.js

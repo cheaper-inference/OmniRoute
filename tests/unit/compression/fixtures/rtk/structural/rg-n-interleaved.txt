@@ -1,0 +1,32 @@
+src/a.ts:3:  const value3 = needle(options.3);
+src/b.ts:5:export const needleHandler5 = () => needle("b5");
+src/lib/c.ts:2:// needle: see section 2
+src/a.ts:8:  const value8 = needle(options.8);
+docs/guide.md:4:Use the needle option here (4).
+src/a.ts:14:  const value14 = needle(options.14);
+src/b.ts:19:export const needleHandler19 = () => needle("b19");
+src/a.ts:21:  const value21 = needle(options.21);
+src/lib/c.ts:9:// needle: see section 9
+docs/guide.md:12:Use the needle option here (12).
+src/a.ts:27:needle(config, { retries: 3 });
+src/a.ts:33:  const value33 = needle(options.33);
+src/b.ts:20:export const needleHandler20 = () => needle("b20");
+src/lib/c.ts:11:// needle: see section 11
+docs/guide.md:40:Use the needle option here (40).
+src/a.ts:41:  const value41 = needle(options.41);
+src/a.ts:48:  const value48 = needle(options.48);
+src/b.ts:44:export const needleHandler44 = () => needle("b44");
+src/lib/c.ts:30:// needle: see section 30
+src/a.ts:52:  const value52 = needle(options.52);
+src/a.ts:60:  const value60 = needle(options.60);
+src/b.ts:45:export const needleHandler45 = () => needle("b45");
+src/a.ts:71:  const value71 = needle(options.71);
+src/lib/c.ts:31:// needle: see section 31
+src/a.ts:75:  const value75 = needle(options.75);
+src/a.ts:88:  const value88 = needle(options.88);
+src/b.ts:67:export const needleHandler67 = () => needle("b67");
+src/lib/c.ts:55:// needle: see section 55
+src/a.ts:90:  const value90 = needle(options.90);
+src/b.ts:70:export const needleHandler70 = () => needle("b70");
+src/b.ts:101:export const needleHandler101 = () => needle("b101");
+src/b.ts:120:export const needleHandler120 = () => needle("b120");

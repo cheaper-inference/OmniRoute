@@ -182,7 +182,8 @@ computed from the whole input, and drops blob ids and unchanged context. Dispatc
   straight to token accounting and raw-output retention.
 - The format comes from the correlated shell command (`git diff` / `git show`) when there is one,
   otherwise from a diff signature on the first line. Non-shell tools, assistant text and code
-  blocks are never routed here; in a Responses body only an eligible `local_shell_call_output`
+  blocks are never routed here, with one exception: the native `Grep` tool (see "Search matches"
+  below), selected by tool name; in a Responses body only an eligible `local_shell_call_output`
   is. Anthropic `tool_result` blocks marked `is_error: true` or carrying `cache_control` are
   returned untouched, as before.
 - A recognised diff that cannot be summarised faithfully is returned **unchanged**: combined (merge)
@@ -194,7 +195,44 @@ computed from the whole input, and drops blob ids and unchanged context. Dispatc
   the legacy RTK; the rule `rtk:structural:over-budget` is recorded so the incidence can be measured.
 - A project or global filter that matches the command, any explicitly enabled filter, or the matched
   filter being explicitly disabled keeps the legacy path. The `rtkConfig.renderers` allowlist is
-  matched against the format name (`git-diff`).
+  matched against the format name (`git-diff`, `shell-grep`, `git-status`).
+
+### Search matches (`rg`, `grep`, `ag`, native `Grep`)
+
+`renderSearchMatches` (`renderers/searchMatches.ts`, format `shell-grep`) summarises content-mode
+search output, where every line is `path:line:text` (`rg -n`, `grep -rn`). Per file, in first-seen
+order, it keeps the path, the total number of matches, the first five matches verbatim (line number
+included) and an `(+N omitted)` count; a one-line `N matches in M files` header opens the summary.
+The command is recognised from the correlated shell call (`rg`, `grep`, `ag`) and the output must
+also open like a match listing, otherwise the legacy path runs.
+
+The native `Grep` tool is routed by its tool name (case-insensitive) through `NATIVE_TOOL_ROUTES`
+in `structural.ts`, because RTK never runs shell filters on non-shell tools. Content-mode output is
+summarised the same way; an optional `Found N matches` header and a `[Showing results with
+pagination = …]` footer are kept verbatim, so the envelope survives. `files_with_matches`, count and
+"no matches" outputs do not open like a match listing and stay on the legacy path.
+
+The renderer validates the whole listing and declines on the first line that does not fit: a context
+line (`path-12-text`) or `--` separator, a `Binary file … matches` notice, an I/O error such as
+`rg: … No such file or directory`, a blank line, a non-numeric line field, or a path with an
+ambiguous colon (a Windows drive path). A listing that starts valid and ends with an unknown line is
+therefore returned in full, never with a partial count.
+
+### Git status (`git status --porcelain`, `--short`)
+
+`renderGitStatus` (`renderers/gitStatus.ts`, format `git-status`) accepts only the textual v1 shape:
+an optional `## branch` line, then `XY path` entries. It keeps the branch line verbatim and splits
+the entries into `staged`, `unstaged`, `unmerged`, `untracked` and `ignored`, each with its total. A
+file changed on both axes (`MM`) appears under both, with the letter of each axis; renames and
+copies keep both sides (`R old.ts -> new.ts`). Staged, unstaged and unmerged entries are listed in
+full; untracked and ignored files are grouped by directory with a total and their first three names.
+Quoted paths (names with spaces or special bytes) are listed as written, never regrouped.
+
+The command must ask for this format (`--porcelain`, `--porcelain=v1`, `-s`, `--short`); the
+human-readable `git status` stays on the legacy path. `-z` output (NUL separated), porcelain v2,
+colour codes, unknown status letters, a rename without both sides, a `##` line after the first or any
+stray line are returned in full: `-z` and v2 are recognised from the command alone so they never
+reach a truncating filter.
 
 ## Code Comment Stripping (`stripCodeComments` / `preserveDocstrings`)
 

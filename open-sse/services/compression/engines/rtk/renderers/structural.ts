@@ -5,6 +5,8 @@ import { matchRtkFilter } from "../filterLoader.ts";
 import { effectiveMaxLines } from "../intensity.ts";
 import { lastCommandSegment } from "../splitCompositeCommand.ts";
 import { STRUCTURAL_REGISTRY } from "./index.ts";
+import { gitStatusCommandKind, startsLikePorcelainV1 } from "./gitStatus.ts";
+import { startsLikeSearchMatches } from "./searchMatches.ts";
 import type { RenderResult, Renderer } from "./types.ts";
 
 /**
@@ -73,14 +75,43 @@ interface StructuralRoute {
  * `tryStructuralRender` apply to those routes unchanged.
  */
 type NativeToolRouteSelector = (text: string, toolName: string) => StructuralRoute | null;
-const NATIVE_TOOL_ROUTES: Record<string, NativeToolRouteSelector> = {};
+const NATIVE_TOOL_ROUTES: Record<string, NativeToolRouteSelector> = {
+  // Content-mode output of a native Grep tool (`path:line:text`, optional envelope lines).
+  grep: (text) => (startsLikeSearchMatches(text) ? searchRoute(null) : null),
+};
 
 const DIFF_COMMAND_RE = /^git\s+(?:diff|show)\b/i;
 const DIFF_FILE_HEADER_RE = /^diff --(?:git|cc|combined) /m;
 const DIFF_STRONG_START_RE = /^diff --(?:git|cc|combined) /;
+const SEARCH_COMMAND_RE = /^(?:rg|grep|ag)\b/i;
 
 function diffRoute(command: string | null): StructuralRoute {
   return { type: "git-diff", render: STRUCTURAL_REGISTRY["git-diff"], command };
+}
+
+function searchRoute(command: string | null): StructuralRoute {
+  return { type: "shell-grep", render: STRUCTURAL_REGISTRY["shell-grep"], command };
+}
+
+function statusRoute(command: string): StructuralRoute {
+  return { type: "git-status", render: STRUCTURAL_REGISTRY["git-status"], command };
+}
+
+/** Route for a correlated shell command; `full: false` never reads the text body. */
+function selectCommandRoute(text: string, command: string, full: boolean) {
+  if (DIFF_COMMAND_RE.test(command)) {
+    return !full || DIFF_FILE_HEADER_RE.test(text) ? diffRoute(command) : null;
+  }
+  if (SEARCH_COMMAND_RE.test(command)) {
+    return !full || startsLikeSearchMatches(text) ? searchRoute(command) : null;
+  }
+  const status = gitStatusCommandKind(command);
+  if (!status) return null;
+  // `-z` and porcelain v2 are recognised by the command alone: the renderer declines them, so
+  // they come back whole instead of reaching a truncating filter.
+  return status === "integral" || !full || startsLikePorcelainV1(text)
+    ? statusRoute(command)
+    : null;
 }
 
 /**
@@ -90,10 +121,7 @@ function diffRoute(command: string | null): StructuralRoute {
  */
 function selectShellRoute(text: string, rawCommand: string | null | undefined, full: boolean) {
   const command = lastCommandSegment(rawCommand?.trim() ?? "") || null;
-  if (command) {
-    if (!DIFF_COMMAND_RE.test(command)) return null;
-    return !full || DIFF_FILE_HEADER_RE.test(text) ? diffRoute(command) : null;
-  }
+  if (command) return selectCommandRoute(text, command, full);
   return DIFF_STRONG_START_RE.test(full ? text : text.slice(0, 16)) ? diffRoute(null) : null;
 }
 
