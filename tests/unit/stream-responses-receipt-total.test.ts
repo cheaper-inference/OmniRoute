@@ -3,6 +3,8 @@ import test from "node:test";
 import { FORMATS } from "../../open-sse/translator/formats.ts";
 import { createSSEStream } from "../../open-sse/utils/stream.ts";
 import type { StreamCompletePayload } from "../../open-sse/utils/streamCompletePayload.ts";
+import { mergeResponsesUsage } from "../../open-sse/utils/streamUsageMerge.ts";
+import { extractUsage } from "../../open-sse/utils/usageTracking.ts";
 
 const model = "gpt-6-sol";
 type WirePayload = {
@@ -42,21 +44,17 @@ async function replay(mode: "translate" | "passthrough", suffix: string, total?:
   await writer.write(
     encoder.encode(event("response.output_text.delta", { item_id: "msg_test", delta: "Hello" }))
   );
-  await writer.write(
-    encoder.encode(
-      event(
-        "response.completed",
-        {
-          response: {
-            ...response,
-            status: "completed",
-            usage: { input_tokens: 80, output_tokens: 9, total_tokens: total },
-          },
-        },
-        suffix
-      )
-    )
-  );
+  const receipt = {
+    response: {
+      ...response,
+      status: "completed",
+      usage: { input_tokens: 80, output_tokens: 9, total_tokens: total },
+    },
+  };
+  const tail = suffix
+    ? event("response.completed", receipt, suffix)
+    : `data: ${JSON.stringify({ type: "response.completed", ...receipt })}`;
+  await writer.write(encoder.encode(tail));
   await writer.close();
   const payloads: WirePayload[] = (await reading)
     .split("\n")
@@ -72,6 +70,22 @@ async function replay(mode: "translate" | "passthrough", suffix: string, total?:
     summary: (complete?.responseBody as WirePayload | undefined)?.usage?.total_tokens,
   };
 }
+
+test("passthrough: merges components from a bare EOF receipt without a total", async () => {
+  const actual = await replay("passthrough", "");
+  assert.equal(actual.summary, 89);
+});
+
+test("a partial Responses receipt keeps an earlier valid total", () => {
+  const earlier = { prompt_tokens: 80, completion_tokens: 3, total_tokens: 109 };
+  const tail = extractUsage({
+    type: "response.completed",
+    response: { usage: { input_tokens: 80, output_tokens: 9, total_tokens: -1 } },
+  });
+  const merged = mergeResponsesUsage(earlier, tail);
+  assert.equal(merged?.completion_tokens, 9);
+  assert.equal(merged?.total_tokens, 109);
+});
 
 for (const mode of ["translate", "passthrough"] as const) {
   for (const [framing, suffix] of [

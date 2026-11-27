@@ -3108,7 +3108,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                   const isResponses = flushedType.startsWith("response.");
                   const isClaude = isClaudeEventPayload(flushedParsed);
                   if (isResponses) {
-                    mergeResponseUsage(bufferedUsage?.total_tokens ? bufferedUsage : null);
+                    mergeResponseUsage(bufferedUsage);
                     const textualToolCallBackfilled =
                       flushedType === "response.completed" && passthroughToolCalls.size > 0;
                     if (textualToolCallBackfilled) {
