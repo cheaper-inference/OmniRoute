@@ -1,0 +1,1 @@
+- **fix(auth):** API keys with **Disable Non-Public Models** enabled now resolve a custom compatible provider node's prefix to its node id during published-model lookup, so custom and synced models on compatible nodes remain visible in `/v1/models` and callable by prefix. ([#21402](https://github.com/cheaper-inference/OmniRoute/issues/21402))
