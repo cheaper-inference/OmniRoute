@@ -33,7 +33,8 @@ export async function resolveScopedConnectionRestrictions(
   modelConnections?: readonly string[]
 ) {
   let allowedConnections = restrictions.allowedConnections;
-  if (allowedQuotas?.length) {
+  // An explicit empty intersection is terminal; only null is unrestricted.
+  if (allowedQuotas?.length && allowedConnections?.length !== 0) {
     const quota = await resolveQuotaKeyScope([...allowedQuotas]);
     allowedConnections = constrainConnectionsToQuota(allowedConnections ?? [], quota.connectionIds);
   }

@@ -519,10 +519,12 @@ function appendEffortAliases(
   }
 ): void {
   if (!freshConnectionIds || (providerId !== "antigravity" && providerId !== "agy")) return;
-  const fresh = collectModelsForConnections(
-    modelsByConnection,
-    [...connectionIds].filter((id) => freshConnectionIds.has(id))
-  ).filter((row) => !getModelIsHidden(providerId, row.id));
+  // Keep per-account evidence until the alias builder has filtered eligible tiers.
+  // The first row for a fixed ID is not necessarily the row that supports API use.
+  const fresh = [...connectionIds]
+    .filter((id) => freshConnectionIds.has(id))
+    .flatMap((id) => modelsByConnection[id] ?? [])
+    .filter((row) => !getModelIsHidden(providerId, row.id));
   const existing = new Set([...rows, ...overrides].map((row) => row.id));
   const aliases = withAntigravityClientEffortModels(fresh).filter(
     (row): row is Extract<typeof row, { virtualModel: string }> =>

@@ -94,6 +94,23 @@ test("Claude Messages selects a fresh native tier while fixed entries stay fixed
     (await getAllActiveSyncedModels({ includeAntigravityClientEffortModels: true })).antigravity;
   assert.ok(!(await readProjected()).some(({ id }) => id === "claude-opus-5-5"));
   process.env.ANTIGRAVITY_CLIENT_EFFORT_MODELS = "1";
+  // Account ordering cannot hide a tier backed by fresh, eligible discovery.
+  const firstDuplicate = await seed("first-duplicate", 0, ["gemini-4-argon-low"]);
+  const secondDuplicate = await seed("second-duplicate", 1, ["gemini-4-argon-low"]);
+  for (const eligibleFirst of [false, true]) {
+    for (const [id, supportedInApi] of [
+      [firstDuplicate, eligibleFirst],
+      [secondDuplicate, !eligibleFirst],
+    ] as const) {
+      await replaceSyncedAvailableModelsForConnection("antigravity", id, [
+        { id: "gemini-4-argon-low", name: "Gemini 4 Argon Low", supportedInApi },
+      ]);
+    }
+    assert.deepEqual(
+      (await readProjected()).find(({ id }) => id === "gemini-4-argon")?.supportedThinkingEfforts,
+      ["low"]
+    );
+  }
   const models = await readProjected();
   const baseModel = models.find(({ id }) => id === "claude-opus-5-5");
   assert.equal(baseModel?.name, "Opus 5.5");
