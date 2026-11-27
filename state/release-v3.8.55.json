@@ -32,10 +32,11 @@
         "labeledAt": "2026-11-27T08:45:29Z"
       }
     ],
-    "stage": "testing",
+    "stage": "landing",
     "startedAt": "2026-11-27T20:12:55.431Z",
     "attempts": 0,
-    "bisect": null
+    "bisect": null,
+    "landAttempts": 1
   },
   "baseChecks": [
     {
@@ -140,22 +141,6 @@
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-21T18:04:01.542Z",
-      "type": "batch-started",
-      "batchId": "b23",
-      "prs": [
-        20823,
-        20825
-      ],
-      "sha": "0563eb2ec52bfd20ca39b3d4444df3cbd2316944",
-      "detail": "bisect of b22: 2 PR(s) on 5b6c0af52deb",
-      "labeledAt": {
-        "20823": "2026-11-21T10:59:16Z",
-        "20825": "2026-11-21T10:59:23Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44933350434"
-    },
     {
       "at": "2026-11-21T19:41:05.548Z",
       "type": "checks-green",
@@ -2824,8 +2809,24 @@
         "21358": "2026-11-27T04:37:36Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46061885344"
+    },
+    {
+      "at": "2026-11-27T21:56:40.802Z",
+      "type": "checks-green",
+      "batchId": "b71",
+      "prs": [
+        21163,
+        21358,
+        21228
+      ],
+      "sha": "3e23a8afe026a4980926c2fcab5b1fcfabb995c4",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46073482867"
     }
   ],
-  "updatedAt": "2026-11-27T21:20:27.417Z",
-  "batchWindow": 3
+  "updatedAt": "2026-11-27T21:56:54.061Z",
+  "batchWindow": 3,
+  "landingsWithoutVerdict": {
+    "count": 1,
+    "since": "2026-11-27T21:56:54.061Z"
+  }
 }
