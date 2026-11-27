@@ -97,7 +97,6 @@
     "compression",
     "concurrently",
     "cron-parser",
-    "cross-env",
     "csv-stringify",
     "ctrf",
     "dompurify",
