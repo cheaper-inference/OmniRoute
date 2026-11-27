@@ -3,7 +3,11 @@ import type {
   HttpAttemptRejectionSlot,
 } from "../../utils/providerHttpAttempts.ts";
 import { projectFailureUsageErrorCode } from "./failureUsage.ts";
-import { isHedgeCancelledReasonError } from "../../services/combo/comboAbortReasons.ts";
+import {
+  isComboPerModelTimeoutAbort,
+  isHedgeCancelledReasonError,
+  isHedgeCancelledSignal,
+} from "../../services/combo/comboAbortReasons.ts";
 import { isPassiveCodex, recordRejectedToken } from "../../services/tokenRefresh/passiveCodex.ts";
 
 export { extractSystemRoleMessages, relocateDirectiveOnlyMessages } from "./claudeSystemRole.ts";
@@ -19,7 +23,11 @@ import {
 import { recoverAnthropicThinkingSignature } from "../chatCore/thinkingSignatureRecovery.ts";
 import { runProviderExecutionPipeline } from "../chatCore/providerExecutionPipeline.ts";
 import { admitQuotaShareRotation } from "../chatCore/quotaSharePreHook.ts";
-import { isClientAbortError, raceClientAbort } from "../../utils/clientAbort.ts";
+import {
+  isClientAbortError,
+  isDeadlineAbortReason,
+  raceClientAbort,
+} from "../../utils/clientAbort.ts";
 import { markCodexScopeRateLimited } from "../chatCore/codexFailover.ts";
 import { deleteSessionAccountAffinityBestEffort } from "@/lib/db/sessionAccountAffinity";
 import { buildStreamingResponseHeaders, stripStaleForwardingHeaders } from "./responseHeaders.ts";
@@ -746,6 +754,24 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
       ? clientRawRequest.signal
       : streamController.signal;
     const abortStreamingRefresh = () => {
+      const carry = {
+        upstreamHttpSelection,
+        translatedBody,
+        currentModel,
+        effectiveServiceTier,
+        finalBody,
+        pipelineRecovered,
+        providerHeaders,
+        providerResponse,
+        providerUrl,
+      };
+      if (isHedgeCancelledSignal(refreshSignal)) {
+        streamController.handleError(createSafeAbortError());
+        return {
+          response: createErrorResult(599, "Superseded by hedge sibling", null, "hedge_cancelled"),
+          carry,
+        };
+      }
       trackPendingRequest(
         model,
         provider,
@@ -754,20 +780,30 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
         undefined,
         pendingScope.owner ?? pendingRequestId
       );
+      if (
+        isDeadlineAbortReason(refreshSignal.reason) ||
+        isComboPerModelTimeoutAbort(refreshSignal)
+      ) {
+        const deadlineErr =
+          refreshSignal.reason instanceof Error
+            ? refreshSignal.reason
+            : new Error("Request timed out");
+        streamController.handleError(deadlineErr);
+        return {
+          response: createErrorResult(
+            HTTP_STATUS.GATEWAY_TIMEOUT,
+            "Request timed out",
+            null,
+            "upstream_timeout",
+            "upstream_timeout"
+          ),
+          carry,
+        };
+      }
       streamController.handleError(createSafeAbortError());
       return {
         response: createErrorResult(499, "Request aborted"),
-        carry: {
-          upstreamHttpSelection,
-          translatedBody,
-          currentModel,
-          effectiveServiceTier,
-          finalBody,
-          pipelineRecovered,
-          providerHeaders,
-          providerResponse,
-          providerUrl,
-        },
+        carry,
       };
     };
     if (refreshSignal.aborted) return abortStreamingRefresh();

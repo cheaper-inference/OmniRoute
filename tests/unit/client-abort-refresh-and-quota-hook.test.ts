@@ -336,10 +336,14 @@ test("BaseExecutor.execute: abort during proactive refresh unblocks without disp
     assert.equal(getEventListeners(ac.signal, "abort").length, 0);
   } finally {
     // Let the in-flight refresh settle cleanly in background (no unhandled rejection).
-    resolveRefresh({ accessToken: "rotated-token" });
+    resolveRefresh({ accessToken: "rotated-token", refreshToken: "rt-2" });
   }
   await sleep(20);
-  assert.equal(persistCompleted, false);
+  assert.equal(
+    persistCompleted,
+    true,
+    "fallback onCredentialsRefreshed must still persist rotated tokens when background refresh settles"
+  );
 });
 
 test("BaseExecutor.execute: pre-aborted signal skips proactive refresh and URL dispatch", async () => {
@@ -659,12 +663,18 @@ test("clientAbort helpers: late background rejection after abort does not trigge
     await sleep(20);
     assert.equal(unhandled.length, 0, "background rejection after abort must not be unhandled");
 
-    // Pre-aborted signal with TimeoutError preserves TimeoutError name for 504 mapping.
+    // Pre-aborted signal with TimeoutError or BodyTimeoutError preserves deadline name for 504 mapping.
     const timeoutAc = new AbortController();
     const timeoutErr = new Error("deadline reached");
     timeoutErr.name = "TimeoutError";
     timeoutAc.abort(timeoutErr);
     assert.equal(createClientAbortError(timeoutAc.signal), timeoutErr);
+
+    const bodyTimeoutAc = new AbortController();
+    const bodyTimeoutErr = new Error("body deadline reached");
+    bodyTimeoutErr.name = "BodyTimeoutError";
+    bodyTimeoutAc.abort(bodyTimeoutErr);
+    assert.equal(createClientAbortError(bodyTimeoutAc.signal), bodyTimeoutErr);
 
     // sleepWithAbort removes its listener on normal expiry.
     const sleepAc = new AbortController();
@@ -672,6 +682,43 @@ test("clientAbort helpers: late background rejection after abort does not trigge
     assert.equal(getEventListeners(sleepAc.signal, "abort").length, 0);
   } finally {
     process.off("unhandledRejection", onUnhandled);
+  }
+});
+
+test("refreshWithRetry: passive Codex synchronous abort before microtask prevents invoking refreshFn", async () => {
+  const prevPassive = process.env.OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS;
+  process.env.OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS = "codex";
+  try {
+    const ac = new AbortController();
+    let invoked = 0;
+    const pending = refreshWithRetry(
+      async () => {
+        invoked += 1;
+        return { accessToken: "should-not-start" };
+      },
+      3,
+      silentLog,
+      "codex",
+      { signal: ac.signal }
+    );
+    // Abort synchronously before the deferred Promise.resolve().then(...) callback runs.
+    ac.abort("client_gone");
+    const result = await pending;
+    await sleep(15);
+
+    assert.equal(result, null);
+    assert.equal(
+      invoked,
+      0,
+      "passive refresh must not start if aborted before queued callback runs"
+    );
+    assert.equal(getEventListeners(ac.signal, "abort").length, 0);
+  } finally {
+    if (prevPassive === undefined) {
+      delete process.env.OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS;
+    } else {
+      process.env.OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS = prevPassive;
+    }
   }
 });
 

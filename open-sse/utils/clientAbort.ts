@@ -9,10 +9,17 @@
  *    (so an already-started OAuth token refresh can finish persisting safely).
  */
 
+export function isDeadlineAbortReason(reason: unknown): boolean {
+  return (
+    reason instanceof Error &&
+    (reason.name === "TimeoutError" || reason.name === "BodyTimeoutError")
+  );
+}
+
 export function createClientAbortError(signal?: AbortSignal | null): Error {
   const reason = signal?.reason;
   if (reason instanceof Error) {
-    if (reason.name === "AbortError" || reason.name === "TimeoutError") {
+    if (reason.name === "AbortError" || isDeadlineAbortReason(reason)) {
       return reason;
     }
     const err = new Error(reason.message || "Request aborted", { cause: reason });

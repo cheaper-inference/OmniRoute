@@ -267,7 +267,10 @@ export async function refreshWithRetry(
     if (!signal) return refreshFn();
     try {
       return await raceClientAbort(
-        Promise.resolve().then(() => refreshFn()),
+        Promise.resolve().then(() => {
+          if (signal.aborted) return null;
+          return refreshFn();
+        }),
         signal
       );
     } catch (error) {
