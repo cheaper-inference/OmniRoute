@@ -1,10 +1,12 @@
-import { Card } from "@/shared/components";
+import Card from "@/shared/components/Card";
 import { createCurrencyFormatter } from "../CostOverviewTab";
 
 export interface TopListCardProps {
   title: string;
   rows: Array<Record<string, any>>;
   nameKey: string;
+  /** Optional row field that tells apart rows sharing a name (e.g. provider, #20453). */
+  qualifierKey?: string;
   valueKey: string;
   secondaryKey?: string;
   secondaryLabel?: string;
@@ -22,6 +24,7 @@ export function TopListCard({
   title,
   rows,
   nameKey,
+  qualifierKey,
   valueKey,
   secondaryKey,
   secondaryLabel,
@@ -33,35 +36,43 @@ export function TopListCard({
 
   return (
     <Card className="p-5">
-      <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-4">
+      <h3 className="ci-eyebrow mb-4" data-weight="medium">
         {title}
       </h3>
       <div className="space-y-2">
-        {rows.slice(0, 6).map((row) => (
-          <div
-            key={String(row[nameKey])}
-            className="flex items-center justify-between gap-3 rounded-lg border border-border bg-bg-subtle px-4 py-3"
-          >
-            <span className="text-sm text-text-main truncate">{String(row[nameKey])}</span>
-            <div className="flex items-center gap-3 shrink-0">
-              {secondaryKey ? (
-                <span className="text-xs text-text-muted">
-                  {new Intl.NumberFormat(locale, { notation: "compact" }).format(
-                    Number(row[secondaryKey] || 0)
-                  )}{" "}
-                  {secondaryLabel}
-                </span>
-              ) : null}
-              <span className="text-sm font-mono text-text-muted">
-                {hasCostData || Number(row[valueKey] || 0) > 0 ? (
-                  currencyFormatter.format(Number(row[valueKey] || 0))
-                ) : (
-                  <span className="text-xs italic opacity-70">{legacyFreeLabel}</span>
-                )}
+        {rows.slice(0, 6).map((row) => {
+          const qualifier = qualifierKey && row[qualifierKey] ? String(row[qualifierKey]) : "";
+          return (
+            <Card.Section
+              key={qualifier ? `${qualifier}:${String(row[nameKey])}` : String(row[nameKey])}
+              className="flex items-center justify-between gap-3"
+            >
+              <span className="text-sm text-text-main truncate">
+                {String(row[nameKey])}
+                {qualifier ? (
+                  <span className="ml-2 text-xs text-text-muted">{qualifier}</span>
+                ) : null}
               </span>
-            </div>
-          </div>
-        ))}
+              <div className="flex items-center gap-3 shrink-0">
+                {secondaryKey ? (
+                  <span className="text-xs text-text-muted">
+                    {new Intl.NumberFormat(locale, { notation: "compact" }).format(
+                      Number(row[secondaryKey] || 0)
+                    )}{" "}
+                    {secondaryLabel}
+                  </span>
+                ) : null}
+                <span className="text-sm font-mono text-text-muted">
+                  {hasCostData || Number(row[valueKey] || 0) > 0 ? (
+                    currencyFormatter.format(Number(row[valueKey] || 0))
+                  ) : (
+                    <span className="text-xs italic opacity-70">{legacyFreeLabel}</span>
+                  )}
+                </span>
+              </div>
+            </Card.Section>
+          );
+        })}
       </div>
     </Card>
   );

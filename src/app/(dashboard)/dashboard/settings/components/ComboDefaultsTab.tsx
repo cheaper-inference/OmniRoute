@@ -1,15 +1,19 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Card, Button, Input, ModelSelectField, Select, Toggle } from "@/shared/components";
+import { SearchableSelect } from "@omniroute/ui-kit/searchable-select";
+import { Card, Button, ModelSelectField, NumberInput, Select, Toggle } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
-import { matchesSearch } from "@/shared/utils/turkishText";
+import { searchKeywordsFor } from "@/shared/utils/turkishText";
 import FusionDefaultsFields from "./FusionDefaultsFields";
+import SavedNumberInput from "./SavedNumberInput";
 import {
   ROUTING_STRATEGIES,
   SETTINGS_FALLBACK_STRATEGY_VALUES,
 } from "@/shared/constants/routingStrategies";
 import { useTranslations } from "next-intl";
+import type { GeminiPromptCacheMode } from "@omniroute/open-sse/utils/cacheControlPolicy";
+import IconChip from "@/shared/components/IconChip";
 
 const STRATEGY_LABEL_FALLBACKS: Record<string, string> = {
   "context-relay": "Context Relay",
@@ -29,19 +33,20 @@ function msToSeconds(value: unknown): number {
   return Math.round(ms / MS_PER_SECOND);
 }
 
-function msToOptionalSecondsInput(value: unknown): string {
+/** Seconds for an optional timeout field; `null` (an empty field) when the timeout is unset. */
+function msToOptionalSeconds(value: unknown): number | null {
   const ms = Number(value);
-  if (!Number.isFinite(ms) || ms <= 0) return "";
-  return String(Math.round(ms / MS_PER_SECOND));
+  if (!Number.isFinite(ms) || ms <= 0) return null;
+  return Math.round(ms / MS_PER_SECOND);
 }
 
-function secondsInputToMs(value: string, maxSeconds: number): number {
+function secondsInputToMs(value: number | null, maxSeconds: number): number {
   const seconds = Number(value);
   if (!Number.isFinite(seconds) || seconds <= 0) return 0;
   return Math.min(maxSeconds, Math.round(seconds)) * MS_PER_SECOND;
 }
 
-function secondsInputToOptionalMs(value: string, maxSeconds = 86400): number | undefined {
+function secondsInputToOptionalMs(value: number | null, maxSeconds = 86400): number | undefined {
   const seconds = Number(value);
   if (!Number.isFinite(seconds) || seconds <= 0) return undefined;
   return Math.min(maxSeconds, Math.round(seconds)) * MS_PER_SECOND;
@@ -86,6 +91,28 @@ function toGlobalRoutingPatch(strategy: string | undefined, stickyRoundRobinLimi
   return patch;
 }
 
+function GeminiPromptCacheToggle({
+  mode,
+  saving,
+  onChange,
+}: {
+  mode?: GeminiPromptCacheMode;
+  saving: boolean;
+  onChange: (mode: GeminiPromptCacheMode) => void;
+}) {
+  const t = useTranslations("settings");
+  return (
+    <Toggle
+      checked={mode === "implicit"}
+      disabled={mode === undefined || saving}
+      label={t("geminiPromptCacheMode")}
+      description={t("geminiPromptCacheModeDesc")}
+      side="right"
+      onChange={(enabled) => onChange(enabled ? "implicit" : "off")}
+    />
+  );
+}
+
 export default function ComboDefaultsTab() {
   const [comboDefaults, setComboDefaults] = useState<any>({
     strategy: "priority",
@@ -105,14 +132,12 @@ export default function ComboDefaultsTab() {
   });
   const [sessionAffinityTtlMs, setSessionAffinityTtlMs] = useState(0);
   const [promptCacheAffinityEnabled, setPromptCacheAffinityEnabled] = useState(true);
+  const [geminiPromptCacheMode, setGeminiPromptCacheMode] = useState<GeminiPromptCacheMode>();
+  const savedGeminiPromptCacheMode = useRef<GeminiPromptCacheMode | undefined>(undefined);
   const [providerOverrides, setProviderOverrides] = useState<any>({});
   const [availableProviders, setAvailableProviders] = useState<{ id: string; provider: string }[]>(
     []
   );
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [highlightedIdx, setHighlightedIdx] = useState(0);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<{ type: "success" | "error" | ""; message: string }>({
     type: "",
@@ -138,7 +163,10 @@ export default function ComboDefaultsTab() {
   useEffect(() => {
     Promise.all([
       fetch("/api/settings/combo-defaults").then((res) => res.json()),
-      fetch("/api/settings").then((res) => res.json()),
+      fetch("/api/settings").then((res) => {
+        if (!res.ok) throw new Error("Failed to load global routing settings");
+        return res.json();
+      }),
       fetch("/api/providers")
         .then((res) => res.json())
         .then((providers: any[]) => {
@@ -185,19 +213,12 @@ export default function ComboDefaultsTab() {
             : 0
         );
         setPromptCacheAffinityEnabled(settingsData.promptCacheAffinityEnabled !== false);
+        const loadedGeminiPromptCacheMode =
+          settingsData.geminiPromptCacheMode === "implicit" ? "implicit" : "off";
+        savedGeminiPromptCacheMode.current = loadedGeminiPromptCacheMode;
+        setGeminiPromptCacheMode(loadedGeminiPromptCacheMode);
       })
       .catch((err) => console.error("Failed to fetch combo defaults:", err));
-  }, []);
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // The banner timer outlives the component: without a handle to clear it, a save
@@ -242,6 +263,11 @@ export default function ComboDefaultsTab() {
         // (mirrors stickyRoundRobinLimit) so combo.ts resolution reads settings.disableSessionStickiness.
         disableSessionStickiness: disableSessionStickiness === true,
         promptCacheAffinityEnabled,
+        // An unchanged tab snapshot must not overwrite a newer choice from another client.
+        geminiPromptCacheMode:
+          geminiPromptCacheMode === savedGeminiPromptCacheMode.current
+            ? undefined
+            : geminiPromptCacheMode,
       };
 
       const comboDefaultsRes = await fetch("/api/settings/combo-defaults", {
@@ -258,6 +284,8 @@ export default function ComboDefaultsTab() {
       }
 
       await syncGlobalRoutingSettings(settingsPatch);
+      savedGeminiPromptCacheMode.current =
+        settingsPatch.geminiPromptCacheMode ?? savedGeminiPromptCacheMode.current;
       showStatus("success", t("savedSuccessfully"));
     } catch (err) {
       console.error("Failed to save combo defaults:", err);
@@ -271,9 +299,6 @@ export default function ComboDefaultsTab() {
     const trimmed = name.trim().toLowerCase();
     if (!trimmed || providerOverrides[trimmed]) return;
     setProviderOverrides((prev) => ({ ...prev, [trimmed]: { maxRetries: 1 } }));
-    setDropdownOpen(false);
-    setSearchQuery("");
-    setHighlightedIdx(0);
   };
 
   const removeProviderOverride = (provider: string) => {
@@ -304,41 +329,16 @@ export default function ComboDefaultsTab() {
     });
   };
 
-  // Filtered provider list — excludes already-added ones, filtered by search query
-  const filteredProviders = availableProviders.filter(
-    (p) => !providerOverrides[p.provider] && matchesSearch(p.provider, searchQuery)
-  );
-
-  const handleDropdownKeyDown = (e: React.KeyboardEvent) => {
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        setHighlightedIdx((prev) => Math.min(prev + 1, filteredProviders.length - 1));
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        setHighlightedIdx((prev) => Math.max(prev - 1, 0));
-        break;
-      case "Enter":
-        e.preventDefault();
-        if (filteredProviders[highlightedIdx]) {
-          addProviderOverride(filteredProviders[highlightedIdx].provider);
-        }
-        break;
-      case "Escape":
-        e.preventDefault();
-        setDropdownOpen(false);
-        break;
-    }
-  };
+  // Providers still without an override: the options of the "add provider" picker.
+  const remainingProviders = availableProviders.filter((p) => !providerOverrides[p.provider]);
 
   return (
     <Card>
       <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+        <IconChip>
           <Icon name="tune" size={20} />
-        </div>
-        <h3 className="text-lg font-semibold">
+        </IconChip>
+        <h3 className="ci-heading" data-size="lg">
           {translateOrFallback(t, "comboDefaultsTitle", "Default Routing & Combo Settings")}
         </h3>
         <span className="text-xs text-text-muted ml-auto">{t("globalComboConfig")}</span>
@@ -405,14 +405,12 @@ export default function ComboDefaultsTab() {
               <p className="text-sm font-medium">{t("stickyLimit")}</p>
               <p className="text-xs text-text-muted">{t("stickyLimitDesc")}</p>
             </div>
-            <Input
-              type="number"
+            <SavedNumberInput
               aria-label={t("stickyLimit")}
-              min="1"
-              max="1000"
+              min={1}
+              max={1000}
               value={comboDefaults.stickyRoundRobinLimit || 3}
-              onChange={async (e) => {
-                const nextLimit = parseInt(e.target.value) || 3;
+              onSave={async (nextLimit) => {
                 setComboDefaults((prev) => ({
                   ...prev,
                   stickyRoundRobinLimit: nextLimit,
@@ -432,55 +430,49 @@ export default function ComboDefaultsTab() {
         {/* Numeric settings */}
         <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border/50">
           {numericSettings.map(({ key, label, min, max, step }) => (
-            <Input
+            <NumberInput
               key={key}
               label={label}
-              type="number"
               min={min}
               max={max}
               step={step || 1}
-              value={comboDefaults[key] ?? ""}
-              onChange={(e) =>
-                setComboDefaults((prev) => ({ ...prev, [key]: parseInt(e.target.value) || 0 }))
+              value={comboDefaults[key] ?? null}
+              onValueChange={(value) =>
+                setComboDefaults((prev) => ({ ...prev, [key]: value ?? 0 }))
               }
-              className="text-sm"
             />
           ))}
-          <Input
+          <NumberInput
             label={translateOrFallback(t, "targetTimeout", "Target timeout (seconds)")}
-            type="number"
             min={1}
             max={86400}
             step={1}
-            value={msToOptionalSecondsInput(comboDefaults.targetTimeoutMs)}
+            value={msToOptionalSeconds(comboDefaults.targetTimeoutMs)}
             placeholder={translateOrFallback(t, "inheritRequestTimeout", "Inherit request timeout")}
-            onChange={(e) =>
+            onValueChange={(value) =>
               setComboDefaults((prev) => ({
                 ...prev,
-                targetTimeoutMs: secondsInputToOptionalMs(e.target.value),
+                targetTimeoutMs: secondsInputToOptionalMs(value),
               }))
             }
-            className="text-sm"
           />
-          <Input
+          <NumberInput
             label={translateOrFallback(t, "comboTimeout", "Combo timeout (seconds)")}
-            type="number"
             min={1}
             max={86400}
             step={1}
-            value={msToOptionalSecondsInput(comboDefaults.comboTimeoutMs)}
+            value={msToOptionalSeconds(comboDefaults.comboTimeoutMs)}
             placeholder={translateOrFallback(
               t,
               "inheritComboSafetyTimeout",
               "Inherit 10-minute hang-stop"
             )}
-            onChange={(e) =>
+            onValueChange={(value) =>
               setComboDefaults((prev) => ({
                 ...prev,
-                comboTimeoutMs: secondsInputToOptionalMs(e.target.value),
+                comboTimeoutMs: secondsInputToOptionalMs(value),
               }))
             }
-            className="text-sm"
           />
         </div>
         <p className="text-xs text-text-muted">
@@ -511,15 +503,13 @@ export default function ComboDefaultsTab() {
               )}
             </p>
           </div>
-          <Input
+          <NumberInput
             label={translateOrFallback(t, "sessionAffinityTtl", "Affinity TTL (seconds)")}
-            type="number"
             min={0}
             max={86400}
             step={60}
             value={msToSeconds(sessionAffinityTtlMs)}
-            onChange={(e) => setSessionAffinityTtlMs(secondsInputToMs(e.target.value, 86400))}
-            className="text-sm"
+            onValueChange={(value) => setSessionAffinityTtlMs(secondsInputToMs(value, 86400))}
           />
         </div>
 
@@ -536,122 +526,96 @@ export default function ComboDefaultsTab() {
               )}
             </p>
           </div>
-          <Input
+          <NumberInput
             label={translateOrFallback(t, "resetAwareQuotaCacheTtl", "Fresh TTL (seconds)")}
-            type="number"
             min={0}
             max={300}
             step={5}
             value={msToSeconds(comboDefaults.resetAwareQuotaCacheTtlMs)}
-            onChange={(e) =>
+            onValueChange={(value) =>
               setComboDefaults((prev) => ({
                 ...prev,
-                resetAwareQuotaCacheTtlMs: secondsInputToMs(e.target.value, 300),
+                resetAwareQuotaCacheTtlMs: secondsInputToMs(value, 300),
               }))
             }
-            className="text-sm"
           />
-          <Input
+          <NumberInput
             label={translateOrFallback(t, "resetAwareQuotaCacheMaxStale", "Max stale (seconds)")}
-            type="number"
             min={0}
             max={3600}
             step={30}
             value={msToSeconds(comboDefaults.resetAwareQuotaCacheMaxStaleMs)}
-            onChange={(e) =>
+            onValueChange={(value) =>
               setComboDefaults((prev) => ({
                 ...prev,
-                resetAwareQuotaCacheMaxStaleMs: secondsInputToMs(e.target.value, 3600),
+                resetAwareQuotaCacheMaxStaleMs: secondsInputToMs(value, 3600),
               }))
             }
-            className="text-sm"
           />
         </div>
 
         {/* Round-Robin specific */}
         {comboDefaults.strategy === "round-robin" && (
           <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border/50">
-            <Input
+            <NumberInput
               label={t("concurrencyPerModel")}
-              type="number"
               min={1}
               max={20}
-              value={comboDefaults.concurrencyPerModel ?? ""}
+              value={comboDefaults.concurrencyPerModel ?? null}
               placeholder="3"
-              onChange={(e) =>
-                setComboDefaults((prev) => ({
-                  ...prev,
-                  concurrencyPerModel: parseInt(e.target.value) || 0,
-                }))
+              onValueChange={(value) =>
+                setComboDefaults((prev) => ({ ...prev, concurrencyPerModel: value ?? 0 }))
               }
-              className="text-sm"
             />
-            <Input
+            <NumberInput
               label={t("queueTimeout")}
-              type="number"
               min={1000}
               max={120000}
               step={1000}
-              value={comboDefaults.queueTimeoutMs ?? ""}
+              value={comboDefaults.queueTimeoutMs ?? null}
               placeholder="30000"
-              onChange={(e) =>
-                setComboDefaults((prev) => ({
-                  ...prev,
-                  queueTimeoutMs: parseInt(e.target.value) || 0,
-                }))
+              onValueChange={(value) =>
+                setComboDefaults((prev) => ({ ...prev, queueTimeoutMs: value ?? 0 }))
               }
-              className="text-sm"
             />
-            <Input
+            <NumberInput
               label={t("queueDepth")}
-              type="number"
               min={0}
               max={100}
-              value={comboDefaults.queueDepth ?? ""}
+              value={comboDefaults.queueDepth ?? null}
               placeholder="20"
-              onChange={(e) =>
-                setComboDefaults((prev) => ({
-                  ...prev,
-                  queueDepth: parseInt(e.target.value) || 0,
-                }))
+              onValueChange={(value) =>
+                setComboDefaults((prev) => ({ ...prev, queueDepth: value ?? 0 }))
               }
-              className="text-sm"
             />
           </div>
         )}
 
         {comboDefaults.strategy === "context-relay" && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-border/50">
-            <Input
+            <NumberInput
               label={translateOrFallback(t, "contextRelayHandoffThreshold", "Handoff Threshold")}
-              type="number"
               min={0.5}
               max={0.94}
               step={0.01}
-              value={comboDefaults.handoffThreshold ?? ""}
+              value={comboDefaults.handoffThreshold ?? null}
               placeholder="0.85"
-              onChange={(e) =>
-                setComboDefaults((prev) => ({
-                  ...prev,
-                  handoffThreshold: e.target.value ? Number(e.target.value) : undefined,
-                }))
+              onValueChange={(value) =>
+                setComboDefaults((prev) => ({ ...prev, handoffThreshold: value ?? undefined }))
               }
-              className="text-sm"
             />
-            <Input
+            <NumberInput
               label={translateOrFallback(t, "contextRelayMaxMessages", "Max Messages For Summary")}
-              type="number"
               min={5}
               max={100}
-              value={comboDefaults.maxMessagesForSummary ?? ""}
+              value={comboDefaults.maxMessagesForSummary ?? null}
               placeholder="30"
-              onChange={(e) =>
+              onValueChange={(value) =>
                 setComboDefaults((prev) => ({
                   ...prev,
-                  maxMessagesForSummary: e.target.value ? Number(e.target.value) : undefined,
+                  maxMessagesForSummary: value ?? undefined,
                 }))
               }
-              className="text-sm"
             />
             <ModelSelectField
               label={translateOrFallback(t, "contextRelaySummaryModel", "Summary Model")}
@@ -719,6 +683,11 @@ export default function ComboDefaultsTab() {
               onChange={() => setPromptCacheAffinityEnabled((enabled) => !enabled)}
             />
           </div>
+          <GeminiPromptCacheToggle
+            mode={geminiPromptCacheMode}
+            saving={saving}
+            onChange={setGeminiPromptCacheMode}
+          />
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="font-medium text-sm">
@@ -816,116 +785,75 @@ export default function ComboDefaultsTab() {
                 <div className="flex flex-col gap-0.5">
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon-2xs"
                     icon="arrow_upward"
                     onClick={() => moveProviderOverride(provider, -1)}
                     disabled={index === 0}
-                    className="size-5 min-h-5"
                     title={t("moveUp")}
                     aria-label={t("moveUp")}
                   />
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon-2xs"
                     icon="arrow_downward"
                     onClick={() => moveProviderOverride(provider, 1)}
                     disabled={index === Object.keys(providerOverrides).length - 1}
-                    className="size-5 min-h-5"
                     title={t("moveDown")}
                     aria-label={t("moveDown")}
                   />
                 </div>
                 <span className="text-xs font-mono font-medium min-w-[80px]">{provider}</span>
-                <Input
-                  type="number"
-                  min="0"
-                  max="5"
+                <NumberInput
+                  min={0}
+                  max={5}
                   value={config.maxRetries ?? 1}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     setProviderOverrides((prev) => ({
                       ...prev,
-                      [provider]: { ...prev[provider], maxRetries: parseInt(e.target.value) || 0 },
+                      [provider]: { ...prev[provider], maxRetries: value ?? 0 },
                     }))
                   }
-                  className="text-xs w-16"
+                  size="xs"
+                  className="w-16"
                   aria-label={t("providerMaxRetriesAria", { provider })}
                 />
-                <span className="text-[10px] text-text-muted">{t("retries")}</span>
+                <span className="text-3xs text-text-muted">{t("retries")}</span>
                 <Button
-                  variant="ghost"
+                  variant="destructive-ghost"
                   size="icon-sm"
                   icon="close"
                   onClick={() => removeProviderOverride(provider)}
-                  className="ml-auto text-error"
+                  className="ml-auto"
                   aria-label={t("removeProviderOverrideAria", { provider })}
                 />
               </div>
             )
           )}
 
-          <div className="relative" ref={dropdownRef}>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              aria-expanded={dropdownOpen}
-              className="mt-2 w-full justify-between font-normal text-text-muted"
-            >
-              <span className="flex-1 text-left">
-                {t("selectProviderPlaceholder") || "Select provider..."}
-              </span>
-              <Icon
-                name="expand_more"
-                size={16}
-                className={`transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
-              />
-            </Button>
-
-            {dropdownOpen && (
-              <div className="absolute z-50 mt-1 w-full rounded-lg border border-border bg-surface shadow-lg overflow-hidden">
-                <div className="p-2 border-b border-border/50">
-                  <Input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setHighlightedIdx(0);
-                    }}
-                    placeholder={t("searchProviderPlaceholder") || "Search providers..."}
-                    aria-label={t("searchProviderAria") || "Search providers"}
-                    onKeyDown={handleDropdownKeyDown}
-                    autoFocus
-                  />
-                </div>
-                <ul role="listbox" className="max-h-48 overflow-auto py-1">
-                  {filteredProviders.length === 0 ? (
-                    <li className="px-3 py-2 text-xs text-text-muted text-center">
-                      {availableProviders.filter((p) => !providerOverrides[p.provider]).length === 0
-                        ? t("allProvidersAdded")
-                        : t("noProvidersFound")}
-                    </li>
-                  ) : (
-                    filteredProviders.map((p, idx) => (
-                      <li
-                        key={p.provider}
-                        role="option"
-                        aria-selected={idx === highlightedIdx}
-                        className={`px-3 py-2 text-xs cursor-pointer transition-colors ${
-                          idx === highlightedIdx
-                            ? "bg-bg-subtle font-medium"
-                            : "hover:bg-bg-subtle/60"
-                        }`}
-                        onClick={() => addProviderOverride(p.provider)}
-                        onMouseEnter={() => setHighlightedIdx(idx)}
-                      >
-                        {p.provider}
-                      </li>
-                    ))
-                  )}
-                </ul>
-              </div>
-            )}
-          </div>
+          {/* "Add provider" picker on the kit SearchableSelect (Radix popover: body portal,
+              collision-aware placement, Escape, outside press, arrow keys with
+              aria-activedescendant). It never holds a value: a choice adds the override row. */}
+          <SearchableSelect
+            className="mt-2"
+            variant="field"
+            value=""
+            onValueChange={addProviderOverride}
+            label={t("selectProviderPlaceholder")}
+            placeholder={t("selectProviderPlaceholder")}
+            searchPlaceholder={t("searchProviderPlaceholder")}
+            emptyMessage={
+              remainingProviders.length === 0 ? t("allProvidersAdded") : t("noProvidersFound")
+            }
+            // The kit lowercases the query with the browser locale and matches it against label +
+            // keywords. The keywords carry the folded name and its dotless-ı spelling, so an
+            // upper-case query still matches in a Turkish-locale browser ("OPENAI" → "openaı").
+            // A query typed with accents no longer matches: the kit has no filter hook.
+            options={remainingProviders.map((p) => ({
+              value: p.provider,
+              label: p.provider,
+              keywords: searchKeywordsFor(p.provider),
+            }))}
+          />
         </div>
 
         {/* Save */}

@@ -9,6 +9,7 @@ import Input from "./Input";
 import Modal from "./Modal";
 import SegmentedControl from "./SegmentedControl";
 import Select from "./Select";
+import SearchableSelectField from "@/shared/components/SearchableSelectField";
 import { cn } from "@/shared/utils/cn";
 import DistributeProxiesButton from "./DistributeProxiesButton";
 import NoAuthProviderToggle from "./NoAuthProviderToggle";
@@ -763,7 +764,7 @@ export default function NoAuthAccountCard({
                   data-account-id={id}
                   className="group flex items-center gap-2 rounded-lg border border-border bg-bg/40 px-2.5 py-2 transition-colors hover:bg-bg-subtle"
                 >
-                  <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bg text-[10px] font-medium text-text-muted">
+                  <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-bg text-3xs font-medium text-text-muted">
                     {i + 1}
                   </span>
                   <span className="min-w-0 flex-1 truncate font-mono text-xs text-text-muted">
@@ -787,10 +788,10 @@ export default function NoAuthAccountCard({
                     <Icon name="shield" size={16} fill={configured} />
                   </Button>
                   <Button
-                    variant="ghost"
+                    variant="destructive-ghost"
                     size="icon-sm"
                     onClick={() => handleRemoveAccount(id)}
-                    className="size-6 shrink-0 text-text-muted opacity-0 hover:bg-error/10 hover:text-error group-hover:opacity-100 focus-visible:opacity-100"
+                    className="size-6 shrink-0 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
                     aria-label={t("removeAccount")}
                   >
                     <Icon name="delete" size={16} />
@@ -840,21 +841,26 @@ export default function NoAuthAccountCard({
             />
 
             {proxyMode === "saved" ? (
-              <Select
+              <SearchableSelectField
                 value={selectedProxyId}
-                onChange={(e) => setSelectedProxyId(e.target.value)}
-                aria-label={t("saved")}
-                selectClassName="text-xs"
-              >
-                <option value="">
-                  {savedProxies.length === 0 ? t("noSavedProxies") : t("inheritConnectionOption")}
-                </option>
-                {savedProxies.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {(p.name || p.host) ?? p.id} ({p.type || "socks5"}://{p.host}:{p.port})
-                  </option>
-                ))}
-              </Select>
+                onValueChange={setSelectedProxyId}
+                label={t("saved")}
+                resetKey={proxyAccountId}
+                options={[
+                  {
+                    value: "",
+                    label:
+                      savedProxies.length === 0
+                        ? t("noSavedProxies")
+                        : t("inheritConnectionOption"),
+                    alwaysVisible: true,
+                  },
+                  ...savedProxies.map((p) => ({
+                    value: p.id,
+                    label: `${(p.name || p.host) ?? p.id} (${p.type || "socks5"}://${p.host}:${p.port})`,
+                  })),
+                ]}
+              />
             ) : (
               <>
                 <div className="flex gap-2">

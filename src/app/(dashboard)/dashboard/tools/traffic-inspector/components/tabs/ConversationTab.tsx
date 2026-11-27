@@ -33,7 +33,11 @@ export function ConversationTab({ request }: ConversationTabProps) {
       )}
       {conversation.request.length > 0 && (
         <>
-          <div className="flex items-center gap-2 mt-2 mb-1 text-[11px] uppercase tracking-wider text-text-muted font-semibold">
+          <div
+            className="ci-eyebrow flex items-center gap-2 mt-2 mb-1"
+            data-size="2xs"
+            data-weight="medium"
+          >
             <span className="h-px flex-1 bg-border" aria-hidden="true" />
             <span>{t("contextHistory")}</span>
             <span className="h-px flex-1 bg-border" aria-hidden="true" />
@@ -45,7 +49,11 @@ export function ConversationTab({ request }: ConversationTabProps) {
       )}
       {conversation.response.length > 0 && (
         <>
-          <div className="flex items-center gap-2 mt-3 mb-1 text-[11px] uppercase tracking-wider text-text-muted font-semibold">
+          <div
+            className="ci-eyebrow flex items-center gap-2 mt-3 mb-1"
+            data-size="2xs"
+            data-weight="medium"
+          >
             <span className="h-px flex-1 bg-border" aria-hidden="true" />
             <span>{t("modelResponse")}</span>
             <span className="h-px flex-1 bg-border" aria-hidden="true" />

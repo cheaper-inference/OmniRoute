@@ -158,26 +158,6 @@ export const NOAUTH_PROVIDERS = {
       text: "OpenAI Codex (App-Server) drives the Codex CLI's local app-server (JSON-RPC over WebSocket). The CLI self-manages its OpenAI OAuth, so OmniRoute never sees or replays your token. Requires the codex CLI reachable at the configured app-server URL; sign in via the CLI or the dashboard \u201cSign in with ChatGPT\u201d action.",
     },
   },
-  uncloseai: {
-    id: "uncloseai",
-    alias: "unc",
-    name: "UncloseAI",
-    icon: "auto_awesome",
-    color: "#8B5CF6",
-    textIcon: "UN",
-    website: "https://uncloseai.com",
-    noAuth: true,
-    hasFree: true,
-    passthroughModels: true,
-    serviceKinds: ["llm"],
-    toolCalling: "emulated",
-    authHint:
-      "No auth required. API accepts any non-empty string as key for identification. If older built-in models return 404, use Available Models → Import from /models or Auto-Sync; verified live model: turboderp/Qwen3.8-27B-exl3.",
-    freeNote: "Free forever — no signup, no credit card. OpenAI-compatible endpoints.",
-    notice: {
-      text: "UncloseAI needs no API key. API accepts any non-empty string as key for identification. If older built-in models return 404, use Available Models → Import from /models or Auto-Sync.",
-    },
-  },
   aihorde: {
     id: "aihorde",
     alias: "horde",

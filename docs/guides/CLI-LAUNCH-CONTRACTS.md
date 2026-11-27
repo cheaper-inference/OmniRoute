@@ -1,7 +1,7 @@
 ---
 title: "Shared CLI launch and configuration contracts"
-version: 3.8.51
-lastUpdated: 2026-09-21
+version: 3.8.54
+lastUpdated: 2026-11-13
 ---
 
 # Shared CLI launch and configuration contracts
@@ -29,6 +29,34 @@ Interrupt and termination signals are forwarded to the child. The launcher
 waits for the child's close event before removing temporary configuration.
 `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` controls the grace period before forced
 termination (default 5000 milliseconds).
+
+`omniroute launch <tool>` (see [LAUNCH.md](./LAUNCH.md)) follows the same
+environment rules and signal forwarding, and adds:
+
+- **Gateway auto-start.** For a local target, when no gateway answers on the
+  port, the launcher starts `omniroute serve --headless --no-open` bound to
+  `127.0.0.1` under a detached reaper process. Each running launch holds a
+  lease in `DATA_DIR/launch/leases/` (heartbeat every 15 s, stale after 45 s or
+  when its process is gone). The reaper stops the gateway it started once no
+  lease has been live for the idle grace (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`,
+  default 10000 milliseconds). A gateway the user started is used but never
+  stopped. `--keep-gateway` or `omniroute gateway keep` turns a launcher
+  gateway into a normal one; `--no-start` restores the old fail-if-down
+  behaviour. Remote targets are probed only.
+- **Launch sessions.** Every launch mints a short-lived `olx_` session token
+  from the parent credential (`POST /api/launch/sessions`), heartbeats it while
+  the tool runs, reads the usage summary and revokes it after the tool exits.
+  The token is a strict subset of its parent: same permissions, the same or a
+  narrower catalog, a shorter life, and it is not a dashboard credential. The
+  tool receives the session token, never the parent credential, and requests
+  are tagged `launch:<tool>:<sessionId>` unless `--tag` is given. A gateway
+  without the session API fails with `GatewayTooOld` instead of falling back to
+  an unscoped launch.
+- **Per-launch config.** Tool config files are written to a private temp
+  directory (mode 0700, prefix `omnirouter-`) and removed after the child
+  exits. A `SIGKILL` of the launcher leaves the directory behind;
+  `omniroute launch --cleanup` removes such directories once they are older
+  than a day.
 
 ## Gemini persistent setup
 
@@ -79,14 +107,13 @@ unpacked archive), and `omniroute serve` passes the CLI environment on to the
 server and to every tool the server runs. So a `.env` there may set only these
 keys, listed in `bin/cli/utils/untrustedCwdEnv.mjs`:
 
-| Key                                  | Accepted values                                                       |
-| ------------------------------------ | --------------------------------------------------------------------- |
-| `PORT`, `API_PORT`, `DASHBOARD_PORT` | a number from 1 to 65535                                              |
-| `REQUIRE_API_KEY`                    | `true`, `1` or `yes` in any case, the values the server treats as on  |
-| `LANG`, `LC_ALL`, `LC_MESSAGES`      | up to 64 letters, digits, `_`, `.`, `@` or `-`                        |
-| `LANGUAGE`                           | the same, plus `:`                                                    |
-| `TZ`                                 | up to 64 letters, digits, `_`, `+`, `-` or `/`, not starting with `/` |
-| `NO_COLOR`, `FORCE_COLOR`            | up to 16 letters and digits                                           |
+| Key                             | Accepted values                                                       |
+| ------------------------------- | --------------------------------------------------------------------- |
+| `REQUIRE_API_KEY`               | `true`, `1` or `yes` in any case, the values the server treats as on  |
+| `LANG`, `LC_ALL`, `LC_MESSAGES` | up to 64 letters, digits, `_`, `.`, `@` or `-`                        |
+| `LANGUAGE`                      | the same, plus `:`                                                    |
+| `TZ`                            | up to 64 letters, digits, `_`, `+`, `-` or `/`, not starting with `/` |
+| `NO_COLOR`, `FORCE_COLOR`       | up to 16 letters and digits                                           |
 
 Every value `REQUIRE_API_KEY` accepts turns the check on, so the file cannot
 turn the check off itself. It does not decide the result, though: the server
@@ -102,18 +129,21 @@ Names must match exactly, in upper case. Any other line, a value that fails its
 check, and a name that is not plain ASCII letters, digits and `_` (for example
 one with a NUL byte or a look-alike letter) are skipped. The CLI prints one
 warning that names the keys it cannot set and one that names allowed keys it
-ignored, each with what to change (`PORT (expected a port number from 1 to
-65535)`, `port (write the name as PORT)`). Neither prints the values. File
+ignored, each with what to change (`TZ (expected a zone name such as
+Europe/Berlin)`, `lang (write the name as LANG)`). Neither prints the values. File
 paths in these messages, and the `.env` path `omniroute doctor` reports, are
 escaped when they contain control or bidi characters. The restriction does not apply when the working directory is the
 data directory or the package directory.
 
-A port from that file still decides which local port the CLI talks to. A
-process that listens on that port receives the CLI's API key, the context
-token, and the CLI machine token (`x-omniroute-cli-token`, see
+`PORT`, `API_PORT` and `DASHBOARD_PORT` are not on the list. Without a base
+URL from a higher-precedence source, the CLI talks to `localhost:<PORT>`, and
+whatever listens there receives the CLI's API key, the context token and the
+CLI machine token (`x-omniroute-cli-token`, see
 [CLI_TOKEN.md](../security/CLI_TOKEN.md)), which the local server accepts for
-management calls from loopback. On a machine shared with other users, do not
-run `omniroute` in a directory whose `.env` sets a port you did not choose.
+management calls from loopback. A port from the working directory would let
+that file choose the listener, so set the ports in the shell, in
+`<DATA_DIR>/.env` or with the `--port` option of commands that have one
+(`serve`, `launch`, `run`).
 
 The parser has no `export` syntax. A line such as `export LD_PRELOAD=...` names
 a variable `export LD_PRELOAD`; from the working directory it is skipped, and

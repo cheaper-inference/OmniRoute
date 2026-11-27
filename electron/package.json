@@ -1,6 +1,6 @@
 {
   "name": "omniroute-desktop",
-  "version": "3.8.54",
+  "version": "3.8.55",
   "description": "OmniRoute Desktop Application",
   "main": "main.js",
   "author": {
@@ -38,7 +38,8 @@
     "plist": "^4.0.0",
     "form-data": "^4.0.6",
     "js-yaml": "^4.2.0",
-    "undici": "^7.29.0"
+    "undici": "^7.30.2",
+    "minimatch@>=9.0.0": "^11.0.9"
   },
   "build": {
     "appId": "online.omniroute.desktop",
@@ -53,7 +54,7 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "diegosouzapw",
+      "owner": "cheaper-inference",
       "repo": "OmniRoute"
     },
     "files": [

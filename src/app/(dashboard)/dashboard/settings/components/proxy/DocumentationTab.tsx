@@ -1,7 +1,8 @@
 "use client";
 import { useTranslations } from "next-intl";
-import { CodePreview } from "@omniroute/ui-kit/code-preview";
+import CodePreview from "@/shared/components/CodePreview";
 import { Card } from "@/shared/components";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 
 export default function DocumentationTab() {
   const t = useTranslations("settings");
@@ -10,7 +11,7 @@ export default function DocumentationTab() {
   return (
     <Card className="p-6 space-y-6">
       <section>
-        <h3 className="font-semibold mb-2">{t("proxyDocumentationScopeTitle")}</h3>
+        <h3 className="mb-2">{t("proxyDocumentationScopeTitle")}</h3>
         <p className="text-sm text-text-muted">
           {t("proxyDocumentationScopeDescBefore")}
           <strong>{t("proxyDocumentationScopeOrder")}</strong>
@@ -19,7 +20,7 @@ export default function DocumentationTab() {
       </section>
 
       <section>
-        <h3 className="font-semibold mb-2">{t("proxyDocumentationAddTitle")}</h3>
+        <h3 className="mb-2">{t("proxyDocumentationAddTitle")}</h3>
         <p className="text-sm text-text-muted">
           {t("proxyDocumentationAddDescBefore")}
           <strong>{t("proxyPoolTab")}</strong>
@@ -30,7 +31,7 @@ export default function DocumentationTab() {
       </section>
 
       <section>
-        <h3 className="font-semibold mb-2">{t("proxyDocumentationBulkTitle")}</h3>
+        <h3 className="mb-2">{t("proxyDocumentationBulkTitle")}</h3>
         <CodePreview
           variant="surface"
           showLineNumbers={false}
@@ -47,24 +48,23 @@ export default function DocumentationTab() {
       </section>
 
       <section>
-        <h3 className="font-semibold mb-2">SOCKS5</h3>
+        <h3 className="mb-2">SOCKS5</h3>
         <p className="text-sm text-text-muted">
           {t("proxyDocumentationSocks5DescBefore")}{" "}
-          <code className="bg-bg-subtle px-1 rounded">ENABLE_SOCKS5_PROXY=false</code>{" "}
+          <InlineCode>ENABLE_SOCKS5_PROXY=false</InlineCode>{" "}
           {t("proxyDocumentationSocks5DescAfter")}
         </p>
       </section>
 
       <section>
-        <h3 className="font-semibold mb-2">{t("freePoolTab")}</h3>
+        <h3 className="mb-2">{t("freePoolTab")}</h3>
         <p className="text-sm text-text-muted">{t("proxyDocumentationFreePoolDesc")}</p>
       </section>
 
       <section>
-        <h3 className="font-semibold mb-2">Vercel Relay</h3>
+        <h3 className="mb-2">Vercel Relay</h3>
         <p className="text-sm text-text-muted">
-          {t("proxyDocumentationVercelRelayDescBefore")} (
-          <code className="bg-bg-subtle px-1 rounded">x-relay-auth</code>).{" "}
+          {t("proxyDocumentationVercelRelayDescBefore")} (<InlineCode>x-relay-auth</InlineCode>).{" "}
           {t("proxyDocumentationVercelRelayDescAfter")}
         </p>
       </section>

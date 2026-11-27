@@ -520,6 +520,57 @@ export function isOpencodePoolReselectEnabled(): boolean {
   }
 }
 
+/**
+ * PROXY_REEGRESS_ON_QUOTA_429 (default off): after a per-IP quota 429 through a pool member,
+ * the chat loop re-sends the same request with the same account through another member.
+ * Fail closed: an unreadable flag store keeps the pre-flag behavior (disabled).
+ */
+export function isProxyReEgressOnQuota429Enabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("PROXY_REEGRESS_ON_QUOTA_429");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve PROXY_REEGRESS_ON_QUOTA_429, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/**
+ * SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED (#16676, default off): /v1/systemone serves the
+ * cloudflare-ai/* decisions models. Fail-closed: an unreadable flag store keeps them refused.
+ */
+export function isSystemOneCloudflareBackendEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/** Default-off boolean flag that fails closed when the flag store cannot be read. */
+function isDefaultOffFlagEnabled(key: string): boolean {
+  try {
+    return isFeatureFlagEnabled(key);
+  } catch (error) {
+    console.error(
+      `[featureFlags] Failed to resolve ${key}, defaulting to disabled:`,
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/** SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED (#14667, default off): /v1/systemone serves ollama-local/*. */
+export function isSystemOneOllamaLocalBackendEnabled(): boolean {
+  return isDefaultOffFlagEnabled("SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED");
+}
+
 /** OPENCODE_FREE_TIER_EGRESS_PROBE (default off): probe one other proxy after a FreeTierError. */
 export function isOpencodeFreeTierEgressProbeEnabled(): boolean {
   try {
@@ -662,6 +713,30 @@ export function isFalNativeEnabled(): boolean {
       "[featureFlags] Failed to resolve FAL_NATIVE_ENABLED, defaulting to disabled:",
       error instanceof Error ? error.message : error
     );
+    return false;
+  }
+}
+
+/**
+ * Opt-in Node.js permission model for plugin processes. Read when a plugin is activated.
+ * Fail closed to the pre-flag behavior: an unreadable flag store keeps it disabled.
+ */
+export function isPluginPermissionModelEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("PLUGIN_PERMISSION_MODEL_ENABLED");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve PLUGIN_PERMISSION_MODEL_ENABLED, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+export function isAgentSessionMessagesEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("AGENT_SESSION_MESSAGES_ENABLED");
+  } catch {
     return false;
   }
 }

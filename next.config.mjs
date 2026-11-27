@@ -24,7 +24,7 @@ const projectRoot = dirname(fileURLToPath(import.meta.url));
 const scriptSrc =
   process.env.NODE_ENV === "development"
     ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://static.cloudflareinsights.com"
-    : "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://static.cloudflareinsights.com";
+    : "script-src 'self' 'unsafe-inline' blob: https://static.cloudflareinsights.com";
 const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",

@@ -166,27 +166,24 @@ export default function HomeRecentRequests({ enabled = true }: { enabled?: boole
           {t("recentRequestsEmpty")}
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto -mx-1 px-1">
+        // The card has a fixed height and this flex item takes what the heading leaves: the kit
+        // table fills it (`fill`), scrolls its rows inside its own container (a named tab stop
+        // while it overflows) and pins the header row.
+        <div className="min-h-0 flex-1">
           <Table
-            className="min-w-0 text-xs [&_td]:h-auto [&_th]:h-auto"
-            // Vertical scroll lives on the card body and the header is sticky to it: the kit
-            // container must not become a scroll box (no persistent horizontal bar either).
-            persistentScrollbars={false}
-            containerClassName="overflow-visible rounded-none border-0"
+            fill
+            variant="plain"
+            density="compact"
+            className="min-w-0"
             scrollbarLabel={t("recentRequests")}
+            scrollLabel={t("recentRequests")}
           >
-            <TableHeader className="sticky top-0 z-10 bg-surface">
-              <TableRow className="border-b border-border text-text-muted">
-                <TableHead className="w-2 py-1.5" />
-                <TableHead className="py-1.5 text-left font-semibold">
-                  {t("recentRequestsModel")}
-                </TableHead>
-                <TableHead className="py-1.5 text-right font-semibold whitespace-nowrap">
-                  {t("recentRequestsTokens")}
-                </TableHead>
-                <TableHead className="py-1.5 text-right font-semibold">
-                  {t("recentRequestsWhen")}
-                </TableHead>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-2" />
+                <TableHead>{t("recentRequestsModel")}</TableHead>
+                <TableHead numeric>{t("recentRequestsTokens")}</TableHead>
+                <TableHead numeric>{t("recentRequestsWhen")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -194,20 +191,17 @@ export default function HomeRecentRequests({ enabled = true }: { enabled?: boole
                 const state = requestState(row);
                 return (
                   <TableRow key={row.id || i}>
-                    <TableCell className="py-1.5">
+                    <TableCell>
                       <span className={`block size-1.5 rounded-full ${STATE_DOT[state]}`} />
                     </TableCell>
-                    <TableCell
-                      className="py-1.5 font-mono truncate max-w-[140px]"
-                      title={row.model || ""}
-                    >
+                    <TableCell className="max-w-[140px] truncate font-mono" title={row.model || ""}>
                       {row.model || "—"}
                     </TableCell>
-                    <TableCell className="py-1.5 text-right whitespace-nowrap">
+                    <TableCell numeric>
                       <span className="text-primary">{fmtCompact(row.tokens?.in)}↑</span>{" "}
                       <span className="text-success">{fmtCompact(row.tokens?.out)}↓</span>
                     </TableCell>
-                    <TableCell className="py-1.5 text-right whitespace-nowrap text-text-muted">
+                    <TableCell numeric className="text-text-muted">
                       {state === "active" ? (
                         <span className="text-primary">•••</span>
                       ) : (

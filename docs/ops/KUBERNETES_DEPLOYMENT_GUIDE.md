@@ -40,7 +40,7 @@ the same volume corrupt the database. Everything below follows from that:
 
 If you need more capacity, run **N independent releases**, each with its own PVC
 — see [Scale-out](#scale-out) below. Multi-writer HA is tracked upstream in
-[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) and is not a
+[#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) and is not a
 supported path today.
 
 ---
@@ -354,7 +354,7 @@ Helm:
 
 ```bash
 # Kustomize: pin a real tag rather than relying on :latest
-kubectl -n omniroute set image deploy/omniroute omniroute=diegosouzapw/omniroute:3.8.51
+kubectl -n omniroute set image deploy/omniroute omniroute=cheaperinference/omniroute:3.8.54
 
 # Helm
 helm upgrade omniroute deploy/helm/omniroute -n omniroute --reuse-values \
@@ -374,6 +374,30 @@ Drain clients first if you can. `:latest` only moves when a stable release
 promotes it, so it lags merged fixes — pin `:X.Y.Z` or a digest for anything
 you care about.
 
+### API key enforcement when upgrading with Kustomize or Helm
+
+The Kustomize base now sets `REQUIRE_API_KEY` to `"true"`, and the Helm chart
+defaults to `config.requireApiKey: true`. Before enabling enforcement, create keys
+in the dashboard's **API Manager** (`/dashboard/api-manager`) and configure clients
+to send them. Clients that omit the key will receive `401`.
+
+For Helm upgrades, `--reuse-values` carries forward the previous release's values.
+Pass `--set config.requireApiKey=true` explicitly to `helm upgrade` to enable
+enforcement. To keep keyless access, pass `--set config.requireApiKey=false`.
+
+In **Feature Flags** (`/dashboard/settings/feature-flags`), check for a stored
+`REQUIRE_API_KEY=false` override and reset that flag if you are enabling enforcement.
+With either deployment method, a SQLite override takes precedence over the ConfigMap
+value and survives a restart.
+
+For Kustomize, recreate the pod after applying the manifests so it picks up the new
+environment value. The `Recreate` strategy causes a brief outage while the replacement starts.
+Once the pod is Ready, send a valid `POST /v1/chat/completions` request with a
+configured model through the Ingress or, if disabled, through a port-forward.
+Expect `401` without a key and `200` when you repeat the request with a valid
+bearer key. Avoid `GET /v1/models` for this check. Its own authentication rules
+can return `401` even when `REQUIRE_API_KEY` is `"false"`.
+
 ---
 
 ## 6. Storage and backups
@@ -390,7 +414,7 @@ Never put `DATA_DIR` on NFS or CIFS. SQLite WAL journaling corrupts there.
 plane is small — provider connections, keys, combos are hundreds of rows — but
 `conversation_turn_nodes` and `agentic_conversations` currently have no retention
 path and grow with traffic (a reported ~190 MB/day under agentic load). Until
-[#12453](https://github.com/diegosouzapw/OmniRoute/issues/12453) lands, treat the
+[#12453](https://github.com/cheaper-inference/OmniRoute/issues/12453) lands, treat the
 PVC as sized by your retention window, and watch actual growth before trusting
 the 10Gi/20Gi defaults here.
 
@@ -422,7 +446,7 @@ the database behind. Delete it deliberately.
 
 One Node process is one V8 heap. Two overlapping large `/v1/responses` requests
 (~3 MiB / ~750k tokens) can abort a heap at ~12 GiB — see
-[#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+[#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 | Workload                 | requests     | limits   | `config.maxOldSpaceSizeMb` |
 | ------------------------ | ------------ | -------- | -------------------------- |

@@ -133,7 +133,7 @@ export default function RadarIntelPage() {
         <>
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
-              <p className="text-xs uppercase tracking-wide text-text-muted">{t("methodology")}</p>
+              <p className="ci-eyebrow">{t("methodology")}</p>
               <p className="mt-2 font-semibold">
                 {t("eloMethod", {
                   initial: intel.methodology.initialRating,
@@ -142,7 +142,7 @@ export default function RadarIntelPage() {
               </p>
             </Card>
             <Card>
-              <p className="text-xs uppercase tracking-wide text-text-muted">{t("freshness")}</p>
+              <p className="ci-eyebrow">{t("freshness")}</p>
               <p className="mt-2 font-semibold">
                 {t(`freshnessValues.${intel.catalog.freshness}`)}
               </p>
@@ -151,7 +151,7 @@ export default function RadarIntelPage() {
               </p>
             </Card>
             <Card>
-              <p className="text-xs uppercase tracking-wide text-text-muted">{t("trend")}</p>
+              <p className="ci-eyebrow">{t("trend")}</p>
               <p className="mt-2 font-semibold">{t(`trendValues.${intel.catalog.trend}`)}</p>
               <p className="mt-1 text-sm text-text-muted">
                 {t("modelDelta", {
@@ -165,20 +165,22 @@ export default function RadarIntelPage() {
 
           <Card>
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold">{t("ranking")}</h2>
+              <h2 className="ci-heading" data-size="lg">
+                {t("ranking")}
+              </h2>
               <span className="text-xs text-text-muted">{meta.version}</span>
             </div>
             {intel.rankings.length === 0 ? (
               <p className="py-6 text-center text-text-muted">{t("noRankings")}</p>
             ) : (
-              <Table className="text-sm" aria-label={t("ranking")} scrollbarLabel={t("ranking")}>
+              <Table aria-label={t("ranking")} scrollbarLabel={t("ranking")} variant="plain">
                 <TableHeader>
                   <TableRow>
                     <TableHead>#</TableHead>
                     <TableHead>{t("model")}</TableHead>
                     <TableHead>{t("category")}</TableHead>
-                    <TableHead className="text-right">{t("rating")}</TableHead>
-                    <TableHead className="text-right">{t("matches")}</TableHead>
+                    <TableHead numeric>{t("rating")}</TableHead>
+                    <TableHead numeric>{t("matches")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -189,8 +191,8 @@ export default function RadarIntelPage() {
                         {ranking.provider}/{ranking.modelId}
                       </TableCell>
                       <TableCell>{ranking.category}</TableCell>
-                      <TableCell className="text-right">{ranking.rating}</TableCell>
-                      <TableCell className="text-right">{ranking.matches}</TableCell>
+                      <TableCell numeric>{ranking.rating}</TableCell>
+                      <TableCell numeric>{ranking.matches}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

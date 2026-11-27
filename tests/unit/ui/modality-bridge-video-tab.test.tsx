@@ -13,6 +13,7 @@ vi.mock("next-intl", () => ({
     namespace === "settings" && key === "degradationFull"
       ? "MISSING:settings.degradationFull"
       : key,
+  useLocale: () => "en",
 }));
 
 // KEA-7886: the advanced numeric fields live in the kit Accordion (Collapsible adapter), which
@@ -164,6 +165,16 @@ describe("ModalityBridgeVideoTab", () => {
     expect(element.textContent).toContain("avgLatency: 100 ms");
     expect(element.textContent).not.toContain("modalityBridgeVideoComingSoon");
     expect(element.textContent).toContain("modalityBridgeVideoDrilldownUsage: 2 · 1234 B");
+  });
+
+  it("shows conservative promotion readiness when evidence context is unavailable", async () => {
+    const element = await render();
+    const readiness = element.querySelector('[data-testid="video-promotion-readiness"]');
+    expect(readiness).not.toBeNull();
+    expect(readiness?.textContent).toContain("modalityBridgeVideoPromotionHold");
+    expect(readiness?.textContent).toContain("segment_aware");
+    expect(readiness?.textContent).toContain("contact_sheet");
+    expect(readiness?.textContent).toContain("modalityBridgeVideoPromotionContextRequired");
   });
 
   it.each([
@@ -361,7 +372,6 @@ describe("ModalityBridgeVideoTab", () => {
     const timeout = element.querySelector(
       '[data-testid="modality-bridge-video-timeout"]'
     ) as HTMLInputElement;
-    expect(timeout.max).toBe("120000");
     act(() => {
       const setter = Object.getOwnPropertyDescriptor(
         window.HTMLInputElement.prototype,
@@ -374,6 +384,9 @@ describe("ModalityBridgeVideoTab", () => {
       timeout.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
+    // The kit NumberInput is a text field: the cap is not a `max` attribute, it is what the
+    // field shows once the edit ends.
+    expect(timeout.value).toBe("120000");
     await waitFor(
       () =>
         fetchMock.mock.calls.some(([, init]) => {

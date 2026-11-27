@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 // #4401: Firecrawl and Jina Reader were added as webFetch providers in #2645 with
 // their own executors, but no API-key validator was registered — so adding an account
 // through the dashboard failed with "Provider validation not supported". These tests
-// pin the validator dispatch (firecrawl → POST api.firecrawl.dev/v1/scrape with Bearer;
+// pin the validator dispatch (firecrawl → POST api.firecrawl.dev/v2/scrape with Bearer;
 // jina-reader → GET r.jina.ai/<url> with Bearer) and the auth-failure mapping.
 
 const { validateProviderApiKey } = await import("../../src/lib/providers/validation.ts");
@@ -32,7 +32,7 @@ test("#4401 firecrawl validator probes the scrape endpoint with Bearer auth and 
   assert.equal(result.valid, true);
   assert.equal(result.unsupported ?? false, false);
   assert.equal(calls.length, 1);
-  assert.equal(calls[0].url, "https://api.firecrawl.dev/v1/scrape");
+  assert.equal(calls[0].url, "https://api.firecrawl.dev/v2/scrape");
   assert.equal(calls[0].init.method, "POST");
   assert.equal(headerValue(calls[0].init, "Authorization"), "Bearer fc-test-key");
 });
@@ -64,4 +64,22 @@ test("#4401 webFetch validators map 401/403 to an invalid-key error, not 'not su
   assert.equal(firecrawl.error, "Invalid API key");
   assert.equal(jina.valid, false);
   assert.equal(jina.error, "Invalid API key");
+});
+
+test("#4401 firecrawl validator keeps a custom base URL on /v1/scrape", async () => {
+  const calls: { url: string }[] = [];
+  globalThis.fetch = async (url) => {
+    calls.push({ url: String(url) });
+    return new Response(JSON.stringify({ success: true, data: {} }), { status: 200 });
+  };
+
+  const result = await validateProviderApiKey({
+    provider: "firecrawl",
+    apiKey: "fc-test-key",
+    providerSpecificData: { baseUrl: "http://127.0.0.1:3002/" },
+  });
+
+  assert.equal(result.valid, true);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, "http://127.0.0.1:3002/v1/scrape");
 });

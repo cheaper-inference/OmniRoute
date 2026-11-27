@@ -1,0 +1,1 @@
+- fix(memory): skip a failing rerank model for a backoff window (60 s up to 10 min) instead of retrying it on every retrieval (#20535)

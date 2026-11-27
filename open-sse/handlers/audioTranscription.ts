@@ -36,6 +36,14 @@ import { errorResponse } from "../utils/error.ts";
 import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
 import { isJsonObject } from "../utils/kieTask.ts";
 import { handleOpenRouterTranscription } from "./openrouterTranscription.ts";
+import { handleMiniMaxTranscription } from "./minimaxTranscription.ts";
+import {
+  buildCloudflareTranscriptionUrl,
+  cloudflareNova3ToVerboseJson,
+  readCloudflareEnvelopeError,
+  readCloudflareTranscript,
+  resolveCloudflareAccountId,
+} from "./cloudflareWorkersAiTranscription.ts";
 import { handleGrokTranscription } from "./grokMedia.ts";
 import { handleSyntxTranscription } from "./syntxAudio.ts";
 import {
@@ -47,6 +55,9 @@ import {
 type TranscriptionCredentials = {
   apiKey?: string;
   accessToken?: string;
+  /** Account-scoped providers (Cloudflare Workers AI) read their account id here. */
+  accountId?: string;
+  providerSpecificData?: Record<string, unknown> | null;
 };
 
 /**
@@ -253,6 +264,61 @@ async function handleDeepgramTranscription(
 }
 
 /**
+ * Handle Cloudflare Workers AI transcription (`@cf/deepgram/nova-3`): raw binary audio
+ * POSTed to the connection's account, Deepgram options as query params. The response
+ * mapping lives in cloudflareWorkersAiTranscription.ts.
+ */
+async function handleCloudflareWorkersAiTranscription(
+  providerConfig: AudioProvider,
+  file: Blob & { name?: unknown },
+  modelId: string,
+  token: string,
+  formData: FormData,
+  credentials?: TranscriptionCredentials | null
+) {
+  const accountId = resolveCloudflareAccountId(credentials);
+  if (!accountId) {
+    return audioErrorResponse(
+      400,
+      "Cloudflare Workers AI transcription requires an Account ID on the connection"
+    );
+  }
+
+  const url = buildCloudflareTranscriptionUrl(providerConfig.baseUrl, accountId, modelId);
+  url.searchParams.set("punctuate", "true");
+  const diarize = readDiarizationFlag(formData);
+  if (diarize) url.searchParams.set("diarize", "true");
+  const language = readFormString(formData, "language");
+  if (language) url.searchParams.set("language", language);
+
+  const res = await fetch(url.toString(), {
+    method: "POST",
+    headers: {
+      ...buildAuthHeaders(providerConfig, token),
+      "Content-Type": resolveAudioContentType(file),
+    },
+    body: await file.arrayBuffer(),
+  });
+  if (!res.ok) {
+    return upstreamErrorResponse(res, await res.text());
+  }
+
+  const data: unknown = await res.json();
+  const envelopeError = readCloudflareEnvelopeError(data);
+  if (envelopeError) {
+    const code = envelopeError.code === null ? "" : ` (code ${envelopeError.code})`;
+    return audioErrorResponse(502, `Cloudflare Workers AI transcription failed${code}`);
+  }
+
+  const verbose =
+    diarize || readFormString(formData, "response_format").toLowerCase() === "verbose_json";
+  const body = verbose
+    ? cloudflareNova3ToVerboseJson(data, language)
+    : { text: readCloudflareTranscript(data) };
+  return Response.json(body, { headers: { ...CORS_HEADERS } });
+}
+
+/**
  * Handle AssemblyAI transcription (async: upload file → submit → poll)
  */
 async function handleAssemblyAITranscription(providerConfig, file, modelId, token, formData) {
@@ -334,8 +400,9 @@ async function handleAssemblyAITranscription(providerConfig, file, modelId, toke
 async function handleGladiaTranscription(providerConfig, file, modelId, token) {
   const authHeaders = buildAuthHeaders(providerConfig, token);
 
-  // Step 1: Upload the audio file (multipart/form-data)
-  const { body: uploadBody, contentType: uploadCT } = await buildMultipartBody(file, {});
+  // Step 1: Upload the audio file (multipart/form-data). Gladia reads the file from the
+  // "audio" field; any other name is a 400 "Missing audio file".
+  const { body: uploadBody, contentType: uploadCT } = await buildMultipartBody(file, {}, "audio");
   const uploadRes = await fetch("https://api.gladia.io/v2/upload", {
     method: "POST",
     headers: { ...authHeaders, "Content-Type": uploadCT },
@@ -908,14 +975,27 @@ async function pollSpeechmaticsJob(jobUrl, authHeaders) {
  * the requested transcription options. Streaming (real-time WebSocket) mode is
  * out of scope for v1 — this handler only implements batch (REST) transcription.
  */
-async function handleSpeechmaticsTranscription(providerConfig, file, modelId, token) {
+async function handleSpeechmaticsTranscription(
+  providerConfig,
+  file,
+  modelId,
+  token,
+  formData?: FormData
+) {
   const authHeaders = buildAuthHeaders(providerConfig, token);
   const baseUrl = providerConfig.baseUrl.replace(/\/$/, "");
 
-  // Step 1: submit the job — multipart body with "data_file" (audio) + "config" (JSON)
+  // Step 1: submit the job — multipart body with "data_file" (audio) + "config" (JSON).
+  // Speechmatics rejects a config without transcription_config.language; "auto" asks it
+  // to identify the language when the request names none.
+  const requestedLanguage = formData?.get("language");
+  const language =
+    typeof requestedLanguage === "string" && requestedLanguage.trim()
+      ? requestedLanguage.trim()
+      : "auto";
   const config = JSON.stringify({
     type: "transcription",
-    transcription_config: { operating_point: speechmaticsOperatingPoint(modelId) },
+    transcription_config: { language, operating_point: speechmaticsOperatingPoint(modelId) },
   });
   const { body, contentType } = await buildMultipartBody(file, { config }, "data_file");
 
@@ -1057,6 +1137,9 @@ export async function handleAudioTranscription({
   const file = resolvedFile.file;
 
   // Route to provider-specific handler
+  if (providerConfig.format === "minimax-asr") {
+    return handleMiniMaxTranscription(providerConfig, file, modelId, token, formData, signal);
+  }
   if (providerConfig.format === "gemini-live") {
     return handleGeminiLiveTranscription(
       providerConfig,
@@ -1102,6 +1185,17 @@ export async function handleAudioTranscription({
     return handleDeepgramTranscription(providerConfig, file, modelId, token, formData);
   }
 
+  if (providerConfig.format === "cloudflare-workers-ai") {
+    return handleCloudflareWorkersAiTranscription(
+      providerConfig,
+      file,
+      modelId as string,
+      token as string,
+      formData,
+      credentials
+    );
+  }
+
   if (providerConfig.format === "assemblyai") {
     return handleAssemblyAITranscription(providerConfig, file, modelId, token, formData);
   }
@@ -1131,7 +1225,7 @@ export async function handleAudioTranscription({
   }
 
   if (providerConfig.format === "speechmatics") {
-    return handleSpeechmaticsTranscription(providerConfig, file, modelId, token);
+    return handleSpeechmaticsTranscription(providerConfig, file, modelId, token, formData);
   }
 
   if (providerConfig.format === "openrouter-stt") {

@@ -5,21 +5,30 @@ import {
   renderReadmeWorksZeroConfig,
   WORKS_ZERO_CONFIG_COPY,
 } from "../../../scripts/docs/gen-readme-works-zero-config.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
 
-// The committed three-step strip must be exactly what the generator produces, draw the kit type as outlines, keep every string as text and declare both palettes with no literal
+// The committed four-step strip must be exactly what the generator produces, draw the kit type as outlines, keep every string as text and declare both palettes with no literal
 // color escaping the theme. Same staleness contract as tests/unit/docs/readme-hero-svg.test.ts.
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed works-zero-config diagram is exactly what the generator produces", async () => {
-  const generated = await renderReadmeWorksZeroConfig();
-  const committed = readFileSync("docs/diagrams/works-zero-config.svg", "utf8");
-  assert.equal(
-    committed,
-    generated,
-    "docs/diagrams/works-zero-config.svg is stale — regenerate with `node scripts/docs/gen-readme-works-zero-config.mjs`"
-  );
-});
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/works-zero-config.svg") };
+
+test(
+  "the committed works-zero-config diagram is exactly what the generator produces",
+  stalenessCheck,
+  async () => {
+    const generated = await renderReadmeWorksZeroConfig();
+    const committed = readFileSync("docs/diagrams/works-zero-config.svg", "utf8");
+    assert.equal(
+      committed,
+      generated,
+      "docs/diagrams/works-zero-config.svg is stale — regenerate with `node scripts/docs/gen-readme-works-zero-config.mjs`"
+    );
+  }
+);
 
 test("the only embedded font is the mono subset for the commands and URLs, and nothing is external", async () => {
   const svg = await renderReadmeWorksZeroConfig();
@@ -28,7 +37,10 @@ test("the only embedded font is the mono subset for the commands and URLs, and n
   const style = svg.slice(svg.indexOf("<style>"), svg.indexOf("</style>"));
   assert.doesNotMatch(style, /Switzer|CI Serif|CI Sans/, "the mono subset is the only face");
   assert.match(svg, /<use href="#g[0-9a-z]+"/, "the Switzer text is drawn as outlines");
-  assert.doesNotMatch(svg, /https?:\/\/(?!www\.w3\.org\/2000\/svg)|@import|<script|<foreignObject/);
+  assert.doesNotMatch(
+    svg,
+    /https?:\/\/(?!www\.w3\.org\/2000\/svg|localhost:20128\/v1(?=[\s<]))|@import|<script|<foreignObject/
+  );
   assert.match(svg, /^<svg viewBox="0 0 1200 430" [^>]*role="img"/);
   assert.ok(Buffer.byteLength(svg) < 200 * 1024, "must stay under the 200 KB studio target");
 });
@@ -38,6 +50,18 @@ test("every copy string stays in the file as text", async () => {
   for (const s of Object.values(WORKS_ZERO_CONFIG_COPY).flat()) {
     assert.ok(svg.includes(esc(s)), `string not drawn: ${s}`);
   }
+});
+
+test("the flow shows four steps with an animated connector between each pair", async () => {
+  const svg = await renderReadmeWorksZeroConfig();
+  assert.deepEqual(WORKS_ZERO_CONFIG_COPY.stepTitles, [
+    "Install",
+    "Start",
+    "Connect and get a key",
+    "Call /v1",
+  ]);
+  assert.equal(svg.match(/<rect width="256" height="180" rx="12" class="surface"/g)?.length, 4);
+  assert.equal(svg.match(/<animateMotion\b/g)?.length, 3);
 });
 
 test("light and dark palettes are both declared and no literal color escapes the theme", async () => {

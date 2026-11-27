@@ -87,6 +87,53 @@ describe("Sidebar rendered with the kit Sidebar family", () => {
     expect(navEl.querySelectorAll("svg.oi-icon").length).toBeGreaterThan(5);
   });
 
+  // Kit #282: a section is the kit's collapsible SidebarGroup. Its label is the trigger, the
+  // group names the region it controls, and the pin is the kit SidebarGroupAction (placed with a
+  // logical inset, so it is on the right side in RTL). No hand-made <button> is left in the row.
+  it("renders a section as the kit collapsible group, with the pin as its group action", async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+    const navEl = await screen.findByRole("navigation", { name: "Main navigation" });
+    const trigger = within(navEl).getByRole("button", { name: "OmniProxy", exact: true });
+    expect(trigger.getAttribute("data-slot")).toBe("sidebar-group-trigger");
+    const group = trigger.closest<HTMLElement>("[data-slot=sidebar-group]")!;
+    expect(group.getAttribute("data-collapsible")).toBe("true");
+    expect(group.getAttribute("data-state")).toBe("closed");
+    // The kit chevron, not a host icon turned by a class.
+    expect(trigger.querySelector("svg.ci-sidebar__group-chevron")).not.toBeNull();
+    expect(trigger.querySelector(".rotate-180")).toBeNull();
+
+    const label = group.firstElementChild as HTMLElement;
+    expect(label.getAttribute("data-slot")).toBe("sidebar-group-label");
+    expect(label.contains(trigger)).toBe(true);
+    const pin = within(group).getByRole("button", { name: "Pin section open: OmniProxy" });
+    expect(pin.getAttribute("data-slot")).toBe("sidebar-group-action");
+    expect(pin.getAttribute("data-show-on-hover")).toBe("true");
+    expect(pin.getAttribute("aria-pressed")).toBe("false");
+    // Right after the label, as the kit positions it, and outside the trigger.
+    expect(label.nextElementSibling).toBe(pin);
+
+    // Closed: the region exists (the trigger's aria-controls resolves), hidden and empty.
+    const panel = document.getElementById(trigger.getAttribute("aria-controls")!)!;
+    expect(panel.getAttribute("data-slot")).toBe("sidebar-group-content");
+    expect(panel.parentElement).toBe(group);
+    expect(panel.hidden).toBe(true);
+    expect(panel.querySelector("a")).toBeNull();
+
+    await user.click(trigger);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(group.getAttribute("data-state")).toBe("open");
+    expect(panel.hidden).toBe(false);
+    expect(within(panel).getAllByRole("link").length).toBeGreaterThan(0);
+
+    // Pinning keeps the section open and presses the action.
+    await user.click(pin);
+    const pinned = within(group).getByRole("button", { name: "Unpin section: OmniProxy" });
+    expect(pinned).toBe(pin);
+    expect(pin.getAttribute("aria-pressed")).toBe("true");
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+  });
+
   // #19066: subgroup headers ("Compression Context") were hand-made disclosure buttons; they are
   // the kit Disclosure now, with the same compact row and the panel wired by the kit.
   it("renders subgroups as kit Disclosures that mount their links only while open", async () => {
@@ -171,10 +218,24 @@ describe("Sidebar rendered with the kit Sidebar family", () => {
     render(<Harness />);
     const navEl = await screen.findByRole("navigation", { name: "Main navigation" });
     await user.click(within(navEl).getByRole("button", { name: "OmniProxy", exact: true }));
-    await user.click(within(navEl).getAllByRole("button", { name: "Pin item" })[0]);
+    // The pin is the kit SidebarMenuAction: it places itself at the row's inline end and pads the
+    // row (no classes of ours), and a pin that is off only shows on row hover or focus.
+    const pin = within(navEl).getAllByRole("button", { name: "Pin item" })[0];
+    expect(pin.getAttribute("data-slot")).toBe("sidebar-menu-action");
+    expect(pin.className).toContain("ci-sidebar__menu-action");
+    expect(pin.className).not.toMatch(/\babsolute\b|\bend-1\b|opacity-0/);
+    expect(pin.getAttribute("data-show-on-hover")).toBe("true");
+    const row = pin.closest("[data-slot=sidebar-menu-item]")!;
+    expect(row.className).not.toContain("group/nav-item");
+    expect(row.querySelector("[data-slot=sidebar-menu-button]")!.className).not.toContain("pe-8");
+    await user.click(pin);
     expect(within(navEl).getByRole("button", { name: "Pinned", exact: true })).not.toBeNull();
     expect(JSON.parse(localStorage.getItem("sidebar-pinned-items")!).length).toBe(1);
-    await user.click(within(navEl).getAllByRole("button", { name: "Unpin item" })[0]);
+    // A pin that is on stays visible.
+    const unpin = within(navEl).getAllByRole("button", { name: "Unpin item" })[0];
+    expect(unpin.getAttribute("data-slot")).toBe("sidebar-menu-action");
+    expect(unpin.hasAttribute("data-show-on-hover")).toBe(false);
+    await user.click(unpin);
     expect(within(navEl).queryByRole("button", { name: "Pinned", exact: true })).toBeNull();
     expect(JSON.parse(localStorage.getItem("sidebar-pinned-items")!)).toEqual([]);
   });

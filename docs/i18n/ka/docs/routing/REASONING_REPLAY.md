@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 გადაღება ხდება `open-sse/handlers/chatCore.ts` ში (ორი საიტი, `cacheReasoningFromAssistantMessage` ზარის ორ საიტზე). გამეორება ხდება `open-sse/translator/index.ts` ში სქემის იძულების შემდეგ, მაგრამ გაგზავნამდე.
+
+ინსტრუმენტზე გამოძახების ჩანაწერები ინახება `buildToolCallCacheKey()` ში, მოთხოვნის ფარგლების შეჯამებით და ხელსაწყოს გამოძახების id-ში, ასე რომ, იგივე id, რომელიც გამოიყენება სხვა API კლავიშის ან სესიის მიერ, არ ირჩევს ჩანაწერს. ფარგლები მოდის `buildReasoningCacheScope()` დან: API კლავიშის ID, პლუს სესიის გასაღები, როდესაც მოთხოვნას აქვს ერთი. აქედან გამომდინარე, `tool_call_id` სვეტი და დაფა აჩვენებს ამ ჩანაწერებს.
 
 ასისტენტის უბრალო (არაინსტრუმენტული გამოძახების) მონაცვლეობები განსხვავებულად იწერება: `buildAssistantMessageCacheKey()` ანაწილებს სესიის ფარგლებს, პლუს ნორმალიზებული OpenAI ფორმატის ტრანსკრიპტს ამ მომენტამდე, რადგან DeepSeek მოითხოვს _ყოველი_ წინა შემობრუნების მსჯელობას, როდესაც `tools` იქნება. Responses-API სამიზნეებისთვის (მაგალითად, `opencode-go/deepseek-v4-flash`, გადაყვანილია `/responses` მდე) ზედა ნაკადის სხეული ატარებს `input` და არა `messages`, ამიტომ `translateRequest()` (`open-sse/translator/index.ts`) აცნობებს კრებსით ტრანსკრიპტს, რომელიც დაიჯესტია გამოძახების ვარიანტის მეშვეობით და დაჭერის საიტები იჭრება იმავე ტრანსკრიპტს. Responses replay pass გადის OpenAI pivot-ზე ყველა წყაროს ფორმატისთვის, ამიტომ Anthropic Messages კლიენტებიც (Claude → OpenAI → Responses) ხელახლა ითამაშებენ.
 

@@ -360,7 +360,7 @@ export const updateSettingsSchema = z.object({
   codexServiceTier: z
     .object({
       enabled: z.boolean().optional(),
-      tier: z.enum(["default", "priority", "flex"]).optional(),
+      tier: z.enum(["default", "priority", "flex", "ultrafast"]).optional(),
       supportedModels: z.array(z.string().max(200)).max(200).optional(),
     })
     .optional(),
@@ -435,6 +435,9 @@ export const updateSettingsSchema = z.object({
         planWeights: z
           .record(z.string().trim().min(1).max(40), z.number().finite().min(0.01).max(100))
           .optional(),
+        /** expiry-first: "rate" (default) or "deadline" (nearest reset first while quota lasts). */
+        expiryFirstOrder: z.enum(["rate", "deadline"]).optional(),
+        expiryFirstDeadlineTieMinutes: z.number().finite().min(0).max(1440).optional(),
       })
     )
     .optional(),

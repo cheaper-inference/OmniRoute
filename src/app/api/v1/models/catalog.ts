@@ -1,6 +1,7 @@
 import { createCatalogConnectionExclusionFilter } from "@/lib/providerModels/copilotCatalogRejections";
 import { PROVIDER_MODELS, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { NOAUTH_PROVIDERS } from "@/shared/constants/providers";
+import { getUnavailableLocalCliProviderKeys } from "@/shared/services/localCliAvailability";
 import { getCombos } from "@/lib/db/combos";
 import { createHiddenModelLookup } from "@/lib/hiddenModelLookup";
 import { getSettings } from "@/lib/db/settings";
@@ -94,6 +95,13 @@ import {
   syntheticVariantListingIds,
 } from "./catalogResponse";
 import {
+  forgetLaunchSessionForRequest,
+  launchAnonymousRemoteRejection,
+  LaunchSessionChangedError,
+  launchViewFromKeyMetadata,
+} from "./catalogLaunchView";
+import { catalogMetadataLookup } from "./catalogResponse";
+import {
   isNoAuthProviderBlocked,
   isNoAuthProviderKey,
   isNoAuthRawProviderPrefix,
@@ -104,7 +112,6 @@ import {
   getTokenLimit,
   hasContextLengthEnvOverride,
 } from "@omniroute/open-sse/services/contextManager";
-import { extractApiKey } from "@/sse/services/auth";
 import type { ComboModelStep } from "@/lib/combos/steps";
 import {
   type CustomModelEntry,
@@ -149,6 +156,7 @@ import {
 } from "./catalogNodeModality";
 import { createComboPricingTargetResolver } from "./catalogPricing";
 import {
+  extractCatalogApiKey,
   getModelCatalogAuthRejection,
   isCodexModelCatalogClient,
   isCcDiscoveryModelCatalogClient,
@@ -227,6 +235,34 @@ function resolveCombosOnly(
   return settings?.exposeCombosOnly === true && options.ignoreExposeCombosOnly !== true;
 }
 
+/** Requests already retried once after LaunchSessionChangedError (never retried twice). */
+const launchRetriedRequests = new WeakSet<Request>();
+
+/**
+ * True, once per request, when `err` reports a launch session that changed under the build:
+ * marks the request as retried and forgets its memoized session so the retry re-resolves it.
+ */
+function claimLaunchSessionRetry(err: unknown, request: Request): boolean {
+  if (!(err instanceof LaunchSessionChangedError) || launchRetriedRequests.has(request)) {
+    return false;
+  }
+  launchRetriedRequests.add(request);
+  forgetLaunchSessionForRequest(request);
+  return true;
+}
+
+/**
+ * Model id whose token limit fills a missing `context_length`: the routed model of a
+ * `no-think/` alias, else the entry's root, else the last segment of its id.
+ */
+function contextFallbackModelId(model: any): string | undefined {
+  return (
+    catalogMetadataLookup(model)?.model ||
+    model.root ||
+    (typeof model.id === "string" ? model.id.split("/").pop() : undefined)
+  );
+}
+
 /**
  * Build unified OpenAI-compatible model catalog response.
  * Reused by `/api/v1/models` and `/api/v1` to avoid semantic drift (T09).
@@ -258,6 +294,11 @@ export async function getUnifiedModelsResponse(
       ...diagnosticHeaders,
     });
     if (authRejection) return authRejection;
+    const launchRejection = launchAnonymousRemoteRejection(request, {
+      ...corsHeaders,
+      ...diagnosticHeaders,
+    });
+    if (launchRejection) return launchRejection;
   } catch {
     // Fall through to full builder on auth-check failure; core handles errors.
   }
@@ -291,6 +332,13 @@ export async function getUnifiedModelsResponse(
       }
     );
   } catch (err) {
+    // A launch session changed (revoked, expired, re-viewed) while a build keyed on its
+    // parent's entry ran: that build was discarded. Retry once from the top, so the auth
+    // gate sees the current session (a revoked token gets its 401) and any joiner (the
+    // parent, another session) gets a clean build instead of a 500.
+    if (claimLaunchSessionRetry(err, request)) {
+      return getUnifiedModelsResponse(request, corsHeaders, options);
+    }
     // Hard rule #12: never put a raw err.message/err.stack in a response body.
     // Route it through the shared sanitizer instead — same status/type/code as
     // before, minus the stack-trace/path leak.
@@ -377,6 +425,11 @@ async function buildUnifiedModelsResponseCore(
       ...diagnosticHeaders,
     });
     if (authRejection) return authRejection;
+    const launchRejection = launchAnonymousRemoteRejection(request, {
+      ...corsHeaders,
+      ...diagnosticHeaders,
+    });
+    if (launchRejection) return launchRejection;
 
     // #9147: yield after auth check before DB initialization prologue
     await yieldCatalogBuildTurn();
@@ -543,8 +596,14 @@ async function buildUnifiedModelsResponseCore(
     }
 
     // noAuth providers have no DB rows; settings.blockedProviders disables them.
+    // #18753: local-CLI providers (auggie, zcode) whose binary is absent on this host are not
+    // advertised; resolved once per build. An explicit connection row (added above) keeps them.
+    const unavailableLocalCli = getUnavailableLocalCliProviderKeys();
+    const isLocalCliUnavailable = (...keys: Array<string | null | undefined>) =>
+      keys.some((key) => key != null && unavailableLocalCli.has(key));
     for (const p of Object.values(NOAUTH_PROVIDERS)) {
       if (isNoAuthProviderBlocked(blockedProviders, p.id, "alias" in p ? p.alias : null)) continue;
+      if (isLocalCliUnavailable(p.id, "alias" in p ? p.alias : null)) continue;
       activeAliases.add(p.id);
       if ("alias" in p && typeof p.alias === "string") activeAliases.add(p.alias);
     }
@@ -591,7 +650,11 @@ async function buildUnifiedModelsResponseCore(
       const alias = providerIdToAlias[providerId] || providerKey;
       // noAuth providers have no connection rows — treat every model as eligible. (#2798)
       const isNoAuth = isNoAuthProviderKey(providerId, providerKey, alias);
-      if (isNoAuth && !isNoAuthProviderBlocked(blockedProviders, providerId, providerKey, alias))
+      if (
+        isNoAuth &&
+        !isNoAuthProviderBlocked(blockedProviders, providerId, providerKey, alias) &&
+        !isLocalCliUnavailable(providerId, providerKey, alias)
+      )
         return true;
       return hasEligibleConnectionForModel(
         getConnectionsForProvider(providerKey, providerId, alias),
@@ -907,7 +970,7 @@ async function buildUnifiedModelsResponseCore(
     const listedIds = new Set<string>();
     // The per-key metadata (quota pools, allowAutoCombos, allowCcDiscoveryAliases) must be
     // resolved before the post-filter context below reads it.
-    const earlyApiKey = extractApiKey(request);
+    const earlyApiKey = extractCatalogApiKey(request);
     let earlyKeyMeta: Awaited<
       ReturnType<typeof import("@/lib/db/apiKeys").getApiKeyMetadata>
     > | null = null;
@@ -949,6 +1012,8 @@ async function buildUnifiedModelsResponseCore(
       isSyntheticVariantHidden,
       hideNoThinkVariants: settings.hideNoThinkVariants === true,
       allowCcDiscoveryAliases: earlyKeyMeta?.allowCcDiscoveryAliases !== false,
+      // Launch-session server view (`olx_` bearer); null for every other caller.
+      launchView: launchViewFromKeyMetadata(earlyKeyMeta),
       blockedProviders: settings.blockedProviders,
       // Per-entry `pricing`: a combo is priced as its first visible target.
       pricing: {
@@ -1938,7 +2003,9 @@ async function buildUnifiedModelsResponseCore(
           )
             continue;
           // noAuth providers have no connection rows; keep auth providers gated. (#2798/#3200)
-          const isNoAuthProvider = isNoAuthProviderKey(canonicalProviderId, providerId, alias);
+          const isNoAuthProvider =
+            isNoAuthProviderKey(canonicalProviderId, providerId, alias) &&
+            !isLocalCliUnavailable(canonicalProviderId, providerId, alias);
           if (
             (!isNoAuthProvider ||
               isNoAuthProviderBlocked(blockedProviders, canonicalProviderId, providerId, alias)) &&
@@ -2258,7 +2325,7 @@ async function buildUnifiedModelsResponseCore(
     }
 
     // Filter by API key permissions if requested
-    const apiKey = extractApiKey(request);
+    const apiKey = extractCatalogApiKey(request);
     // exposeCombosOnly: same row test as the per-key `catalogScope: "combos"`; the
     // per-key filter below then intersects with it.
     let finalModels = combosOnly ? models.filter((m) => m.owned_by === "combo") : models;
@@ -2308,11 +2375,12 @@ async function buildUnifiedModelsResponseCore(
       if (!provider) return undefined;
       const canonicalId = aliasToProviderId[provider] || provider;
 
-      const registryFallback = REGISTRY[canonicalId]?.defaultContextLength;
-      if (registryFallback) return registryFallback;
+      // #20415: a passthrough provider's default is a placeholder, not a real window.
+      const registry = REGISTRY[canonicalId];
+      if (registry?.passthroughModels) return undefined;
+      if (registry?.defaultContextLength) return registry.defaultContextLength;
 
-      const modelId =
-        model.root || (typeof model.id === "string" ? model.id.split("/").pop() : undefined);
+      const modelId = contextFallbackModelId(model);
       return modelId
         ? getTokenLimit(canonicalId, modelId, capabilityResolutionSnapshot)
         : getTokenLimit(canonicalId, null, capabilityResolutionSnapshot);

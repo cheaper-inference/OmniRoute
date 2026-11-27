@@ -2,16 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import {
-  Badge,
-  Button,
-  Card,
-  Collapsible,
-  Input,
-  ModelSelectField,
-  Toggle,
-} from "@/shared/components";
+import { ScopeChip } from "@omniroute/ui-kit/scope-chip";
+import { Button, Card, Collapsible, Input, ModelSelectField, Toggle } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
 
 export default function BackgroundDegradationTab() {
   const [config, setConfig] = useState({
@@ -96,11 +90,13 @@ export default function BackgroundDegradationTab() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+        <IconChip>
           <Icon name="speed" size={20} />
-        </div>
+        </IconChip>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold">{t("backgroundDegradationTitle")}</h3>
+          <h3 className="ci-heading" data-size="lg">
+            {t("backgroundDegradationTitle")}
+          </h3>
           <p className="text-sm text-text-muted">{t("backgroundDegradationDesc")}</p>
         </div>
         {status === "saved" && (
@@ -111,7 +107,7 @@ export default function BackgroundDegradationTab() {
       </div>
 
       {/* Toggle */}
-      <div className="flex items-center justify-between p-4 rounded-lg bg-surface/30 border border-border/30 mb-4">
+      <Card.Section className="flex items-center justify-between mb-4">
         <div>
           <p className="text-sm font-medium">{t("enableDegradation")}</p>
           <p className="text-xs text-text-muted mt-0.5">
@@ -125,7 +121,7 @@ export default function BackgroundDegradationTab() {
           disabled={loading || saving}
           ariaLabel={t("enableDegradation")}
         />
-      </div>
+      </Card.Section>
 
       {/* Stats */}
       {config.stats && config.stats.detected > 0 && (
@@ -144,7 +140,7 @@ export default function BackgroundDegradationTab() {
         <>
           {/* Degradation Map */}
           <div className="mb-4">
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wider mb-2">
+            <p className="ci-eyebrow mb-2" data-weight="medium">
               {t("degradationMap")}
             </p>
 
@@ -220,18 +216,16 @@ export default function BackgroundDegradationTab() {
             {/* Existing patterns */}
             <div className="flex flex-wrap gap-2">
               {(config.detectionPatterns || []).map((pattern, idx) => (
-                <Badge key={idx} variant="info" className="gap-1 pe-0.5">
+                <ScopeChip
+                  key={idx}
+                  tone="info"
+                  onRemove={() => {
+                    if (!saving) removePattern(idx);
+                  }}
+                  removeLabel={`${t("remove")} ${pattern}`}
+                >
                   {pattern}
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    icon="close"
-                    onClick={() => removePattern(idx)}
-                    disabled={saving}
-                    className="size-5 min-h-5"
-                    aria-label={`${t("remove")} ${pattern}`}
-                  />
-                </Badge>
+                </ScopeChip>
               ))}
             </div>
           </Collapsible>

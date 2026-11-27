@@ -124,14 +124,34 @@ describe("CompareView", () => {
       );
     });
     const verifyBtn = container.querySelector('[data-testid="verify-all"]') as HTMLButtonElement;
-    expect(verifyBtn.disabled).toBe(true); // no judge model yet
+    // No judge model yet: blocked (GuardedAction, decision 4) — inactive, with the reason
+    // exposed, and a click does not verify.
+    expect(verifyBtn.getAttribute("aria-disabled")).toBe("true");
+    expect(verifyBtn.getAttribute("data-blocked")).toBe("true");
+    expect(
+      document.getElementById(verifyBtn.getAttribute("aria-describedby") ?? "")
+    ).not.toBeNull();
+    await act(async () => {
+      verifyBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    // The verdict cells stay empty and no verify request goes out.
+    expect(
+      Array.from(container.querySelectorAll('[data-testid="verify-verdict"]')).map(
+        (c) => c.textContent
+      )
+    ).toEqual(["", ""]);
+    expect(
+      (globalThis.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.some(([url]) =>
+        String(url).includes("/compression/compare/verify")
+      )
+    ).toBe(false);
     const modelInput = container.querySelector('[data-testid="verify-model"]') as HTMLInputElement;
     await act(async () => {
       setInputValue(modelInput, "claude-haiku");
     });
-    expect(
-      (container.querySelector('[data-testid="verify-all"]') as HTMLButtonElement).disabled
-    ).toBe(false);
+    const readyBtn = container.querySelector('[data-testid="verify-all"]') as HTMLButtonElement;
+    expect(readyBtn.disabled).toBe(false);
+    expect(readyBtn.getAttribute("aria-disabled")).toBeNull();
     await act(async () => {
       (container.querySelector('[data-testid="verify-all"]') as HTMLButtonElement).dispatchEvent(
         new MouseEvent("click", { bubbles: true })

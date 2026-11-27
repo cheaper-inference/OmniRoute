@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import Badge from "@/shared/components/Badge";
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 
 type CavemanIntensity = "lite" | "full" | "ultra";
@@ -82,10 +83,10 @@ export default function CompressionTokenSaverCard({
   };
 
   return (
-    <section className="rounded-lg border border-border/70 bg-surface/40 p-4">
+    <Card.Section>
       <div className="mb-1 flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <h4 className="flex items-center gap-2 text-base font-semibold text-text-main">
+          <h4 className="ci-heading flex items-center gap-2 text-text-main" data-size="md">
             <Icon name="bolt" size={21} className="text-warning" />
             {t("tokenSaverTitle")}
           </h4>
@@ -128,6 +129,6 @@ export default function CompressionTokenSaverCard({
           .
         </p>
       </div>
-    </section>
+    </Card.Section>
   );
 }

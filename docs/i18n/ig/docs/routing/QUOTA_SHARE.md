@@ -343,17 +343,16 @@ na-eji ya, a kpachapụrụkwa anya wepụ ya na `ROUTING_STRATEGY_VALUES` ka �
 
 ---
 
-## Mkpuchi Nnwale
+## Nnwale mkpuchi
 
-Engine quota-share ahụ nwere ọkwa abụọ nke mkpuchi nnwale akpaghị aka:
+N'ígwé abụọ nke ụgbọ mmiri mkpuchi akpaaka nwere injin oke oke:
 
-| Otu Nnwale         | Command                                                                | Ihe ọ na-ekpuchi                                                                                                                                                                                                    |
-| :----------------- | :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Unit (nnwale 29)   | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | Scheduler DRR, gating saturation, oke concurrency, mgbakọ fairShare, na itinye ihe na backlog queue                                                                                                                 |
-| Matrix integration | `npm run test:combo:matrix`                                            | Mkpebi routing site na mmalite ruo na njedebe n'ime combo pipeline n'ezie; izi ezi DRR + ibelata mkpa saturation site na seams dị ndụ (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Suite             | Iwu                                                                    | Ihe ọ na-ekpuchi                                                                                                                                                                                                 |
+| :---------------- | :--------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nkeji (Nnwale 29) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR nhazi ọkwa, saturation gating, concurrency okpu, fairShare mgbakọ na mwepụ, backlog kwụ n'ahịrị                                                                                                              |
+| Matrix njikọ      | `npm run test:combo:matrix`                                            | Mkpebi ntụgharị nke njedebe na njedebe site na ezigbo njikọ pipeline; DRR ziri ezi + saturation deprioritization site na ndụ seams (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Matrix integration ahụ na-agba na CI yana strategy ọha niile dị 19. Enwere ike
-ịgba unit suite ahụ naanị ya.
+Matriks njikọta na-aga na CI n'akụkụ atụmatụ ọha 22 niile. Enwere ike ịgba ọsọ unit ahụ naanị ya.
 
 ---
 

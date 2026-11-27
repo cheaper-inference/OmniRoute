@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
+import CodePreview from "@/shared/components/CodePreview";
+import Notice from "@/shared/components/Notice";
 
 interface PlaygroundResult {
   data: unknown;
@@ -66,7 +68,7 @@ export function PlaygroundCard({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Icon name="labs" size={18} className="text-text-muted" />
-          <h3 className="text-sm font-semibold">
+          <h3 className="ci-heading" data-size="sm">
             {t("exampleLabel")} · {kindLabel}
           </h3>
         </div>
@@ -75,9 +77,12 @@ export function PlaygroundCard({
       {/* Endpoint display */}
       <div className="mb-3">
         <span className="block text-xs text-text-muted mb-1">{t("endpoint")}</span>
-        <code className="block text-xs font-mono bg-bg-subtle rounded px-2 py-1.5 border border-border text-text-main truncate">
-          {apiEndpoint}
-        </code>
+        <CodePreview
+          showHeader={false}
+          variant="surface"
+          code={apiEndpoint}
+          codeLabel={t("endpoint")}
+        />
       </div>
 
       {/* Injected fields */}
@@ -110,10 +115,9 @@ export function PlaygroundCard({
 
       {/* Error display */}
       {error && (
-        <div className="mt-3 flex items-start gap-2 rounded-lg bg-error-bg border border-error/30 px-3 py-2">
-          <Icon name="error" size={16} className="text-error" />
-          <p className="text-xs text-error">{error}</p>
-        </div>
+        <Notice variant="critical" icon="error" className="mt-3">
+          {error}
+        </Notice>
       )}
 
       {/* Result display */}

@@ -1,0 +1,1 @@
+- **fix(ci):** `@omniroute/opencode-provider` gets a publish job through Trusted Publishing (0.1.1 ships the changes since the hand-published 0.1.0), and the npm workflow no longer requires the expired `NPM_TOKEN` secret, which only the manual DIRECT fallback still reads ([#20637](https://github.com/cheaper-inference/OmniRoute/pull/20637))

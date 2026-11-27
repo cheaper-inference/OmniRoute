@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Icon from "@/shared/components/Icon";
 
 import { useCallback, useEffect, useState } from "react";
@@ -9,6 +10,7 @@ import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
+import IconChip from "@/shared/components/IconChip";
 import { cn } from "@/shared/utils/cn";
 
 export default function NotionSourceCard() {
@@ -134,11 +136,11 @@ export default function NotionSourceCard() {
           variant="ghost"
           onClick={() => setExpanded(!expanded)}
           aria-expanded={expanded}
-          className="w-full h-auto justify-start gap-3 p-0 text-left font-normal whitespace-normal hover:bg-transparent"
+          className="w-full h-auto justify-start gap-3 p-0 text-left whitespace-normal hover:bg-transparent"
         >
-          <div className="flex items-center justify-center size-10 rounded-lg bg-info/10 shrink-0">
-            <Icon name="description" className="text-xl text-info" />
-          </div>
+          <IconChip tone="info" className="shrink-0">
+            <Icon name="description" />
+          </IconChip>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-semibold text-sm">Notion</span>
@@ -189,20 +191,18 @@ export default function NotionSourceCard() {
                     onChange={(e) => setToken(e.target.value)}
                     placeholder="ntn_... or secret_..."
                     disabled={busy}
-                    className="font-mono text-sm flex-1"
+                    className="flex-1"
                   />
                   <Button onClick={handleSaveToken} loading={busy} variant="primary" size="sm">
                     {translateOrFallback("notionConnect", "Connect")}
                   </Button>
                 </div>
-                <p className="text-[10px] text-text-muted">
+                <p className="text-xs text-text-muted">
                   {translateOrFallback(
                     "notionIntegrationHelp",
                     "Create an Internal Integration at"
                   )}{" "}
-                  <code className="text-primary font-mono bg-surface/80 px-1 rounded">
-                    https://www.notion.so/profile/integrations
-                  </code>
+                  <InlineCode>https://www.notion.so/profile/integrations</InlineCode>
                 </p>
               </div>
             ) : (

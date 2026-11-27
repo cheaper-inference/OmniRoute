@@ -16,7 +16,9 @@ export default function MitmProxyError({
       aria-live="assertive"
     >
       <div className="text-center space-y-4">
-        <h2 className="text-xl font-semibold text-error">Failed to load MITM proxy</h2>
+        <h2 className="ci-heading text-error" data-size="xl">
+          Failed to load MITM proxy
+        </h2>
         <p className="text-text-muted max-w-md">
           We could not load MITM proxy data right now. Check your connection and try again.
         </p>

@@ -432,6 +432,24 @@
             "workflow"
           ]
         },
+        "base-check-unit": {
+          "when": "omni-queue-base-check",
+          "disposition": "required",
+          "domains": [
+            "build",
+            "catalog",
+            "cli",
+            "core",
+            "db",
+            "docs",
+            "i18n",
+            "provider",
+            "routing",
+            "tests",
+            "ui",
+            "workflow"
+          ]
+        },
         "lint-guard": {
           "when": "code",
           "disposition": "required",

@@ -4,7 +4,7 @@
 
 ---
 
-## Mmalite Ngwa Ngwa
+## Mmalite ngwa ngwa
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## Ntụaka API
+## API
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Ọrụ nrụpụta nke na-emepụta ihe Plugin nwere ụkpụrụ ndabara.
+Ọrụ ụlọ ọrụ na-emepụta ihe nkwụnye nwere ndabara.
 
-**Paramita:**
+**Oke:**
 
-- `name` (string, achọrọ) — Aha plugin n'ụdị kebab-case
-- `priority` (number, nhọrọ, ndabara: 100) — Nke dị ala na-arụ ọrụ mbụ
-- `enabled` (boolean, nhọrọ, ndabara: true) — Ọ ga-amalite dịka nke agbanyere?
-- `onRequest` (function, nhọrọ) — Na-arụ ọrụ tupu chat handler
-- `onResponse` (function, nhọrọ) — Na-arụ ọrụ mgbe chat handler gachara
-- `onError` (function, nhọrọ) — Na-arụ ọrụ mgbe njehie handler mere
+- `name` (eriri, achọrọ) — Aha ngwa mgbakwunye na kebab-case
+- `priority` (nọmba, nhọrọ, ndabara: 100) — Lower agba mbụ
+- `enabled` (boolean, nhọrọ, ndabara: ezi) — Agbanyere aka?
+- `onRequest` (ọrụ, nhọrọ) — Na-agba ọsọ tupu onye njikwa nkata
+- `onResponse` (ọrụ, nhọrọ) — Na-agba ọsọ ma onye njikwa nkata gachara
+- `onError` (ọrụ, nhọrọ) — Na-agba ọsọ na njehie njikwa
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Gbochie arịrịọ ahụ ma, ọ bụrụ na achọrọ, weghachite nzaghachi ahaziri iche.
+Gbochie arịrịọ ahụ wee weghachi nzaghachi omenala na nhọrọ.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Gbanwee body nke arịrịọ tupu ọ rute provider.
+Gbanwee otu arịrịọ tupu ọ rute onye na-eweta ya.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Tinye metadata na context nke arịrịọ ahụ.
+Tinye metadata na mpaghara arịrịọ.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Context Plugin (`PluginContext`)
+## Ọdịnihu ngwa mgbakwunye (`PluginContext`)
 
-| Field       | Type                      | Nkọwa                          |
-| ----------- | ------------------------- | ------------------------------ |
-| `requestId` | `string`                  | Ihe njirimara arịrịọ pụrụ iche |
-| `model`     | `string`                  | Aha model a rịọrọ              |
-| `provider`  | `string`                  | ID provider ezubere iche       |
-| `body`      | `Record<string, unknown>` | Body nke arịrịọ                |
-| `headers`   | `Record<string, string>`  | Headers nke arịrịọ             |
-| `metadata`  | `Record<string, unknown>` | Metadata enwere ike ịgbanwe    |
-| `timestamp` | `number`                  | Timestamp nke arịrịọ           |
+| Ubi          | Ụdị                       | Nkọwa                              |
+| ------------ | ------------------------- | ---------------------------------- |
+| `requestId`  | `string`                  | Ihe nchọpụta arịrịọ pụrụ iche      |
+| `model`      | `string`                  | Aha ụdị achọrọ                     |
+| `provider`   | `string`                  | Onye na-eweta ebumnuche ID         |
+| `body`       | `Record<string, unknown>` | Rịọ ahụ                            |
+| `headers`    | `Record<string, string>`  | Rịọ nkụnye eji isi mee (lee ndetu) |
+| `metadata`   | `Record<string, unknown>` | metadata agbanwe agbanwe           |
+| `timestamp`  | `number`                  | Rịọ akara oge                      |
+| `apiKeyInfo` | `object` (nhọrọ)          | metadata igodo API (lee ndetu)     |
+
+Ihe gbara ya gburugburu anaghị eburu nzere onye ahịa: ewepụrụ `authorization`, `x-api-key`, `proxy-authorization` na `cookie` nkụnye eji isi mee ( casing ọ bụla), na `apiKeyInfo` na-edobe metadata igodo (dị ka `id`, `name` na `scopes`) mana ọ bụghị uru isi ma ọ bụ akara mkpịsị aka ya (`redactPluginContext()` na `src/lib/plugins/hooks.ts`). Nke a na-emetụta `onRequest`, `onResponse` na `onError`.
 
 ## Manifest (`plugin.json`)
 
@@ -138,19 +141,18 @@ Ma ọ bụ dịka boolean ndị dị mfe (ibu ụzọ ndabara 100):
 }
 ```
 
-## Usoro Ikikere
+## Sistemụ ikike
 
-Plugins na-arụ ọrụ n'ime ọnọdụ VM e kewapụrụ iche. Ịnweta akụrụngwa ndị dị na mpụga chọrọ ikikere doro anya:
+Ngwa mgbakwunye bụ** ọ bụghị sandboxed** . Ngwa mgbakwunye ọ bụla na-arụ ọrụ na-agba ọsọ dị ka usoro Node.js nkịtị dị iche (`loadPlugin()` na `src/lib/plugins/loader.ts`) n'okpuru otu onye ọrụ sistemụ dị ka OmniRoute, na-enweghị ọnọdụ VM yana enweghị ọkọlọtọ ikike Node.js. Koodu ngwa mgbakwunye nwere ike iji `node:fs`, `node:child_process`, `fetch` na Node.js API ọ bụla: ọ nwere ike ịgụ ma dee faịlụ ọ bụla onye ọrụ OmniRoute nwere ike (gụnyere ndekọ data), mee mmemme wee rute netwọkụ.
 
-| Ikikere      | Ihe ọ na-enye ohere                                          |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Proxy `process.env` nke bụ naanị maka ịgụ                    |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+Ihe ngosi `requires.permissions` na-anabata `network`, `file-read`, `file-write`, `env` na `exec`, mana taa naanị `env` nwere mmetụta na oge ọsọ:
 
-Ọ bụrụ na enweghị ikikere, globals ndị kwekọrọ na ya agaghị adị n'ime sandbox ahụ.
+| Ikike                                        | Mmetụta taa                                                                                                                                                                                                                                        |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Usoro ngwa mgbakwunye na-enwetakwa `PORT`, `HOSTNAME`, `TZ` na `TMPDIR`. Na-enweghị ya, ọ na-enweta naanị `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` na `PLUGIN_NAME` (gbakwunyere `SystemRoot` na `windir` na Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Ọ dịghị. Ha bụ naanị nkwupụta: ọ dịghị ihe na-egbochi mgbe ha na-efu.                                                                                                                                                                              |
+
+Ịwụnye ngwa mgbakwunye dị ka ịwụnye mmemme ọ bụla na onye ọbịa. Wụnye naanị plugins ndị ị tụkwasịrị obi isi mmalite ha.
 
 ## Schema Nhazi
 
@@ -192,9 +194,9 @@ A na-echekwa uru config n'ime database, a pụkwara ịnweta ha site na ibe conf
 | `onDeactivate`    | Mgbe a kwụsịrị plugin ịrụ ọrụ             | `{ name, version, manifest }` |
 | `onUninstall`     | Mgbe ewepụrụ plugin (tupu ehichapụ faịlụ) | `{ name, version, manifest }` |
 
-## Ọmụmaatụ
+## Ihe atụ
 
-### Onye Na-edekọ Request
+### Rịọ Logger
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Onye Na-amachi Ọnụọgụ Request
+### Oke oke
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // Nkeji 1
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Onye Na-agbanwe Response
+### Ihe ntụgharị nzaghachi
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

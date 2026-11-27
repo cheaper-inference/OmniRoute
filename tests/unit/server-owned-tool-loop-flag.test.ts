@@ -78,8 +78,22 @@ describe("feature-flags-settings count update", () => {
     // (#13505, default off) to 85; KIRO_TOOL_CALL_REPAIR_ENABLED (default on) to 86;
     // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, default off) to 87.
     // FAL_NATIVE_ENABLED (#18849) adds the 120th flag; CODEX_SEARCH_AUTO_FALLBACK_ENABLED (#17933) the 121st;
-    // CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060) the 122nd.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 122);
+    // CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060) the 122nd;
+    // PII_REVERSIBLE_VAULT_ENABLED (#18017 wiring, default off) the 123rd;
+    // SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED, SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED and
+    // COMBO_JEV_STRATEGY_ENABLED (System One, default off) to 126;
+    // PLUGIN_PERMISSION_MODEL_ENABLED (opt-in plugin sandbox, default off) to 127;
+    // COMBO_DECISION_ROUTER_ENABLED (decision auto-router, default off) to 128.
+    // AGENT_GUARD_MODE (client-agent observation mode, default off) takes it to 129.
+    // AGENT_GUARD_STRICT (agent guard strict mode, default off) takes it to 130.
+    // QUOTA_SELF_PANEL (self-service quota API, default off) to 131.
+    // CLAUDE_CODE_LOCAL_{COMMAND_PREFIX,SUGGESTION,FILEPATHS}_ENABLED (default off) to 134.
+    // PROXY_REEGRESS_ON_QUOTA_429 (pool re-send after a per-IP 429, default off) to 135.
+    // QUOTA_DAILY_REVALIDATION (#20343, default off) to 136.
+    // CODEBUDDY_TELEMETRY_ENABLED (#18398, codebuddy-intl turn reports, default off) to 137.
+    // AGENT_SESSION_MESSAGES_ENABLED (#14864, opt-in session turn capture, default off) to 138.
+    // AIHORDE_CATALOG_BACKGROUND_REFRESH_ENABLED (default off) to 139.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 139);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.
@@ -89,6 +103,7 @@ describe("feature-flags-settings count update", () => {
     // PROXY_STRICT_POST_REPLAY_ENABLED + RESPONSES_TRANSPORT_KEEPALIVE_ENABLED (#18312, default off) to 117.
     // OPENCODE_FREE_TIER_EGRESS_PROBE (one-hop egress probe after a FreeTierError, default off) to 118.
     // PROXY_REFUSAL_MODEL_SCOPE (#18686, default off) to 119.
+    // PII_REVERSIBLE_VAULT_ENABLED (#18017 wiring, default off) to 120.
     // OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED (#16571, default off) to 87.
     // COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED (#16256, default off) to 87.
     // OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED (#16797, default off) to 87;

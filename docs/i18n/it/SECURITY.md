@@ -4,13 +4,13 @@
 
 ---
 
-## Segnalazione delle vulnerabilità
+## Segnalazione di vulnerabilità
 
 Se scopri una vulnerabilità di sicurezza in OmniRoute, segnalala in modo responsabile:
 
-1. **NON** aprire una issue pubblica su GitHub
-2. Usa [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Includi: descrizione, passaggi per la riproduzione e impatto potenziale
+1. **DO NOT** aprire un problema pubblico GitHub
+2. Utilizza [gli avvisi di sicurezza GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Includere: descrizione, passaggi di riproduzione e potenziale impatto
 
 ## Tempistiche di risposta
 
@@ -31,23 +31,12 @@ Se scopri una vulnerabilità di sicurezza in OmniRoute, segnalala in modo respon
 
 ## Finestra di supporto LTS (v3.9.x)
 
-Dopo la 3.8.59, la versione successiva è la **3.9.0**, che inaugura la linea di supporto a lungo termine sul
-branch `stable/v3` (vedere [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — v3.9.0 LTS").
+Dopo la 3.8.59 la versione successiva è** 3.9.0** , che apre la linea di supporto a lungo termine sul ramo `stable/v3` (vedi [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — v3.9.0 LTS").
 
-- **Cosa riceve `stable/v3`:** correzioni di bug, patch di sicurezza e aggiornamenti dei provider. Le nuove
-  funzionalità vengono introdotte nel canale v4; la linea LTS privilegia la stabilità. `npm install omniroute`
-  (il dist-tag `latest`) rimane sulla v3 per l'intero ciclo della v4.
-- **Durata della finestra:** `stable/v3` riceve **correzioni di sicurezza e delle regressioni critiche per
-  12 mesi dopo il rilascio della 3.9.0, oppure fino a 90 giorni dopo la pubblicazione della v4.0.0 come `latest` —
-  a seconda di quale data sia successiva**. La data di fine risultante viene registrata nelle note di rilascio della 3.9.0 e in
-  [`ROADMAP.md`](ROADMAP.md) al momento del rilascio.
-- **Segnalazione di una vulnerabilità nella linea LTS:** utilizzare lo stesso canale previsto per qualsiasi altra versione —
-  un [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privato,
-  mai una issue pubblica. Indicare quale versione è stata testata (ad esempio `3.9.2`); le correzioni vengono integrate in
-  `stable/v3` e successivamente portate sulla v4.
-- **Baseline di sicurezza al rilascio LTS:** lo stato rilevato dagli scanner, le verifiche delle protezioni delle route e
-  delle credenziali pubbliche sono registrati in
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **Cosa riceve `stable/v3` :** correzioni di bug, patch di sicurezza e aggiornamenti del provider. Le nuove funzionalità vanno al canale v4; la linea LTS è incentrata sulla stabilità. `npm install omniroute` (il tag dist `latest` ) rimane su v3 durante l'intero ciclo v4.
+- **Durata della finestra:** `stable/v3` riceve** correzioni di sicurezza e regressioni critiche per 12 mesi dopo il taglio 3.9.0 o fino a 90 giorni dopo la pubblicazione della v4.0.0 come `latest` — a seconda di quale evento sia successivo** . La data di fine risultante viene registrata nelle note di rilascio della versione 3.9.0 e in [`ROADMAP.md`](ROADMAP.md) quando avviene il taglio.
+- **Segnalazione di una vulnerabilità nella linea LTS :** stesso canale di qualsiasi altra versione — un [avviso di sicurezza GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) privato, mai un problema pubblico. Di' quale versione hai testato (ad esempio `3.9.2`); le correzioni arrivano su `stable/v3` e vengono inoltrate alla v4.
+- **Base di sicurezza al taglio LTS :** lo stato misurato dello scanner, la protezione del percorso e le prove delle credenziali pubbliche sono registrati in [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 
@@ -211,7 +200,7 @@ docker run -d \
   -e JWT_SECRET="$(openssl rand -base64 48)" \
   -e API_KEY_SECRET="$(openssl rand -hex 32)" \
   -e STORAGE_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ---

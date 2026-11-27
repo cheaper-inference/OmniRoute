@@ -14,7 +14,7 @@ import {
 } from "@/lib/providerModels/managedModelImport";
 import { createModelSyncTimings } from "@/lib/providerModels/modelSyncTimings";
 import { saveCallLog } from "@/lib/usage/callLogs";
-import { isAuthenticated } from "@/shared/utils/apiAuth";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { AUTHZ_HEADER_PEER_LOCALITY } from "@/server/authz/headers";
 import {
   buildModelSyncInternalHeaders,
@@ -41,6 +41,7 @@ import {
   pruneStaleComboModelRefs,
 } from "@/lib/combos/staleModelPrune";
 import { logAuditEvent } from "@/lib/compliance/index";
+import { recordSyncedModelsForInbox } from "@/lib/newModelsInbox";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -453,11 +454,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   let channelLabel: string | null = null;
 
   try {
-    if (!(await isAuthenticated(request)) && !isModelSyncInternalRequest(request)) {
-      return NextResponse.json(
-        { error: { message: "Authentication required", type: "invalid_api_key" } },
-        { status: 401 }
-      );
+    if (!isModelSyncInternalRequest(request)) {
+      const authError = await requireManagementAuth(request);
+      if (authError) return authError;
     }
 
     const connection = await getCachedProviderConnectionById(id);
@@ -505,6 +504,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       }
       const previous = await getSyncedAvailableModelsForConnection(logProvider, id);
       const synced = await replaceSyncedAvailableModelsForConnection(logProvider, id, discovered);
+      recordSyncedModelsForInbox(logProvider, synced);
       const prevIds = new Set(previous.map((m) => String(m.id)));
       const added = synced.filter((m) => !prevIds.has(String(m.id))).length;
       const removed = previous.filter(
@@ -686,6 +686,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       })
     );
 
+    recordSyncedModelsForInbox(logProvider, allFetchedModels);
     if (freeFilterEmpty) {
       // A free-only connection whose listing holds no free model has nothing
       // callable. The report already cuts the stale snapshot

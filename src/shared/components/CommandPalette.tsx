@@ -6,12 +6,14 @@ import { useTranslations } from "next-intl";
 import {
   Command,
   CommandEmpty,
+  CommandFooter,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
 } from "@omniroute/ui-kit/command";
 import { Dialog, DialogContent, DialogTitle } from "@omniroute/ui-kit/dialog";
+import { Kbd, KbdGroup } from "@omniroute/ui-kit/kbd";
 import {
   SIDEBAR_SECTIONS,
   HIDDEN_SIDEBAR_ITEMS_SETTING_KEY,
@@ -328,13 +330,11 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
                     <Icon name="close" size={16} />
                   </Button>
                 )}
-                <kbd className="hidden shrink-0 rounded border border-border bg-bg-subtle px-1.5 py-0.5 font-mono text-[10px] text-text-muted sm:inline-flex">
-                  Esc
-                </kbd>
+                <Kbd className="hidden shrink-0 sm:inline-flex">Esc</Kbd>
               </>
             }
           />
-          <CommandList aria-label={t("commandPalette.title")} className="custom-scrollbar">
+          <CommandList aria-label={t("commandPalette.title")}>
             {grouped.map((group) => (
               <CommandGroup key={group.sectionId} heading={group.sectionLabel}>
                 {group.subgroups.map((subgroup) => {
@@ -353,26 +353,25 @@ function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
             ))}
           </CommandList>
           <CommandEmpty>{t("noResults")}</CommandEmpty>
+          {/* Key hints: part of the Command, outside the listbox; a press keeps focus in the input. */}
+          <CommandFooter>
+            <span className="flex items-center gap-1">
+              <KbdGroup>
+                <Kbd>↑</Kbd>
+                <Kbd>↓</Kbd>
+              </KbdGroup>
+              {t("commandPalette.navigate")}
+            </span>
+            <span className="flex items-center gap-1">
+              <Kbd>↵</Kbd>
+              {t("commandPalette.open")}
+            </span>
+            <span className="flex items-center gap-1">
+              <Kbd>Esc</Kbd>
+              {t("commandPalette.close")}
+            </span>
+          </CommandFooter>
         </Command>
-
-        <div className="flex items-center gap-4 border-t border-border px-5 py-2 text-[11px] text-text-muted">
-          <span className="flex items-center gap-1">
-            <kbd className="rounded border border-border bg-bg-subtle px-1 py-0.5 font-mono">
-              ↑↓
-            </kbd>
-            {t("commandPalette.navigate")}
-          </span>
-          <span className="flex items-center gap-1">
-            <kbd className="rounded border border-border bg-bg-subtle px-1 py-0.5 font-mono">↵</kbd>
-            {t("commandPalette.open")}
-          </span>
-          <span className="flex items-center gap-1">
-            <kbd className="rounded border border-border bg-bg-subtle px-1 py-0.5 font-mono">
-              Esc
-            </kbd>
-            {t("commandPalette.close")}
-          </span>
-        </div>
       </DialogContent>
     </Dialog>
   );

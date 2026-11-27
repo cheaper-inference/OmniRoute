@@ -16,6 +16,7 @@
 
 import { getMusicProvider, parseMusicModel } from "../config/musicRegistry.ts";
 import { kieExecutor } from "../executors/kie.ts";
+import { clampPollIntervalMs, clampPollTimeoutMs } from "../utils/pollBounds.ts";
 import { vertexGenerateMusic } from "../executors/vertexMedia.ts";
 import {
   submitComfyWorkflow,
@@ -36,7 +37,7 @@ import {
   UPSTREAM_MEDIA_LIMITS,
   downloadUpstreamMedia,
   upstreamMediaErrorText,
-} from "@/shared/network/remoteImageFetch";
+} from "../utils/remoteMediaFetch.ts";
 import { handleFalMusicGeneration } from "./mediaGeneration/fal.ts";
 import { handleGeminiMusicGeneration } from "./mediaGeneration/geminiMusic.ts";
 import { handleSyntxMusicGeneration } from "./syntxAudio.ts";
@@ -361,8 +362,8 @@ async function handleKieMusicGeneration({
   } | null;
 }) {
   const startTime = Date.now();
-  const timeoutMs = Number(body.timeout_ms) > 0 ? Number(body.timeout_ms) : 300000;
-  const pollIntervalMs = Number(body.poll_interval_ms) > 0 ? Number(body.poll_interval_ms) : 2500;
+  const timeoutMs = clampPollTimeoutMs(body.timeout_ms, 300000);
+  const pollIntervalMs = clampPollIntervalMs(body.poll_interval_ms, 2500);
   const token = credentials?.apiKey || credentials?.accessToken;
   const baseUrl = providerConfig.baseUrl.replace(/\/$/, "");
   const prompt = typeof body.prompt === "string" ? body.prompt : String(body.prompt ?? "");

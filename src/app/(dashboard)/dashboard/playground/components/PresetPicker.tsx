@@ -95,7 +95,7 @@ export default function PresetPicker({ configState, setConfigState }: PresetPick
   return (
     <>
       <div className="flex flex-col gap-2">
-        <span className="text-xs font-medium text-text-muted uppercase tracking-wider">
+        <span className="ci-eyebrow" data-weight="medium">
           {t("presetsLabel")}
         </span>
 
@@ -112,7 +112,7 @@ export default function PresetPicker({ configState, setConfigState }: PresetPick
             }}
             defaultValue=""
             className="flex-1"
-            selectClassName="text-xs"
+            nativeSize="xs"
             aria-label={t("loadPreset")}
           >
             <option value="" disabled>
@@ -146,23 +146,23 @@ export default function PresetPicker({ configState, setConfigState }: PresetPick
             {presets.map((preset) => (
               <div
                 key={preset.id}
-                className="flex items-center justify-between text-[11px] text-text-muted hover:text-text-main group"
+                className="flex items-center justify-between text-xs text-text-muted hover:text-text-main group"
               >
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="2xs"
                   onClick={() => handleLoad(preset.id)}
-                  className="h-auto min-h-0 flex-1 justify-start truncate px-1 py-0.5 text-left text-[11px] font-normal"
+                  className="flex-1 justify-start truncate text-left"
                   aria-label={`Load preset "${preset.name}"`}
                 >
                   {preset.name}
                   <span className="ml-1.5 opacity-60">{preset.model}</span>
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="destructive-ghost"
                   size="icon-sm"
                   onClick={() => void remove(preset.id)}
-                  className="text-text-muted hover:text-error opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
+                  className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
                   aria-label={`Delete preset "${preset.name}"`}
                   icon="delete"
                 />

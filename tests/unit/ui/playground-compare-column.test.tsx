@@ -159,6 +159,8 @@ describe("CompareColumn", () => {
     ) as HTMLButtonElement;
 
     expect(copyBtn).not.toBeNull();
+    // The copy button has a title: the kit tooltip adds no element around the button, so it
+    // sits right before the remove button.
     expect(copyBtn.nextElementSibling).toBe(removeBtn);
 
     await act(async () => {
@@ -175,7 +177,8 @@ describe("CompareColumn", () => {
     const copyBtn = el.querySelector("[aria-label='Copy']") as HTMLButtonElement;
 
     expect(copyBtn).not.toBeNull();
-    expect(copyBtn.disabled).toBe(true);
+    // A titled Button is aria-disabled while inactive (it stays hoverable for its tooltip).
+    expect(copyBtn.getAttribute("aria-disabled")).toBe("true");
   });
 
   it("updates metrics displayed when metrics change (TTFT after first chunk)", () => {

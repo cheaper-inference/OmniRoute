@@ -72,8 +72,22 @@ const {
 // PROXY_REFUSAL_MODEL_SCOPE (#18686, default off) takes it to 119.
 // FAL_NATIVE_ENABLED (#18849, schema-driven Fal gateway, default off) takes it to 120;
 // CODEX_SEARCH_AUTO_FALLBACK_ENABLED (#17933, default off) takes it to 121.
-// CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060, default off) takes it to 122.
-const EXPECTED_FEATURE_FLAG_COUNT = 122;
+// CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060, default off) takes it to 122;
+// PII_REVERSIBLE_VAULT_ENABLED (#18017 wiring, default off) takes it to 123;
+// SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED (#16676), SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED (#14667)
+// and COMBO_JEV_STRATEGY_ENABLED (#15279), all default off, take it to 126.
+// PLUGIN_PERMISSION_MODEL_ENABLED (opt-in plugin sandbox, default off) takes it to 127, and
+// COMBO_DECISION_ROUTER_ENABLED (unified decision routing, default off) to 128.
+// AGENT_GUARD_MODE (client-agent observation mode, default off) takes it to 129.
+// AGENT_GUARD_STRICT (agent guard strict mode, default off) takes it to 130.
+// QUOTA_SELF_PANEL (self-service quota API, default off) takes it to 131.
+// CLAUDE_CODE_LOCAL_{COMMAND_PREFIX,SUGGESTION,FILEPATHS}_ENABLED (Claude Code local helper replies, default off) take it to 134.
+// PROXY_REEGRESS_ON_QUOTA_429 (pool re-send after a per-IP 429, default off) takes it to 135.
+// QUOTA_DAILY_REVALIDATION (#20343, default off) takes it to 136.
+// CODEBUDDY_TELEMETRY_ENABLED (#18398, codebuddy-intl turn reports, default off) takes it to 137.
+// AGENT_SESSION_MESSAGES_ENABLED (#14864, opt-in session turn capture, default off) takes it to 138.
+// AIHORDE_CATALOG_BACKGROUND_REFRESH_ENABLED (default off) takes it to 139.
+const EXPECTED_FEATURE_FLAG_COUNT = 139;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import { Skeleton } from "@/shared/components/Loading";
@@ -26,7 +27,7 @@ function StatCard({
   label,
   value,
   sub,
-  valueClass = "text-text",
+  valueClass = "text-text-main",
 }: {
   icon: string;
   label: string;
@@ -35,14 +36,14 @@ function StatCard({
   valueClass?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1 p-4 rounded-lg bg-bg-subtle border border-border">
+    <Card.Section className="flex flex-col gap-1">
       <div className="flex items-center gap-1.5 text-text-muted text-xs">
         <Icon name={icon} size={16} />
         {label}
       </div>
       <div className={`text-2xl font-semibold tabular-nums ${valueClass}`}>{value}</div>
       {sub && <div className="text-xs text-text-muted">{sub}</div>}
-    </div>
+    </Card.Section>
   );
 }
 

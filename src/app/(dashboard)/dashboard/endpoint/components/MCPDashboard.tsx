@@ -413,7 +413,9 @@ export default function McpDashboardPage() {
       </div>
 
       <Card className="p-5">
-        <h2 className="text-lg font-semibold mb-4">{t("activity24h")}</h2>
+        <h2 className="ci-heading mb-4" data-size="lg">
+          {t("activity24h")}
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <StatCard label={t("totalCalls")} value={status?.activity?.totalCalls24h ?? 0} compact />
           <StatCard
@@ -428,8 +430,10 @@ export default function McpDashboardPage() {
           />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="rounded-lg border border-border p-3">
-            <h3 className="text-sm font-semibold mb-2">{t("topTools")}</h3>
+          <Card.Section>
+            <h3 className="ci-heading mb-2" data-size="sm">
+              {t("topTools")}
+            </h3>
             {topTools.length === 0 ? (
               <p className="text-sm text-text-muted">{t("noToolCalls24h")}</p>
             ) : (
@@ -442,9 +446,11 @@ export default function McpDashboardPage() {
                 ))}
               </ul>
             )}
-          </div>
-          <div className="rounded-lg border border-border p-3">
-            <h3 className="text-sm font-semibold mb-2">{t("runtimeDetails")}</h3>
+          </Card.Section>
+          <Card.Section>
+            <h3 className="ci-heading mb-2" data-size="sm">
+              {t("runtimeDetails")}
+            </h3>
             <div className="text-sm space-y-1">
               <p>
                 {t("transport")}: <span className="font-mono">{runtimeTransport}</span>
@@ -471,14 +477,16 @@ export default function McpDashboardPage() {
                 <span className="font-mono text-xs break-all">{status?.heartbeatPath || "—"}</span>
               </p>
             </div>
-          </div>
+          </Card.Section>
         </div>
       </Card>
 
       <Card className="p-5">
-        <h2 className="text-lg font-semibold mb-4">{t("operationalControls")}</h2>
+        <h2 className="ci-heading mb-4" data-size="lg">
+          {t("operationalControls")}
+        </h2>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-          <div className="rounded-lg border border-border p-3 space-y-3">
+          <Card.Section className="space-y-3">
             <p className="text-sm font-semibold">{t("switchCombo")}</p>
             <Select
               aria-label={t("switchCombo")}
@@ -499,9 +507,9 @@ export default function McpDashboardPage() {
             >
               {selectedCombo?.isActive === false ? t("activateCombo") : t("deactivateCombo")}
             </Button>
-          </div>
+          </Card.Section>
 
-          <div className="rounded-lg border border-border p-3 space-y-3">
+          <Card.Section className="space-y-3">
             <p className="text-sm font-semibold">{t("applyResilienceProfile")}</p>
             <Select
               aria-label={t("applyResilienceProfile")}
@@ -522,9 +530,9 @@ export default function McpDashboardPage() {
             >
               {t("applyProfile")}
             </Button>
-          </div>
+          </Card.Section>
 
-          <div className="rounded-lg border border-border p-3 space-y-3">
+          <Card.Section className="space-y-3">
             <p className="text-sm font-semibold">{t("resetCircuitBreakers")}</p>
             <p className="text-xs text-text-muted">{t("resetCircuitBreakersHelp")}</p>
             <Button
@@ -535,15 +543,21 @@ export default function McpDashboardPage() {
             >
               {t("resetAllBreakers")}
             </Button>
-          </div>
+          </Card.Section>
         </div>
         {actionMessage && <p className="text-sm text-text-muted mt-3">{actionMessage}</p>}
       </Card>
 
       <Card className="p-5">
-        <h2 className="text-lg font-semibold mb-4">{t("toolsAndScopes")}</h2>
+        <h2 className="ci-heading mb-4" data-size="lg">
+          {t("toolsAndScopes")}
+        </h2>
         <div className="overflow-x-auto">
-          <Table scrollbarLabel={t("toolsAndScopes")}>
+          <Table
+            scrollbarLabel={t("toolsAndScopes")}
+            scrollLabel={t("toolsAndScopes")}
+            variant="plain"
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("tableTool")}</TableHead>
@@ -569,7 +583,9 @@ export default function McpDashboardPage() {
       <Card className="p-5">
         <div className="flex flex-wrap gap-2 items-end justify-between mb-4">
           <div>
-            <h2 className="text-lg font-semibold">{t("auditLog")}</h2>
+            <h2 className="ci-heading" data-size="lg">
+              {t("auditLog")}
+            </h2>
             <p className="text-sm text-text-muted">
               {t("auditSummary", { total: auditData.total, page: currentPage, totalPages })}
             </p>
@@ -620,7 +636,7 @@ export default function McpDashboardPage() {
           <p className="text-sm text-text-muted">{t("noAuditEntriesForFilters")}</p>
         ) : (
           <div className="overflow-x-auto">
-            <Table scrollbarLabel={t("auditLog")}>
+            <Table scrollbarLabel={t("auditLog")} scrollLabel={t("auditLog")} variant="plain">
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("tableTimestamp")}</TableHead>
@@ -688,7 +704,7 @@ function StatCard({
 }) {
   return (
     <div className={`rounded-lg border border-border bg-bg p-4 ${compact ? "" : "min-h-[84px]"}`}>
-      <p className="text-xs text-text-muted uppercase tracking-wide">{label}</p>
+      <p className="ci-eyebrow">{label}</p>
       <p className="text-xl font-semibold mt-1">{value}</p>
     </div>
   );

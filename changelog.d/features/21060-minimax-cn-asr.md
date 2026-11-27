@@ -1,0 +1,1 @@
+- **feat(stt):** Transcribe with `minimax-cn/asr-1.0` through `/v1/audio/transcriptions`, including browser WebM recordings when ffmpeg is installed ([#21060](https://github.com/cheaper-inference/OmniRoute/pull/21060)) — thanks @gorquan.

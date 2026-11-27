@@ -1,0 +1,1 @@
+- fix(opencode-plugin): only hide a flat effort-variant id when its base model is served, so ids like `qwen3.8-max` and `gemini-3.8-flash-high` stay visible (#20401)

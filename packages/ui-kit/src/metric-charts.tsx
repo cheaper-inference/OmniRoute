@@ -63,14 +63,18 @@ export interface MetricDonutProps extends Omit<MetricChartFrameProps, "children"
   label: string;
   data: MetricDonutDatum[];
   totalLabel?: string;
+  /** Formats the total, the legend values and the values in the accessible name, such as currency or a compact count. Defaults to the raw number. */
+  valueFormatter?: (value: number) => string;
+  /** Read in the accessible name for a value that is not measured. Defaults to "unavailable". */
+  unavailableLabel?: string;
 }
-export function MetricDonut({ data, label, totalLabel = "total", className, ...props }: MetricDonutProps) {
+export function MetricDonut({ data, label, totalLabel = "total", unavailableLabel = "unavailable", valueFormatter = String, className, ...props }: MetricDonutProps) {
   const replay = useContext(MetricMotionContext);
   const sum = data.reduce((value, item) => value + item.value, 0);
   const total = data.every((item) => measured(item.value)) && Number.isFinite(sum) ? sum : null;
   let offset = 0;
   return <MetricChartFrame {...props} className={cn("ci-metric-donut", className)}
-    aria-label={`${label}: ${data.map((item) => `${item.label} ${measured(item.value) ? item.value : "unavailable"}`).join(", ")}`}>
+    aria-label={`${label}: ${data.map((item) => `${item.label} ${measured(item.value) ? valueFormatter(item.value) : unavailableLabel}`).join(", ")}`}>
     <div className="ci-metric-donut__summary">
       <div className="ci-metric-donut__chart">
         <svg key={replay} viewBox="0 0 160 160" aria-hidden>
@@ -95,10 +99,10 @@ export function MetricDonut({ data, label, totalLabel = "total", className, ...p
           })}
         </svg>
       </div>
-      <div className="ci-metric-donut__total"><strong>{total ?? "—"}</strong><span>{totalLabel}</span></div>
+      <div className="ci-metric-donut__total"><strong>{total === null ? "—" : valueFormatter(total)}</strong><span>{totalLabel}</span></div>
     </div>
     <figcaption className="ci-metric-donut__legend">
-      {data.map((item) => <div key={item.key}><i aria-hidden style={{ background: item.color }} /><span>{item.label}</span><strong>{measured(item.value) ? item.value : "—"}</strong></div>)}
+      {data.map((item) => <div key={item.key}><i aria-hidden style={{ background: item.color }} /><span>{item.label}</span><strong>{measured(item.value) ? valueFormatter(item.value) : "—"}</strong></div>)}
     </figcaption>
   </MetricChartFrame>;
 }

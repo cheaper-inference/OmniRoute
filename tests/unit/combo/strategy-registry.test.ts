@@ -69,7 +69,16 @@ const LEGACY_DECISIONS: { [K in keyof StrategyTraits]: (s: string) => StrategyTr
   stickyPin: (s) => (s === "weighted" ? "weighted" : s === "round-robin" ? "round-robin" : "none"),
   // dispatchPrelude.ts simpleExecuteStrategies + orderRuntimeUnits
   runtimeUnitOrder: (s) => {
-    const simple = ["priority", "round-robin", "random", "strict-random", "weighted", "fill-first"];
+    // `jev` orders its runtime units through jevRuntimeUnits.ts (declared user order, then admission).
+    const simple = [
+      "priority",
+      "round-robin",
+      "random",
+      "strict-random",
+      "weighted",
+      "fill-first",
+      "jev",
+    ];
     if (!simple.includes(s)) return "unsupported";
     if (s === "random") return "shuffle";
     if (s === "strict-random") return "deck";
@@ -84,9 +93,12 @@ const LEGACY_DECISIONS: { [K in keyof StrategyTraits]: (s: string) => StrategyTr
   stickinessRespectsDeclaredOrder: (s) => s === "priority",
   // targetResolution.ts preScreenTargets
   preScreensTargets: (s) => s === "priority",
-  // targetResolution.ts modelOrderPreservingStrategies (#8370)
+  // targetResolution.ts modelOrderPreservingStrategies (#8370); round-robin joined it in #20191
+  // so a cross-model affinity reorder no longer pins every request to one rotation target.
   promptCacheAffinityScope: (s) =>
-    ["priority", "weighted", "fill-first", "quota-share"].includes(s) ? "model" : "global",
+    ["priority", "weighted", "fill-first", "quota-share", "jev", "round-robin"].includes(s)
+      ? "model"
+      : "global",
   // promptCacheAffinity.ts shouldProtectOriginalFirst (#8370)
   protectsFirstTargetFromAffinity: (s) =>
     s === "auto" ||
@@ -95,7 +107,8 @@ const LEGACY_DECISIONS: { [K in keyof StrategyTraits]: (s: string) => StrategyTr
     s === "priority" ||
     s === "fill-first" ||
     s === "lkgp" ||
-    s === "quota-weighted",
+    s === "quota-weighted" ||
+    s === "jev",
   // targetResolution.ts applyContinuityFilters cacheStrategyAffinityApplied
   cacheAffinityOwnsOrdering: (s) => s === "cache-optimized",
   // targetResolution.ts dispatchSmartPipeline
@@ -113,8 +126,8 @@ const LEGACY_DECISIONS: { [K in keyof StrategyTraits]: (s: string) => StrategyTr
   contextRelay: (s) => s === "context-relay",
 };
 
-test("registry covers every canonical strategy (21 public + quota-share) and nothing else", () => {
-  assert.equal(CANONICAL.length, 22);
+test("registry covers every canonical strategy (22 public + quota-share) and nothing else", () => {
+  assert.equal(CANONICAL.length, 23);
   assert.deepEqual([...REGISTERED_COMBO_STRATEGIES].sort(), [...CANONICAL].sort());
   for (const strategy of CANONICAL) {
     assert.ok(Object.hasOwn(COMBO_STRATEGY_REGISTRY, strategy), `missing ${strategy}`);

@@ -4,10 +4,9 @@
 
 ---
 
-Sejak v3.8.49 (WS3.2/WS3.4 dalam pelan quality/velocity), laluan gabungan lalai bagi
-PR yang telah disemak ke dalam `release/vX.Y.Z` ialah **baris gilir gabungan Mergify** (`.mergify.yml`);
-**tren gabungan manual** yang didokumenkan di bawah ialah PILIHAN SANDARAN — digunakan semasa insiden,
-pembekuan keluaran, atau jika pelan Sumber Terbuka Mergify berubah.
+> **2026-11-19: baris gilir gabungan Mergify ditamatkan** (keputusan pemilik). `.mergify.yml` tidak lagi mentakrifkan baris gilir dan menolak perintah Mergify yang menggabungkan atau menulis semula permintaan tarik. Keluaran PRs digabungkan dengan tangan di bawah set peraturan repositori "Memerlukan gerbang hijau pada keluaran aktif" (`Gate / CI` + `Gate / Quality`) sehingga omni-queue berjalan dalam mod langsung, dan melalui omni-queue selepas itu ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Bahagian Mergify di bawah menerangkan baris gilir seperti sedia ada.
+
+Sejak v3.8.49 (WS3.2/WS3.4 pelan quality/velocity ) laluan penggabungan lalai untuk PRs yang disemak menjadi `release/vX.Y.Z` ialah** Gabungkan baris gilir gabungan** (`.mergify.yml`); yang** kereta api gabungan manual** didokumenkan di bawah ialah FALLBACK — yang digunakan semasa insiden, keluaran terhenti atau jika pelan Sumber Terbuka Mergify pernah berubah.
 
 ## Laluan lalai: baris gilir Mergify
 

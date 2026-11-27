@@ -10,11 +10,13 @@
 
 import { saveCallLog } from "@/lib/usageDb";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 import { formatSearchProviderFailure } from "./providerFailure.ts";
 import { fetchWithCheckedRedirects, isRegistryEndpoint } from "./redirectGuard.ts";
+import type { SearchUrlGuard } from "./baseUrl.ts";
 import { HTTP_STATUS } from "../../config/constants.ts";
 import { lockBorrowedSearchKey } from "./borrowedKeyLock.ts";
-import { isSubscriptionQuotaText } from "../../services/quotaTextCooldowns.ts";
+import { isSubscriptionQuotaForStatus } from "../../services/quotaTextCooldowns.ts";
 import type { SearchProviderConfig } from "../../config/searchRegistry.ts";
 import type { SearchResult } from "../search.ts";
 import {
@@ -28,6 +30,9 @@ import {
 export function saveSearchCallLog(entry: Record<string, unknown>): Promise<void> {
   return saveCallLog(entry);
 }
+
+/** A search page is small (SearXNG about 1 MiB); a larger body is a fault or an attack. */
+const SEARCH_MAX_BODY_BYTES = 4 * 1024 * 1024;
 
 export const SEARCH_COOLDOWN_STATUSES = new Set([
   HTTP_STATUS.PAYMENT_REQUIRED,
@@ -48,7 +53,9 @@ export function shouldCoolDownSearchConnection(status: number, errorText: string
   if (SEARCH_COOLDOWN_STATUSES.has(status)) return true;
   const lower = errorText.toLowerCase();
   if (SEARCH_CREDIT_EXHAUSTION_PHRASES.some((phrase) => lower.includes(phrase))) return true;
-  return isSubscriptionQuotaText(lower);
+  // A 400 can quote the caller's query back: plan/usage-limit wording counts on 400
+  // only with a structured quota code (same status contract as LLM fallback).
+  return isSubscriptionQuotaForStatus(status, null, errorText);
 }
 
 /** Post-dispatch state cleanup shared by JSON and SSE search providers. */
@@ -199,6 +206,8 @@ export interface ExecuteProviderFetchParams {
   config: SearchProviderConfig;
   url: string;
   init: RequestInit;
+  /** `public-only` when the base URL came from the caller (searchBaseUrlGuard). */
+  guard?: SearchUrlGuard;
   controller: AbortController;
   timer: ReturnType<typeof setTimeout>;
   query: string;
@@ -273,13 +282,14 @@ export async function executeProviderFetch(
         { ...init, signal: controller.signal },
         config.id,
         // The fixed registry origin keeps the pooled dispatcher on the first hop.
-        !isRegistryEndpoint(url, config.baseUrl)
+        !isRegistryEndpoint(url, config.baseUrl),
+        { guard: p.guard }
       )
     );
-    clearTimeout(timer);
-
+    // The timer also bounds the body read; the catch below clears it on failure.
     if (!response.ok) {
-      const errorText = await response.text();
+      const errorText = await readResponseTextWithinCap(response, SEARCH_MAX_BODY_BYTES);
+      clearTimeout(timer);
       if (log) {
         log.error("SEARCH", `${config.id} error ${response.status}: ${errorText.slice(0, 200)}`);
       }
@@ -316,7 +326,8 @@ export async function executeProviderFetch(
       };
     }
 
-    const data = await response.json();
+    const data = JSON.parse(await readResponseTextWithinCap(response, SEARCH_MAX_BODY_BYTES));
+    clearTimeout(timer);
     const normalized = normalize(config.id, data, query, searchType);
     const results = normalized.results.slice(0, maxResults);
     const duration = Date.now() - startTime;

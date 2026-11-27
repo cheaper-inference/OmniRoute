@@ -1,9 +1,11 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
+import { Alert } from "@omniroute/ui-kit/alert";
 
 import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Collapsible from "@/shared/components/Collapsible";
 import { Card, Button, Select, Badge } from "@/shared/components";
 import Input from "@/shared/components/Input";
@@ -218,13 +220,13 @@ function TestBenchContent() {
   return (
     <div className="space-y-5 min-w-0">
       {/* Info Banner */}
-      <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-primary/5 border border-primary/10 text-sm text-text-muted">
-        <Icon name="info" size={20} className="text-primary mt-0.5" />
-        <div>
-          <p className="font-medium text-text-main mb-0.5">{t("compatibilityTester")}</p>
-          <p>{t("testBenchDescription")}</p>
-        </div>
-      </div>
+      <Alert
+        variant="info"
+        dismissible={false}
+        icon={<Icon name="info" size={18} />}
+        title={t("compatibilityTester")}
+        description={t("testBenchDescription")}
+      />
 
       {/* Controls */}
       <Card>
@@ -291,7 +293,9 @@ function TestBenchContent() {
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
-                <h3 className="text-sm font-semibold text-text-main">{t("compatibilityReport")}</h3>
+                <h3 className="ci-heading" data-size="sm">
+                  {t("compatibilityReport")}
+                </h3>
                 <Badge
                   variant={
                     compatibility >= 80 ? "success" : compatibility >= 50 ? "warning" : "error"
@@ -310,13 +314,13 @@ function TestBenchContent() {
                 </span>
               </div>
             </div>
-            {/* Progress bar */}
-            <div className="w-full h-2 bg-bg-subtle rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-success to-success rounded-full transition-all duration-500"
-                style={{ width: `${compatibility}%` }}
-              />
-            </div>
+            <Progress
+              aria-label={t("compatibilityReport")}
+              aria-valuetext={`${compatibility}%`}
+              value={compatibility}
+              tone="success"
+              animate={false}
+            />
           </div>
         </Card>
       )}
@@ -367,7 +371,7 @@ function TestBenchContent() {
                       <p className="text-sm font-medium text-text-main">
                         {scenarioLabels[scenario.id] || scenario.id}
                       </p>
-                      <p className="text-[10px] text-text-muted uppercase">
+                      <p className="ci-eyebrow" data-size="3xs">
                         {srcMeta.label} →{" "}
                         {providerOptions.find((o) => o.value === provider)?.label || provider}
                       </p>

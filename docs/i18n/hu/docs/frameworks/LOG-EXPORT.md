@@ -195,144 +195,170 @@ a visszaadott mezőleírók alapján jelenik meg, így egy új célhelyhez nem s
 
 ---
 
-## 4. BigQuery-célhely
+## 4. BigQuery-cél
 
 Konfigurációs kulcsok (`type: "bigquery"`):
 
-| Kulcs                | Megjegyzések                                                                             |
-| -------------------- | ---------------------------------------------------------------------------------------- |
-| `projectId`          | Az adatkészletet tartalmazó GCP-projekt                                                  |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                          |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                          |
-| `location`           | Csak az adatkészlet létrehozásakor használatos (alapértelmezés: `EU`)                    |
-| `serviceAccountJson` | Szolgáltatásfiók-kulcs. Titkos adat: tároláskor titkosított, soha nem kerül visszaadásra |
-| `autoCreate`         | Az adatkészlet és a tábla létrehozása az első exportáláskor (alapértelmezés: `true`)     |
+| Kulcs                | Megjegyzések                                                                                                                                    |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | Az adatkészletet tartalmazó GCP-projekt                                                                                                         |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                                                 |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                                                 |
+| `location`           | Csak akkor használatos, ha létre kell hozni az adatkészletet (alapértelmezés: `EU`)                                                             |
+| `serviceAccountJson` | Szolgáltatásfiók-kulcs. Titkos: nyugalmi állapotban titkosítva, soha nem kerül visszaadásra                                                     |
+| `autoCreate`         | Hiányzó adatkészlet/tábla létrehozása; a null értéket engedélyező használati bizonyíték oszlopok feltételes hozzáadása (alapértelmezés: `true`) |
 
-A szolgáltatásfióknak `bigquery.tables.updateData` jogosultságra van szüksége a céltáblán, továbbá
-`bigquery.datasets.create` / `bigquery.tables.create` jogosultságra, ha az `autoCreate` be van kapcsolva.
+A szolgáltatásfióknak `bigquery.tables.updateData` jogosultságra van szüksége a célként megadott
+táblán, továbbá `bigquery.datasets.create` / `bigquery.tables.create` jogosultságra, ha az
+`autoCreate` engedélyezve van. Egy meglévő tábla frissítéséhez a két null értéket engedélyező
+használati bizonyíték mező hozzáadásakor a `bigquery.tables.update` jogosultság is szükséges.
+Hiányzó jogosultság esetén az export sikertelen lesz, és a kurzor nem lép tovább.
 
-A konfigurált köteg **kurzoregység**, nem HTTP-egység: a `send()` legfeljebb 500 soros insertAll
-hívásokra bontja, így egy nagy `batch_size` sem lépheti túl a BigQuery kérelmenkénti 10 MB-os korlátját.
-Az átmeneti állapotkódok (408/429/500/502/503/504) esetén legfeljebb három újrapróbálkozás történik exponenciálisan
-növekvő várakozási idővel, ugyanazokat az insertIds értékeket használva; a hitelesítési és sémahibák már az első kísérletnél kivételt váltanak ki,
-ahelyett, hogy feleslegesen folytatódna a futás.
+Egy konfigurált köteg egy **kurzoregység**, nem pedig egy HTTP-egység: a `send()` legfeljebb 500
+sort tartalmazó insertAll-hívásokra bontja, így a nagy `batch_size` nem lépheti túl a BigQuery
+10 MB-os kéréskorlátját. Az átmeneti állapotok (408/429/500/502/503/504) legfeljebb háromszor
+újrapróbálkozhatók exponenciális visszalépéssel, ugyanazon insertIds használatával; a hitelesítési
+és sémahibák már az első kísérletkor kivételt váltanak ki, a futtatás felesleges terhelése nélkül.
 
-A néhány pillanattal korábban létrehozott tábla még nem látható a streamelési végpont számára, amely
-néhány másodpercig 404-es választ ad. Ilyen 404-es válasz esetén történik újrapróbálkozás, de **csak akkor, ha a táblát ez a futás hozta létre** —
-egy valóban hiányzó tábla továbbra is azonnali hibát okoz. Fontos, hogy ha egy táblát nemrég törölt néven
-hoz létre újra, a BigQuery több percig elutasítja a streamelt beszúrásokat; ez a
-törlés, majd újralétrehozás sajátossága, ezért egy tábla törlése és ismételt hozzáadása helyett inkább használjon új táblanevet.
+A néhány pillanattal korábban létrehozott tábla még nem látható a streaming végpont számára, amely
+néhány másodpercig 404-es választ ad. Ezt a 404-et újrapróbálja a rendszer, de **csak akkor, ha
+ez a futtatás hozta létre a táblát** — egy valóban hiányzó tábla esetén a művelet azonnal meghiúsul.
+Ne feledd, hogy egy nemrég törölt tábla nevének újbóli létrehozásakor a BigQuery több percre
+megtagadhatja a streaming beszúrásokat; ez a törlés, majd újbóli létrehozás sajátossága, ezért
+előnyösebb új táblanevet használni a tábla törlése és újbóli hozzáadása helyett.
 
-**A részleges hiba HTTP 200 válaszként érkezik, nem üres `insertErrors[]` mezővel.** Ezt a rendszer
-hibának tekinti, és kivételt vált ki, ami megakadályozza, hogy a kurzor túllépjen azokon a sorokon, amelyeket a BigQuery soha nem
-fogadott el; ezt a viselkedést a `tests/unit/log-export-bigquery.test.ts` rögzíti.
+**A részleges hiba HTTP 200-as válaszként érkezik nem üres `insertErrors[]` értékkel.** Ezt a
+rendszer hibaként kezeli és kivételt vált ki, így a kurzor nem lép túl azokon a sorokon, amelyeket
+a BigQuery nem fogadott el; a `tests/unit/log-export-bigquery.test.ts` rögzíti ezt a viselkedést.
 
-Az adatátvitel egyszerű REST-en keresztül történik — egy saját aláírású RS256-állítás hozzáférési tokenre cserélődik a
-`https://oauth2.googleapis.com/token` címen, majd a sorok a `tabledata.insertAll` végpontra kerülnek. Nem kerül be Google SDK
-függőségként. A hozzáférési tokeneket a rendszer folyamaton belül, (szolgáltatásfiók, hatókör) páronként gyorsítótárazza.
+Az átvitel egyszerű REST — egy önaláírt RS256-assertion hozzáférési tokenre váltódik a
+`https://oauth2.googleapis.com/token` címen, majd a sorok a `tabledata.insertAll` végpontra
+kerülnek. Google SDK nem kerül behúzásra. A hozzáférési tokenek folyamaton belül,
+szolgáltatásfiókonként és hatókörönként gyorsítótárazódnak.
 
-A létrehozott tábla a Naplók lap minden mezőjéhez egy oszlopot tartalmaz, kiegészítve az `exported_at` oszloppal, és az elrendezése
-a hívásnaplók tényleges lekérdezési módjához igazodik:
+A létrehozott tábla a Logs lap minden mezőjéhez egy oszlopot, valamint egy `exported_at` oszlopot
+tartalmaz, és a tényleges lekérdezési módhoz igazított elrendezésű:
 
-- **Napi particionálás a `timestamp` alapján**, így a dátummal korlátozott lekérdezés csak az érintett napokat vizsgálja.
-- **Klaszterezés az `api_key_name`, `provider`, `model`, `status` alapján** (ebben a sorrendben), így az
-  indítóra, a célra vagy a sikertelenségre történő szűrés kizárja a nem releváns blokkokat az egyes partíciókon belül. A BigQuery
-  legfeljebb négy klaszterezési oszlopot engedélyez, és a sorrend számít: a kizárólag `api_key_name` szerinti szűrés
-  kizár blokkokat, a kizárólag `status` szerinti szűrés nem.
-- **Opcionális partíciómegőrzés** a `partitionExpirationDays` segítségével (a 0 mindent megőriz), amely
-  a tábla létrehozásakor kerül alkalmazásra.
+- **A `timestamp` alapján napokra particionált**, így a dátum szerint korlátozott lekérdezés csak
+  az adott napokat olvassa be.
+- **Az `api_key_name`, `provider`, `model`, `status` szerint fürtözött** (ebben a sorrendben), így
+  a futtató személy, a célhely vagy a sikertelenség szerinti szűrés blokkokat hagy ki az egyes
+  partíciókon belül. A BigQuery legfeljebb négy fürtözési oszlopot engedélyez, és a sorrend számít:
+  az önmagában az `api_key_name` szerinti szűrés blokkokat hagy ki, az önmagában a `status`
+  szerinti szűrés nem.
+- **Opcionális partíciómegőrzés** a `partitionExpirationDays` használatával (a 0 mindent megőriz),
+  amely a tábla létrehozásakor kerül alkalmazásra.
 
-Mindkét beállítás a létrehozáskor lép érvénybe. Egy meglévő tábla megtartja a korábbi elrendezését, ezért
-ha ezeket szeretné alkalmazni, a célhelyet egy új táblaazonosítóra irányítsa.
+Mindkét beállítás a létrehozáskor érvényesül. Egy meglévő tábla megtartja a már meglévő
+elrendezését, ezért ha alkalmazni szeretnéd ezeket, irányítsd a célt egy új táblaazonosítóra.
 
-A `tests/unit/log-export-bigquery.test.ts` ellenőrzi, hogy a leképező és a táblaséma összhangban maradjon,
-így egy új hívásnapló-oszlop nem veszhet el észrevétlenül az exportálás során.
+A `tests/unit/log-export-bigquery.test.ts` ellenőrzi, hogy a leképező és a tábla sémája
+összhangban maradjon, így egy új hívásnapló-oszlop nem maradhat észrevétlenül ki az export során.
 
-A kötegek darabolása **mind** a sorok száma, mind a szerializált méret alapján történik. Önmagában a sorszám nem elegendő,
-ha az export az adattartalmakat is tartalmazza: 500, promptokat tartalmazó sor több tíz megabájt is lehet, az insertAll pedig
-elutasítja a 10 MB-nál nagyobb kérelmeket. A darabok 500 sornál vagy 9 MB-nál zárulnak le, attól függően, hogy melyik korlátot érik el előbb.
+A kötegek felosztása **a sorok száma és a szerializált bájtok száma alapján egyaránt** történik.
+A sorok száma önmagában nem elegendő, ha a hasznos terhelések is exportálásra kerülnek: a
+promptokat tartalmazó 500 sor több tíz megabájtot is kitehet, az insertAll pedig elutasítja a
+10 MB-nál nagyobb kéréseket. A darabok 500 sornál vagy 9 MB-nál záródnak le — attól függően,
+melyik következik be előbb.
 
 ---
 
-## 5. OTLP/HTTP nyomkövetési célhely
+## 5. OTLP/HTTP-traces célállomás
 
-A konfiguráció a `type: "otlp-http"` értéket használja. Ez a tárolt hívásnaplók ütemezett,
-kurzorral követett exportálása, nem pedig az
-`open-sse/services/routing/otel.ts` fájlban található, élő útválasztási eseményeket legjobb igyekezet szerint fogadó célpont. Nem olvassa és nem módosítja annak környezeti
-változóit, időzítőit vagy puffereit. Mindkettő engedélyezése két egymástól független spantípust eredményezhet;
-e hívásnapló-spanek megkülönböztetéséhez használja az `omniroute.log-export` instrumentációs hatókört.
+A konfiguráció a `type: "otlp-http"` beállítást használja. Ez a megőrzött hívásnaplók ütemezett,
+kurzorral támogatott exportálása, nem pedig a
+`open-sse/services/routing/otel.ts` fájlban található, legjobb erőfeszítésen alapuló élő
+útválasztási események nyelője. Nem olvassa és nem módosítja a nyelő környezeti
+változóit, időzítőit vagy puffereit. Mindkettő engedélyezése két egymástól független
+span-típust eredményezhet; a `omniroute.log-export` műszerezési hatókörrel különböztesse meg
+ezeket a hívásnapló-spánokat.
 
-| Kulcs                    | Alapértelmezés / rendeltetés                                                              |
-| ------------------------ | ----------------------------------------------------------------------------------------- |
-| `endpoint`               | Kötelező teljes HTTP(S) nyomkövetési URL; nem egészül ki `/v1/traces` utótaggal           |
-| `headers`                | Opcionális `Name: value` sorok vagy karakterláncokat tartalmazó JSON-objektum; titkosítva |
-| `requestHeaderAllowlist` | Üres (kikapcsolva); spanattribútumként rögzítendő kliensfejlécnevek/-előtagok             |
-| `serviceName`            | `omniroute`; a `service.name` erőforrás-attribútum                                        |
-| `langfuseMapping`        | `false`; Langfuse-generálási, -munkamenet- és -felhasználói attribútumokat ad hozzá       |
-| `identity`               | `pseudonymous`, `keyName` vagy `none`                                                     |
-| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                   |
-| `timeoutMs`              | `30000` HTTP-próbálkozásonként                                                            |
-| `environment`            | Nincs beállítva; opcionális `langfuse.environment`                                        |
+| Kulcs                    | Alapértelmezett / cél                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------ |
+| `endpoint`               | Kötelező teljes HTTP(S)-traces URL; a `/v1/traces` utótag nem kerül hozzáadásra      |
+| `headers`                | Opcionális `Name: value` sorok vagy karakterláncokból álló JSON-objektum; titkosítva |
+| `requestHeaderAllowlist` | Üres (kikapcsolva); rögzítendő kliensfejléc-nevek/-előtagok span-attribútumokként    |
+| `serviceName`            | `omniroute`; a `service.name` erőforrásattribútuma                                   |
+| `langfuseMapping`        | `false`; Langfuse generation/session/user attribútumokat ad hozzá                    |
+| `identity`               | `pseudonymous`, `keyName` vagy `none`                                                |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                              |
+| `timeoutMs`              | `30000` HTTP-kísérletenként                                                          |
+| `environment`            | Nincs beállítva; opcionális `langfuse.environment`                                   |
 
-Az általános irányítópult megjeleníti ezeket a mezőket. A `paths` az API-n keresztül tömböt, illetve szövegterületen
-újsorokkal/vesszőkkel elválasztott pontos útvonalakat fogad el. A beágyazásokhoz, újrarangsoroláshoz és más műveletekhez tartozó útvonalakat
-kihagyja, kivéve, ha kifejezetten engedélyezve vannak. A kihagyott sorok is előreléptetik a kurzort; a meglévő
-futtató `exported`/`exportedTotal` számlálói a feldolgozott forrássorokat számolják, a kiszűrt
-sorokat is beleértve, nem pedig az elfogadott spaneket. A szűrés a gyermekfolyamatban történik, annak
-IPC-/kurzorszerződésének módosítása nélkül.
+Az általános irányítópult ezeket a mezőket jeleníti meg. A `paths` API-tömböt vagy
+pontos útvonalakat tartalmazó, újsorokkal/vesszőkkel tagolt szövegmezőt fogad el. Az
+embeddings-, rerank- és egyéb útvonalak kimaradnak, kivéve, ha kifejezetten engedélyezve
+vannak. A kihagyott sorok továbbra is előreléptetik a kurzort; a meglévő futtató
+`exported`/`exportedTotal` számlálói a feldolgozott forrássorokat számolják, beleértve a
+szűrt sorokat is, nem pedig az elfogadott spaneket. A szűrés a gyermekfolyamatban történik,
+az IPC-/kurzorszerződés módosítása nélkül.
 
-Az URL-ellenőrzés az
-`src/shared/network/outboundUrlGuard.ts` fájl adatbázis-független `parseAndValidateNonMetadataUrl` segédfüggvényét használja: a
-`block-metadata` házirendet. Ugyanazokat a feltétel nélküli metaadat-/protokoll-/beágyazott-hitelesítőadat-ellenőrzéseket végzi el, mint a webhook-ellenőrző
-engedélyezett privát URL-ek mellett, de szándékosan engedélyezi a localhost/LAN célokat globális
-funkciókapcsolós felülbírálás nélkül. Ez lehetővé teszi a saját üzemeltetésű Langfuse-, Phoenix-, Tempo- és Collector-végpontok
-használatát, beleértve a privát HTTP-végpontokat is. A felhőmetaadat-kiszolgálók mindig tiltva vannak.
-Az átirányításokat nem követi, így a gyűjtő nem irányíthatja át a hitelesítő adatokat másik kiszolgálóra.
-A meglévő lexikális URL-védelemhez hasonlóan ez sem rögzíti a DNS-feloldás eredményét; csak
-az üzemeltető által ellenőrzött kiszolgálókat konfiguráljon. Részesítse előnyben a HTTPS-t, ha a végpont nem megbízható hálózaton található.
+Az URL-érvényesítés az adatbázis használata nélküli
+`parseAndValidateNonMetadataUrl` segédet használja a
+`src/shared/network/outboundUrlGuard.ts` fájlból: a `block-metadata` szabályzatot. Ugyanazokkal
+a feltétel nélküli metaadat-/protokoll-/beágyazott hitelesítőadat-ellenőrzésekkel
+rendelkezik, mint a webhook-érvényesítő, de a privát URL-ek engedélyezve vannak, és
+szándékosan engedélyezi a localhost-/LAN-célpontokat globális funkciójelző-felülbírálás
+nélkül. Ez lehetővé teszi az önállóan üzemeltetett Langfuse-, Phoenix-, Tempo- és Collector-
+végpontok használatát, beleértve a privát HTTP-végpontokat is. A felügyelt metaadat-hosztok
+mindig blokkolva vannak. Az átirányításokat a rendszer nem követi, ezért egy collector nem
+irányíthatja át a hitelesítő adatokat másik hosztra. A meglévő lexikális URL-védelemhez
+hasonlóan ez sem rögzíti a DNS-feloldást; csak az üzemeltető által felügyelt hosztokat
+konfigurálja. Ha a végpont nem megbízható hálózaton található, részesítse előnyben a HTTPS-t.
 
-### Adattartalom és kézbesítés
+### Hasznos teher és kézbesítés
 
-Az OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) engedélyezett
-soronként egy CLIENT spant továbbít, amelynek neve a kérés pontos útvonala. Az útvonalalapú elnevezés megkülönbözteti
-a Chat Completions, Responses és Messages műveleteket anélkül, hogy modell- vagy azonosítóadatokat ágyazna a
-span nevébe. Az erőforrás-attribútumok közé tartozik a `service.name` és a csomag `service.version` értéke.
+Az OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) egy
+CLIENT spant továbbít minden engedélyezett sorhoz, amelyet a pontos kérési útvonaláról
+nevez el. Az útvonal alapú elnevezés megkülönbözteti a Chat Completions, Responses és
+Messages műveleteket anélkül, hogy modell- vagy identitásadatokat ágyazna a span nevébe.
+Az erőforrásattribútumok között szerepel a `service.name` és a csomag
+`service.version` értéke.
 
-A normál csevegési próbálkozásnaplózó (`open-sse/handlers/chatCore/attemptLogging.ts`) befejezéskor írja be
-a `duration = Date.now() - startTime` értéket, és nem ad meg időbélyeget;
-a `src/lib/usage/callLogs.ts` fájlban található `saveCallLogOperation` alapértelmezés szerint az írás
-(befejezés) időpontját használja időbélyegként. Az exportálás ezért a befejezést a sor időbélyegére, a kezdetet pedig a befejezés mínusz időtartam
-értékre állítja (ezredmásodpercben, decimális nanoszekundumra átszámítva). A hívó által megadott múltbeli időbélyegek
-szintén befejezési időpontként maradnak meg; nincs soronkénti jelző a kezdés és a befejezés megkülönböztetésére.
-A null időtartamból nulla lesz. Az érvénytelen/hiányzó időbélyegek nem determinisztikus spanek létrehozása helyett
-a teljes köteg hibáját okozzák. A `ttftMs` lehet null, és az `omniroute.ttft_ms` attribútumra képeződik le.
+A normál csevegési kísérletnaplózó (`open-sse/handlers/chatCore/attemptLogging.ts`) a
+befejezéskor a `duration = Date.now() - startTime` értéket írja ki, és nem ad meg
+időbélyeget; a `src/lib/usage/callLogs.ts` fájlban található `saveCallLogOperation` az
+időbélyeget alapértelmezés szerint az írás (befejezés) idejére állítja. Az export ezért a
+sor időbélyegét használja végpontként, a kezdőpont pedig a végpont mínusz az időtartam
+(milliszekundumban, decimális nanoszekundumra átszámítva). A hívó által megadott korábbi
+időbélyegek szintén végpontként maradnak meg; soronként nincs kezdés/befejezés szerinti
+megkülönböztető jelző. A null értékű időtartam nullává válik. Az érvénytelen vagy hiányzó
+időbélyegek meghiúsítják a köteget, ahelyett hogy nem determinisztikus spaneket hoznának
+létre. A `ttftMs` nullable, és az `omniroute.ttft_ms` értékre képeződik le.
 
-Az attribútumok közé tartozik a `gen_ai.operation.name="chat"`, a szolgáltató, a kért/válaszmodell,
-a bemeneti/kimeneti tokenek, az opcionális gyorsítótár-olvasási/-létrehozási/gondolkodási tokenek, a HTTP-állapot,
-a kombináció, a gyorsítótár forrása, a munkamenetcímke és a korrelációs azonosító. Az egész számú OTLP-értékek és az időbélyegek
-decimális karakterláncok; a karakterláncok, logikai értékek és törtszámok a natív OTLP-értékváltozataikat
-használják. A hibás spanek ERROR állapotot és megtisztított állapotüzenetet kapnak. A kanonikus
-rekord nem tartalmaz upstream kiszolgáló-URL-t, ezért a `server.address` kimarad, ahelyett, hogy tévesen
-a gyűjtőt azonosítaná modellszerverként. A költséget nem exportálja.
+Az attribútumok tartalmazzák a `gen_ai.operation.name="chat"` értéket, a szolgáltatót, a
+kért/válaszmodell nevét, a bemeneti/kimeneti tokeneket, az opcionális gyorsítótárból
+olvasott/létrehozott és következtetési tokeneket, a HTTP-állapotot, a kombinációt, a
+gyorsítótár forrását, a munkamenetcímkét és a korrelációs azonosítót. Az egész típusú OTLP-
+értékek és időbélyegek decimális karakterláncok; a karakterláncok, logikai értékek és
+törtértékek a natív OTLP-értékváltozataikat használják. A hibás spanek ERROR-állapotúak, és
+megtisztított állapotüzenetet tartalmaznak. A kanonikus rekord nem tartalmaz upstream hoszt-
+URL-t, ezért a `server.address` elmarad, ahelyett hogy helytelenül a collectort azonosítaná
+modellhosztként. A költség nem kerül exportálásra.
 
-Csak az `includeBodies=true` tölti be a tartalmat. A `langfuseMapping=false` beállítás mellett
-a `gen_ai.input.messages` / `gen_ai.output.messages` az OmniRoute által tárolt, megtisztított kérés-/választörzs
-JSON-t továbbítja (ha értelmezhető, kanonizálva), nem pedig átalakított, szemantikai konvenciók szerinti
-üzenettömböt. A csonkolt/nem JSON-törzsek nyers szövegként maradnak meg. A `langfuseMapping=true` beállítás mellett
-a törzsek csak `langfuse.observation.input` / `langfuse.observation.output` formájában kerülnek ki;
-a `gen_ai.*.messages` attribútumok kimaradnak, így minden törzs csak egyszer kerül elküldésre. Mindkét mód
-a meglévő tartalombetöltési folyamatból örökli a `maxBodyBytes` értékét;
+Csak az `includeBodies=true` tölti be a tartalmat. A `langfuseMapping=false` esetén a
+`gen_ai.input.messages` / `gen_ai.output.messages` attribútumok a
+OmniRoute által tárolt, megtisztított kérés-/választörzs JSON-adatait tartalmazzák
+(értelmezhető formátum esetén kanonikalizálva), nem pedig újraformázott semconv
+üzenettömböt. A csonkolt/nem JSON-formátumú törzsek nyers szövegként maradnak meg. A
+`langfuseMapping=true` esetén a törzsek csak `langfuse.observation.input` /
+`langfuse.observation.output` attribútumként kerülnek kibocsátásra; a
+`gen_ai.*.messages` attribútumok kimaradnak, így minden törzs csak egyszer kerül
+elküldésre. Mindkét mód örökli a meglévő betöltési útvonal `maxBodyBytes` értékét;
 az `omniroute.bodies_truncated=true` jelzi a csonkolást.
-Ez a célhely nem ad hozzá további folyamatpillanatképeket vagy megtisztítás nélküli artefaktumolvasásokat;
-az opcionális kérésfejléc-rögzítés az alább ismertetett, meglévő betöltött klienspillanatképet használja.
-Törzsek exportálásakor használjon perces ütemezést, például `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`,
-ahelyett, hogy óránkénti feldolgozásra váró hátralékot halmozna fel.
+Ez a célállomás nem ad hozzá további folyamatpipeline-pillanatképeket vagy nem
+megtisztított artefaktum-olvasásokat; az opcionális kérésfejléc-rögzítés az alább ismertetett
+meglévő betöltött klienspillanatképet használja. Törzsek exportálásakor óránkénti
+visszalék-felhalmozás helyett használjon perces gyakoriságot, például
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`.
 
 ### Opcionális klienskérés-fejlécek
 
-A fejléc-rögzítés **alapértelmezés szerint ki van kapcsolva**. Állítsa be a `requestHeaderAllowlist` értékét a célhely konfigurációjában,
-és engedélyezze a **Promptok és válaszok exportálása** lehetőséget (`includeBodies: true` a célhelyen).
-Az engedélyezési lista az API-n keresztül tömböt, illetve szövegterületen újsorral/vesszővel elválasztott neveket fogad el:
+A fejlécrögzítés **alapértelmezés szerint ki van kapcsolva**. Állítsa be a
+`requestHeaderAllowlist` értékét a célállomás konfigurációjában, és engedélyezze a
+**Kérések és válaszok exportálása** lehetőséget (`includeBodies: true` a célállomáson).
+Az engedélyezési lista API-tömböt vagy újsorokkal/vesszőkkel elválasztott neveket tartalmazó
+szövegmezőt fogad el:
 
 ```json
 {
@@ -340,77 +366,79 @@ Az engedélyezési lista az API-n keresztül tömböt, illetve szövegterületen
 }
 ```
 
-A nevek egyezése pontos, de nem különbözteti meg a kis- és nagybetűket, kivéve, ha egyetlen záró `*` egy nem üres
-fejlécnév-előtagot jelöl ki. Az önálló `*`, a beágyazott helyettesítő karakterek és az érvénytelen HTTP-fejlécnevek elutasításra kerülnek.
-Legfeljebb 64 kiválasztó adható meg, mindegyik legfeljebb 256 ASCII bájtos névvel/előtaggal.
-Ez a beállítás független a `headers` beállítástól, amely az exportálót hitelesíti a gyűjtő felé.
+A nevek kis- és nagybetűkre nem érzékenyek, és pontos egyezést igényelnek, kivéve ha egyetlen záró `*` nem üres
+headernév-előtagot választ ki. A puszta `*`, a beágyazott helyettesítő karakterek és az érvénytelen HTTP-headernevek
+elutasításra kerülnek. Legfeljebb 64 választó adható meg, amelyek mindegyikének neve/előtagja legfeljebb 256 ASCII bájt.
+Ez a beállítás különálló a `headers` beállítástól, amely az exportert hitelesíti a gyűjtőnél.
 
-A rögzítés kizárólag a `pipeline_client_request` értékét olvassa, amelyet a mentett részletes feldolgozási lánc
-`clientRawRequest` (vagy a korábbi `clientRequest`) mezője tölt ki. Soha nem használja helyette a szolgáltatónak küldött kérés fejléceit.
-A részletes feldolgozásilánc-naplózásnak engedélyezve kellett lennie a kérés rögzítésekor. Ha az
-`includeBodies` le van tiltva, vagy az ügyfélpillanatkép JSON-ja hiányzik, sérült vagy csonkolt, nem kerülnek kibocsátásra
-fejlécattribútumok. A `maxBodyBytes` növelése megakadályozhatja a pillanatkép exportáláskori csonkolását;
-a soha el nem mentett részleteket azonban nem állíthatja vissza. Az 1 MiB-nál nagyobb vagy több mint
-256 fejlécbejegyzést tartalmazó pillanatképet a rendszer figyelmen kívül hagyja. A meglévő prompt-/válaszexport a
-fejlécrögzítés mellett is engedélyezve marad; az engedélyezési lista nem biztosít kizárólag fejléceket betöltő módot.
+A rögzítés csak a `pipeline_client_request` értékét olvassa, amelyet a mentett részletes pipeline
+`clientRawRequest` (vagy a régi `clientRequest`) mezője tölt ki. Soha nem tér vissza a szolgáltatói kérés fejléceihez.
+A részletes pipeline-naplózást engedélyezni kellett a kérés rögzítésekor. Letiltott
+`includeBodies` esetén, illetve hiányzó, sérült vagy csonkolt kliens-pillanatkép JSON esetén a rendszer nem bocsát ki
+header-attribútumokat. A `maxBodyBytes` növelése elkerülheti az exportáláskor történő pillanatkép-csonkolást;
+azt a részletességet azonban nem tudja helyreállítani, amelyet soha nem mentettek. Az 1 MiB-nál nagyobb vagy
+256-nál több headerbejegyzést tartalmazó pillanatképeket a rendszer figyelmen kívül hagyja. A meglévő prompt-/válaszexport
+a header-rögzítéssel párhuzamosan továbbra is engedélyezve marad; az engedélyezési lista nem biztosít csak fejléceket
+betöltő módot.
 
-A kiválasztott értékek `http.request.header.<full lowercase header name>` nevű OTLP-karakterlánctömbökké válnak,
-még egyetlen karakterlánc esetén is. Például az `X-OmniRoute-Meta-Team: example-team` eredménye
-`http.request.header.x-omniroute-meta-team`, az alábbi értékkel:
+A kiválasztott értékek `http.request.header.<full lowercase header name>` OTLP-stringtömbökké válnak,
+egyetlen string esetén is. Például az `X-OmniRoute-Meta-Team: example-team` értékből
+`http.request.header.x-omniroute-meta-team` lesz, a következővel:
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
-A teljes előtag megmarad: ezek hagyományos fejlécek, üzleti mezők értelmezése vagy
-`omniroute.metadata.*` / Langfuse-metaadatokká alakítás nélkül. A `langfuseMapping` nem módosítja a fejlécek
-szemantikáját. Egy kiválasztott, egyetlen értékű `User-Agent` a szabványos skalár
-`user_agent.original` attribútumot is beállítja. Az egy értéken belüli vesszők nem bontják fel az értéket. A kis- és nagybetűs változatok a mentett
-bejegyzések sorrendjében egyesülnek; bármely érvénytelen változat az adott fejléc teljes kihagyását eredményezi. Az attribútumok sorrendjét a kisbetűs név határozza meg.
+A teljes előtag megmarad: ezek közönséges headerek, üzleti mezők feldolgozása, illetve
+`omniroute.metadata.*` / Langfuse-metaadatokká alakítás nélkül. A `langfuseMapping` nem módosítja a headerek
+szemantikáját. Egy kiválasztott, egyértékű `User-Agent` a szabványos `user_agent.original` skalárt is beállítja.
+Az egyetlen értéken belüli vesszők nem kerülnek felbontásra. A kis- és nagybetűs változatok a mentett bejegyzések
+sorrendjében egyesülnek; ha bármely változat érvénytelen, a teljes header kimarad. Az attribútumok kisbetűs név szerint
+vannak rendezve.
 
-Az Authorization, Proxy-Authorization, Cookie, Set-Cookie és API-kulcsot tartalmazó fejlécek, az
-auth/token/secret/password/credential jelölőket tartalmazó nevek, valamint a belső átjáró hitelesítő adatai mindig
-ki vannak zárva, még akkor is, ha ki vannak választva, vagy a tárolóban részlegesen maszkolva vannak. Az ismert hitelesítőadat-minták felismerése
-a közös hitelesítőadat-felismerőt használja; a kitakarási jelölők kimaradnak, nem kerülnek biztonságos értékként exportálásra.
-Csak karakterláncok és nem üres karakterlánctömbök fogadhatók el; számok vagy objektumok nem kerülnek típuskonverzióra.
-Az érvénytelen neveket, prototípuskulcsokat, vezérlőkaraktereket (a vízszintes tabulátor kivételével) és hibás Unicode-ot
-a rendszer figyelmen kívül hagyja anélkül, hogy a köteg meghiúsulna, vagy tartalmuk megjelenne a hibákban.
+Az Authorization, Proxy-Authorization, Cookie, Set-Cookie, API-kulcsot tartalmazó headerek, az auth/token/secret/password/credential
+jelöléseket tartalmazó nevek, valamint a belső átjáró hitelesítő adatai mindig kizárásra kerülnek, még akkor is, ha
+ki lettek választva vagy részben maszkolva vannak a tárolóban. Az ismert hitelesítőadat-minták az osztott hitelesítőadat-detektort
+használják; a kitakarási jelölők kimaradnak, nem kerülnek exportálásra biztonságos értékként.
+Csak stringek és nem üres stringtömbök fogadhatók el; a számok és objektumok nem kerülnek kényszerített átalakításra.
+Az érvénytelen nevek, prototípus-kulcsok, vezérlőkarakterek (a horizontális tabulátor kivételével) és a hibás Unicode
+figyelmen kívül maradnak anélkül, hogy a kötegelés meghiúsulna vagy tartalmuk megjelenne a hibákban.
 
-Minden span legfeljebb 32 fejlécet rögzít, fejlécenként 16 értékkel, értékenként 4096 UTF-8 bájttal,
-és a rögzített fejlécnevekre és -értékekre összesen 16384 UTF-8 bájtos korláttal. A túlméretes/érvénytelen fejlécek
-teljes egészükben kimaradnak, nem csonkolódnak. A kiválasztás az üzemeltető adatvédelmi döntése: a biztonságosnak tűnő nevek
-is tartalmazhatnak személyes adatokat, és ezek a korlátok/felismerők nem alkotnak általános személyesadat-szűrőt.
+Az egyes spanek legfeljebb 32 headert, headerenként 16 értéket, értékenként 4096 UTF-8 bájtot,
+valamint a rögzített headernevek és -értékek összességére 16384 UTF-8 bájtot tartalmazhatnak. A túlméretes/érvénytelen
+headerek teljes egészében kimaradnak, nem lesznek csonkolva. A kiválasztás üzemeltetői adatvédelmi döntés:
+a biztonságosnak tűnő nevek is tartalmazhatnak személyes adatokat, és ezek a korlátok/detektorok nem általános
+PII-tisztító eszközök.
 
 ### Kézbesítési korlátok
 
-A kérések legfeljebb 500 spant és 4 MiB UTF-8 JSON-t tartalmazhatnak, a burkolóstruktúrával együtt.
-A kurzorköteg első kérése előtt minden engedélyezett span mérete ellenőrzésre kerül. Ha egyetlen
-span meghaladja a korlátot, a köteg egyetlen része sem kerül elküldésre, és a művelet a
-`maxBodyBytes` csökkentésére vonatkozó útmutatással meghiúsul; a span nem marad ki csendben. Az előzetes ellenőrzés csak a rekordhivatkozásokat és
-bájtszámokat őrzi meg, minden ideiglenes spant/JSON-t eldob; a spanek korlátozott méretű darabokhoz újra felépülnek
-ahelyett, hogy a köteg második szerializált példánya is a memóriában maradna. HTTP 408/429/5xx, hálózati hibák és időtúllépések esetén legfeljebb
-három kísérlet történik, 250/500 ms-os exponenciális várakozással. A `Retry-After` másodpercértékei vagy HTTP-dátumai
-legfeljebb 5 másodpercre növelhetik a várakozást. Más állapotkódok azonnali hibát eredményeznek. Az OTLP 2xx részleges elutasítása szintén kivételt vált ki
-az elveszett span nyugtázása helyett; az üres vagy érvényes JSON-nyugták elfogadhatók,
-64 KiB-os válaszolvasási korláttal.
+A kérések legfeljebb 500 spant és 4 MiB UTF-8-kódolású JSON-t tartalmazhatnak, a burkolóelemet is beleértve.
+Minden engedélyezett span méretét ellenőrzi a rendszer a kurzorköteg első kérését megelőzően. A korlátnál nagyobb egyedi
+span esetén a köteg egyetlen része sem kerül elküldésre, és a művelet a `maxBodyBytes` csökkentésére vonatkozó
+útmutatással meghiúsul; a span nem kerül csendben eldobásra. Az előzetes ellenőrzés csak rekordhivatkozásokat és
+bájtszámokat tart meg, minden ideiglenes spant/JSON-t eldob; a spanek korlátozott részekre lesznek újra felépítve,
+így nem kell megtartani a köteg második szerializált másolatát. A HTTP 408/429/5xx válaszok, a hálózati hibák és az időtúllépések
+legfeljebb három próbálkozást kapnak, 250/500 ms-os exponenciális visszalépéssel. A `Retry-After` által megadott másodpercek
+vagy HTTP-dátumok legfeljebb 5 másodpercre növelhetik a késleltetést. Más állapotok azonnal hibát okoznak. A 2xx OTLP-részleges
+elutasítás szintén kivételt vált ki ahelyett, hogy nyugtázná az elveszett spant; az üres vagy érvényes JSON-nyugtázásokat
+a rendszer elfogadja, a válasz beolvasása pedig 64 KiB-ban korlátozott.
 
-A hibák csak az exportáló saját tényeit tartalmazzák: HTTP-állapotkódot, újrapróbálkozási osztályt, kísérletszámot és az elküldött spanek
-számát, illetve rögzített szöveget a nyugtázási/hálózati hibákról. A gyűjtő válaszának törzse,
-a részleges siker darabszámai és a válaszfejlécek soha nem kerülnek be a hibákba, naplókba vagy az
-irányítópultra. A sikertelen vagy részlegesen elfogadott köteg nem kerül nyugtázásra: a célhely
-hibás állapotot jelez az adott állapotkóddal, a kurzor az utolsó nyugtázott kötegnél marad, a következő futás pedig
-újraküldi ugyanazokat a sorokat. Az állandó hibát jelző állapotkódok mindaddig hibát okoznak, amíg a gyűjtőt vagy a konfigurációt
-ki nem javítják. A válasz részleteihez használja a gyűjtő saját naplóit. A hívásnapló hibaösszefoglalóira továbbra is
-külön kitakarás vonatkozik.
-A `prepare()` semmit sem hoz létre; a teszt pontosan a `{"resourceSpans":[]}` tartalmat küldi el, és
-jelenti a HTTP-állapotkódot anélkül, hogy hívásnapló-spaneket írna.
+A hibák csak az exporter által kezelt tényeket tartalmazzák: HTTP-állapotot, újrapróbálkozási osztályt, próbálkozások számát
+és az elküldött spanek számát, illetve rögzített nyugtázási/hálózati hibaszöveget. A gyűjtő válaszának törzsét,
+a részleges siker darabszámait és a válasz fejléceit a rendszer soha nem másolja hibákba, naplókba vagy az irányítópultba.
+A sikertelen vagy részben elfogadott köteg nem lesz nyugtázva: a célállomás az adott állapottal Failing állapotot mutat,
+a kurzor az utolsó nyugtázott kötegnél marad, a következő futtatás pedig ugyanazokat a sorokat küldi újra.
+A végleges állapotok mindaddig hibát jeleznek, amíg a gyűjtőt vagy a konfigurációt ki nem javítják.
+A válasz részleteiért használja a gyűjtő saját naplóit. A hívásnapló hibáinak összefoglalói megtartják saját kitakarásukat.
+A `prepare()` semmit nem hoz létre; a Test pontosan a `{"resourceSpans":[]}` törzset küldi el, és a hívásnapló-spanek írása
+nélkül jelenti a HTTP-állapotot.
 
-A nyomkövetési és spanazonosítók a
-`"omniroute.trace\\0" + callLogId`, illetve `"omniroute.span\\0" + callLogId` SHA-256-kivonatának első 32/16 hexadecimális számjegyéből állnak. Az újraküldések
-azonos azonosítókat tartalmaznak. Ez nem jelent deduplikációs garanciát: egyes háttérrendszerek, köztük a Langfuse
-v4 adatfogadása, nem szűrik ki az azonos azonosítójú spanek ismétlődéseit. Egy összeomlás vagy egy darab részleges hibája
-legfeljebb az egyetlen nem nyugtázott kurzorköteg újraküldését okozhatja; ez a teljes köteg megkettőződhet,
-nem csak az utolsó HTTP-darabja. A kurzorköteg méretét ennek a kompromisszumnak a figyelembevételével válassza meg.
+A trace-id-k és span-id-k az SHA-256 első 32/16 hexadecimális számjegyei, a következő bemenetek alapján:
+`"omniroute.trace\\0" + callLogId` és `"omniroute.span\\0" + callLogId`. Az újraküldések azonos id-ket hordoznak.
+Ez nem jelent deduplikációs garanciát: egyes háttérrendszerek, köztük a Langfuse v4 betöltése, nem deduplikálják az azonos id-val
+rendelkező spaneket. Egy összeomlás vagy részleges részhhiba legfeljebb az egyetlen, nem nyugtázott kurzorköteget küldheti újra;
+a teljes köteg duplikálódhat, nem csupán az utolsó HTTP-rész. A kurzorköteg méretét ennek a kompromisszumnak a figyelembevételével
+válassza meg.
 
 ### Langfuse-példa
 
-Saját üzemeltetésű Langfuse-példányhoz állítsa be ezeket a mezőket:
+Önállóan üzemeltetett Langfuse-példányhoz konfigurálja ezeket a mezőket:
 
 ```json
 {
@@ -423,44 +451,44 @@ Saját üzemeltetésű Langfuse-példányhoz állítsa be ezeket a mezőket:
 }
 ```
 
-Az Authorization értékét helyben állítsa elő a szó szerinti `public-key:secret-key`
-karakterlánc Base64-kódolásával (például a `Buffer.from(publicKey + ":" + secretKey).toString("base64")` használatával).
-Ne illesszen valódi hitelesítő adatokat naplókba, képernyőképekbe vagy hibajegyekbe. A leképezés automatikusan
-beállítja az `x-langfuse-ingestion-version: 4` fejlécet; az Authorization értékét továbbra is a `headers` mezőben kell megadni.
-Mind a fejlécek, mind a generált identitássó a meglévő titkosított titkosmező-mechanizmust
-és API-helyőrzőket használja; a `STORAGE_ENCRYPTION_KEY` kötelező.
+Az Authorization értékét helyben állítsa elő a szó szerinti `public-key:secret-key` string Base64-kódolásaként
+(például a `Buffer.from(publicKey + ":" + secretKey).toString("base64")` használatával).
+Ne illesszen be valódi hitelesítő adatokat naplókba, képernyőképekbe vagy issue-kba. A leképezés automatikusan beállítja a
+`x-langfuse-ingestion-version: 4` értéket; az Authorization értékét továbbra is a `headers` mezőben kell megadni.
+Mindkét header, valamint a létrehozott identitássó a meglévő titkosított titkosmező-mechanizmust és API-helyőrzőket használja;
+a `STORAGE_ENCRYPTION_KEY` szükséges.
 
-A leképezés hozzáadja a generálás típusát/modelljét, a használat JSON-formátumú részleteit (bemenet/kimenet/összesen és az elérhető
-gyorsítótárkulcsok), a bemenet/kimenet JSON-pillanatképeit, az ERROR/DEFAULT szintet, a megtisztított állapotüzenetet,
-a nyomkövetés nevét, a munkamenet-azonosítót, az opcionális környezetet és a szűrhető
-`langfuse.observation.metadata.<key>` attribútumot a szolgáltatóhoz, a kért modellhez, az útvonalhoz, a kombinációhoz, a gyorsítótár
-forrásához és az állapothoz. A `langfuse.observation.completion_start_time` ISO 8601 formátumú értéke
-a kezdési idő + TTFT, de csak akkor, ha a TTFT ismert, és az időtartamon belül van. Költségattribútumok nem kerülnek elküldésre.
+A leképezés hozzáadja a generálás típusát/modelljét, a JSON-használat részleteit (bemenet/kimenet/összesen és elérhető
+cache-kulcsok), a JSON-bemenet/-kimenet pillanatképeit, az ERROR/DEFAULT szintet, a
+megtisztított állapotüzenetet, a trace nevét, a munkamenet-azonosítót, valamint az opcionális környezetet és a szűrhető
+`langfuse.observation.metadata.<key>` mezőket a szolgáltató, a kért modell, az útvonal, a kombináció, a cache
+forrása és az állapot számára. A `langfuse.observation.completion_start_time` ISO 8601 formátumú az
+indulás időpontjától + TTFT, de csak akkor, ha a TTFT ismert és az időtartamon belül van. Költségattribútumok nem kerülnek továbbításra.
 
-Az identitásmódok a `langfuse.user.id` attribútumra vonatkoznak:
+Az identitási módok a `langfuse.user.id` értékre vonatkoznak:
 
-- `pseudonymous` (alapértelmezett): az API-kulcs belső azonosítójának HMAC-SHA256 lenyomata, véletlenszerű,
-  célonkénti 32 bájtos sóval. A só létrehozáskor generálódik, ha nincs megadva, titkosítva tárolódik
-  `identitySalt` néven, soha nem kerül visszaadásra, és szerkesztéskor megmarad. A nyers kulcsazonosítók soha
-  nem kerülnek spanattribútumokba. A cél sójának újralétrehozása/rotálása megváltoztatja az identitásokat.
-- `keyName`: a beállított API-kulcsnév, amely szándékosan felfedi ezt az üzemeltetői címkét.
-- `none`: nincs felhasználóazonosító. A munkamenetcímkék továbbra is exportálódnak, ha vannak; ezek a módok nem
-  anonimizálják a tetszőleges prompttartalmat vagy az üzemeltető által megadott munkamenet-/korrelációs címkéket.
+- `pseudonymous` (alapértelmezett): az API-kulcs belső azonosítójának HMAC-SHA256 értéke, célhelyenként egy véletlenszerű,
+  32 bájtos sóval. A só létrehozáskor jön létre, ha még nem létezik, `identitySalt` néven titkosítva tárolódik,
+  soha nem kerül visszaadásra, és szerkesztéskor megmarad. A nyers kulcsazonosítók soha nem kerülnek span-attribútumokba.
+  Egy célhely sójának újbóli létrehozása vagy rotációja megváltoztatja az identitásokat.
+- `keyName`: a konfigurált API-kulcs neve, amely szándékosan felfedi az operátor által megadott címkét.
+- `none`: nincs felhasználói azonosító. A munkamenetcímkék továbbra is exportálódnak, ha jelen vannak; ezek a módok nem
+  anonimizálják a tetszőleges prompttartalmat, illetve az operátor által megadott munkamenet-/korrelációs címkéket.
 
-### Indítás visszamenőleges betöltés nélkül
+### Visszatöltés nélküli indítás
 
-Kizárólag létrehozáskor engedélyezze az **Indítás az aktuális pozíciótól (meglévő naplók kihagyása)** beállítást, vagy adja meg
-a `startFromCurrentPosition: true` értéket a létrehozási API-kérés törzsének legfelső szintjén. Ez a
-`cursor_row_id` értékét a megőrzött hívásnapló aktuális legnagyobb rowid értékére inicializálja a meglévő kurzor-
-segédfüggvényekkel, migráció nélkül. Az alapértelmezés hamis (0 értékű kurzor és a megőrzött előzmények visszamenőleges betöltése).
-Ez nem a kurzor frissítéskori visszaállítására szolgáló beállítás.
+Csak létrehozáskor engedélyezze a **Kezdés az aktuális pozíciótól (meglévő naplók kihagyása)** lehetőséget, vagy adja át a
+`startFromCurrentPosition: true` értéket a létrehozási API-kérés törzsének legfelső szintjén. Ez inicializálja a
+`cursor_row_id` értékét a megőrzött hívásnapló aktuális maximális rowid-értékére a meglévő kurzorsegéd-függvények használatával,
+migráció nélkül. Az alapértelmezett érték false (0 értékű kurzor és a megőrzött előzmények visszatöltése).
+Ez nem a kurzor frissítéskori visszaállítását beállító lehetőség.
 
-A megosztott `ttftMs` bővítés egy nullázható `ttft_ms` oszlopot is hozzáad a BigQuery-leképezőhöz
-és az új táblák sémájához: a sémateszt megköveteli, hogy minden kanonikus rekordmezőhöz tartozzon
-oszlop. A meglévő táblák exportálása változatlanul folytatódik: a `prepare()` beolvassa a tábla sémáját, és
-csak a `ttft_ms` mezőt hagyja ki, ha az oszlop hiányzik. Adja hozzá a nullázható INT64 oszlopot, hogy a következő futtatáskor megkapja
-a TTFT értékét, vagy használjon új táblát. Nincs szükség PATCH-re, automatikus sémamódosításra vagy további
-jogosultságokra; az összes többi sormező szigorú sémaellenőrzése megmarad.
+A megosztott `ttftMs` hozzáadása egy null értéket engedélyező `ttft_ms` oszlopot is hozzáad a BigQuery-leképezőhöz
+és az új táblák sémájához: a sémateszt megköveteli, hogy minden kanonikus rekordmezőhöz tartozzon oszlop. A meglévő táblák
+változatlanul exportálnak: a `prepare()` beolvassa a tábla sémáját, és csak akkor hagyja el a `ttft_ms` mezőt, ha az oszlop
+hiányzik. Adja hozzá a null értéket engedélyező INT64 oszlopot, hogy a következő futtatástól elérhető legyen a TTFT, vagy használjon
+új táblát. Az opcionális TTFT-oszlop nem indít sémafrissítést. A használati bizonyítékot tartalmazó oszlopok az alábbi
+feltételes, opt-in kompatibilitási folyamatot követik; a többi sormező továbbra is szigorú sémavizsgálat alá esik.
 
 ---
 
@@ -485,15 +513,28 @@ Két szabály új célhelyekhez:
 
 ---
 
-## 7. Üzemeltetés
+## 7. Működtetés
 
-- **Irányítópult**: Integrációk → Naplóexportálás. Adj hozzá egy célhelyet, futtasd a **Teszt** műveletet a hitelesítő adatok
-  sorok írása nélküli ellenőrzéséhez, majd engedélyezd.
-- **Feldolgozási hátralék**: minden célhelykártya megjeleníti a függőben lévő sorokat és a kurzort; a `GET
-/api/log-export/status` ugyanezeket az adatokat adja vissza, kiegészítve az utolsó 20 feladatfuttatással.
-- **Egy célhely hibája nem okozza a többi hibáját** — a futtatási összesítő célhelyenként rögzíti az
-  állapotot a `last_status` / `last_error` mezőkben, a feladatfuttatási előzmények pedig az összesített adatokat tárolják.
-- **A célhely törlése a kurzorát is törli.** Újbóli hozzáadásakor a feldolgozás a legrégebbi megőrzött
-  hívásnapló-bejegyzéstől indul, így újraküldi azokat a sorokat is, amelyek már megvannak a célhelyen. A BigQuery esetében a soronkénti
-  `insertId` ezt csak a BigQuery saját deduplikációs időablakán belül küszöböli ki, ezért a törlés
-  helyett inkább tiltsd le a célhelyet.
+- **Irányítópult**: Integrációk → Naplóexportálás. Adjon hozzá egy célt, futtassa a **Teszt** műveletet a hitelesítő adatok ellenőrzéséhez
+  sorok írása nélkül, majd engedélyezze.
+- **Várólista**: minden cél kártyája megjeleníti a függőben lévő sorokat és a kurzort; a `GET
+/api/log-export/status` ugyanazokat az értékeket adja vissza, valamint az utolsó 20 feladatfuttatást.
+- **Egy hibás cél nem okozza a többi hibáját** — a futtatás összegzése célonként rögzíti
+  az állapotot a `last_status` / `last_error` mezőkben, a feladatfuttatási előzmények pedig megőrzik az összesített állapotot.
+- **Egy cél törlése törli annak kurzorát is.** Az újbóli hozzáadás a legrégebbi megőrzött
+  hívásnaplónál kezdődik, így újraküldi azokat a sorokat, amelyeket a cél már tartalmazhat. A BigQuery esetében soronként az
+  `insertId` ezt csak a BigQuery saját duplikációszűrési időablakán belül kezeli, ezért egy cél törlése helyett inkább tiltsa le azt.
+
+### A használati bizonyítékok sémakompatibilitása
+
+Az új BigQuery-táblák nullable `usage_evidence` (JSON-t tartalmazó STRING) és
+`usage_estimated` (BOOL) mezőket tartalmaznak. Az `autoCreate` engedélyezése esetén egy
+meglévő táblához csak ezek a hiányzó, nullable oszlopok adhatók hozzá. Az exportáló megőrzi a teljes meglévő
+sémát, beleértve a mezők metaadatait is, és a visszaadott etag használatával feltételes PATCH-kérést
+küld. Egy párhuzamos sémamódosítás az exportálás felülírás helyett hibával leáll; a következő futtatás újból beolvassa a táblát.
+
+Az `autoCreate` letiltása esetén ezeket az oszlopokat saját magának kell hozzáadnia, mielőtt
+használati bizonyítékokat tartalmazó rekordokat exportálna. A hiányzó séma- vagy etag-metaadatok, illetve egy sikertelen módosítás
+szintén megakadályozza a bizonyítékokat tartalmazó beszúrásokat. Az exportálási kurzor ilyen hiba esetén nem lép tovább,
+és a bizonyítékok soha nem vesznek el csendben. A helyi naplómegőrzés továbbra is érvényes, amíg az exportálás blokkolva van,
+ezért oldja meg a hibát, mielőtt a megőrzött forrássorok lejárnának.

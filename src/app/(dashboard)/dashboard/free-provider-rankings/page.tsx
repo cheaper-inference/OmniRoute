@@ -224,7 +224,7 @@ export default function FreeProviderRankingsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <div
-                          className="ci-brand-tint bg-[var(--ci-brand-subtle)] w-6 h-6 rounded flex items-center justify-center text-[10px] font-semibold text-text-main"
+                          className="ci-brand-tint bg-[var(--ci-brand-subtle)] w-6 h-6 rounded flex items-center justify-center text-3xs font-semibold text-text-main"
                           style={brandTintVars(provider.color) as CSSProperties}
                         >
                           {provider.textIcon || provider.name.charAt(0)}
@@ -256,7 +256,12 @@ export default function FreeProviderRankingsPage() {
           {/* Full List */}
           {displayedRankings.length > 0 && (
             <Card>
-              <Table className="min-w-0" scrollbarLabel={t("title")}>
+              <Table
+                className="min-w-0"
+                scrollbarLabel={t("title")}
+                scrollLabel={t("title")}
+                containerClassName="rounded-none border-0"
+              >
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-16">{t("colRank")}</TableHead>
@@ -280,7 +285,7 @@ export default function FreeProviderRankingsPage() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div
-                            className="ci-brand-tint bg-[var(--ci-brand-subtle)] w-6 h-6 rounded flex items-center justify-center text-[10px] font-semibold text-text-main"
+                            className="ci-brand-tint bg-[var(--ci-brand-subtle)] w-6 h-6 rounded flex items-center justify-center text-3xs font-semibold text-text-main"
                             style={brandTintVars(provider.color) as CSSProperties}
                           >
                             {provider.textIcon || provider.name.charAt(0)}

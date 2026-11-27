@@ -33,7 +33,12 @@ interface Props {
   /** True while the active-state PUT is in flight. */
   togglingActive: boolean;
   onTestSent?: () => void;
+  /** Shared card clock (epoch ms) for the token-expiry countdown. */
+  now?: number;
 }
+
+/** Ink of the active toggle at rest: muted while the quota is active (an inactive one is error ink). */
+const toggleTone = (isActive: boolean) => (isActive ? ("muted" as const) : undefined);
 
 export default function QuotaCardHeader({
   connection,
@@ -46,6 +51,7 @@ export default function QuotaCardHeader({
   onToggleActive,
   togglingActive,
   onTestSent,
+  now,
 }: Props) {
   const t = useTranslations("usage");
   const isActive = connection.isActive ?? true;
@@ -69,7 +75,7 @@ export default function QuotaCardHeader({
       : readCookieExpiresAt(connection.providerSpecificData);
   const tokenExpiryMs = tokenExpiryIso ? new Date(tokenExpiryIso).getTime() : NaN;
   const hasTokenExpiry = Number.isFinite(tokenExpiryMs);
-  const tokenCountdown = hasTokenExpiry ? formatCountdown(tokenExpiryIso) : null;
+  const tokenCountdown = hasTokenExpiry ? formatCountdown(tokenExpiryIso, now) : null;
   const tokenExpiryLabel = !hasTokenExpiry
     ? null
     : tokenCountdown
@@ -129,12 +135,12 @@ export default function QuotaCardHeader({
               </span>
             )}
           </div>
-          <span className="text-[11px] text-text-muted truncate" title={accountName ?? ""}>
+          <span className="text-2xs text-text-muted truncate" title={accountName ?? ""}>
             {accountName}
           </span>
           {tokenExpiryLabel && (
             <span
-              className={`text-[10px] whitespace-normal [overflow-wrap:anywhere] leading-[1.4] ${tokenCountdown ? "text-info" : "text-error"}`}
+              className={`text-3xs whitespace-normal [overflow-wrap:anywhere] leading-[1.4] ${tokenCountdown ? "text-info" : "text-error"}`}
               title={tokenExpiryTitle}
             >
               {tokenExpiryLabel}
@@ -151,7 +157,8 @@ export default function QuotaCardHeader({
         />
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="icon-2xs"
+          tone={toggleTone(isActive)}
           disabled={togglingActive}
           onClick={(e) => {
             e.stopPropagation();
@@ -160,7 +167,7 @@ export default function QuotaCardHeader({
           }}
           title={toggleActiveLabel}
           aria-label={toggleActiveLabel}
-          className={`size-6 min-h-6 ${isActive ? "text-text-muted" : "text-error"}`}
+          className={isActive ? undefined : "text-error"}
         >
           <Icon name={isActive ? "toggle_on" : "toggle_off"} size={14} />
         </Button>

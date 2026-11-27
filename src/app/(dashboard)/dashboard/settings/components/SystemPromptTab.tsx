@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
 import { Card, Textarea, Toggle } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
 
 export default function SystemPromptTab() {
   const [config, setConfig] = useState({ enabled: false, prefixPrompt: "", suffixPrompt: "" });
@@ -63,11 +64,13 @@ export default function SystemPromptTab() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+        <IconChip>
           <Icon name="edit_note" size={20} />
-        </div>
+        </IconChip>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold">{t("globalSystemPrompt")}</h3>
+          <h3 className="ci-heading" data-size="lg">
+            {t("globalSystemPrompt")}
+          </h3>
         </div>
         <div className="flex items-center gap-3">
           {status === "saved" && (

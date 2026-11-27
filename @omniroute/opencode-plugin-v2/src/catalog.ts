@@ -8,6 +8,13 @@ import {
   type ProviderResolve,
 } from "./provider-filter.js";
 import type { LegacyModel } from "./legacy-model.js";
+import {
+  catalogOrderComparator,
+  DEFAULT_CATALOG_ORDER,
+  toOrderEntry,
+  type CatalogOrderEntry,
+  type CatalogOrderSpec,
+} from "./catalog-order.js";
 import { isUserComboRow, usesModelsComboSource, type CombosSource } from "./combos-source.js";
 import {
   comboLookupName,
@@ -50,6 +57,7 @@ import {
   mapComboToModelV2,
   mapRawModelToModelV2,
   usableProviderAliasSet,
+  withInferredFreeLabel,
 } from "./shared/index.js";
 import {
   compileModelListFilter,
@@ -62,7 +70,7 @@ import {
   SHOWCASE_PER_OWNER,
   baseIdOf,
   freshWindowDaysToMs,
-  isFlatTierId,
+  isFlatVariantOf,
   passesWhatServes,
   readEntryStatus,
   selectFreshKeptIds,
@@ -78,6 +86,7 @@ export {
   compareByRecency,
   freshWindowDaysToMs,
   isFlatTierId,
+  isFlatVariantOf,
   isFreshModel,
   ownerKeyOf,
   passesWhatServes,
@@ -128,6 +137,11 @@ export interface ResolvedOptions extends FreeOptions {
   toolsOnly?: boolean;
   visionOnly?: boolean;
   enrichment?: OmniRouteEnrichmentMap | boolean;
+  /**
+   * Ordered catalog sort criteria; each with an optional direction. Absent or
+   * empty applies the default chain `provider → name → recency → id`.
+   */
+  modelOrder?: readonly CatalogOrderSpec[];
   /**
    * Per-provider showcase size. Absent means the catalog default
    * (`SHOWCASE_PER_OWNER`); direct callers keep working without it.
@@ -298,10 +312,14 @@ async function resolveUsageIds(
  * base entry: the base restores in place of its flat, never the flat
  * itself (flats stay excluded by the `restorable` filter above).
  */
-function matchesUsage(id: string, used: ReadonlySet<string>): boolean {
+function matchesUsage(
+  id: string,
+  used: ReadonlySet<string>,
+  allIds?: ReadonlySet<string>
+): boolean {
   const lower = id.toLowerCase();
   if (used.has(lower)) return true;
-  if (isFlatTierId(id)) return false;
+  if (isFlatVariantOf(id, allIds)) return false;
   for (const name of used) {
     if (baseIdOf(name) === lower) return true;
   }
@@ -734,7 +752,7 @@ async function publishCombos(
             } satisfies CapabilityPresetFlags)
       )
         continue;
-      if (comboInferred) mapped.name += INFERRED_FREE_LABEL;
+      if (comboInferred) mapped.name = withInferredFreeLabel(mapped.name, INFERRED_FREE_LABEL);
       const mid = mapped.id.startsWith(X + "/") ? mapped.id.slice(X.length + 1) : mapped.id;
       const key = X + "/" + mid;
       if (publishedKeys.has(key)) {
@@ -893,6 +911,8 @@ export async function collectCatalog(
   const presetPool = catalogAll
     ? []
     : filterRawPoolByPreset(rawModels, enrichment, canonicalToAlias, presetFlags, isFreeInferred);
+  // A flat effort id only counts as a variant when its base is served.
+  const allRawIds = new Set(rawModels.map((e) => String(e.id ?? "").toLowerCase()));
   const showcasePool = catalogAll
     ? []
     : presetPool.filter(
@@ -903,7 +923,7 @@ export async function collectCatalog(
           passesModelAllowlist(entry.id, visibleFilter, hiddenFilter) &&
           passesProviderFilter(entry.id, providerFilter, providerResolve, providerAllUnknown) &&
           readEntryStatus(entry) !== "deprecated" &&
-          !isFlatTierId(entry.id)
+          !isFlatVariantOf(entry.id, allRawIds)
       );
   const showcased = catalogAll
     ? new Set<string>()
@@ -917,7 +937,8 @@ export async function collectCatalog(
         opts.freshPerOwner ?? FRESH_PER_OWNER,
         nowMs,
         visibleFilter,
-        windowMs
+        windowMs,
+        allRawIds
       );
   const staticallyDropped: OmniRouteRawModelEntry[] = [];
   // Stage counters for the refresh summary line. Frozen at the end of the
@@ -951,7 +972,7 @@ export async function collectCatalog(
     if (
       !catalogAll &&
       !servedCombo &&
-      !passesWhatServes(entry, showcased, visibleFilter, nowMs, freshKept, windowMs)
+      !passesWhatServes(entry, showcased, visibleFilter, nowMs, freshKept, windowMs, allRawIds)
     ) {
       staticallyDropped.push(entry);
       continue;
@@ -963,7 +984,8 @@ export async function collectCatalog(
       apiFormat: opts.apiFormat,
     });
     if (servedCombo) {
-      mapped.name = buildModelDisplayName({ rawId: mapped.name, isCombo: true });
+      // From the raw id: the mapper's name already carries the provider prefix.
+      mapped.name = buildModelDisplayName({ rawId: entry.id, isCombo: true });
     }
     const enrichmentEntry = lookupEnrichment(
       entry.id,
@@ -987,7 +1009,7 @@ export async function collectCatalog(
     )
       continue;
     afterPresets += 1;
-    if (inferred) mapped.name += INFERRED_FREE_LABEL;
+    if (inferred) mapped.name = withInferredFreeLabel(mapped.name, INFERRED_FREE_LABEL);
     const mid = mapped.id.startsWith(X + "/") ? mapped.id.slice(X.length + 1) : mapped.id;
     const key = X + "/" + mid;
     collected.set(key, mapped);
@@ -1004,10 +1026,10 @@ export async function collectCatalog(
     // entry, a flat effort-variant id or an id past the fresh cap is
     // never restored — filter before resolving.
     const restorable = staticallyDropped.filter(
-      (entry) => !staysDropped(entry, freshKept, nowMs, windowMs)
+      (entry) => !staysDropped(entry, freshKept, nowMs, windowMs, allRawIds)
     );
     const used = await resolveUsageIds(restorable, opts, fetchers, log);
-    const toRestore = restorable.filter((entry) => matchesUsage(entry.id, used));
+    const toRestore = restorable.filter((entry) => matchesUsage(entry.id, used, allRawIds));
     for (const entry of toRestore) {
       const mapped = mapRawModelToModelV2(entry, {
         providerId: X,
@@ -1040,7 +1062,7 @@ export async function collectCatalog(
         } satisfies CapabilityPresetFlags)
       )
         continue;
-      if (restoreInferred) mapped.name += INFERRED_FREE_LABEL;
+      if (restoreInferred) mapped.name = withInferredFreeLabel(mapped.name, INFERRED_FREE_LABEL);
       const mid = mapped.id.startsWith(X + "/") ? mapped.id.slice(X.length + 1) : mapped.id;
       const key = X + "/" + mid;
       collected.set(key, mapped);
@@ -1144,7 +1166,14 @@ export function buildProviderPayload(
     integrationID: X,
   } as unknown as StableProviderInfo;
   const models: StableModelInfo[] = [];
-  for (const [key, legacy] of collected.entries) {
+  const specs =
+    opts.modelOrder && opts.modelOrder.length > 0 ? opts.modelOrder : DEFAULT_CATALOG_ORDER;
+  const ordered: Array<{ key: string; legacy: LegacyModel; entry: CatalogOrderEntry }> = [
+    ...collected.entries,
+  ].map(([key, legacy]) => ({ key, legacy, entry: toOrderEntry(key, legacy) }));
+  const compare = catalogOrderComparator(specs);
+  ordered.sort((a, b) => compare(a.entry, b.entry));
+  for (const { key, legacy } of ordered) {
     const slash = key.indexOf("/");
     const bareId = slash > 0 ? key.slice(slash + 1) : legacy.id;
     models.push(legacyToStable(X, bareId, legacy, opts.apiKey, opts.baseURL));
