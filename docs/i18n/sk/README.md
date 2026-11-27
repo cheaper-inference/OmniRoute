@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Prísľub — Jeden koncový bod a 394 poskytovateľov. Automatické záložné smerovanie udrží smerovanie funkčné, kým je k dispozícii iný zdravý cieľ. Šesť pilierov: odolné záložné smerovanie naprieč 394 poskytovateľmi · až 95 % úspora tokenov pri oprávnených úlohách · $0 na začiatok so 150+ bezplatnými úrovňami a 51 opakovanými/bezkľúčovými poskytovateľmi navždy zadarmo · 39 integrácií CLI/agentov prostredníctvom jednej konfigurácie · kompatibilita s rozhraniami OpenAI, Claude, Gemini a Responses API na /v1 · produkčné ovládacie prvky vrátane ističov, TLS stealth, MCP s 110 nástrojmi, A2A, pamäte, ochranných mechanizmov, evaluácií a viac než 56 000 statických deklarácií testov v rámci viac než 7 800 sledovaných testovacích súborov."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Prísľub — Jeden koncový bod a 394 poskytovateľov. Automatické záložné smerovanie udrží smerovanie funkčné, kým je k dispozícii iný zdravý cieľ. Šesť pilierov: odolné záložné smerovanie naprieč 394 poskytovateľmi · až 95 % úspora tokenov pri oprávnených úlohách · $0 na začiatok so 150+ bezplatnými úrovňami a 40 opakovanými/bezkľúčovými poskytovateľmi navždy zadarmo · 39 integrácií CLI/agentov prostredníctvom jednej konfigurácie · kompatibilita s rozhraniami OpenAI, Claude, Gemini a Responses API na /v1 · produkčné ovládacie prvky vrátane ističov, TLS stealth, MCP s 110 nástrojmi, A2A, pamäte, ochranných mechanizmov, evaluácií a viac než 56 000 statických deklarácií testov v rámci viac než 7 800 sledovaných testovacích súborov."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ histórie vášho shellu. → [CLI Integrácie](docs/guides/CLI-INTEGRATIONS.md)
 
 </div>
 
-> **394 registrovaných poskytovateľov** v rámci kanonických kolekcií pre chat, médiá, vyhľadávanie, lokálne služby, cloudových agentov a systémové služby vrátane **153 poskytovateľov s vyhľadávacími metadátami `hasFree: true`**. Register chatovacích modelov zahŕňa **239 poskytovateľov / 3 059 jedinečných dvojíc poskytovateľ–model / 1 475 nespracovaných ID modelov**; samostatný katalóg bezplatných limitov obsahuje **465 riadkov pre jednotlivé modely**, **34 opakujúcich sa fondov** a **51 opakujúcich sa alebo bezkľúčových poskytovateľov bezplatných navždy**. Zámerne ide o rozdielne menovatele; definície a výpočty s deduplikovanými fondmi nájdete v dokumentoch [Referenčná príručka poskytovateľov](docs/reference/PROVIDER_REFERENCE.md) a [Bezplatné úrovne](docs/reference/FREE_TIERS.md).
+> **394 registrovaných poskytovateľov** v rámci kanonických kolekcií pre chat, médiá, vyhľadávanie, lokálne služby, cloudových agentov a systémové služby vrátane **153 poskytovateľov s vyhľadávacími metadátami `hasFree: true`**. Register chatovacích modelov zahŕňa **239 poskytovateľov / 3 059 jedinečných dvojíc poskytovateľ–model / 1 475 nespracovaných ID modelov**; samostatný katalóg bezplatných limitov obsahuje **465 riadkov pre jednotlivé modely**, **34 opakujúcich sa fondov** a **40 opakujúcich sa alebo bezkľúčových poskytovateľov bezplatných navždy**. Zámerne ide o rozdielne menovatele; definície a výpočty s deduplikovanými fondmi nájdete v dokumentoch [Referenčná príručka poskytovateľov](docs/reference/PROVIDER_REFERENCE.md) a [Bezplatné úrovne](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1322,7 +1322,7 @@ Kanonické metriky k 2026-10-18: **1.976 jedinečných videí** · **20.220.289 
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Jazyk</b></td><td>TypeScript 6.0 — <b>100 % TypeScriptu</b> v <code>src/</code> a <code>open-sse/</code> (v jadre od v2.0 žiadne <code>any</code>)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databáza</b></td><td>better-sqlite3 (SQLite, WAL žurnálovanie) + LowDB (starší JSON) — 147 doménových modulov, 244 migrácií</td></tr>
+  <tr><td nowrap><b>Databáza</b></td><td>better-sqlite3 (SQLite, WAL žurnálovanie) + LowDB (starší JSON) — 147 doménových modulov, 252 migrácií</td></tr>
   <tr><td nowrap><b>Pamäť</b></td><td>Fulltextové vyhľadávanie SQLite FTS5 + vektorové embeddingy kvantizované na int8, typované vyprchávanie</td></tr>
   <tr><td nowrap><b>Schémy</b></td><td>Zod 4 — validácia I/O nástrojov MCP + kontrakty API</td></tr>
   <tr><td nowrap><b>Protokoly</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

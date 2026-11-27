@@ -1,0 +1,1 @@
+- fix(i18n): replace hardcoded German/Portuguese UI and error strings with English source text and t() keys, and add a regression guard (#20500)

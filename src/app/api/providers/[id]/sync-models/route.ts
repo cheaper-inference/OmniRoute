@@ -14,7 +14,7 @@ import {
 } from "@/lib/providerModels/managedModelImport";
 import { createModelSyncTimings } from "@/lib/providerModels/modelSyncTimings";
 import { saveCallLog } from "@/lib/usage/callLogs";
-import { isAuthenticated } from "@/shared/utils/apiAuth";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { AUTHZ_HEADER_PEER_LOCALITY } from "@/server/authz/headers";
 import {
   buildModelSyncInternalHeaders,
@@ -454,11 +454,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   let channelLabel: string | null = null;
 
   try {
-    if (!(await isAuthenticated(request)) && !isModelSyncInternalRequest(request)) {
-      return NextResponse.json(
-        { error: { message: "Authentication required", type: "invalid_api_key" } },
-        { status: 401 }
-      );
+    if (!isModelSyncInternalRequest(request)) {
+      const authError = await requireManagementAuth(request);
+      if (authError) return authError;
     }
 
     const connection = await getCachedProviderConnectionById(id);

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import { cn } from "@/shared/utils/cn";
+import Card from "@/shared/components/Card";
 
 type CompatMode = "off" | "auto" | "always";
 
@@ -81,10 +82,12 @@ export default function ClaudeClassifierCompatToggle() {
   }, [mode, t]);
 
   return (
-    <div className="rounded-lg border border-border bg-bg-subtle p-3">
+    <Card.Section>
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <h4 className="text-xs text-text-main">{t("classifierCompatTitle")}</h4>
+          <h4 className="ci-heading text-text-main" data-size="xs">
+            {t("classifierCompatTitle")}
+          </h4>
           <p className="text-xs text-text-muted">
             {t.rich("classifierCompatDescription", {
               code: (chunks) => <code>{chunks}</code>,
@@ -103,6 +106,6 @@ export default function ClaudeClassifierCompatToggle() {
         </Button>
       </div>
       {error ? <p className="mt-2 text-xs text-error">{error}</p> : null}
-    </div>
+    </Card.Section>
   );
 }

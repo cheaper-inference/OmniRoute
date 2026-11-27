@@ -127,14 +127,14 @@ export default function NoAuthProviderControls({
   const providerProxyControl = supportsNoAuthProviderProxy(providerId) ? (
     <Button
       variant="ghost"
-      size="sm"
+      size="2xs"
       icon="vpn_lock"
       onClick={onConfigureProviderProxy}
-      className={`h-auto min-h-0 gap-1 rounded px-2 py-1 text-xs ${
+      className={
         host
           ? "bg-warning/15 text-warning hover:bg-warning/25"
           : "bg-bg-subtle text-text-muted/50 hover:bg-bg-subtle hover:text-text-muted"
-      }`}
+      }
       title={host ? t("providerProxyTitleConfigured", { host }) : t("providerProxyConfigureHint")}
     >
       <span className="max-w-30 truncate">{host || t("providerProxy")}</span>

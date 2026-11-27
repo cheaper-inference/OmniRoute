@@ -22,6 +22,17 @@ export interface NumberTickerProps extends Omit<HTMLAttributes<HTMLSpanElement>,
   locale?: string;
   /** Animate only after the number enters the viewport. */
   animateOnView?: boolean;
+  /**
+   * Formats the number on screen and the accessible value, instead of `formatOptions` and
+   * `locale`. While counting it receives in-between values, so round inside it if needed.
+   */
+  valueFormatter?: (value: number) => string;
+  /**
+   * How the first value appears. `"count"` (default) counts it up. `"static"` renders it as it
+   * is, in the server markup too, and animates only later changes: use it for a number that is
+   * already known when the component mounts. Read on mount only.
+   */
+  initial?: "count" | "static";
 }
 
 export const NumberTicker = forwardRef<HTMLSpanElement, NumberTickerProps>(
@@ -35,24 +46,31 @@ export const NumberTicker = forwardRef<HTMLSpanElement, NumberTickerProps>(
       formatOptions,
       locale,
       animateOnView = true,
+      valueFormatter,
+      initial = "count",
       ...props
     },
     forwardedRef,
   ) {
     const localRef = useRef<HTMLSpanElement | null>(null);
     const hasAnimated = useRef(false);
-    // True once a count has drawn its first frame (or reduced motion showed a value).
-    const hasCounted = useRef(false);
+    // With initial="static", the value rendered on mount; null once a different value arrives.
+    const staticValue = useRef(initial === "static" ? value : null);
+    // True once a count has drawn its first frame (or reduced motion or initial="static" showed a value).
+    const hasCounted = useRef(staticValue.current !== null);
     const followsPrevious = from === "previous";
     const origin = followsPrevious ? 0 : from;
-    const [displayValue, setDisplayValue] = useState(origin);
+    const [displayValue, setDisplayValue] = useState(staticValue.current ?? origin);
     // The number on screen, read when a live value interrupts or follows a count.
-    const shownValue = useRef(origin);
+    const shownValue = useRef(staticValue.current ?? origin);
     // With from="previous", when the first delayed count is due (performance.now() clock). A
     // live value that arrives before then keeps this deadline instead of restarting the delay.
     const firstCountAt = useRef<number | null>(null);
 
     useEffect(() => {
+      // The static first value is already on screen: nothing to count until it changes.
+      if (staticValue.current !== null && Object.is(staticValue.current, value)) return;
+      staticValue.current = null;
       const show = (next: number) => {
         shownValue.current = next;
         setDisplayValue(next);
@@ -132,10 +150,12 @@ export const NumberTicker = forwardRef<HTMLSpanElement, NumberTickerProps>(
       };
     }, [animateOnView, delay, duration, followsPrevious, origin, value]);
 
-    const formatter = new Intl.NumberFormat(locale, {
+    // Built only as the fallback: a caller's function must not depend on `formatOptions` and
+    // `locale` being valid for Intl.
+    const format = valueFormatter ?? new Intl.NumberFormat(locale, {
       maximumFractionDigits: Number.isInteger(value) ? 0 : 2,
       ...formatOptions,
-    });
+    }).format;
 
     return (
       <span
@@ -145,10 +165,10 @@ export const NumberTicker = forwardRef<HTMLSpanElement, NumberTickerProps>(
           else if (forwardedRef) forwardedRef.current = node;
         }}
         className={cn("ci-number-ticker", className)}
-        aria-label={formatter.format(value)}
+        aria-label={format(value)}
         {...props}
       >
-        {formatter.format(displayValue)}
+        {format(displayValue)}
       </span>
     );
   },

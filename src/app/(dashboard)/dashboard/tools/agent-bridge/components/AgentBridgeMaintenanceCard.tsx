@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Alert } from "@omniroute/ui-kit/alert";
 import { Button, Card, Input, Modal } from "@/shared/components";
+import { FileTrigger } from "@/shared/components/FileInput";
 import Icon from "@/shared/components/Icon";
 import {
   runDiagnose,
@@ -14,6 +15,9 @@ import {
   type DiagnoseResult,
 } from "@/lib/inspector/agentBridgeMaintenanceApi";
 import type { AgentBridgeConfig, ImportResult } from "@/lib/inspector/configPortability";
+import Notice from "@/shared/components/Notice";
+import IconChip from "@/shared/components/IconChip";
+import { CardSection } from "@/shared/components/Card";
 
 interface AgentBridgeMaintenanceCardProps {
   /** A crash left DNS spoof / CA / system proxy behind → surface the repair banner. */
@@ -69,7 +73,6 @@ export function AgentBridgeMaintenanceCard({
   >(null);
   const [sudoPassword, setSudoPassword] = useState("");
   const [passwordModalError, setPasswordModalError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const canRunWithoutPassword = isWin || hasCachedPassword || !needsSudoPassword;
 
@@ -163,10 +166,7 @@ export function AgentBridgeMaintenanceCard({
       downloadJson(config, `agent-bridge-config-${Date.now()}.json`);
     });
 
-  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = ""; // allow re-selecting the same file
-    if (!file) return;
+  const handleImportFile = async (file: File) => {
     await run("import", async () => {
       let parsed: unknown;
       try {
@@ -197,11 +197,11 @@ export function AgentBridgeMaintenanceCard({
     <>
       <Card padding="none" className="overflow-hidden">
         <div className="flex items-center gap-3 px-5 py-4">
-          <div className="rounded-control bg-bg-subtle p-2 text-text-main">
-            <Icon name="build" size={20} />
-          </div>
+          <IconChip>
+            <Icon name="build" />
+          </IconChip>
           <div>
-            <h2 className="ci-heading text-sm">
+            <h2 className="ci-heading" data-size="sm">
               {t("maintenanceTitle") || "Maintenance & Diagnostics"}
             </h2>
             <p className="mt-0.5 text-xs text-text-muted">
@@ -297,27 +297,20 @@ export function AgentBridgeMaintenanceCard({
               : t("exportConfig") || "Export config"}
           </Button>
 
-          <Button
-            size="sm"
-            variant="outline"
-            icon="upload"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={busy !== null}
-          >
-            {busy === "import"
-              ? t("importing") || "Importing…"
-              : t("importConfig") || "Import config"}
-          </Button>
-          {/* kit-exception: Hidden native file picker driven by the Import button above (no visible control). */}
-          <input
-            ref={fileInputRef}
-            type="file"
+          <FileTrigger
             accept="application/json,.json"
-            onChange={handleImportFile}
-            className="hidden"
-            aria-hidden="true"
-            tabIndex={-1}
-          />
+            disabled={busy !== null}
+            onFilesChange={(files) => void handleImportFile(files[0])}
+            onFilesRejected={() =>
+              onError(t("importInvalidJson") || "The selected file is not valid JSON.")
+            }
+          >
+            <Button size="sm" variant="outline" icon="upload">
+              {busy === "import"
+                ? t("importing") || "Importing…"
+                : t("importConfig") || "Import config"}
+            </Button>
+          </FileTrigger>
         </div>
 
         {/* Success notice */}
@@ -334,7 +327,7 @@ export function AgentBridgeMaintenanceCard({
 
         {/* Diagnose report */}
         {report && (
-          <div className="mx-5 mb-4 rounded-control border border-border bg-bg-subtle p-3">
+          <CardSection className="mx-5 mb-4">
             <div className="mb-2 flex items-center gap-2 text-xs font-medium">
               <Icon
                 name={report.healthy ? "check_circle" : "error"}
@@ -364,7 +357,7 @@ export function AgentBridgeMaintenanceCard({
                 </li>
               ))}
             </ul>
-          </div>
+          </CardSection>
         )}
       </Card>
 
@@ -375,10 +368,9 @@ export function AgentBridgeMaintenanceCard({
         size="sm"
       >
         <div className="flex flex-col gap-4">
-          <div className="flex items-start gap-3 rounded-control border border-warning/30 bg-warning-bg p-3">
-            <Icon name="warning" size={20} className="text-warning" />
-            <p className="text-xs text-text-muted">{tCli("sudoPasswordHint")}</p>
-          </div>
+          <Notice variant="warning" icon="warning">
+            {tCli("sudoPasswordHint")}
+          </Notice>
 
           <Input
             type="password"

@@ -396,7 +396,7 @@ test("execute() spawns with a valid allowlisted model and a '--' argv separator"
     const body = await response.json();
     assert.equal(body.choices[0].message.content, "ok");
     const argv = fs.readFileSync(argvFile, "utf8").trim().split("\n");
-    assert.deepEqual(argv, ["--print", "--quiet", "--model", "opus4.6", "--"]);
+    assert.deepEqual(argv, ["--print", "--model", "opus4.6", "--"]);
   } finally {
     if (prevBin === undefined) delete process.env.AUGGIE_BIN;
     else process.env.AUGGIE_BIN = prevBin;

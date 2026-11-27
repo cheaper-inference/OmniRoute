@@ -125,7 +125,7 @@ export function PayloadSection({
     <div>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
-          <h3 className="text-[11px] text-text-muted uppercase">{title}</h3>
+          <h3 className="text-2xs text-text-muted uppercase">{title}</h3>
           {collapsible && (
             <Button
               variant="ghost"
@@ -324,7 +324,7 @@ export function ConversationContextSection({ log, detail }) {
     <div>
       <div className="flex items-center justify-between gap-3 mb-2">
         <div className="flex items-center gap-3">
-          <h3 className="text-[11px] text-text-muted uppercase">{t("conversationContext")}</h3>
+          <h3 className="text-2xs text-text-muted uppercase">{t("conversationContext")}</h3>
           <Button
             variant="ghost"
             size="icon-sm"
@@ -346,7 +346,7 @@ export function ConversationContextSection({ log, detail }) {
             // the parent entry if the user is already on this page.
             <a
               href={`/dashboard/logs?id=${encodeURIComponent(liveDetail.parentLogId)}`}
-              className="flex items-center gap-1 text-[11px] text-text-muted hover:text-primary transition-colors"
+              className="flex items-center gap-1 text-2xs text-text-muted hover:text-primary transition-colors"
               title={t("continuesFrom", { id: liveDetail.parentLogId })}
             >
               <Icon name="reply" size={14} />
@@ -361,7 +361,7 @@ export function ConversationContextSection({ log, detail }) {
             // /api/conversations/[id]/tree both key on.
             <a
               href={`/dashboard/conversations?tree=${encodeURIComponent(liveDetail.sessionTag)}`}
-              className="flex items-center gap-1 text-[11px] text-text-muted hover:text-primary transition-colors"
+              className="flex items-center gap-1 text-2xs text-text-muted hover:text-primary transition-colors"
               title={t("openConversation", { id: liveDetail.sessionTag })}
             >
               <Icon name="forum" size={14} />

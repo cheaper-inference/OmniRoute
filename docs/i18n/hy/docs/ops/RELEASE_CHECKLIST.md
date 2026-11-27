@@ -355,111 +355,70 @@ v3.8.x-ի որևէ թողարկում հրապարակելուց առաջ ստո
 
 ---
 
-## 3.9.0 LTS ճյուղավորումը (փորձարկվել է 3.8.58-ում)
+## 3.9.0 LTS cut (փորձված է 3.8.58-ում)
 
-v3.8.59-ից հետո հաջորդ տարբերակը 3.9.0-ն է, և դրա վերջին commit-ից ստեղծվում են երկու երկարաժամկետ ճյուղեր՝
-`stable/v3` (v3 LTS գիծը, npm `latest`) և `develop` (v4, տարբերակը բարձրացված է մինչև 4.0.0, npm
-`nightly`)։ Ճյուղերի/ալիքների մոդելը, առաջ փոխադրումը և պիտակները նկարագրված են
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md)-ում, իսկ պլանը՝ [ROADMAP](../../ROADMAP.md)-ում (Փուլ 3)։ Ճյուղավորումն իրականացվում է մեկ անգամ.
-3.8.58-ը սկզբից մինչև վերջ փորձարկում է այն fork-ում, իսկ 3.8.59-ն ավարտվում է
-[GO/NO-GO ստուգաթերթով](./LTS_GO_NO_GO.md)։
+v3.8.59-ից հետո հաջորդ տարբերակը 3.9.0-ն է, և դրա ծայրը դառնում է երկու երկարակյաց ճյուղեր՝ `stable/v3` (v3 LTS գիծ, npm `latest`) և `develop` (v4, bumped 4.0.0, npm `nightly`): branch/channel մոդելը, առաջ-պորտը և պիտակները [RELEASE_STRATEGY են .md](./RELEASE_STRATEGY.md) ; պլանը գտնվում է [ROADMAP](../../ROADMAP.md) ում (փուլ 3): Կտրումը կատարվում է մեկ անգամ; 3.8.58-ը կրկնում է այն ծայրից ծայր պատառաքաղի վրա, իսկ 3.8.59-ը փակվում է [GO/NO-GO ստուգաթերթով](./LTS_GO_NO_GO.md) :
 
-### Փորձնական գործարկում (միայն ընթերցում, անվտանգ է ցանկացած պահի)
+### Չոր աշխատանք (միայն կարդալու, ցանկացած պահի անվտանգ)
 
 ```bash
-npm run release:dry-run-lts-cut                       # իրական ճյուղավորումը՝ 3.9.0՝ HEAD-ից, նախորդ թեգը՝ v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # ամրագրել սկզբնաղբյուր commit-ը
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs`-ը ոչինչ չի կատարում. այն կարդում է git-ի և `gh`-ի տվյալները և արտածում ամբողջ
-հաջորդականությունը՝ նախապայմանները (սկզբնաղբյուրը որոշվում է, սկզբնաղբյուր պահոցն ունի ամբողջական պատմություն.
-մակերեսային clone-ը չի կարող push անել `stable/v3`, ընդունող կողմը մերժում է փաթեթը առաջին
-արհեստականորեն միացված ծնող commit-ի մոտ, ուստի նախ կատարեք ճյուղավորումն ամբողջական clone-ից կամ
-`git fetch --unshallow origin` — նախորդ թեգը գոյություն ունի, `package.json`-ում նշված է նպատակային տարբերակը,
-բաց է `release-freeze` issue, գոյություն ունեցող թողարկման ճյուղում բաց
-`Release branch not green` issue չկա. գոյություն չունեցող ճյուղը հաղորդում է անհայտ `?` վիճակ և երբեք
-կանաչ չի համարվում. Mergify-ի `release` հերթը կազմաձևված է (G11՝ `queue_rules`, `checks_timeout`,
-`queue` պիտակ), `release/*` կանոնների հավաքածուն դեռ արգելափակում է ջնջումը և force-push-ը, իսկ
-`stable/v3`-ը և `develop`-ը դեռ գոյություն չունեն), ճյուղերի երկու քայլերը, dormant workflow-ների
-որ trigger-ներն ու `if:` պայմաններն են դառնում true (և որոնք են մնում պահոցի փոփոխականով սահմանափակված կամ
-կանոնական պահոցին ամրագրված), սպասվող dist-tag-երը (`latest` → 3.9.0, `next` և
-`nightly`՝ դատարկ) և հետադարձումը։ Ելքի `0` = `RESULT: READY`, `1` = արգելափակող նախապայմանը
-չի կատարվել (`✗`), `2` = օգտագործման սխալ։ `--advisory <id,...>`-ը ստուգումը դարձնում է նախազգուշացում (`!`)՝
-առանց այն թաքցնելու։
+`scripts/release/dry-run-lts-cut.mjs` executes nothing: it reads git and `gh` and prints the whole sequence — preconditions (source resolves, the source repository has full history — a shallow clone cannot push `stable/v3`, the receiving side rejects the pack at the first grafted parent, so cut from a full clone or `git fetch --unshallow origin` first — previous tag exists, `package.json` is the target version, a `release-freeze` issue is open, no open `Release branch not green` issue on an existing release branch — a branch that does not exist reports `?` unknown, never green — omni-queue lands the release PRs (G11: `config/merge-queue/config.json` valid, its `bases` manage the release branch, `mode` `live`, its label exists), the `release/*` ruleset still blocks deletion and force-push, and `stable/v3` and `develop` do not exist yet), the two branch steps, which dormant-workflow triggers and `if:` conditions turn true (and which stay gated by a repository variable or pinned to the canonical repository), the expected dist-tags (`latest` → 3.9.0, `next` and `nightly` empty) and the rollback. Exit `0` = `RESULT: READY`, `1` = a blocking precondition failed (`✗`), `2` = usage error. `--advisory <id,...>` downgrades a check to a warning (`!`) without hiding it.
 
-Իրական ճյուղավորման փորձնական գործարկումը կատարեք, քանի դեռ 3.9.0-ի թողարկման սառեցումը բաց է. ճյուղերը
-ստեղծվում են թեգից հետո և մինչև Փուլ 12c-ում սառեցումը վերացնելը։
+Գործարկեք իրական կտրվածքի չոր գործարկումը, — 3.9.0 թողարկման սառեցումը դեռ բաց է:
 
-### 3.8.58-ի փորձարկում (միայն fork-ում)
+### 3.8.58 փորձ (միայն պատառաքաղ)
 
 ```bash
-# 1. Փորձնական գործարկում ընթացիկ վերջին commit-ի վրա՝ փորձարկման պարամետրերով
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Կատարել FORK remote-ի նկատմամբ (origin-ը կամ ցանկացած remote, որի URL-ը կանոնական
-#    պահոցինն է, մերժվում է. յուրաքանչյուր քայլի համար տերմինալում հաստատում է պահանջվում)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Գործարկել dormant workflow-ները fork-ում (workflow_dispatch այնտեղ, որտեղ փորձնական գործարկումը
-#    հայտնում է կանոնական պահոցին ամրագրում), ապա հետադարձել
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop-ի տարբերակը բարձրացնող commit-ը ստեղծվում է git plumbing-ի միջոցով (աշխատանքային ծառը չի փոփոխվում) և թարմացնում է
-նույն հինգ ֆայլերը, ինչ ցիկլը բացող commit-ը՝ `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` և `docs/openapi.yaml`։ `[4.0.0]`
-CHANGELOG բաժինը և դրա i18n պատճենները դրանից հետո բացվում են `develop`-ում՝ մինչև դրա առաջին
-PR-ը։ Սկրիպտը երբեք չի փոփոխում npm dist-tag-երը. դրանք փորձարկեք ժամանակավոր փաթեթի վրա։
+Development bump commit-ը կառուցված է git plumbing-ով (աշխատող ծառ չի դիպչում) և բախվում է նույն հինգ ֆայլերին, ինչ ցիկլային բաց կոմիտը՝ `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` և `docs/openapi.yaml`: `[4.0.0]` CHANGELOG հատվածը և նրա i18n հայելիները բացվում են `develop` վրա այնուհետև՝ առաջին PR ից առաջ: Սցենարը երբեք չի փոխվում npm dist-tags — rehearse of a scratch փաթեթի վրա:
 
-### PR-ի նախադիտման արտեֆակտ (կառուցել մեկ անգամ, առաջխաղացնել նույն բայթերը)
+### PR նախադիտման արտեֆակտ (կառուցել մեկ անգամ, խթանել նույն բայթերը)
 
-`.github/workflows/preview-artifact.yml`-ը PR-ի head-ից կառուցում է մեկ production tarball և
-վավերացնում հենց այդ build-ը (#8084 հատված (a))։ Միայն նույն պահոցի PR-ներ. ոչինչ չի հրապարակվում։
+`.github/workflows/preview-artifact.yml` կառուցում է մեկ արտադրական tarball PR գլխից և հաստատում է այդ ճշգրիտ կառուցվածքը (#8084 կտոր (a)): Միայն PRs նույն պահոցը; ոչինչ չի հրապարակվում.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # կամ ավելացրեք `preview-artifact` պիտակը
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # նախադիտման տեղադրում
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Գործարկումը կատարում է `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, փաթեթավորում է
-tarball-ը, գործարկում `npm run check:pack-boot` (կեղծ գաղտնիքներ, ժամանակավոր տվյալների գրացուցակ), կրկին փաթեթավորում է և
-ձախողվում, եթե digest-ը նույնական չէ, ապա գրանցում է `artifact-identity.json`-ը (head SHA, base
-SHA, lockfile hash, հարթակ, ճարտարապետություն, node ABI, bundler, կառուցման քաղաքականություն՝
-`scripts/release/artifact-identity.mjs`) և առանձին job-ում հաստատում է tarball-ի ծագումը։ Նախադիտման
-առաջխաղացումը նշանակում է տեղադրել այդ tarball-ը. երբեք մի վերակառուցեք սկզբնաղբյուրից։
+Գործարկումը կատարում է `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, փաթեթավորում է tarball-ը, գործարկում `npm run check:pack-boot` (կեղծ գաղտնիքներ, ժամանակավոր տվյալների dir), նորից փաթեթավորում և ձախողվում է, քանի դեռ ամփոփումը նույնական չէ, այնուհետև գրանցում է `artifact-identity.json` (գլուխ SHA, բազային SHA, lockfile hash, ABI, քաղաքականություն, — attest `scripts/release/artifact-identity.mjs`): թարբոլը առանձին աշխատանքում։ Նախադիտման խթանումը նշանակում է տեղադրել այդ tarball-ը. երբեք մի վերակառուցեք աղբյուրից:
 
-### Ճյուղավորումը (3.9.0, GO-ից հետո)
+### Կտրումը (3.9.0, GO ից հետո)
 
-1. GO-ն գրանցված է [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md)-ում։
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0`-ն արտածում է `RESULT: READY`։
-3. Ձեռքով ստեղծեք ճյուղերը `origin`-ում՝ փորձնական գործարկման արտածած հրամաններով.
-   սկրիպտը հրաժարվում է push անել դեպի `origin`։ Վերանայված develop commit-ը կրկին օգտագործելու համար նախ
-   կատարեք `--execute` փորձարկումը 3.9.0-ի վերջին commit-ի վրա՝ ձեր fork-ի նկատմամբ. այն արտածում է երկու SHA-ներն էլ, և
-   նույն commit-ները կարելի է push անել.
+1. GO արձանագրվել է [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` տպում `RESULT: READY`.
+3. Ձեռքով ստեղծեք `origin` ի ճյուղերը՝ այն հրամաններով, որոնք տպում են dry-run — սցենարը հրաժարվում է մղել `origin` ին: Վերանայված մշակման հանձնառությունը կրկին օգտագործելու համար նախ գործարկեք `--execute` փորձը 3.9.0 հուշումով ձեր պատառաքաղի վրա; այն տպում է և՛ SHAs, և՛ նույն պարտավորությունները կարող են մղվել.
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Պաշտպանեք `stable/v3`-ը և `develop`-ը (կանոնների հավաքածուներ + միաձուլման հերթ), նախքան առաջին PR-ի մուտքը։
-5. Չգործարկված աշխատանքային հոսքերն ակտիվանում են ճյուղի առկայությամբ՝ `forward-port.yml` (`stable/v3`
-   ուղարկման դեպքում), `validate-stable-pr.yml` (`stable/v3`-ին ուղղված PR-ների համար) և `nightly-v4-build.yml`
-   (`develop`-ի կառուցումներ)։ Նախքան գործարկումը սահմանեք պահոցի `secrets.FORWARD_PORT_TOKEN` գաղտնիքը (որպեսզի CI-ն աշխատի
-   առաջ տեղափոխման PR-ների համար)։ Գիշերային հրապարակումը կմնա անջատված, մինչև պատասխանատուն պահոցի
-   `vars.NIGHTLY_PUBLISH` փոփոխականի արժեքը սահմանի `true`, իսկ npm Trusted Publishing-ը ընդունի
-   `nightly-v4-build.yml`-ը։ Ալիքի որոշումն իրականացնում է `scripts/release/dist-tag.mjs`-ը՝ նույն
-   որոշիչը, որն օգտագործում է `npm-publish.yml`-ը։
-6. Ստուգեք ալիքները․ `npm view omniroute dist-tags --json`-ը պետք է ցույց տա `latest` = 3.9.0 և չպարունակի
-   `next` / `nightly`, մինչև v4-ի հրապարակումը։
-7. Անհրաժեշտության դեպքում հետ գլորեք փոփոխությունները՝ `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   և `npm dist-tag add omniroute@3.8.59 latest`։
+4. Պաշտպանեք `stable/v3` և `develop` (կանոնների + միաձուլման հերթը) նախքան առաջին PR վայրէջք կատարելը:
+5. Հանգիստ աշխատանքային հոսքերը միանում են ըստ ճյուղերի առկայության՝ `forward-port.yml` (մղում դեպի `stable/v3`), `validate-stable-pr.yml` (PRs դեպի `stable/v3`) և `nightly-v4-build.yml` (կառուցում է `develop`): Նախքան live-ը, սահմանեք `secrets.FORWARD_PORT_TOKEN` պահեստի գաղտնիքը (այսպես, CI աշխատում է առաջընթաց-պորտ PRs ում); Գիշերային հրատարակումն անջատվում է այնքան ժամանակ, մինչև սեփականատերը շտեմարանի `vars.NIGHTLY_PUBLISH` փոփոխականը դնի `true`, իսկ npm Trusted Publishing-ը կընդունի `nightly-v4-build.yml`: Ալիքի լուծումը `scripts/release/dist-tag.mjs` է, նույն լուծիչը օգտագործում է `npm-publish.yml` :
+6. Ստուգեք ալիքները. `npm view omniroute dist-tags --json` ցույց է տալիս `latest` = 3.9.0 և ոչ մի `next` / `nightly` մինչև v4-ի հրապարակումը:
+7. Վերադարձ, եթե անհրաժեշտ է՝ `git push origin --delete refs/heads/stable/v3 refs/heads/develop` և `npm dist-tag add omniroute@3.8.59 latest`:
 
 ---
 

@@ -1,0 +1,1 @@
+- **docs(llm):** `llm.txt` points at the `cheaper-inference/OmniRoute` repository and the `cheaperinference/omniroute` Docker Hub and GHCR images ([#20897](https://github.com/cheaper-inference/OmniRoute/pull/20897))

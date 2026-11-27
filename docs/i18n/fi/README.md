@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lupaus — yksi päätepiste ja 394 palveluntarjoajaa. Automaattinen varareititys pitää reitityksen toiminnassa, kun toinen terve kohde on käytettävissä. Kuusi pilaria: vikasietoinen varareititys 394 palveluntarjoajan välillä · jopa 95 %:n tokenisäästöt kelvollisissa työkuormissa · aloitus maksutta, yli 150 ilmaistasoa ja 51 toistuvasti saatavilla olevaa tai avaimetonta ikuisesti ilmaista palveluntarjoajaa · 39 CLI-/agentti-integraatiota yhden määrityksen kautta · OpenAI-, Claude-, Gemini- ja Responses API -yhteensopivuus osoitteessa /v1 · tuotantokäytön hallintatoiminnot, kuten piirikytkimet, TLS-stealth, MCP:n 110 työkalua, A2A, muisti, suojaukset, arvioinnit ja yli 56 000 staattista testimäärittelyä yli 7 800 seuratussa testitiedostossa."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lupaus — yksi päätepiste ja 394 palveluntarjoajaa. Automaattinen varareititys pitää reitityksen toiminnassa, kun toinen terve kohde on käytettävissä. Kuusi pilaria: vikasietoinen varareititys 394 palveluntarjoajan välillä · jopa 95 %:n tokenisäästöt kelvollisissa työkuormissa · aloitus maksutta, yli 150 ilmaistasoa ja 40 toistuvasti saatavilla olevaa tai avaimetonta ikuisesti ilmaista palveluntarjoajaa · 39 CLI-/agentti-integraatiota yhden määrityksen kautta · OpenAI-, Claude-, Gemini- ja Responses API -yhteensopivuus osoitteessa /v1 · tuotantokäytön hallintatoiminnot, kuten piirikytkimet, TLS-stealth, MCP:n 110 työkalua, A2A, muisti, suojaukset, arvioinnit ja yli 56 000 staattista testimäärittelyä yli 7 800 seuratussa testitiedostossa."/>
 
 <br/>
 <br/>
@@ -712,7 +712,7 @@ komentorivihistoriastasi. → [CLI-integraatiot](docs/guides/CLI-INTEGRATIONS.md
 
 </div>
 
-> **394 rekisteröityä palveluntarjoajaa** kanonisissa keskustelu-, media-, haku-, paikallis-, pilviagentti- ja järjestelmäkokoelmissa, mukaan lukien **153 palveluntarjoajaa, joilla on `hasFree: true` -hakumetatieto**. Keskustelumallien rekisteri kattaa **239 palveluntarjoajaa / 3 059 erillistä palveluntarjoaja–malli-paria / 1 475 raakaa mallin tunnistetta**; erillisessä maksuttomien budjettien luettelossa on **465 mallikohtaista riviä**, **34 toistuvaa kiintiötä** ja **51 toistuvaa tai avaimetonta ikuisesti maksutonta palveluntarjoajaa**. Nämä ovat tarkoituksella eri nimittäjiä; määritelmät ja kiintiöiden kaksoiskappaleet poistavat laskelmat löytyvät [Palveluntarjoajien viiteoppaasta](docs/reference/PROVIDER_REFERENCE.md) ja [Maksuttomista tasoista](docs/reference/FREE_TIERS.md).
+> **394 rekisteröityä palveluntarjoajaa** kanonisissa keskustelu-, media-, haku-, paikallis-, pilviagentti- ja järjestelmäkokoelmissa, mukaan lukien **153 palveluntarjoajaa, joilla on `hasFree: true` -hakumetatieto**. Keskustelumallien rekisteri kattaa **239 palveluntarjoajaa / 3 059 erillistä palveluntarjoaja–malli-paria / 1 475 raakaa mallin tunnistetta**; erillisessä maksuttomien budjettien luettelossa on **465 mallikohtaista riviä**, **34 toistuvaa kiintiötä** ja **40 toistuvaa tai avaimetonta ikuisesti maksutonta palveluntarjoajaa**. Nämä ovat tarkoituksella eri nimittäjiä; määritelmät ja kiintiöiden kaksoiskappaleet poistavat laskelmat löytyvät [Palveluntarjoajien viiteoppaasta](docs/reference/PROVIDER_REFERENCE.md) ja [Maksuttomista tasoista](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1333,7 +1333,7 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
   <tr><td nowrap><b>Ajoympäristö</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Ohjelmointikieli</b></td><td>TypeScript 6.0 — <b>100 % TypeScriptiä</b> hakemistoissa <code>src/</code> ja <code>open-sse/</code> (ytimessä ei ole yhtään <code>any</code>-tyyppiä versiosta v2.0 lähtien)</td></tr>
   <tr><td nowrap><b>Viitekehys</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL-kirjaus) + LowDB (JSON-perintö) — 147 toimialamoduulia, 244 migraatiota</td></tr>
+  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL-kirjaus) + LowDB (JSON-perintö) — 147 toimialamoduulia, 252 migraatiota</td></tr>
   <tr><td nowrap><b>Muisti</b></td><td>SQLite FTS5 -kokotekstihaku + int8-kvantisoinnit vektoriesityksille, tyypitetty vanheneminen</td></tr>
   <tr><td nowrap><b>Skeemat</b></td><td>Zod 4 — MCP-työkalujen I/O-validointi + API-sopimukset</td></tr>
   <tr><td nowrap><b>Protokollat</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

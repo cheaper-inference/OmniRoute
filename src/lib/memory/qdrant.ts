@@ -183,9 +183,11 @@ async function qdrantFetch(cfg: QdrantConfig, path: string, init?: RequestInit):
 export type QdrantCollectionMetadata =
   { exists: false } | { exists: true; vectorSize: number; vectorName: string | null };
 
-export async function getQdrantCollectionMetadata(): Promise<QdrantCollectionMetadata | null> {
+export async function getQdrantCollectionMetadata(options?: {
+  allowDisabled?: boolean;
+}): Promise<QdrantCollectionMetadata | null> {
   const cfg = await getQdrantConfig();
-  if (!cfg.enabled || !cfg.host) return null;
+  if ((!cfg.enabled && !options?.allowDisabled) || !cfg.host) return null;
 
   const res = await qdrantFetch(cfg, `/collections/${encodeURIComponent(cfg.collection)}`, {
     method: "GET",
@@ -206,7 +208,7 @@ export async function getQdrantCollectionMetadata(): Promise<QdrantCollectionMet
   return { exists: true, vectorSize, vectorName };
 }
 
-export async function checkQdrantHealth(): Promise<{
+export async function checkQdrantHealth(options?: { allowDisabled?: boolean }): Promise<{
   ok: boolean;
   latencyMs: number;
   error?: string;
@@ -214,7 +216,7 @@ export async function checkQdrantHealth(): Promise<{
 }> {
   const cfg = await getQdrantConfig();
   const start = Date.now();
-  if (!cfg.enabled || !cfg.host) {
+  if ((!cfg.enabled && !options?.allowDisabled) || !cfg.host) {
     return { ok: false, latencyMs: 0, error: "not_configured" };
   }
 
@@ -225,7 +227,7 @@ export async function checkQdrantHealth(): Promise<{
       const text = await res.text().catch(() => "");
       return { ok: false, latencyMs, error: text.slice(0, 200) || `HTTP ${res.status}` };
     }
-    const collection = await getQdrantCollectionMetadata();
+    const collection = await getQdrantCollectionMetadata(options);
     return { ok: true, latencyMs, ...(collection ? { collection } : {}) };
   } catch (err) {
     return {
@@ -375,7 +377,7 @@ export async function upsertSemanticMemoryPoint(input: {
 export async function searchSemanticMemory(
   query: string,
   topK = 5,
-  scope?: { apiKeyId?: string; sessionId?: string | null }
+  scope?: { apiKeyId?: string; sessionId?: string | null; allowDisabled?: boolean }
 ): Promise<{
   ok: boolean;
   latencyMs: number;
@@ -383,7 +385,9 @@ export async function searchSemanticMemory(
   error?: string;
 }> {
   const cfg = await getQdrantConfig();
-  if (!cfg.enabled || !cfg.host) return { ok: false, latencyMs: 0, error: "not_configured" };
+  if ((!cfg.enabled && !scope?.allowDisabled) || !cfg.host) {
+    return { ok: false, latencyMs: 0, error: "not_configured" };
+  }
   const start = Date.now();
   try {
     const vector = await embedText(cfg, query);

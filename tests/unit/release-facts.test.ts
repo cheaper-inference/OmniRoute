@@ -50,7 +50,50 @@ const CODE = {
   freeTierReg: 74,
   manifestFreeTier: 74,
   freeTierBudget: { steady: 1623225000, pools: [], oneTime: [] },
+  headlineSteady: 1623200000,
+  headlineFirst: 2212700000,
+  headlineGated: 6000000,
+  headlineSocialGated: 0,
+  rowSumLive: 12744500000,
+  rowSumRetired: 0,
+  rowSumTotal: 12744500000,
+  rowSumRetiredShare: 0,
+  freeProviders: { total: 62, apiKey: 54, keyless: 6, toolAccount: 1, webChat: 1 },
+  freeModels: 323,
+  freeAccessRows: 387,
+  freePublishedPools: 21,
+  hasFreeProviders: 160,
+  freeSearchProviders: 9,
+  freeAudioProviders: 4,
+  headlineSteadyLabel: "~1.6B",
+  headlineFirstLabel: "~2.2B",
+  rowSumLiveLabel: "~12.7B",
+  rowSumTotalLabel: "~12.7B",
+  publicFreeTierBudget: { steady: 1623200000, pools: [], oneTime: [] },
 };
+
+const FREE_CATALOG_FACT_KEYS = [
+  "headlineSteady",
+  "headlineFirst",
+  "headlineGated",
+  "headlineSocialGated",
+  "rowSumLive",
+  "rowSumRetired",
+  "rowSumTotal",
+  "rowSumRetiredShare",
+  "freeProviders",
+  "freeModels",
+  "freeAccessRows",
+  "freePublishedPools",
+  "hasFreeProviders",
+  "freeSearchProviders",
+  "freeAudioProviders",
+  "headlineSteadyLabel",
+  "headlineFirstLabel",
+  "rowSumLiveLabel",
+  "rowSumTotalLabel",
+  "publicFreeTierBudget",
+];
 
 const calls: SpawnCall[] = [];
 function fakeSpawn(result: Record<string, unknown>) {
@@ -306,8 +349,24 @@ describe("snapshot serialization", () => {
     assert.ok(snap, `${FACTS_SNAPSHOT_PATH} must exist and parse`);
     assert.equal(serializeFacts(snap), committed);
     assert.equal(snap.schemaVersion, 1);
-    assert.deepEqual(Object.keys(snap.code), CODE_FACT_KEYS);
+    // Keys follow CODE_FACT_KEYS order. Keys added since the last release refresh are missing
+    // only at the end: the snapshot is written by `npm run release:refresh-derived`, never by a
+    // feature PR.
+    const snapKeys = Object.keys(snap.code);
+    assert.deepEqual(snapKeys, CODE_FACT_KEYS.slice(0, snapKeys.length));
     assert.equal(snap.providers, snap.code.providers);
+  });
+
+  it("code fact keys end with the free-catalog keys in order", () => {
+    assert.deepEqual(CODE_FACT_KEYS.slice(-FREE_CATALOG_FACT_KEYS.length), FREE_CATALOG_FACT_KEYS);
+    // The five the public surfaces print, last, so a consumer can slice them off.
+    assert.deepEqual(CODE_FACT_KEYS.slice(-5), [
+      "headlineSteadyLabel",
+      "headlineFirstLabel",
+      "rowSumLiveLabel",
+      "rowSumTotalLabel",
+      "publicFreeTierBudget",
+    ]);
   });
 });
 

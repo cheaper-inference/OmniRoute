@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
 import { buildClaudeDiscoverySettingsSnippet } from "@/shared/services/claudeCliConfig";
 import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
 
 /**
  * ClaudeGatewayOnboardingBlock — the copy-paste `settings.json` fragment that points
@@ -36,20 +37,20 @@ export default function ClaudeGatewayOnboardingBlock({ baseUrl }: { baseUrl: str
   };
 
   return (
-    <div className="rounded-lg border border-border bg-bg-subtle p-3">
+    <Card.Section>
       <div className="mb-2 flex items-center justify-between gap-2">
-        <span className="text-[12px] font-medium text-text-main">{t("ccOnboardingTitle")}</span>
-        <Button variant="outline" size="sm" onClick={handleCopy} className="gap-1 text-[11px]">
+        <span className="text-xs font-medium text-text-main">{t("ccOnboardingTitle")}</span>
+        <Button variant="outline" size="sm" onClick={handleCopy} className="gap-1">
           <Icon name={copied ? "check" : "content_copy"} size={14} />
           {copied ? t("ccOnboardingCopied") : t("ccOnboardingCopy")}
         </Button>
       </div>
 
-      <pre className="overflow-x-auto rounded-md bg-bg-subtle p-2 font-mono text-[11px] leading-relaxed text-text-main">
+      <pre className="overflow-x-auto rounded-md bg-bg-subtle p-2 font-mono text-xs leading-relaxed text-text-main">
         {snippet}
       </pre>
 
       <p className="mt-2 text-xs text-text-muted">{t("ccOnboardingWindowNote")}</p>
-    </div>
+    </Card.Section>
   );
 }

@@ -4,14 +4,9 @@
 
 ---
 
-OmniRoute utilizza un modello di rilascio a **cicli paralleli**: un branch dedicato `release/vX.Y.Z`
-per il ciclo attivo, `main` per la linea pubblicata e un tag immutabile
-`vX.Y.Z` quando il ciclo viene rilasciato. È normale vedere commit arrivare sia su `release/*` _sia_ su
-`main`: non si tratta di un errore.
+OmniRoute usa a** ciclo parallelo** modello di rilascio: un ramo `release/vX.Y.Z` dedicato per il ciclo attivo, `main` per la riga pubblicata e un tag `vX.Y.Z` immutabile quando il ciclo viene spedito. Vedere i commit atterrare su `release/*` _e_ su `main` è previsto che — non sia un malinteso.
 
-I dettagli per i maintainer si trovano in `CLAUDE.md` (Regola fondamentale n. 21) e
-[RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Questa pagina è il riepilogo pubblico
-destinato ai contributor.
+I dettagli del manutentore si trovano in `CLAUDE.md` (Hard Rule #21) e [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Questa pagina è il riepilogo rivolto ai contributori pubblici.
 
 ## In breve
 
@@ -42,25 +37,23 @@ flowchart LR
 `main` non è il branch di integrazione per il lavoro quotidiano. Le PR aperte verso `main`
 di solito devono cambiare destinazione prima del merge.
 
-## Congelamento del rilascio (cicli paralleli)
+## Congelamento rilascio (cicli paralleli)
 
-Quando è in corso la riconciliazione di un rilascio, viene aperta un'issue di riferimento con
-l'etichetta `release-freeze`. Questo **non interrompe lo sviluppo**:
+Quando una versione viene riconciliata, viene aperta una questione marcatore denominata `release-freeze`. Quello** non ferma lo sviluppo** :
 
-- Il branch `release/vX.Y.Z` congelato è affidato al responsabile di quel rilascio.
-- Il branch `release/vX+1` del ciclo successivo viene creato dalla punta congelata, affinché i contributor possano continuare
-  a integrare il proprio lavoro.
-- Le PR aperte che hanno ancora come destinazione il branch congelato devono essere **reindirizzate** al
-  branch `release/v*` attivo, ossia quello con la versione più alta.
+- La `release/vX.Y.Z` congelata appartiene al capitano che ha liberato quella nave.
+- La `release/vX+1` del ciclo successivo viene tagliata dalla punta congelata in modo che i contributori continuino a sbarcare il lavoro.
+- Dovrebbe essere aperto PRs che prende di mira ancora il ramo congelato** ritargetizzato** al ramo `release/v*` attivo (più alto).
 
-Verifica la presenza di un congelamento aperto prima di presumere che il branch desiderato accetti merge:
+Verificare la presenza di un blocco aperto prima di presumere che il ramo desiderato sia unificabile:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Le meccaniche di merge (etichetta `queue` del proprietario → Mergify) sono documentate in
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+I meccanismi di unione (proprietario `queue` etichetta → Mergify) sono documentati in [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: la coda di unione Mergify è stata ritirata** (decisione del proprietario). `.mergify.yml` non definisce più una coda e rifiuta i comandi Mergify che uniscono o riscrivono una richiesta pull. Le versioni PRs vengono unite manualmente secondo il set di regole del repository "Richiedi porte verdi sulla versione attiva" (`Gate / CI` + `Gate / Quality`) finché la coda omnidirezionale non viene eseguita in modalità live, quindi tramite la coda omnidirezionale ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). L'etichetta `queue` non unisce più nulla.
 
 ## Perché sia un branch sia un tag?
 

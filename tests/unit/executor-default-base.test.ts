@@ -20,6 +20,7 @@ import {
   CONTEXT_1M_BETA_HEADER,
 } from "../../open-sse/services/claudeCodeCompatible.ts";
 import { runWithCapture } from "../../open-sse/utils/providerRequestLogging.ts";
+import { PROXY_FETCH_NO_REPLAY } from "../../open-sse/utils/proxyFetchTransportSupport.ts";
 import { CLAUDE_CODE_CLIENT_BILLING_VERSION } from "../../src/shared/constants/claudeCodeClient.ts";
 
 class TestExecutor extends BaseExecutor {
@@ -1418,6 +1419,37 @@ test("BaseExecutor.execute returns response metadata and merges headers", async 
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test("BaseExecutor: generic skipUpstreamRetry does not mark the request non-replayable", async () => {
+  const executor = new TestExecutor();
+  const originalFetch = globalThis.fetch;
+  let capturedOptions: RequestInit | undefined;
+  globalThis.fetch = async (_url, options = {}) => {
+    capturedOptions = options;
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  };
+
+  try {
+    await executor.execute({
+      model: "gpt-4.1",
+      body: { messages: [{ role: "user", content: "skip only executor retry" }] },
+      stream: false,
+      credentials: { apiKey: "test-key" },
+      skipUpstreamRetry: true,
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+
+  assert.ok(capturedOptions);
+  assert.equal(
+    (capturedOptions as RequestInit & { [PROXY_FETCH_NO_REPLAY]?: boolean })[PROXY_FETCH_NO_REPLAY],
+    undefined
+  );
 });
 
 test("BaseExecutor.execute refreshes credentials before the request when needed", async () => {

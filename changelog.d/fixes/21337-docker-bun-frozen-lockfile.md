@@ -1,0 +1,1 @@
+- **fix(docker,build):** `Dockerfile.bun` installs with `bun install --frozen-lockfile --ignore-scripts` from `package-lock.json`, the VNC Chromium image is pinned by digest, and `build:native:tproxy` uses npm's bundled `node-gyp` instead of `npx --yes` ([#21337](https://github.com/cheaper-inference/OmniRoute/pull/21337), from #21036, refs #21014 — thanks @same7soliman)
