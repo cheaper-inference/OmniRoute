@@ -7,9 +7,12 @@
  * stats are computed at read time and never written into the provider-limits
  * cache; every entry point is fail-open so a usage_history problem can never
  * break the quota response it decorates.
+ *
+ * The query lives in `db/repositories/sqliteUsageStatsReadRepository.ts`.
  */
 
 import { getDbInstance } from "../db/core";
+import { usageStatsRepositories } from "../db/repositories/usageStatsRepositories";
 import {
   summarizeConnectionSpeed,
   type ConnectionSpeedRow,
@@ -27,15 +30,18 @@ export function getConnectionSpeedStats(
   { limit = DEFAULT_CONNECTION_SPEED_ROWS }: { limit?: number } = {}
 ): ConnectionSpeedStats | null {
   if (!connectionId) return null;
-  const rows = getDbInstance()
-    .prepare(
-      `SELECT model, latency_ms, ttft_ms, tokens_output, tokens_reasoning
-       FROM usage_history
-       WHERE connection_id = ? AND success = 1
-       ORDER BY timestamp DESC
-       LIMIT ?`
-    )
-    .all(connectionId, Math.max(1, Math.floor(limit))) as ConnectionSpeedRow[];
+  const samples = usageStatsRepositories.legacySync.listRecentConnectionSpeedSamples(
+    getDbInstance(),
+    connectionId,
+    Math.max(1, Math.floor(limit))
+  );
+  const rows: ConnectionSpeedRow[] = samples.map((sample) => ({
+    model: sample.model,
+    latency_ms: sample.latencyMs,
+    ttft_ms: sample.ttftMs,
+    tokens_output: sample.tokensOutput,
+    tokens_reasoning: sample.tokensReasoning,
+  }));
   return summarizeConnectionSpeed(rows);
 }
 
