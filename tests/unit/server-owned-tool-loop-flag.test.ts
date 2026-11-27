@@ -92,7 +92,8 @@ describe("feature-flags-settings count update", () => {
     // QUOTA_DAILY_REVALIDATION (#20343, default off) to 136.
     // CODEBUDDY_TELEMETRY_ENABLED (#18398, codebuddy-intl turn reports, default off) to 137.
     // AGENT_SESSION_MESSAGES_ENABLED (#14864, opt-in session turn capture, default off) to 138.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 138);
+    // AIHORDE_CATALOG_BACKGROUND_REFRESH_ENABLED (default off) to 139.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 139);
     // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
     // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
     // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.
