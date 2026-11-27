@@ -583,17 +583,18 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "ainative", modelId: "llama3.1-8b-cerebras", displayName: "Llama 3.1 8B (Cerebras)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "ainative-free", tos: "caution" },
   // 2026-10-28: docs.ainative.studio/docs/api/models/ retires nous-coder; R1 requires Enterprise.
   { provider: "ainative", modelId: "gemini-flash", displayName: "Gemini Flash", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "ainative-free", tos: "caution" },
-  // evidence: api-public https://api.aionlabs.ai/v1/models (2026-11-23) — aion-labs/aion-2.5 is no longer listed
-  // ⇒ discontinued.
-  // gates: ["card"] — public-page https://www.aionlabs.ai/docs/rate-limits/ (2026-11-23): "Free-tier API keys are
-  // activated by verifying a payment card on the Billing page of your dashboard. The card is verified through Stripe
-  // and never charged; one card can activate one free account." The free limit stays published as "Daily Token
-  // Limit Free 20,000"; the rows stay uncapped (0) as curated.
-  { provider: "aion", modelId: "aion-labs/aion-3.0", displayName: "Aion 3.0", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "aion-free", tos: "ok", gates: ["card"] },
-  { provider: "aion", modelId: "aion-labs/aion-3.0-mini", displayName: "Aion 3.0 Mini", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "aion-free", tos: "ok", gates: ["card"] },
+  // evidence: public-page https://www.aionlabs.ai/docs/rate-limits/ (2026-11-27)
+  // Daily Token Limit, Free tier: "20,000". 20,000 × 30 = 600,000, shared across API models.
+  // "Free-tier API keys are activated by verifying a payment card on the Billing page of your dashboard."
+  // https://api.aionlabs.ai/terms/ §6: "We do not use your Input or Output to train models and we do not sell them."
+  // https://api.aionlabs.ai/v1/models lists the six live IDs. Aion 2.5 remains discontinued.
+  { provider: "aion", modelId: "aion-labs/aion-3.0", displayName: "Aion 3.0", monthlyTokens: 600_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "aion-free", tos: "ok", gates: ["card"], trainsOnPrompts: false },
+  { provider: "aion", modelId: "aion-labs/aion-3.0-mini", displayName: "Aion 3.0 Mini", monthlyTokens: 600_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "aion-free", tos: "ok", gates: ["card"], trainsOnPrompts: false },
   { provider: "aion", modelId: "aion-labs/aion-2.5", displayName: "Aion 2.5", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: "aion-free", tos: "ok" },
-  { provider: "aion", modelId: "aion-labs/aion-2.0", displayName: "Aion 2.0", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "aion-free", tos: "ok", gates: ["card"] },
-  { provider: "aion", modelId: "aion-labs/aion-rp-llama-3.1-8b", displayName: "Aion RP Llama 3.1 8B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "aion-free", tos: "ok", gates: ["card"] },
+  { provider: "aion", modelId: "aion-labs/aion-2.0", displayName: "Aion 2.0", monthlyTokens: 600_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "aion-free", tos: "ok", gates: ["card"], trainsOnPrompts: false },
+  { provider: "aion", modelId: "aion-labs/aion-rp-llama-3.1-8b", displayName: "Aion RP Llama 3.1 8B", monthlyTokens: 600_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "aion-free", tos: "ok", gates: ["card"], trainsOnPrompts: false },
+  { provider: "aion", modelId: "aion-labs/aion-3.5", displayName: "Aion 3.5", monthlyTokens: 600_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "aion-free", tos: "ok", gates: ["card"], trainsOnPrompts: false },
+  { provider: "aion", modelId: "aion-labs/aion-3.5-mini", displayName: "Aion 3.5 Mini", monthlyTokens: 600_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "aion-free", tos: "ok", gates: ["card"], trainsOnPrompts: false },
   { provider: "sealion", modelId: "aisingapore/Llama-SEA-LION-v3.5-70B-R", displayName: "Llama SEA-LION v3.5 70B R", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "sealion-free", tos: "ok" },
   { provider: "sealion", modelId: "aisingapore/Llama-SEA-LION-v3-70B-IT", displayName: "Llama SEA-LION v3 70B IT", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "sealion-free", tos: "ok" },
   { provider: "sealion", modelId: "aisingapore/Gemma-SEA-LION-v4-27B-IT", displayName: "Gemma SEA-LION v4 27B IT", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "sealion-free", tos: "ok" },
@@ -722,4 +723,57 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "naga-ac", modelId: "google/gemma-4-26b-a4b-it:free", displayName: "Gemma 4 26B A4B  (Free)", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "naga-free", tos: "caution" },
   { provider: "naga-ac", modelId: "google/gemma-4-31b-it:free", displayName: "Gemma 4 31B (Free)", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "naga-free", tos: "caution" },
   { provider: "naga-ac", modelId: "google/gemini-2.5-flash:free", displayName: "Gemini 2.5 Flash (Free) (Free)", monthlyTokens: 2_400_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "naga-free", tos: "caution" },
+  // evidence: public-page https://docs.meganova.ai/tiers/tier-1.md (2026-11-27)
+  // "50 RPD (Requests Per Day)" for each of the eight Tier 1 chat IDs listed on https://api.meganova.ai/v1/models.
+  // https://docs.meganova.ai/free-model-quota: "Free quota is granted per account, not per request".
+  // 50 × 800 × 30 = 1,200,000 for the account's single catalog pool. Paid overage can be enabled.
+  // https://docs.meganova.ai/legal-docs/terms-of-service.md, Annex A: "High-throughput use of free modules is prohibited and may lead to suspension."
+  { provider: "meganova-ai", modelId: "mistralai/Mistral-Small-3.2-24B-Instruct-2506", displayName: "Mistral Small 3.2 24B Instruct", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "meganova-free", tos: "caution" },
+  { provider: "meganova-ai", modelId: "meganova-ai/manta-mini-1.0", displayName: "Manta Mini 1.0", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "meganova-free", tos: "caution" },
+  { provider: "meganova-ai", modelId: "meganova-ai/manta-flash-1.0", displayName: "Manta Flash 1.0", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "meganova-free", tos: "caution" },
+  { provider: "meganova-ai", modelId: "Steelskull/L3.3-MS-Nevoria-70b", displayName: "L3.3 MS Nevoria 70B", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "meganova-free", tos: "caution" },
+  { provider: "meganova-ai", modelId: "Sao10K/L3-70B-Euryale-v2.1", displayName: "L3 70B Euryale v2.1", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "meganova-free", tos: "caution" },
+  { provider: "meganova-ai", modelId: "Sao10K/L3-8B-Stheno-v3.2", displayName: "L3 8B Stheno v3.2", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "meganova-free", tos: "caution" },
+  { provider: "meganova-ai", modelId: "BruhzWater/Sapphira-L3.3-70b-0.1", displayName: "Sapphira L3.3 70B 0.1", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "meganova-free", tos: "caution" },
+  { provider: "meganova-ai", modelId: "FallenMerick/MN-Violet-Lotus-12B", displayName: "MN Violet Lotus 12B", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "meganova-free", tos: "caution" },
+
+  // evidence: public-page https://free.ai/api/ (2026-11-27)
+  // "Free 30,000 a day (free pool) 1,000 60 $0" under the API requests/month and requests/minute headings.
+  // The 1,000-call monthly ceiling gives 1,000 × 800 = 800,000, below 30,000 × 30. Email confirmation is required.
+  // https://api.free.ai/v1/models reports these self-hosted aliases. Display names follow the model served.
+  // The /models/qwen-coder/ and /models/qwen3-coder/ pages document both aliases on /v1/chat/.
+  // https://free.ai/terms/ §6: "We do not use your Input or Output to train our models without your explicit consent."
+  // The API docs describe HTTP 402 when out of tokens. Purchased tokens can be used after the daily allowance.
+  { provider: "free-ai", modelId: "qwen7b", displayName: "Qwen 3.6 35B", monthlyTokens: 800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "free-ai", tos: "ok", trainsOnPrompts: false },
+  { provider: "free-ai", modelId: "qwen-coder", displayName: "Qwen 3.6 35B", monthlyTokens: 800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "free-ai", tos: "ok", trainsOnPrompts: false },
+  { provider: "free-ai", modelId: "qwen3-coder", displayName: "Qwen 3.6 35B", monthlyTokens: 800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "free-ai", tos: "ok", trainsOnPrompts: false },
+  { provider: "free-ai", modelId: "deepseek-r1", displayName: "Qwen 3.6 35B Thinking", monthlyTokens: 800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "free-ai", tos: "ok", trainsOnPrompts: false },
+  { provider: "free-ai", modelId: "mistral", displayName: "Qwen 3.6 35B", monthlyTokens: 800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "free-ai", tos: "ok", trainsOnPrompts: false },
+  { provider: "free-ai", modelId: "qwen3-8b", displayName: "Qwen 3.6 35B", monthlyTokens: 800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "free-ai", tos: "ok", trainsOnPrompts: false },
+  { provider: "free-ai", modelId: "deepseek-r1-7b", displayName: "Qwen 3.6 35B Thinking", monthlyTokens: 800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "free-ai", tos: "ok", trainsOnPrompts: false },
+  { provider: "free-ai", modelId: "qwen-vl", displayName: "Qwen 3.6 35B", monthlyTokens: 800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "free-ai", tos: "ok", trainsOnPrompts: false },
+  { provider: "free-ai", modelId: "qwen25-vl", displayName: "Qwen 3.6 35B", monthlyTokens: 800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "free-ai", tos: "ok", trainsOnPrompts: false },
+  { provider: "free-ai", modelId: "moondream2", displayName: "Moondream 2", monthlyTokens: 800_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "free-ai", tos: "ok", trainsOnPrompts: false },
+
+  // evidence: api-public https://kenari.id/api/public/pricing (2026-11-27)
+  // free_tier has "daily":50 and "rpm":5. 50 × 800 × 30 = 1,200,000 per account with zero balance.
+  // https://kenari.id/en/docs/free-models.md: "It is never charged."
+  // "A request over a free-model limit returns HTTP 429."
+  // https://kenari.id/en/terms §3 requires respecting upstream model policies and restricts resale.
+  // Include only chat IDs marked free in both the pricing feed and https://kenari.id/v1/models.
+  { provider: "kenari", modelId: "beam-1-0:free", displayName: "Beam 1.0", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "kenari-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "kenari", modelId: "ernie-5-5-flash-preview:free", displayName: "ERNIE 5.5 Flash Preview", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "kenari-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "kenari", modelId: "flint-v1-0:free", displayName: "Flint 1.0", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "kenari-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "kenari", modelId: "glm-4-6v-flash:free", displayName: "GLM-4.6V-Flash", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "kenari-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "kenari", modelId: "glm-4-7-flash:free", displayName: "GLM-4.7-Flash", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "kenari-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "kenari", modelId: "hy4-flash:free", displayName: "Hy4 Flash", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "kenari-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "kenari", modelId: "laguna-xs-2-1:free", displayName: "Laguna XS 2.1", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "kenari-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "kenari", modelId: "lfm-3-1-7b:free", displayName: "LFM3 1.7B", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "kenari-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "kenari", modelId: "longcat-2-5:free", displayName: "LongCat 2.5", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "kenari-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "kenari", modelId: "nemotron-3-5-lightning:free", displayName: "Nemotron 3.5 Lightning", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "kenari-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "kenari", modelId: "nemotron-3-5-super-vl:free", displayName: "Nemotron 3.5 Super VL", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "kenari-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "kenari", modelId: "nemotron-3-nano-omni-30b-a3b-reasoning:free", displayName: "Nemotron 3 Nano Omni 30B A3B Reasoning", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "kenari-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "kenari", modelId: "nemotron-3-ultra-550b-a55b:free", displayName: "Nemotron 3 Ultra 550B A55B", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "kenari-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "kenari", modelId: "particle-1:free", displayName: "Particle-1", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "kenari-free", tos: "caution", hardStopGuaranteed: true },
+  { provider: "kenari", modelId: "solar-mini4:free", displayName: "Solar Mini4", monthlyTokens: 1_200_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "kenari-free", tos: "caution", hardStopGuaranteed: true },
 ];

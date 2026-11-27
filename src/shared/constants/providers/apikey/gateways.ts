@@ -379,9 +379,9 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     website: "https://meganova.ai",
     hasFree: true,
     freeNote:
-      "Free signup without a card. Published Tier 1 per-model quotas total 550 requests/day; they are not a shared global pool, and paid overage can apply if enabled.",
+      "Tier 1 has per-model quotas of 50 requests a day for eligible chat models, with no card required. Paid overage applies if you enable it. High-throughput use can lead to suspension.",
     apiHint:
-      "Create a MegaNova API key, then use https://api.meganova.ai/v1 as the OpenAI-compatible base URL.",
+      "Create a MegaNova API key and use https://api.meganova.ai/v1. Tier 1 chat quotas reset at 00:00 UTC.",
   },
   mixlayer: {
     id: "mixlayer",
@@ -635,9 +635,9 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     website: "https://free.ai",
     hasFree: true,
     freeNote:
-      "30,000 tokens/day cover self-hosted models after email verification. Usage beyond the pool can bill at raw cost, and premium external models are paid.",
+      "Free accounts get 30,000 tokens/day for self-hosted models after email verification, with a limit of 1,000 API requests/month. Premium external models are paid.",
     apiHint:
-      "Create an sk-free- key, then use the nonstandard but OpenAI-shaped https://api.free.ai/v1/chat/ endpoint. Select a self-hosted zero-price model to stay within the free pool.",
+      "Confirm your email, create an sk-free- key, and use https://api.free.ai/v1/chat/. Choose a self-hosted model to use your daily allowance.",
   },
 
   dgrid: {
@@ -1350,10 +1350,15 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     textIcon: "KN",
     passthroughModels: true,
     website: "https://kenari.id",
+    hasFree: true,
+    subscriptionRisk: true,
+    riskNoticeVariant: "unofficial-service",
+    freeNote:
+      "New accounts can make 50 requests a day and 5 per minute on :free models with a zero balance. Kenari is a third-party gateway whose upstream providers may restrict access.",
     authHint:
       "Use your Kenari API key (kn-...) in Authorization: Bearer <key>. Fully OpenAI-compatible. API base URL: https://kenari.id/v1.",
     apiHint:
-      "Kenari exposes an OpenAI-compatible chat completions endpoint at https://kenari.id/v1/chat/completions, plus a live /v1/models catalog covering Claude, GPT, DeepSeek, GLM, Kimi and more. OmniRoute uses the OpenAI protocol and lists models via passthrough.",
+      "Use https://kenari.id/v1/chat/completions with your Kenari API key. Select a model ending in :free to use the zero-balance quota.",
   },
   tokenmarket: {
     id: "tokenmarket",
@@ -1433,11 +1438,11 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     website: "https://www.aionlabs.ai",
     hasFree: true,
     freeNote:
-      "Free tier ~20k tokens/day across the Aion reasoning models; activating it requires verifying a payment card, which is never charged (checked 2026-11-23).",
+      "The free API tier shares 20,000 tokens/day across models. Verify a payment card to activate your API key. Aion does not charge it for verification.",
     authHint:
       "Create an API key at aionlabs.ai and verify a payment card on the Billing page to activate the free tier (the card is never charged), then paste it here as a Bearer token.",
     apiHint:
-      "OpenAI-compatible endpoint at https://api.aionlabs.ai/v1 with a public /models catalog carrying context and pricing.",
+      "Verify a payment card in Billing to activate your free API key, then use https://api.aionlabs.ai/v1 as your OpenAI-compatible base URL.",
   },
   routeway: {
     id: "routeway",

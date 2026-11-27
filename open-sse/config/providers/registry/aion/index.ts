@@ -4,9 +4,9 @@ import { buildOpenAiCompatibleRegistryEntry } from "../../shared.ts";
 /**
  * Aion Labs — OpenAI-compatible aggregator (api.aionlabs.ai).
  *
- * Free key from aionlabs.ai (no card). The
- * public /models catalog (5 models, verified 2026-07-20) carries context and
- * pricing; free tier is 20k tokens/day.
+ * The free API tier requires card verification and shares 20,000 tokens per day
+ * across models. See https://www.aionlabs.ai/docs/rate-limits/ (2026-11-27).
+ * The public /models catalog carries context and pricing.
  */
 export const aionProvider: RegistryEntry = buildOpenAiCompatibleRegistryEntry({
   id: "aion",

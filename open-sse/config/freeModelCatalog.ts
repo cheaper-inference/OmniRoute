@@ -480,6 +480,10 @@ export const FREE_QUOTA_UNIT: Record<string, FreeQuotaUnit> = {
   onomeo: "requests",
   dgrid: "requests",
   "naga-ac": "requests",
+  "meganova-ai": "requests",
+  "free-ai": "requests",
+  aion: "tokens",
+  kenari: "requests",
 };
 
 /** Per-pool override of `FREE_QUOTA_UNIT`, for a pool published in a different unit. */
