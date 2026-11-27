@@ -1196,6 +1196,7 @@
   "featureFlagAutoRequestResolvedCapabilitiesDescription": "Let auto/* requests build the candidate pool with resolved model capabilities (vision, reasoning, thinking) and observed quality scores, read in one bulk pass. Off by default: request-time candidate weights stay exactly as before. On: those signals feed the snapshot weights, so candidate weights and selection can change.",
   "featureFlagCredentialHealthRetestAutoDisabledDescription": "Let the credential health sweep retest connections the gateway switched off by itself (at most once every 6 hours each, 5 per sweep) and switch one back on when its retest passes. Off by default: such connections stay off until an operator acts. Operator-disabled and permanently banned connections are never retested.",
   "featureFlagQuotaDailyRevalidationDescription": "Let the credential health sweep re-probe a quota lock that parked a model for more than a day. Cost: one minimal real request (answer cap of 16 tokens, the smallest budget some upstreams accept) to that model on its connection, at most once a day per locked model and 5 per sweep. A lock scoped to a quota family (Codex `codex`/`spark`, Antigravity `gemini`/`claude`/`argon`) is probed through a real model of that same family. If the model answers, its lock is cleared early, so a quota that resets early (or a lock derived from a bad parse) stops parking it; a quota answer keeps the lock, and any other outcome leaves it untouched. A probe only ever affects that model's lock, never the connection or its other models. Off by default: a long quota lock lasts exactly the window it announced, and no extra upstream request is made.",
+  "featureFlagManagedUpdateRollbackEnabledDescription": "Let the dashboard update button hand a global npm install on Linux, running as the CLI-managed service, to a detached coordinator that snapshots the data and the installed package, installs the exact new version, proves the new process ready, and restores the previous version and data once if it cannot. The service stops during the swap. Off by default: the update button keeps today's flow.",
   "sidebar": {
     "home": "Home",
     "dashboard": "Dashboard",
@@ -2066,6 +2067,49 @@
     "stepRebuildNativeModules": "Rebuild Native Modules",
     "stepRestartService": "Restart Service",
     "stepComplete": "Complete",
+    "stepManagedStop": "Stop Service",
+    "stepManagedSnapshot": "Snapshot Data and Package",
+    "stepManagedInstall": "Install New Version",
+    "stepManagedVerify": "Start and Verify",
+    "stepManagedRestore": "Restore Previous Version",
+    "managedUpdateReconnecting": "Waiting for the server to come back.",
+    "managedUpdateMessage": {
+      "stop": {
+        "pending": "Waiting to stop the service.",
+        "running": "Stopping the service.",
+        "done": "Service stopped.",
+        "failed": "The service could not be stopped."
+      },
+      "snapshot": {
+        "pending": "Waiting to snapshot the data and the installed package.",
+        "running": "Copying the data and the installed package.",
+        "done": "Data and package copied.",
+        "failed": "The snapshot could not be completed."
+      },
+      "install": {
+        "pending": "Waiting to install v{version}.",
+        "running": "Installing v{version}.",
+        "done": "Installed v{version}.",
+        "failed": "The installation of v{version} failed."
+      },
+      "verify": {
+        "pending": "Waiting to start v{version}.",
+        "running": "Starting v{version} and checking that it answers.",
+        "done": "v{version} started and passed its readiness check.",
+        "failed": "v{version} did not start correctly."
+      },
+      "restore": {
+        "running": "Restoring v{version} and its data.",
+        "done": "v{version} and its data restored.",
+        "failed": "The restoration did not complete."
+      },
+      "updated": "Updated to v{version}. The service restarted and answered its readiness check.",
+      "rolledBack": "The update to v{target} did not start correctly. v{version} and its data were restored and the service is running again.",
+      "manualRecovery": "The update failed and the automatic recovery did not complete. Manual recovery is required.",
+      "snapshotAt": "Your data from before the update is preserved at {path}.",
+      "notApplied": "The update was not applied. Nothing was changed.",
+      "timeout": "The update did not report a result in time. Check the service before trying again."
+    },
     "stepError": "Error",
     "updateCompleteTitle": "Update Complete!",
     "updateFailedTitle": "Update Failed",

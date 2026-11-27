@@ -1813,6 +1813,14 @@ uses (`npm`, `source` or `docker-compose`).
   (falls back to the `latest` field, then `"unavailable"`); `next`, `nightly` and `lts` appear
   only when that dist-tag exists. A `Cache-Control: no-cache` request refreshes both lookups.
 
+With `MANAGED_UPDATE_ROLLBACK_ENABLED` on, `GET /api/system/version?operationId=<uuid>` returns the
+durable verdict of a managed update instead (management auth, `Cache-Control: no-store`; 400 for a
+malformed id, 404 for an unknown one). `status` is `running`, `updated`, `rolled-back`,
+`manual-recovery` or `unsupported`, with `phase`, the two versions, `runningVersion`, and, for
+`manual-recovery`, `snapshotPath` and `recovery.steps`. The matching `POST` answers `202` with that
+`operationId` when the host is in scope (global npm install on Linux under the CLI-managed service);
+otherwise it behaves as before. See `docs/guides/CLI-INTEGRATIONS.md` for the flow and its limits.
+
 The channel model (`latest` = v3 until the 4.0 GA, `next` = rc, `nightly` = `develop` builds,
 `lts` = v3 patches after the 4.0 GA) is described in `docs/ops/RELEASE_STRATEGY.md`.
 

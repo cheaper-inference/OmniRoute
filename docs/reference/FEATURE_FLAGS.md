@@ -46,7 +46,7 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-138 flags across 6 categories. **Default** is the definition default — the value
+139 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
 ### Security (16)
@@ -130,7 +130,7 @@ Invalid enum values and unreadable feature-flag storage fail closed. Neither opt
 priced spend or a failed pricing lookup. Enforcement and the administrator report resolve the
 same effective policy.
 
-### Runtime (64)
+### Runtime (65)
 
 | Key                                            | Type    | Default | Restart | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------------- | ------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -200,6 +200,7 @@ same effective policy.
 | `COMBO_DECISION_ROUTER_ENABLED`                | boolean | `false` |         | Let auto combos that use the `decision` router strategy ask their configured decider which model should answer each request: TypeSafe System One, an operator decision URL (System One or OpenAI chat wire), or one of the combo's own models in process. Every routed request then sends the last user message (at most 8000 characters) and the model menu to that decider, which may be a paid third-party call; a stored key alone never turns it on. Off by default: decision combos read no credential, make no call and route with the `rules` strategy.                                                                                 |
 | `CODEX_SEARCH_AUTO_FALLBACK_ENABLED`           | boolean | `false` |         | Let an automatic web search (no explicit `provider`) use a connected Codex (ChatGPT) account through `codex-search`: as the last resort ahead of the keyless providers when no credentialed search provider is usable, and as the failover alternate (#17933). Each such search spends ChatGPT subscription quota and takes about 10–40 s. Off by default: `codex-search` runs only when a request names it explicitly.                                                                                                                                                                                                                         |
 | `CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER`   | boolean | `false` |         | For Antigravity / Code Assist onboarding, an account whose `loadCodeAssist` answer lists `ineligibleTiers` and marks no allowed tier as default onboards with `legacy-tier` instead of its `currentTier` (#18060), matching the Antigravity-Manager `fetch_project_id` order. Not yet confirmed on a real restricted account. Off by default: such an account keeps onboarding with its `currentTier`.                                                                                                                                                                                                                                          |
+| `MANAGED_UPDATE_ROLLBACK_ENABLED`              | boolean | `false` |         | Let the dashboard update button hand a global npm install on Linux, run as the CLI-managed service, to a detached coordinator that snapshots data and package, installs the exact version, proves the new process ready and restores the previous version and data once if it cannot. The service stops during the swap; the verdict is read by id (`GET /api/system/version?operationId=`). Off by default: today's flow. Docker, Electron, Windows, source installs and systemd or pm2 services always keep it. CLI: `omniroute update --rollback-on-failure`.                                                                                |
 
 ### CLI (8)
 
@@ -301,10 +302,10 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 138 flags
+    // ... all 139 flags
   ],
   "summary": {
-    "total": 138,
+    "total": 139,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

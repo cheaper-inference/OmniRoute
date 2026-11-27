@@ -48,11 +48,18 @@ function UpdateStepRows({ steps }: { steps: UpdateStep[] }) {
     install: t("stepInstallPackage"),
     rebuild: t("stepRebuildNativeModules"),
     restart: t("stepRestartService"),
+    "managed-stop": t("stepManagedStop"),
+    "managed-snapshot": t("stepManagedSnapshot"),
+    "managed-install": t("stepManagedInstall"),
+    "managed-verify": t("stepManagedVerify"),
+    "managed-restore": t("stepManagedRestore"),
     complete: t("stepComplete"),
     error: t("stepError"),
   };
-  // "complete" and "error" are outcomes, drawn by UpdateOutcome.
-  const rows = steps.filter((s) => s.step !== "complete" && s.step !== "error");
+  // "complete", "error" and "recovery" are outcomes, drawn by UpdateOutcome.
+  const rows = steps.filter(
+    (s) => s.step !== "complete" && s.step !== "error" && s.step !== "recovery"
+  );
   return (
     <>
       {rows.map((s) => (
@@ -77,8 +84,22 @@ function UpdateOutcome({ phase, steps }: { phase: UpdatePhase; steps: UpdateStep
   const t = useTranslations("home");
   const error = steps.find((s) => s.step === "error");
   const complete = steps.find((s) => s.step === "complete");
+  // A managed update that failed: prose outcome (rolled back, or manual recovery steps).
+  const recovery = steps.find((s) => s.step === "recovery");
   return (
     <>
+      {recovery && (
+        <div
+          role="alert"
+          className={`mt-1 px-3 py-2.5 rounded-lg border ${
+            recovery.status === "failed"
+              ? "border-error/30 bg-error/5 text-error"
+              : "border-warning/30 bg-warning/5"
+          }`}
+        >
+          <p className="text-xs whitespace-pre-line break-words">{recovery.message}</p>
+        </div>
+      )}
       {error && (
         <div className="mt-1 px-3 py-2.5 rounded-lg border border-error/30 bg-error/5 text-error">
           <p className="text-xs font-mono break-all">{error.message}</p>
@@ -99,17 +120,20 @@ function UpdateOutcome({ phase, steps }: { phase: UpdatePhase; steps: UpdateStep
 
 function UpdateActions({
   phase,
+  steps,
   onDismiss,
   onRetry,
-}: Pick<UpdateProgressDialogProps, "phase" | "onDismiss" | "onRetry">) {
+}: Pick<UpdateProgressDialogProps, "phase" | "steps" | "onDismiss" | "onRetry">) {
   const t = useTranslations("home");
   if (phase !== "failed" && phase !== "done") return null;
+  // After a failed automatic recovery nothing may be started again until the operator acts.
+  const manualRecovery = steps.some((s) => s.step === "recovery" && s.status === "failed");
   return (
     <div className="flex gap-2 mt-4">
       <Button size="sm" fullWidth onClick={onDismiss}>
         {phase === "done" ? t("reloadNow") : t("closeUpdate")}
       </Button>
-      {phase === "failed" && (
+      {phase === "failed" && !manualRecovery && (
         <Button size="sm" variant="secondary" fullWidth onClick={onRetry}>
           {t("retryUpdate")}
         </Button>
@@ -149,7 +173,7 @@ export default function UpdateProgressDialog({
         <UpdateOutcome phase={phase} steps={steps} />
       </div>
 
-      <UpdateActions phase={phase} onDismiss={onDismiss} onRetry={onRetry} />
+      <UpdateActions phase={phase} steps={steps} onDismiss={onDismiss} onRetry={onRetry} />
     </Modal>
   );
 }
