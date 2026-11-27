@@ -24,7 +24,7 @@
 | **+ n'azụ nlele njirimara mpaghara**                 | **+~ 6M**         | `modelscope` (njikọ Alibaba igwe ojii + mainland-China nkwenye ezigbo aha). Oke oke na-emegharị ugboro ugboro, ekpughere dị ka `gatedRecurringTokens` / `gatedProviders` yana na dashboard. Ọ dịghị mgbe a chịkọtara n'ime isi okwu: +~ 6M n'azụ nkwenye njirimara mpaghara. |
 | Theoretical uko ụlọ (niile ọnụego oke, 24/7)         | ~ 10B             | Nchịkọ nke ọnụ ahịa ndị na-eweta ọ bụla wepụrụ na ojiji anaghị akwụsị akwụsị.** Ọ bụghị nkwa** — emela isi okwu a.                                                                                                                                                           |
 
-**Akụkọ eziokwu:** _OmniRoute mkpokọta**~ 1.62B edekọtara akara ngosi efu kwa ọnwa** (ruo ~ 2.22B n'ọnwa mbụ gị nwere kredit ndebanye aha) gafere ọdọ mmiri 34 na-akwụghị ụgwọ — gbakwunyere ogologo ọdụ ọdụ nke na-adịgide adịgide, ndị na-enye enweghị okpu — na RTK + Caveman mkpakọ (15-95% token ego) na-agbatịkwu nke ahụ._
+**Akụkọ eziokwu:** _OmniRoute mkpokọta**~ 1.62B edekọtara akara ngosi efu kwa ọnwa** (ruo ~ 2.22B n'ọnwa mbụ gị nwere kredit ndebanye aha) gafere ọdọ mmiri 26 na-akwụghị ụgwọ — gbakwunyere ogologo ọdụ ọdụ nke na-adịgide adịgide, ndị na-enye enweghị okpu — na RTK + Caveman mkpakọ (15-95% token ego) na-agbatịkwu nke ahụ._
 
 > **Kedu ihe kpatara nke a ji daa site na ~ gara aga 1.94B.** Ntughari 2026-06-17 bụ mgbazi n'eziokwu, ọ bụghị ihe efu: `gemini` bụ ugbu a ọdọ mmiri ewepụghị (a na-ejupụta ya site n'ịgụta ụdị Flash ọ bụla iche iche, 462M → 60M), `cloudflare-ai` dezie ya n'ezie 10k-Neurons/day (122M → 30M), `doubao` - eweghachiteghị kredit dị ka otu (nke ewepụrụghị oge kredit)`chutes`/`phind`/`kluster` kwụsịrị). Nkwụghachi nke obere site na `llm7` ( 5M/day → 150M ziri ezi) yana ndị na-eweta n'efu (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
@@ -38,7 +38,7 @@
 >
 > **Emeziri na 2026-09-03 (#11773):** eweghachiri `cerebras` site na onyinye 30M/mo ugboro ugboro (nnwale 1M tokens/day enweghị kaadị) gaa na kredit ndebanye $5 otu oge nke chọrọ usoro ịkwụ ụgwọ. Otu iwu ịkwụwa aka ọtọ ka LongCat.
 >
-> **Ọzọkwa xKiro (2026-09-03):** ọdọ mmiri `xkiro-free` ọhụrụ (150M/mo) na-agbakwụnye igodo ọdọ mmiri ugboro iri atọ na ise. Weebụ Felo ewepụrụ mgbe provenance/licensing nke GPL nwetara na-anọgide na HOLD. Isi mmalite na-akọ ugbu a** 34 igodo ọdọ mmiri ugboro ugboro** na**~ 1.62B kwụ ọtọ** — dị ndụ, nọmba CI-gated (`check:docs-counts` daa n'iwu ma ọ bụrụ na nke a si na `computeFreeModelTotals()` pụọ).
+> **Ọzọkwa xKiro (2026-09-03):** ọdọ mmiri `xkiro-free` ọhụrụ (150M/mo) na-agbakwụnye igodo ọdọ mmiri ugboro iri atọ na ise. Weebụ Felo ewepụrụ mgbe provenance/licensing nke GPL nwetara na-anọgide na HOLD. Isi mmalite na-akọ ugbu a** 26 igodo ọdọ mmiri ugboro ugboro** na**~ 1.62B kwụ ọtọ** — dị ndụ, nọmba CI-gated (`check:docs-counts` daa n'iwu ma ọ bụrụ na nke a si na `computeFreeModelTotals()` pụọ).
 
 Kachasị ukwuu** edeputara** ndị nyere aka: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (ise otu ụdị okpu), `cloudflare-ai` 30M, `api-airforce` 24M. (Ewepụrụ `longcat` — onyinye ya 10M LongCat-2.0 bụ otu oge, kredit nbanye KYC gated, ọ bụghị mmefu ego kwa ọnwa na-emegharị.)
 

@@ -5,13 +5,18 @@ on:
     branches:
       - main
       - "release/**"
-    types: [opened, synchronize, reopened, ready_for_review]
+    # `edited` only for a base change (a retarget): the job checks the merge with the new base,
+    # and omni-queue reads this check per head (config/merge-queue/config.json prChecksRequired).
+    # A title/body edit skips the job in a group of its own, as in ci.yml (see its comment above
+    # `concurrency`): a skipped job is named by its unevaluated `name:` expression, never
+    # `API Route Typecheck`, so the real run's check stays the newest of that name.
+    types: [opened, synchronize, reopened, ready_for_review, edited]
   push:
     branches: [main]
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && !github.event.changes.base && (github.event.changes.body || github.event.changes.title)) && format('-metadata-edit-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 permissions:
@@ -19,7 +24,8 @@ permissions:
 
 jobs:
   api-typecheck:
-    name: API Route Typecheck
+    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && !github.event.changes.base && (github.event.changes.body || github.event.changes.title)) && 'API Route Typecheck (PR metadata edit)' || 'API Route Typecheck' }}
+    if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'edited' && !github.event.changes.base && (github.event.changes.body || github.event.changes.title)) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7

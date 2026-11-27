@@ -1,0 +1,1 @@
+- **feat(api):** Add a server-side request context for integrations to bind a required API key and apply its policy and usage attribution without forwarding the secret.

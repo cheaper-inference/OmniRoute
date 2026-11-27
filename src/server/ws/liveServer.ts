@@ -48,7 +48,9 @@ import {
 import {
   buildAllowedOrigins,
   buildAllowedHosts,
-  isOriginAllowed as isOriginAllowedPure,
+  isLiveWsAuthAcceptedForOrigin,
+  resolveLiveWsOriginVerdict,
+  type LiveWsOriginVerdict,
 } from "./liveServerAllowList";
 
 // ── Config ────────────────────────────────────────────────────────────────
@@ -109,14 +111,17 @@ const ALLOWED_ORIGINS = buildAllowedOrigins();
 const ALLOWED_HOSTS = buildAllowedHosts();
 
 /**
- * Whether the given Origin is acceptable for a WS upgrade.
+ * The Origin verdict for a WS upgrade: allow-listed, same-origin (the dashboard's own
+ * origin, relayed through the main HTTP port, KEA-9514) or forbidden.
  *
  * Delegates to `liveServerAllowList` for the actual policy; this wrapper
  * exists so the connection handler can read the closure-bound allow-lists
  * without re-parsing env on every connection.
  */
-function isOriginAllowed(origin: string | undefined): boolean {
-  return isOriginAllowedPure(origin, process.env, {
+function originVerdict(request: IncomingMessage): LiveWsOriginVerdict {
+  const origin = request.headers["origin"];
+  const originStr = Array.isArray(origin) ? origin[0] : origin;
+  return resolveLiveWsOriginVerdict(originStr, request.headers, process.env, {
     allowedOrigins: ALLOWED_ORIGINS,
     allowedHosts: ALLOWED_HOSTS,
   });
@@ -138,6 +143,8 @@ interface ClientState {
   request: IncomingMessage;
   /** True while a heartbeat re-check of the credential is in flight */
   revalidating: boolean;
+  /** Origin verdict at upgrade time; a same-origin client must keep a real credential */
+  originVerdict: LiveWsOriginVerdict;
 }
 
 const clients = new Map<string, ClientState>();
@@ -258,7 +265,7 @@ async function authorizeConnection(request: import("http").IncomingMessage): Pro
   // connection because no auth_token cookie is ever issued (there is no login
   // flow to mint one). See issue #14256.
   if (!(await isLiveWsAuthRequired(request))) {
-    return { authorized: true, sessionId };
+    return { authorized: true, sessionId, anonymous: true };
   }
 
   // Token MUST come from the Authorization header (or X-Live-WS-Token).
@@ -631,7 +638,8 @@ function revalidateClient(clientId: string, client: ClientState): void {
   authorizeConnection(client.request)
     .catch((): WsAuthResult => ({ authorized: false, sessionId: clientId }))
     .then((auth) => {
-      if (!shouldCloseClientAfterRevalidation(auth.authorized, clientId, client, clients)) return;
+      const accepted = isLiveWsAuthAcceptedForOrigin(client.originVerdict, auth);
+      if (!shouldCloseClientAfterRevalidation(accepted, clientId, client, clients)) return;
       clients.delete(clientId);
       sendTo(client.ws, {
         type: "error",
@@ -748,10 +756,11 @@ export async function startLiveDashboardServer(
     // Origin check — browsers always send Origin on the WS upgrade; reject
     // unknown origins to stop drive-by cross-origin WebSocket from a victim
     // page. Non-browser clients (CLI / MCP) omit Origin and are accepted
-    // only when bound to loopback (see isOriginAllowed).
-    const origin = request.headers["origin"];
-    const originStr = Array.isArray(origin) ? origin[0] : origin;
-    if (!isOriginAllowed(originStr)) {
+    // only when bound to loopback (see isOriginAllowed). The dashboard's own
+    // origin, relayed through the main HTTP port, is accepted too, but only
+    // with a real credential (checked after authorization below).
+    const verdict = originVerdict(request);
+    if (verdict === "forbidden") {
       sendTo(ws, { type: "error", code: "FORBIDDEN_ORIGIN", message: "Origin not allowed" });
       ws.close(4003, "Forbidden origin");
       return;
@@ -771,6 +780,12 @@ export async function startLiveDashboardServer(
       ws.close(4001, "Unauthorized");
       return;
     }
+    if (!isLiveWsAuthAcceptedForOrigin(verdict, auth)) {
+      // Same-origin but anonymous: refused like an unknown origin (KEA-9514).
+      sendTo(ws, { type: "error", code: "FORBIDDEN_ORIGIN", message: "Origin not allowed" });
+      ws.close(4003, "Forbidden origin");
+      return;
+    }
 
     const clientId = auth.sessionId;
     activeClientId = clientId;
@@ -784,6 +799,7 @@ export async function startLiveDashboardServer(
       remoteAddress: request.socket?.remoteAddress || "unknown",
       request,
       revalidating: false,
+      originVerdict: verdict,
     };
 
     clients.set(clientId, client);

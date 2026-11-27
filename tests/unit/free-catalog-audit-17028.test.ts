@@ -58,11 +58,14 @@ test("#17028 seven exact free offers have evidence while regional and account ga
     "glm-cn/glm-4.5-flash",
     "requesty/mistral/leanstral-1-5",
     "requesty/nvidia/nemotron-3-nano-30b-a3b",
+    // November 2026 re-audit: the Aion free key now needs a verified card (gates ["card"]), so
+    // the changed economics left debt for a dated record.
+    "aion/aion-labs/aion-3.0",
   ]) {
     assert.ok(evidence.has(key), key);
     assert.equal(policy.debt.includes(key), false, key);
   }
-  for (const key of ["agnes-cn/agnes-2.5-flash", "aion/aion-labs/aion-3.0"]) {
+  for (const key of ["agnes-cn/agnes-2.5-flash"]) {
     assert.equal(evidence.has(key), false, key);
     assert.ok(policy.debt.includes(key), key);
   }

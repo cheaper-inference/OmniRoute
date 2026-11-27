@@ -37,6 +37,13 @@ import { isComboModelVisible } from "./comboVisibility.ts";
 import { getTargetProvider, MAX_COMBO_DEPTH } from "./comboPredicates.ts";
 import { evaluateContextLimit, getModelContextOverrideValue } from "./contextOverrideGate.ts";
 import {
+  contextRequirementsForTarget,
+  exceedsKnownOutputLimit,
+  hasKnownCompatibleContextLimit,
+  getAutomaticOutputCapFallback,
+  type CompatFilterOptions,
+} from "./outputLimitPolicy.ts";
+import {
   normalizeModelEntry,
   orderTargetsForWeightedFallback,
   selectWeightedTarget,
@@ -54,6 +61,7 @@ import type {
 } from "./types.ts";
 
 export { getComboModelString, normalizeComboStep };
+export type { CompatFilterOptions } from "./outputLimitPolicy.ts";
 export type { ComboStep } from "../../../src/lib/combos/steps.ts";
 
 /** Resolve a provider alias to the id used by the capability registries. */
@@ -539,26 +547,6 @@ export function deriveRequestCompatibilityRequirements(
   };
 }
 
-function exceedsKnownOutputLimit(
-  requestedOutputTokens: number,
-  maxOutputTokens: number | null
-): boolean {
-  if (requestedOutputTokens <= 0 || maxOutputTokens === null) return false;
-  return maxOutputTokens < requestedOutputTokens;
-}
-
-function hasKnownCompatibleContextLimit(
-  target: ResolvedComboTarget,
-  requirements: RequestCompatibilityRequirements
-): boolean {
-  if (requirements.requiredContextTokens <= 0) return false;
-  const capabilities = getResolvedModelCapabilities({
-    provider: target.providerId || target.provider || null,
-    model: target.modelStr,
-  });
-  return evaluateContextLimit(capabilities, requirements, target.modelStr) === true;
-}
-
 /**
  * #13870: how far the required-token estimate exceeds an operator-set
  * `model_context_override` before that override is no longer trusted as
@@ -681,56 +669,6 @@ function getTargetCompatibilityFailures(
   return failures;
 }
 
-export type CompatFilterOptions = {
-  /**
-   * Opt-in legacy behavior (#8488): when every target fails a hard capability
-   * requirement (tools / vision / structured_output), restore the full pool
-   * instead of returning an empty list. Default is fail-closed.
-   */
-  failOpen?: boolean;
-  /**
-   * Opt-in: a known output ceiling below the request's `max_tokens` no longer
-   * removes the target; it keeps its place in the strategy order (operator
-   * priority wins). Clients like Claude Code send max_tokens as a generous
-   * ceiling (128000), which otherwise strips every 64k-output model from the
-   * combo; translators clamp to the model cap, and a real rejection still falls
-   * through to the next target. Default keeps the hard exclusion.
-   */
-  outputLimitAdvisory?: boolean;
-};
-
-/**
- * #17958: under `outputLimitAdvisory` a target whose known output limit sits
- * below `max_tokens` stays in the pool, and dispatch caps its reply at that
- * limit (`getExplicitModelOutputCap` into `enforceOutputTokenBudget`). Size its
- * context-window check with the same cap, so it is not demoted for a budget it
- * would never be sent. The output_tokens check still sees the full request, and
- * an unknown limit keeps the full requested budget. A limit of zero or less
- * counts as unknown, as it does at dispatch.
- */
-function contextRequirementsForTarget(
-  target: ResolvedComboTarget,
-  requirements: RequestCompatibilityRequirements,
-  outputLimitAdvisory: boolean
-): RequestCompatibilityRequirements {
-  if (!outputLimitAdvisory) return requirements;
-  const { maxOutputTokens } = getResolvedModelCapabilities({
-    provider: target.providerId || target.provider || null,
-    model: target.modelStr,
-  });
-  if (
-    typeof maxOutputTokens !== "number" ||
-    maxOutputTokens <= 0 ||
-    !exceedsKnownOutputLimit(requirements.requestedOutputTokens, maxOutputTokens)
-  ) {
-    return requirements;
-  }
-  return {
-    ...requirements,
-    requiredContextTokens: requirements.estimatedInputTokens + maxOutputTokens,
-  };
-}
-
 function highestKnownOutputLimit(targets: ResolvedComboTarget[]): number {
   let ceiling = 0;
   for (const target of targets) {
@@ -851,13 +789,47 @@ function preferConfirmedVisionTargets(
   return partitionConfirmedVisionTargets(targets, requirements).targets;
 }
 
+type RequestCompatibilityDetails = {
+  contextRequirementsByTarget: Map<ResolvedComboTarget, RequestCompatibilityRequirements>;
+  usedAutomaticOutputCapFallback: boolean;
+};
+
 /** Filter incompatible targets without restoring unsupported media through fail-open routing. */
 export function filterTargetsByRequestCompatibility(
   targets: ResolvedComboTarget[],
   body: Record<string, unknown>,
   log: ComboLogger,
-  label = "Context-aware fallback",
+  label?: string,
   options?: CompatFilterOptions
+): ResolvedComboTarget[] {
+  return filterTargetsWithCompatibilityDetails(targets, body, log, label, options);
+}
+
+/** Keep the per-target reservation and any automatic fallback decision with the pool. */
+export function resolveTargetRequestCompatibility(
+  targets: ResolvedComboTarget[],
+  body: Record<string, unknown>,
+  log: ComboLogger,
+  label?: string,
+  options?: CompatFilterOptions
+) {
+  const details: RequestCompatibilityDetails = {
+    contextRequirementsByTarget: new Map(),
+    usedAutomaticOutputCapFallback: false,
+  };
+  return {
+    targets: filterTargetsWithCompatibilityDetails(targets, body, log, label, options, details),
+    ...details,
+  };
+}
+
+function filterTargetsWithCompatibilityDetails(
+  targets: ResolvedComboTarget[],
+  body: Record<string, unknown>,
+  log: ComboLogger,
+  label = "Context-aware fallback",
+  options?: CompatFilterOptions,
+  details?: RequestCompatibilityDetails
 ): ResolvedComboTarget[] {
   if (targets.length === 0) return targets;
   const outputLimitAdvisory = options?.outputLimitAdvisory === true;
@@ -873,16 +845,13 @@ export function filterTargetsByRequestCompatibility(
 
   const rejected: Array<{ target: ResolvedComboTarget; reasons: string[] }> = [];
   const targetReasons = new Map<ResolvedComboTarget, string[]>();
-  const targetRequirements = new Map(
-    targets.map((target) => [
-      target,
-      contextRequirementsForTarget(target, requirements, outputLimitAdvisory),
-    ])
-  );
+  const targetRequirements = details?.contextRequirementsByTarget ?? new Map();
   const requirementsFor = (target: ResolvedComboTarget) =>
     targetRequirements.get(target) ?? requirements;
   for (const target of targets) {
-    const reasons = getTargetCompatibilityFailures(target, requirementsFor(target));
+    const adjusted = contextRequirementsForTarget(target, requirements, outputLimitAdvisory);
+    if (adjusted !== requirements) targetRequirements.set(target, adjusted);
+    const reasons = getTargetCompatibilityFailures(target, adjusted);
     targetReasons.set(target, reasons);
     if (reasons.length > 0) rejected.push({ target, reasons });
   }
@@ -951,6 +920,20 @@ export function filterTargetsByRequestCompatibility(
     return preferConfirmedVisionTargets(compatible, requirements);
   }
   if (compatible.length === 0) {
+    const capFallback = getAutomaticOutputCapFallback(body, rejected, requirements, options);
+    if (capFallback?.size) {
+      if (details) {
+        details.usedAutomaticOutputCapFallback = true;
+        for (const [target, adjusted] of capFallback) targetRequirements.set(target, adjusted);
+      }
+      log.debug?.(
+        "COMBO",
+        `${label}: using model output caps for the Anthropic max_tokens ceiling (${capFallback.size}/${targets.length} targets)`
+      );
+      return preferConfirmedVisionTargets([...capFallback.keys()], requirements);
+    }
+    // Do not let the legacy media-only recovery undo a failed safe-cap check.
+    if (capFallback !== null) return [];
     const hardRejected = rejected.some((entry) => hasHardCapabilityFailure(entry.reasons));
     const failOpen = options?.failOpen === true;
 

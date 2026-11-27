@@ -37,11 +37,11 @@ matching Dependabot alert is dismissed as `tolerable_risk`.
 
 ## 3. GitHub security alerts
 
-| Source                 | Command                                                                              | Open | Fixed | Dismissed                                                                |
-| ---------------------- | ------------------------------------------------------------------------------------ | ---: | ----: | ------------------------------------------------------------------------ |
-| Code scanning (CodeQL) | `gh api "repos/diegosouzapw/OmniRoute/code-scanning/alerts?state=open" --paginate`   |    0 |    67 | 241 (false positive 120 · won't fix 72 · used in tests 49)               |
-| Dependabot             | `gh api "repos/diegosouzapw/OmniRoute/dependabot/alerts?state=open" --paginate`      |    0 |   286 | 5 (all `tolerable_risk`: braces, sprintf-js, node-forge, extract-zip ×2) |
-| Secret scanning        | `gh api "repos/diegosouzapw/OmniRoute/secret-scanning/alerts?state=open" --paginate` |    0 |     — | —                                                                        |
+| Source                 | Command                                                                                   | Open | Fixed | Dismissed                                                                |
+| ---------------------- | ----------------------------------------------------------------------------------------- | ---: | ----: | ------------------------------------------------------------------------ |
+| Code scanning (CodeQL) | `gh api "repos/cheaper-inference/OmniRoute/code-scanning/alerts?state=open" --paginate`   |    0 |    67 | 241 (false positive 120 · won't fix 72 · used in tests 49)               |
+| Dependabot             | `gh api "repos/cheaper-inference/OmniRoute/dependabot/alerts?state=open" --paginate`      |    0 |   286 | 5 (all `tolerable_risk`: braces, sprintf-js, node-forge, extract-zip ×2) |
+| Secret scanning        | `gh api "repos/cheaper-inference/OmniRoute/secret-scanning/alerts?state=open" --paginate` |    0 |     — | —                                                                        |
 
 Nothing was closed or dismissed while producing this baseline (Hard Rule #14).
 
@@ -76,8 +76,8 @@ while producing this baseline.
 
 ```bash
 npm audit --omit=dev --json
-gh api "repos/diegosouzapw/OmniRoute/code-scanning/alerts?state=open" --paginate
-gh api "repos/diegosouzapw/OmniRoute/dependabot/alerts?state=open" --paginate
+gh api "repos/cheaper-inference/OmniRoute/code-scanning/alerts?state=open" --paginate
+gh api "repos/cheaper-inference/OmniRoute/dependabot/alerts?state=open" --paginate
 for w in codeql.yml semgrep.yml scorecard.yml dast-smoke.yml nightly-llm-security.yml; do
   gh run list --workflow "$w" --limit 3 --json conclusion,createdAt
 done

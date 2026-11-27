@@ -208,6 +208,9 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   // Imported by scripts/build/postinstall.mjs to pick the better-sqlite3 prebuild target.
   "scripts/build/betterSqlitePrebuildTarget.mjs",
   "scripts/build/postinstallSupport.mjs",
+  // #20998 / #21001: imported by scripts/build/postinstall.mjs to plan the locked
+  // better-sqlite3 rebuild (install layout resolution + local-only npm env).
+  "scripts/build/sqliteRebuildPlan.mjs",
   "scripts/build/colocateOptionals.mjs",
   // #8859: imported by scripts/build/postinstall.mjs to repair playwright-core's
   // browser resolution on Termux/Android (no glibc, no bundled browsers).
@@ -321,6 +324,9 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   "scripts/build/native-binary-compat.mjs",
   "scripts/build/postinstall.mjs",
   "scripts/build/postinstallSupport.mjs",
+  // #20998 / #21001: postinstall.mjs imports this at module scope — its absence
+  // from the tarball breaks every published install with ERR_MODULE_NOT_FOUND.
+  "scripts/build/sqliteRebuildPlan.mjs",
   "scripts/build/colocateOptionals.mjs",
   "scripts/build/runtime-env.mjs",
   "scripts/build/wreqJsNative.mjs",

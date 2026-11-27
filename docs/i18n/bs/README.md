@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — Jedna krajnja tačka i 394 dobavljača. Automatski rezervni način rada održava usmjeravanje dok je dostupno drugo zdravo odredište. Šest stubova: otporno prebacivanje između 394 dobavljača · do 95% uštede tokena na podržanim radnim opterećenjima · $0 za početak sa više od 150 besplatnih nivoa i 51 besplatnim dobavljačem koji se obnavljaju ili su zauvijek dostupni bez ključa · 39 CLI/agent integracija kroz jednu konfiguraciju · kompatibilnost sa OpenAI, Claude, Gemini i Responses API na /v1 · kontrole za produkciju, uključujući prekidače kola, TLS stealth, MCP sa 110 alata, A2A, memoriju, zaštitne mehanizme, evaluacije i više od 56.000 statičkih deklaracija testova kroz više od 7.800 praćenih datoteka testova."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — Jedna krajnja tačka i 394 dobavljača. Automatski rezervni način rada održava usmjeravanje dok je dostupno drugo zdravo odredište. Šest stubova: otporno prebacivanje između 394 dobavljača · do 95% uštede tokena na podržanim radnim opterećenjima · $0 za početak sa više od 150 besplatnih nivoa i 40 besplatnim dobavljačem koji se obnavljaju ili su zauvijek dostupni bez ključa · 39 CLI/agent integracija kroz jednu konfiguraciju · kompatibilnost sa OpenAI, Claude, Gemini i Responses API na /v1 · kontrole za produkciju, uključujući prekidače kola, TLS stealth, MCP sa 110 alata, A2A, memoriju, zaštitne mehanizme, evaluacije i više od 56.000 statičkih deklaracija testova kroz više od 7.800 praćenih datoteka testova."/>
 
 <br/>
 <br/>
@@ -711,7 +711,7 @@ izvan vaše shell historije. → [CLI Integracije](docs/guides/CLI-INTEGRATIONS.
 
 </div>
 
-> **394 registrovana provajdera** u kanonskim kolekcijama za razgovor, medije, pretragu, lokalne sisteme, cloud agente i sistemske funkcije, uključujući **153 provajdera sa metapodacima za otkrivanje `hasFree: true`**. Registar modela za razgovor obuhvata **239 provajdera / 3,059 različitih parova provajder-model / 1,475 sirovih ID-ova modela**; zasebni katalog besplatnih budžeta ima **465 redova po modelu**, **34 periodična fonda** i **51 provajdera koji su trajno besplatni, bez ključa ili sa periodičnim fondom**. Ovo su različiti nazivnici po dizajnu; definicije i izračuni sa uklonjenim duplikatima fondova nalaze se u dokumentima [Referenca provajdera](docs/reference/PROVIDER_REFERENCE.md) i [Besplatni nivoi](docs/reference/FREE_TIERS.md).
+> **394 registrovana provajdera** u kanonskim kolekcijama za razgovor, medije, pretragu, lokalne sisteme, cloud agente i sistemske funkcije, uključujući **153 provajdera sa metapodacima za otkrivanje `hasFree: true`**. Registar modela za razgovor obuhvata **239 provajdera / 3,059 različitih parova provajder-model / 1,475 sirovih ID-ova modela**; zasebni katalog besplatnih budžeta ima **465 redova po modelu**, **34 periodična fonda** i **40 provajdera koji su trajno besplatni, bez ključa ili sa periodičnim fondom**. Ovo su različiti nazivnici po dizajnu; definicije i izračuni sa uklonjenim duplikatima fondova nalaze se u dokumentima [Referenca provajdera](docs/reference/PROVIDER_REFERENCE.md) i [Besplatni nivoi](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
