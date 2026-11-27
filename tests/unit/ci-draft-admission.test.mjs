@@ -18,6 +18,10 @@ const ready = {
   "github.event.repository.id": 1157102282,
   "github.event.pull_request.head.repo.id": 1157102282,
   "github.event.pull_request.base.repo.id": 1157102282,
+  // An `edited` event's `changes`: none on any other action.
+  "github.event.changes.base": null,
+  "github.event.changes.body": null,
+  "github.event.changes.title": null,
   "needs.changes.result": "success",
   "needs.changes.outputs.queueCandidate": "false",
   "needs.changes.outputs.code": "true",
@@ -242,14 +246,37 @@ for (const profile of ["ci", "quality"]) {
     }
   });
 
-  test(`${profile}: queue description edits retain their separate skipped check`, () => {
-    const values = {
-      ...valuesFor({ ...queue, "github.event.action": "edited" }),
-      "needs.changes.result": "skipped",
-      "needs.changes.outputs.queueCandidate": "",
-    };
-    assert.equal(Boolean(expression(workflow.jobs.changes.if, values)), false);
-    assert.equal(Boolean(expression(gate.if, values)), false);
-    assert.equal(expression(gate.name, values), `${checkName} (queue-draft edit)`);
+  test(`${profile}: title/body edits retain their separate skipped check, on any PR`, () => {
+    for (const context of [ready, draft, queue]) {
+      for (const changes of [
+        { "github.event.changes.body": { from: "old body" } },
+        { "github.event.changes.title": { from: "old title" } },
+        { "github.event.changes.body": { from: null } },
+      ]) {
+        const values = {
+          ...valuesFor({ ...context, ...changes, "github.event.action": "edited" }),
+          "needs.changes.result": "skipped",
+          "needs.changes.outputs.queueCandidate": "",
+        };
+        assert.equal(Boolean(expression(workflow.jobs.changes.if, values)), false);
+        assert.equal(Boolean(expression(gate.if, values)), false);
+        assert.equal(expression(gate.name, values), `${checkName} (PR metadata edit)`);
+      }
+    }
+  });
+
+  test(`${profile}: a retarget keeps the classifier and the required admission`, () => {
+    const base = { ref: { from: "release/v3.8.54" }, sha: { from: "a".repeat(40) } };
+    for (const context of [ready, queue]) {
+      for (const changes of [
+        { "github.event.changes.base": base },
+        { "github.event.changes.base": base, "github.event.changes.body": { from: "old" } },
+      ]) {
+        const values = valuesFor({ ...context, ...changes, "github.event.action": "edited" });
+        assert.equal(Boolean(expression(workflow.jobs.changes.if, values)), true);
+        assert.equal(Boolean(expression(gate.if, values)), true);
+        assert.equal(expression(gate.name, values), checkName);
+      }
+    }
   });
 }

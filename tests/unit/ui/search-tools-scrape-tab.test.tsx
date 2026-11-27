@@ -16,17 +16,25 @@ vi.mock("next/link", () => ({
 }));
 
 // Mock ScrapeResult to keep test focused
-vi.mock(
-  "../../../src/app/(dashboard)/dashboard/search-tools/components/ScrapeResult",
-  () => ({
-    default: ({ result }: { result: { content: string; url: string; provider: string; links: string[]; metadata: null; screenshot_url: null } }) =>
-      React.createElement("div", {
-        "data-testid": "scrape-result-mock",
-        "data-url": result.url,
-        "data-provider": result.provider,
-      }),
-  }),
-);
+vi.mock("../../../src/app/(dashboard)/dashboard/search-tools/components/ScrapeResult", () => ({
+  default: ({
+    result,
+  }: {
+    result: {
+      content: string;
+      url: string;
+      provider: string;
+      links: string[];
+      metadata: null;
+      screenshot_url: null;
+    };
+  }) =>
+    React.createElement("div", {
+      "data-testid": "scrape-result-mock",
+      "data-url": result.url,
+      "data-provider": result.provider,
+    }),
+}));
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -45,9 +53,9 @@ const MOCK_SCRAPE_RESPONSE = {
 
 // ── Import component after mocks ──────────────────────────────────────────────
 
-const { default: ScrapeTab } = await import(
-  "../../../src/app/(dashboard)/dashboard/search-tools/components/tabs/ScrapeTab"
-);
+const { default: ScrapeTab } =
+  await import("../../../src/app/(dashboard)/dashboard/search-tools/components/tabs/ScrapeTab");
+const { WEB_FETCH_URL_MAX_LENGTH } = await import("../../../src/shared/constants/formLimits");
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -76,7 +84,9 @@ function renderScrapeTab(): HTMLDivElement {
 
 describe("ScrapeTab", () => {
   beforeEach(() => {
-    (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+    (
+      globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
+    ).IS_REACT_ACT_ENVIRONMENT = true;
   });
 
   afterEach(() => {
@@ -126,7 +136,7 @@ describe("ScrapeTab", () => {
       // Trigger React onChange via a proper event
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
         window.HTMLInputElement.prototype,
-        "value",
+        "value"
       )?.set;
       nativeInputValueSetter?.call(input, INVALID_URL);
       input.dispatchEvent(new Event("input", { bubbles: true }));
@@ -145,7 +155,7 @@ describe("ScrapeTab", () => {
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve(MOCK_SCRAPE_RESPONSE),
-      } as Response),
+      } as Response)
     );
     globalThis.fetch = mockFetch;
 
@@ -156,7 +166,7 @@ describe("ScrapeTab", () => {
     act(() => {
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
         window.HTMLInputElement.prototype,
-        "value",
+        "value"
       )?.set;
       nativeInputValueSetter?.call(input, VALID_URL);
       input.dispatchEvent(new Event("input", { bubbles: true }));
@@ -182,7 +192,7 @@ describe("ScrapeTab", () => {
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve(MOCK_SCRAPE_RESPONSE),
-      } as Response),
+      } as Response)
     );
     globalThis.fetch = mockFetch;
 
@@ -198,7 +208,7 @@ describe("ScrapeTab", () => {
       // Dispatch a proper React-compatible input event
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
         window.HTMLInputElement.prototype,
-        "value",
+        "value"
       )?.set;
       nativeInputValueSetter?.call(input, VALID_URL);
       input.dispatchEvent(new Event("change", { bubbles: true }));
@@ -230,7 +240,7 @@ describe("ScrapeTab", () => {
       Promise.resolve({
         ok: false,
         json: () => Promise.resolve({ error: { message: "Provider unavailable" } }),
-      } as Response),
+      } as Response)
     );
     globalThis.fetch = mockFetch;
 
@@ -240,7 +250,7 @@ describe("ScrapeTab", () => {
     act(() => {
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
         window.HTMLInputElement.prototype,
-        "value",
+        "value"
       )?.set;
       nativeInputValueSetter?.call(input, VALID_URL);
       input.dispatchEvent(new Event("change", { bubbles: true }));
@@ -275,7 +285,7 @@ describe("ScrapeTab", () => {
     act(() => {
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
         window.HTMLInputElement.prototype,
-        "value",
+        "value"
       )?.set;
       nativeInputValueSetter?.call(input, HTTP_ONLY_URL);
       input.dispatchEvent(new Event("input", { bubbles: true }));
@@ -288,5 +298,139 @@ describe("ScrapeTab", () => {
 
     const errorEl = el.querySelector("[data-testid='url-error']");
     expect(errorEl).toBeTruthy();
+  });
+});
+
+// ── KEA-9515: Extract needs a connected fetch provider; the URL is capped ─────
+
+function catalogItem(
+  id: string,
+  kind: "search" | "fetch",
+  status: "configured" | "missing" | "rate_limited"
+) {
+  return {
+    id,
+    name: id,
+    kind,
+    costPerQuery: 0,
+    freeMonthlyQuota: 0,
+    status,
+    configureHref: "/dashboard/providers",
+  };
+}
+
+// A search provider is connected, but no fetch provider is: the Scrape tab cannot extract.
+const NO_FETCH_CATALOG = [
+  catalogItem("brave-search", "search", "configured"),
+  catalogItem("firecrawl", "fetch", "missing"),
+  catalogItem("jina-reader", "fetch", "missing"),
+];
+const FETCH_CATALOG = [
+  catalogItem("brave-search", "search", "configured"),
+  catalogItem("firecrawl", "fetch", "configured"),
+  catalogItem("jina-reader", "fetch", "missing"),
+];
+
+function renderWithCatalog(catalogProviders: unknown): HTMLDivElement {
+  const el = document.createElement("div");
+  document.body.appendChild(el);
+  const root = createRoot(el);
+  act(() => {
+    root.render(
+      React.createElement(ScrapeTab, {
+        configState: DEFAULT_CONFIG,
+        catalogProviders,
+      } as React.ComponentProps<typeof ScrapeTab>)
+    );
+  });
+  containers.push({ root, el });
+  return el;
+}
+
+function typeUrl(el: HTMLElement, value: string) {
+  const input = el.querySelector("[data-testid='url-input']") as HTMLInputElement;
+  act(() => {
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set?.call(
+      input,
+      value
+    );
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+}
+
+describe("ScrapeTab — fetch provider gate and URL cap (KEA-9515)", () => {
+  beforeEach(() => {
+    (
+      globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
+    ).IS_REACT_ACT_ENVIRONMENT = true;
+  });
+
+  afterEach(() => {
+    for (const { root, el } of containers.splice(0)) {
+      act(() => root.unmount());
+      el.remove();
+    }
+    document.body.innerHTML = "";
+    vi.restoreAllMocks();
+  });
+
+  it("blocks Extract and shows the no-fetch-provider state when none is connected", async () => {
+    const mockFetch = vi.fn(() =>
+      Promise.resolve({ ok: true, json: () => Promise.resolve(MOCK_SCRAPE_RESPONSE) } as Response)
+    );
+    globalThis.fetch = mockFetch;
+
+    const el = renderWithCatalog(NO_FETCH_CATALOG);
+    const btn = el.querySelector("[data-testid='scrape-button']") as HTMLButtonElement;
+    expect(btn.getAttribute("aria-disabled")).toBe("true");
+    expect(btn.getAttribute("data-blocked")).toBe("true");
+
+    const notice = el.querySelector("[data-testid='scrape-no-fetch-provider']");
+    expect(notice?.textContent).toContain("scrapeNoFetchProvider");
+    expect(notice?.querySelector("a[href='/dashboard/providers']")?.textContent).toBe(
+      "configureProvider"
+    );
+
+    typeUrl(el, VALID_URL);
+    await act(async () => {
+      btn.click();
+      await new Promise((r) => setTimeout(r, 20));
+    });
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("enables Extract and calls /v1/web/fetch when a fetch provider is connected", async () => {
+    const mockFetch = vi.fn(() =>
+      Promise.resolve({ ok: true, json: () => Promise.resolve(MOCK_SCRAPE_RESPONSE) } as Response)
+    );
+    globalThis.fetch = mockFetch;
+
+    const el = renderWithCatalog(FETCH_CATALOG);
+    const btn = el.querySelector("[data-testid='scrape-button']") as HTMLButtonElement;
+    expect(btn.getAttribute("aria-disabled")).toBeNull();
+    expect(el.querySelector("[data-testid='scrape-no-fetch-provider']")).toBeNull();
+
+    typeUrl(el, VALID_URL);
+    await act(async () => {
+      btn.click();
+      await new Promise((r) => setTimeout(r, 20));
+    });
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch.mock.calls[0][0]).toBe("/v1/web/fetch");
+    expect(el.querySelector("[data-testid='scrape-result-mock']")).toBeTruthy();
+  });
+
+  it("does not block Extract while the provider catalog is unknown", () => {
+    const el = renderWithCatalog(null);
+    const btn = el.querySelector("[data-testid='scrape-button']") as HTMLButtonElement;
+    expect(btn.getAttribute("aria-disabled")).toBeNull();
+    expect(el.querySelector("[data-testid='scrape-no-fetch-provider']")).toBeNull();
+  });
+
+  it("caps the URL input at WEB_FETCH_URL_MAX_LENGTH", () => {
+    const el = renderWithCatalog(FETCH_CATALOG);
+    const input = el.querySelector("[data-testid='url-input']") as HTMLInputElement;
+    expect(WEB_FETCH_URL_MAX_LENGTH).toBe(2000);
+    expect(input.maxLength).toBe(WEB_FETCH_URL_MAX_LENGTH);
   });
 });

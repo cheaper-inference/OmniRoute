@@ -66,11 +66,12 @@ export default function StudioTopBar({ metrics, exportState }: StudioTopBarProps
             variant="outline"
             size="sm"
             onClick={() => setExportOpen(true)}
-            className="gap-1 text-xs text-text-muted"
+            tone="muted"
+            className="gap-1 text-xs"
             title={t("exportCode")}
             aria-label={t("exportCode")}
           >
-            <span className="font-mono text-[11px]" aria-hidden="true">
+            <span className="font-mono text-2xs" aria-hidden="true">
               &lt;/&gt;
             </span>
             <span>{t("exportShort")}</span>

@@ -40,6 +40,7 @@ async function compileRuntimeRequireModules(): Promise<string[]> {
     "src/lib/db/adapters/runtimeRequire.ts",
     "src/lib/machineToken.ts",
     "open-sse/services/browserPool.ts",
+    "open-sse/utils/playwrightChromium.ts",
     "open-sse/utils/tlsClient.ts",
     // Owns the wreq-js createRequire loader that tlsClient.ts imports.
     "open-sse/utils/browserProfiles.ts",
@@ -82,6 +83,8 @@ async function compileRuntimeRequireModules(): Promise<string[]> {
         // erroring "Can't resolve './obscura.ts'".
         "./obscura.ts",
         "./virtualDisplay.ts",
+        // browserPool.ts imports this helper, which is compiled as its own entry above.
+        "../utils/playwrightChromium.ts",
         "./tlsFirstByteWatchdog.ts",
         // browserPool.ts builds Playwright proxy options from a record via
         // `../utils/playwrightProxy.ts`. Same isolated-compile reason.

@@ -327,10 +327,10 @@ for (const profile of ["ci", "quality"]) {
     const checkName = policy.profiles[profile].checkName;
     const unrequestedName = `Admission not requested / ${profile === "ci" ? "CI" : "Quality"}`;
     assert.ok(verdict.name.endsWith(`&& '${checkName}' || '${unrequestedName}' }}`), verdict.name);
-    // Classification failure still reaches always(); queue description edits remain excluded.
+    // Classification failure still reaches always(); PR title/body edits remain excluded.
     assert.match(
       verdict.if,
-      /^\$\{\{ always\(\) && !\(github\.event_name == 'pull_request' && github\.event\.action == 'edited' && github\.event\.pull_request\.user\.login == 'mergify\[bot\]' && /
+      /^\$\{\{ always\(\) && !\(github\.event_name == 'pull_request' && github\.event\.action == 'edited' && !github\.event\.changes\.base && \(github\.event\.changes\.body \|\| github\.event\.changes\.title\)\) && /
     );
     assert.deepEqual(workflow.on.pull_request.branches, ["main", "release/**"]);
     // Push runs only for main since 2026-10-18: each change already ran the matrix on its

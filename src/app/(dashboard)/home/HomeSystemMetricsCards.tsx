@@ -104,13 +104,13 @@ function MetricCard({
                 title={activeTitle}
               />
             </div>
-            <span className="text-[11px] text-text-muted truncate block">{subtitle}</span>
+            <span className="text-2xs text-text-muted truncate block">{subtitle}</span>
           </div>
         </div>
 
         <div className="text-right shrink-0">
           <span className="text-sm font-semibold tabular-nums text-text-main">{value}</span>
-          <span className="block text-[10px] text-text-muted uppercase tracking-wider">
+          <span className="block text-3xs text-text-muted uppercase tracking-wider">
             {hostLabel}
           </span>
         </div>
@@ -119,7 +119,7 @@ function MetricCard({
       <UsageBar percent={percent} label={title} />
 
       {/* Breakdown for OmniRoute process */}
-      <div className="flex items-center justify-between text-[11px] text-text-muted pt-1 border-t border-border/30">
+      <div className="flex items-center justify-between text-2xs text-text-muted pt-1 border-t border-border/30">
         <span>{breakdownLabel}</span>
         <span className="font-medium text-text-main tabular-nums">{breakdownValue}</span>
       </div>

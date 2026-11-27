@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { CHATGPT_RESOURCE, CHATGPT_TOKEN_URL } from "../../../config/chatgpt.ts";
-import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { runCommittedWithProxyContext } from "../../../utils/proxyFetch.ts";
 
 type Credentials = {
   accessToken?: string;
@@ -83,7 +83,7 @@ export async function refreshChatGptToken(credentials: Credentials, proxyConfig:
     return { error: "unrecoverable_refresh_error", code: "invalid_client" };
   const notDue = refreshNotDueResult(credentials);
   if (notDue) return notDue;
-  const response = await runWithProxyContext(proxyConfig, () =>
+  const response = await runCommittedWithProxyContext(proxyConfig, () =>
     fetch(CHATGPT_TOKEN_URL, {
       method: "POST",
       redirect: "error",

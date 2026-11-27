@@ -72,7 +72,8 @@ export default function UsageLogCard({ poolId, keyLabels }: UsageLogCardProps) {
         size="sm"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
-        className="h-7 min-h-7 w-full justify-start gap-1 px-1 text-[10px] uppercase tracking-wide text-text-muted"
+        tone="muted"
+        className="h-7 min-h-7 w-full justify-start gap-1 px-1 text-3xs uppercase"
       >
         <Icon
           name="chevron_right"
@@ -93,7 +94,7 @@ export default function UsageLogCard({ poolId, keyLabels }: UsageLogCardProps) {
               {events.map((ev, i) => (
                 <div
                   key={`${ev.apiKeyId}-${ev.dimensionKey}-${ev.bucketIndex}-${i}`}
-                  className="flex items-center gap-1.5 text-[11px] text-text-muted"
+                  className="flex items-center gap-1.5 text-2xs text-text-muted"
                 >
                   <span className="tabular-nums text-text-muted/60 shrink-0 w-[52px]">
                     {formatTime(ev.updatedAt)}

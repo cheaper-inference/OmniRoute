@@ -1,0 +1,14 @@
+{
+  "wrapGeometry": {
+    "active": "انتخاب مدل",
+    "activeIndex": "0",
+    "rows": 12,
+    "top": 0
+  },
+  "reverseGeometry": {
+    "active": "مدل آزمایشی 04999 · OpenAImodel-04999 · Synthetic QA fixture",
+    "activeIndex": "5000",
+    "rows": 11,
+    "top": 239843
+  }
+}

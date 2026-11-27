@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vəd — Bir endpoint və 394 provayder. Başqa bir sağlam hədəf mövcud olduğu müddətdə avtomatik geri dönüş yönləndirməni davam etdirir. Altı sütun: 394 provayder arasında dayanıqlı geri dönüş · uyğun iş yüklərində tokenlərə görə 95%-dək qənaət · 150-dən çox pulsuz paket və təkrarlanan/açarsız, həmişəlik pulsuz 51 provayderlə başlamaq üçün $0 · bir konfiqurasiya vasitəsilə 39 CLI/agent inteqrasiyası · /v1 ünvanında OpenAI, Claude, Gemini və Responses API uyğunluğu · circuit breaker-lər, TLS stealth, MCP 110 aləti, A2A, yaddaş, guardrails, evals və 7 800-dən çox izlənən test faylında 56 000-dən çox statik test deklarasiyası daxil olmaqla istehsal nəzarətləri."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vəd — Bir endpoint və 394 provayder. Başqa bir sağlam hədəf mövcud olduğu müddətdə avtomatik geri dönüş yönləndirməni davam etdirir. Altı sütun: 394 provayder arasında dayanıqlı geri dönüş · uyğun iş yüklərində tokenlərə görə 95%-dək qənaət · 150-dən çox pulsuz paket və təkrarlanan/açarsız, həmişəlik pulsuz 40 provayderlə başlamaq üçün $0 · bir konfiqurasiya vasitəsilə 39 CLI/agent inteqrasiyası · /v1 ünvanında OpenAI, Claude, Gemini və Responses API uyğunluğu · circuit breaker-lər, TLS stealth, MCP 110 aləti, A2A, yaddaş, guardrails, evals və 7 800-dən çox izlənən test faylında 56 000-dən çox statik test deklarasiyası daxil olmaqla istehsal nəzarətləri."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ shell tarixçənizdən kənarda saxlayır. → [CLI İnteqrasiyaları](docs/guid
 
 </div>
 
-> **394 qeydiyyatdan keçmiş provayder** əsas çat, media, axtarış, lokal, bulud-agent və sistem kolleksiyalarında yer alır; bunlara kəşf metadatasında **`hasFree: true` daşıyan 153 provayder** daxildir. Çat model reyestrində **239 provayder / 3 059 fərqli provayder-model cütü / 1 475 xam model ID-si** var; ayrıca pulsuz büdcə kataloqunda **model başına 465 sətir**, **34 təkrarlanan hovuz** və **51 təkrarlanan/açarsız əbədi pulsuz provayder** mövcuddur. Bunlar qəsdən fərqli məxrəclərdir; təriflər və hovuzların təkrarsızlaşdırılması əsasında hesablamalar [Provayder arayışı](docs/reference/PROVIDER_REFERENCE.md) və [Pulsuz tariflər](docs/reference/FREE_TIERS.md) bölmələrində təqdim olunur.
+> **394 qeydiyyatdan keçmiş provayder** əsas çat, media, axtarış, lokal, bulud-agent və sistem kolleksiyalarında yer alır; bunlara kəşf metadatasında **`hasFree: true` daşıyan 153 provayder** daxildir. Çat model reyestrində **239 provayder / 3 059 fərqli provayder-model cütü / 1 475 xam model ID-si** var; ayrıca pulsuz büdcə kataloqunda **model başına 465 sətir**, **34 təkrarlanan hovuz** və **40 təkrarlanan/açarsız əbədi pulsuz provayder** mövcuddur. Bunlar qəsdən fərqli məxrəclərdir; təriflər və hovuzların təkrarsızlaşdırılması əsasında hesablamalar [Provayder arayışı](docs/reference/PROVIDER_REFERENCE.md) və [Pulsuz tariflər](docs/reference/FREE_TIERS.md) bölmələrində təqdim olunur.
 
 <div align="center">
 
@@ -1318,7 +1318,7 @@ bir port üzərindən təqdim olunur, buna görə hazırda yalnız CLI üçün a
   <tr><td nowrap><b>İşləmə mühiti</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Dil</b></td><td>TypeScript 6.0 — <code>src/</code> və <code>open-sse/</code> üzrə <b>100% TypeScript</b> (v2.0-dan etibarən nüvədə sıfır <code>any</code>)</td></tr>
   <tr><td nowrap><b>Freymvork</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Verilənlər bazası</b></td><td>better-sqlite3 (SQLite, WAL jurnallaşdırması) + LowDB (JSON legacy) — 147 domen modulu, 244 miqrasiya</td></tr>
+  <tr><td nowrap><b>Verilənlər bazası</b></td><td>better-sqlite3 (SQLite, WAL jurnallaşdırması) + LowDB (JSON legacy) — 147 domen modulu, 252 miqrasiya</td></tr>
   <tr><td nowrap><b>Yaddaş</b></td><td>SQLite FTS5 tam mətn axtarışı + int8-kəmiyyətləşdirilmiş vektor embedding-ləri, tipləşdirilmiş azalma</td></tr>
   <tr><td nowrap><b>Sxemlər</b></td><td>Zod 4 — MCP alətləri üçün giriş/çıxış yoxlaması + API müqavilələri</td></tr>
   <tr><td nowrap><b>Protokollar</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

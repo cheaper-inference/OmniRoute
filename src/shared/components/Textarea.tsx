@@ -7,6 +7,12 @@ import { cn } from "@/shared/utils/cn";
 
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   error?: boolean;
+  /**
+   * Kit code font at the size and leading of `CodePreview`, for JSON, code and lists of keys;
+   * also turns spell check, auto-capitalize and auto-correct off (pass any of them to turn it
+   * back on). `font-mono` does nothing on a `<textarea>`: the kit typography sheet wins.
+   */
+  mono?: boolean;
   /** Visible label: wraps the control in the kit `Field` (like `Input`). */
   label?: React.ReactNode;
   /** Helper text under the control, announced through aria-describedby. Needs `label`. */
@@ -21,7 +27,7 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
  * `label` it renders the bare control, as it always did.
  */
 const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
-  { error = false, className, label, hint, fieldClassName, id: externalId, ...props },
+  { error = false, mono = false, className, label, hint, fieldClassName, id: externalId, ...props },
   ref
 ) {
   const generatedId = useId();
@@ -35,6 +41,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textare
       ref={ref}
       id={textareaId}
       error={error}
+      mono={mono}
       aria-invalid={error || undefined}
       className={className}
       {...props}

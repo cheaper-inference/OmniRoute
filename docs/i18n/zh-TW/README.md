@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="OmniRoute 的承諾 — 單一端點與 394 個提供者。只要仍有其他健康的目標可用，自動備援就會持續路由。六大支柱：跨 394 個提供者的高韌性備援 · 符合資格的工作負載最高可節省 95% 的權杖 · $0 起步，提供 150+ 個免費方案，以及 51 個定期提供／免金鑰、永久免費的提供者 · 透過單一設定支援 39 個 CLI／代理程式整合 · 在 /v1 相容於 OpenAI、Claude、Gemini 與 Responses API · 生產環境控制項，包括斷路器、TLS 隱匿、MCP 110 個工具、A2A、記憶、護欄、評估，以及分布於 7,800+ 個受追蹤測試檔案中的 56,000+ 個靜態測試宣告。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="OmniRoute 的承諾 — 單一端點與 394 個提供者。只要仍有其他健康的目標可用，自動備援就會持續路由。六大支柱：跨 394 個提供者的高韌性備援 · 符合資格的工作負載最高可節省 95% 的權杖 · $0 起步，提供 150+ 個免費方案，以及 40 個定期提供／免金鑰、永久免費的提供者 · 透過單一設定支援 39 個 CLI／代理程式整合 · 在 /v1 相容於 OpenAI、Claude、Gemini 與 Responses API · 生產環境控制項，包括斷路器、TLS 隱匿、MCP 110 個工具、A2A、記憶、護欄、評估，以及分布於 7,800+ 個受追蹤測試檔案中的 56,000+ 個靜態測試宣告。"/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ Shell 歷程記錄中。→ [CLI 整合](docs/guides/CLI-INTEGRATIONS.md)
 
 </div>
 
-> **394 個已註冊的提供者**，涵蓋標準聊天、媒體、搜尋、本機、雲端代理程式與系統集合，其中包括 **153 個帶有 `hasFree: true` 探索中繼資料的提供者**。聊天模型登錄表涵蓋 **239 個提供者 / 3,059 組不同的提供者—模型配對 / 1,475 個原始模型 ID**；獨立的免費額度目錄則有 **465 筆按模型列出的資料**、**34 個週期性資源池**，以及 **51 個週期性／免金鑰的永久免費提供者**。這些分母本來就不同；定義與經資源池去重的計算方式，請參閱[提供者參考](docs/reference/PROVIDER_REFERENCE.md)與[免費方案](docs/reference/FREE_TIERS.md)。
+> **394 個已註冊的提供者**，涵蓋標準聊天、媒體、搜尋、本機、雲端代理程式與系統集合，其中包括 **153 個帶有 `hasFree: true` 探索中繼資料的提供者**。聊天模型登錄表涵蓋 **239 個提供者 / 3,059 組不同的提供者—模型配對 / 1,475 個原始模型 ID**；獨立的免費額度目錄則有 **465 筆按模型列出的資料**、**34 個週期性資源池**，以及 **40 個週期性／免金鑰的永久免費提供者**。這些分母本來就不同；定義與經資源池去重的計算方式，請參閱[提供者參考](docs/reference/PROVIDER_REFERENCE.md)與[免費方案](docs/reference/FREE_TIERS.md)。
 
 <div align="center">
 
@@ -1316,7 +1316,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
   <tr><td nowrap><b>執行環境</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>語言</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> 涵蓋 <code>src/</code> 與 <code>open-sse/</code>（自 v2.0 起核心中零個 <code>any</code>）</td></tr>
   <tr><td nowrap><b>框架</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite、WAL 記錄）+ LowDB（JSON 舊版）— 147 個領域模組、244 次遷移</td></tr>
+  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite、WAL 記錄）+ LowDB（JSON 舊版）— 147 個領域模組、252 次遷移</td></tr>
   <tr><td nowrap><b>記憶體</b></td><td>SQLite FTS5 全文搜尋 + int8 量化向量嵌入、具類型衰減</td></tr>
   <tr><td nowrap><b>結構描述</b></td><td>Zod 4 — MCP 工具 I/O 驗證 + API 契約</td></tr>
   <tr><td nowrap><b>通訊協定</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>

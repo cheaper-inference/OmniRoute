@@ -3,6 +3,7 @@
 import Textarea from "@/shared/components/Textarea";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
 
 // src/app/(dashboard)/dashboard/playground/components/tabs/BuildTab.tsx
 
@@ -256,14 +257,11 @@ export default function BuildTab({ configState }: BuildTabProps) {
                   <Icon name="function" size={14} className="text-warning" />
                   <code className="text-xs font-mono text-text-main">{tc.function.name}</code>
                 </div>
-                <pre className="text-[11px] font-mono text-text-muted bg-bg-alt rounded p-2 overflow-x-auto mb-2 whitespace-pre-wrap break-all">
+                <pre className="text-xs font-mono text-text-muted bg-bg-alt rounded p-2 overflow-x-auto mb-2 whitespace-pre-wrap break-all">
                   {tc.function.arguments}
                 </pre>
                 <div className="flex flex-col gap-2">
-                  <span
-                    className="text-[10px] text-text-muted uppercase tracking-wider"
-                    aria-hidden="true"
-                  >
+                  <span className="ci-eyebrow" data-size="3xs" aria-hidden="true">
                     Tool result
                   </span>
                   <Textarea
@@ -278,7 +276,8 @@ export default function BuildTab({ configState }: BuildTabProps) {
                     rows={3}
                     placeholder={t("enterToolResult")}
                     aria-label={t("enterToolResult")}
-                    className="text-xs font-mono resize-y"
+                    mono
+                    className="resize-y"
                   />
                   <Button
                     size="sm"
@@ -296,17 +295,12 @@ export default function BuildTab({ configState }: BuildTabProps) {
 
       {/* Structured output validation */}
       {validationResult != null && (
-        <div
-          className={`text-xs rounded-lg px-3 py-2 border ${
-            validationResult.valid
-              ? "border-success/40 bg-success/5 text-success"
-              : "border-error/40 bg-error/5 text-error"
-          }`}
+        <Notice
+          variant={validationResult.valid ? "success" : "critical"}
+          icon={validationResult.valid ? "check_circle" : "error"}
         >
-          {validationResult.valid
-            ? "✅ Valid JSON schema response"
-            : `❌ ${validationResult.error}`}
-        </div>
+          {validationResult.valid ? "Valid JSON schema response" : validationResult.error}
+        </Notice>
       )}
     </div>
   );

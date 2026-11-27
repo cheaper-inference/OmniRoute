@@ -3,9 +3,16 @@ import type { ConnectGuardMode } from "./connectGuardDispatcher.ts";
 import tlsClient, { type TlsFetchOptions } from "./tlsClient.ts";
 import { isUpstreamHttp2Enabled } from "./proxyDispatcher.ts";
 import { isRegisteredFeatureFlagEnabled } from "./registeredFeatureFlag.ts";
+/**
+ * Per-request opt-in to the strict POST replay policy: a transport error may be resent
+ * only when it provably happened before any request byte was sent (see
+ * canResendAfterTransportError). Set by the executor for custom OpenAI-compatible nodes.
+ */
+export const PROXY_FETCH_NO_REPLAY = Symbol.for("omniroute.proxyFetch.noReplay");
 export type FetchWithDispatcherOptions = RequestInit & {
   dispatcher?: unknown;
   connectGuard?: ConnectGuardMode;
+  [PROXY_FETCH_NO_REPLAY]?: boolean;
 };
 export type FetchWithDispatcher = (
   input: RequestInfo | URL,
@@ -255,7 +262,7 @@ const PRE_SEND_ERROR_CODES = new Set([
   "UND_ERR_CONNECT_TIMEOUT",
 ]);
 
-function isPreSendConnectionError(error: unknown): boolean {
+export function isPreSendConnectionError(error: unknown): boolean {
   let current = error;
   for (let depth = 0; depth < 4 && current && typeof current === "object"; depth++) {
     const { code, cause } = current as { code?: unknown; cause?: unknown };
@@ -272,6 +279,8 @@ export function canResendAfterTransportError(
   error: unknown
 ): boolean {
   if (requestHasNonReplayableBody(input, options)) return false;
+  // The POST may already have been accepted: only a failure before the first byte is safe.
+  if (options[PROXY_FETCH_NO_REPLAY] === true) return isPreSendConnectionError(error);
   if (!isRegisteredFeatureFlagEnabled("PROXY_STRICT_POST_REPLAY_ENABLED")) return true;
   return isAmbiguousFailureReplaySafe(input, options) || isPreSendConnectionError(error);
 }

@@ -5,7 +5,7 @@ import {
   refreshM365AccessToken,
 } from "../../../executors/copilot-m365-connection.ts";
 import type { ProviderCredentials } from "../../../executors/base.ts";
-import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { runCommittedWithProxyContext } from "../../../utils/proxyFetch.ts";
 import {
   isProviderBlocked,
   recordRefreshFailure,
@@ -93,7 +93,7 @@ export async function refreshM365Token(
   if (isProviderBlocked(M365_CLIENT_CONFIG_BREAKER, breaker)) {
     return { error: M365_CLIENT_CONFIG_ERROR };
   }
-  const result = await runWithProxyContext(proxyConfig, () =>
+  const result = await runCommittedWithProxyContext(proxyConfig, () =>
     refreshM365AccessToken(refreshToken, routingTenant, log ?? undefined)
   );
   // Only a client rejection counts toward the cap; any other answer ends the streak.
