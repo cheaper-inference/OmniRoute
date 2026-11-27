@@ -39,6 +39,10 @@ import { containsMediaKind } from "../utils/mediaParts.ts";
 import { isMissingBrowserExecutable } from "./browserExecutableCheck.ts";
 import { makeExecutorErrorResult as makeErrorResult } from "../utils/error.ts";
 import { connectObscuraBrowser } from "../services/obscura.ts";
+import {
+  importPlaywright,
+  resolveCloudflareChromiumOverride,
+} from "../utils/playwrightChromium.ts";
 import type { Browser, Page } from "playwright";
 
 export const PLAYGROUND_URL = "https://playground.ai.cloudflare.com/";
@@ -404,8 +408,7 @@ export class PlaywrightCfTransport implements CfTransport {
       if (obscura) {
         this.browser = obscura.browser;
       } else {
-        const executablePath =
-          this.chromeExecutablePath ?? process.env.CLOUDFLARE_PLAYGROUND_CHROME_PATH;
+        const executablePath = resolveCloudflareChromiumOverride(this.chromeExecutablePath);
         this.browser = await playwright.chromium.launch({
           ...(executablePath ? { executablePath } : {}),
           headless: true,
@@ -483,16 +486,6 @@ export class PlaywrightCfTransport implements CfTransport {
     const browser = this.browser;
     this.browser = null;
     if (browser) await browser.close().catch(() => {});
-  }
-}
-
-async function importPlaywright(): Promise<typeof import("playwright")> {
-  try {
-    return await import("playwright");
-  } catch {
-    throw new Error(
-      "Playwright is not available. Install it (npm i playwright && npx playwright install chromium) or set CLOUDFLARE_PLAYGROUND_CHROME_PATH to a Chrome binary."
-    );
   }
 }
 

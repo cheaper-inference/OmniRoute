@@ -1,0 +1,10 @@
+{
+  "data": [
+    {
+      "code": "free",
+      "token_cap_daily": 7000000,
+      "rpm_limit": 15,
+      "models": []
+    }
+  ]
+}

@@ -179,11 +179,11 @@ test("v1 models catalog includes display names by default", async () => {
     new Request("http://localhost/api/v1/models")
   );
   const body = (await response.json()) as any;
-  const model = body.data.find((item) => item.id === "unc/turboderp/Qwen3.8-27B-exl3");
+  const model = body.data.find((item) => item.id === "cfp/zai-org/glm-5.2");
 
   assert.equal(response.status, 200);
   assert.ok(model);
-  assert.equal(model.name, "Qwen3.8 27B exl3 (🆓 Free)");
+  assert.equal(model.name, "GLM 5.2 (Z.ai)");
 });
 
 test("v1 models catalog omits display names when the feature flag is disabled", async () => {
@@ -194,12 +194,12 @@ test("v1 models catalog omits display names when the feature flag is disabled", 
       new Request("http://localhost/api/v1/models")
     );
     const body = (await response.json()) as any;
-    const model = body.data.find((item) => item.id === "unc/turboderp/Qwen3.8-27B-exl3");
+    const model = body.data.find((item) => item.id === "cfp/zai-org/glm-5.2");
 
     assert.equal(response.status, 200);
     assert.ok(model);
     assert.equal("name" in model, false);
-    assert.equal(model.root, "turboderp/Qwen3.8-27B-exl3");
+    assert.equal(model.root, "zai-org/glm-5.2");
   } finally {
     featureFlagsDb.removeFeatureFlagOverride("MODEL_CATALOG_INCLUDE_NAMES");
   }
@@ -1612,7 +1612,7 @@ test("v1 models catalog computes combo context_length from known targets when so
   );
 });
 
-// Regression test for Issue #2798: noAuth providers (e.g. uncloseai/unc) have no DB connection rows
+// Regression test for Issue #2798: noAuth providers (e.g. Cloudflare Playground/cfp) have no DB connection rows
 // but their models must still appear in /v1/models.
 test("v1 models catalog includes noAuth provider models when no DB connections exist (#2798)", async () => {
   // No connections seeded — empty DB, simulating a fresh install with no credentials added.
@@ -1624,10 +1624,10 @@ test("v1 models catalog includes noAuth provider models when no DB connections e
 
   assert.equal(response.status, 200);
   // noAuth models must surface even with zero connection rows, under the
-  // provider alias (e.g. "unc/<model>").
+  // provider alias (e.g. "cfp/<model>").
   assert.ok(
-    ids.some((id) => id.startsWith("unc/")),
-    `Expected at least one unc/* model in /v1/models but got none. IDs sample: ${ids.slice(0, 10).join(", ")}`
+    ids.some((id) => id.startsWith("cfp/")),
+    `Expected at least one cfp/* model in /v1/models but got none. IDs sample: ${ids.slice(0, 10).join(", ")}`
   );
   assert.equal(
     ids.some((id) => id.startsWith("oc/")),
@@ -1637,7 +1637,9 @@ test("v1 models catalog includes noAuth provider models when no DB connections e
 });
 
 test("v1 models catalog hides disabled noAuth provider models", async () => {
-  await settingsDb.updateSettings({ blockedProviders: ["uncloseai", "duckduckgo-web"] });
+  await settingsDb.updateSettings({
+    blockedProviders: ["cloudflare-playground", "duckduckgo-web"],
+  });
 
   const response = await v1ModelsCatalog.getUnifiedModelsResponse(
     new Request("http://localhost/api/v1/models")
@@ -1647,9 +1649,9 @@ test("v1 models catalog hides disabled noAuth provider models", async () => {
 
   assert.equal(response.status, 200);
   assert.equal(
-    ids.some((id) => id.startsWith("unc/")),
+    ids.some((id) => id.startsWith("cfp/")),
     false,
-    "UncloseAI no-auth models must be hidden while no-auth providers are disabled"
+    "Cloudflare Playground no-auth models must be hidden while no-auth providers are disabled"
   );
   assert.equal(
     ids.some((id) => id.startsWith("ddgw/")),

@@ -1,0 +1,28 @@
+{
+  "data": [
+    {
+      "id": "mistralai/mistral-large-2512",
+      "access_tier": "free"
+    },
+    {
+      "id": "mistralai/mistral-small-2603",
+      "access_tier": "free"
+    },
+    {
+      "id": "sensenova/sensenova-6.8-flash-lite",
+      "access_tier": "free"
+    },
+    {
+      "id": "qwen/qwen3-vl-plus:free",
+      "access_tier": "free"
+    },
+    {
+      "id": "minimax/minimax-m2.7:free",
+      "access_tier": "free"
+    },
+    {
+      "id": "deepseek/deepseek-v4-pro",
+      "access_tier": "free"
+    }
+  ]
+}
