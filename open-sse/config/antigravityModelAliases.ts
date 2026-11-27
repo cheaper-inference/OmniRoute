@@ -186,6 +186,7 @@ export function isDiscoverableAntigravityModelId(modelId: string): boolean {
     id.startsWith("chat_") ||
     id.startsWith("tab_") ||
     id.endsWith("_weekly") ||
+    id.endsWith("-disabled") ||
     ANTIGRAVITY_NON_CHAT_MODEL_IDS.has(id) ||
     ANTIGRAVITY_RETIRED_MODEL_IDS.has(id)
   ) {

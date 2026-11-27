@@ -61,6 +61,9 @@ const ANTIGRAVITY_PRICING = {
   "gemini-4-hydrogen-medium": GEMINI_4_HYDROGEN_PRICING,
   "gemini-4-hydrogen-high": GEMINI_4_HYDROGEN_PRICING,
   "gemini-4-hydrogen-xhigh": GEMINI_4_HYDROGEN_PRICING,
+  "gemini-4-hydrogen-tiered-high": GEMINI_4_HYDROGEN_PRICING,
+  "gemini-4-hydrogen-tiered-xhigh": GEMINI_4_HYDROGEN_PRICING,
+  "gemini-4-hydrogen-sonar": GEMINI_4_HYDROGEN_PRICING,
   "gemini-3.5-flash-lite": {
     input: 0.3,
     output: 2.5,
