@@ -67,11 +67,11 @@ export function setReasoningCache(
 export function getReasoningCache(
   toolCallId: string
 ): { reasoning: string; provider: string; model: string; expiresAt: string } | null {
-  const row = legacy.get(toolCallId);
+  const row = legacy.getRow(toolCallId);
 
   const PLACEHOLDER = "(prior reasoning summary unavailable)";
   if (row && row.reasoning && row.reasoning.trim() === PLACEHOLDER) return null;
-  return row;
+  return row ? legacy.rowToReadResult(row) : null;
 }
 
 /**

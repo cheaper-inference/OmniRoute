@@ -175,6 +175,15 @@ test("an entry expiring this very second is already expired for get, stats and c
   assert.equal(cache.cleanupExpiredReasoning(), 1);
 });
 
+test("get rejects a placeholder row before formatting its expiry; other unformattable expiries still throw", () => {
+  // 8640000000001 s is live for SQLite but beyond the range of a JavaScript Date.
+  const farFuture = 8_640_000_000_001;
+  insertRaw("call_ph_far", farFuture, { reasoning: PLACEHOLDER });
+  insertRaw("call_far", farFuture);
+  assert.equal(cache.getReasoningCache("call_ph_far"), null);
+  assert.throws(() => cache.getReasoningCache("call_far"), RangeError);
+});
+
 test("delete removes one entry, expired or not, and reports the row count", () => {
   insertRaw("call_live", nowSeconds() + 600);
   insertRaw("call_expired", nowSeconds() - 5);

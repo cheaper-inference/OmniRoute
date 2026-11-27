@@ -56,32 +56,43 @@ function putReasoningCacheEntry(entry: ReasoningCacheWrite, ttlMs: number): void
   ).run(entry.toolCallId, entry.provider, entry.model, entry.reasoning, entry.charCount, expiresAt);
 }
 
-function getReasoningCacheEntry(
-  toolCallId: string
-): { reasoning: string; provider: string; model: string; expiresAt: string } | null {
+/** Raw live row; `expires_at` is still in its stored encoding. */
+type ReasoningCacheRow = {
+  reasoning: string;
+  provider: string;
+  model: string;
+  expires_at: number | string;
+};
+
+function getReasoningCacheRow(toolCallId: string): ReasoningCacheRow | undefined {
   const db = getDbInstance();
-  const row = db
+  return db
     .prepare(
       `SELECT reasoning, provider, model, expires_at FROM reasoning_cache
        WHERE tool_call_id = ? AND ${EXPIRES_AT_EPOCH_SQL} > unixepoch('now')`
     )
-    .get(toolCallId) as
-    | {
-        reasoning: string;
-        provider: string;
-        model: string;
-        expires_at: number | string;
-      }
-    | undefined;
+    .get(toolCallId) as ReasoningCacheRow | undefined;
+}
 
-  return row
-    ? {
-        reasoning: row.reasoning,
-        provider: row.provider,
-        model: row.model,
-        expiresAt: epochSecondsToIso(row.expires_at),
-      }
-    : null;
+function rowToReadResult(row: ReasoningCacheRow): {
+  reasoning: string;
+  provider: string;
+  model: string;
+  expiresAt: string;
+} {
+  return {
+    reasoning: row.reasoning,
+    provider: row.provider,
+    model: row.model,
+    expiresAt: epochSecondsToIso(row.expires_at),
+  };
+}
+
+function getReasoningCacheEntry(
+  toolCallId: string
+): { reasoning: string; provider: string; model: string; expiresAt: string } | null {
+  const row = getReasoningCacheRow(toolCallId);
+  return row ? rowToReadResult(row) : null;
 }
 
 function deleteReasoningCacheEntry(toolCallId: string): number {
@@ -233,10 +244,16 @@ export const sqliteReasoningCacheStore: ReasoningCacheStore = {
   list: async (options) => listReasoningCacheEntries(options),
 };
 
-/** Synchronous compatibility is SQLite-only, not part of the portable contract. */
+/**
+ * Synchronous compatibility is SQLite-only, not part of the portable contract.
+ * Reads return the raw row so the facade can reject the placeholder before the
+ * stored expiry is formatted, exactly as before (formatting can throw on
+ * out-of-range values).
+ */
 export const sqliteReasoningCacheLegacySync = {
   put: putReasoningCacheEntry,
-  get: getReasoningCacheEntry,
+  getRow: getReasoningCacheRow,
+  rowToReadResult,
   delete: deleteReasoningCacheEntry,
   deleteExpired: deleteExpiredReasoningCacheEntries,
   clear: clearReasoningCacheEntries,

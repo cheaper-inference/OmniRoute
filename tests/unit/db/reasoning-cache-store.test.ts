@@ -125,13 +125,20 @@ test("list honors limit, offset and filters exactly as given (no clamp in the st
   assert.equal((await store.list({ limit: 500, offset: 0, provider: "kimi" })).length, 0);
 });
 
+test("list has no page clamp of its own; the facade caps pages at 200", async () => {
+  for (let i = 0; i < 205; i++) await store.put(write(`call_${i}`), 60_000);
+  assert.equal((await store.list({ limit: 500, offset: 0 })).length, 205);
+  assert.equal(facade.getReasoningCacheEntries({ limit: 500 }).length, 200);
+});
+
 test("legacy sync access and the Promise store share one table", async () => {
   legacy.put(write("call_sync"), 60_000);
   assert.equal((await store.get("call_sync"))?.reasoning, "reasoning call_sync");
   await store.put(write("call_async"), 60_000);
-  const row = legacy.get("call_async");
+  const row = legacy.getRow("call_async");
   assert.ok(!(row instanceof Promise));
   assert.equal(row?.provider, "deepseek");
+  assert.deepEqual(legacy.rowToReadResult(row!), await store.get("call_async"));
 });
 
 test("facade writes and deletes go through the store", async () => {
