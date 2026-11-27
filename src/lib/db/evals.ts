@@ -22,13 +22,9 @@ import type {
 import { evalRepositories } from "./repositories/evalRepositories";
 
 export type {
-  EvalCaseRecord,
-  EvalCaseStrategy,
-  EvalMessage,
   EvalRoutingRunQuery,
   EvalRunSummary,
   EvalSuiteRecord,
-  EvalTargetDescriptor,
   EvalTargetType,
   PersistedEvalRun,
 } from "@/domain/persistence/evalRepository";

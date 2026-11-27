@@ -266,6 +266,14 @@ function toTargetDescriptor(row: JsonRecord): EvalTargetDescriptor {
   };
 }
 
+function stringOrEmpty(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
+function nonBlankStringOrNull(value: unknown): string | null {
+  return typeof value === "string" && value.trim().length > 0 ? value : null;
+}
+
 function toPersistedEvalRun(row: unknown): PersistedEvalRun | null {
   const camel = rowToCamel(row) as JsonRecord | null;
   if (!camel) return null;
@@ -281,18 +289,12 @@ function toPersistedEvalRun(row: unknown): PersistedEvalRun | null {
   );
 
   return {
-    id: typeof camel.id === "string" ? camel.id : "",
-    runGroupId:
-      typeof camel.runGroupId === "string" && camel.runGroupId.trim().length > 0
-        ? camel.runGroupId
-        : null,
-    suiteId: typeof camel.suiteId === "string" ? camel.suiteId : "",
-    suiteName: typeof camel.suiteName === "string" ? camel.suiteName : "",
+    id: stringOrEmpty(camel.id),
+    runGroupId: nonBlankStringOrNull(camel.runGroupId),
+    suiteId: stringOrEmpty(camel.suiteId),
+    suiteName: stringOrEmpty(camel.suiteName),
     target: toTargetDescriptor(camel),
-    apiKeyId:
-      typeof camel.apiKeyId === "string" && camel.apiKeyId.trim().length > 0
-        ? camel.apiKeyId
-        : null,
+    apiKeyId: nonBlankStringOrNull(camel.apiKeyId),
     avgLatencyMs: parseNumber(camel.avgLatencyMs),
     summary: {
       total: parseNumber(summaryRecord.total ?? camel.total),
@@ -302,7 +304,7 @@ function toPersistedEvalRun(row: unknown): PersistedEvalRun | null {
     },
     results: parseJsonArray(camel.results ?? camel.resultsJson),
     outputs,
-    createdAt: typeof camel.createdAt === "string" ? camel.createdAt : "",
+    createdAt: stringOrEmpty(camel.createdAt),
   };
 }
 
@@ -522,6 +524,68 @@ function findSuiteByIdSync(suiteId: string): EvalSuiteRecord | null {
   return listSuitesSync().find((suite) => suite.id === normalizedSuiteId) || null;
 }
 
+type SaveEvalSuiteCaseInput = SaveEvalSuiteInput["cases"][number];
+
+/** Validates one case and inserts it; runs inside saveSuiteSync's transaction. */
+function insertSuiteCase(
+  db: DbLike,
+  suiteId: string,
+  rawCase: SaveEvalSuiteCaseInput,
+  index: number,
+  now: string
+): void {
+  const caseId =
+    typeof rawCase.id === "string" && rawCase.id.trim().length > 0
+      ? rawCase.id.trim()
+      : randomUUID();
+  const caseName = rawCase.name.trim();
+  const model =
+    typeof rawCase.model === "string" && rawCase.model.trim().length > 0
+      ? rawCase.model.trim()
+      : null;
+  const sanitizedInput = sanitizeEvalCaseInput(rawCase.input);
+  const sanitizedExpected = sanitizeEvalExpected(rawCase.expected);
+  const tags = Array.isArray(rawCase.tags)
+    ? rawCase.tags.map((tag) => tag.trim()).filter((tag) => tag.length > 0)
+    : [];
+
+  if (!caseName) {
+    throw new Error(`Case ${index + 1} is missing a name`);
+  }
+
+  if (sanitizedInput.messages.length === 0) {
+    throw new Error(`Case ${index + 1} must include at least one message`);
+  }
+
+  if (
+    (sanitizedExpected.strategy === "contains" ||
+      sanitizedExpected.strategy === "exact" ||
+      sanitizedExpected.strategy === "regex") &&
+    !sanitizedExpected.value
+  ) {
+    throw new Error(`Case ${index + 1} must include an expected value`);
+  }
+
+  db.prepare(
+    `INSERT INTO eval_cases
+      (id, suite_id, sort_order, name, model, input_json, expected_strategy, expected_value,
+       tags_json, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(
+    caseId,
+    suiteId,
+    index,
+    caseName,
+    model,
+    JSON.stringify(sanitizedInput),
+    sanitizedExpected.strategy,
+    sanitizedExpected.value || null,
+    JSON.stringify(tags),
+    now,
+    now
+  );
+}
+
 function saveSuiteSync(input: SaveEvalSuiteInput): EvalSuiteRecord {
   const db = getDbInstance() as unknown as DbLike;
   ensureEvalSuiteTables(db);
@@ -564,56 +628,7 @@ function saveSuiteSync(input: SaveEvalSuiteInput): EvalSuiteRecord {
     db.prepare("DELETE FROM eval_cases WHERE suite_id = ?").run(suiteId);
 
     input.cases.forEach((rawCase, index) => {
-      const caseId =
-        typeof rawCase.id === "string" && rawCase.id.trim().length > 0
-          ? rawCase.id.trim()
-          : randomUUID();
-      const caseName = rawCase.name.trim();
-      const model =
-        typeof rawCase.model === "string" && rawCase.model.trim().length > 0
-          ? rawCase.model.trim()
-          : null;
-      const sanitizedInput = sanitizeEvalCaseInput(rawCase.input);
-      const sanitizedExpected = sanitizeEvalExpected(rawCase.expected);
-      const tags = Array.isArray(rawCase.tags)
-        ? rawCase.tags.map((tag) => tag.trim()).filter((tag) => tag.length > 0)
-        : [];
-
-      if (!caseName) {
-        throw new Error(`Case ${index + 1} is missing a name`);
-      }
-
-      if (sanitizedInput.messages.length === 0) {
-        throw new Error(`Case ${index + 1} must include at least one message`);
-      }
-
-      if (
-        (sanitizedExpected.strategy === "contains" ||
-          sanitizedExpected.strategy === "exact" ||
-          sanitizedExpected.strategy === "regex") &&
-        !sanitizedExpected.value
-      ) {
-        throw new Error(`Case ${index + 1} must include an expected value`);
-      }
-
-      db.prepare(
-        `INSERT INTO eval_cases
-          (id, suite_id, sort_order, name, model, input_json, expected_strategy, expected_value,
-           tags_json, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      ).run(
-        caseId,
-        suiteId,
-        index,
-        caseName,
-        model,
-        JSON.stringify(sanitizedInput),
-        sanitizedExpected.strategy,
-        sanitizedExpected.value || null,
-        JSON.stringify(tags),
-        now,
-        now
-      );
+      insertSuiteCase(db, suiteId, rawCase, index, now);
     });
 
     db.prepare("COMMIT").run();

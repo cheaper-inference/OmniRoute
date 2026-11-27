@@ -328,6 +328,24 @@ test("run decoding: default labels per target type and partial summary JSON", ()
   assert.deepEqual(partial.outputs, {});
 });
 
+test("characterization: run decoding keeps padded text as stored (only blank group/key become null)", () => {
+  insertRawRun({
+    id: " pad ",
+    run_group_id: " g ",
+    suite_id: " s ",
+    suite_name: " S ",
+    api_key_id: " k ",
+    created_at: " 2026-01-01 ",
+  });
+  const [r] = evalsDb.listEvalRuns();
+  assert.equal(r.id, " pad ");
+  assert.equal(r.runGroupId, " g ");
+  assert.equal(r.suiteId, " s ");
+  assert.equal(r.suiteName, " S ");
+  assert.equal(r.apiKeyId, " k ");
+  assert.equal(r.createdAt, " 2026-01-01 ");
+});
+
 // ─── listModelEvalRunsForRouting ─────────────────────────────────────────────
 
 test("routing query: empty or blank target ids return [] without reading", () => {
@@ -573,6 +591,7 @@ test("saveCustomEvalSuite creates a suite with sanitized cases in order", () => 
   assert.equal(c2.sortOrder, 1);
   assert.deepEqual(c3.expected, { strategy: "contains", value: "v" });
   const rawCase = db().prepare("SELECT * FROM eval_cases WHERE id = 'k1'").get()!;
+  assert.equal(rawCase.model, "gpt");
   assert.equal(
     rawCase.input_json,
     JSON.stringify({ messages: [{ role: "user", content: "hi" }], max_tokens: 12 })
