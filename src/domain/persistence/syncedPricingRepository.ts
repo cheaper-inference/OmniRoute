@@ -31,21 +31,3 @@ export interface SyncedPricingRepository {
   /** Upserts the last-sync record. */
   writeStatus(lastSyncTime: string, lastSyncModelCount: number): Promise<void>;
 }
-
-// ── Arena ELO sync state (`arena_elo` key_value namespace) ──────────────────
-
-/** Keys the Arena ELO sync keeps next to the `model_intelligence` rows it writes. */
-export type ArenaEloSyncStateKey = "lastFailedAt" | "lastError" | "activeSource" | "datasetDate";
-
-/**
- * Persistence only, and errors propagate: the sync service decides which failures it
- * swallows, logs or treats as "no value". Values are stored as given.
- */
-export interface ArenaEloSyncStateRepository {
-  /** The stored value (possibly an empty string), or null when the key is absent. */
-  get(key: ArenaEloSyncStateKey): Promise<string | null>;
-  /** Upserts one key. */
-  set(key: ArenaEloSyncStateKey, value: string): Promise<void>;
-  /** Deletes one key; a missing key is a no-op. */
-  remove(key: ArenaEloSyncStateKey): Promise<void>;
-}

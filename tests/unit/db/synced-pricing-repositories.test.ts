@@ -4,18 +4,17 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "external-sync-state-repositories-"));
+const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "synced-pricing-repositories-"));
 process.env.DATA_DIR = dataDir;
 process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 
 const core = await import("../../../src/lib/db/core.ts");
 const readCache = await import("../../../src/lib/db/readCache.ts");
-const { externalSyncStateRepositories } =
-  await import("../../../src/lib/db/repositories/externalSyncStateRepositories.ts");
+const { syncedPricingRepositories } =
+  await import("../../../src/lib/db/repositories/syncedPricingRepositories.ts");
 const pricingSync = await import("../../../src/lib/pricingSync.ts");
-const arena = await import("../../../src/lib/arenaEloSync.ts");
 
-const { syncedPricing, arenaEloSyncState } = externalSyncStateRepositories;
+const { syncedPricing } = syncedPricingRepositories;
 
 test.beforeEach(() => {
   core.resetDbInstance();
@@ -39,9 +38,8 @@ function kv(namespace: string): Array<{ key: string; value: string }> {
     .all(namespace) as Array<{ key: string; value: string }>;
 }
 
-test("services hand out the composition-root repositories", () => {
+test("the service hands out the composition-root repository", () => {
   assert.equal(pricingSync.getSyncedPricingRepository(), syncedPricing);
-  assert.equal(arena.getArenaEloSyncStateRepository(), arenaEloSyncState);
 });
 
 test("synced pricing: Promise replace/list/clear without remap, backup or invalidation", async () => {
@@ -93,22 +91,4 @@ test("synced pricing: status record round-trips and reads leniently", async () =
     .prepare("UPDATE key_value SET value = ? WHERE namespace = 'pricing_sync_status'")
     .run(JSON.stringify({ lastSyncTime: "t", lastSyncModelCount: "9" }));
   assert.deepEqual(await syncedPricing.readStatus(), { lastSyncTime: "t", lastSyncModelCount: 0 });
-});
-
-test("arena state: Promise get/set/remove, values as stored, errors propagate", async (t) => {
-  assert.equal(await promised(arenaEloSyncState.get("lastError")), null);
-  await promised(arenaEloSyncState.set("lastError", ""));
-  assert.equal(await arenaEloSyncState.get("lastError"), "", "empty string is a stored value");
-  await promised(arenaEloSyncState.set("activeSource", "huggingface"));
-  await promised(arenaEloSyncState.remove("lastError"));
-  await promised(arenaEloSyncState.remove("datasetDate"));
-  assert.deepEqual(kv("arena_elo"), [{ key: "activeSource", value: "huggingface" }]);
-
-  const db = core.getDbInstance();
-  t.mock.method(db, "prepare", () => {
-    throw new Error("kv down");
-  });
-  await assert.rejects(arenaEloSyncState.get("activeSource"), /kv down/);
-  await assert.rejects(arenaEloSyncState.set("lastError", "x"), /kv down/);
-  await assert.rejects(arenaEloSyncState.remove("lastError"), /kv down/);
 });

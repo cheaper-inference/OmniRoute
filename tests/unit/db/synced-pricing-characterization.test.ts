@@ -1,9 +1,9 @@
 /**
- * Characterization of the LiteLLM pricing sync and Arena ELO sync persistence.
- * Uses only the long-standing exports so it runs unchanged before and after the
- * repository extraction: stored shapes, full-replace atomicity, the truncation
- * guard, the read memo, the historical-alias remap, cache invalidation, the
- * cross-instance sync status, and the Arena ELO failure/backoff bookkeeping.
+ * Characterization of the LiteLLM pricing sync persistence. Uses only the
+ * long-standing exports so it runs unchanged before and after the repository
+ * extraction: stored shapes, full-replace atomicity, the truncation guard, the
+ * read memo, the historical-alias remap, cache invalidation and the
+ * cross-instance sync status.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -11,7 +11,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "external-sync-state-characterization-"));
+const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "synced-pricing-characterization-"));
 process.env.DATA_DIR = dataDir;
 process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 delete process.env.PRICING_SYNC_ENABLED;
@@ -19,7 +19,6 @@ delete process.env.PRICING_SYNC_ENABLED;
 const core = await import("../../../src/lib/db/core.ts");
 const readCache = await import("../../../src/lib/db/readCache.ts");
 const pricingSync = await import("../../../src/lib/pricingSync.ts");
-const arena = await import("../../../src/lib/arenaEloSync.ts");
 
 const originalFetch = globalThis.fetch;
 
@@ -32,7 +31,6 @@ test.beforeEach(() => {
 });
 test.after(() => {
   globalThis.fetch = originalFetch;
-  arena.stopArenaEloSync();
   pricingSync.stopPeriodicSync();
   core.resetDbInstance();
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
@@ -114,9 +112,14 @@ test("pricing: save and clear bump the model-catalog cache version in the same t
   const v1 = readCache.getModelCatalogCacheVersion();
   assert.ok(v1 > v0);
 
+  putKv("pricing", "openai", JSON.stringify({ keep: { input: 9, output: 9 } }));
+  putKv("pricing_sync_status", "last_sync", JSON.stringify({ lastSyncTime: "t" }));
   pricingSync.clearSyncedPricing();
   assert.ok(readCache.getModelCatalogCacheVersion() > v1);
   assert.deepEqual(kvRows("pricing_synced"), []);
+  // Clearing synced prices leaves user overrides and the sync status alone.
+  assert.equal(kvRows("pricing").length, 1);
+  assert.equal(kvRows("pricing_sync_status").length, 1);
 });
 
 test("pricing: reads skip corrupted rows, remap historical buckets and memoize", (t) => {
@@ -192,6 +195,23 @@ test("pricing sync: the truncation guard counts stored rows before remap and kee
   assert.deepEqual(kvRows("pricing_sync_status"), []);
 });
 
+test("pricing sync: the guard ignores the historical-bucket copies made on read", async () => {
+  // 4 stored models under vertex_ai read back as 12 after the remap (vertex_ai, gemini,
+  // vertex); the guard must compare against the 4 actually stored.
+  pricingSync.saveSyncedPricing({
+    vertex_ai: Object.fromEntries(
+      Array.from({ length: 4 }, (_, i) => [`v${i}`, { input: 1, output: 1 }])
+    ),
+  });
+  serveJson(litellmFixture(2)); // 2 models x (openai, cx) = 4
+  const result = await pricingSync.syncPricingFromSources({ sources: ["litellm"] });
+  assert.equal(result.success, true, String(result.error));
+  assert.deepEqual(
+    kvRows("pricing_synced").map((r) => r.key),
+    ["cx", "openai"]
+  );
+});
+
 test("pricing status: a fresh module instance reads the persisted record", async () => {
   putKv(
     "pricing_sync_status",
@@ -220,117 +240,4 @@ test("pricing status: unreadable or partial records degrade instead of throwing"
   putKv("pricing_sync_status", "last_sync", "{oops");
   assert.equal(fresh.getSyncStatus().lastSync, null);
   assert.equal(fresh.getSyncStatus().lastSyncModelCount, 0);
-});
-
-// ── arena_elo sync state ────────────────────────────────────────────────────
-
-function arenaBoards(): void {
-  globalThis.fetch = (async (input: string | URL | Request) => {
-    const url = String(input);
-    const category = url.includes("name=code") ? "code" : "text";
-    return new Response(
-      JSON.stringify({
-        meta: { leaderboard: category, model_count: 2 },
-        models: [
-          {
-            rank: 1,
-            model: "anthropic/claude-a",
-            vendor: "A",
-            score: 1400,
-            ci: 5,
-            votes: 9000,
-            license: "p",
-          },
-          {
-            rank: 2,
-            model: "openai/gpt-b",
-            vendor: "B",
-            score: 1300,
-            ci: 5,
-            votes: 9000,
-            license: "p",
-          },
-        ],
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
-  }) as typeof fetch;
-}
-
-test("arena: a failed sync stamps lastFailedAt and a sanitized lastError", async (t) => {
-  t.mock.method(console, "warn", () => {});
-  globalThis.fetch = (async () => new Response("", { status: 503 })) as typeof fetch;
-  const result = await arena.syncArenaElo();
-  assert.equal(result.success, false);
-
-  const rows = Object.fromEntries(kvRows("arena_elo").map((r) => [r.key, r.value]));
-  assert.deepEqual(Object.keys(rows).sort(), ["lastError", "lastFailedAt"]);
-  assert.ok(!Number.isNaN(Date.parse(rows.lastFailedAt)));
-  assert.ok(rows.lastError.length > 0 && rows.lastError.length <= 500);
-
-  const status = arena.getArenaEloSyncStatus();
-  assert.equal(status.lastFailedAt, rows.lastFailedAt);
-  assert.equal(status.lastError, rows.lastError);
-  assert.equal(status.activeSource, null);
-});
-
-test("arena: a fresh lastFailedAt backs off; an unparsable one does not", async (t) => {
-  t.mock.method(console, "warn", () => {});
-  t.mock.method(console, "log", () => {});
-  putKv("arena_elo", "lastFailedAt", new Date().toISOString());
-  let fetched = false;
-  globalThis.fetch = (async () => {
-    fetched = true;
-    return new Response("", { status: 503 });
-  }) as typeof fetch;
-  const skipped = await arena.syncArenaElo();
-  assert.equal(fetched, false);
-  assert.match(String(skipped.error), /backoff window/);
-
-  putKv("arena_elo", "lastFailedAt", "not a date");
-  arenaBoards();
-  const result = await arena.syncArenaElo();
-  assert.equal(result.success, true);
-});
-
-test("arena: success clears failure keys, records the source and drops datasetDate", async (t) => {
-  t.mock.method(console, "log", () => {});
-  putKv("arena_elo", "lastFailedAt", "2000-01-01T00:00:00.000Z");
-  putKv("arena_elo", "lastError", "old");
-  putKv("arena_elo", "datasetDate", "2026-10-22");
-  arenaBoards();
-
-  const result = await arena.syncArenaElo();
-  assert.equal(result.success, true);
-  assert.deepEqual(kvRows("arena_elo"), [{ key: "activeSource", value: "wulong" }]);
-
-  const status = arena.getArenaEloSyncStatus();
-  assert.equal(status.activeSource, "wulong");
-  assert.equal(status.lastError, null);
-  assert.equal(status.lastFailedAt, null);
-  assert.equal(status.datasetDate, null);
-});
-
-test("arena status: empty or unknown stored values read as null", () => {
-  putKv("arena_elo", "lastError", "");
-  putKv("arena_elo", "activeSource", "elsewhere");
-  putKv("arena_elo", "datasetDate", "2026-10-22");
-  const status = arena.getArenaEloSyncStatus();
-  assert.equal(status.lastError, null);
-  assert.equal(status.activeSource, null);
-  assert.equal(status.datasetDate, "2026-10-22");
-});
-
-test("arena status: key_value failures are swallowed", (t) => {
-  const db = core.getDbInstance();
-  const realPrepare = db.prepare.bind(db);
-  t.mock.method(db, "prepare", (sql: string) => {
-    if (sql.includes("key_value")) throw new Error("kv down");
-    return realPrepare(sql);
-  });
-  const status = arena.getArenaEloSyncStatus();
-  assert.equal(status.lastError, null);
-  assert.equal(status.lastFailedAt, null);
-  assert.equal(status.activeSource, null);
-  assert.equal(status.datasetDate, null);
 });

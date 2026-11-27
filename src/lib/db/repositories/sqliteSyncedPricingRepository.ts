@@ -9,7 +9,7 @@ import type {
   PricingSyncStatusRecord,
   SyncedPricingMap,
   SyncedPricingRepository,
-} from "@/domain/persistence/externalSyncStateRepositories";
+} from "@/domain/persistence/syncedPricingRepository";
 import { getDbInstance } from "../core";
 
 const SYNC_STATUS_NAMESPACE = "pricing_sync_status";

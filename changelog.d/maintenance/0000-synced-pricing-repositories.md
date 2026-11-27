@@ -1,0 +1,1 @@
+- **refactor(db):** Move the LiteLLM synced-pricing rows and the pricing sync status record behind a Promise-based repository while preserving the full-replace transaction, the truncation guard, the read memo and historical-alias remap, the pre-write backup and pricing cache invalidation, and the cross-instance sync status (thanks @xiaoyaner0201).

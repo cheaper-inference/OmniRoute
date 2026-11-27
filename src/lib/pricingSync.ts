@@ -10,11 +10,11 @@
  * Opt-in via PRICING_SYNC_ENABLED=true (default: false).
  */
 
-import type { SyncedPricingRepository } from "@/domain/persistence/externalSyncStateRepositories";
+import type { SyncedPricingRepository } from "@/domain/persistence/syncedPricingRepository";
 import { invalidateDbCache, getModelCatalogCacheVersion } from "./db/readCache";
 import { backupDbFile } from "./db/backup";
 import { LITELLM_PROVIDER_MAP, remapHistoricalLitellmRows } from "./litellmProviderMap";
-import { externalSyncStateRepositories } from "./db/repositories/externalSyncStateRepositories";
+import { syncedPricingRepositories } from "./db/repositories/syncedPricingRepositories";
 
 // ─── Types ───────────────────────────────────────────────
 
@@ -222,11 +222,11 @@ export function transformToOmniRoute(raw: Record<string, LiteLLMModelInfo>): Pri
 // pricing lookup path, and every write is followed by its backup and cache
 // invalidation in the same turn. This module keeps the memo, the truncation guard,
 // the backup and the cache invalidation.
-const legacy = externalSyncStateRepositories.legacySync.syncedPricing;
+const legacy = syncedPricingRepositories.legacySync;
 
 /** Async persistence contract; it never backs up, invalidates caches or remaps aliases. */
 export function getSyncedPricingRepository(): SyncedPricingRepository {
-  return externalSyncStateRepositories.syncedPricing;
+  return syncedPricingRepositories.syncedPricing;
 }
 
 // getSyncedPricing() re-ran the SELECT + JSON.parse of the pricing_synced

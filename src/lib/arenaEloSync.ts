@@ -16,10 +16,7 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 
 import { isArenaEloSyncEnabled } from "@/shared/utils/featureFlags";
 
-import type {
-  ArenaEloSyncStateKey,
-  ArenaEloSyncStateRepository,
-} from "@/domain/persistence/externalSyncStateRepositories";
+import { getDbInstance } from "./db/core";
 import { backupDbFile } from "./db/backup";
 import { fetchHuggingFaceLeaderboards } from "./arenaEloHfSource";
 import {
@@ -28,7 +25,6 @@ import {
   getLatestSyncedAt,
   type ModelIntelligenceEntry,
 } from "./db/modelIntelligence";
-import { externalSyncStateRepositories } from "./db/repositories/externalSyncStateRepositories";
 
 // ─── Types ───────────────────────────────────────────────
 
@@ -191,21 +187,16 @@ function getErrorMessage(error: unknown): string {
 // window (remediation 2026-09-12: prevents boot-loop retry storms).
 const BACKOFF_MS = SYNC_INTERVAL_MS / 4; // 6h for the default 24h interval
 
-// The `arena_elo` key_value rows persist behind ArenaEloSyncStateRepository, which lets
-// errors propagate; the try/catch policy below (never break the sync) stays here. These
-// helpers stay synchronous over the SQLite-only legacy access.
-const syncState = externalSyncStateRepositories.legacySync.arenaEloSyncState;
-
-/** Async persistence contract for the `arena_elo` state keys; errors are not swallowed. */
-export function getArenaEloSyncStateRepository(): ArenaEloSyncStateRepository {
-  return externalSyncStateRepositories.arenaEloSyncState;
-}
+const KV_READ_SQL = `SELECT value FROM key_value WHERE namespace = ? AND key = ? LIMIT 1`;
+const KV_WRITE_SQL = `INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)`;
 
 function readLastFailedAt(): number | null {
   try {
-    const value = syncState.get("lastFailedAt");
-    if (!value) return null;
-    const ts = Date.parse(value);
+    const db = getDbInstance();
+    const row = db.prepare(KV_READ_SQL).get("arena_elo", "lastFailedAt") as
+      { value: string } | undefined;
+    if (!row?.value) return null;
+    const ts = Date.parse(row.value);
     return Number.isFinite(ts) ? ts : null;
   } catch {
     return null; // kv problems must never break the sync itself
@@ -214,7 +205,8 @@ function readLastFailedAt(): number | null {
 
 function writeLastFailedAt(ts: number): void {
   try {
-    syncState.set("lastFailedAt", new Date(ts).toISOString());
+    const db = getDbInstance();
+    db.prepare(KV_WRITE_SQL).run("arena_elo", "lastFailedAt", new Date(ts).toISOString());
   } catch (err) {
     console.warn(`[ARENA_ELO_SYNC] Failed to persist lastFailedAt: ${getErrorMessage(err)}`);
   }
@@ -222,26 +214,33 @@ function writeLastFailedAt(ts: number): void {
 
 function clearLastFailedAt(): void {
   try {
-    syncState.remove("lastFailedAt");
+    const db = getDbInstance();
+    db.prepare(`DELETE FROM key_value WHERE namespace = ? AND key = ?`).run(
+      "arena_elo",
+      "lastFailedAt"
+    );
   } catch {
     // Swallow: a stuck kv row only costs one redundant fetch later.
   }
 }
 
-function readKv(key: ArenaEloSyncStateKey): string | null {
+function readKv(key: string): string | null {
   try {
-    return syncState.get(key) || null;
+    const row = getDbInstance().prepare(KV_READ_SQL).get("arena_elo", key) as
+      { value: string } | undefined;
+    return row?.value || null;
   } catch {
     return null;
   }
 }
 
-function writeKv(key: ArenaEloSyncStateKey, value: string | null): void {
+function writeKv(key: string, value: string | null): void {
   try {
+    const db = getDbInstance();
     if (value === null) {
-      syncState.remove(key);
+      db.prepare(`DELETE FROM key_value WHERE namespace = ? AND key = ?`).run("arena_elo", key);
     } else {
-      syncState.set(key, value);
+      db.prepare(KV_WRITE_SQL).run("arena_elo", key, value);
     }
   } catch {
     // kv problems must never break the sync itself
