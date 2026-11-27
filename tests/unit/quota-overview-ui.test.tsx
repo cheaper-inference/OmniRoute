@@ -116,7 +116,7 @@ it.each(["en", "zh-CN"])(
     expect(claude.querySelector("[data-partial]")).toBeNull();
     const tip = await hoverHoverCardTrigger(claude);
     expect(tip).toHaveTextContent("a2@example.test");
-    expect(tip.querySelectorAll('[role="progressbar"]')).toHaveLength(1);
+    expect(tip.querySelectorAll('[role="meter"]')).toHaveLength(1);
     expect(tip.querySelector("[data-other-pool]")).toHaveTextContent("72%");
     expect(tip.closest("[data-radix-popper-content-wrapper]")?.parentElement).toBe(document.body);
     fireEvent.keyDown(document, { key: "Escape" });

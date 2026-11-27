@@ -149,6 +149,7 @@ function QuotaWindowRow({
         <span className="font-medium">{Math.round(remaining)}% left</span>
       </div>
       <Progress
+        semantics="meter"
         value={remaining}
         size="sm"
         color={getBarColor(remaining).bar}
