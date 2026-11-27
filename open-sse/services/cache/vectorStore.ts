@@ -21,6 +21,7 @@ export interface CacheEntry {
   response: Record<string, unknown>;
   streamChunks?: Array<Record<string, unknown>>;
   tokensSaved: number;
+  originalCostUsd?: number;
   createdAt: number;
   expiresAt: number;
 }
