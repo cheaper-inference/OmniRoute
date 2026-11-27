@@ -24,6 +24,16 @@ export function getAntigravityOnboardUrls(): string[] {
 
 const ANTIGRAVITY_MODELS_PATH = "/v1internal:models";
 const ANTIGRAVITY_FETCH_AVAILABLE_MODELS_PATH = "/v1internal:fetchAvailableModels";
+export const ANTIGRAVITY_WRITE_TRAJECTORY_ACLS_PATH = "/v1internal:writeTrajectoryAcls";
+
+export function buildAntigravityWriteTrajectoryAclsUrl(generateUrl: string): string {
+  try {
+    const parsed = new URL(generateUrl);
+    return `${parsed.origin}${ANTIGRAVITY_WRITE_TRAJECTORY_ACLS_PATH}`;
+  } catch {
+    return `${ANTIGRAVITY_GENERATION_BASE_URLS[0]}${ANTIGRAVITY_WRITE_TRAJECTORY_ACLS_PATH}`;
+  }
+}
 
 function buildAntigravityDiscoveryUrls(path: string): string[] {
   return ANTIGRAVITY_DISCOVERY_BASE_URLS.map((baseUrl) => `${baseUrl}${path}`);

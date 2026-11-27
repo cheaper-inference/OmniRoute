@@ -2685,6 +2685,7 @@ async function handleChatCoreInner({
           targetFormat,
           provider,
           ccSessionId,
+          antigravitySessionKey,
           modelInfo,
           requestBody: body,
         }),

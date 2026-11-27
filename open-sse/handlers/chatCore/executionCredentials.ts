@@ -122,6 +122,7 @@ export function resolveExecutionCredentials(opts: {
   targetFormat: string;
   provider: string | null | undefined;
   ccSessionId: string | null;
+  antigravitySessionKey?: string | null;
   modelInfo?: Record<string, unknown> | null;
   requestBody?: Record<string, unknown>;
 }): ResolvedExecutionCredentials {
@@ -132,6 +133,7 @@ export function resolveExecutionCredentials(opts: {
     targetFormat,
     provider,
     ccSessionId,
+    antigravitySessionKey,
     modelInfo,
     requestBody,
   } = opts;
@@ -218,6 +220,9 @@ export function resolveExecutionCredentials(opts: {
   if (codexThinking) providerSpecificData._omnirouteCodexThinking = codexThinking;
   const withApiType = {
     ...nextCredentials,
+    ...(provider === "antigravity" && antigravitySessionKey
+      ? { _antigravitySessionKey: antigravitySessionKey }
+      : {}),
     providerSpecificData,
   };
 

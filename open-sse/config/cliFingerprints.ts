@@ -172,14 +172,15 @@ export const CLI_FINGERPRINTS: Record<string, CliFingerprint> = {
     userAgent: getGitHubCopilotChatUserAgent,
   },
   antigravity: {
-    // Native capture of the Go CLI (agy 1.4.4, Windows): streaming is requested by the
-    // `?alt=sse` query param, so there is no Accept header, and the consumer path carries
-    // no x-goog-* identity headers at all.
+    // Native capture of the Go CLI (agy 1.5.18, Windows): streaming is requested by the
+    // `?alt=sse` query param, so there is no Accept header, Accept-Encoding is `gzip`, and
+    // the consumer path carries no x-goog-* identity headers at all.
     headerOrder: [
       "Host",
-      "Content-Type",
-      "Authorization",
       "User-Agent",
+      "Content-Length",
+      "Authorization",
+      "Content-Type",
       "Accept-Encoding",
       "Transfer-Encoding",
     ],

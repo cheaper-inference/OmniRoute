@@ -36,7 +36,14 @@ import { withAntigravityTiming, timeAntigravityFetch } from "../../services/anti
 import * as timingLog from "@/sse/utils/logger";
 import { getCachedSettings } from "@/lib/db/readCache";
 import { resolveAntigravityTimingTelemetryEnabled } from "../../services/antigravityTimingConfig.ts";
-import { generateAntigravityRequestId } from "../../services/antigravityIdentity.ts";
+import {
+  isAntigravityTrajectoryAclWritten,
+  markAntigravityTrajectoryAclWritten,
+  refreshAntigravityRequestIdTimestamp,
+} from "../../services/antigravityIdentity.ts";
+import { buildAntigravityWriteTrajectoryAclsUrl } from "../../config/antigravityUpstream.ts";
+import { getAntigravityContentHeaders } from "../../services/antigravityHeaders.ts";
+import { scrubProxyAndFingerprintHeaders } from "../../services/antigravityHeaderScrub.ts";
 import {
   createCreditsExtractionTransform as createCreditsExtractionTransformImpl,
   buildSsePassthroughResult,
@@ -379,6 +386,61 @@ function dumpAntigravityRequestDebug(
   );
 }
 
+function shouldWriteAntigravityTrajectoryAcls(
+  clientProfile: string,
+  credentials: AntigravityCredentials
+): boolean {
+  if (clientProfile !== "cli") return false;
+  if (process.env.OMNIROUTE_ANTIGRAVITY_WRITE_TRAJECTORY_ACLS === "true") return true;
+  const psd = credentials?.providerSpecificData as Record<string, unknown> | undefined;
+  return psd?.writeTrajectoryAcls === true;
+}
+
+async function ensureAntigravityTrajectoryAcl(
+  provider: string,
+  generateUrl: string,
+  transformedBody: Record<string, unknown>,
+  credentials: AntigravityCredentials,
+  signal: AbortSignal | null | undefined,
+  log: SafeAntigravityLog
+): Promise<void> {
+  const innerRequest = transformedBody.request as Record<string, unknown> | undefined;
+  const labels = innerRequest?.labels as Record<string, unknown> | undefined;
+  const trajectoryId = typeof labels?.trajectory_id === "string" ? labels.trajectory_id : "";
+  if (!trajectoryId || isAntigravityTrajectoryAclWritten(trajectoryId)) return;
+
+  const aclUrl = buildAntigravityWriteTrajectoryAclsUrl(generateUrl);
+  const rawHeaders = scrubProxyAndFingerprintHeaders(
+    getAntigravityContentHeaders("cli", credentials.accessToken),
+    "cli"
+  );
+  const serialized = serializeAntigravityRequest(provider, rawHeaders, { trajectoryId });
+  applyAntigravityClientProfileHeaders(serialized.headers, credentials, { trajectoryId });
+  const timeoutSignal = AbortSignal.timeout(2_000);
+  const combinedSignal =
+    signal instanceof AbortSignal ? mergeAbortSignals(signal, timeoutSignal) : timeoutSignal;
+
+  try {
+    const resp = await fetch(aclUrl, {
+      method: "POST",
+      headers: serialized.headers,
+      body: serialized.bodyString,
+      signal: combinedSignal,
+    });
+    if (resp.ok) {
+      markAntigravityTrajectoryAclWritten(trajectoryId);
+    } else {
+      log.debug("TELEMETRY", `[Antigravity] writeTrajectoryAcls returned ${resp.status}`);
+    }
+  } catch (err) {
+    if (signal?.aborted) throw signal.reason ?? err;
+    log.debug(
+      "TELEMETRY",
+      `[Antigravity] writeTrajectoryAcls skipped: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+}
+
 /**
  * Send one Antigravity request attempt: serialize + apply the client-profile
  * fingerprint, debug-dump the outgoing envelope, fetch with a readiness timeout,
@@ -411,6 +473,10 @@ export async function sendAntigravityRequest(
     credentials,
     transformedBody
   );
+
+  if (shouldWriteAntigravityTrajectoryAcls(clientProfile, credentials)) {
+    await ensureAntigravityTrajectoryAcl(provider, url, transformedBody, credentials, signal, log);
+  }
 
   log.debug(
     "TELEMETRY",
@@ -510,7 +576,7 @@ export async function sendAntigravityRequest(
           const retryBody: Record<string, unknown> = {
             ...transformedBody,
             model: reResolvedModel,
-            requestId: generateAntigravityRequestId(),
+            requestId: refreshAntigravityRequestIdTimestamp(transformedBody.requestId),
           };
           const reSerialized = serializeAntigravityRequest(provider, headers, retryBody);
           const retryHeaders = reSerialized.headers;

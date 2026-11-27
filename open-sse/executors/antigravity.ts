@@ -83,7 +83,9 @@ import {
 import {
   getAntigravityClientProfile,
   resolveAntigravityClientVersion,
+  type AntigravityClientProfile,
 } from "../services/antigravityClientProfile.ts";
+import { orderFields } from "../config/cliFingerprints.ts";
 import {
   buildAntigravityEnvelopeIdentity,
   getAntigravityEnvelopeUserAgent,
@@ -272,18 +274,21 @@ export function markConnectionQuotaExhausted(
 
 function applyAntigravityGenerationDefaults(
   request: Record<string, unknown>,
-  modelId?: string | null
+  modelId?: string | null,
+  clientProfile: AntigravityClientProfile = "ide"
 ): void {
   const generationConfig =
     request.generationConfig && typeof request.generationConfig === "object"
       ? (request.generationConfig as Record<string, unknown>)
       : {};
 
-  if (generationConfig.topK === undefined) {
-    generationConfig.topK = 40;
-  }
-  if (generationConfig.topP === undefined) {
-    generationConfig.topP = 1.0;
+  if (clientProfile !== "cli") {
+    if (generationConfig.topK === undefined) {
+      generationConfig.topK = 40;
+    }
+    if (generationConfig.topP === undefined) {
+      generationConfig.topP = 1.0;
+    }
   }
 
   const thinkingConfig =
@@ -539,7 +544,8 @@ export function normalizeAntigravityClaudeContents(contents: unknown[]): unknown
 }
 
 function sanitizeAntigravityGeminiRequest(
-  request: Record<string, unknown>
+  request: Record<string, unknown>,
+  clientProfile: AntigravityClientProfile = "ide"
 ): Record<string, unknown> {
   const clean: Record<string, unknown> = {};
 
@@ -562,7 +568,11 @@ function sanitizeAntigravityGeminiRequest(
   const geminiTools = buildGeminiTools(request.tools);
   if (geminiTools) {
     clean.tools = geminiTools;
-    clean.toolConfig = { functionCallingConfig: { mode: "VALIDATED" } };
+    if (clientProfile !== "cli") {
+      clean.toolConfig = { functionCallingConfig: { mode: "VALIDATED" } };
+    } else if (asRecord(request.toolConfig)) {
+      clean.toolConfig = request.toolConfig;
+    }
   } else if (asRecord(request.toolConfig)) {
     clean.toolConfig = request.toolConfig;
   }
@@ -737,7 +747,7 @@ export class AntigravityExecutor extends BaseExecutor {
       raw.Accept = "text/event-stream";
     }
     // Scrub proxy/fingerprint headers that reveal non-native traffic
-    return scrubProxyAndFingerprintHeaders(raw);
+    return scrubProxyAndFingerprintHeaders(raw, clientProfile);
   }
 
   async transformRequest(
@@ -937,31 +947,41 @@ export class AntigravityExecutor extends BaseExecutor {
       }
     }
 
+    const clientProfile = getAntigravityClientProfile(credentials);
     const identity = buildAntigravityEnvelopeIdentity({
       isClaude,
       credentials,
       sessionIdFallback:
         typeof normalizedRequest?.sessionId === "string" ? normalizedRequest.sessionId : undefined,
+      clientProfile,
+      model: upstreamModel,
+      contentsLength: contents.length > 0 ? contents.length : rawContents.length,
     });
 
     const safetySettings = getAntigravitySafetySettings(normalizedRequest?.safetySettings);
-    const rawTransformedRequest = {
+    const resolvedToolConfig =
+      clientProfile !== "cli" &&
+      Array.isArray(normalizedRequest?.tools) &&
+      normalizedRequest.tools.length > 0
+        ? { functionCallingConfig: { mode: "VALIDATED" } }
+        : normalizedRequest?.toolConfig;
+    const rawTransformedRequest: Record<string, unknown> = {
       ...normalizedRequest,
       ...(contents.length > 0 && { contents }),
       sessionId: identity.sessionId,
       ...(safetySettings !== undefined && { safetySettings }),
-      toolConfig:
-        Array.isArray(normalizedRequest?.tools) && normalizedRequest.tools.length > 0
-          ? { functionCallingConfig: { mode: "VALIDATED" } }
-          : normalizedRequest?.toolConfig,
+      ...(resolvedToolConfig !== undefined && { toolConfig: resolvedToolConfig }),
     };
+    if (resolvedToolConfig === undefined) {
+      delete rawTransformedRequest.toolConfig;
+    }
 
     // Note: sanitizeAntigravityGeminiRequest() applies a Claude-only field whitelist
     // (dropping fields native Gemini requests may legitimately carry), so the Gemini
     // branch only runs the trailing-turn strip — never the sanitize/whitelist step.
     const transformedRequest = isClaude
       ? stripTrailingAntigravityAssistantTurn(
-          sanitizeAntigravityGeminiRequest(rawTransformedRequest)
+          sanitizeAntigravityGeminiRequest(rawTransformedRequest, clientProfile)
         )
       : isGemini
         ? stripTrailingAntigravityAssistantTurn(
@@ -971,13 +991,40 @@ export class AntigravityExecutor extends BaseExecutor {
           // and no identity rewrite, but empty system parts are rejected the same way.
           dropEmptyAntigravitySystemParts(rawTransformedRequest);
 
-    applyAntigravityGenerationDefaults(transformedRequest, upstreamModel);
-    // Identity labels join (never replace) the caller's own labels (#16618).
-    const callerLabels = asRecord((transformedRequest as Record<string, unknown>).labels);
-    (transformedRequest as Record<string, unknown>).labels = {
+    if (clientProfile === "cli") {
+      const sysInstr = asRecord(transformedRequest.systemInstruction);
+      if (sysInstr && sysInstr.role !== "user") {
+        transformedRequest.systemInstruction = { ...sysInstr, role: "user" };
+      }
+    }
+
+    applyAntigravityGenerationDefaults(transformedRequest, upstreamModel, clientProfile);
+    // Strip caller-supplied harness telemetry from the inner request first (#16618).
+    // On the IDE profile, telemetry keys are kept absent from the final request too;
+    // on the CLI profile, authoritative executor-derived labels (including `used_claude*`
+    // and `used_non_gemini_model`) are emitted to match the native agy wire image.
+    const sanitizedInnerRequest = stripAntigravityHarnessTelemetry(transformedRequest) as Record<
+      string,
+      unknown
+    >;
+    const callerLabels = asRecord(sanitizedInnerRequest.labels);
+    sanitizedInnerRequest.labels = {
       ...callerLabels,
       ...identity.labels,
     };
+    const finalInnerRequest =
+      clientProfile === "cli"
+        ? orderFields(sanitizedInnerRequest, [
+            "contents",
+            "systemInstruction",
+            "tools",
+            "toolConfig",
+            "safetySettings",
+            "labels",
+            "generationConfig",
+            "sessionId",
+          ])
+        : stripAntigravityHarnessTelemetry(sanitizedInnerRequest);
     const {
       project: _project,
       model: _model,
@@ -1009,15 +1056,12 @@ export class AntigravityExecutor extends BaseExecutor {
     const envelope: AntigravityRequestEnvelope = {
       project: projectId,
       requestId: identity.requestId,
-      request: transformedRequest,
+      request: finalInnerRequest,
       model: upstreamModel,
       userAgent: getAntigravityEnvelopeUserAgent(credentials),
       requestType,
       ...stripAntigravityHarnessTelemetry(passthroughFields),
     };
-    // Harness telemetry is dropped from the inner request too (the Claude branch's
-    // whitelist already omits it; the Gemini/other branches pass the request through).
-    envelope.request = stripAntigravityHarnessTelemetry(envelope.request);
 
     return envelope;
   }

@@ -43,12 +43,15 @@ const HEADERS_TO_REMOVE = [
   "accept-encoding",
 ];
 
+import type { AntigravityClientProfile } from "@/shared/constants/antigravityClientProfile";
+
 /**
  * Remove headers that reveal proxy infrastructure or non-native client identity
  * from an outgoing request to Antigravity's upstream API.
  */
 export function scrubProxyAndFingerprintHeaders(
-  headers: Record<string, string>
+  headers: Record<string, string>,
+  clientProfile?: AntigravityClientProfile
 ): Record<string, string> {
   const cleaned: Record<string, string> = {};
   let authorizationValue: string | undefined;
@@ -66,8 +69,8 @@ export function scrubProxyAndFingerprintHeaders(
     }
     cleaned[key] = value;
   }
-  // Set the standard Node.js accept-encoding
-  cleaned["Accept-Encoding"] = "gzip, deflate, br";
+  // Native Go CLI (agy) sends Accept-Encoding: gzip; Node.js IDE sends gzip, deflate, br.
+  cleaned["Accept-Encoding"] = clientProfile === "cli" ? "gzip" : "gzip, deflate, br";
   if (authorizationValue !== undefined) {
     cleaned["Authorization"] = authorizationValue;
   }
