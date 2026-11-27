@@ -46,10 +46,18 @@ function normalizeAgentMessageForChat(item: JsonRecord): JsonRecord | null {
   const text = collectAgentMessageText(item);
   if (typeof text !== "string" || !text.trim()) return null;
 
+  // Codex delivers another agent's task or reply as inbound context. Encoding it
+  // as assistant history leaves the model without a new user turn to respond to.
+  const author = typeof item.author === "string" ? item.author : "";
+  const recipient = typeof item.recipient === "string" ? item.recipient : "";
+  const header =
+    author || recipient
+      ? `[Agent message from ${author || "unknown"} to ${recipient || "unknown"}]\n`
+      : "";
   return {
     type: "message",
-    role: "assistant",
-    content: [{ type: "input_text", text }],
+    role: "user",
+    content: [{ type: "input_text", text: header + text }],
   };
 }
 
