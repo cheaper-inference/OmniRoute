@@ -267,7 +267,7 @@ import {
   shouldRetrySameAccountTransport,
   sameAccountTransportRetryDelayMs,
 } from "../services/sameAccountTransportRetry";
-import { checkConnectionCapacity } from "../utils/backpressure";
+import { runWithConnectionSlot } from "../utils/backpressure";
 import {
   buildManagedLeaseErrorResponse,
   buildManagedLeaseSelectionErrorResponse,
@@ -404,7 +404,15 @@ function logBreakerStateChange(name: string, from: string, to: string): void {
 
 export { shouldTripProviderBreakerForResult } from "./chatPredicates";
 
-async function handleChatImplementation(
+async function handleChatImplementation(...args: Parameters<typeof handleAdmittedChat>) {
+  const [request, , , , , signal = request?.signal ?? null] = args;
+  const peerRejection = rejectPeerRequest(request?.headers, log.warn, errorResponse);
+  if (peerRejection) return peerRejection;
+
+  return runWithConnectionSlot(signal, () => handleAdmittedChat(...args), log);
+}
+
+async function handleAdmittedChat(
   request: any,
   clientRawRequest: any = null,
   preParsedBody: any = null,
@@ -412,18 +420,9 @@ async function handleChatImplementation(
   admissionContext: chatAdmission.ChatAdmissionContext,
   signal: AbortSignal | null = request?.signal ?? null // #15010 deadline-aware lifecycle signal
 ) {
-  const peerRejection = rejectPeerRequest(request?.headers, log.warn, errorResponse);
-  if (peerRejection) return peerRejection;
-
   // Pipeline: Start request telemetry
   const reqId = correlationId || generateRequestId();
   const telemetry = new RequestTelemetry(reqId);
-
-  const backpressure = checkConnectionCapacity();
-  if (backpressure.shouldReject) {
-    log.warn("BACKPRESSURE", "Rejecting request: at connection limit");
-    return backpressure.response;
-  }
 
   let body;
   try {

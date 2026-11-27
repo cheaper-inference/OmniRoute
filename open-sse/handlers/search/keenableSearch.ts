@@ -52,15 +52,51 @@ type MakeResult = (
   now: string
 ) => SearchResult;
 
+/** Bare host of a domain-filter entry: scheme and path dropped (`https://a.com/x` → `a.com`). */
+function domainHost(entry: string): string {
+  return entry
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/\/.*$/, "");
+}
+
 /** Keenable takes a single `site`; a lone include domain maps to it, anything else is not sent. */
 function singleIncludeDomain(domainFilter: string[] | undefined): string | undefined {
   const includes = (domainFilter ?? []).filter((d) => !d.startsWith("-"));
   if (includes.length !== 1) return undefined;
-  const host = includes[0]
-    .trim()
-    .replace(/^https?:\/\//i, "")
-    .replace(/\/.*$/, "");
-  return host || undefined;
+  return domainHost(includes[0]) || undefined;
+}
+
+function hostMatches(url: string, domains: string[]): boolean {
+  let host: string;
+  try {
+    host = new URL(url).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  return domains.some((domain) => host === domain || host.endsWith(`.${domain}`));
+}
+
+/**
+ * The request carries at most one `site`, so exclusions and several includes never reach
+ * Keenable: enforce the caller's whole domain filter on the results (a domain also covers
+ * its subdomains) (#19028).
+ */
+function applyDomainFilter<T extends { url: string }>(results: T[], domainFilter?: string[]): T[] {
+  const includes: string[] = [];
+  const excludes: string[] = [];
+  for (const entry of domainFilter ?? []) {
+    if (typeof entry !== "string") continue;
+    const excluded = entry.trim().startsWith("-");
+    const host = domainHost(excluded ? entry.trim().slice(1) : entry).toLowerCase();
+    if (host) (excluded ? excludes : includes).push(host);
+  }
+  if (includes.length === 0 && excludes.length === 0) return results;
+  return results.filter(
+    (result) =>
+      (includes.length === 0 || hostMatches(result.url, includes)) &&
+      !hostMatches(result.url, excludes)
+  );
 }
 
 export function buildKeenableSearchRequest(
@@ -107,16 +143,26 @@ interface KeenableSearchItem {
 const nonEmptyString = (value: unknown): string | undefined =>
   typeof value === "string" && value.trim().length > 0 ? value : undefined;
 
+/** Result URLs are external data: only plain http(s) reaches the caller (no `javascript:`/`data:`). */
+const httpUrl = (value: unknown): string | undefined => {
+  const url = nonEmptyString(value);
+  return url && /^https?:\/\//i.test(url) ? url : undefined;
+};
+
 export function normalizeKeenableSearchResponse(
   data: unknown,
-  makeResult: MakeResult
+  makeResult: MakeResult,
+  domainFilter?: string[]
 ): { results: SearchResult[]; totalResults: number | null } {
   const rows = (data as { results?: unknown } | null)?.results;
   if (!Array.isArray(rows)) return { results: [], totalResults: null };
   const now = new Date().toISOString();
-  const items = rows.filter(
-    (row): row is KeenableSearchItem & { url: string } =>
-      !!row && typeof row === "object" && !Array.isArray(row) && !!nonEmptyString(row.url)
+  const items = applyDomainFilter(
+    rows.filter(
+      (row): row is KeenableSearchItem & { url: string } =>
+        !!row && typeof row === "object" && !Array.isArray(row) && !!httpUrl(row.url)
+    ),
+    domainFilter
   );
   const results = items.map((item, idx) => {
     const text = nonEmptyString(item.snippet);

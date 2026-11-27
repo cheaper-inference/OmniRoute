@@ -45,7 +45,7 @@ function nullableNumber(value: unknown): number | null {
 
 function normalizeMeta(
   value: unknown
-): { version: string; tier: string; fetchedAt: string } | null {
+): { version: string; tier: string; fetchedAt: string; olderThanRelease?: boolean } | null {
   const meta = record(value);
   if (
     typeof meta.version !== "string" ||
@@ -54,7 +54,14 @@ function normalizeMeta(
   ) {
     return null;
   }
-  return { version: meta.version, tier: meta.tier, fetchedAt: meta.fetchedAt };
+  return {
+    version: meta.version,
+    tier: meta.tier,
+    fetchedAt: meta.fetchedAt,
+    ...(typeof meta.olderThanRelease === "boolean"
+      ? { olderThanRelease: meta.olderThanRelease }
+      : {}),
+  };
 }
 
 function normalizeEntry(value: unknown) {

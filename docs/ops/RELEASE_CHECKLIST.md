@@ -6,7 +6,6 @@ lastUpdated: 2026-10-10
 
 # Release Checklist
 
-> **Last updated:** 2026-08-28 — v3.8.51
 > Streamlined release flow that leverages Claude Code skills for automation.
 >
 > **Keep the queue/branch green between releases:** see [RELEASE_GREEN.md](./RELEASE_GREEN.md)
@@ -196,7 +195,8 @@ Breaking changes: add `BREAKING CHANGE:` footer or `!` after the scope (e.g. `fe
 ### Documentation
 
 - [ ] `npm run check:docs-sync` passes (auto-run by pre-commit)
-- [ ] `npm run check:docs-all` passes (umbrella: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-all` passes. Its advisory `check:deprecated-versions` flags versions
+      explicitly attributed to OmniRoute (3.6.x and earlier) and ignores dates.
 - [ ] `npm run check:env-doc-sync` exits 0 — code ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env contract is intact
 - [ ] `npm run check:doc-links` exits 0 — no broken internal markdown references after restructuring
 - [ ] `docs/architecture/ARCHITECTURE.md` reviewed for storage/runtime drift

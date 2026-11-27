@@ -1,0 +1,1 @@
+- **fix(settings):** Security flags invalid CORS origins inline and skips autosave for the invalid list. The settings API rejects invalid lists and preserves the saved origins (KEA-9580)

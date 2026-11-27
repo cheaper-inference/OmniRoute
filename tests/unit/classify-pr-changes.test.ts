@@ -297,6 +297,26 @@ const LEGACY_STDOUT_CASES: Array<[string[], string, string]> = [
     "docs",
   ],
   [
+    [".i18n-state.json"],
+    "code=false\ndocs=true\ni18n=false\nworkflow=false\ntestsOnly=false\n",
+    "docs",
+  ],
+  [
+    ["docs/i18n/pt-BR/docs/architecture/QUALITY_GATES.md", ".i18n-state.json"],
+    "code=false\ndocs=true\ni18n=false\nworkflow=false\ntestsOnly=false\n",
+    "docs",
+  ],
+  [
+    [".i18n-state.json", "src/lib/db/core.ts"],
+    "code=true\ndocs=true\ni18n=false\nworkflow=false\ntestsOnly=false\n",
+    "db,docs",
+  ],
+  [
+    [".i18n-state.json.bak"],
+    "code=true\ndocs=false\ni18n=false\nworkflow=false\ntestsOnly=false\n",
+    "core",
+  ],
+  [
     ["src/i18n/messages/en.json"],
     "code=false\ndocs=false\ni18n=true\nworkflow=false\ntestsOnly=false\n",
     "i18n",
@@ -324,7 +344,7 @@ const LEGACY_STDOUT_CASES: Array<[string[], string, string]> = [
 ];
 
 for (const [files, legacy, domains] of LEGACY_STDOUT_CASES) {
-  test(`regression: stdout keeps the legacy lines byte-identical, then appends domains (${files[0]})`, () => {
+  test(`classifier CLI emits the five workflow flags and domains for ${files.join(", ")}`, () => {
     const out = runCli(files);
     assert.equal(out, `${legacy}domains=${domains}\n`);
   });

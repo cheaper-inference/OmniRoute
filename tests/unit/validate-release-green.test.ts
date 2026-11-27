@@ -412,6 +412,24 @@ test("unit shards: the REAL ci.yml yields its shard count and the shard script e
   assert.match(pkg.scripts["test:unit:ci:shard"], /--test-concurrency=4/);
 });
 
+test("hosted unit jobs use the native CI budget in both observer matrices", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { load } = await import("js-yaml");
+  type Workflow = { jobs: Record<string, { "timeout-minutes": number | string }> };
+  const readWorkflow = (file: string) =>
+    load(
+      readFileSync(new URL(`../../.github/workflows/${file}`, import.meta.url), "utf8")
+    ) as Workflow;
+
+  const unitBudget = readWorkflow("ci.yml").jobs["test-unit"]["timeout-minutes"];
+  assert.equal(typeof unitBudget, "number");
+  const observer = readWorkflow("nightly-release-green.yml");
+  const expected = "${{ matrix.script == 'test:unit:ci:shard' && " + unitBudget + " || 30 }}";
+  for (const job of ["suites", "main-suites"]) {
+    assert.equal(observer.jobs[job]["timeout-minutes"], expected, job);
+  }
+});
+
 test("unit shards: the pool gives each running shard four cores (its --test-concurrency)", () => {
   // availableParallelism() honours the runner's cgroup cpu.max: omniroute-113-6 (CPUQuota=800%)
   // reports 8 on a 32-core box, measured 2026-10-19.

@@ -127,6 +127,28 @@ test("validates backs", () => {
   }
 });
 
+test("validates pendingCatalogFix entries", () => {
+  const m = manifest();
+  const entry = {
+    probeId: "a",
+    reason: "The published allowance differs from the catalog.",
+    sourceUrl: "https://api.example.com/pricing",
+  };
+  assert.deepEqual(validateManifest({ ...m, pendingCatalogFix: [entry] }), []);
+  assert.deepEqual(validateManifest({ ...m, pendingCatalogFix: [{ ...entry, probeId: "x" }] }), [
+    "pendingCatalogFix: unknown probe x",
+  ]);
+  assert.notDeepEqual(
+    validateManifest({ ...m, pendingCatalogFix: [{ ...entry, sourceUrl: "http://example.com" }] }),
+    []
+  );
+  assert.notDeepEqual(
+    validateManifest({ ...m, pendingCatalogFix: [{ ...entry, reason: "" }] }),
+    []
+  );
+  assert.notDeepEqual(validateManifest({ ...m, pendingCatalogFix: entry }), []);
+});
+
 test("loadManifest throws with every error joined", (t) => {
   mkdirSync("_artifacts", { recursive: true });
   const dir = mkdtempSync("_artifacts/catalog-drift-manifest-");

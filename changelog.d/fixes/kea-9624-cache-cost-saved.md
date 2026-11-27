@@ -1,0 +1,1 @@
+- **fix(sse):** Semantic cache hits for Messages and Responses now report the original request's USD cost in `X-OmniRoute-Cost-Saved`.

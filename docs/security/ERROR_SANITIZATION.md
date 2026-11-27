@@ -10,7 +10,6 @@ lastUpdated: 2026-09-02
 > `open-sse/utils/errorPathRedaction.ts`, and the public builders in `open-sse/utils/error.ts`
 > **Tests:** `tests/unit/error-message-sanitization.test.ts`,
 > `tests/unit/error-public-boundaries-hardening.test.ts`
-> **Last updated:** 2026-09-02 — v3.8.51
 > **Audience:** Any engineer touching error responses (HTTP routes, SSE streams, executors, MCP handlers).
 > **Status:** **MANDATORY** for every code path that returns an error message to a client.
 
