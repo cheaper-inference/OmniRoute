@@ -1,0 +1,1 @@
+- **fix(dashboard):** hide short email addresses in combo account labels when email visibility is off, and show the account ID where available.
