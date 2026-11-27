@@ -3,12 +3,12 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b58",
+    "batchId": "b59",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b58-1dd7e050a4d8",
-    "candidateSha": "1dd7e050a4d86287557fb077731a378391ad2f69",
+    "candidateRef": "omni-queue/release-v3.8.55/b59-3a12be33fd8b",
+    "candidateSha": "3a12be33fd8bd4d213b0aaca60da785f88424d02",
     "baseSha": "9671192011beb2d7f83979f40be488c5da8772b9",
-    "treeSha": "89a16a2025ea0a75ebbde91776f7b88e00de16e0",
+    "treeSha": "4db24d103d27f5caa9fb73fe3fcfdbcb50d962de",
     "prs": [
       {
         "n": 21356,
@@ -44,52 +44,86 @@
         "title": "chore(quality): sync the merge-gates template with the live omni-queue rules",
         "author": "diegosouzapw",
         "labeledAt": "2026-11-26T23:38:36Z"
-      },
-      {
-        "n": 21306,
-        "head": "1f512456d8f9c3f0cb638b329309b162b36d6cad",
-        "title": "feat(models): refresh the AI Horde image catalog in the background behind a flag",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T23:38:42Z"
-      },
-      {
-        "n": 21313,
-        "head": "4bde8273c00a4aa9c9f24b9872612235d57d957c",
-        "title": "test(combo): prove the handoff summary stays inside the key's metered budget",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T23:38:49Z"
-      },
-      {
-        "n": 21359,
-        "head": "103b3ea5fcfc24281149effd17355d6580317964",
-        "title": "test(ui): give the combo searchable-selector cases their own 60 s deadline",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T23:38:55Z"
-      },
-      {
-        "n": 21337,
-        "head": "78b84d0722bb18007e779bcfe66fd1f83520d1db",
-        "title": "fix(docker,build): enforce the frozen lockfile in Dockerfile.bun and pin container/native tooling",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T23:39:04Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-26T23:40:16.084Z",
+    "startedAt": "2026-11-27T00:51:15.282Z",
     "attempts": 0,
-    "bisect": null,
-    "rerun": {
-      "ref": "omni-queue/release-v3.8.55/b58-1dd7e050a4d8",
-      "requestedAt": "2026-11-27T00:17:04.433Z",
-      "afterMs": 1795738599000,
-      "runIds": [
-        45912305355
+    "bisect": {
+      "rootBatchId": "b58",
+      "segments": [
+        [
+          {
+            "n": 21356,
+            "head": "c7eb5ff042a0d7335c88b83413c0f21ff3324a87",
+            "title": "fix(authz): check the browser origin on anonymous management mutations",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-26T23:36:56Z"
+          },
+          {
+            "n": 21351,
+            "head": "60271ae2db34793ab3fe35659786f38bd41dfac4",
+            "title": "fix(sse): route the Codex prompt-cache anchor digest through opaqueTokenFingerprint",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-26T23:37:00Z"
+          },
+          {
+            "n": 21341,
+            "head": "67eb9b5f7c2be0583c10b646106364cb63e970bd",
+            "title": "fix(sse): enforce strict per-request budgets before auto routing (KEA-9622)",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-26T23:37:22Z"
+          },
+          {
+            "n": 21358,
+            "head": "96d930fa00ddc170988e59c698ecac501f86480c",
+            "title": "docs: trim AGENTS.md and CLAUDE.md to what an agent cannot derive",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-26T23:38:23Z"
+          },
+          {
+            "n": 21295,
+            "head": "c9b3fd98e0f358f1baef2dba19977fe6fadaf523",
+            "title": "chore(quality): sync the merge-gates template with the live omni-queue rules",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-26T23:38:36Z"
+          }
+        ],
+        [
+          {
+            "n": 21306,
+            "head": "1f512456d8f9c3f0cb638b329309b162b36d6cad",
+            "title": "feat(models): refresh the AI Horde image catalog in the background behind a flag",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-26T23:38:42Z"
+          },
+          {
+            "n": 21313,
+            "head": "4bde8273c00a4aa9c9f24b9872612235d57d957c",
+            "title": "test(combo): prove the handoff summary stays inside the key's metered budget",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-26T23:38:49Z"
+          },
+          {
+            "n": 21359,
+            "head": "103b3ea5fcfc24281149effd17355d6580317964",
+            "title": "test(ui): give the combo searchable-selector cases their own 60 s deadline",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-26T23:38:55Z"
+          },
+          {
+            "n": 21337,
+            "head": "78b84d0722bb18007e779bcfe66fd1f83520d1db",
+            "title": "fix(docker,build): enforce the frozen lockfile in Dockerfile.bun and pin container/native tooling",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-26T23:39:04Z"
+          }
+        ]
       ],
-      "jobs": [
-        "Gate / CI",
-        "Unit Tests (3/8)",
-        "Integration Tests (2/2)"
-      ]
+      "culprits": [],
+      "landed": [],
+      "steps": 0,
+      "hang": false
     }
   },
   "baseChecks": [
@@ -186,56 +220,15 @@
     }
   },
   "counters": {
-    "batchSeq": 58,
-    "ciRuns": 63,
+    "batchSeq": 59,
+    "ciRuns": 64,
     "landedPrs": 51,
     "landedBatches": 15,
     "redBatches": 12,
-    "bisections": 3,
+    "bisections": 4,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-20T12:06:16.789Z",
-      "type": "checks-green",
-      "batchId": "b10",
-      "prs": [
-        18544,
-        18551,
-        18575,
-        18587
-      ],
-      "sha": "212063f002231a4dbd53600d0e0ed3c3bf4221e6",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44732907873"
-    },
-    {
-      "at": "2026-11-20T12:06:32.647Z",
-      "type": "would-land",
-      "batchId": "b10",
-      "prs": [
-        18544,
-        18551,
-        18575,
-        18587
-      ],
-      "sha": "212063f002231a4dbd53600d0e0ed3c3bf4221e6",
-      "detail": "shadow mode: would merge-ff onto 632d84f569f7",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44732907873"
-    },
-    {
-      "at": "2026-11-20T13:24:20.960Z",
-      "type": "batch-started",
-      "batchId": "b11",
-      "prs": [
-        18591
-      ],
-      "sha": "b6dd0a1696681bfca5062552030831a38ea263e7",
-      "detail": "1 PR(s) on 8f5680304177; window 9",
-      "labeledAt": {
-        "18591": "2026-11-20T13:12:50Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44743913685"
-    },
     {
       "at": "2026-11-20T14:34:07.620Z",
       "type": "checks-green",
@@ -2924,8 +2917,68 @@
       "sha": "1dd7e050a4d86287557fb077731a378391ad2f69",
       "detail": "re-running the failed jobs of b58 once (Gate / CI, Unit Tests (3/8), Integration Tests (2/2)) before bisecting",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45915798583"
+    },
+    {
+      "at": "2026-11-27T00:50:58.534Z",
+      "type": "checks-red",
+      "batchId": "b58",
+      "prs": [
+        21356,
+        21351,
+        21341,
+        21358,
+        21295,
+        21306,
+        21313,
+        21359,
+        21337
+      ],
+      "sha": "1dd7e050a4d86287557fb077731a378391ad2f69",
+      "detail": "Gate / CI, Unit Tests (3/8), Integration Tests (2/2)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45919102204"
+    },
+    {
+      "at": "2026-11-27T00:50:58.535Z",
+      "type": "bisect-split",
+      "batchId": "b58",
+      "prs": [
+        21356,
+        21351,
+        21341,
+        21358,
+        21295,
+        21306,
+        21313,
+        21359,
+        21337
+      ],
+      "sha": "1dd7e050a4d86287557fb077731a378391ad2f69",
+      "detail": "batch of 9 red: testing #21356, #21351, #21341, #21358, #21295 first",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45919102204"
+    },
+    {
+      "at": "2026-11-27T00:51:18.527Z",
+      "type": "batch-started",
+      "batchId": "b59",
+      "prs": [
+        21356,
+        21351,
+        21341,
+        21358,
+        21295
+      ],
+      "sha": "3a12be33fd8bd4d213b0aaca60da785f88424d02",
+      "detail": "bisect of b58: 5 PR(s) on 9671192011be",
+      "labeledAt": {
+        "21295": "2026-11-26T23:38:36Z",
+        "21341": "2026-11-26T23:37:22Z",
+        "21351": "2026-11-26T23:37:00Z",
+        "21356": "2026-11-26T23:36:56Z",
+        "21358": "2026-11-26T23:38:23Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45919102204"
     }
   ],
-  "updatedAt": "2026-11-27T00:17:57.572Z",
-  "batchWindow": 9
+  "updatedAt": "2026-11-27T00:51:57.462Z",
+  "batchWindow": 4
 }
