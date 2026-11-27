@@ -169,6 +169,10 @@ export function mergedPrsBetween(git, expectedBaseSha, candidateSha) {
  * key, in any paragraph, is refused rather than resolved). The chain is read with each commit's
  * whole message, as the CI reads it; output that cannot be split into whole commits is a
  * mismatch. The subject, the author trailer and the commit identity are not checked.
+ * Nor is a signature (config landing.signing "ssh"): every read here is of the tree, the parents
+ * and the message (%B, which never holds the gpgsig header), so a signed candidate verifies
+ * exactly as the unsigned composition of the same inputs, and a signature never makes a commit
+ * with another tree, parents or trailers pass.
  *
  * @param {{git: Git, expectedBaseSha: string, candidateSha: string, prs: PrRef[],
  *          treeSha?: string|null, trees?: boolean}} input   the commits must be in the scratch

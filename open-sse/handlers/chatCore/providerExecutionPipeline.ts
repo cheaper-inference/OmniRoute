@@ -107,6 +107,12 @@ export interface PipelineConnectionContext {
    * the request carried no constraint.
    */
   allowedConnections?: string[] | null;
+  /**
+   * Called with the connection the pipeline is about to rotate to. Returning false keeps the
+   * current upstream error instead of rotating (e.g. the key's Quota Share cap for that
+   * connection's pool is used up). Absent: every rotation is admitted.
+   */
+  admitRotation?: (nextConnectionId: string) => Promise<boolean>;
   refreshCredentials?: (
     credentials: Record<string, unknown>
   ) => Promise<Record<string, unknown> | null>;
@@ -544,7 +550,12 @@ export async function runProviderExecutionPipeline(
               codexFailoverOptions
             )
       ).catch(() => null);
-      if (nextCreds && !nextCreds.allRateLimited && nextCreds.connectionId) {
+      if (
+        nextCreds &&
+        !nextCreds.allRateLimited &&
+        nextCreds.connectionId &&
+        (await connection.admitRotation?.(String(nextCreds.connectionId))) !== false
+      ) {
         await state.onAuditAccountRotation?.({
           action: "codex.account_rotation",
           failedConnectionId: failedId,
@@ -576,7 +587,12 @@ export async function runProviderExecutionPipeline(
             excludeConnectionIds: [...excludedIds],
           })
           .catch(() => null);
-        if (nextCreds && !nextCreds.allRateLimited && nextCreds.connectionId) {
+        if (
+          nextCreds &&
+          !nextCreds.allRateLimited &&
+          nextCreds.connectionId &&
+          (await connection.admitRotation?.(String(nextCreds.connectionId))) !== false
+        ) {
           connection.replaceCredentials(nextCreds as Record<string, unknown>);
           antigravityByopRotationPending = true;
           continue;

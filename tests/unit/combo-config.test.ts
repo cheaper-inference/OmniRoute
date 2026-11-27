@@ -532,7 +532,8 @@ test("combo editor and defaults pages expose comboTimeoutMs", async () => {
   );
   assert.match(editor, /import ComboTimeoutFields from "\.\/ComboTimeoutFields"/);
   assert.match(editor, /<ComboTimeoutFields[\s\S]*showHelp=\{!isExpertMode\}/);
-  assert.match(defaults, /comboTimeoutMs: secondsInputToOptionalMs\(e\.target\.value\)/);
+  // The field is the kit NumberInput: `onValueChange` hands the seconds as a number (or null).
+  assert.match(defaults, /comboTimeoutMs: secondsInputToOptionalMs\(value\)/);
   assert.match(defaults, /comboTimeoutHint/);
 });
 

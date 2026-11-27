@@ -53,10 +53,7 @@ describe("suffixComposition :free tier (#4517)", () => {
     const filter = buildAutoCandidateFilter("coding", "free");
     assert.notEqual(filter, null);
 
-    assert.equal(
-      filter!({ provider: "uncloseai", model: "Lorbus/Qwen3.6-27B-int4-AutoRound" }),
-      true
-    );
+    assert.equal(filter!({ provider: "duckduckgo-web", model: "claude-haiku-4-5" }), true);
     assert.equal(filter!({ provider: "duckduckgo-web", model: "gpt-4o-mini" }), true);
   });
 

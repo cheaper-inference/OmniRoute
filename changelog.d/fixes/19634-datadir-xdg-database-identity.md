@@ -1,0 +1,1 @@
+- **fix(cli):** an XDG or %APPDATA% install keeps using its own database when an empty `~/.omniroute` folder appears, instead of silently switching to a new empty database on the next start. ([#19634](https://github.com/cheaper-inference/OmniRoute/pull/19634))

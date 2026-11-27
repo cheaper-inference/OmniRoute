@@ -20,7 +20,7 @@ export default function BurnRateChartInner({ usage }: BurnRateChartInnerProps) {
   if (!hasData) {
     return (
       <div className="h-20 flex items-center justify-center rounded-md bg-bg-subtle/30 border border-border/30">
-        <p className="text-[11px] text-text-muted italic">{t("burnRateTitle")} — no data yet</p>
+        <p className="text-xs text-text-muted italic">{t("burnRateTitle")} — no data yet</p>
       </div>
     );
   }
@@ -55,8 +55,10 @@ export default function BurnRateChartInner({ usage }: BurnRateChartInnerProps) {
 
   return (
     <div className="space-y-1">
-      <div className="flex items-center justify-between text-[10px] text-text-muted">
-        <span className="font-semibold uppercase tracking-wide">{t("burnRateTitle")}</span>
+      <div className="flex items-center justify-between text-3xs text-text-muted">
+        <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
+          {t("burnRateTitle")}
+        </span>
         {exhaustionLabel && <span className="text-warning font-semibold">{exhaustionLabel}</span>}
       </div>
       <div className="h-24">

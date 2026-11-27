@@ -180,7 +180,9 @@ async function attemptRetry(
   if (!nextCreds?.connectionId) return null;
 
   const snapshot = { ...deps.credentials };
-  Object.assign(deps.credentials, nextCreds);
+  // Swap, not merge: a key only the old connection defines (routing, lease, a Copilot session
+  // token) must not ride along to the next connection. restoreCredentials is the reverse swap.
+  restoreCredentials(deps.credentials, nextCreds as Record<string, unknown>);
   const retryConnectionId = String(nextCreds.connectionId);
   deps.log?.info?.("FLUSH_EMPTY_RETRY", `retrying on ${retryConnectionId}`);
 

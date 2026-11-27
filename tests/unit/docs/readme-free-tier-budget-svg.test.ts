@@ -77,6 +77,37 @@ test("the counts gate's own readers of this file accept the generated content (s
   }
 });
 
+test("the card draws the owner's block: big figure on top with its label, real right below, dated", () => {
+  const code = (snapshotFacts as { code: Record<string, never> }).code as Record<string, unknown>;
+  const label = (k: string) => String(code[k]);
+  const c = buildFreeTierBudgetCopy() as Record<string, string[]>;
+  const flat = Object.values(c).flat().join("\n");
+  // D47 (owner, 2026-11-21) with the card texts S-A (owner, 2026-11-24).
+  assert.equal(c.big[0], label("rowSumTotalLabel"));
+  assert.match(c.big.join(" "), /counted the way other catalogs count/i);
+  assert.match(c.big.join(" "), /ended offers included/i);
+  assert.doesNotMatch(c.big.join(" "), /capacity|available|you get/i);
+  assert.deepEqual(c.hero, [label("headlineSteadyLabel")]);
+  assert.match(c.heroLabel.join(""), /^\s*real\b/i);
+  assert.match(flat, /what you can actually use/i);
+  const keys = Object.keys(c);
+  assert.ok(keys.indexOf("big") < keys.indexOf("hero"), "big is declared before hero");
+  assert.ok(
+    flat.indexOf(label("rowSumTotalLabel")) < flat.indexOf(label("headlineSteadyLabel")),
+    "the big figure comes first"
+  );
+  assert.ok(c.heroSub.join("").includes(`${label("headlineFirstLabel")} in your first month`));
+  assert.ok(!flat.includes("~10B"));
+  assert.doesNotMatch(flat, /we don't publish that/);
+  assert.ok(flat.includes(label("catalogDate")));
+  assert.ok(c.ladder.some((s) => s.includes(`${label("rowSumLiveLabel")} summed per live row`)));
+  for (const s of Object.values(c).flat()) assert.doesNotMatch(s, /\b0\.\d+B\b/, s);
+  const meta = c.heroMeta.join("");
+  assert.ok(meta.includes(`${code.freePublishedPools} pools with a published quota`), meta);
+  assert.ok(meta.includes(`${code.freeAccessRows} catalog rows with free access`), meta);
+  assert.doesNotMatch(meta, /recurring pools|catalog entries/);
+});
+
 test("light and dark palettes are both declared and no literal color escapes the theme", async () => {
   const svg = await renderReadmeFreeTierBudget();
   assert.match(svg, /:root\{[^}]*--bg:#f3f1e9/);

@@ -1,0 +1,1 @@
+- **feat(sse):** OpenCode Zen and Go now declare model ids that were reachable only through passthrough: GPT 6 Astra, GPT 5.5 / 5.5 Pro / 5.4 Pro / 5.3 Codex, Claude Fable 5.1, Opus 4.8 / 4.7, Sonnet 4.6 and Gemini 3.8 / 3.6 / 3.5 Flash on Zen, plus GLM-5.3 and GLM-5.3 Flash on both tiers (with reasoning and vision flags)

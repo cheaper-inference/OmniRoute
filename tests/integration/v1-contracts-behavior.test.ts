@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
+import { aiHordeImageCatalog } from "../../open-sse/services/aihordeImageCatalog.ts";
+
 const BASE_URL = "http://localhost:20128";
 
 // #9320 (`fix(security): require auth for /v1/models when management auth is
@@ -16,9 +18,22 @@ const TEST_API_KEY = "sk-v1-contracts-behavior-test-key";
 const previousEnvApiKey = process.env.OMNIROUTE_API_KEY;
 process.env.OMNIROUTE_API_KEY = TEST_API_KEY;
 
+// These checks cover response shapes. The #12627 suite covers the cold-build deadline and 503.
+const previousCatalogBuildTimeout = process.env.CATALOG_BUILD_TIMEOUT_MS;
+process.env.CATALOG_BUILD_TIMEOUT_MS = "120000";
+
+// setFetch has no getter, so capture the current transport for teardown.
+const previousHordeFetch = aiHordeImageCatalog["fetchImpl"];
+aiHordeImageCatalog.setFetch(async () =>
+  Response.json([{ name: "Stable Diffusion", type: "image", count: 1 }])
+);
+
 test.after(() => {
   if (previousEnvApiKey === undefined) delete process.env.OMNIROUTE_API_KEY;
   else process.env.OMNIROUTE_API_KEY = previousEnvApiKey;
+  if (previousCatalogBuildTimeout === undefined) delete process.env.CATALOG_BUILD_TIMEOUT_MS;
+  else process.env.CATALOG_BUILD_TIMEOUT_MS = previousCatalogBuildTimeout;
+  aiHordeImageCatalog.setFetch(previousHordeFetch);
 });
 
 function authedRequest(path: string): Request {

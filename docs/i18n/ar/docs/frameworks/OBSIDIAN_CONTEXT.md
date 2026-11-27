@@ -90,6 +90,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### الأمان وبروتوكول النقل
+
+يتتبّع نظام مصادقة WebDAV محاولات المصادقة الفاشلة لكل عنوان IP ويفرض حظراً مؤقتاً. بعد 10 محاولات فاشلة خلال 60 ثانية، يُحظر العنوان مدة 5 دقائق مع الاستجابة `429 Too Many Requests` والترويسة `Retry-After`. ونظراً إلى أن WebDAV ينقل بيانات اعتماد المصادقة الأساسية، يُوصى بشدة بإنهاء اتصال TLS أو تمريره عبر نفق آمن مثل Tailscale أو Cloudflare Tunnel عند الوصول إلى نقطة نهاية WebDAV من خارج واجهة الاسترجاع المحلية (loopback).
+
 ### مصدر سياق لكل مفتاح API (اختياري)
 
 يمكن تحديد نطاق إعداد Obsidian **لكل مفتاح API** عبر جدول `api_key_context_sources`

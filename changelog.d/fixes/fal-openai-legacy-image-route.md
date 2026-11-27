@@ -1,0 +1,1 @@
+- **fix(images):** Legacy Fal image generation preserves the `openai/` publisher prefix when routing requests to `fal.run`.

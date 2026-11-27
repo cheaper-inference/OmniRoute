@@ -24,7 +24,7 @@ Bu raqamlar alohida uchinchi tomon hisoblarini va katalogdagi muvofiqlik shartla
 | **mintaqaviy shaxsni tekshirish ortida +**           | **+~ 6M**               | `modelscope` (Alibaba Cloud bog'lovchi + materik-Xitoy haqiqiy nomini tekshirish). Haqiqiy takrorlanuvchi kvota, `gatedRecurringTokens` / `gatedProviders` sifatida va asboblar panelida ko'rsatiladi. Hech qachon sarlavhaga kiritilmagan: +~ 6M mintaqaviy shaxsni tekshirish ortida.      |
 | Nazariy shift (barcha tarif chegaralari, 24/7)       | ~ 10B                   | Uzluksiz foydalanish uchun ekstrapolyatsiya qilingan har bir provayder tarif limiti summasi.** Kafolat emas** — buni sarlavha qilmang.                                                                                                                                                       |
 
-**Halol sarlavha:** _OmniRoute agregatlari**~ 1.62B hujjatlashtirilgan oyiga bepul tokenlar** (roʻyxatdan oʻtish kreditlari bilan birinchi oyda ~ 2.22B gacha) — bepul 34 ta hovuz va doimiy bepul, cheksiz — va RTK + Caveman siqish provayderlarining uzun qismi (15–95% token tejash) buni yanada kengaytiradi._
+**Halol sarlavha:** _OmniRoute agregatlari**~ 1.62B hujjatlashtirilgan oyiga bepul tokenlar** (roʻyxatdan oʻtish kreditlari bilan birinchi oyda ~ 2.22B gacha) — bepul 26 ta hovuz va doimiy bepul, cheksiz — va RTK + Caveman siqish provayderlarining uzun qismi (15–95% token tejash) buni yanada kengaytiradi._
 
 > **Nima uchun bu avvalgi ~ 1.94B dan tushib ketdi.** 2026-06-17 yangilanishi bu yo‘qotish emas, halollik bilan bog‘liq tuzatishdir: `gemini` endi hovuzga ajratildi (har bir Flash variantini alohida hisoblash orqali oshirildi, 462M → 60M), `cloudflare-ai` haqiqiy 10k-Neurons/day (122M → 30M), qayta ro‘yxatdan o‘tish `doubao` qayta ro‘yxatdan o‘tish emas) va o'chirish darajalari olib tashlandi (`chutes`/`phind`/`kluster` to'xtatildi). Qisman `llm7` (to'g'ri 5M/day → 150M) va yangi bepul provayderlar (Kilo, OpenCode Zen, Z.AI GLM-Flash) tomonidan qoplanadi.
 >
@@ -38,7 +38,7 @@ Bu raqamlar alohida uchinchi tomon hisoblarini va katalogdagi muvofiqlik shartla
 >
 > **2026-09-03 (#11773) da tuzatilgan:** `cerebras` 30M/mo grantdan (kartasiz 1 million tokens/day sinov muddati) bir martalik ro‘yxatdan o‘tish uchun to‘lov usulini talab qiluvchi $5 kreditga qayta tasniflandi. LongCat bilan bir xil halollik qoidasi.
 >
-> **Plus xKiro (2026-09-03):** yangi `xkiro-free` hovuzi (150M/mo) 35-takroriy hovuz kalitini qo'shadi. Felo Web HOLD da GPL-dan olingan provenance/licensing qolsa, istisno qoladi. Hozirda manba xabar bermoqda** 34 ta takrorlanuvchi pul kalitlari** va**~ 1.62B barqaror** — jonli, CI-shartli raqam (agar bu `computeFreeModelTotals()` dan chetga chiqsa,`check:docs-counts` tuzilmayapti).
+> **Plus xKiro (2026-09-03):** yangi `xkiro-free` hovuzi (150M/mo) 35-takroriy hovuz kalitini qo'shadi. Felo Web HOLD da GPL-dan olingan provenance/licensing qolsa, istisno qoladi. Hozirda manba xabar bermoqda** 26 ta takrorlanuvchi pul kalitlari** va**~ 1.62B barqaror** — jonli, CI-shartli raqam (agar bu `computeFreeModelTotals()` dan chetga chiqsa,`check:docs-counts` tuzilmayapti).
 
 Eng katta** hujjatlashtirilgan** hissa qo'shuvchilar: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (har bir model uchun beshta qopqoq), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` bundan mustasno — uning 10M LongCat-2.0 granti bir martalik, KYC-shartli roʻyxatdan oʻtish krediti boʻlib, takroriy oylik byudjet emas.)
 

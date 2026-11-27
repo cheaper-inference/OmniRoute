@@ -258,7 +258,7 @@ until it lands, new releases can repeat this.
    [Convert]::ToBase64String($b)
    ```
    The output must match `latest.yml` → `sha512`. If it does not, delete the file and
-   re-download only from the [GitHub releases page](https://github.com/diegosouzapw/OmniRoute/releases).
+   re-download only from the [GitHub releases page](https://github.com/cheaper-inference/OmniRoute/releases).
 2. **Restore + exclude** — restore the rolled-back items from quarantine and add an exclusion
    for `%LOCALAPPDATA%\Programs\OmniRoute` (Kaspersky → Settings → Threats and Exclusions),
    then reinstall.
@@ -472,7 +472,7 @@ see [`docs/guides/KIRO_SETUP.md`](./KIRO_SETUP.md).
 2. **Permanent fix:** Bind to IPv4 explicitly by using `-p 127.0.0.1:20128:20128` in your `docker run` command:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    This forces the IPv4 bind and also avoids exposing the proxy on all host interfaces.
 
@@ -880,7 +880,7 @@ More symptoms:
 
 ## Still Stuck?
 
-- **GitHub Issues**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
+- **GitHub Issues**: [github.com/cheaper-inference/OmniRoute/issues](https://github.com/cheaper-inference/OmniRoute/issues)
 - **Architecture**: See [`docs/architecture/ARCHITECTURE.md`](../architecture/ARCHITECTURE.md) for internal details
 - **API Reference**: See [`docs/reference/API_REFERENCE.md`](../reference/API_REFERENCE.md) for all endpoints
 - **Health Dashboard**: Check **Dashboard → Health** for real-time system status

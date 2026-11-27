@@ -11,6 +11,7 @@ import {
   getConfiguredLocalCorpusStatus,
   resetLocalCorpusIndex,
 } from "@/lib/localCorpus/configured";
+import { requireOperatorCredential } from "@/lib/api/operatorCredential";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 
@@ -19,6 +20,11 @@ const localCorpusSchema = z
     rootPath: z.string().trim().min(1).max(4_096),
   })
   .strict();
+
+// CodeQL #1371: the root is indexed and served by the MCP local-corpus search tools, so choosing
+// it is an operator action. A machine credential (an API key of any scope) gets 403.
+const LOCAL_CORPUS_ROOT_FORBIDDEN_MESSAGE =
+  "Choosing the local corpus root requires a signed-in dashboard session or the local CLI; API keys and access tokens cannot change it.";
 
 export async function GET(request: NextRequest) {
   if (!(await isAuthenticated(request))) {
@@ -40,6 +46,10 @@ export async function POST(request: NextRequest) {
   if (!(await isAuthenticated(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const operatorVerdict = await requireOperatorCredential(request, {
+    forbiddenMessage: LOCAL_CORPUS_ROOT_FORBIDDEN_MESSAGE,
+  });
+  if (operatorVerdict.ok === false) return operatorVerdict.response;
 
   let body: unknown;
   try {

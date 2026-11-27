@@ -58,7 +58,7 @@ function EngineOptions({
           disabled
           label={
             <>
-              llmlingua <span className="text-[10px]">({t("requiresOnnx")})</span>
+              llmlingua <span className="text-3xs">({t("requiresOnnx")})</span>
             </>
           }
         />
@@ -115,7 +115,8 @@ export function PlaygroundInput({
       <Textarea
         data-testid="play-input"
         aria-label={t("inputPlaceholder")}
-        className="min-h-[160px] w-full font-mono text-xs"
+        mono
+        className="min-h-[160px] w-full"
         value={text}
         onChange={(e) => onText(e.target.value)}
         placeholder={t("inputPlaceholder")}

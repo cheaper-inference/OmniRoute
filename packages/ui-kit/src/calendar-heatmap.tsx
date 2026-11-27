@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import type { ComponentProps, CSSProperties, KeyboardEvent } from "react";
 import { EmptyState } from "./empty-state";
+import { heatLevel } from "./heat-cell";
 import { cn } from "./lib/utils";
 
 export interface CalendarHeatmapDatum {
@@ -56,12 +57,6 @@ function dayTime(date: string | undefined) {
   return Number.isFinite(time) && new Date(time).toISOString().slice(0, 10) === date ? time : null;
 }
 
-function levelFor(value: number | null, maximum: number, thresholds?: readonly number[]) {
-  if (value === null || value <= 0) return 0;
-  if (thresholds) return Math.min(7, 1 + thresholds.filter(bound => value >= bound).length);
-  return Math.max(1, Math.min(7, Math.ceil((value / maximum) * 7)));
-}
-
 function buildDays(data: readonly CalendarHeatmapDatum[], startDate?: string, endDate?: string, thresholds?: readonly number[]) {
   const valid = data.flatMap(datum => {
     const time = dayTime(datum.date);
@@ -76,7 +71,7 @@ function buildDays(data: readonly CalendarHeatmapDatum[], startDate?: string, en
     const time = start + index * DAY;
     const datum = byTime.get(time);
     const value = datum?.value ?? null;
-    return { date: new Date(time).toISOString().slice(0, 10), time, value, hint: datum?.hint, level: levelFor(value, maximum, thresholds) };
+    return { date: new Date(time).toISOString().slice(0, 10), time, value, hint: datum?.hint, level: heatLevel(value, maximum, thresholds) ?? 0 };
   });
 }
 

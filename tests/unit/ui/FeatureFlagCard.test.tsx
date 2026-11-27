@@ -120,7 +120,10 @@ describe("FeatureFlagCard", () => {
     // The full text opens in the kit Tooltip (Radix: body portal, collision-aware), from the
     // keyboard too: the clamped paragraph is focusable and points at the tooltip while open.
     expect(clamped!.tabIndex).toBe(0);
+    // Tab to it: the kit tooltip opens on a focus the keyboard moved, not on a bare focus (kit #317).
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
     act(() => clamped!.focus());
+    document.dispatchEvent(new KeyboardEvent("keyup", { key: "Tab" }));
     const tooltip = document.querySelector<HTMLElement>('[role="tooltip"]');
     expect(tooltip).not.toBeNull();
     expect(container.contains(tooltip)).toBe(false);

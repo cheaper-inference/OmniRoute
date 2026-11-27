@@ -15,13 +15,13 @@ import {
   renderhourBaseUrl,
   renderhourConfig,
   renderhourFailure,
-  renderhourNumber,
   renderhourSeconds,
   renderhourToken,
   runRenderhourJob,
   uploadRenderhourInputs,
   type RenderhourUploadTarget,
 } from "../mediaGeneration/renderhour.ts";
+import { clampVideoPollIntervalMs, clampPollTimeoutMs } from "../../utils/pollBounds.ts";
 
 type Body = Record<string, unknown>;
 
@@ -112,8 +112,8 @@ async function runVideoJob({
       baseUrl,
       token,
       request,
-      timeoutMs: renderhourNumber(body.timeout_ms, 900_000),
-      pollIntervalMs: renderhourNumber(body.poll_interval_ms, 5000),
+      timeoutMs: clampPollTimeoutMs(body.timeout_ms, 900_000),
+      pollIntervalMs: clampVideoPollIntervalMs(body.poll_interval_ms, 5000),
       log,
       signal,
     });

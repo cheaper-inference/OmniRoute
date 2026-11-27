@@ -93,7 +93,7 @@
 
 [![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Löftet — En slutpunkt och 394 leverantörer. Automatisk reservroutning fortsätter routningen så länge ett annat friskt mål är tillgängligt. Sex pelare: robust reservroutning över 394 leverantörer · upp till 95 % tokenbesparingar för berättigade arbetsbelastningar · $0 för att komma igång med över 150 kostnadsfria nivåer och 51 återkommande/nyckellösa leverantörer som alltid är kostnadsfria · 39 CLI-/agentintegreringar via en enda konfiguration · kompatibilitet med OpenAI-, Claude-, Gemini- och Responses-API:erna på /v1 · produktionskontroller inklusive kretsbrytare, TLS-stealth, MCP med 110 verktyg, A2A, minne, skyddsräcken, utvärderingar och över 56 000 statiska testdeklarationer över fler än 7 800 spårade testfiler."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Löftet — En slutpunkt och 394 leverantörer. Automatisk reservroutning fortsätter routningen så länge ett annat friskt mål är tillgängligt. Sex pelare: robust reservroutning över 394 leverantörer · upp till 95 % tokenbesparingar för berättigade arbetsbelastningar · $0 för att komma igång med över 150 kostnadsfria nivåer och 40 återkommande/nyckellösa leverantörer som alltid är kostnadsfria · 39 CLI-/agentintegreringar via en enda konfiguration · kompatibilitet med OpenAI-, Claude-, Gemini- och Responses-API:erna på /v1 · produktionskontroller inklusive kretsbrytare, TLS-stealth, MCP med 110 verktyg, A2A, minne, skyddsräcken, utvärderingar och över 56 000 statiska testdeklarationer över fler än 7 800 spårade testfiler."/>
 
 <br/>
 <br/>
@@ -711,7 +711,7 @@ från din shellhistorik. → [CLI-integrationer](docs/guides/CLI-INTEGRATIONS.md
 
 </div>
 
-> **394 registrerade leverantörer** i de kanoniska samlingarna för chatt, media, sökning, lokalt, molnagenter och system, inklusive **153 med `hasFree: true` i upptäcktsmetadata**. Chattmodellregistret omfattar **239 leverantörer / 3 059 distinkta leverantör-modell-par / 1 475 råmodell-ID:n**; den separata katalogen för gratisbudget har **465 rader per modell**, **34 återkommande pooler** och **51 återkommande eller nyckellösa leverantörer som är kostnadsfria för alltid**. Dessa är avsiktligt olika nämnare; definitioner och beräkningar deduplicerade efter pool finns i [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) och [Free Tiers](docs/reference/FREE_TIERS.md).
+> **394 registrerade leverantörer** i de kanoniska samlingarna för chatt, media, sökning, lokalt, molnagenter och system, inklusive **153 med `hasFree: true` i upptäcktsmetadata**. Chattmodellregistret omfattar **239 leverantörer / 3 059 distinkta leverantör-modell-par / 1 475 råmodell-ID:n**; den separata katalogen för gratisbudget har **465 rader per modell**, **34 återkommande pooler** och **40 återkommande eller nyckellösa leverantörer som är kostnadsfria för alltid**. Dessa är avsiktligt olika nämnare; definitioner och beräkningar deduplicerade efter pool finns i [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) och [Free Tiers](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -786,7 +786,7 @@ från din shellhistorik. → [CLI-integrationer](docs/guides/CLI-INTEGRATIONS.md
   <tr><th align="left">Plattform</th><th align="left">Installation</th><th align="left">Höjdpunkter</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (globalt)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Ett kommando, alla operativsystem</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (globalt)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Samma register-tarball, snabbare installationer</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Stöd för flera arkitekturer: <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">Stöd för flera arkitekturer: <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Skrivbord (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Inbyggt fönster + systemfält — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Menyfält (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Övervakar och uppdaterar servern automatiskt — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>inbyggt stöd för <code>arm64</code></td><td align="left">Raspberry Pi, ARM-servrar, Apple Silicon</td></tr>
@@ -1110,7 +1110,7 @@ Använd dessa endast för klienter som inte kan bifoga `Authorization: Bearer ..
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 `:latest` följer den högsta **publicerade** stabila SemVer-versionen. Den följer inte git `main`. Ange `:X.Y.Z` för GitOps. Se [Docker-versioneringskanaler](docs/guides/DOCKER_GUIDE.md#release-channels). Avbildningen låser **`OMNIROUTE_MEMORY_MB=1024`**. Det räcker för kontrollpanelen och en lätt chatt. **Kodningsagenter** (`POST /v1/responses` från Claude Code, Codex, Grok, …) behöver en mycket större V8-heap, annars ger processen `FATAL ERROR` vid cirka 12 GiB under två överlappande långa kontexter. Dimensionera containern större än heapen (inbyggda buffertar ligger utanför V8):
@@ -1124,7 +1124,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 Fullständig tabell: [Docker-guide — RAM under körning](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
@@ -1330,7 +1330,7 @@ Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kä
   <tr><td nowrap><b>Körmiljö</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Språk</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> i <code>src/</code> och <code>open-sse/</code> (noll <code>any</code> i kärnan sedan v2.0)</td></tr>
   <tr><td nowrap><b>Ramverk</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databas</b></td><td>better-sqlite3 (SQLite, WAL-journalföring) + LowDB (äldre JSON) — 147 domänmoduler, 240 migreringar</td></tr>
+  <tr><td nowrap><b>Databas</b></td><td>better-sqlite3 (SQLite, WAL-journalföring) + LowDB (äldre JSON) — 147 domänmoduler, 252 migreringar</td></tr>
   <tr><td nowrap><b>Minne</b></td><td>SQLite FTS5-fulltextsökning + int8-kvantiserade vektorinbäddningar, typad avklingning</td></tr>
   <tr><td nowrap><b>Schema</b></td><td>Zod 4 — validering av MCP-verktygens indata/utdata + API-kontrakt</td></tr>
   <tr><td nowrap><b>Protokoll</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1343,7 +1343,7 @@ Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kä
   <tr><td nowrap><b>Testning</b></td><td>Node.js-testkörning + Vitest — <b>60 000+ statiska testdeklarationer</b> i fler än 8 400 spårade testfiler (enhets-, integrations-, E2E-, säkerhets- och ekosystemtester)</td></tr>
   <tr><td nowrap><b>Plattformar</b></td><td>Skrivbord (Electron) · Android (Termux) · PWA (valfri webbläsare)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatisk npm-publicering + Docker Hub vid release</td></tr>
-  <tr><td nowrap><b>Länkar</b></td><td><a href="https://omniroute.online">Webbplats</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Länkar</b></td><td><a href="https://omniroute.online">Webbplats</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">
