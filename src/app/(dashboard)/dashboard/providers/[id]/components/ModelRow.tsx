@@ -429,7 +429,7 @@ export default function ModelRow({
             )}
           </span>
         )}
-        <div className="ml-auto flex shrink-0 items-center gap-1">
+        <div className="ml-auto flex max-w-full flex-wrap items-center justify-end gap-1">
           {onToggleHidden && testStatus === "error" && (
             <Button
               variant="ghost"
