@@ -354,111 +354,70 @@ Avant de publier toute version v3.8.x, vérifiez également les éléments suiva
 
 ---
 
-## Découpage de la version LTS 3.9.0 (répété avec la version 3.8.58)
+## 3.9.0 LTS cut (répété en 3.8.58)
 
-Après la v3.8.59, la version suivante est la 3.9.0, et son sommet devient deux branches à longue durée de vie :
-`stable/v3` (la ligne LTS v3, npm `latest`) et `develop` (v4, passée à 4.0.0, npm
-`nightly`). Le modèle de branches/canaux, le portage en aval et les labels sont décrits dans
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; le plan figure dans la [FEUILLE DE ROUTE](../../ROADMAP.md) (Phase 3). Le découpage n'est effectué qu'une fois ;
-la version 3.8.58 permet de le répéter de bout en bout sur un fork, et la version 3.8.59 se termine avec la
-[liste de contrôle GO/NO-GO](./LTS_GO_NO_GO.md).
+Après la v3.8.59, la version suivante est la 3.9.0, et sa pointe devient deux branches de longue durée : `stable/v3` (la ligne LTS v3, npm `latest`) et `develop` (v4, passée à 4.0.0, npm `nightly`). Le modèle branch/channel, le port direct et les étiquettes sont dans [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; le plan est dans le [ROADMAP](../../ROADMAP.md) (Phase 3). La coupe s'exécute une fois ; 3.8.58 le répète bout à bout sur un fork, et 3.8.59 se termine avec la [liste de contrôle GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Simulation (lecture seule, sûre à tout moment)
+### Exécution à sec (lecture seule, sécurisée à tout moment)
 
 ```bash
-npm run release:dry-run-lts-cut                       # le véritable découpage : 3.9.0 depuis HEAD, balise précédente v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # épingler le commit source
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` n'exécute rien : il lit git et `gh`, puis affiche la
-séquence complète — les conditions préalables (la source est résolue, le dépôt source possède un historique complet —
-un clone superficiel ne peut pas pousser `stable/v3`, le côté récepteur rejette le paquet au premier
-parent greffé ; effectuez donc le découpage depuis un clone complet ou exécutez d'abord `git fetch --unshallow origin` — la balise
-précédente existe, `package.json` contient la version cible, un ticket `release-freeze` est ouvert, aucun
-ticket `Release branch not green` ouvert
-sur une branche de publication existante — une branche qui n'existe pas renvoie `?` pour inconnu, jamais
-vert — la file d'attente `release` de Mergify est configurée (G11 : `queue_rules`, `checks_timeout`,
-label `queue`), le jeu de règles `release/*` bloque toujours la suppression et le push forcé, et
-`stable/v3` et `develop` n'existent pas encore), les deux étapes de branchement, les déclencheurs de workflows
-dormants et les conditions `if:` qui deviennent vraies (ainsi que celles qui restent bloquées par une variable
-de dépôt ou épinglées au dépôt canonique), les dist-tags attendus (`latest` → 3.9.0, `next` et
-`nightly` vides) et le retour arrière. Code de sortie `0` = `RESULT: READY`, `1` = échec d'une condition
-préalable bloquante (`✗`), `2` = erreur d'utilisation. `--advisory <id,...>` rétrograde une vérification en
-avertissement (`!`) sans la masquer.
+`scripts/release/dry-run-lts-cut.mjs` n'exécute rien : il lit git et `gh` et imprime la séquence entière des conditions préalables — (la source est résolue, le référentiel source a un historique complet — un clone superficiel ne peut pas pousser `stable/v3`, le côté récepteur rejette le pack au premier parent greffé, donc coupé d'un clone complet ou `git fetch --unshallow origin` en premier — la balise précédente existe, `package.json` est la version cible, un problème `release-freeze` est ouvert, aucun problème `Release branch not green` ouvert sur une branche de version existante — une branche qui n'existe pas signale `?` inconnu, jamais verte la file d'attente omni — obtient la version PRs (G11 : `config/merge-queue/config.json` valide, son `bases` gère la branche de version, `mode` `live`, son étiquette existe), l'ensemble de règles `release/*` bloque toujours la suppression et la poussée forcée, et `stable/v3` et `develop` n'existent pas encore), les deux étapes de branche, qui dorment-workflow les déclencheurs et les conditions `if:` deviennent vrais (et qui restent contrôlés par une variable du référentiel ou épinglés au référentiel canonique), les balises dist attendues (`latest` → 3.9.0, `next` et `nightly` vides) et la restauration. Quittez `0` = `RESULT: READY`, `1` = une condition préalable de blocage a échoué (`✗`), erreur d'utilisation `2` =. `--advisory <id,...>` rétrograde une vérification en avertissement (`!`) sans la masquer.
 
-Exécutez la simulation du véritable découpage pendant que le gel de publication de la version 3.9.0 est toujours actif — les branches sont
-créées après la balise et avant que la Phase 12c ne lève le gel.
+Exécutez l'essai à sec de la coupe réelle pendant que le gel de la version 3.9.0 est encore ouvert — les branches sont créées après la balise et avant que la phase 12c ne lève le gel.
 
-### Répétition avec la version 3.8.58 (fork uniquement)
+### 3.8.58 répétition (fork seulement)
 
 ```bash
-# 1. Simulation sur le sommet actuel avec les paramètres de répétition
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Exécution sur un dépôt distant de type FORK (`origin`, ou tout dépôt distant dont l'URL est celle du dépôt
-#    canonique, est refusé ; chaque étape demande une confirmation dans le terminal)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Exécution des workflows dormants dans le fork (`workflow_dispatch` lorsque la simulation
-#    signale un épinglage au dépôt canonique), puis retour arrière
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Le commit de passage de `develop` à la version suivante est créé avec la plomberie git (aucun arbre de travail n'est modifié) et met à jour
-les cinq mêmes fichiers qu'un commit d'ouverture de cycle : `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` et `docs/openapi.yaml`. La section `[4.0.0]` du
-CHANGELOG et ses miroirs i18n sont ensuite ouverts sur `develop`, avant sa première
-PR. Le script ne modifie jamais les dist-tags npm — répétez cette opération sur un package de test.
+Le commit de développement est construit avec git plumbing (aucun arbre de travail n'est touché) et supprime les cinq mêmes fichiers qu'un commit à ouverture de cycle : `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` et `docs/openapi.yaml`. La section `[4.0.0]` CHANGELOG et ses miroirs i18n sont ensuite ouverts sur `develop`, avant son premier PR. Le script ne change jamais les balises npm dist — pour répéter celles d'un package de travail.
 
-### Artefact de prévisualisation de PR (compiler une fois, promouvoir exactement les mêmes octets)
+### Artefact d'aperçu PR (construit une fois, favorise les mêmes octets)
 
-`.github/workflows/preview-artifact.yml` compile une archive tar de production à partir de la tête d'une PR et
-valide exactement ce même build (partie (a) de #8084). Uniquement pour les PR provenant du même dépôt ; rien n'est publié.
+`.github/workflows/preview-artifact.yml` crée une archive tar de production à partir d'une tête PR et valide cette version exacte (#8084 slice (a)). PRs dans le même référentiel uniquement ; rien n'est publié.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # ou ajouter le label `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # installation de prévisualisation
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-L'exécution lance `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, empaquette
-l'archive tar, lance `npm run check:pack-boot` (faux secrets, répertoire de données éphémère), recrée le paquet et
-échoue si l'empreinte n'est pas identique, puis enregistre `artifact-identity.json` (SHA de la tête, SHA de la base,
-empreinte du fichier de verrouillage, plateforme, architecture, ABI Node, bundler, politique de build —
-`scripts/release/artifact-identity.mjs`) et atteste l'archive tar dans une tâche distincte. Promouvoir
-une prévisualisation signifie installer cette archive tar : ne la recompilez jamais depuis les sources.
+L'exécution effectue `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, emballe l'archive tar, exécute `npm run check:pack-boot` (faux secrets, répertoire de données éphémères), remballe et échoue à moins que le résumé ne soit identique, puis enregistre `artifact-identity.json` (tête SHA, base SHA, hachage de fichier de verrouillage, plateforme, arch, nœud ABI, bundler, politique de construction — `scripts/release/artifact-identity.mjs`) et atteste l'archive tar dans un travail à part. Promouvoir un aperçu signifie installer cette archive tar : ne jamais reconstruire à partir des sources.
 
-### Le découpage (3.9.0, après le GO)
+### La coupe (3.9.0, après GO)
 
-1. GO consigné dans [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` affiche `RESULT: READY`.
-3. Créez manuellement les branches sur `origin` avec les commandes affichées par la simulation — le
-   script refuse de pousser vers `origin`. Pour réutiliser un commit `develop` révisé, lancez d'abord la
-   répétition avec `--execute` sur le sommet de la version 3.9.0 vers votre fork ; elle affiche les deux SHA, et
-   les mêmes commits peuvent être poussés :
+1. GO enregistré dans [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` imprime `RESULT: READY`.
+3. Créez les branches sur `origin` à la main avec les commandes, l'exécution à sec imprime — le script refuse de pousser vers `origin`. Pour réutiliser un commit de développement révisé, exécutez d'abord la répétition `--execute` sur la pointe 3.9.0 contre votre fork ; il imprime les deux SHAs, et les mêmes commits peuvent être poussés :
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Protégez `stable/v3` et `develop` (ensembles de règles + file d’attente de fusion) avant l’arrivée de la première PR.
-5. Les workflows inactifs s’activent lorsque les branches existent : `forward-port.yml` (push vers
-   `stable/v3`), `validate-stable-pr.yml` (PR vers `stable/v3`) et `nightly-v4-build.yml`
-   (builds de `develop`). Avant la mise en production, définissez le secret de dépôt `secrets.FORWARD_PORT_TOKEN` (afin que la CI s’exécute sur
-   les PR de report en avant) ; la publication nocturne reste désactivée jusqu’à ce que le propriétaire définisse la variable de dépôt
-   `vars.NIGHTLY_PUBLISH` sur `true` et que npm Trusted Publishing accepte
-   `nightly-v4-build.yml`. La résolution des canaux se trouve dans `scripts/release/dist-tag.mjs`, le même
-   résolveur que celui utilisé par `npm-publish.yml`.
-6. Vérifiez les canaux : `npm view omniroute dist-tags --json` affiche `latest` = 3.9.0 et aucun
-   `next` / `nightly` jusqu’à la publication de la v4.
-7. Restauration, si nécessaire : `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   et `npm dist-tag add omniroute@3.8.59 latest`.
+4. Protégez `stable/v3` et `develop` (file d'attente de fusion des ensembles de règles + ) avant l'arrivée du premier PR.
+5. Les workflows dormants s'activent selon l'existence d'une branche : `forward-port.yml` (push to `stable/v3`), `validate-stable-pr.yml` (PRs to `stable/v3`) et `nightly-v4-build.yml` (builds `develop`). Avant la mise en ligne, définissez le secret du référentiel `secrets.FORWARD_PORT_TOKEN` (pour que CI s'exécute sur le port forward PRs) ; la publication nocturne reste désactivée jusqu'à ce que le propriétaire définisse la variable du référentiel `vars.NIGHTLY_PUBLISH` sur `true` et que npm Trusted Publishing accepte `nightly-v4-build.yml`. La résolution du canal est `scripts/release/dist-tag.mjs`, le même résolveur `npm-publish.yml` utilise.
+6. Vérifiez les chaînes : `npm view omniroute dist-tags --json` affiche `latest` = 3.9.0 et pas `next` / `nightly` jusqu'à la publication de la v4.
+7. Rollback, si nécessaire : `git push origin --delete refs/heads/stable/v3 refs/heads/develop` et `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

@@ -1,5 +1,6 @@
 // omni-queue REST client (scripts/merge-queue/github.mjs) against the in-process fake GitHub.
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { commentMarker } from "../../../scripts/merge-queue/contracts.mjs";
 import {
@@ -16,6 +17,11 @@ import {
   retryDelayMs,
 } from "../../../scripts/merge-queue/github.mjs";
 import { sha, startFakeGitHub } from "./helpers/fake-github.mjs";
+
+/** GET …/actions/runs/{id}/jobs payloads captured on real GitHub (see the fixture's _source). */
+const JOB_PAYLOADS = JSON.parse(
+  readFileSync(new URL("./fixtures/workflow-jobs-api-check-run.json", import.meta.url), "utf8")
+);
 
 const TOKEN = "ghs_SuperSecretInstallationToken0123456789";
 
@@ -764,6 +770,127 @@ test("a request that keeps timing out fails with GitHubError status 0", async (t
   });
 });
 
+// ── owner voice: the owner's token writes, the App's reads, both logins' markers count ──
+
+const OWNER_TOKEN = "github_pat_OwnerFineGrainedToken0123456789";
+
+/** Fake GitHub with the App's token (omni-queue[bot]) and the owner's (`owner-login`). */
+async function voiceSetup(t) {
+  const fake = await startFakeGitHub({ token: TOKEN, actor: "omni-queue[bot]" });
+  t.after(() => fake.close());
+  fake.tokenActors.set(OWNER_TOKEN, "owner-login");
+  const client = (token) =>
+    createGitHubClient({
+      token,
+      repository: fake.repository,
+      apiUrl: fake.url,
+      botLogin: "omni-queue[bot]",
+      sleep: async () => {},
+    });
+  return { fake, app: client(TOKEN), owner: client(OWNER_TOKEN) };
+}
+
+const marked = (id, key, login) => ({
+  id,
+  body: `earlier\n\n${commentMarker(key)}`,
+  user: { login, type: /\[bot\]$/.test(login) ? "Bot" : "User" },
+  created_at: "2026-11-13T10:00:00Z",
+});
+
+test("getAuthenticatedLogin: the login of the token's user (GET /user)", async (t) => {
+  const { fake, app, owner } = await voiceSetup(t);
+  assert.equal(await owner.getAuthenticatedLogin(), "owner-login");
+  assert.equal(await app.getAuthenticatedLogin(), "omni-queue[bot]");
+  const reads = fake.requests.filter((r) => r.path === "!/user");
+  assert.equal(reads.length, 2);
+  assert.ok(reads.every((r) => r.method === "GET"));
+});
+
+test("commentOnce alsoLogins: a marker by that login counts as the queue's own", async (t) => {
+  const { fake, app } = await voiceSetup(t);
+  fake.addPull({ number: 21 });
+  fake.comments.set(21, [marked(1, "culprit:abc", "owner-login")]);
+  // Without the owner's login only the App's markers count (today's behaviour)...
+  assert.deepEqual(await app.commentOnce(21, "culprit:abc", "x"), { posted: true });
+  fake.comments.set(21, [marked(1, "culprit:abc", "owner-login")]);
+  // ...with it, the owner's earlier comment is the queue's own: nothing is posted again.
+  assert.deepEqual(await app.commentOnce(21, "culprit:abc", "x", { alsoLogins: ["owner-login"] }), {
+    posted: false,
+  });
+  assert.equal(fake.comments.get(21).length, 1);
+});
+
+test("commentOnce alsoLogins: a marker by anybody else still never counts", async (t) => {
+  const { fake, app } = await voiceSetup(t);
+  fake.addPull({ number: 22 });
+  fake.comments.set(22, [marked(1, "culprit:abc", "mallory")]);
+  assert.deepEqual(await app.commentOnce(22, "culprit:abc", "x", { alsoLogins: ["owner-login"] }), {
+    posted: true,
+  });
+  const comments = fake.comments.get(22);
+  assert.equal(comments.length, 2, "mallory's planted marker is left alone and ignored");
+  assert.equal(comments[0].user.login, "mallory");
+  assert.equal(comments[1].user.login, "omni-queue[bot]");
+});
+
+test("commentOnce reader: lists through the reader's token, posts through its own", async (t) => {
+  const { fake, app, owner } = await voiceSetup(t);
+  fake.addPull({ number: 23 });
+  const opts = { reader: app, alsoLogins: ["owner-login"] };
+  assert.deepEqual(await owner.commentOnce(23, "landed:abc", "Landed", opts), { posted: true });
+  const [comment] = fake.comments.get(23);
+  assert.equal(comment.user.login, "owner-login", "the comment is the owner's");
+  assert.equal(comment.body, `Landed\n\n${commentMarker("landed:abc")}`);
+  const auth = (r) => String(r.headers.authorization ?? "");
+  const lists = fake.requests.filter((r) => r.method === "GET" && r.path === "/issues/23/comments");
+  assert.ok(lists.length >= 1);
+  assert.ok(
+    lists.every((r) => auth(r) === `Bearer ${TOKEN}`),
+    "every read uses the App's token"
+  );
+  const posts = fake.requests.filter(
+    (r) => r.method === "POST" && r.path === "/issues/23/comments"
+  );
+  assert.deepEqual(
+    posts.map((r) => auth(r)),
+    [`Bearer ${OWNER_TOKEN}`]
+  );
+  // The owner's own marker counts on the next call, and on the App's fallback path too.
+  assert.deepEqual(await owner.commentOnce(23, "landed:abc", "Landed", opts), { posted: false });
+  assert.deepEqual(
+    await app.commentOnce(23, "landed:abc", "Landed", { alsoLogins: ["owner-login"] }),
+    { posted: false }
+  );
+  assert.equal(fake.comments.get(23).length, 1);
+});
+
+test("commentOnce reader: a duplicate the owner raced with the App is removed, oldest kept", async (t) => {
+  const { fake, app } = await voiceSetup(t);
+  fake.addPull({ number: 24 });
+  let planted = false;
+  const racing = createGitHubClient({
+    token: OWNER_TOKEN,
+    repository: fake.repository,
+    apiUrl: fake.url,
+    botLogin: "omni-queue[bot]",
+    fetchImpl: async (url, init) => {
+      if (!planted && init.method === "POST" && url.endsWith("/issues/24/comments")) {
+        planted = true; // the App's approval job posts between our read and our write
+        fake.comments.set(24, [marked(1, "not-approver", "omni-queue[bot]")]);
+      }
+      return fetch(url, init);
+    },
+  });
+  const result = await racing.commentOnce(24, "not-approver", "mine", {
+    reader: app,
+    alsoLogins: ["owner-login"],
+  });
+  assert.deepEqual(result, { posted: false });
+  const comments = fake.comments.get(24);
+  assert.equal(comments.length, 1, "the owner's newer duplicate was deleted");
+  assert.equal(comments[0].id, 1);
+});
+
 test("commentOnce keeps the oldest when another writer posted the same marker meanwhile", async (t) => {
   const fake = await startFakeGitHub({ token: TOKEN, actor: "omni-queue[bot]" });
   t.after(() => fake.close());
@@ -1089,8 +1216,14 @@ test("listWorkflowRunJobs lists every attempt's jobs (filter=all, every page) wi
   for (let i = 0; i < 45; i++) {
     runs.push(fake.addCheckRun(sha("cand"), { name: `Job ${i}`, suiteId: 4242 }));
   }
-  // POST /check-runs with a workflow token: in the same suite, no job of the run.
-  const planted = fake.addCheckRun(sha("cand"), { name: "Gate / CI", suiteId: 4242, job: false });
+  // POST /check-runs with a workflow token: in the same suite, no job of the run, and (here) left
+  // out of the listing (the listing GitHub really gives is the next test's).
+  const planted = fake.addCheckRun(sha("cand"), {
+    name: "Gate / CI",
+    suiteId: 4242,
+    job: false,
+    listedInJobs: false,
+  });
   const run = fake.addWorkflowRun({
     headSha: sha("cand"),
     headBranch: "omni-queue/x",
@@ -1108,10 +1241,12 @@ test("listWorkflowRunJobs lists every attempt's jobs (filter=all, every page) wi
   assert.deepEqual(Object.keys(jobs[0]).sort(), [
     "checkRunId",
     "conclusion",
+    "htmlUrl",
     "id",
     "name",
     "runAttempt",
     "runId",
+    "runnerId",
     "status",
   ]);
   const pages = fake.requests.slice(from).filter((r) => r.path === `/actions/runs/${run.id}/jobs`);
@@ -1119,6 +1254,58 @@ test("listWorkflowRunJobs lists every attempt's jobs (filter=all, every page) wi
   assert.equal(pages[0].query.filter, "all", "every attempt");
   await assert.rejects(gh.listWorkflowRunJobs(0), /invalid workflow run id/);
   await assert.rejects(gh.listWorkflowRunJobs(987654), /404/);
+});
+
+test("listWorkflowRunJobs: a check run created through POST /check-runs in the run's suite is listed as GitHub lists it (…/runs/<id>, no runner)", async (t) => {
+  const { fake, gh } = await setup(t);
+  const real = fake.addCheckRun(sha("cand"), { name: "Gate / CI", conclusion: "failure" });
+  const suiteId = real.check_suite.id;
+  const skipped = fake.addCheckRun(sha("cand"), { name: "Docs", conclusion: "skipped", suiteId });
+  const planted = fake.addCheckRun(sha("cand"), { name: "Gate / CI", suiteId, job: false });
+  const run = fake.addWorkflowRun({
+    headSha: sha("cand"),
+    headBranch: "omni-queue/x",
+    checkSuiteId: suiteId,
+  });
+  const jobs = await gh.listWorkflowRunJobs(run.id);
+  const byId = new Map(jobs.map((j) => [j.checkRunId, j]));
+  assert.equal(jobs.length, 3, "GitHub lists the API-created check run among the run's jobs");
+  const base = `https://github.com/${fake.repository}`;
+  assert.deepEqual(
+    [byId.get(real.id).htmlUrl, byId.get(real.id).runId, byId.get(real.id).id],
+    [`${base}/actions/runs/${run.id}/job/${real.id}`, run.id, real.id]
+  );
+  assert.ok(byId.get(real.id).runnerId > 0, "a job that ran has a runner");
+  assert.equal(byId.get(skipped.id).runnerId, null, "a skipped job never had a runner");
+  assert.equal(byId.get(skipped.id).htmlUrl, `${base}/actions/runs/${run.id}/job/${skipped.id}`);
+  assert.equal(byId.get(planted.id).htmlUrl, `${base}/runs/${planted.id}`);
+  assert.equal(byId.get(planted.id).runnerId, null);
+  assert.equal(byId.get(planted.id).runId, run.id, "it even carries the run's id");
+});
+
+test("normalizeWorkflowJob keeps html_url and runner_id of the payloads GitHub served (captured 2026-11-19)", () => {
+  const { variantA, variantB } = JOB_PAYLOADS;
+  const a = variantA.jobs.map(normalizeWorkflowJob);
+  assert.deepEqual(
+    a.map((j) => [j.htmlUrl, j.runnerId]),
+    variantA.jobs.map((raw) => [raw.html_url, raw.runner_id])
+  );
+  const forged = a.at(-1);
+  assert.equal(forged.name, "Gate / CI");
+  assert.equal(forged.conclusion, "failure");
+  assert.equal(forged.runId, variantA.jobs[0].run_id, "listed with the real run's id");
+  assert.equal(forged.checkRunId, forged.id);
+  assert.match(forged.htmlUrl, /\/runs\/\d+$/);
+  assert.equal(forged.runnerId, null);
+  for (const job of a.slice(0, -1)) {
+    assert.ok(Number.isSafeInteger(job.runnerId) && job.runnerId > 0, job.name);
+    assert.ok(job.htmlUrl.endsWith(`/actions/runs/${job.runId}/job/${job.id}`), job.name);
+  }
+  const b = variantB.jobs.map(normalizeWorkflowJob).at(-1);
+  assert.deepEqual([b.name, b.conclusion, b.runnerId], ["Gate / CI", "success", null]);
+  // Absent or malformed fields read as null.
+  const bare = normalizeWorkflowJob({ id: 1, run_id: 2, html_url: 7, runner_id: "12" });
+  assert.deepEqual([bare.htmlUrl, bare.runnerId], [null, null]);
 });
 
 test("normalizeWorkflowJob reads the check run id from check_run_url, null when there is none", () => {

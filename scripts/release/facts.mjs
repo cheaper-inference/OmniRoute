@@ -304,6 +304,28 @@ export const CODE_FACT_KEYS = [
   "freeTierReg",
   "manifestFreeTier",
   "freeTierBudget",
+  // Free-catalog facts (scripts/release/lib/free-catalog-facts.mjs), appended in this order. The
+  // last five are the ones the public surfaces print.
+  "headlineSteady",
+  "headlineFirst",
+  "headlineGated",
+  "headlineSocialGated",
+  "rowSumLive",
+  "rowSumRetired",
+  "rowSumTotal",
+  "rowSumRetiredShare",
+  "freeProviders",
+  "freeModels",
+  "freeAccessRows",
+  "freePublishedPools",
+  "hasFreeProviders",
+  "freeSearchProviders",
+  "freeAudioProviders",
+  "headlineSteadyLabel",
+  "headlineFirstLabel",
+  "rowSumLiveLabel",
+  "rowSumTotalLabel",
+  "publicFreeTierBudget",
 ];
 
 function ordered(obj, keys) {

@@ -1,0 +1,1 @@
+- **fix(security):** Compression engines bound their regex work on hostile input: the headroom GCF inline-array check and the RTK raw-output command slug run in linear time, and CCR `grep` rejects patterns with more than one unbounded quantifier and stops a scan that exceeds a 1 s time budget (CodeQL #1301, #1302, #1349)

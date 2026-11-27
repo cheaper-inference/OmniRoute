@@ -4,7 +4,7 @@
 
 ---
 
-## เริ่มต้นใช้งานอย่างรวดเร็ว
+## เริ่มต้นอย่างรวดเร็ว
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## เอกสารอ้างอิง API
+## อ้างอิง API
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-ฟังก์ชัน Factory ที่สร้างออบเจ็กต์ Plugin พร้อมค่าเริ่มต้น
+ฟังก์ชั่นโรงงานที่สร้างวัตถุปลั๊กอินด้วยค่าเริ่มต้น
 
 **พารามิเตอร์:**
 
-- `name` (string, จำเป็น) — ชื่อ Plugin ในรูปแบบ kebab-case
-- `priority` (number, ไม่บังคับ, ค่าเริ่มต้น: 100) — ค่าที่ต่ำกว่าจะทำงานก่อน
-- `enabled` (boolean, ไม่บังคับ, ค่าเริ่มต้น: true) — เปิดใช้งานตั้งแต่เริ่มต้นหรือไม่
-- `onRequest` (function, ไม่บังคับ) — ทำงานก่อน chat handler
-- `onResponse` (function, ไม่บังคับ) — ทำงานหลัง chat handler
-- `onError` (function, ไม่บังคับ) — ทำงานเมื่อ handler เกิดข้อผิดพลาด
+- `name` (สตริง, จำเป็น) — ชื่อปลั๊กอินใน kebab-case
+- `priority` (ตัวเลข, ทางเลือก, ค่าเริ่มต้น: 100) — รันต่ำกว่าก่อน
+- `enabled` (บูลีน, ตัวเลือก, ค่าเริ่มต้น: จริง) — เริ่มเปิดใช้งานหรือไม่
+- `onRequest` (ฟังก์ชัน, ทางเลือก) — ทำงานก่อนตัวจัดการแชท
+- `onResponse` (ฟังก์ชัน, ทางเลือก) — ทำงานตามตัวจัดการแชท
+- `onError` (ฟังก์ชัน, ทางเลือก) — รันบนข้อผิดพลาดของตัวจัดการ
 
 ### `blockRequest(response?): BlockingHookResult`
 
-บล็อกคำขอและส่งคืนการตอบกลับที่กำหนดเองได้ตามต้องการ
+บล็อกคำขอและส่งคืนการตอบกลับที่กำหนดเอง (ไม่บังคับ)
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-แก้ไขเนื้อหาคำขอก่อนที่จะส่งไปถึง provider
+แก้ไขเนื้อหาคำขอก่อนที่จะถึงผู้ให้บริการ
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-แนบ metadata เข้ากับบริบทของคำขอ
+แนบข้อมูลเมตากับบริบทคำขอ
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## บริบทของ Plugin (`PluginContext`)
+## บริบทปลั๊กอิน (`PluginContext`)
 
-| ฟิลด์       | ชนิด                      | คำอธิบาย                 |
-| ----------- | ------------------------- | ------------------------ |
-| `requestId` | `string`                  | ตัวระบุคำขอที่ไม่ซ้ำกัน  |
-| `model`     | `string`                  | ชื่อโมเดลที่ร้องขอ       |
-| `provider`  | `string`                  | ID ของ provider เป้าหมาย |
-| `body`      | `Record<string, unknown>` | เนื้อหาคำขอ              |
-| `headers`   | `Record<string, string>`  | ส่วนหัวของคำขอ           |
-| `metadata`  | `Record<string, unknown>` | metadata ที่แก้ไขได้     |
-| `timestamp` | `number`                  | เวลาประทับของคำขอ        |
+| สนาม         | พิมพ์                     | คำอธิบาย                          |
+| ------------ | ------------------------- | --------------------------------- |
+| `requestId`  | `string`                  | ตัวระบุคำขอที่ไม่ซ้ำ              |
+| `model`      | `string`                  | ชื่อรุ่นที่ขอ                     |
+| `provider`   | `string`                  | ผู้ให้บริการเป้าหมาย ID           |
+| `body`       | `Record<string, unknown>` | ขอร่างกาย                         |
+| `headers`    | `Record<string, string>`  | ส่วนหัวของคำขอ (ดูหมายเหตุ)       |
+| `metadata`   | `Record<string, unknown>` | ข้อมูลเมตาที่ไม่แน่นอน            |
+| `timestamp`  | `number`                  | ขอประทับเวลา                      |
+| `apiKeyInfo` | `object` (ไม่จำเป็น)      | ข้อมูลเมตาของคีย์API (ดูหมายเหตุ) |
+
+บริบทไม่เคยนำข้อมูลรับรองของลูกค้า: ส่วนหัว `authorization`, `x-api-key`, `proxy-authorization` และ `cookie` จะถูกลบออก (ตัวพิมพ์เล็ก/ใหญ่) และ `apiKeyInfo` จะเก็บข้อมูลเมตาของคีย์ (เช่น `id`, `name` และ `scopes`) แต่ไม่ใช่ค่าคีย์หรือลายนิ้วมือ (`redactPluginContext()` ใน `src/lib/plugins/hooks.ts`) สิ่งนี้ใช้กับ `onRequest`, `onResponse` และ `onError`
 
 ## Manifest (`plugin.json`)
 
@@ -138,19 +141,18 @@ onRequest: (ctx) => {
 }
 ```
 
-## ระบบสิทธิ์
+## ระบบการอนุญาต
 
-ปลั๊กอินทำงานในบริบท VM แบบแซนด์บ็อกซ์ การเข้าถึงทรัพยากรภายนอกต้องได้รับสิทธิ์อย่างชัดเจน:
+ปลั๊กอินต่างๆ ก็มี** ไม่ใช่แซนด์บ็อกซ์** . Each active plugin runs as a separate, ordinary Node.js child process (`loadPlugin()` in `src/lib/plugins/loader.ts`) under the same operating-system user as OmniRoute, with no VM context and no Node.js permission flags. Plugin code can use `node:fs`, `node:child_process`, `fetch` and every other Node.js API: it can read and write any file the OmniRoute user can (including the data directory), run programs and reach the network.
 
-| สิทธิ์       | อนุญาตให้ใช้                                                 |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | พร็อกซี `process.env` แบบอ่านอย่างเดียว                      |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+`requires.permissions` ของรายการยอมรับ `network`, `file-read`, `file-write`, `env` และ `exec` แต่วันนี้มีเพียง `env` เท่านั้นที่มีผลกระทบเมื่อรันไทม์:
 
-หากไม่มีสิทธิ์ โกลบอลที่เกี่ยวข้องจะไม่สามารถใช้งานได้ในแซนด์บ็อกซ์
+| การอนุญาต                                    | มีผลวันนี้                                                                                                                                                                                                                  |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | กระบวนการปลั๊กอินยังได้รับ `PORT`, `HOSTNAME`, `TZ` และ `TMPDIR` หากไม่มีมันจะได้รับเพียง `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` และ `PLUGIN_NAME` (บวก `SystemRoot` และ `windir` บน Windows) |
+| `network`, `file-read`, `file-write`, `exec` | ไม่มี. เป็นเพียงการประกาศเท่านั้น: ไม่มีอะไรถูกบล็อกเมื่อหายไป                                                                                                                                                              |
+
+การติดตั้งปลั๊กอินก็เหมือนกับการติดตั้งโปรแกรมอื่นๆ บนโฮสต์ ติดตั้งเฉพาะปลั๊กอินที่มีแหล่งที่มาที่คุณเชื่อถือ
 
 ## สคีมาการกำหนดค่า
 
@@ -194,7 +196,7 @@ onRequest: (ctx) => {
 
 ## ตัวอย่าง
 
-### ตัวบันทึกคำขอ
+### ขอคนบันทึก
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### ตัวจำกัดอัตราการใช้งาน
+### ตัวจำกัดอัตรา
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 นาที
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### ตัวแปลงการตอบกลับ
+### หม้อแปลงตอบสนอง
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

@@ -76,9 +76,10 @@ describe("hand-made bars announce themselves as progressbars", () => {
     const { container } = render(<QuotaMiniBar percent={142} label="Weekly" />);
     const [bar] = bars(container);
     expect(range(bar)).toMatchObject({ name: "Weekly", min: "0", max: "100", now: "100" });
-    // The drawing is unchanged: a thin track with one fill.
-    expect(bar.className).toContain("h-1");
-    expect((bar.firstElementChild as HTMLElement).style.width).toBe("100%");
+    // The drawing is the kit Progress at its thinnest size (4px), with one indicator.
+    expect(bar.className).toContain("ci-progress__track");
+    expect(bar.closest(".ci-progress")?.getAttribute("data-size")).toBe("xs");
+    expect(bar.querySelectorAll(".ci-progress__indicator")).toHaveLength(1);
     await expectNamedProgressbars(container);
   });
 

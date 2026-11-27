@@ -4,10 +4,9 @@
 
 ---
 
-Seit v3.8.49 (WS3.2/WS3.4 des Qualitäts-/Geschwindigkeitsplans) ist der standardmäßige Merge-Pfad für
-reviewte PRs nach `release/vX.Y.Z` die **Mergify-Merge-Queue** (`.mergify.yml`);
-der unten dokumentierte **manuelle Merge-Train** ist die RÜCKFALLEBENE — er wird bei Störungen,
-Release-Freezes oder dann verwendet, wenn sich der Mergify-Open-Source-Tarif jemals ändert.
+> **19.11.2026: Die Mergify-Merge-Warteschlange wird eingestellt** (Entscheidung des Eigentümers). `.mergify.yml` definiert keine Warteschlange mehr und lehnt die Mergify-Befehle ab, die eine Pull-Anfrage zusammenführen oder neu schreiben. Release- PRs werden manuell unter dem Repository-Regelsatz „Erfordern grüne Gates für das aktive Release“ (`Gate / CI` + `Gate / Quality`) zusammengeführt, bis Omni-Queue im Live-Modus ausgeführt wird, und danach über Omni-Queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). In den folgenden Mergify-Abschnitten wird die Warteschlange so beschrieben, wie sie war.
+
+Seit v3.8.49 (WS3.2/WS3.4 des quality/velocity Plans) ist der Standard-Mergepfad für überprüftes PRs in `release/vX.Y.Z` der** Zusammenführungswarteschlange zusammenführen** (`.mergify.yml`); Die** manueller Zusammenführungszug** Unten dokumentiert ist das FALLBACK — das bei Vorfällen, Release-Einfrierungen oder wenn sich der Mergify Open Source-Plan jemals ändert, verwendet wird.
 
 ## Standardpfad: die Mergify-Warteschlange
 

@@ -12,7 +12,7 @@ import { FREE_MODEL_BUDGETS } from "@omniroute/open-sse/config/freeModelCatalog.
 
 test("classifies each credential model from the real registries", () => {
   // noAuth: the connect form never asks for a key.
-  assert.equal(getCredentialRequirement("uncloseai"), "none");
+  assert.equal(getCredentialRequirement("cloudflare-playground"), "none");
   // Literal anonymous token: routable with no user credential, key still honoured.
   assert.equal(getCredentialRequirement("aihorde"), "optional");
   assert.equal(getCredentialRequirement("kilocode"), "optional");
@@ -38,7 +38,7 @@ test("worksWithoutCredential excludes oauth — signing in is still a barrier", 
 test("listNoCredentialProviders is derived, not a hand-kept list", () => {
   const ids = listNoCredentialProviders();
   assert.ok(ids.length > 0);
-  assert.ok(ids.includes("uncloseai"));
+  assert.ok(ids.includes("cloudflare-playground"));
   assert.ok(ids.includes("ovhcloud"));
   assert.ok(ids.includes("aihorde"));
   assert.ok(!ids.includes("groq"), "key-gated providers must never be listed");
@@ -69,7 +69,14 @@ test("providers that reject anonymous calls are never advertised as key-free", (
   // freeType: "keyless" in the catalog (meaning "not token-quantifiable"), so a
   // UI section built on that field would invite users to call providers that
   // reject them. This is the regression guard for that bug.
-  for (const id of ["blackbox", "friendliai", "iflytek", "sparkdesk", "muse-spark-web"]) {
+  for (const id of [
+    "blackbox",
+    "friendliai",
+    "iflytek",
+    "sparkdesk",
+    "muse-spark-web",
+    "uncloseai",
+  ]) {
     assert.equal(
       worksWithoutCredential(getCredentialRequirement(id)),
       false,

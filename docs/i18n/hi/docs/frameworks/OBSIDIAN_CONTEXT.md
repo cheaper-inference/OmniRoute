@@ -91,6 +91,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### सुरक्षा एवं परिवहन
+
+WebDAV प्रमाणीकरण प्रति-आईपी विफलता ट्रैकिंग और लॉकआउट को लागू करता है (60-सेकंड विंडो के भीतर 10 असफल प्रयास `429 Too Many Requests` और `Retry-After` के साथ 5 मिनट के लॉकआउट को ट्रिगर करता है)। चूँकि WebDAV बुनियादी प्रमाणीकरण क्रेडेंशियल प्रसारित करता है, लूपबैक के बाहर WebDAV समापन बिंदु तक पहुँचने पर TLS समाप्त करना (या Tailscale या Cloudflare Tunnel जैसी सुरक्षित सुरंग पर रूट करना) की दृढ़ता से अनुशंसा की जाती है।
+
 ### प्रति-API-key context source (वैकल्पिक)
 
 Obsidian config को `api_key_context_sources` टेबल

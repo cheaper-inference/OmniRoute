@@ -50,8 +50,9 @@ function assertNoStaleLength(response: Response, body: string, label: string) {
 }
 
 test("provider models route re-serializes without the catalog's stale content-length", async () => {
-  const request = new Request("http://127.0.0.1:20128/api/v1/providers/uncloseai/models");
-  const response = await GET(request, { params: Promise.resolve({ provider: "uncloseai" }) });
+  const provider = "cloudflare-playground";
+  const request = new Request(`http://127.0.0.1:20128/api/v1/providers/${provider}/models`);
+  const response = await GET(request, { params: Promise.resolve({ provider }) });
 
   assert.equal(response.status, 200);
   const text = await response.text();

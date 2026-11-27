@@ -97,6 +97,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### ደህንነት እና ትራንስፖርት
+
+WebDAV ማረጋገጫ በየአይ ፒ አለመሳካት መከታተል እና መቆለፍን ያስፈጽማል (በ60 ሰከንድ መስኮት ውስጥ 10 ያልተሳኩ ሙከራዎች በ `429 Too Many Requests` እና `Retry-After` የ5 ደቂቃ መቆለፊያን ያስነሳል)። WebDAV መሰረታዊ የማረጋገጫ ምስክርነቶችን ስለሚያስተላልፍ፣ TLS ማቋረጥ (ወይም ደህንነቱ በተጠበቀ መሿለኪያ እንደ Tailscale ወይም Cloudflare Tunnel) ወደ WebDAV የመጨረሻ ነጥብ ከ loopback ውጪ ሲደርሱ በጣም ይመከራል።
+
 ### ለእያንዳንዱ API key context source (አማራጭ)
 
 የObsidian config በ`api_key_context_sources` table

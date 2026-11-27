@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs
 import { Alert } from "@omniroute/ui-kit/alert";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
 import { type AccessEditorTab } from "../[id]/access/useApiKeyAccessForm";
 import TabErrorList from "../[id]/access/tabs/TabErrorList";
 
@@ -125,17 +126,19 @@ function PolicyTabList() {
           >
             <span>{t(tabDef.labelKey)}</span>
             {errCount > 0 && (
-              <span
-                className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-error text-bg"
+              <Badge
+                size="sm"
+                variant="error"
+                className="ml-1"
                 title={t("errorBadgeLabel", { count: errCount })}
               >
                 {errCount}
-              </span>
+              </Badge>
             )}
             {errCount === 0 && warnCount > 0 && (
-              <span className="ml-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-warning text-bg">
+              <Badge size="sm" variant="warning" className="ml-1">
                 {warnCount}
-              </span>
+              </Badge>
             )}
           </TabsTrigger>
         );

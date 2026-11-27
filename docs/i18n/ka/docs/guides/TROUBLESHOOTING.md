@@ -464,7 +464,7 @@ v3.8.0-მდე იმპორტირებულ კავშირებ�
 2. **მუდმივი გამოსწორება:** თქვენს `docker run` ბრძანებაში `-p 127.0.0.1:20128:20128`-ის გამოყენებით აშკარად მიაბით IPv4-ს:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    ეს აიძულებს IPv4 მიბმას და ასევე თავიდან აგაცილებთ პროქსის ჰოსტის ყველა ინტერფეისზე გამოქვეყნებას.
 

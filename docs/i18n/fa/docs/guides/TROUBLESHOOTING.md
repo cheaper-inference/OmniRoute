@@ -444,7 +444,7 @@ OmniRoute توکنها را بهطور خودکار نوسازی میکند. ا�
 2. **راهحل دائمی:** با استفاده از `-p 127.0.0.1:20128:20128` در دستور `docker run`، اتصال را صراحتاً به IPv4 محدود کنید:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    این کار اتصال IPv4 را اجباری میکند و همچنین از در معرض قرار گرفتن پراکسی روی تمام رابطهای میزبان جلوگیری میکند.
 

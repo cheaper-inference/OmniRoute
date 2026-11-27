@@ -11,6 +11,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { getSettledModelCatalogResponse } from "../_setup/modelCatalogFixture.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-cc-alias-catalog-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -24,7 +25,8 @@ const providersDb = await import("../../src/lib/db/providers.ts");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
 
 async function fetchCatalogIds(key?: string): Promise<string[]> {
-  const res = await v1ModelsCatalog.getUnifiedModelsResponse(
+  const res = await getSettledModelCatalogResponse(
+    v1ModelsCatalog,
     new Request("http://localhost/api/v1/models", {
       method: "GET",
       headers: key ? { authorization: `Bearer ${key}` } : {},

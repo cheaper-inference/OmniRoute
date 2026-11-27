@@ -309,6 +309,7 @@ Folosiți cu generozitate clauzele `IF NOT EXISTS`, `IF EXISTS` și `OR IGNORE` 
 3. **Completați cu atenție datele** : utilizați `UPDATE ... WHERE ...` pentru a gestiona rândurile existente
 4. **Verificați ordinea și denumirea** : `npm run test:migrations:fresh` (toate migrările pe o bază de date goală) și `npm run check:migration-numbering`
 5. **Testați pe o copie** : nu rulați niciodată migrări netestate în producție
+6. **Un tabel creat din cod are nevoie și de o migrare** : dacă un modul creează și tabelul leneș (`CREATE TABLE IF NOT EXISTS`, păstrat ca o cale de auto-vindecare), o migrare trebuie să o creeze cu același DDL. În caz contrar, o instalare curată și o instalare actualizată ajung cu scheme diferite, în funcție de a rula calea codului. `tests/unit/db/lazy-table-migration-guard.test.ts` scanează `src/` și `open-sse/` și eșuează pe un `CREATE` leneș fără o migrare (#20557). Exemplu: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Exemplu:
 

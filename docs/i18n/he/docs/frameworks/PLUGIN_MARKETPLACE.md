@@ -25,31 +25,26 @@ OmniRoute מגיעה עם מערכת תוספים בסגנון WordPress. תוס
 loopback, ללא קשר לאימות. ראו
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## כיצד הכול משתלב
+## איך זה מתאים Together
 
 ```
-לוח הבקרה (/dashboard/plugins)
-  ├─ הלשונית "מותקנים"  → GET /api/plugins            (listPlugins)
-  │                        POST /api/plugins/scan      (pluginManager.scan)
-  │                        POST /api/plugins/{name}/activate|deactivate
-  │                        DELETE /api/plugins/{name}   (הסרה)
-  └─ הלשונית "שוק"       → GET /api/plugins/marketplace
-                             → listMarketplacePlugins()
-                               ├─ ללא URL מותאם אישית → SEED_REGISTRY מובנה
-                               └─ URL מותאם אישית → מנגנון הגנת SSRF מסוג isSafeMarketplaceUrl()
-                                                   → safeOutboundFetch(guard:"public-only")
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **שכבת המאגר** — `src/lib/plugins/marketplace.ts`: מציגה את הקטלוג / מחפשת
-  בו, וחוזרת למאגר האתחול במקרה של כשל כלשהו.
-- **שכבת מחזור החיים** — `src/lib/plugins/manager.ts` (מופע יחיד של
-  `pluginManager`): התקנה, שדרוג, הפעלה, השבתה, הסרה, סריקה וטעינה בעת ההפעלה.
-- **שכבת המניפסט** — `src/lib/plugins/manifest.ts`: סכמת Zod + ערכי ברירת מחדל
-  עבור `plugin.json`.
-- **סורק** — `src/lib/plugins/scanner.ts`: מגלה תוספים בדיסק תחת תיקיית
-  התוספים.
-- **טוען** — `src/lib/plugins/loader.ts`: יוצר עבור כל תוסף תהליך צאצא מבודד
-  ומתווך קריאות hook באמצעות IPC.
+- **שכבת הרישום** — `src/lib/plugins/marketplace.ts`: רשימות / מחפשות בקטלוג, נופלת בחזרה ל-Seed Registry בכל כשל.
+- **שכבת מחזור חיים** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): התקן, שדרג, הפעל, השבת, הסר התקנה, סריקה, טעינת אתחול.
+- **שכבה גלויה** — `src/lib/plugins/manifest.ts`: ברירת המחדל של סכימת Zod + עבור `plugin.json`.
+- **סוֹרֵק** — `src/lib/plugins/scanner.ts`: מגלה תוספים בדיסק תחת ספריית הפלאגינים.
+- **מטעין** — `src/lib/plugins/loader.ts`: מולידה כל תוסף בתהליך ילד נפרד Node.js ומתווכים מבצעים שיחות על IPC. הילד אינו ארגז חול (ראה "בידוד ביצוע פלאגין" להלן).
 
 ## קטלוג השוק
 
@@ -82,36 +77,33 @@ loopback, ללא קשר לאימות. ראו
 > מציג כרגע הודעת "בקרוב". כיום ההתקנה מתבצעת באמצעות תהליך ההתקנה מנתיב מקומי
 > (`POST /api/plugins`) וגילוי בדיסק (`POST /api/plugins/scan`).
 
-## API מסוג REST
+## REST API
 
-כל נקודות הקצה דורשות אימות ניהולי (`requireManagementAuth`) **וגם**
-מוגבלות ל-loopback בלבד — הנתיבים `/api/plugins` ו-`/api/plugins/` מופיעים
-ב-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
+כל נקודות הקצה דורשות אישור ניהול (`requireManagementAuth`)** ו** הם `/api/plugins` — `/api/plugins/` רשומים ב- `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| נקודת קצה                        | שיטה   | תיאור                                             |
-| -------------------------------- | ------ | ------------------------------------------------- |
-| `/api/plugins`                   | GET    | הצגת התוספים המותקנים (מסנן `?status=` אופציונלי) |
-| `/api/plugins`                   | POST   | התקנת תוסף מנתיב מקומי מוחלט                      |
-| `/api/plugins/scan`              | POST   | סריקת ספריית התוספים ורישום תוספים חדשים          |
-| `/api/plugins/marketplace`       | GET    | הצגת רשומות קטלוג זירת התוספים                    |
-| `/api/plugins/[name]`            | GET    | קבלת פרטי תוסף מותקן                              |
-| `/api/plugins/[name]`            | DELETE | הסרת התקנה של תוסף                                |
-| `/api/plugins/[name]/activate`   | POST   | הפעלה (טעינה + רישום hooks)                       |
-| `/api/plugins/[name]/deactivate` | POST   | השבתה (הפעלת `onDeactivate`, ביטול רישום hooks)   |
-| `/api/plugins/[name]/config`     | GET    | קבלת תצורת התוסף + סכמת התצורה                    |
-| `/api/plugins/[name]/config`     | PUT    | עדכון תצורת התוסף (עם אימות מול הסכמה)            |
+| נקודת קצה                        | שִׁיטָה | תֵאוּר                                           |
+| -------------------------------- | ------- | ------------------------------------------------ |
+| `/api/plugins`                   | GET     | רשימת תוספים מותקנים (מסנן `?status=` אופציונלי) |
+| `/api/plugins`                   | POST    | התקן תוסף מספריית מקורות הפלאגין                 |
+| `/api/plugins/scan`              | POST    | סרוק את ספריית התוספים ורשום תוספים חדשים        |
+| `/api/plugins/marketplace`       | GET     | רשימת ערכי קטלוג השוק                            |
+| `/api/plugins/[name]`            | GET     | קבל פרטי תוסף מותקן                              |
+| `/api/plugins/[name]`            | DELETE  | הסר התקנה של תוסף                                |
+| `/api/plugins/[name]/activate`   | POST    | הפעל (טען ווים + register)                       |
+| `/api/plugins/[name]/deactivate` | POST    | השבתה (אש `onDeactivate`, בטל רישום ווים)        |
+| `/api/plugins/[name]/config`     | GET     | קבל את סכימת התצורה של התוסף +                   |
+| `/api/plugins/[name]/config`     | PUT     | עדכון תצורת הפלאגין (אומת כנגד סכימה)            |
 
-המסנן `status` של `GET /api/plugins` מקבל אחד מהערכים
-`installed` / `active` / `inactive` / `error`. ערך לא חוקי מחזיר `400`.
+מסנן `GET /api/plugins` `status` מקבל אחד מ- `installed` / `active` / `inactive` / `error`. ערך לא חוקי מחזיר `400`.
 
-### הצגת התוספים המותקנים
+### רשימת תוספים מותקנים
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### התקנה מנתיב מקומי
+### התקן מנתיב מקומי
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -120,19 +112,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-הנתיב `path` חייב להיות **מוחלט**, ואסור שיכיל מקטעי מעבר `..` או
-בתי null (נאכף באמצעות Zod). ספריית המקור חייבת להכיל קובץ
-`plugin.json` חוקי (או להיות ספריית אב של ספרייה המכילה אותו). במקרה של הצלחה, התגובה היא `201` עם
-רשומת התוסף שהותקן.
+ה- `path` חייב להיות an** מוּחלָט** נתיב לספרייה** בתוך ספריית מקורות הפלאגין** : `plugin-sources` ליד שורש הפלאגין, אז `~/.omniroute/plugin-sources/` כברירת מחדל, או `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` כאשר המשתנה הזה מוגדר (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). תחילה העתק או שיבט את הפלאגין לשם. ההתקנה נדחתה עם `400` כאשר הנתיב מכיל `..` או byte null, נמצא מחוץ לאותה ספרייה, נפתר מחוצה לה באמצעות סימן-קישור, מכיל סימן-קישור שהיעד שלו נמצא מחוצה לו, או כאשר הספרייה אינה קיימת. ספריית המקור חייבת להכיל `plugin.json` חוקי (או להיות הורה של אחד). על הצלחה התגובה היא `201` עם שורת הפלאגין המותקנת.
 
-### עיון בזירת התוספים
+בניגוד למסלולי הפלאגין האחרים, זה דורש את אישורי הניהול (הפעלת לוח מחוונים או מפתח API בהיקף ניהול) גם כאשר הכניסה מושבתת (`requireLogin=false`): התקנת קוד היא אף פעם לא פעולה אנונימית.
+
+### עיין בשוק
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### עדכון תצורת תוסף
+### עדכן את תצורת הפלאגין
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -141,10 +132,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-הנתיב `PUT .../config` מאמת כל ערך שסופק מול
-`configSchema` של התוסף (המוצהרת במניפסט): שדות `number` מכבדים את `min`/`max`,
-ושדות `select` חייבים להתאים ל-`enum` המוצהר. מפתחות שאינם קיימים בסכמה
-מורשים לעבור.
+`PUT .../config` מאמת כל ערך שסופק כנגד `configSchema` של התוסף (מוצהר במניפסט): שדות `number` מכבדים `min`/`max`, שדות `select` חייבים להתאים ל- `enum` המוצהר. מותר לעבור למפתחות שאינם קיימים בסכימה.
 
 ## הגדרות
 
@@ -201,84 +189,60 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
 > `listMarketplacePlugins()`) מכבד את המפתח לאחר שהוא קיים במאגר
 > ההגדרות.
 
-## אבטחה
+## בִּטָחוֹן
 
-### רמת נתיב — לולאה מקומית בלבד
+### מסלול tier — loopback בלבד
 
-תוספים מריצים קוד בתהליכי־צאצא שנוצרים בנפרד, ולכן כל הממשק `/api/plugins`
-מסווג כ־`LOCAL_ONLY` (רמה 1). אכיפת הלולאה המקומית מתבצעת
-ללא תנאי **לפני** כל בדיקת אימות, כך שגם אסימון ניהול שדלף ומגיע
-למכונה דרך מנהרה עדיין אינו יכול להתקין, להפעיל או להסיר תוסף.
-ראו [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) וכן
-כללים קשיחים מס' 15 / מס' 17.
+תוספים מבצעים קוד בתהליכי צאצא שנוצרו, כך שמשטח `/api/plugins` כולו מסווג `LOCAL_ONLY` (Tier 1). אכיפת לולאה חוזרת פועלת ללא תנאי** לִפנֵי** כל בדיקת אישור, כך שאסימון ניהול שדלף מגיע לקופסה מעל מנהרה עדיין לא יכול להתקין, להפעיל או להסיר את ההתקנה של תוסף. ראה [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) וכללים קשיחים #15 / #17.
 
-### הגנת SSRF עבור מאגר ה־Marketplace
+### Marketplace Registry SSRF guard
 
-כתובת URL מותאמת אישית של מאגר היא הגדרה שתוקף יכול להשפיע עליה, ולכן לפני
-שליפתה `listMarketplacePlugins()` מעבירה אותה דרך שתי שכבות:
+רישום מותאם אישית URL הוא תצורה הניתנת להשפעה של תוקף, אז לפני שליפתו `listMarketplacePlugins()` מריץ אותו דרך שתי שכבות:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
    - דוחה כל דבר שאינו `http:` / `https:`.
-   - דוחה מארחים מפורשים מסוג פרטי/לולאה מקומית/link-local/ULA ‏(IPv4 **וגם** IPv6,
-     לרבות IPv4 ממופה) באמצעות `isPrivateHost` הקנוני
-     (`src/shared/network/outboundUrlGuard.ts`).
-   - פותר רשומות `A` **וגם** `AAAA`, ודוחה אם כתובת **כלשהי** שהתקבלה
-     היא פרטית — ובכך סוגר את המעקף של שם מארח ציבורי → כתובת IP פרטית.
-   - **נכשל באופן סגור**: כשל בפתרון DNS גורם לדחיית כתובת ה־URL.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): מחיל מחדש בזמן השליפה את הגנת כתובות ה־URL
-   המוגבלת לכתובות ציבוריות, ו**חוסם הפניות מחדש** (ללא ציר `30x`
-   מציבורי → פרטי).
+   - דוחה מארחי private/loopback/link-local/ULA מילולית (IPv4** ו** IPv6, כולל IPv4-mapped) באמצעות `isPrivateHost` הקנוני (`src/shared/network/outboundUrlGuard.ts`).
+   - פותר** שְׁנֵיהֶם** `A` ו- `AAAA` מקליטים ודוחים אם** כֹּל** הכתובת שנפתרה היא פרטית — סוגרת את שם המארח הציבורי → private-IP עוקף.
+   - **נכשל סגור** : כשל ברזולוציית DNS דוחה את ה- URL.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): מחיל מחדש את ה- URL guard הציבורי בלבד בזמן אחזור ו** חוסם הפניות מחדש** (ללא → פרטי `30x` pivot).
 
-כתובת URL שנכשלת באחת מהשכבות אינה מבטלת את הבקשה — ה־Marketplace
-חוזר בשקט למאגר האתחול המובנה ורושם אזהרה ביומן.
+URL שנכשל בכל אחת מהשכבות אינו מבטל את הבקשה — השוק נופל בשקט בחזרה ל-Seed Registry המובנה ומתעד אזהרה.
 
-> הגנה זו חוזקה ב־PR #3774 במיוחד כדי לפתור רשומות A + AAAA ולהשתמש
-> ב־`isPrivateHost` הקנוני במקום בבדיקה המוגבלת ל־IPv4 בלבד.
+> הגארד הזה הוקשח ב- PR #3774 במיוחד כדי לפתור את A + AAAA ולהשתמש ב- `isPrivateHost` הקנוני במקום צ'ק IPv4-only.
 
-### בידוד הרצת תוספים
+### בידוד ביצוע תוסף
 
-- **בידוד תהליכים** — `loadPlugin()` (`src/lib/plugins/loader.ts`) מפעילה
-  כל תוסף בתהליך־צאצא נפרד של Node.js ומתקשרת באמצעות IPC.
-  לקריאות hook יש זמן קצוב, עם הסלמה מ־`SIGTERM` ל־`SIGKILL`.
-- **רשימת היתרים למשתני סביבה** — תהליך־הצאצא מקבל רק קבוצה מאושרת של משתני
-  סביבה; הקבוצה הרחבה יותר ניתנת רק כאשר המניפסט מבקש את ההרשאה
-  `env`.
-- **הגבלת נתיבים** — התקנה/שדרוג/הסרה מוודאים שתיקיית התוסף
-  ו־`manifest.main` נפתרים לנתיב שנמצא **בתוך** שורש התוספים המנוהל,
-  לפני כל העתקה או מחיקה רקורסיבית (הגנה מפני נתיבי מסד נתונים ששונו בזדון ומפני
-  חציית `../` בתוך `manifest.main`). ההפעלה פותרת קישורים סמליים באמצעות
-  `realpath` ומסרבת לטעון נקודת כניסה שחורגת מתיקיית
-  התוסף.
-- **קיבוע תקינות אופציונלי** — מניפסט יכול להצהיר על שדה `integrity`
-  (`sha256-<base64>`, בתבנית SRI). כאשר השדה קיים, הטוען מאמת את גיבוב
-  קובץ הכניסה בזמן הטעינה ומסרב להפעיל במקרה של אי־התאמה. זהו
-  מנגנון אופציונלי לזיהוי שינויים, **לא** גבול אבטחה — ניתוב המוגבל ללולאה מקומית
-  ומודל ההרשאות הם הגבולות האמיתיים.
+> **תוספים אינם בארגז חול.** הילד הוא תהליך Node.js רגיל הפועל כמשתמש OmniRoute, ללא הקשר VM וללא דגלי הרשאות Node.js, כך שקוד הפלאגין יכול לקרוא ולכתוב כל קובץ שהמשתמש יכול, להריץ תוכניות ולהגיע לרשת. `requires.permissions` רק מחליט אילו משתני סביבה הילד מקבל; ההרשאות האחרות אינן נאכפות. התקן רק תוספים שאתה סומך עליהם. גבול התהליך למטה מכיל קריסות ותלות; זה לא גבול בטחוני.
+
+- **בידוד תהליך** — `loadPlugin()` (`src/lib/plugins/loader.ts`) מולידה כל תוסף בתהליך ילד נפרד Node.js ומתקשר באמצעות IPC. לשיחות Hook יש פסק זמן עם הסלמה `SIGTERM` → `SIGKILL`.
+- **רשימת ההיתרים של Env** — הילד מקבל רק קבוצה מורשית של משתני סביבה; הסט הרחב יותר מוענק רק כאשר המניפסט מבקש את הרשאת `env`.
+- **התקן בלימת מקור** — `POST /api/plugins` קורא רק מספריית המקורות של הפלאגין (ראה "התקנה מנתיב מקומי"): הנתיב עובר כקנוניזציה ב- `realpath`, חייב להישאר רק בתוך הספרייה הזו, ועץ מקור הנושא קישור סימבולי שנמלט ממנו נדחה לפני שמשהו יועתק.
+- **בלימת נתיב** — install/upgrade/uninstall טוענים שספריית הפלאגין וה- `manifest.main` פותרים** בְּתוֹך** שורש הפלאגין המנוהל לפני כל העתקה או מחיקה רקורסיבית (שומר מפני נתיבי DB משובשים ומעבר `../` ב- `manifest.main`). ההפעלה פותרת סימלינקים דרך `realpath` ומסרבת לטעון נקודת כניסה שנמלטת מספריית הפלאגין.
+- **סיכת שלמות אופציונלית** — a Manifest עשוי להכריז על שדה `integrity` (`sha256-<base64>`, SRI format). כאשר קיים, הטוען מאמת את ה-hash של קובץ הכניסה בזמן הטעינה ומסרב להפעיל במקרה של אי התאמה. זה הסכמה לזיהוי חבלה,** לֹא** גבול אבטחה: זה לא מגביל את מה שתוסף טעון יכול לעשות.
+- **אין אישורי לקוח ב-hooks** — ההקשר המועבר ל- `onRequest`, `onResponse` ו- `onError` הוסרו את הכותרות `authorization`, `x-api-key`, `proxy-authorization` ו- `cookie`, ורשומת מפתח API אינה נושאת ערך מפתח (`redactPluginContext()` ב- `src/lib/plugins/hooks.ts`).
 
 ## מניפסט (`plugin.json`)
 
-מאומת באמצעות `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
+מאומת על ידי `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
-| שדה                | סוג       | הערות                                                      |
-| ------------------ | --------- | ---------------------------------------------------------- |
-| `name`             | string    | חובה; kebab-case (`^[a-z0-9-]+$`), בין 1 ל־100 תווים       |
-| `version`          | string    | חובה; semver (`MAJOR.MINOR.PATCH`)                         |
-| `description`      | string?   | עד 500 תווים                                               |
-| `author`           | string?   | עד 200 תווים                                               |
-| `license`          | string?   | ברירת המחדל היא `MIT`                                      |
-| `main`             | string?   | קובץ הכניסה; ברירת המחדל היא `index.js`                    |
-| `source`           | enum?     | `local` \| `marketplace` (ברירת המחדל היא `local`)         |
-| `tags`             | string[]? | תגיות חיפוש                                                |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                            |
-| `hooks`            | object?   | ערכים בוליאניים המצהירים אילו hooks התוסף מממש             |
-| `skills`           | object[]? | הגדרות מיומנויות אופציונליות                               |
-| `enabledByDefault` | boolean?  | הפעלה אוטומטית בעת ההתקנה                                  |
-| `configSchema`     | object?   | מיפוי של שדות תצורה (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | קיבוע אופציונלי מסוג `sha256-<base64>` עבור קובץ הכניסה    |
+| שָׂדֶה             | סוּג           | הערות                                                    |
+| ------------------ | -------------- | -------------------------------------------------------- |
+| `name`             | חוּט           | דָרוּשׁ; מארז קבב (`^[a-z0-9-]+$`), 1-100 תווים          |
+| `version`          | חוּט           | דָרוּשׁ; סמבר (`MAJOR.MINOR.PATCH`)                      |
+| `description`      | חוּט?          | ≤ 500 תווים                                              |
+| `author`           | חוּט?          | ≤ 200 תווים                                              |
+| `license`          | חוּט?          | ברירת המחדל היא `MIT`                                    |
+| `main`             | חוּט?          | קובץ כניסה; ברירת המחדל היא `index.js`                   |
+| `source`           | enum?          | `local` \| `marketplace` (ברירת המחדל היא `local`)       |
+| `tags`             | חוּט[]?        | חפש תגיות                                                |
+| `requires`         | לְהִתְנַגֵד?   | `{ omniroute?, permissions[] }`                          |
+| `hooks`            | לְהִתְנַגֵד?   | בוליאנים שמצהירים אילו ווים התוסף מיישם                  |
+| `skills`           | לְהִתְנַגֵד[]? | הגדרות מיומנות אופציונליות                               |
+| `enabledByDefault` | בוליאני?       | הפעלה אוטומטית בהתקנה                                    |
+| `configSchema`     | לְהִתְנַגֵד?   | מפה של שדות תצורה (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | חוּט?          | סיכת קובץ כניסה אופציונלית `sha256-<base64>`             |
 
-ההרשאות נלקחות מה־enum
-`network` / `file-read` / `file-write` / `env` / `exec`.
+ההרשאות נלקחות מה-enum `network` / `file-read` / `file-write` / `env` / `exec`. רק `env` יש אפקט זמן ריצה (רשימת אישורים של משתני סביבה מעט יותר גדולה עבור הילד); האחרות הן הצהרות ואינן נאכפות.
 
 ## זרימת מחזור החיים
 
@@ -336,19 +300,16 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
 מדדים וניתוח נתונים של תוספים מנוהלים בטבלאות נוספות
 (`090_plugin_metrics.sql`, `091_plugin_analytics.sql`).
 
-## לוח הבקרה
+## לוּחַ מַחווָנִים
 
-דף לוח הבקרה ב-`/dashboard/plugins`
-‏(`src/app/(dashboard)/dashboard/plugins/page.tsx`) מספק שתי כרטיסיות:
+דף לוח המחוונים ב- `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) מספק שתי כרטיסיות:
 
-- **מותקנים** — מציגה את התוספים המותקנים עם ה-hooks המוצהרים שלהם, מתג
-  הפעלה/השבתה, כפתור הסרת התקנה ופעולת "סריקת תוספים"
-  (`POST /api/plugins/scan`).
-- **זירת התוספים** — מציגה את הקטלוג מ-`GET /api/plugins/marketplace` עם
-  שדה להגדרת כתובת URL מותאמת אישית של מאגר הרישום.
+- **מוּתקָן** — מציגה רשימה של תוספים מותקנים עם הווים המוצהרים שלהם, בורר activate/deactivate, כפתור הסרה ופעולת "סרוק תוספים" (`POST /api/plugins/scan`).
+- **שוק** — מציג את הקטלוג מ- `GET /api/plugins/marketplace` עם שדה להגדרת הרישום המותאם אישית URL.
 
-דף תצורה ייעודי לכל תוסף נמצא ב-`/dashboard/plugins/[name]/config`
-‏(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+העמוד תמיד מציג אזהרה שתוספים פועלים עם הרשאות המלאות של תהליך OmniRoute.
+
+דף תצורה לכל תוסף חי ב- `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
 
 ## ראו גם
 

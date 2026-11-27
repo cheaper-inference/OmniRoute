@@ -558,6 +558,8 @@ Wannan wakili:
 
 Ɗaukaka WebSocket don dashboard ɗin da aka haɗa ana sarrafa su ta hanyar uwar garken aboki akan tashar da aka keɓe (duba `src/lib/services/embedWsProxy.ts`).
 
+Ana ba da izini kowane haɓakawa kafin buɗe rami, tare da ƙa'idodi iri ɗaya da hanyar hanyar HTTP : dole ne abokin gaba ya zama madauki ba tare da wani madaidaicin isar da wakili ba, `Origin` mai bincike dole ne ya zama asalin dashboard (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` ya tsawaita madaidaicin madauki), kuma mai kiran yana buƙatar zaman dashboard ko maɓallin API mai sarrafawa sai dai idan ba za a iya shiga dashboard ba.
+
 **Tsaro:** Hannun hanyoyin wakili an rarraba su ƙarƙashin `LOCAL_ONLY_API_PREFIXES` kuma ana iya samun su daga madauki. Maharin da ya sami JWT ta hanyar ramin Cloudflare/Ngrok ba zai iya zama wakili a cikin ayyukan da aka haɗa ba.
 
 ---

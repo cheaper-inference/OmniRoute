@@ -1,6 +1,7 @@
 "use client";
 
-import { Input } from "@/shared/components";
+import { Input, NumberInput } from "@/shared/components";
+import { numberToText, textToNumber } from "../../../numberFieldText";
 import type { ProviderMessageTranslator } from "../../providerPageHelpers";
 
 // #9415 — New-API / One-API / Sub2API aggregator balance detection.
@@ -46,13 +47,13 @@ export default function NewApiAggregatorFields({
         placeholder={t("newApiUserIdPlaceholder")}
         hint={t("newApiAggregatorUserIdHint")}
       />
-      <Input
+      <NumberInput
         label={t("newApiAggregatorQuotaPerUnitLabel")}
-        value={values.quotaPerUnit}
-        onChange={(e) => onChange({ quotaPerUnit: e.target.value })}
+        min={0}
+        value={textToNumber(values.quotaPerUnit)}
+        onValueChange={(value) => onChange({ quotaPerUnit: numberToText(value) })}
         placeholder="500000"
         hint={t("newApiAggregatorQuotaPerUnitHint")}
-        type="number"
       />
     </>
   );

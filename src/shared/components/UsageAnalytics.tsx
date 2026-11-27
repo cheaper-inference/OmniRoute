@@ -363,7 +363,12 @@ export default function UsageAnalytics() {
       <CompactStatGrid
         sections={[
           {
-            title: t("infraTitle"),
+            // KEA-9391: these four are distinct accounts, providers, API keys and models that
+            // served a request in the selected period (and key filter), not what the workspace
+            // has configured; the heading and its sentence say so.
+            title: t("usedInPeriodTitle"),
+            description: t("usedInPeriodHint"),
+            testId: "analytics-used-in-period",
             items: [
               { icon: "group", label: t("infraAccounts"), value: s.uniqueAccounts || 0 },
               {

@@ -8,16 +8,24 @@
  * OpenCode additionally retains explicit conversation identity before body translation.
  */
 import { preserveOpencodeSessionIdentity } from "../../utils/opencodeSessionIdentity.ts";
+import {
+  CODEX_METADATA_CACHE_SESSION_HEADER,
+  preserveCodexMetadataSessionIdentity,
+} from "../../executors/codex/promptCacheKey.ts";
 
-// Pre-compiled set for O(1) lease control header checks (hot path)
-const LEASE_CONTROL_HEADERS = new Set([
+// Pre-compiled set for O(1) internal control-header checks (hot path). These are
+// OmniRoute-only signals: forwarding them upstream would leak routing internals and,
+// for `x-omniroute-no-log`, could be misread as a provider-side retention switch.
+const INTERNAL_CONTROL_HEADERS = new Set([
   "x-omniroute-lease-owner",
   "x-omniroute-lease-generation",
+  "x-omniroute-no-log",
   "x-deadline-token",
+  CODEX_METADATA_CACHE_SESSION_HEADER,
 ]);
 
-function isLeaseControlHeader(key: string): boolean {
-  return LEASE_CONTROL_HEADERS.has(key.toLowerCase());
+function isInternalControlHeader(key: string): boolean {
+  return INTERNAL_CONTROL_HEADERS.has(key.toLowerCase());
 }
 
 export function buildExecutorClientHeaders(
@@ -29,12 +37,12 @@ export function buildExecutorClientHeaders(
 
   if (headers instanceof Headers) {
     headers.forEach((value, key) => {
-      if (isLeaseControlHeader(key)) return;
+      if (isInternalControlHeader(key)) return;
       normalized[key] = value;
     });
   } else if (headers && typeof headers === "object") {
     for (const [key, value] of Object.entries(headers)) {
-      if (isLeaseControlHeader(key)) continue;
+      if (isInternalControlHeader(key)) continue;
       if (typeof value === "string") {
         normalized[key] = value;
       }
@@ -48,5 +56,6 @@ export function buildExecutorClientHeaders(
   }
 
   preserveOpencodeSessionIdentity(normalized, request);
+  preserveCodexMetadataSessionIdentity(normalized, request);
   return Object.keys(normalized).length > 0 ? normalized : null;
 }

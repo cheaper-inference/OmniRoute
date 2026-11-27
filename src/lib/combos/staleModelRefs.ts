@@ -92,13 +92,23 @@ async function collectExplicitStepProviders(): Promise<Set<string>> {
  * Stale refs across every provider an explicit combo step pins, for the combo
  * editor badge. Each provider keeps the same fail-open rule as above.
  */
-export async function findAllStaleComboModelRefs(): Promise<StaleComboModelRef[]> {
+export async function findAllStaleComboModelRefs(
+  // Optional lookup supports deterministic isolation tests without breaking the
+  // real catalog/DB reader used by the combo editor.
+  lookupProvider: (providerId: string) => Promise<StaleComboModelRef[]> = findStaleComboModelRefs
+): Promise<StaleComboModelRef[]> {
   // A step can match two provider ids (alias vs canonical), so dedupe by key.
   const byKey = new Map<string, StaleComboModelRef>();
   for (const providerId of await collectExplicitStepProviders()) {
-    for (const ref of await findStaleComboModelRefs(providerId)) {
-      const key = JSON.stringify([ref.comboId, ref.stepId, ref.model]);
-      if (!byKey.has(key)) byKey.set(key, ref);
+    try {
+      for (const ref of await lookupProvider(providerId)) {
+        const key = JSON.stringify([ref.comboId, ref.stepId, ref.model]);
+        if (!byKey.has(key)) byKey.set(key, ref);
+      }
+    } catch {
+      // An unavailable provider catalog must not hide badges for other providers.
+      // This is a read-only hint; no combo is modified by skipping one provider.
+      continue;
     }
   }
   return [...byKey.values()];

@@ -29,9 +29,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import { pathToFileURL } from "node:url";
+
 import { runScopedTypecheck } from "./run-scoped-typecheck.mjs";
 import { parseTscOutput, diffAgainstBaseline } from "./typecheckBaseline.mjs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 import {
   countLineSuppressions,
   fingerprintDrift,
@@ -341,6 +342,6 @@ function main() {
   process.exit(0);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (isMainModule(import.meta.url)) {
   main();
 }

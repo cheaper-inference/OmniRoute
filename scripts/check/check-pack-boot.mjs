@@ -43,13 +43,12 @@ export const REQUIRED_MACHINE_TOKEN_RUNTIME_FILES = Object.freeze([
   "node_modules/node-machine-id/index.js",
 ]);
 
-// Translated /docs pages (2026-11-03): the tarball carries the docs mirrors under dist/docs, and
-// the sanitizer that renders them imports jsdom, which npm installs as a declared dependency.
-// Either one missing and every translated page silently falls back to English.
-export const REQUIRED_DOCS_I18N_RUNTIME_FILES = Object.freeze([
-  "dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md",
-  "node_modules/jsdom/package.json",
-]);
+// /docs runtime (2026-11-17): the npm package ships no translated docs mirrors. With them the
+// 3.8.54 tarball reached 206.1 MB and the registry answered 413, so npm installs serve /docs in
+// English. jsdom (the sanitizer behind translated pages) stays a declared dependency, and a
+// dist/docs/i18n tree in the installed package means the mirrors came back into the tarball.
+export const REQUIRED_DOCS_RUNTIME_FILES = Object.freeze(["node_modules/jsdom/package.json"]);
+export const FORBIDDEN_DOCS_RUNTIME_PATHS = Object.freeze(["dist/docs/i18n"]);
 
 /** Parse `npm pack --json` output into the generated tarball filename. */
 export function pickTarball(packJsonOutput) {
@@ -58,6 +57,123 @@ export function pickTarball(packJsonOutput) {
   if (!filename) throw new Error("npm pack --json returned no filename");
   // npm >=9 may emit scoped names with "/" — normalize to the on-disk file name.
   return filename.replace(/\//g, "-");
+}
+
+/**
+ * Prebuilt tarball interface, shared with check-install-upgrade.mjs.
+ *
+ * The npm-publish workflow used to pack the same dist/ four times per attempt (this gate,
+ * check:install-upgrade, the hand-off to the hosted upload job and GitHub Packages), and
+ * `npm pack` is single-threaded: 13–36 min each on the shared self-hosted runner during the
+ * v3.8.54 publish. The workflow now packs ONCE and hands that file to every consumer, so
+ * the bytes the gates prove are the bytes that get published.
+ *
+ *   --tarball <path>              (wins when both are given)
+ *   OMNIROUTE_PACKED_TARBALL=<path>
+ *
+ * When neither is set the gate packs the tree itself, exactly as before, so a local
+ * `npm run check:pack-boot` needs nothing new.
+ */
+export const PACKED_TARBALL_ENV = "OMNIROUTE_PACKED_TARBALL";
+
+/** The prebuilt tarball path from argv/env, or null when the gate must pack itself. */
+export function resolvePrebuiltTarballOption(argv = process.argv.slice(2), env = process.env) {
+  const idx = argv.indexOf("--tarball");
+  if (idx >= 0) {
+    const value = argv[idx + 1];
+    if (!value || value.startsWith("--")) {
+      throw new Error("--tarball needs a path to a packed .tgz");
+    }
+    return value;
+  }
+  const fromEnv = env[PACKED_TARBALL_ENV];
+  return fromEnv && fromEnv.trim() ? fromEnv.trim() : null;
+}
+
+/** Read package/package.json out of an npm tarball without unpacking it to disk. */
+export function readTarballManifest(tarballPath, run = execFileSync) {
+  let raw;
+  try {
+    raw = run("tar", ["-xzOf", tarballPath, "package/package.json"], {
+      encoding: "utf8",
+      maxBuffer: 16 * 1024 * 1024,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+  } catch (e) {
+    throw new Error(
+      `cannot read package/package.json from ${tarballPath} — not an npm tarball? (${e?.message ?? e})`
+    );
+  }
+  try {
+    return JSON.parse(raw);
+  } catch {
+    throw new Error(`package/package.json inside ${tarballPath} is not valid JSON`);
+  }
+}
+
+/**
+ * Validate a prebuilt tarball against the tree it claims to package: it must exist and its
+ * manifest must carry the same name and version as ./package.json. A stale tarball from a
+ * previous attempt (or one rewritten for another registry) would otherwise be "proven" in
+ * place of the release.
+ */
+export function verifyPrebuiltTarball(
+  tarballPath,
+  { expectedName, expectedVersion, exists = fs.existsSync, readManifest = readTarballManifest }
+) {
+  const absolute = path.resolve(tarballPath);
+  if (!exists(absolute)) {
+    throw new Error(
+      `prebuilt tarball not found: ${absolute} (from --tarball/${PACKED_TARBALL_ENV})`
+    );
+  }
+  const manifest = readManifest(absolute) ?? {};
+  const mismatches = [];
+  if (manifest.name !== expectedName) {
+    mismatches.push(`name "${manifest.name}" (expected "${expectedName}")`);
+  }
+  if (manifest.version !== expectedVersion) {
+    mismatches.push(`version "${manifest.version}" (expected "${expectedVersion}")`);
+  }
+  if (mismatches.length) {
+    throw new Error(
+      `prebuilt tarball ${path.basename(absolute)} does not match ./package.json: ${mismatches.join(", ")}`
+    );
+  }
+  return absolute;
+}
+
+/**
+ * The tarball a gate should install: the validated prebuilt one when given, otherwise a
+ * fresh `npm pack` of `root` into `destDir` (the historical behavior). `pack` is injectable
+ * so the no-pack path is testable without packing anything.
+ */
+export function obtainTarball({
+  root,
+  destDir,
+  prebuilt,
+  expectedName,
+  expectedVersion,
+  pack = (cwd, dest) =>
+    execFileSync("npm", ["pack", "--json", "--pack-destination", dest], {
+      cwd,
+      encoding: "utf8",
+      maxBuffer: 128 * 1024 * 1024,
+    }),
+  exists = fs.existsSync,
+  readManifest = readTarballManifest,
+}) {
+  if (prebuilt) {
+    const tarball = verifyPrebuiltTarball(prebuilt, {
+      expectedName,
+      expectedVersion,
+      exists,
+      readManifest,
+    });
+    return { tarball, packed: false };
+  }
+  const packOut = pack(root, destDir);
+  return { tarball: path.join(destDir, pickTarball(packOut)), packed: true };
 }
 
 /**
@@ -91,9 +207,15 @@ export function findMissingMachineTokenRuntimeFiles(packageRoot, exists = fs.exi
   );
 }
 
-export function findMissingDocsI18nRuntimeFiles(packageRoot, exists = fs.existsSync) {
-  return REQUIRED_DOCS_I18N_RUNTIME_FILES.filter(
+export function findMissingDocsRuntimeFiles(packageRoot, exists = fs.existsSync) {
+  return REQUIRED_DOCS_RUNTIME_FILES.filter(
     (relativePath) => !exists(path.join(packageRoot, relativePath))
+  );
+}
+
+export function findForbiddenDocsRuntimePaths(packageRoot, exists = fs.existsSync) {
+  return FORBIDDEN_DOCS_RUNTIME_PATHS.filter((relativePath) =>
+    exists(path.join(packageRoot, relativePath))
   );
 }
 
@@ -431,9 +553,22 @@ async function main() {
     );
     process.exit(2);
   }
-  const expectedVersion = JSON.parse(
-    fs.readFileSync(path.join(ROOT, "package.json"), "utf8")
-  ).version;
+  const rootManifest = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
+  const expectedVersion = rootManifest.version;
+  let prebuilt;
+  try {
+    prebuilt = resolvePrebuiltTarballOption();
+    // Validate before creating any workspace: a bad --tarball fails fast, packs nothing.
+    if (prebuilt) {
+      prebuilt = verifyPrebuiltTarball(prebuilt, {
+        expectedName: rootManifest.name,
+        expectedVersion,
+      });
+    }
+  } catch (e) {
+    console.error(`[pack-boot] ❌ ${e.message}`);
+    process.exit(1);
+  }
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-pack-boot-"));
   let child = null;
   let tail = [];
@@ -442,13 +577,17 @@ async function main() {
   let cleanupError = null; // recorded ONLY in finally, ONLY for a final stopChild failure
   let shutdownConfirmed = false; // process group confirmed stopped → safe to rm the workspace
   try {
-    log(`packing v${expectedVersion}…`);
-    const packOut = execFileSync("npm", ["pack", "--json", "--pack-destination", tmp], {
-      cwd: ROOT,
-      encoding: "utf8",
-      maxBuffer: 64 * 1024 * 1024,
+    if (prebuilt) log(`using prebuilt tarball ${prebuilt} (v${expectedVersion}) — not packing`);
+    else log(`packing v${expectedVersion}…`);
+    // One code path for both modes; a prebuilt tarball is re-verified (a few seconds of
+    // gunzip) rather than trusted from the early check.
+    const { tarball } = obtainTarball({
+      root: ROOT,
+      destDir: tmp,
+      prebuilt,
+      expectedName: rootManifest.name,
+      expectedVersion,
     });
-    const tarball = path.join(tmp, pickTarball(packOut));
     log(`installing ${path.basename(tarball)} into a clean prefix (postinstall runs for real)…`);
     const prefix = path.join(tmp, "prefix");
     execFileSync("npm", ["install", "-g", "--prefix", prefix, tarball], {
@@ -470,13 +609,19 @@ async function main() {
       );
     }
     log("installed package contains the node-machine-id runtime");
-    const missingDocsI18nFiles = findMissingDocsI18nRuntimeFiles(packageRoot);
-    if (missingDocsI18nFiles.length > 0) {
+    const missingDocsFiles = findMissingDocsRuntimeFiles(packageRoot);
+    if (missingDocsFiles.length > 0) {
       throw new Error(
-        `installed package is missing the translated-docs runtime contract: ${missingDocsI18nFiles.join(", ")}`
+        `installed package is missing the docs runtime contract: ${missingDocsFiles.join(", ")}`
       );
     }
-    log("installed package contains the translated docs mirrors and jsdom");
+    const forbiddenDocsPaths = findForbiddenDocsRuntimePaths(packageRoot);
+    if (forbiddenDocsPaths.length > 0) {
+      throw new Error(
+        `installed package carries translated docs mirrors the npm package must not ship: ${forbiddenDocsPaths.join(", ")}`
+      );
+    }
+    log("installed package contains jsdom and no translated docs mirrors");
 
     const port = pickPort();
     const dataDir = path.join(tmp, "data");

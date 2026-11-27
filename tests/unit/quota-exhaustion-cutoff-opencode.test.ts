@@ -24,6 +24,9 @@ type ExhaustionCase = {
 };
 
 const originalFetch = globalThis.fetch;
+test.beforeEach((t) =>
+  t.mock.timers.enable({ apis: ["Date"], now: Date.parse("2026-09-01T00:00:00Z") })
+);
 const resetAt: Record<WindowName, string> = {
   rolling: "2026-09-01T01:02:03.000Z",
   weekly: "2026-09-05T04:05:06.000Z",

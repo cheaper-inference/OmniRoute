@@ -1,0 +1,1 @@
+- **fix(translator):** thinking blocks that OmniRoute translates for Claude clients now carry an empty `signature` field, so strict Claude clients no longer fail to parse reasoning from OpenAI-shaped and Gemini providers. ([#19403](https://github.com/cheaper-inference/OmniRoute/pull/19403))

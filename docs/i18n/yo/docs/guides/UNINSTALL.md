@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Kì í ṣe dandan) Yọ image náà kúrò
+docker rmi cheaperinference/omniroute:latest
+# Awọn fifi sori ẹrọ ti ogbo fa orukọ ogún naa:
 docker rmi diegosouzapw/omniroute:latest
 ```
 
