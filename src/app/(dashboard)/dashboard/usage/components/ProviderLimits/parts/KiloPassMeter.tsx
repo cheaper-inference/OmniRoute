@@ -185,6 +185,7 @@ export default function KiloPassMeter({
       {/* Kit Progress bands (kit #190): paid and bonus each get a track sized by their
           capacity and their own used fill; paid credits are spent first. */}
       <Progress
+        semantics="meter"
         aria-label={meterLabel}
         bands={bands}
         value={model.progressValue}
