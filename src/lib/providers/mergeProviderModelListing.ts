@@ -4,8 +4,10 @@
  * exclude retired static/imported rows while preserving operator-owned models.
  */
 
+import { providerUsesAuthoritativeLiveCatalog } from "@omniroute/open-sse/config/providerRegistry";
 import { appendSyncedEffortVariants } from "@omniroute/open-sse/utils/syncedEffortVariants";
 import { ensureCursorAutoCatalogEntry } from "@/lib/providerModels/cursorAutoCatalog";
+import { liveCatalogAdmitsModel, type LiveCatalogGate } from "@/lib/providers/liveCatalogAdmission";
 import { mergeModelsWithCustomPrecedence } from "@/lib/providers/modelMetadataPrecedence";
 import {
   isDiscoveryImportedCustomSource,
@@ -43,10 +45,69 @@ export type MergeProviderModelListingInput = {
   customModels: Array<{ id: string; name?: string; source?: string; [key: string]: unknown }>;
   usesCuratedModelsOnly?: boolean;
   syncedCatalogAuthoritative?: boolean;
+  /**
+   * The runtime live-catalog gate (`liveCatalog` of GET /api/synced-available-models:
+   * authority and ids of `getActiveSyncedCatalog(providerId)` with custom rows included).
+   * Drives only the `liveCatalogMissing` flag — never which rows are listed.
+   */
+  liveCatalog?: LiveCatalogGate;
 };
 
 function normalizeCustomSource(source: unknown): "imported" | "custom" {
   return source === "imported" ? "imported" : "custom";
+}
+
+/**
+ * The gate the `liveCatalogMissing` flag applies. The server's runtime gate wins; an
+ * explicit non-authoritative listing without it fails open like dispatch does. Only
+ * callers with no server state at all infer authority from a non-empty synced catalog.
+ */
+function resolveLiveCatalogGate(
+  input: MergeProviderModelListingInput,
+  synced: Array<{ id: string }>,
+  custom: Array<{ id: string }>
+): LiveCatalogGate {
+  if (input.liveCatalog) return input.liveCatalog;
+  if (input.syncedCatalogAuthoritative === false) return { authoritative: false, modelIds: [] };
+  return {
+    authoritative: synced.length > 0 && providerUsesAuthoritativeLiveCatalog(input.providerId),
+    modelIds: [...synced, ...custom].map((model) => model.id),
+  };
+}
+
+/**
+ * Registry rows of the registry-first listing. Mirrors the runtime gate in
+ * `src/sse/services/model.ts::lookupModelMeta` (same `liveCatalogAdmitsModel` rule, same
+ * catalog): a built-in model the authoritative live catalog does not serve is rejected at
+ * request time ("not available in the active live catalog"). Listing it unflagged made
+ * the dashboard show (and Test All run) a model that can never succeed. The row stays
+ * listed (registry-first merge is an upstream contract) but is flagged
+ * `liveCatalogMissing` so the UI can warn. Custom rows stay explicit operator overrides.
+ */
+function buildBuiltInRows(
+  input: MergeProviderModelListingInput,
+  synced: MergeProviderModelListingInput["syncedModels"],
+  custom: MergeProviderModelListingInput["customModels"]
+): ProviderListingModel[] {
+  const syncedById = new Map(synced.map((model) => [model.id, model]));
+  const gate = resolveLiveCatalogGate(input, synced, custom);
+  const catalogIds = new Set(gate.modelIds);
+  const customIds = new Set(custom.map((model) => model.id));
+  const isServedByLiveCatalog = (modelId: string): boolean =>
+    liveCatalogAdmitsModel({
+      providerId: input.providerId,
+      modelId,
+      authoritative: gate.authoritative,
+      catalogContains: (id) => catalogIds.has(id),
+      customMatch: customIds.has(modelId),
+    });
+
+  return input.registryModels.map((model) => ({
+    ...model,
+    ...(input.providerId === "codex" ? syncedById.get(model.id) : {}),
+    source: "system",
+    ...(isServedByLiveCatalog(model.id) ? {} : { liveCatalogMissing: true }),
+  }));
 }
 
 function dedupeById(models: ProviderListingModel[]): ProviderListingModel[] {
@@ -109,12 +170,7 @@ export function mergeProviderModelListing(
       : exclusiveMerged;
   }
 
-  const syncedById = new Map(synced.map((model) => [model.id, model]));
-  const builtInModels = input.registryModels.map((model) => ({
-    ...model,
-    ...(input.providerId === "codex" ? syncedById.get(model.id) : {}),
-    source: "system",
-  }));
+  const builtInModels = buildBuiltInRows(input, synced, custom);
   const registryIds = new Set(builtInModels.map((model) => model.id));
   const syncedExtras = synced
     .filter((model) => model.id && !registryIds.has(model.id))

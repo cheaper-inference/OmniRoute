@@ -23,7 +23,7 @@ import {
 import { getLearnedReasoningEffortForModel } from "@omniroute/open-sse/services/learnedReasoningEffortCaps.ts";
 import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { ANTIGRAVITY_MODEL_ALIASES } from "@omniroute/open-sse/config/antigravityModelAliases.ts";
-import { getRegisteredProviderEffortBaseModelId } from "@omniroute/open-sse/utils/registeredEffortVariants.ts";
+import { liveCatalogAdmitsModel } from "@/lib/providers/liveCatalogAdmission";
 import { canGrandfatherProviderPrefix } from "@/lib/providers/providerPrefixCollision";
 import { getReservedProviderPrefixes } from "@/shared/constants/reservedProviderPrefixes";
 import { getProviderByAlias } from "@/shared/constants/providers";
@@ -469,13 +469,15 @@ async function lookupModelMeta(
     const compatOverrideMatch = Array.isArray(compatOverrides)
       ? compatOverrides.find((m) => m.id === resolvedModelId || m.id === modelId)
       : undefined;
-    const effortBaseModelId = getRegisteredProviderEffortBaseModelId(providerId, modelId);
-
-    const liveBackedEffortVariant =
-      effortBaseModelId !== null && syncedModels.some((model) => model.id === effortBaseModelId);
-
-    const available =
-      !liveCatalog.authoritative || Boolean(customMatch || syncedMatch || liveBackedEffortVariant);
+    // Shared with the provider dashboard's "Not in live catalog" flag (#20065).
+    const available = liveCatalogAdmitsModel({
+      providerId,
+      modelId,
+      authoritative: liveCatalog.authoritative,
+      catalogContains: (id) => syncedModels.some((model) => model.id === id),
+      customMatch: Boolean(customMatch),
+      syncedMatch: Boolean(syncedMatch),
+    });
 
     const metadata = buildRuntimeModelMeta(
       customMatch,

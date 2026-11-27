@@ -305,6 +305,52 @@ describe("useProviderModels — initial state", () => {
     expect(typeof result!.handleDeleteAlias).toBe("function");
   });
 
+  it("surfaces the runtime live-catalog gate next to the listing catalog (#20065)", async () => {
+    type HookResult = ReturnType<typeof useProviderModels>;
+    let result: HookResult | null = null;
+    fetchStub.mockImplementation(async (url: unknown) => ({
+      ok: true,
+      json: async () =>
+        String(url).includes("synced-available-models")
+          ? {
+              authoritative: false,
+              models: [],
+              liveCatalog: { authoritative: true, modelIds: ["my-custom"] },
+            }
+          : { models: [{ id: "my-custom", source: "custom" }] },
+    }));
+
+    function TestWrapper() {
+      const hookResult = useProviderModels("deepseek", false);
+      useEffect(() => {
+        result = hookResult;
+      }, [hookResult]);
+      return <span />;
+    }
+
+    try {
+      await act(async () => {
+        root.render(<TestWrapper />);
+      });
+      expect(result!.liveCatalog).toBeUndefined();
+      await act(async () => {
+        await result!.fetchProviderModelMeta();
+      });
+      // Listing authority stays the custom-free one; the flag gets the runtime's.
+      expect(result!.syncedCatalogAuthoritative).toBe(false);
+      expect(result!.syncedAvailableModels).toEqual([]);
+      expect(result!.liveCatalog).toEqual({ authoritative: true, modelIds: ["my-custom"] });
+    } finally {
+      fetchStub.mockReset();
+      fetchStub.mockResolvedValue({
+        ok: true,
+        json: async () => ({}),
+        text: async () => "",
+        headers: { get: () => null },
+      } as any);
+    }
+  });
+
   it("does not auto-fetch on isSearchProvider=true", async () => {
     const { useProviderModels } = await import("../hooks/useProviderModels");
 

@@ -210,6 +210,7 @@ export default function ProviderDetailPageClient() {
     modelMeta,
     syncedAvailableModels,
     syncedCatalogAuthoritative,
+    liveCatalog,
     modelAliases,
     fetchProviderModelMeta,
     fetchAliases,
@@ -345,6 +346,7 @@ export default function ProviderDetailPageClient() {
       registryModels,
       syncedModels: syncedAvailableModels,
       syncedCatalogAuthoritative,
+      liveCatalog,
       customModels: (modelMeta.customModels || []).map((cm) => ({
         ...cm,
         id: cm.id,
@@ -359,6 +361,7 @@ export default function ProviderDetailPageClient() {
     syncedAvailableModels,
     modelMeta.customModels,
     syncedCatalogAuthoritative,
+    liveCatalog,
     usesCuratedModelsOnly,
   ]);
   const isUpstreamProxyProvider = providerInfo?.category === "upstream-proxy";
