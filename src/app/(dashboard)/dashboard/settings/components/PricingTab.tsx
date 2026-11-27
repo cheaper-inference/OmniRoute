@@ -527,19 +527,12 @@ export default function PricingTab() {
     <div className="flex flex-col gap-4">
       {/* Hero — combined header (stats + sync + how-it-works tooltip) */}
       <Card className="p-5">
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <div className="flex items-center gap-2">
-            <h2 className="ci-heading flex items-center gap-2" data-size="xl">
-              <Icon name="payments" size={22} className="text-primary" />
-              {t("modelPricing")}
-            </h2>
-            <InfoTooltip
-              text={`${t("pricingDescInput")} · ${t("pricingDescOutput")} · ${t("pricingDescCached")} · ${t("pricingDescReasoning")} · ${t("pricingDescCacheWrite")} · ${t("pricingDescFormula")}`}
-            />
-          </div>
-          <p className="text-text-muted text-xs hidden sm:block self-center">
-            {t("modelPricingDesc")}
-          </p>
+        {/* The page title lives in the PageHeader of costs/pricing (KEA-9799). */}
+        <div className="flex items-center gap-2 mb-4">
+          <p className="text-text-muted text-xs">{t("modelPricingDesc")}</p>
+          <InfoTooltip
+            text={`${t("pricingDescInput")} · ${t("pricingDescOutput")} · ${t("pricingDescCached")} · ${t("pricingDescReasoning")} · ${t("pricingDescCacheWrite")} · ${t("pricingDescFormula")}`}
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-4">
