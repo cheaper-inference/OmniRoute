@@ -387,6 +387,7 @@ test("derived keys differ for first prompts sharing the bounded 4096-char anchor
 
   const keyA = deriveCodexConversationCacheKey(bodyFor("X"), creds);
   const keyB = deriveCodexConversationCacheKey(bodyFor("Y"), creds);
+  assert.equal(keyA, "394fdc3c-cf27-4aaa-b4b7-e759a0e2d72e");
   assert.notEqual(keyA, keyB, "distinct long prompts sharing a 4096-char prefix must not collide");
   assert.equal(
     deriveCodexConversationCacheKey(bodyFor("X"), creds),

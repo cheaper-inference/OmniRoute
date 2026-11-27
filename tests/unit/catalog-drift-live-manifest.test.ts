@@ -6,6 +6,9 @@ globalThis.fetch = async () => {
 };
 
 const { loadManifest } = await import("../../scripts/quality/catalog-drift/manifest.mjs");
+const { activeCatalogIds } = await import("../../scripts/quality/catalog-drift/catalog.mjs");
+const { backsFindings } = await import("../../scripts/quality/catalog-drift/probes.mjs");
+const { FREE_MODEL_BUDGETS } = await import("../../open-sse/config/freeModelCatalog.data.ts");
 const manifestPath = "scripts/quality/catalog-drift/manifest.json";
 const manifest = loadManifest(manifestPath);
 
@@ -13,13 +16,25 @@ test("the shipped manifest is valid", () => {
   assert.doesNotThrow(() => loadManifest(manifestPath));
 });
 
-test("covers the four November providers and the largest pools", () => {
+test("backs agree with the catalog of this tree", () => {
+  const pendingProbeIds = new Set(manifest.pendingCatalogFix?.map(({ probeId }) => probeId));
+  const findings = manifest.probes
+    .filter((probe) => probe.backs && !pendingProbeIds.has(probe.id))
+    .flatMap((probe) => backsFindings(probe, FREE_MODEL_BUDGETS));
+  assert.deepEqual(findings, []);
+});
+
+test("keeps the retired LLM7 pool out of live probes", () => {
+  assert.deepEqual(activeCatalogIds(FREE_MODEL_BUDGETS, "llm7"), []);
+  assert.ok(!manifest.probes.some(({ provider }) => provider === "llm7"));
+});
+
+test("covers the remaining November providers and the largest pools", () => {
   const providers = new Set(manifest.probes.map(({ provider }) => provider));
   for (const provider of [
     "mistral",
     "nara",
     "xkiro",
-    "llm7",
     "groq",
     "cloudflare-ai",
     "api-airforce",
@@ -44,15 +59,7 @@ test("has the spec's public JSON assertions", () => {
 });
 
 test("each model-list provider of the scoreboard has exactly one stats probe", () => {
-  for (const provider of [
-    "openrouter",
-    "routeway",
-    "bazaarlink",
-    "xkiro",
-    "nara",
-    "llm7",
-    "arcee-ai",
-  ]) {
+  for (const provider of ["openrouter", "routeway", "bazaarlink", "xkiro", "nara", "arcee-ai"]) {
     const probes = manifest.probes.filter(
       (probe) =>
         probe.provider === provider &&
