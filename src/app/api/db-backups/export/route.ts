@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
 import os from "os";
+import { scrubSystemApiKeySecretsInCopy } from "@/lib/db/backup";
 import { getDbInstance, SQLITE_FILE } from "@/lib/db/core";
 import {
   CREDENTIAL_EXPORT_FORBIDDEN_MESSAGE,
@@ -13,14 +14,12 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
  * GET /api/db-backups/export — Download the current database as a .sqlite file.
  *
  * Uses SQLite's native backup API to create a consistent snapshot,
- * then streams it as a downloadable attachment.
+ * removes system API key secrets and prefixes, then streams the attachment.
  *
  * 🔒 Operator-only: dashboard session, local CLI, or login disabled. API keys (any scope)
- *    and `oma_` access tokens get 403 — the file carries every stored credential.
+ *    and `oma_` access tokens get 403. The file carries all other stored credentials.
  */
 export async function GET(request: Request) {
-  // Hands out every stored credential: operator only (dashboard session, local CLI, or login
-  // disabled). API keys of any scope and `oma_` access tokens get 403.
   const operatorVerdict = await requireOperatorCredential(request, {
     forbiddenMessage: CREDENTIAL_EXPORT_FORBIDDEN_MESSAGE,
   });
@@ -38,10 +37,9 @@ export async function GET(request: Request) {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-backup-"));
     const tmpPath = path.join(tmpDir, "backup.sqlite");
 
-    // Use native SQLite backup API for a consistent snapshot
-    const db = getDbInstance();
     try {
-      await db.backup(tmpPath);
+      await getDbInstance().backup(tmpPath);
+      await scrubSystemApiKeySecretsInCopy(tmpPath);
     } catch (backupError) {
       fs.rmSync(tmpDir, { recursive: true, force: true });
       throw backupError;

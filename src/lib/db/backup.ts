@@ -25,7 +25,10 @@ import {
   resolveDbBackupRetention,
 } from "./backupRetention";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
+import type { SqliteAdapter } from "./adapters/types";
+import { SYSTEM_API_KEY_SOURCE } from "./apiKeys/systemKey";
 import { isEncryptionEnabled } from "./encryption";
+import { getTableColumns, quoteIdentifier } from "./schemaColumns";
 
 type CountRow = { cnt?: number };
 
@@ -752,6 +755,81 @@ export async function restoreDbBackup(
 
 // ──────────────── Export-All helpers (for /api/db-backups/exportAll) ────────────────
 
+/** Let multiple scrubbed system rows share an empty key, while keeping real keys unique. */
+function allowBlankSystemKeysInCopy(db: SqliteAdapter): void {
+  const definition = db
+    .prepare<{ sql: string }>(
+      "SELECT sql FROM sqlite_schema WHERE type = 'table' AND name = 'api_keys'"
+    )
+    .get()?.sql;
+  const inlineUnique = /\bkey\s+TEXT\s+NOT\s+NULL\s+UNIQUE\b/i;
+  if (!definition || !inlineUnique.test(definition)) return;
+
+  const objects = db
+    .prepare<{ sql: string }>(
+      "SELECT sql FROM sqlite_schema WHERE tbl_name = 'api_keys' AND type IN ('index', 'trigger') AND sql IS NOT NULL"
+    )
+    .all();
+  const columns = getTableColumns(db, "api_keys").map(quoteIdentifier).join(", ");
+  // Rebuild on the disposable copy. Disable cascades while replacing the parent
+  // table, and retain the existing columns, indexes and triggers.
+  db.pragma("foreign_keys = OFF");
+  db.pragma("legacy_alter_table = ON");
+  db.transaction(() => {
+    db.exec(
+      definition
+        .replace(
+          /^CREATE TABLE (?:api_keys|"api_keys")(?=\s*\()/i,
+          "CREATE TABLE api_keys_download"
+        )
+        .replace(inlineUnique, "key TEXT NOT NULL")
+    );
+    db.exec(`
+      INSERT INTO api_keys_download (${columns}) SELECT ${columns} FROM api_keys;
+      DROP TABLE api_keys;
+      ALTER TABLE api_keys_download RENAME TO api_keys;
+      CREATE UNIQUE INDEX idx_ak_key_non_scrubbed ON api_keys(key)
+        WHERE key <> '' OR source IS NOT '${SYSTEM_API_KEY_SOURCE}';
+    `);
+    for (const object of objects) db.exec(object.sql);
+  })();
+}
+
+/** Remove system API key secrets from a staged download before publishing it. */
+export async function scrubSystemApiKeySecretsInCopy(filePath: string): Promise<void> {
+  const { openDatabaseAsync } = await import("./adapters/driverFactory");
+  const db = await openDatabaseAsync(filePath, { fileMustExist: true });
+  const persistedCopy = db.driver === "sql.js" ? `${filePath}.scrubbed` : null;
+  try {
+    const journalMode = db.pragma("journal_mode = DELETE", { simple: true });
+    if (journalMode !== "delete" && !(persistedCopy && journalMode === "memory")) {
+      throw new Error("Could not disable WAL on the database export copy");
+    }
+    db.pragma("secure_delete = ON");
+
+    const matches = db
+      .prepare<{ count: number }>(
+        "SELECT COUNT(*) AS count FROM api_keys WHERE source = ? OR key = ''"
+      )
+      .get(SYSTEM_API_KEY_SOURCE);
+    if ((matches?.count ?? 0) > 1) allowBlankSystemKeysInCopy(db);
+    db.prepare("UPDATE api_keys SET key = '', key_prefix = '' WHERE source = ?").run(
+      SYSTEM_API_KEY_SOURCE
+    );
+    // Rebuild the file to discard stale bytes in freed pages and indexes.
+    db.exec("VACUUM");
+    // The WASM adapter's close is best-effort. Its backup propagates write errors.
+    if (persistedCopy) await db.backup(persistedCopy);
+  } finally {
+    db.close();
+  }
+
+  if (persistedCopy) fs.renameSync(persistedCopy, filePath);
+  if (["-wal", "-shm", "-journal"].some((suffix) => fs.existsSync(`${filePath}${suffix}`))) {
+    throw new Error("Database export copy has unexpected journal files");
+  }
+}
+
 export interface ExportAllRows {
   settings: Record<string, string>;
   combos: unknown[];
@@ -767,8 +845,8 @@ export interface ExportAllRows {
  * - combos:    full combos table
  * - providers: provider_connections rows, **excluding sensitive credentials**
  *              (id, provider, name, auth_type, is_active, email, created_at only)
- * - apiKeys:   api_keys rows with masked prefix
- *              (id, name, first 8 chars of key, machine_id, created_at)
+ * - apiKeys:   api_keys metadata (id, name, prefix, machine_id, created_at).
+ *              System keys have a blank prefix. Other keys retain their first 8 stored chars.
  *
  * Each category is wrapped in a try/catch so a missing table never aborts the
  * entire export — consistent with the original inline behaviour.
@@ -814,9 +892,10 @@ export function exportAllSummaryRows(): ExportAllRows {
     apiKeys.push(
       ...db
         .prepare(
-          "SELECT id, name, substr(key, 1, 8) as prefix, machine_id, created_at FROM api_keys"
+          `SELECT id, name, CASE WHEN source = ? THEN '' ELSE substr(key, 1, 8) END AS prefix,
+                  machine_id, created_at FROM api_keys`
         )
-        .all()
+        .all(SYSTEM_API_KEY_SOURCE)
     );
   } catch {
     // api_keys table might not exist

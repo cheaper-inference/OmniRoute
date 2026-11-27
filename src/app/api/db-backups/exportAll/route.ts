@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDbInstance, SQLITE_FILE } from "@/lib/db/core";
-import { exportAllSummaryRows } from "@/lib/db/backup";
+import { exportAllSummaryRows, scrubSystemApiKeySecretsInCopy } from "@/lib/db/backup";
 import { getCallLogsDir } from "@/lib/usage/callLogArtifacts";
 import fs from "fs";
 import { createReadStream } from "node:fs";
@@ -29,13 +29,12 @@ function runTar(args: string[], options: { cwd: string; timeout: number }): Prom
 
 /**
  * GET /api/db-backups/exportAll
- * Exports the entire database + settings as a tar.gz archive
+ * Exports the database and settings as a tar.gz archive, with system API key
+ * secrets and prefixes removed. All other stored credentials remain in the SQLite file.
  * Security: operator-only (dashboard session, local CLI, or login disabled); API keys
  * and `oma_` access tokens get 403.
  */
 export async function GET(request: NextRequest) {
-  // Hands out every stored credential: operator only (dashboard session, local CLI, or login
-  // disabled). API keys of any scope and `oma_` access tokens get 403.
   const operatorVerdict = await requireOperatorCredential(request, {
     forbiddenMessage: CREDENTIAL_EXPORT_FORBIDDEN_MESSAGE,
   });
@@ -45,16 +44,17 @@ export async function GET(request: NextRequest) {
 }
 
 const ARCHIVE_CONTENTS = [
-  "storage.sqlite - Full database",
+  "storage.sqlite - Database with system API key secrets and prefixes removed",
   "settings.json - Key-value settings",
   "combos.json - Combo configurations",
   "providers.json - Provider connections (no credentials)",
-  "api-keys.json - API key metadata (masked)",
+  "api-keys.json - API key metadata (masked, with blank system key prefixes)",
   "reasoning-routing-rules.json - Reasoning routing policies",
   "call_logs/ - Detailed call log artifacts",
+  "metadata.json - Archive format and contents",
 ];
 
-/** Stage the JSON sidecars of the export payload (steps 2–7). */
+/** Stage the JSON sidecars and call-log artifacts. */
 function writeExportSidecars(payloadDir: string): void {
   const { settings, combos, providers, apiKeys, reasoningRoutingRules } = exportAllSummaryRows();
   const write = (name: string, value: unknown) =>
@@ -138,10 +138,10 @@ async function buildFullExportResponse(request: NextRequest): Promise<Response> 
 
     try {
       fs.mkdirSync(payloadDir);
-      // 1. Export database using native backup API
-      await db.backup(path.join(payloadDir, "storage.sqlite"));
+      const sqlitePath = path.join(payloadDir, "storage.sqlite");
+      await db.backup(sqlitePath);
+      await scrubSystemApiKeySecretsInCopy(sqlitePath);
 
-      // 2–7. JSON sidecars, call-log artifacts and metadata
       writeExportSidecars(payloadDir);
 
       // A bare filename avoids GNU tar interpreting a Windows drive colon as a
@@ -174,7 +174,7 @@ async function buildFullExportResponse(request: NextRequest): Promise<Response> 
     return NextResponse.json(
       {
         error: "Failed to create full export",
-        details: sanitizeErrorMessage(error instanceof Error ? error.message : String(error)),
+        details: sanitizeErrorMessage(error),
       },
       { status: 500 }
     );
