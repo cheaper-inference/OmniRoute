@@ -1,0 +1,1 @@
+- **fix(quality):** Block high-severity npm advisories in the dependency audit gate.

@@ -10,7 +10,7 @@ import {
 } from "../../../scripts/quality/audit-dependencies.mjs";
 
 const result = (counts = {}) => ({
-  status: counts.critical ? 1 : 0,
+  status: counts.critical || counts.high ? 1 : 0,
   stdout: JSON.stringify({
     auditReportVersion: 2,
     metadata: {
@@ -55,25 +55,33 @@ test("all five independent package roots are audited", (t) => {
     calls.map((call) => call.cwd),
     AUDIT_SCOPES.map((scope) => join(root, scope))
   );
+  for (const { args } of calls) {
+    assert.deepEqual(args, ["audit", "--json", "--audit-level=high"]);
+  }
   assert.ok(report.results.every((scope) => /^[a-f0-9]{64}$/.test(scope.lockSha256)));
 });
 
-test("a critical result in any subpackage blocks while retaining the other receipts", (t) => {
-  const root = mkdtempSync(join(tmpdir(), "dependency-audit-"));
-  t.after(() => rmSync(root, { recursive: true, force: true }));
-  for (const scope of AUDIT_SCOPES) {
-    mkdirSync(join(root, scope), { recursive: true });
-    writeFileSync(join(root, scope, "package-lock.json"), "{}");
-  }
-  const report = auditDependencies({
-    root,
-    run: (_cmd, _args, options) => result(options.cwd.endsWith("plugin-v2") ? { critical: 1 } : {}),
+for (const severity of ["high", "critical"]) {
+  test(`a ${severity} result in a subpackage blocks while retaining the other receipts`, (t) => {
+    const root = mkdtempSync(join(tmpdir(), "dependency-audit-"));
+    t.after(() => rmSync(root, { recursive: true, force: true }));
+    for (const scope of AUDIT_SCOPES) {
+      mkdirSync(join(root, scope), { recursive: true });
+      writeFileSync(join(root, scope, "package-lock.json"), "{}");
+    }
+    const report = auditDependencies({
+      root,
+      run: (_cmd, _args, options) =>
+        result(options.cwd.endsWith("plugin-v2") ? { [severity]: 1 } : {}),
+    });
+    assert.equal(report.ok, false);
+    assert.equal(report.complete, true);
+    assert.equal(report.results.length, 5);
+    const blocked = report.results.find((receipt) => receipt.scope.endsWith("plugin-v2"));
+    assert.equal(blocked.state, "FAIL");
+    assert.equal(blocked.counts[severity], 1);
   });
-  assert.equal(report.ok, false);
-  assert.equal(report.complete, true);
-  assert.equal(report.results.length, 5);
-  assert.equal(report.results.find((r) => r.scope.endsWith("plugin-v2")).state, "FAIL");
-});
+}
 
 test("missing lockfiles are incomplete evidence", () => {
   const report = auditDependencies({
@@ -87,10 +95,15 @@ test("missing lockfiles are incomplete evidence", () => {
   assert.equal(report.results.length, 5);
 });
 
-test("high advisories remain visible under the existing warning policy", () => {
-  const r = evaluateAuditResult(result({ high: 2 }));
+test("moderate advisories remain visible and pass", () => {
+  const r = evaluateAuditResult(result({ moderate: 3 }));
   assert.equal(r.state, "PASS");
-  assert.equal(r.counts.high, 2);
+  assert.equal(r.counts.moderate, 3);
+});
+
+test("invalid audit JSON is incomplete even when npm exits successfully", () => {
+  const r = evaluateAuditResult({ status: 0, stdout: '{"auditReportVersion":' });
+  assert.equal(r.state, "INCOMPLETE");
 });
 
 test("an invocation failure retains the other package receipts and cannot pass", (t) => {

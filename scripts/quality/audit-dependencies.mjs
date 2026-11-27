@@ -31,11 +31,11 @@ export function evaluateAuditResult(result) {
     !counts ||
     [...SEVERITIES, "total"].some((key) => !Number.isSafeInteger(counts[key]) || counts[key] < 0) ||
     SEVERITIES.reduce((sum, key) => sum + counts[key], 0) !== counts.total ||
-    (result.status === 0) !== (counts.critical === 0)
+    (result.status === 0) !== (counts.critical === 0 && counts.high === 0)
   ) {
     return { state: "INCOMPLETE", reason: "invalid-or-failed-audit" };
   }
-  return { state: counts.critical ? "FAIL" : "PASS", counts, report };
+  return { state: counts.critical || counts.high ? "FAIL" : "PASS", counts, report };
 }
 
 export function auditDependencies({
@@ -55,7 +55,7 @@ export function auditDependencies({
       lockSha256 = createHash("sha256").update(readFileSync(lock)).digest("hex");
       result = run(
         process.platform === "win32" ? "npm.cmd" : "npm",
-        ["audit", "--json", "--audit-level=critical"],
+        ["audit", "--json", "--audit-level=high"],
         {
           cwd,
           encoding: "utf8",
@@ -98,7 +98,7 @@ export function auditDependencies({
   const complete = results.every((result) => result.state !== "INCOMPLETE");
   return {
     schemaVersion: 1,
-    policy: { blockingSeverity: "critical", high: "warning" },
+    policy: { blockingSeverity: "high", high: "blocking" },
     complete,
     ok: complete && results.every((result) => result.state === "PASS"),
     results,
@@ -114,9 +114,9 @@ if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
     console.log(
       `[audit:deps] ${result.scope}: ${result.state} ${result.counts ? JSON.stringify(result.counts) : result.reason}`
     );
-    if (result.counts?.high)
+    if (result.counts?.critical || result.counts?.high)
       console.log(
-        `::warning::${result.scope}: ${result.counts.high} high-severity advisory records (current policy: warning)`
+        `::error::${result.scope}: ${result.counts.critical} critical, ${result.counts.high} high-severity advisory records (policy: blocking)`
       );
   }
   console.log(`dependencyAudit=${report.complete ? (report.ok ? "PASS" : "FAIL") : "INCOMPLETE"}`);

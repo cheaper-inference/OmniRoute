@@ -282,7 +282,7 @@
     "quality:scan": "node scripts/quality/run-all-gates.mjs",
     "quality:scan:fast": "node scripts/quality/run-all-gates.mjs --fast",
     "audit:deps": "node scripts/quality/audit-dependencies.mjs",
-    "audit:electron": "npm --prefix electron audit --audit-level=critical && (npm --prefix electron audit --audit-level=high || echo '::warning::electron high-severity advisories present (non-blocking)')",
+    "audit:electron": "npm --prefix electron audit --audit-level=high",
     "typecheck:core": "tsc --pretty false -p tsconfig.typecheck-core.json",
     "typecheck:build": "tsc --pretty false -p tsconfig.build.json",
     "typecheck:noimplicit:core": "tsc --pretty false -p tsconfig.typecheck-noimplicit-core.json",
