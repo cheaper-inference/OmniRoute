@@ -11,7 +11,13 @@
 
 import { FREE_MODEL_BUDGETS } from "@omniroute/open-sse/config/freeModelCatalog";
 import { FREE_CATALOG_CURATED_AT } from "@omniroute/open-sse/config/freeModelCatalog.data";
-import { RadarFeedSchema, type RadarFeed, type RadarReferral } from "./feedSchema";
+import {
+  RadarFeedSchema,
+  type RadarFeed,
+  type RadarFeedPriceReference,
+  type RadarFeedRowSum,
+  type RadarReferral,
+} from "./feedSchema";
 import { RadarReferralsFeedSchema, type RadarReferralsFeed } from "./referralsFeedSchema";
 import {
   filterActiveRadarOffers,
@@ -51,6 +57,8 @@ export interface RadarCatalogResult {
     tier: string;
     fetchedAt: string;
     olderThanRelease: boolean;
+    rowSum: RadarFeedRowSum | null;
+    priceReference: RadarFeedPriceReference | null;
   } | null;
 }
 
@@ -173,6 +181,8 @@ export function getRadarCatalog(deps: GetRadarCatalogDeps = {}): RadarCatalogRes
       tier: cache.tier,
       fetchedAt: cache.fetchedAt,
       olderThanRelease,
+      rowSum: feed.totals.rowSum ?? null,
+      priceReference: feed.priceReference ?? null,
     },
   };
 }
