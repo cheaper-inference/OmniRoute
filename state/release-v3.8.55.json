@@ -3,36 +3,34 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b67",
+    "batchId": "b68",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b67-b15b2ee6ac0f",
-    "candidateSha": "b15b2ee6ac0f57af254be4a3cc60ba8a6cc9a523",
-    "baseSha": "44812b66fdff9e420d92aee4645a61546fe89f43",
-    "treeSha": "898b5f62caa98d685399344785e643eed4cb75c8",
+    "candidateRef": "omni-queue/release-v3.8.55/b68-490e5651c3c5",
+    "candidateSha": "490e5651c3c589b7bbf376f342f6a3e9160c173b",
+    "baseSha": "b15b2ee6ac0f57af254be4a3cc60ba8a6cc9a523",
+    "treeSha": "a840303403e450ca591b41f90ab8b940deb19583",
     "prs": [
       {
-        "n": 21331,
-        "head": "8bdfdfb91a24a151cec700fd4c471127a2229e7e",
-        "title": "docs(checks): flag only OmniRoute version claims and drop manual Last updated stamps",
+        "n": 21352,
+        "head": "2e71918927684659060561614ccab39660f4b1be",
+        "title": "fix(api): refuse a selected Playground key that is gone instead of running without its policy (KEA-9523)",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-27T01:10:15Z"
+        "labeledAt": "2026-11-27T04:28:36Z"
+      },
+      {
+        "n": 21345,
+        "head": "8fbe4785be1d6be723bf7e2e0a58bfa04ff27cde",
+        "title": "fix(translator): list recent translations newest first (KEA-9583)",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-27T04:28:45Z"
       }
     ],
-    "stage": "landing",
-    "startedAt": "2026-11-27T14:40:38.176Z",
+    "stage": "testing",
+    "startedAt": "2026-11-27T15:49:22.856Z",
     "attempts": 0,
     "bisect": {
       "rootBatchId": "b64",
       "segments": [
-        [
-          {
-            "n": 21331,
-            "head": "8bdfdfb91a24a151cec700fd4c471127a2229e7e",
-            "title": "docs(checks): flag only OmniRoute version claims and drop manual Last updated stamps",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-27T01:10:15Z"
-          }
-        ],
         [
           {
             "n": 21352,
@@ -52,14 +50,21 @@
       ],
       "culprits": [],
       "landed": [
-        21360
+        21360,
+        21331
       ],
-      "steps": 2,
+      "steps": 3,
       "hang": false
-    },
-    "landAttempts": 1
+    }
   },
   "baseChecks": [
+    {
+      "baseSha": "b15b2ee6ac0f57af254be4a3cc60ba8a6cc9a523",
+      "ref": "omni-queue/release-v3.8.55/b67-b15b2ee6ac0f",
+      "status": "green",
+      "startedAt": "2026-11-27T14:40:38.176Z",
+      "signatures": []
+    },
     {
       "baseSha": "44812b66fdff9e420d92aee4645a61546fe89f43",
       "ref": "omni-queue/release-v3.8.55/b66-44812b66fdff",
@@ -122,13 +127,6 @@
       "status": "green",
       "startedAt": "2026-11-26T15:53:09.248Z",
       "signatures": []
-    },
-    {
-      "baseSha": "16e2c146fb5b8e4ee6364fb679ffe412880757fb",
-      "ref": "omni-queue/release-v3.8.55/b53-16e2c146fb5b",
-      "status": "green",
-      "startedAt": "2026-11-26T14:30:47.177Z",
-      "signatures": []
     }
   ],
   "shadow": {
@@ -153,55 +151,15 @@
     }
   },
   "counters": {
-    "batchSeq": 67,
-    "ciRuns": 72,
-    "landedPrs": 63,
-    "landedBatches": 20,
+    "batchSeq": 68,
+    "ciRuns": 73,
+    "landedPrs": 64,
+    "landedBatches": 21,
     "redBatches": 15,
     "bisections": 5,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-21T05:29:46.716Z",
-      "type": "batch-started",
-      "batchId": "b21",
-      "prs": [
-        14667,
-        18122,
-        19403,
-        19542
-      ],
-      "sha": "f5c4de4bb0d31333fb699d401455c899b63e0240",
-      "detail": "4 PR(s) on 76b26b8ead94; window 6",
-      "labeledAt": {
-        "14667": "2026-11-21T03:56:04Z",
-        "18122": "2026-11-21T03:56:16Z",
-        "19403": "2026-11-21T03:56:26Z",
-        "19542": "2026-11-21T03:56:33Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44871053098"
-    },
-    {
-      "at": "2026-11-21T05:33:54.818Z",
-      "type": "would-dequeue",
-      "prs": [
-        20823
-      ],
-      "sha": "6441b5b6f3587b771547c106caf91229fa556cfb",
-      "detail": "head-changed-after-label",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44871402948"
-    },
-    {
-      "at": "2026-11-21T05:39:23.291Z",
-      "type": "would-dequeue",
-      "prs": [
-        20825
-      ],
-      "sha": "2a48a0a823bf12139867cc9cf8b70814302c2689",
-      "detail": "head-changed-after-label",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44871855421"
-    },
     {
       "at": "2026-11-21T06:34:33.612Z",
       "type": "checks-green",
@@ -2869,12 +2827,45 @@
       ],
       "sha": "b15b2ee6ac0f57af254be4a3cc60ba8a6cc9a523",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46028161049"
+    },
+    {
+      "at": "2026-11-27T15:49:05.142Z",
+      "type": "land-blessed",
+      "batchId": "b67",
+      "prs": [
+        21331
+      ],
+      "sha": "b15b2ee6ac0f57af254be4a3cc60ba8a6cc9a523",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46028161049"
+    },
+    {
+      "at": "2026-11-27T15:49:08.714Z",
+      "type": "landed",
+      "batchId": "b67",
+      "prs": [
+        21331
+      ],
+      "sha": "b15b2ee6ac0f57af254be4a3cc60ba8a6cc9a523",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46028161049"
+    },
+    {
+      "at": "2026-11-27T15:49:26.216Z",
+      "type": "batch-started",
+      "batchId": "b68",
+      "prs": [
+        21352,
+        21345
+      ],
+      "sha": "490e5651c3c589b7bbf376f342f6a3e9160c173b",
+      "detail": "bisect of b64: 2 PR(s) on b15b2ee6ac0f",
+      "labeledAt": {
+        "21345": "2026-11-27T04:28:45Z",
+        "21352": "2026-11-27T04:28:36Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46028161049"
     }
   ],
-  "updatedAt": "2026-11-27T15:49:01.626Z",
-  "batchWindow": 2,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-27T15:49:01.626Z"
-  }
+  "updatedAt": "2026-11-27T15:50:36.147Z",
+  "batchWindow": 2
 }
