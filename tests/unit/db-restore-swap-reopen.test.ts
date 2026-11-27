@@ -54,9 +54,18 @@ test("a database open during the swap is refused and the restore lands on the re
   setMarker("live");
   assert.equal(readMarker(), "live");
 
-  // A concurrent request touches the database inside the restore's 500 ms wait.
+  // A concurrent request touches the database inside the restore's 500 ms wait. The gate closes
+  // only after the safety backup and the staged copy, which can outlast a fixed wait on a loaded
+  // runner, so wait for it; once closed it stays closed for at least 500 ms.
   const restore = backupDb.restoreDbBackup(backupId);
-  await new Promise((resolve) => setTimeout(resolve, 150));
+  for (const end = Date.now() + 10_000; Date.now() < end;) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    try {
+      core.getDbInstance();
+    } catch {
+      break;
+    }
+  }
   assert.throws(() => core.getDbInstance(), /restore/i);
 
   const result = await restore;
