@@ -1,4 +1,8 @@
 import {
+  antigravityClientEffortEnabled,
+  withAntigravityClientEffortModels,
+} from "@omniroute/open-sse/config/antigravityClientEffort.ts";
+import {
   providerUsesAuthoritativeLiveCatalog,
   getRegistryEntry,
 } from "@omniroute/open-sse/config/providerRegistry";
@@ -14,6 +18,7 @@ import {
 } from "@/lib/providerModels/cursorAutoCatalog";
 import {
   getCustomModels,
+  getModelIsHidden,
   getSyncedAvailableModels,
   getSyncedAvailableModelsByConnection,
   type SyncedAvailableModel,
@@ -479,6 +484,67 @@ export interface GetAllActiveSyncedModelsOptions {
    * namespace a second time (#16929 operator endpoint overlay).
    */
   customModelsByProvider?: Readonly<Record<string, unknown>>;
+  includeAntigravityClientEffortModels?: boolean;
+}
+
+function freshIdsForEffortProjection(
+  options: GetAllActiveSyncedModelsOptions,
+  connections: unknown[]
+): Set<string> | null {
+  if (!options.includeAntigravityClientEffortModels || !antigravityClientEffortEnabled())
+    return null;
+  return new Set(
+    connections
+      .map(readConnectionRef)
+      .flatMap((connection) =>
+        connection && isSyncedAtFresh(connection.syncedModelsAt) ? [connection.id] : []
+      )
+  );
+}
+
+function appendEffortAliases(
+  rows: SyncedAvailableModel[],
+  {
+    providerId,
+    connectionIds,
+    freshConnectionIds,
+    modelsByConnection,
+    overrides,
+  }: {
+    providerId: string;
+    connectionIds: Set<string>;
+    freshConnectionIds: Set<string> | null;
+    modelsByConnection: Record<string, SyncedAvailableModel[]>;
+    overrides: Array<{ id?: string }>;
+  }
+): void {
+  if (!freshConnectionIds || (providerId !== "antigravity" && providerId !== "agy")) return;
+  const fresh = collectModelsForConnections(
+    modelsByConnection,
+    [...connectionIds].filter((id) => freshConnectionIds.has(id))
+  ).filter((row) => !getModelIsHidden(providerId, row.id));
+  const existing = new Set([...rows, ...overrides].map((row) => row.id));
+  const aliases = withAntigravityClientEffortModels(fresh).filter(
+    (row): row is Extract<typeof row, { virtualModel: string }> =>
+      "virtualModel" in row && !existing.has(row.id) && !getModelIsHidden(providerId, row.id)
+  );
+  rows.push(...aliases);
+}
+
+// #16929: reuse an existing request-level snapshot, or read custom models once.
+async function readListingCustomModels(
+  snapshot: Readonly<Record<string, unknown>> | undefined
+): Promise<Readonly<Record<string, unknown>>> {
+  if (snapshot) return snapshot;
+  try {
+    const all = await getCustomModels();
+    if (all && typeof all === "object" && !Array.isArray(all)) {
+      return all as Record<string, unknown>;
+    }
+  } catch {
+    // A missing custom overlay must not empty the live catalog.
+  }
+  return {};
 }
 
 export async function getAllActiveSyncedModels(
@@ -496,22 +562,9 @@ export async function getAllActiveSyncedModels(
       groupListableConnections(connections);
 
     const result: Record<string, SyncedAvailableModel[]> = {};
+    const freshConnectionIds = freshIdsForEffortProjection(options, connections);
 
-    // #16929: one customModels read for the whole listing (not one per provider),
-    // and none at all when the caller's capability snapshot already holds the rows.
-    let customModelsByProvider: Readonly<Record<string, unknown>> =
-      options.customModelsByProvider ?? {};
-    if (!options.customModelsByProvider) {
-      try {
-        const all = await getCustomModels();
-        if (all && typeof all === "object" && !Array.isArray(all)) {
-          customModelsByProvider = all as Record<string, unknown>;
-        }
-      } catch {
-        // An unavailable custom overlay must not empty the entire live model
-        // catalog: keep the raw synced entries just as dispatch does.
-      }
-    }
+    const customModelsByProvider = await readListingCustomModels(options.customModelsByProvider);
 
     await Promise.all(
       Array.from(connectionIdsByProvider.entries()).map(async ([providerId, connectionIds]) => {
@@ -563,6 +616,13 @@ export async function getAllActiveSyncedModels(
           )
         );
 
+        appendEffortAliases(models, {
+          providerId,
+          connectionIds,
+          freshConnectionIds,
+          modelsByConnection,
+          overrides,
+        });
         if (models.length > 0) {
           result[providerId] = models;
         }

@@ -1,3 +1,4 @@
+import { constrainConnectionsToQuota, resolveQuotaKeyScope } from "@/lib/quota/quotaKey";
 import { comboPinAllowlist } from "@/lib/combos/steps.ts";
 import { intersectAllowedConnectionIds } from "@/sse/handlers/chat/connectionConstraints.ts";
 import { getConnectionRestrictionSources } from "./credentialSelectionDiagnostics.ts";
@@ -23,4 +24,22 @@ export function resolveConnectionRestrictions(
       isCombo,
     }),
   };
+}
+
+/** Apply the same quota and optional native-model scope to preflight and dispatch. */
+export async function resolveScopedConnectionRestrictions(
+  restrictions: ReturnType<typeof resolveConnectionRestrictions>,
+  allowedQuotas: readonly string[] | null | undefined,
+  modelConnections?: readonly string[]
+) {
+  let allowedConnections = restrictions.allowedConnections;
+  if (allowedQuotas?.length) {
+    const quota = await resolveQuotaKeyScope([...allowedQuotas]);
+    allowedConnections = constrainConnectionsToQuota(allowedConnections ?? [], quota.connectionIds);
+  }
+  if (modelConnections !== undefined) {
+    const allowed = allowedConnections;
+    allowedConnections = modelConnections.filter((id) => !allowed || allowed.includes(id));
+  }
+  return { ...restrictions, allowedConnections };
 }

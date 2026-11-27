@@ -1,3 +1,4 @@
+import { getComboPreflightModelInfo } from "./chat/comboPreflightModelInfo.ts";
 import { requiresQoderHttpTransport } from "@omniroute/open-sse/services/qoderCapabilities";
 import { randomUUID } from "crypto";
 import { resolveChatRequestBody } from "./requestBody";
@@ -38,7 +39,7 @@ import {
 } from "@omniroute/open-sse/services/accountFallback/antiAvalanche.ts";
 import { estimateTokens } from "@omniroute/open-sse/services/contextManager.ts";
 import { getCodexPlanType } from "@omniroute/open-sse/services/codexPlanEligibility.ts";
-import { getCombo, getModelInfo } from "../services/model";
+import { getCombo } from "../services/model";
 import { stripContextWindowSuffix } from "@omniroute/open-sse/services/model.ts";
 import { resolveBareModelToConnectionDefault } from "@omniroute/open-sse/services/model.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
@@ -57,9 +58,8 @@ import type { ComboLike, SingleModelTarget } from "@omniroute/open-sse/services/
 import { mergeAbortSignals } from "@omniroute/open-sse/executors/base.ts";
 import { resolveRequestAutoControls } from "@omniroute/open-sse/services/autoCombo/requestControls.ts";
 import { isVerifiedNativeCodexRequest } from "@omniroute/open-sse/config/codexIdentity.ts";
-import { resolveCompressionSettings } from "@omniroute/open-sse/handlers/chatCore/compressionSettings.ts";
+import { resolveComboContextOverflowDeferral } from "./chat/comboCompressionPreflight.ts";
 import { runWithTurnExecutionOwnership } from "@omniroute/open-sse/handlers/chatCore/turnExecutionContext.ts";
-import type { CompressionExclusions } from "@omniroute/open-sse/services/compression/exclusions.ts";
 import { resolveComboConfig } from "@omniroute/open-sse/services/comboConfig.ts";
 import { injectHandoffIntoBody } from "@omniroute/open-sse/services/contextHandoff.ts";
 import { runWithTransientBackendRetry } from "@omniroute/open-sse/services/transientBackendRetry.ts";
@@ -90,8 +90,6 @@ import {
 } from "@/lib/db/codexConnectionFences";
 import { createHookContext, runHooks, initPreRequestRegistry } from "@/lib/middleware/registry";
 import { rejectPeerRequest } from "@/shared/resilience/peerRouting";
-import { isRuntimeProviderRetirementError } from "@/shared/constants/providerRetirement";
-import { isCommonChatGptWebRetirementError } from "@/shared/constants/chatgptWebRetirement";
 import { isChatGptWebCodexModel } from "@/shared/constants/chatgptWebCodex";
 import { deleteHandoff, getHandoff } from "@/lib/db/contextHandoffs";
 import { scopeHandoffSessionId } from "@omniroute/open-sse/services/combo/handoffSessionScope.ts";
@@ -222,7 +220,6 @@ import { logAuditEvent } from "../../lib/compliance/index";
 import { enforceApiKeyPolicy } from "../../shared/utils/apiKeyPolicy";
 import { rejectIfMeteredBudgetExceeded } from "@/lib/usage/meteredBudgetPolicy";
 import { hasProviderQuotaBypassScope } from "../../shared/constants/apiKeyPolicyScopes";
-import { isMicrosoftDesignerWebProviderRetiredError } from "../../shared/constants/designerWebRetirement";
 import { cloneBoundedForLog } from "@omniroute/open-sse/utils/requestLogger.ts";
 import { handleInternalUsageCommand } from "@/lib/usage/internalUsageCommand";
 import {
@@ -270,7 +267,6 @@ import {
   shouldRetrySameAccountTransport,
   sameAccountTransportRetryDelayMs,
 } from "../services/sameAccountTransportRetry";
-import { constrainConnectionsToQuota, resolveQuotaKeyScope } from "../../lib/quota/quotaKey";
 import { checkConnectionCapacity } from "../utils/backpressure";
 import {
   buildManagedLeaseErrorResponse,
@@ -282,7 +278,11 @@ import {
   validateExclusiveLeaseKeyConfiguration,
   type ManagedLeaseDispatchContext,
 } from "../services/leaseContext";
-import { resolveConnectionRestrictions } from "../services/connectionRestrictions.ts";
+import {
+  resolveConnectionRestrictions,
+  resolveScopedConnectionRestrictions,
+} from "../services/connectionRestrictions.ts";
+import { resolveAntigravityClientEffortRoute } from "../services/antigravityClientEffortRouting.ts";
 
 registerCodexQuotaFetcher();
 registerQuotaTrackersBatch();
@@ -343,31 +343,6 @@ let combosCacheTs = 0;
 let combosCacheVersionSnapshot = -1;
 const COMBOS_CACHE_TTL_MS = 10_000;
 const DEFER_METERED_BUDGET = { meteredBudget: "defer-to-candidate" } as const;
-
-/**
- * #10225 — resolve whether this request's combo preflight should DEFER its hard
- * context-overflow rejection so chatCore's compression runs first.
- *
- * Mirrors handleChatCore's own enablement determination (chatCore.ts): defer only
- * when the global compression switch is ON and the API key has not opted out
- * (`apiKeyInfo.compressionEnabled !== false`). Per-target applicability (server-side
- * exclusions) is checked inside getKnownContextOverflow via the returned exclusions.
- * Fail closed (defer=false) on any lookup error — the existing hard preflight stays.
- */
-async function resolveComboContextOverflowDeferral(
-  logger: { warn?: (...args: unknown[]) => void } | null | undefined,
-  apiKeyInfo: { compressionEnabled?: boolean } | null | undefined
-): Promise<{ defer: boolean; exclusions: CompressionExclusions | undefined }> {
-  try {
-    const compression = await resolveCompressionSettings(logger);
-    return {
-      defer: compression.enabled && apiKeyInfo?.compressionEnabled !== false,
-      exclusions: compression.settings?.exclusions,
-    };
-  } catch {
-    return { defer: false, exclusions: undefined };
-  }
-}
 
 async function getCombosCachedForChat(): Promise<ComboLike[]> {
   const now = Date.now();
@@ -1185,17 +1160,17 @@ async function handleChatImplementation(
       // prefix may differ from the credential provider ID (e.g. model
       // "xiaomi/mimo-v2-flash" resolves to provider "xiaomi" but the combo
       // target specifies providerId: "opengate" for credential lookup).
-      let modelInfo;
-      try {
-        modelInfo = await getModelInfo(modelString);
-      } catch (error) {
-        // Persisted explicit combos may still reference the retired provider. Treat
-        // that target as unavailable so priority/fallback strategies can continue.
-        if (isMicrosoftDesignerWebProviderRetiredError(error)) return false;
-        if (isRuntimeProviderRetirementError(error)) return false;
-        if (isCommonChatGptWebRetirementError(error)) return false;
-        throw error;
-      }
+      const antigravityEffort = await resolveAntigravityClientEffortRoute(
+        modelString,
+        body,
+        sourceFormat,
+        apiKeyInfo,
+        target,
+        true
+      );
+      if (antigravityEffort && "error" in antigravityEffort) return false;
+      const modelInfo = await getComboPreflightModelInfo(antigravityEffort?.address ?? modelString);
+      if (!modelInfo) return false;
       if (modelInfo?.errorType === "model_not_found") return "model_not_in_catalog";
       const provider = comboCheckProvider(
         modelString,
@@ -1209,18 +1184,12 @@ async function handleChatImplementation(
       const resolvedModel = modelInfo.model || modelString;
       const githubGate = await ghComboGate(comboPreselectedCredentials, provider, resolvedModel);
       if (githubGate !== null) return githubGate;
-      const restrictions = resolveConnectionRestrictions(apiKeyInfo, target, true);
-      let allowedConnections = restrictions.allowedConnections;
-
-      // A4: quota-exclusive keys must only use the pool's connection(s).
-      if (apiKeyInfo?.allowedQuotas && apiKeyInfo.allowedQuotas.length > 0) {
-        const quotaScope = await resolveQuotaKeyScope(apiKeyInfo.allowedQuotas);
-        allowedConnections = constrainConnectionsToQuota(
-          allowedConnections ?? [],
-          quotaScope.connectionIds
-        );
-      }
-
+      const restrictions = await resolveScopedConnectionRestrictions(
+        resolveConnectionRestrictions(apiKeyInfo, target, true),
+        apiKeyInfo?.allowedQuotas,
+        antigravityEffort?.connectionIds
+      );
+      const { allowedConnections } = restrictions;
       if (Array.isArray(allowedConnections) && allowedConnections.length === 0) {
         return false;
       }
@@ -1660,9 +1629,22 @@ async function handleSingleModelChat(
 ): Promise<Response> {
   const requestUpstreamStartTimeoutMs = resolveInternalUpstreamStartTimeoutMs(request);
 
+  // Resolve the optional family before model metadata, credential and breaker gates.
+  const antigravityEffort = await resolveAntigravityClientEffortRoute(
+    modelStr,
+    body,
+    detectFormatFromEndpoint(body, clientRawRequest?.endpoint || ""),
+    apiKeyInfo,
+    { ...runtimeOptions, connectionId: runtimeOptions.forcedConnectionId },
+    isCombo
+  );
+  if (antigravityEffort && "error" in antigravityEffort) {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, antigravityEffort.error);
+  }
+
   // 1. Resolve model → provider/model
   const resolved = await resolveModelOrError(
-    modelStr,
+    antigravityEffort?.address ?? modelStr,
     body,
     clientRawRequest?.endpoint,
     clientRawRequest?.headers
@@ -1837,17 +1819,12 @@ async function handleSingleModelChat(
       : "";
   const hasForcedConnection = forcedConnectionId.length > 0;
   const pinTarget = { ...runtimeOptions, connectionId: forcedConnectionId };
-  const restrictions = resolveConnectionRestrictions(apiKeyInfo, pinTarget, isCombo);
-  let effectiveAllowedConnections = restrictions.allowedConnections;
-
-  // A4: quota-exclusive keys must only use the pool's connection(s).
-  if (apiKeyInfo?.allowedQuotas && apiKeyInfo.allowedQuotas.length > 0) {
-    const quotaScope = await resolveQuotaKeyScope(apiKeyInfo.allowedQuotas);
-    effectiveAllowedConnections = constrainConnectionsToQuota(
-      effectiveAllowedConnections ?? [],
-      quotaScope.connectionIds
-    );
-  }
+  const restrictions = await resolveScopedConnectionRestrictions(
+    resolveConnectionRestrictions(apiKeyInfo, pinTarget, isCombo),
+    apiKeyInfo?.allowedQuotas,
+    antigravityEffort?.connectionIds
+  );
+  const effectiveAllowedConnections = restrictions.allowedConnections;
 
   const bypassReason = forceLiveComboTest
     ? "combo live test"

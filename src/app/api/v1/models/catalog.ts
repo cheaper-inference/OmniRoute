@@ -1200,7 +1200,9 @@ async function buildUnifiedModelsResponseCore(
     let syncedModelsByProvider: Record<string, SyncedAvailableModel[]> = {};
     try {
       await yieldCatalogBuildTurn();
-      syncedModelsByProvider = await getAllActiveSyncedModels();
+      syncedModelsByProvider = await getAllActiveSyncedModels({
+        includeAntigravityClientEffortModels: true,
+      });
       await yieldCatalogBuildTurn();
     } catch (e) {
       // DB unavailable — log and fall through; static models remain as defaults.

@@ -1,3 +1,5 @@
+import { antigravityClientEffortEnabled } from "@omniroute/open-sse/config/antigravityClientEffort.ts";
+import { getAllActiveSyncedModels } from "@/lib/db/models/activeSyncedCatalog";
 import { getAllCustomModels, getAllSyncedAvailableModels, getModelIsHidden } from "@/lib/db/models";
 import { getCombos } from "@/lib/db/combos";
 import { getProviderConnections, getProviderNodes } from "@/lib/db/providers";
@@ -780,15 +782,25 @@ function normalizeSyncedModels(raw: unknown): SyncedModelLike[] {
 
 export async function getComboBuilderOptions(): Promise<ComboBuilderOptionsPayload> {
   getSyncedCapabilities();
-  const [connections, providerNodes, customModelsMap, syncedModelsMap, combos, settings] =
-    await Promise.all([
-      getProviderConnections(),
-      getProviderNodes(),
-      getAllCustomModels(),
-      getAllSyncedAvailableModels(),
-      getCombos(),
-      getSettings().catch(() => ({}) as Record<string, unknown>),
-    ]);
+  const [
+    connections,
+    providerNodes,
+    customModelsMap,
+    syncedModelsMap,
+    combos,
+    settings,
+    effortModels,
+  ] = await Promise.all([
+    getProviderConnections(),
+    getProviderNodes(),
+    getAllCustomModels(),
+    getAllSyncedAvailableModels(),
+    getCombos(),
+    getSettings().catch(() => ({}) as Record<string, unknown>),
+    antigravityClientEffortEnabled()
+      ? getAllActiveSyncedModels({ includeAntigravityClientEffortModels: true })
+      : null,
+  ]);
   const blockedProviders = new Set(
     Array.isArray((settings as Record<string, unknown>).blockedProviders)
       ? ((settings as Record<string, unknown>).blockedProviders as string[])
@@ -820,6 +832,11 @@ export async function getComboBuilderOptions(): Promise<ComboBuilderOptionsPaylo
     const syncedModels = normalizeSyncedModels(
       (syncedModelsMap as Record<string, unknown>)[providerId]
     );
+    const virtualRows =
+      effortModels?.[providerId]?.filter(
+        (row) => "virtualModel" in row && row.virtualModel === "antigravity-client-effort"
+      ) ?? [];
+    syncedModels.push(...virtualRows);
     const customModels = normalizeCustomModels(
       (customModelsMap as Record<string, unknown>)[providerId]
     );
