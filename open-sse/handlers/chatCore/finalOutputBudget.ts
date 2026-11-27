@@ -82,6 +82,32 @@ function responsesReasoningEffort(
   return normalized || undefined;
 }
 
+/** Resolve the budget-bearing thinking config that the downstream path will fit. */
+function thinkingForHeadroom(
+  body: Record<string, unknown>,
+  sourceFormat: string,
+  model: string,
+  specId: string,
+  isBedrock: boolean
+): Record<string, unknown> | undefined {
+  if (forcesClaudeToolChoice(body.tool_choice)) return undefined;
+
+  const pivotTarget = isBedrock ? FORMATS.OPENAI : FORMATS.CLAUDE;
+  const bodyForThinking =
+    sourceFormat === FORMATS.OPENAI_RESPONSES && body.reasoning_effort === undefined
+      ? { ...body, reasoning_effort: responsesReasoningEffort(body, model, pivotTarget) }
+      : body;
+  const { thinking } = claudeThinkingFromOpenAIRequest(bodyForThinking, specId);
+  if (!thinking || Number(thinking.budget_tokens) <= 0) return undefined;
+
+  // Adaptive-only Bedrock targets collapse manual thinking to budget-less adaptive
+  // before fitting, so the budget never inflates inferenceConfig.maxTokens.
+  const normalized = isBedrock
+    ? normalizeClaudeAdaptiveThinking({ thinking }, specId)
+    : { thinking };
+  return Number(normalized.thinking?.budget_tokens) > 0 ? normalized.thinking : undefined;
+}
+
 /**
  * Reserve output tokens that the OpenAI-to-Claude translator (or the Bedrock Converse
  * executor) will request after the final gate.
@@ -99,45 +125,23 @@ export function requiredOutputHeadroom(
     const value = body[field];
     return typeof value === "number" && Number.isFinite(value) && value > 0;
   });
+  const defaultHeadroom = hasExplicitLimit ? 0 : DEFAULT_MAX_TOKENS;
   if (!model || !provider || ["kimi-coding", "kimi-coding-apikey"].includes(provider)) {
-    return hasExplicitLimit ? 0 : DEFAULT_MAX_TOKENS;
+    return defaultHeadroom;
   }
-  const specId = path === "bedrock-claude" ? bedrockClaudeSpecId(model) : model;
-  // The Bedrock executor gates thinking on the spec id and skips forced tool
-  // choices; the translator path's forced-tool handling is already mirrored by
-  // forcesClaudeToolChoice below.
-  if (path === "bedrock-claude" && !claudeModelSupportsThinking(specId)) return 0;
-  // Both wire paths read the effort from the pre-pivot Responses body: the pivot
-  // will have promoted it to reasoning_effort (target "claude" or Bedrock's "openai")
-  // by the time the thinking mapping runs.
-  const pivotTarget = path === "bedrock-claude" ? FORMATS.OPENAI : FORMATS.CLAUDE;
-  const bodyForThinking =
-    sourceFormat === FORMATS.OPENAI_RESPONSES && body.reasoning_effort === undefined
-      ? { ...body, reasoning_effort: responsesReasoningEffort(body, model, pivotTarget) }
-      : body;
-  const thinking = forcesClaudeToolChoice(body.tool_choice)
-    ? undefined
-    : claudeThinkingFromOpenAIRequest(bodyForThinking, specId).thinking;
-  if (!thinking || Number(thinking.budget_tokens) <= 0) {
-    return hasExplicitLimit ? 0 : DEFAULT_MAX_TOKENS;
-  }
-  // Adaptive-only Bedrock targets collapse manual thinking to budget-less adaptive
-  // before fitting, so the budget never inflates inferenceConfig.maxTokens.
-  const { thinking: fittedThinking } =
-    path === "bedrock-claude"
-      ? normalizeClaudeAdaptiveThinking({ thinking }, specId)
-      : { thinking };
-  const budget = Number(fittedThinking?.budget_tokens) || 0;
-  if (budget <= 0) {
-    return hasExplicitLimit ? 0 : DEFAULT_MAX_TOKENS;
-  }
+  const isBedrock = path === "bedrock-claude";
+  const specId = isBedrock ? bedrockClaudeSpecId(model) : model;
+  if (isBedrock && !claudeModelSupportsThinking(specId)) return 0;
+
+  const thinking = thinkingForHeadroom(body, sourceFormat, model, specId, isBedrock);
+  if (!thinking) return defaultHeadroom;
   // The final gate caps an explicit response limit to available room; the
   // translator (or the Bedrock executor) can then add a fitted thinking budget on
   // top of that limit.
   const translatedMaxTokens = fitThinkingToMaxTokens(
     specId,
     adjustMaxTokens(body, { honorExplicitCap: true }),
-    fittedThinking,
+    thinking,
     provider
   ).maxTokens;
   return hasExplicitLimit ? translatedMaxTokens : Math.max(DEFAULT_MAX_TOKENS, translatedMaxTokens);

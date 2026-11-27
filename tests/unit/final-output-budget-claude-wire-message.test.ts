@@ -158,6 +158,17 @@ test("Bedrock's OpenAI-format path reserves the executor's fitted thinking budge
     0,
     "non-Claude Bedrock models get no thinking reserve"
   );
+  assert.equal(
+    requiredOutputHeadroom(
+      body,
+      "openai",
+      "openai",
+      "global.anthropic.claude-opus-4-7-v1:0",
+      "bedrock"
+    ),
+    0,
+    "adaptive-only Bedrock models discard the manual budget before fitting"
+  );
 });
 
 test("Anthropic Messages clients get the compactable 'prompt is too long' message", () => {
