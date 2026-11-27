@@ -4,13 +4,9 @@
 
 ---
 
-OmniRoute **parallel sikl** reliz modelidan foydalanadi: faol sikl uchun alohida `release/vX.Y.Z`
-shoxi, eʼlon qilingan yoʻnalish uchun `main` va sikl chiqarilganda oʻzgarmas
-`vX.Y.Z` tegi. Kommitlarning `release/*`ga _ham_, `main`ga ham tushishi kutilgan holat — bu chalkashlik emas.
+OmniRoute a dan foydalanadi** parallel sikl** chiqarish modeli: faol sikl uchun ajratilgan `release/vX.Y.Z` filiali, chop etilgan qator uchun `main` va bu sikl jo‘natilganda o‘zgarmas `vX.Y.Z` tegi. Ko'rish commits on `release/*` _and_ on `main` — kutilmoqda aralashish emas.
 
-Maintaynerlar uchun batafsil maʼlumot `CLAUDE.md` (21-qattiq qoida) va
-[RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md) fayllarida keltirilgan. Ushbu sahifa ommaviy,
-hissa qoʻshuvchilarga moʻljallangan qisqacha bayondir.
+Maintainer tafsilotlari `CLAUDE.md` (Qattiq qoida #21) va [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md) da yashaydi. Bu sahifa umumiy ishtirokchilarga qaratilgan xulosadir.
 
 ## Qisqacha
 
@@ -41,24 +37,23 @@ flowchart LR
 `main` kundalik integratsiya shoxi emas. `main`ga qarshi ochilgan PRlar
 odatda birlashtirishdan oldin boshqa shoxga qayta yoʻnaltirilishi kerak.
 
-## Relizni muzlatish (parallel sikllar)
+## Muzlatish (parallel sikllar)
 
-Reliz muvofiqlashtirilayotganida `release-freeze` yorligʻiga ega belgilovchi issue
-ochiladi. Bu **ishlab chiqishni toʻxtatmaydi**:
+Chiqarish moslashtirilayotganda, `release-freeze` deb nomlangan marker muammosi ochiladi. Bu** rivojlanishini to'xtatmaydi** :
 
-- Muzlatilgan `release/vX.Y.Z` shu reliz uchun reliz kapitaniga tegishli.
-- Hissa qoʻshuvchilar ishlarini qoʻshishda davom etishlari uchun keyingi siklning `release/vX+1` shoxi muzlatilgan uchdan yaratiladi.
-- Hali ham muzlatilgan shoxga yoʻnaltirilgan ochiq PRlar faol (eng yuqori)
-  `release/v*` shoxiga **qayta yoʻnaltirilishi** kerak.
+- Muzlatilgan `release/vX.Y.Z` o'sha kema uchun bo'shatish kapitaniga tegishli.
+- Keyingi tsiklning `release/vX+1` muzlatilgan uchidan kesiladi, shuning uchun hissa qo'shuvchilar qo'nish ishlarini davom ettiradilar.
+- Muzlatilgan filialni nishonga olgan ochiq PRs bo'lishi kerak** qayta yo'naltirilgan** faol (eng yuqori) `release/v*` filialiga.
 
-Kerakli shoxni birlashtirish mumkin deb hisoblashdan oldin ochiq muzlatish holati mavjudligini tekshiring:
+Siz xohlagan filialni birlashtirish mumkin deb hisoblashdan oldin ochiq muzlatish mavjudligini tekshiring:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Birlashtirish mexanizmlari (egasining `queue` yorligʻi → Mergify)
-[MERGE_TRAIN.md](./MERGE_TRAIN.md) faylida hujjatlashtirilgan.
+Birlashtirish mexanikasi (egasi `queue` label → Mergify) [MERGE_TRAIN.md](./MERGE_TRAIN.md) da hujjatlashtirilgan.
+
+> **19.11.2026: Birlashtirish navbati tugatildi** (egasining qarori). `.mergify.yml` endi navbatni belgilamaydi va tortish so'rovini birlashtiruvchi yoki qayta yozuvchi Birlashtirish buyruqlarini rad etadi. Relizlar PRs qo'lda "Faol relizda yashil eshiklarni talab qilish" (`Gate / CI` + `Gate / Quality`) ombori qoidalari ostida omni navbat jonli rejimda ishlamaguncha va undan keyin omni navbat orqali birlashtiriladi ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). `queue` yorlig'i endi hech narsani birlashtirmaydi.
 
 ## Nega ham shox, ham teg kerak?
 

@@ -133,6 +133,11 @@ export function stripEmptyTextBlocks(content: unknown[] | undefined): unknown[] 
     });
 }
 
+/** A message `content` that is one bare block object becomes a one-item block array. */
+function wrapBareContentBlock(content: unknown): unknown {
+  return content && typeof content === "object" && !Array.isArray(content) ? [content] : content;
+}
+
 /**
  * T15: Normalize content to string form.
  * Handles both string and array-of-blocks forms (Cursor, Codex 2.x, etc.).
@@ -141,8 +146,9 @@ export function stripEmptyTextBlocks(content: unknown[] | undefined): unknown[] 
 export function normalizeContentToString(content: string | unknown[] | null | undefined): string {
   if (!content) return "";
   if (typeof content === "string") return content;
-  if (Array.isArray(content)) {
-    return (content as Array<Record<string, unknown>>)
+  const blocks = wrapBareContentBlock(content);
+  if (Array.isArray(blocks)) {
+    return (blocks as Array<Record<string, unknown>>)
       .filter((b) => b.type === "text")
       .map((b) => String(b.text ?? ""))
       .join("\n");
@@ -200,7 +206,10 @@ export function openaiToClaudeRequest(
   // For models that don't force thinking (haiku, older sonnets), preserve temperature.
   // Note: Opus 4.7+/Fable 5 already drop sampling params upstream of the translator via
   // the registry `unsupportedParams` strip; this covers the remaining 4.x families.
-  const modelForcesThinking = /claude-(?:opus|sonnet)-4/i.test(String(model));
+  // Only the OAuth provider forces thinking; API-key and compatible providers keep temperature.
+  const modelForcesThinking =
+    (routedProvider === undefined || routedProvider === "claude") &&
+    /claude-(?:opus|sonnet)-4/i.test(String(model));
   if (body.temperature !== undefined && !modelForcesThinking) {
     result.temperature = body.temperature;
   }
@@ -232,6 +241,14 @@ export function openaiToClaudeRequest(
     }
   }
 
+  // Forced tools and extended thinking cannot be combined on Claude-compatible APIs.
+  const requestedToolChoice = extractAllowedTools(body.tool_choice);
+  const thinkingToolChoice = requestedToolChoice
+    ? convertAllowedToolsChoice(requestedToolChoice)
+    : convertOpenAIToolChoice(body.tool_choice);
+  const forcedType = thinkingToolChoice?.type;
+  if (!isKimiCoding && forcedType && !["auto", "none"].includes(forcedType)) delete result.thinking;
+
   // Fit thinking budget within the model's output cap and ensure
   // max_tokens > budget_tokens for all thinking configurations (#627).
   // Replaces the previous unconditional `budget + 8192` inflation, which
@@ -259,7 +276,11 @@ export function openaiToClaudeRequest(
   // `body.reasoning_effort` (manual budget or adaptive effort), drop temperature
   // defensively. The model-name strip earlier already covers Claude OAuth's
   // forced-thinking case (claude-opus-4.x / claude-sonnet-4.x).
-  if (result.thinking && result.temperature !== undefined) {
+  if (
+    result.thinking &&
+    (result.thinking as Record<string, unknown>).type !== "disabled" &&
+    result.temperature !== undefined
+  ) {
     delete result.temperature;
   }
 
@@ -277,9 +298,10 @@ export function openaiToClaudeRequest(
     // for system-level instructions, and it must reach the Claude system field, not become an assistant turn.
     for (const msg of body.messages) {
       if (msg.role === "system" || msg.role === "developer") {
-        systemParts.push(
-          typeof msg.content === "string" ? msg.content : normalizeContentToString(msg.content)
-        );
+        const text =
+          typeof msg.content === "string" ? msg.content : normalizeContentToString(msg.content);
+        // Anthropic rejects an empty text block (400), so an empty system turn adds nothing.
+        if (text) systemParts.push(text);
       }
     }
 
@@ -643,12 +665,13 @@ function getContentBlocksFromMessage(
       ...(toolResultCacheControl !== undefined && { cache_control: toolResultCacheControl }),
     });
   } else if (msg.role === "user") {
-    if (typeof msg.content === "string") {
-      if (msg.content) {
-        blocks.push({ type: "text", text: msg.content });
+    const userContent = wrapBareContentBlock(msg.content);
+    if (typeof userContent === "string") {
+      if (userContent) {
+        blocks.push({ type: "text", text: userContent });
       }
-    } else if (Array.isArray(msg.content)) {
-      for (const part of msg.content) {
+    } else if (Array.isArray(userContent)) {
+      for (const part of userContent) {
         if (part.type === "text" && part.text) {
           blocks.push({ type: "text", text: part.text });
         } else if (part.type === "tool_result") {
@@ -685,19 +708,27 @@ function getContentBlocksFromMessage(
           // native video input, so non-pdf/non-image files are skipped here.
           const fileData = part.file.file_data || part.file.data;
           const fmatch =
-            typeof fileData === "string" ? fileData.match(/^data:([^;]+);base64,(.+)$/) : null;
+            typeof fileData === "string" ? fileData.match(/^data:([^;]+);base64,([\s\S]+)$/) : null;
           if (fmatch) {
             const mediaType = fmatch[1];
             if (mediaType === "application/pdf") {
               blocks.push({
                 type: "document",
-                source: { type: "base64", media_type: mediaType, data: fmatch[2] },
+                source: {
+                  type: "base64",
+                  media_type: mediaType,
+                  data: fmatch[2].replace(/\s+/g, ""),
+                },
                 ...(part.file.filename ? { title: part.file.filename } : {}),
               });
             } else if (mediaType.startsWith("image/")) {
               blocks.push({
                 type: "image",
-                source: { type: "base64", media_type: mediaType, data: fmatch[2] },
+                source: {
+                  type: "base64",
+                  media_type: mediaType,
+                  data: fmatch[2].replace(/\s+/g, ""),
+                },
               });
             }
           } else if (typeof fileData === "string" && /^https?:\/\//i.test(fileData)) {

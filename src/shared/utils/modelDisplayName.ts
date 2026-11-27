@@ -47,12 +47,24 @@ const DASH_VERSION_BRANDS = new Set(["gpt"]);
 const DATE_TOKEN = /^(19|20)\d{6}$/;
 
 /** "v4.1" / "V2.6" — an explicit version marker. */
-const VERSION_MARKER = /^v\d+([.\d]*)$/i;
+const VERSION_MARKER = /^v\d[.\d]*$/i;
 
 /** Digits left over after the brand prefix ("qwen3.8" -> "qwen" + "3.8"). */
 const BRANDED_VERSION = /^([A-Za-z]+)(\d[.\d]*)$/;
 
 const DIGITS = /^\d+$/;
+
+/** Dash-separated release dates ("gpt-5-2025-08-07"): a year token, then month and day. */
+const YEAR_TOKEN = /^(19|20)\d{2}$/;
+const MONTH_OR_DAY_TOKEN = /^\d{2}$/;
+
+function isDashedDateAt(rawTokens: string[], index: number): boolean {
+  return (
+    YEAR_TOKEN.test(rawTokens[index] || "") &&
+    MONTH_OR_DAY_TOKEN.test(rawTokens[index + 1] || "") &&
+    MONTH_OR_DAY_TOKEN.test(rawTokens[index + 2] || "")
+  );
+}
 
 function capitalize(token: string): string {
   return token.charAt(0).toUpperCase() + token.slice(1);
@@ -75,11 +87,16 @@ function tokenize(leaf: string): string[] {
   for (let i = 0; i < rawTokens.length; i += 1) {
     const token = rawTokens[i];
     if (DATE_TOKEN.test(token)) continue;
+    if (isDashedDateAt(rawTokens, i)) {
+      i += 2;
+      continue;
+    }
     let merged = token;
     while (
       DIGITS.test(merged) &&
       DIGITS.test(rawTokens[i + 1] || "") &&
-      !DATE_TOKEN.test(rawTokens[i + 1])
+      !DATE_TOKEN.test(rawTokens[i + 1]) &&
+      !isDashedDateAt(rawTokens, i + 1)
     ) {
       i += 1;
       merged = `${merged}.${rawTokens[i]}`;

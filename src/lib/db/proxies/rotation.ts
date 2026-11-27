@@ -25,6 +25,7 @@ import { getCachedProxyHealth } from "@/lib/proxyHealth";
 import { getRecentEgressIpForProxy, getRecentEgressIpsForProxy } from "../proxyLogs";
 import { egressKeyForAddresses, normalizeEgressAddress } from "@/shared/network/egressAddress";
 import { readOperatorEgressForMember } from "../proxyOperatorEgress";
+import { syncRotatingEgressExemptions } from "./rotatingEgress";
 import type { JsonRecord, ProxyScope, ProxyRotationStrategy } from "./types";
 import { PROXY_ROTATION_STRATEGIES, DEFAULT_PROXY_ROTATION_STRATEGY } from "./types";
 import {
@@ -170,6 +171,13 @@ function eligibleMemberIndexes(
   return isProxySkipRecentlyFailedEnabled() ? eligible : null;
 }
 
+// A rotating endpoint (rotating_egress = 1) hands out a new exit address per connection,
+// so the address it was last observed on says nothing about the next request: it never
+// counts as sharing a refused neighbor's address. Rows without the column are not rotating.
+function isRotatingEgressRow(row: unknown): boolean {
+  return Number((row as Record<string, unknown> | null)?.rotating_egress) === 1;
+}
+
 // Observed egress keys (an exact address, or the range an exit rotates inside) seeded
 // only from members the refusal memory already sets aside; matches
 // buildHotEgressPredicate's seed discipline. Only scopes in the egress-bucketed lock
@@ -199,6 +207,7 @@ function addressScopeFor(
   }
   return {
     isShared: (row: unknown) => {
+      if (isRotatingEgressRow(row)) return false;
       for (const key of readEgressKeysForMember(row, nowMs).keys) {
         if (hot.has(key)) return true;
       }
@@ -208,7 +217,7 @@ function addressScopeFor(
       if (isProxyAvoided(key, nowMs)) return true;
       if (key === null) return false;
       const row = byKey.get(key);
-      if (row === undefined) return false;
+      if (row === undefined || isRotatingEgressRow(row)) return false;
       for (const key of readEgressKeysForMember(row, nowMs).keys) {
         if (hot.has(key)) return true;
       }
@@ -543,6 +552,7 @@ export function buildHotEgressPredicate(
   }
   if (hot.size === 0) return none;
   return (candidate: unknown) => {
+    if (isRotatingEgressRow(candidate)) return false;
     for (const key of readEgressKeysForMember(candidate, nowMs).keys) {
       if (hot.has(key)) return true;
     }
@@ -663,6 +673,60 @@ function pickStickyCandidate<T>(
   return ranked[eligible ? firstEligibleFrom(idx, eligible, ranked.length) : idx];
 }
 
+// Identity of a member for the session hash: the registry id, else its egress key, else its
+// position. An id survives a pool reorder, so reordering never remaps conversations.
+function sessionMemberIdentity(row: unknown, index: number): string {
+  const id = (row as Record<string, unknown> | null)?.id;
+  if (id !== undefined && id !== null && String(id) !== "") return String(id);
+  return proxyEgressKey(row) ?? String(index);
+}
+
+/**
+ * 53-bit non-cryptographic string hash (cyrb53). Rendezvous selection only needs an even,
+ * deterministic spread over a handful of pool members, not a cryptographic digest, and the
+ * value never leaves the process.
+ */
+function rendezvousScore(text: string): number {
+  let h1 = 0xdeadbeef;
+  let h2 = 0x41c6ce57;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+}
+
+/**
+ * `session` strategy: rendezvous (highest-random-weight) hash of the session key over the
+ * allowed members (every member when `eligible` is null). Each member scores
+ * rendezvousScore(sessionKey NUL identity); the highest score wins, ties go to the earlier
+ * member. The pick depends on neither the position nor the cursor and writes nothing; a
+ * member set aside moves only the conversations it was serving, and they return to it once
+ * it is eligible again.
+ */
+export function pickSessionCandidate<T>(
+  candidates: T[],
+  eligible: number[] | null,
+  sessionKey: string
+): T {
+  const allowed = eligible ?? candidates.map((_, index) => index);
+  let best = allowed[0];
+  let bestScore = -1;
+  for (const index of allowed) {
+    const score = rendezvousScore(
+      `${sessionKey}\u0000${sessionMemberIdentity(candidates[index], index)}`
+    );
+    if (score > bestScore) {
+      best = index;
+      bestScore = score;
+    }
+  }
+  return candidates[best];
+}
+
 // round-robin (default): pick at the current cursor, then advance it monotonically,
 // past any member skipped so the next pick starts after the one actually served.
 function pickRoundRobinCandidate<T>(
@@ -688,15 +752,18 @@ function pickRoundRobinCandidate<T>(
  * Round-robin uses (and persists) a monotonic cursor; random uses crypto.randomInt;
  * sticky holds the current member until its window elapses, then advances.
  * Members that just failed (see proxyRefusalMemory) are skipped while another member is
- * eligible; the cursor then advances past the member actually served.
+ * eligible; the cursor then advances past the member actually served. `session` with a
+ * session key hashes the key over the eligible members (`bySession`); without one it falls
+ * through to round-robin.
  */
 function pickFromCandidates<T>(
   db: ReturnType<typeof getDbInstance>,
   normalizedScope: string,
   rotationScopeId: string,
   candidates: T[],
-  provider?: string | null
-): T {
+  provider?: string | null,
+  sessionKey?: string | null
+): { picked: T; bySession: boolean } {
   // Pool-exhausted check first: a single-member pool set aside is exhausted
   // too, and this runs before the length-1 early return below. Flag-gated
   // inside (zero cost when off), rebound window shared with the bridge. The
@@ -710,12 +777,17 @@ function pickFromCandidates<T>(
     (row) => proxyEgressKey(row),
     (key) => addressScope.isAvoidedKey(key)
   );
-  if (candidates.length === 1) return candidates[0];
+  if (candidates.length === 1) return { picked: candidates[0], bySession: false };
 
   const state = getOrCreateRotationRow(db, normalizedScope, rotationScopeId);
 
+  if (state.strategy === "session" && sessionKey) {
+    const eligible = eligibleMemberIndexes(candidates, provider, nowMs);
+    return { picked: pickSessionCandidate(candidates, eligible, sessionKey), bySession: true };
+  }
+
   const held = pickHeldStickyMember(state, candidates, provider, nowMs);
-  if (held !== undefined) return held;
+  if (held !== undefined) return { picked: held, bySession: false };
 
   // Sticky past its window and every other strategy rank normally; a held sticky
   // member returns above, untouched. The eligible-skip below still applies on the
@@ -724,6 +796,20 @@ function pickFromCandidates<T>(
   const ranked = rankCandidatesForPick(candidates, provider);
   const eligible = eligibleMemberIndexes(ranked, provider, nowMs);
 
+  return {
+    picked: pickByStrategy(db, state, normalizedScope, rotationScopeId, ranked, eligible),
+    bySession: false,
+  };
+}
+
+function pickByStrategy<T>(
+  db: ReturnType<typeof getDbInstance>,
+  state: RotationPickState,
+  normalizedScope: string,
+  rotationScopeId: string,
+  ranked: T[],
+  eligible: number[] | null
+): T {
   if (state.strategy === "random") return pickRandomCandidate(ranked, eligible);
   if (state.strategy === "latency") return pickLatencyCandidate(db, ranked, eligible);
   if (state.strategy === "sticky") {
@@ -743,7 +829,7 @@ function fetchAlivePoolRows(
   matchAnyScopeId: boolean
 ): JsonRecord[] {
   const baseSelect =
-    "SELECT p.id, p.name, p.type, p.host, p.port, p.username, p.password, p.notes, p.family, a.position AS __pos, a.id AS __aid " +
+    "SELECT p.id, p.name, p.type, p.host, p.port, p.username, p.password, p.notes, p.family, p.rotating_egress, a.position AS __pos, a.id AS __aid " +
     "FROM proxy_assignments a JOIN proxy_registry p ON p.id = a.proxy_id WHERE a.scope = ? ";
   const order = " ORDER BY a.position ASC, a.id ASC";
   if (matchAnyScopeId) {
@@ -781,8 +867,14 @@ function resolveScopePoolInternal(
   db: ReturnType<typeof getDbInstance>,
   scope: ProxyScope,
   levelId: string | null,
-  options: { rotationScopeId: string; matchAnyScopeId?: boolean; scopeIdFilter?: string | null }
+  options: {
+    rotationScopeId: string;
+    matchAnyScopeId?: boolean;
+    scopeIdFilter?: string | null;
+    sessionKey?: string | null;
+  }
 ): ReturnType<typeof toRegistryProxyResolution> | null {
+  syncRotatingEgressExemptions();
   const rows = fetchAlivePoolRows(
     db,
     scope,
@@ -790,14 +882,19 @@ function resolveScopePoolInternal(
     options.matchAnyScopeId === true
   );
   if (rows.length === 0) return null;
-  const picked = pickFromCandidates(
+  const { picked, bySession } = pickFromCandidates(
     db,
     scope,
     options.rotationScopeId,
     rows,
-    resolvePoolProvider(db, scope, levelId, options)
+    resolvePoolProvider(db, scope, levelId, options),
+    options.sessionKey
   );
-  return toRegistryProxyResolution(picked, scope, levelId);
+  const resolution = toRegistryProxyResolution(picked, scope, levelId);
+  // Tagged only when a session key chose the member: every other result keeps today's shape.
+  return bySession
+    ? Object.assign(resolution, { rotationStrategy: "session" as const })
+    : resolution;
 }
 
 // Which provider a pool pick serves, for the egress-aware ranking signal only.
@@ -864,15 +961,21 @@ export async function resolveProxyForConnectionFromRegistry(connectionId: string
   }
 }
 
-export async function resolveProxyForScopeFromRegistry(scope: string, scopeId?: string | null) {
+export async function resolveProxyForScopeFromRegistry(
+  scope: string,
+  scopeId?: string | null,
+  options?: { sessionKey?: string | null }
+) {
   try {
     const db = getDbInstance();
     const normalizedScope = normalizeScope(scope);
+    const sessionKey = options?.sessionKey ?? null;
 
     if (normalizedScope === "global") {
       return resolveScopePoolInternal(db, "global", null, {
         rotationScopeId: normalizeRotationScopeId("global", null),
         matchAnyScopeId: true,
+        sessionKey,
       });
     }
 
@@ -882,6 +985,7 @@ export async function resolveProxyForScopeFromRegistry(scope: string, scopeId?: 
     return resolveScopePoolInternal(db, normalizedScope, normalizedScopeId, {
       rotationScopeId: normalizeRotationScopeId(normalizedScope, normalizedScopeId),
       scopeIdFilter: normalizedScopeId,
+      sessionKey,
     });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error);

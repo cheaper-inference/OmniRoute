@@ -100,6 +100,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### பாதுகாப்பு மற்றும் போக்குவரத்து
+
+WebDAV அங்கீகாரம் ஒரு IP தோல்வி கண்காணிப்பு மற்றும் லாக்அவுட்டைச் செயல்படுத்துகிறது (60-வினாடி சாளரத்தில் 10 தோல்வியுற்ற முயற்சிகள் `429 Too Many Requests` மற்றும் `Retry-After` உடன் 5 நிமிட லாக்அவுட்டைத் தூண்டுகிறது). WebDAV அடிப்படை அங்கீகார நற்சான்றிதழ்களை அனுப்புவதால், TLS நிறுத்துவது (அல்லது Tailscale அல்லது Cloudflare Tunnel போன்ற பாதுகாப்பான சுரங்கப்பாதையின் வழியாக ரூட்டிங் செய்வது) லூப்பேக்கிற்கு வெளியே WebDAV எண்ட்பாயிண்ட்டை அணுகும்போது கடுமையாக பரிந்துரைக்கப்படுகிறது.
+
 ### API விசை ஒன்றுக்கான context source (விருப்பத்தேர்வு)
 
 Obsidian config-ஐ `api_key_context_sources` அட்டவணை

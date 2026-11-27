@@ -24,6 +24,8 @@ import { getModelContextOverride } from "@/lib/db/modelContextOverrides";
 import {
   getModelCapabilityOverride,
   getReasoningEffortsOverride,
+  getBooleanModelCapabilityOverride,
+  type BooleanModelCapabilityOverrideKey,
 } from "@/lib/db/modelCapabilityOverrides";
 import { getModelCompatVisionOverride } from "@/lib/db/models/compat";
 import {
@@ -44,11 +46,35 @@ import { getNoAuthHydrationProviderIds } from "@/sse/services/noAuthProviderSibl
 
 export type { GeminiThinkingLevel } from "@/shared/constants/modelSpecs";
 
-/** Native Gemini thinking levels from the static catalog, without a new SSE-to-src import. */
+const GEMINI_4_THINKING_LEVELS = ["low", "medium", "high"] as const;
+const GEMINI_4_XHIGH_THINKING_LEVELS = [...GEMINI_4_THINKING_LEVELS, "xhigh"] as const;
+
+// Keep native protocol capabilities separate from provider catalog/availability data.
+const GEMINI_4_NATIVE_THINKING = {
+  // Preserve Argon's existing bare default's output-cap-aware legacy fallback.
+  argon: { levels: GEMINI_4_THINKING_LEVELS, defaultLevel: undefined },
+  carbon: { levels: GEMINI_4_THINKING_LEVELS, defaultLevel: "medium" },
+  hydrogen: { levels: GEMINI_4_XHIGH_THINKING_LEVELS, defaultLevel: "high" },
+  neon: { levels: GEMINI_4_XHIGH_THINKING_LEVELS, defaultLevel: "high" },
+} as const;
+
+/** Native Gemini thinking levels and fixed-tier defaults, independent of admission. */
 export function getNativeGeminiThinkingSpec(model: string): {
   levels: readonly GeminiThinkingLevel[];
   defaultLevel: GeminiThinkingLevel | undefined;
+  fixedTier?: GeminiThinkingLevel;
 } {
+  const id = model.slice(model.lastIndexOf("/") + 1).toLowerCase();
+  const match = /^gemini-4-(argon|carbon|hydrogen|neon)(?:-(low|medium|high|xhigh))?$/.exec(
+    id === "gemini-4" ? "gemini-4-argon" : id
+  );
+  if (match) {
+    const family = GEMINI_4_NATIVE_THINKING[match[1] as keyof typeof GEMINI_4_NATIVE_THINKING];
+    const levels: readonly GeminiThinkingLevel[] = family.levels;
+    const requestedTier = match[2] as GeminiThinkingLevel | undefined;
+    const fixedTier = requestedTier && levels.includes(requestedTier) ? requestedTier : undefined;
+    return { levels, fixedTier, defaultLevel: fixedTier ?? family.defaultLevel };
+  }
   const spec = getModelSpec(model);
   return {
     levels: spec?.geminiThinkingLevels ?? [],
@@ -602,7 +628,8 @@ function resolveVisionCapability(
   modelId?: string,
   customVisionOverride?: boolean | null,
   compatVisionOverride?: boolean | null,
-  syncedAvailableModelVision?: boolean | null
+  syncedAvailableModelVision?: boolean | null,
+  capabilityVisionOverride?: boolean | null
 ): boolean | null {
   const allModalities = [...modalitiesInput, ...modalitiesOutput].map((entry) =>
     String(entry).toLowerCase()
@@ -621,6 +648,11 @@ function resolveVisionCapability(
   // wins over synced/catalog/heuristic sources, including with explicit false.
   if (typeof compatVisionOverride === "boolean") {
     return compatVisionOverride;
+  }
+
+  // Operator-persisted boolean capability override for vision (#20127)
+  if (typeof capabilityVisionOverride === "boolean") {
+    return capabilityVisionOverride;
   }
 
   // Hard override FIRST: a wrong synced `attachment:true` (or image modality) must not
@@ -701,6 +733,27 @@ function getCapabilityOverride(
   if (canonical !== null) return canonical;
   return resolved.rawModel && resolved.rawModel !== resolved.model
     ? getModelCapabilityOverride(resolved.provider, resolved.rawModel, key)
+    : null;
+}
+
+function getBooleanCapabilityOverride(
+  resolved: { provider: string | null; model: string | null; rawModel: string | null },
+  key: BooleanModelCapabilityOverrideKey,
+  snapshot?: ModelCapabilityResolutionSnapshot | null
+): boolean | null {
+  const bulk = snapshot?.booleanCapabilityOverrides ?? null;
+  const canonical = getBooleanModelCapabilityOverride(resolved.provider, resolved.model, key, bulk);
+  if (canonical !== null) return canonical;
+  // PATCH stores a custom node's `<prefix>/<model>` target under the node id, while a
+  // prefix-addressed lookup (the catalog alias) arrives with the prefix: map it back,
+  // after the direct match, as getCompatVisionOverride() does.
+  const nodeId = resolved.provider ? getProviderNodeIdByPrefixSync(resolved.provider) : null;
+  if (nodeId && nodeId !== resolved.provider) {
+    const mapped = getBooleanModelCapabilityOverride(nodeId, resolved.model, key, bulk);
+    if (mapped !== null) return mapped;
+  }
+  return resolved.rawModel && resolved.rawModel !== resolved.model
+    ? getBooleanModelCapabilityOverride(resolved.provider, resolved.rawModel, key, bulk)
     : null;
 }
 
@@ -956,7 +1009,11 @@ export function getResolvedModelCapabilities(
       ? getUnsupportedParams(resolved.provider, resolved.model).includes("tools")
       : false;
 
+  const toolCallingOverride = usePersistedOverrides
+    ? getBooleanCapabilityOverride(resolved, "tool_calling", snapshot)
+    : null;
   const supportsTools =
+    toolCallingOverride ??
     synced?.tool_call ??
     (typeof registryModel?.toolCalling === "boolean" ? registryModel.toolCalling : null) ??
     (typeof spec?.supportsTools === "boolean" ? spec.supportsTools : null) ??
@@ -987,7 +1044,24 @@ export function getResolvedModelCapabilities(
   const persistedContextWindow = usePersistedOverrides
     ? getContextOverride(resolved, snapshot)
     : null;
-  const limitRows = { synced, registryModel, spec, authoritativeContextWindow };
+  // #20437: models.dev maps `openai` to both `openai` and `cx` (Codex), so a synced
+  // public-API context window (e.g. 1,050,000 for gpt-6.1-sol) can exceed Codex's
+  // actual OAuth window (872,000) in the provider registry. Do not let a larger
+  // synced limit override Codex's narrower registry window.
+  const effectiveSynced =
+    resolved.provider === "codex" &&
+    synced &&
+    typeof registryModel?.contextLength === "number" &&
+    typeof synced.limit_context === "number" &&
+    synced.limit_context > registryModel.contextLength
+      ? { ...synced, limit_context: null }
+      : synced;
+  const limitRows = {
+    synced: effectiveSynced,
+    registryModel,
+    spec,
+    authoritativeContextWindow,
+  };
   const contextLimit = pickContextWindow(limitRows, persistedContextWindow);
   const contextWindow = contextLimit.value;
 
@@ -1059,6 +1133,9 @@ export function getResolvedModelCapabilities(
     resolved.model,
     snapshot ? (snapshot.inputModalities ?? new Map()) : undefined
   );
+  const capabilityVisionOverride = usePersistedOverrides
+    ? getBooleanCapabilityOverride(resolved, "vision", snapshot)
+    : null;
   const supportsVision = textOnlyTransport
     ? false
     : resolveVisionCapability(
@@ -1070,7 +1147,8 @@ export function getResolvedModelCapabilities(
         lookupKey,
         customVisionOverride,
         compatVisionOverride,
-        syncedAvailableModelVision
+        syncedAvailableModelVision,
+        capabilityVisionOverride
       );
   // #17289: WorkBuddy's DeepSeek Flash endpoint was observed to accept image_url
   // (unlike other gateways serving the same upstream id). Provider-scoped, not a
@@ -1120,10 +1198,20 @@ export function getResolvedModelCapabilities(
 
   // #8250: when resolve promoted vision over a contradictory attachment=false,
   // expose attachment=true so catalog / Vision Bridge / clients see one verdict.
-  let attachment = textOnlyTransport ? false : (synced?.attachment ?? null);
-  if (supportsVision === true && attachment === false) {
+  const attachmentOverride = usePersistedOverrides
+    ? getBooleanCapabilityOverride(resolved, "attachment", snapshot)
+    : null;
+  let attachment = textOnlyTransport ? false : (attachmentOverride ?? synced?.attachment ?? null);
+  if (supportsVision === true && attachment === false && attachmentOverride === null) {
     attachment = true;
   }
+
+  const structuredOutputOverride = usePersistedOverrides
+    ? getBooleanCapabilityOverride(resolved, "structured_output", snapshot)
+    : null;
+  const temperatureOverride = usePersistedOverrides
+    ? getBooleanCapabilityOverride(resolved, "temperature", snapshot)
+    : null;
 
   return {
     provider: resolved.provider,
@@ -1145,8 +1233,8 @@ export function getResolvedModelCapabilities(
     supportsFiles,
     supportsMaxTokens: heuristicMaxTokens(lookupKey),
     attachment,
-    structuredOutput: synced?.structured_output ?? null,
-    temperature: synced?.temperature ?? null,
+    structuredOutput: structuredOutputOverride ?? synced?.structured_output ?? null,
+    temperature: temperatureOverride ?? synced?.temperature ?? null,
     contextWindow,
     // Input-only cap, clamped to the total window — never double-counts a requested
     // output against it (see pickMaxInputTokens).

@@ -309,6 +309,7 @@ Yi amfani da `IF NOT EXISTS`, `IF EXISTS`, da `OR IGNORE` / `OR REPLACE` jumlar 
 3. **Cika bayanai a hankali** : yi amfani da `UPDATE ... WHERE ...` don sarrafa layuka da ke akwai
 4. **Duba oda da suna** : `npm run test:migrations:fresh` (duk ƙaura akan rumbun adana bayanai) da `npm run check:migration-numbering`
 5. **Gwaji akan kwafi** : kar a taɓa gudanar da ƙaura marasa gwaji akan samarwa
+6. **Teburin da aka ƙirƙira daga lambar yana buƙatar ƙaura kuma** : idan ma'auni kuma ya ƙirƙiri tebur a kasala (`CREATE TABLE IF NOT EXISTS`, kiyaye shi azaman hanyar warkar da kai), ƙaura dole ne ya haifar da shi da DDL iri ɗaya. In ba haka ba, shigarwa mai tsabta da ingantaccen shigarwa suna ƙare tare da tsare-tsare daban-daban, dangane da ko hanyar lambar ta gudana. `tests/unit/db/lazy-table-migration-guard.test.ts` yana duba `src/` da `open-sse/` kuma ya kasa a kan malalacin `CREATE` ba tare da hijira ba (#20557). Misali: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Misali:
 

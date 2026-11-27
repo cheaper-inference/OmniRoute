@@ -3,7 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Input, Modal } from "@/shared/components";
-import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
 
 export interface MitmSudoPasswordModalProps {
   isOpen: boolean;
@@ -55,10 +55,9 @@ export function MitmSudoPasswordModal({
       size="sm"
     >
       <div className="flex flex-col gap-4">
-        <div className="flex items-start gap-3 rounded-control border border-warning/30 bg-warning-bg p-3">
-          <Icon name="warning" size={20} className="text-warning" />
-          <p className="text-xs text-text-muted">{tCli("sudoPasswordHint")}</p>
-        </div>
+        <Notice variant="warning" icon="warning">
+          {tCli("sudoPasswordHint")}
+        </Notice>
 
         <Input
           type="password"

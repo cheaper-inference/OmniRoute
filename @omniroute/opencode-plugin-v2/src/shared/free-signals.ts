@@ -125,7 +125,7 @@ export function inferFreeSignal(id: string, ctx: FreeSignalContext): boolean {
   return false;
 }
 
-export const INFERRED_FREE_LABEL = " (free, inferred)";
+export const INFERRED_FREE_LABEL = "🆓? ";
 
 export interface FreeOptions {
   freeOnly?: boolean;

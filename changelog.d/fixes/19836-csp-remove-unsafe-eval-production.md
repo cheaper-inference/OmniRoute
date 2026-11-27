@@ -1,0 +1,1 @@
+- **fix(security):** strip `'unsafe-eval'` from the Content-Security-Policy `script-src` directive in production builds while retaining it strictly in development mode for React Fast Refresh and HMR ([#19836](https://github.com/cheaper-inference/OmniRoute/issues/19836)).

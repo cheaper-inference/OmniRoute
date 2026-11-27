@@ -1,0 +1,1 @@
+- **feat(release):** add `npm run release:free-tier-recount`, a report that flags stale free-tier counts on hand-written surfaces after each catalog wave, plus the recount checklist in `docs/ops/FREE_TIER_RECOUNT.md` ([#21232](https://github.com/cheaper-inference/OmniRoute/pull/21232))

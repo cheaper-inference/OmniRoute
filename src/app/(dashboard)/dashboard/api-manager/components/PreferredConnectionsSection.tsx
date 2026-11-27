@@ -3,6 +3,7 @@
 import { memo, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { compareTr } from "@/shared/utils/turkishText";
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import type { ProviderConnection } from "./ProviderConnectionPermissionList";
@@ -48,7 +49,7 @@ const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
   if (groups.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-2 p-4 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-3">
         <div className="flex flex-col gap-1">
           <p className="text-sm font-medium text-text-main">{t("preferredConnections")}</p>
@@ -59,7 +60,8 @@ const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
             variant="ghost"
             size="sm"
             onClick={onClearPreferred}
-            className="shrink-0 text-xs text-text-muted"
+            className="shrink-0 text-xs"
+            tone="muted"
           >
             {t("preferredConnectionsClear")}
           </Button>
@@ -71,7 +73,7 @@ const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
       <div className="flex flex-col gap-1 max-h-64 overflow-y-auto">
         {groups.map(([provider, conns]) => (
           <div key={provider}>
-            <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider px-1 py-0.5">
+            <p className="ci-eyebrow px-1 py-0.5" data-size="3xs" data-weight="medium">
               {provider}
             </p>
             {conns.map((conn) => {
@@ -95,7 +97,7 @@ const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
                     className="h-auto min-w-0 flex-1 justify-start gap-2 px-0 py-0 text-left text-xs"
                   >
                     <span
-                      className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 text-[10px] font-semibold ${
+                      className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 text-3xs font-semibold ${
                         isPreferred ? "bg-primary border-primary text-bg" : "border-border"
                       }`}
                     >
@@ -103,32 +105,30 @@ const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
                     </span>
                     <span className="truncate flex-1">{conn.name || conn.id.slice(0, 8)}</span>
                     {!conn.isActive && (
-                      <span className="text-[9px] text-error shrink-0">{tc("inactive")}</span>
+                      <span className="text-3xs text-error shrink-0">{tc("inactive")}</span>
                     )}
                   </Button>
                   {isPreferred && (
                     <div className="flex items-center gap-0.5 shrink-0">
                       <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="icon-2xs"
                         aria-label={tc("moveUp")}
                         title={tc("moveUp")}
                         disabled={rank === 0}
                         onClick={() => onMovePreferred(conn.id, -1)}
-                        className="h-6 w-6"
                       >
-                        <Icon name="arrow_upward" size={16} />
+                        <Icon name="arrow_upward" size={14} />
                       </Button>
                       <Button
                         variant="ghost"
-                        size="icon-sm"
+                        size="icon-2xs"
                         aria-label={tc("moveDown")}
                         title={tc("moveDown")}
                         disabled={rank === preferredConnections.length - 1}
                         onClick={() => onMovePreferred(conn.id, 1)}
-                        className="h-6 w-6"
                       >
-                        <Icon name="arrow_downward" size={16} />
+                        <Icon name="arrow_downward" size={14} />
                       </Button>
                     </div>
                   )}
@@ -138,7 +138,7 @@ const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
           </div>
         ))}
       </div>
-    </div>
+    </Card.Section>
   );
 });
 

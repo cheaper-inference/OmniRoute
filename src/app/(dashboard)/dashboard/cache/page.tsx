@@ -167,7 +167,7 @@ function LinearMeter({ label, value, helper }: { label: string; value: number; h
         aria-valuetext={`${value.toFixed(1)}%`}
         value={Math.min(value, 100)}
       />
-      {helper && <div className="text-[11px] text-text-muted">{helper}</div>}
+      {helper && <div className="text-xs text-text-muted">{helper}</div>}
     </div>
   );
 }
@@ -183,7 +183,9 @@ function DetailStat({
 }) {
   return (
     <div className="rounded-lg bg-bg-subtle px-3 py-2.5">
-      <div className="text-[11px] uppercase tracking-[0.12em] text-text-muted">{label}</div>
+      <div className="ci-eyebrow" data-size="2xs">
+        {label}
+      </div>
       <div className={`mt-1 text-sm font-semibold tabular-nums ${accent}`}>{value}</div>
     </div>
   );
@@ -245,7 +247,9 @@ function PromptTrendPanel({
       <div>
         <div className="flex items-center gap-2">
           <Icon name="timeline" size={16} className="text-text-muted" />
-          <h3 className="text-sm text-text-main">{title}</h3>
+          <h3 className="ci-heading" data-size="sm">
+            {title}
+          </h3>
         </div>
         <p className="mt-2 text-sm text-text-muted">{noDataLabel}</p>
       </div>
@@ -278,7 +282,9 @@ function PromptTrendPanel({
         <div>
           <div className="flex items-center gap-2">
             <Icon name="timeline" size={16} className="text-text-muted" />
-            <h3 className="text-sm text-text-main">{title}</h3>
+            <h3 className="ci-heading" data-size="sm">
+              {title}
+            </h3>
           </div>
           <p className="mt-2 text-sm text-text-muted">{description}</p>
         </div>
@@ -308,8 +314,8 @@ function PromptTrendPanel({
       </div>
 
       <Table
-        className="text-sm"
-        containerClassName="mt-5 rounded-none border-0"
+        variant="plain"
+        containerClassName="mt-5"
         maxHeight="20rem"
         scrollLabel={title}
         scrollbarLabel={title}
@@ -540,7 +546,9 @@ export default function CachePage() {
                     {t("promptCache")}
                   </SectionBadge>
                   <div>
-                    <h2 className="text-lg text-text-main">{t("promptCache")}</h2>
+                    <h2 className="ci-heading" data-size="lg">
+                      {t("promptCache")}
+                    </h2>
                     <p className="mt-1 max-w-3xl text-sm text-text-muted">
                       {t("promptCacheSectionDesc")}
                     </p>
@@ -622,14 +630,16 @@ export default function CachePage() {
                   {/* A plain section: the Card is the only frame around the table (#19620). */}
                   <div className="w-full">
                     <div>
-                      <h3 className="text-sm text-text-main">{t("byProvider")}</h3>
+                      <h3 className="ci-heading" data-size="sm">
+                        {t("byProvider")}
+                      </h3>
                       <p className="mt-1 text-sm text-text-muted">{t("providerCacheRateDesc")}</p>
                     </div>
 
                     {providerEntries.length > 0 ? (
                       <Table
-                        className="text-sm"
-                        containerClassName="mt-3 rounded-none border-0"
+                        variant="plain"
+                        containerClassName="mt-3"
                         scrollbarLabel={t("byProvider")}
                         scrollLabel={t("byProvider")}
                       >
@@ -721,9 +731,12 @@ export default function CachePage() {
                         </TableBody>
                       </Table>
                     ) : (
-                      <div className="mt-3 rounded-lg border border-dashed border-border px-4 py-6 text-sm text-text-muted">
-                        {t("noPromptCacheData")}
-                      </div>
+                      <EmptyState
+                        layout="inline"
+                        border="dashed"
+                        title={t("noPromptCacheData")}
+                        className="mt-3"
+                      />
                     )}
                   </div>
 
@@ -744,9 +757,7 @@ export default function CachePage() {
                   />
                 </>
               ) : (
-                <div className="rounded-lg border border-dashed border-border px-4 py-6 text-sm text-text-muted">
-                  {t("noPromptCacheData")}
-                </div>
+                <EmptyState layout="inline" border="dashed" title={t("noPromptCacheData")} />
               )}
             </div>
           </Card>
@@ -774,7 +785,9 @@ export default function CachePage() {
                     </SectionBadge>
                   </div>
                   <div>
-                    <h2 className="text-lg text-text-main">{t("semanticCache")}</h2>
+                    <h2 className="ci-heading" data-size="lg">
+                      {t("semanticCache")}
+                    </h2>
                     <p className="mt-1 max-w-3xl text-sm text-text-muted">
                       {t("semanticCacheSectionDesc")}
                     </p>
@@ -833,7 +846,9 @@ export default function CachePage() {
                 <div className="rounded-xl border border-border bg-bg-subtle p-5">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <h3 className="text-sm text-text-main">{t("performance")}</h3>
+                      <h3 className="ci-heading" data-size="sm">
+                        {t("performance")}
+                      </h3>
                       <p className="mt-1 text-sm text-text-muted">
                         {t("autoRefresh", { seconds: REFRESH_INTERVAL_SECONDS })}
                       </p>
@@ -871,7 +886,9 @@ export default function CachePage() {
 
                 <div className="space-y-4">
                   <div className="rounded-xl border border-border bg-bg-subtle p-5">
-                    <h3 className="text-sm text-text-main">{t("behavior")}</h3>
+                    <h3 className="ci-heading" data-size="sm">
+                      {t("behavior")}
+                    </h3>
                     <div className="mt-4 grid gap-3">
                       <InfoRow icon="info">{t("behaviorDeterministic")}</InfoRow>
                       <InfoRow icon="info">
@@ -887,7 +904,9 @@ export default function CachePage() {
                   <div className="rounded-xl border border-border bg-bg-subtle p-5">
                     <div className="flex items-center gap-2">
                       <Icon name="fingerprint" size={16} className="text-text-muted" />
-                      <h3 className="text-sm text-text-main">{t("idempotency")}</h3>
+                      <h3 className="ci-heading" data-size="sm">
+                        {t("idempotency")}
+                      </h3>
                     </div>
                     <div className="mt-4 grid gap-3 md:grid-cols-2">
                       <DetailStat
@@ -907,7 +926,9 @@ export default function CachePage() {
               {/* A plain section: the Card is the only frame around the entries (#19620). */}
               <div>
                 <div className="mb-4 flex flex-col gap-1">
-                  <h3 className="text-sm text-text-main">{t("entries")}</h3>
+                  <h3 className="ci-heading" data-size="sm">
+                    {t("entries")}
+                  </h3>
                   <p className="text-sm text-text-muted">{t("semanticEntriesDesc")}</p>
                 </div>
                 <CacheEntriesTab />

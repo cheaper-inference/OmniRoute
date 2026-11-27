@@ -20,6 +20,8 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
+const compliance = await import("../../src/lib/db/reasoningEffortCompliance.ts");
+const { saveCallLog } = await import("../../src/lib/usage/callLogs.ts");
 const { lockModel, lockExactModel, clearModelLock, clearAllModelLockouts } =
   await import("../../open-sse/services/accountFallback.ts");
 
@@ -29,6 +31,7 @@ const GLM_MODEL_B = "glm-5.3-flash";
 
 async function resetStorage() {
   clearAllModelLockouts();
+  compliance.clearNoneHonoredCache();
   apiKeysDb.resetApiKeyState();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
@@ -82,6 +85,7 @@ test.beforeEach(async () => {
 
 test.after(async () => {
   clearAllModelLockouts();
+  compliance.clearNoneHonoredCache();
   apiKeysDb.resetApiKeyState();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
@@ -269,6 +273,75 @@ test("models/health: restricted keys see only their models", async () => {
       String(item.id).startsWith(`${GLM_ALIAS}/`) || String(item.id).startsWith("qtSd/"),
       `restricted key leaked: ${String(item.id)}`
     );
+  }
+});
+
+test("models/health: requested invisible ids do not disclose cached compliance", async () => {
+  await seedGlmConnections(1);
+  await settingsDb.updateSettings({ requireLogin: true, password: "health-visibility-test" });
+  const { GET } = await import("../../src/app/api/v1/models/health/route.ts");
+  const restricted = await apiKeysDb.createApiKey("health-restricted", "machine-health");
+  await apiKeysDb.updateApiKeyPermissions(restricted.id, {
+    allowedModels: [`${GLM_ALIAS}/${GLM_MODEL_A}`],
+  });
+  const other = await apiKeysDb.createApiKey("health-other", "machine-health");
+  const allowedId = `${GLM_ALIAS}/${GLM_MODEL_A}`;
+  const hiddenIds = [`${GLM_ALIAS}/${GLM_MODEL_B}`, GLM_MODEL_B, "retired-provider/model"];
+  for (const model of [allowedId, ...hiddenIds]) {
+    for (let i = 0; i < 3; i++) {
+      await saveCallLog({
+        id: `visibility-${model}-${i}`,
+        method: "POST",
+        path: "/v1/chat/completions",
+        status: 200,
+        model,
+        requestedModel: model,
+        provider: GLM_ALIAS,
+        apiKeyId: other.id,
+        duration: 100,
+        clientRequestBody: { reasoning_effort: "none" },
+        // An opaque reasoning item is the response shape for which this base
+        // persists the requested effort, so these rows feed the compliance snapshot.
+        responseBody: {
+          output: [
+            { type: "reasoning", encrypted_content: `opaque-${i}` },
+            { type: "message", content: [{ type: "output_text", text: "answer" }] },
+          ],
+        },
+      });
+    }
+  }
+  // Populate the shared snapshot through an unrestricted, authenticated request first.
+  const warm = await GET(
+    new Request("http://localhost/api/v1/models/health", {
+      headers: { Authorization: `Bearer ${other.key}` },
+    })
+  );
+  assert.equal(warm.status, 200);
+  assert.equal(readStates(await warm.json()).get(hiddenIds[0])?.none_sample_size, 3);
+  const snapshot = compliance.getNoneHonoredSnapshot();
+  for (const id of hiddenIds) {
+    assert.deepEqual(compliance.readNoneHonored(snapshot, id), { honored: false, sampleSize: 3 });
+  }
+
+  const query = new URLSearchParams({ ids: hiddenIds.join(",") });
+  const res = await GET(
+    new Request(`http://localhost/api/v1/models/health?${query}`, {
+      headers: { Authorization: `Bearer ${restricted.key}` },
+    })
+  );
+  assert.equal(res.status, 200);
+  const states = readStates(await res.json());
+  // Visible models retain the existing instance-wide compliance semantics.
+  assert.equal(states.get(allowedId)?.none_sample_size, 3);
+  assert.equal(states.get(allowedId)?.none_honored, false);
+  for (const id of hiddenIds) {
+    const entry = states.get(id);
+    assert.ok(entry, "requested invisible ids retain their unknown placeholder");
+    assert.equal(entry.state, "unknown");
+    assert.equal(entry.none_honored, null);
+    assert.equal(entry.none_sample_size, 0);
+    assert.equal(entry.none_window_hours, snapshot.window.hours);
   }
 });
 

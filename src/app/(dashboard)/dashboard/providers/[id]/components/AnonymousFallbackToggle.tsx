@@ -13,7 +13,7 @@ import Icon from "@/shared/components/Icon";
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card, Toggle } from "@/shared/components";
+import { Card, Toggle, IconChip } from "@/shared/components";
 import { getProviderAlias, getProviderById } from "@/shared/constants/providers";
 import { useNotificationStore } from "@/store/notificationStore";
 import { providerText } from "../providerPageHelpers";
@@ -163,9 +163,9 @@ export default function AnonymousFallbackToggle({
   return (
     <Card>
       <div className="flex items-center gap-3">
-        <div className="inline-flex shrink-0 items-center justify-center w-10 h-10 rounded-full bg-info/10 text-info">
-          <Icon name="key_off" size={20} />
-        </div>
+        <IconChip tone="info" shape="circle" className="shrink-0">
+          <Icon name="key_off" />
+        </IconChip>
         <div className="flex-1 min-w-0">
           <h2 className="text-sm">{title}</h2>
           <p className="text-sm text-text-muted">

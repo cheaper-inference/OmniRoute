@@ -1,0 +1,1 @@
+- Stop the quota-share isolation test from failing on the clock: it now reads the wait from the reset hint and compares it with `Retry-After`, whatever shape the hint takes.

@@ -8,7 +8,9 @@ type Translate = ReturnType<typeof useTranslations>;
 type BudgetStatus = NonNullable<Detail["budgetStatus"]>;
 
 function isIncomplete(status: BudgetStatus) {
-  return Boolean(status.hasUnpricedUsage || status.hasPartialRetainedUsage);
+  return Boolean(
+    status.hasUnpricedUsage || status.hasPricingFailure || status.hasPartialRetainedUsage
+  );
 }
 
 function meterColor(status: BudgetStatus) {
@@ -67,7 +69,7 @@ function BudgetNotices({
         <p role="alert" className="text-error">
           {overBudget
             ? t("overBudget", { amount: money(used - status.maxBudgetUsd, locale) })
-            : t("unpricedBudget")}
+            : t(status.hasPricingFailure ? "budgetUnavailable" : "unpricedBudget")}
         </p>
       )}
     </>
@@ -106,7 +108,7 @@ function BudgetFooter({
 }
 
 function BudgetBody({ status, locale, t }: { status: BudgetStatus; locale: string; t: Translate }) {
-  const used = status.estimatedListCostUsd ?? 0;
+  const used = status.accountedCostUsd ?? status.estimatedListCostUsd ?? 0;
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap justify-between gap-2 tabular-nums">

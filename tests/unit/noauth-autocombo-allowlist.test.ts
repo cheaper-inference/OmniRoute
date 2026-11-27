@@ -1,7 +1,7 @@
 /**
  * Auto-combo no-auth pool — the `auto`/`auto-*` candidate pool may only pull in
- * no-auth providers that opt into prompt-emulated tool calling. Local CLI providers
- * are added only after their readiness probe confirms they can serve requests.
+ * no-auth providers that opt into prompt-emulated tool calling. Browser transports
+ * and supported local CLIs also need a successful readiness probe.
  * Every other keyless provider remains usable through direct `<alias>/<model>` calls,
  * but is excluded from auto-routing.
  *
@@ -14,12 +14,8 @@
  * Every other keyless provider stays OUT of every auto/* pool — it remains fully
  * usable via direct `<alias>/<model>` calls, it is just not auto-routed to.
  *
- * Owner-accepted set (no feature flag): `cloudflare-playground`,
- * `devin-cli-agentic`, `duckduckgo-web`, `opencode`, and `uncloseai`.
- * `duckduckgo-web` and `devin-cli-agentic` already carried
- * `toolCalling: "emulated"`; the other three opt in the same way.
- * `aihorde`, `auggie`, `codex-app-server`, `veoaifree-web`, and `zcode` have no
- * flag and stay out. `duckduckgo-web` is in the pool, not excluded.
+ * The admitted providers are Cloudflare Playground, DuckDuckGo, and Devin
+ * when their probes confirm readiness.
  *
  * Historical note: until 2026-07-24 (refs #8183/#6453/#7032) the pool was a
  * hardcoded `{opencode}` allowlist. That narrowing is retired.
@@ -27,7 +23,7 @@
  * Regression guard: EMULATED_TOOL_CALLING_NOAUTH_PROVIDERS in
  * open-sse/services/autoCombo/emulatedNoAuthAllowlist.ts drives what belongs
  * here. Adding `toolCalling: "emulated"` to another NOAUTH_PROVIDERS entry WILL
- * change the pool and must update ALLOWED_NOAUTH_PROVIDERS below.
+ * change the pool and must update AVAILABLE_BROWSER_PROVIDERS below.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -47,13 +43,16 @@ process.env.CLI_DEVIN_AGENTIC_BIN = path.join(TEST_DATA_DIR, "no-such-devin-bina
 delete process.env.DEVIN_AGENTIC_HOME;
 
 const core = await import("../../src/lib/db/core.ts");
+const providersDb = await import("../../src/lib/db/providers.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const virtualFactory = await import("../../open-sse/services/autoCombo/virtualFactory.ts");
+const { createBuiltinAutoCombo } =
+  await import("../../open-sse/services/autoCombo/builtinCatalog.ts");
 const devinStatus = await import("../../src/lib/providers/devinAgenticAuthStatus.ts");
 const noAuthReadiness = await import("../../open-sse/services/autoCombo/noAuthReadiness.ts");
 const readinessBoot = await import("../../src/lib/providers/noAuthAutoRoutingReadiness.ts");
-// What registerNodejs() does at server boot: register the app-layer Devin probe.
-readinessBoot.registerNoAuthAutoRoutingReadiness();
+// Exercise the same readiness registration as the Node.js server boot.
+await readinessBoot.registerNoAuthAutoRoutingReadiness();
 
 async function resetStorage() {
   core.resetDbInstance();
@@ -63,6 +62,9 @@ async function resetStorage() {
 
 test.beforeEach(async () => {
   await resetStorage();
+  for (const providerId of AVAILABLE_BROWSER_PROVIDERS) {
+    noAuthReadiness.registerNoAuthReadiness(providerId, () => true);
+  }
   // contract changed by #15979 (on top of #15839): `excludeTosAvoid` defaults to on and
   // uncataloged models inherit the provider's curated `tos: "avoid"` verdict, so a fresh
   // install filters every opencode model out of auto/*. Opt out so this file keeps guarding
@@ -90,7 +92,7 @@ test.after(async () => {
 
 // Emulated-tool-calling providers expected on a fresh install. Devin is emulated too,
 // but its local CLI readiness gate keeps it out until authentication is confirmed.
-const ALLOWED_NOAUTH_PROVIDERS = ["cloudflare-playground", "duckduckgo-web", "uncloseai"];
+const AVAILABLE_BROWSER_PROVIDERS = ["cloudflare-playground", "duckduckgo-web"];
 // Keyless providers that never opted in — must stay out of every auto/* pool.
 const EXCLUDED_NOAUTH_PROVIDERS = [
   "aihorde",
@@ -103,7 +105,7 @@ const EXCLUDED_NOAUTH_PROVIDERS = [
 test("fresh install: the emulated-tool-calling no-auth providers are present in the auto-combo pool", async () => {
   const combo = await virtualFactory.createVirtualAutoCombo(undefined);
 
-  for (const providerId of ALLOWED_NOAUTH_PROVIDERS) {
+  for (const providerId of AVAILABLE_BROWSER_PROVIDERS) {
     const models = combo.models.filter((m: { providerId: string }) => m.providerId === providerId);
     assert.ok(
       models.length >= 1,
@@ -152,7 +154,7 @@ test("fresh install: ONLY the emulated-tool-calling providers are synthetic-noau
   ].sort();
   assert.deepEqual(
     noauthProviders,
-    [...ALLOWED_NOAUTH_PROVIDERS].sort(),
+    [...AVAILABLE_BROWSER_PROVIDERS].sort(),
     `only the emulated-tool-calling providers may be no-auth (connectionId="noauth") candidates on a ` +
       `fresh install, but found: ${JSON.stringify(noauthProviders)}`
   );
@@ -164,6 +166,90 @@ async function poolProviders(): Promise<string[]> {
   const combo = await virtualFactory.createVirtualAutoCombo(undefined);
   return [...new Set(combo.models.map((m: { providerId: string }) => m.providerId))] as string[];
 }
+
+for (const model of ["auto", "auto/best-free", "auto/best-coding", "auto/coding:free"]) {
+  test(`#19385 ${model} excludes UncloseAI without a connection`, async () => {
+    const combo =
+      model === "auto"
+        ? await virtualFactory.createVirtualAutoCombo(undefined)
+        : await createBuiltinAutoCombo(model, model.slice("auto/".length));
+    assert.equal(
+      combo.models.some((candidate) => candidate.providerId === "uncloseai"),
+      false,
+      `${model} exposed UncloseAI's retired anonymous access`
+    );
+  });
+}
+
+test("#19385 browser-backed providers stay out of auto when their runtime is unconfirmed", async () => {
+  const providers = AVAILABLE_BROWSER_PROVIDERS;
+  noAuthReadiness.__resetNoAuthReadinessForTests();
+  try {
+    for (const provider of providers) {
+      assert.equal((await poolProviders()).includes(provider), false, `${provider} has no probe`);
+    }
+  } finally {
+    await readinessBoot.registerNoAuthAutoRoutingReadiness();
+  }
+});
+
+test("#19385 auto includes browser-backed providers only when their probes confirm readiness", async () => {
+  const providers = AVAILABLE_BROWSER_PROVIDERS;
+  try {
+    for (const available of [false, true]) {
+      for (const provider of providers) {
+        noAuthReadiness.registerNoAuthReadiness(provider, () => available);
+      }
+      const pool = await poolProviders();
+      for (const provider of providers) {
+        assert.equal(pool.includes(provider), available, `${provider} runtime ready: ${available}`);
+      }
+    }
+  } finally {
+    await readinessBoot.registerNoAuthAutoRoutingReadiness();
+  }
+});
+
+test("#19385 an existing Cloudflare connection still needs a ready browser for auto routing", async () => {
+  await providersDb.createProviderConnection({
+    provider: "cloudflare-playground",
+    authType: "apikey",
+    apiKey: "fixture-key",
+    name: "Existing Cloudflare connection",
+  });
+  noAuthReadiness.registerNoAuthReadiness("cloudflare-playground", () => false);
+  assert.equal((await poolProviders()).includes("cloudflare-playground"), false);
+});
+
+test("#19385 boot registers Cloudflare readiness for the configured Chromium executable", async () => {
+  const missingPath = path.join(TEST_DATA_DIR, "missing-chromium");
+  const chromiumPath = path.join(TEST_DATA_DIR, "chromium");
+  fs.writeFileSync(chromiumPath, "test executable", { mode: 0o700 });
+  const original = process.env.CLOUDFLARE_PLAYGROUND_CHROME_PATH;
+  const originalGeneric = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  try {
+    process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH = chromiumPath;
+    process.env.CLOUDFLARE_PLAYGROUND_CHROME_PATH = missingPath;
+    await readinessBoot.registerNoAuthAutoRoutingReadiness();
+    assert.equal((await poolProviders()).includes("cloudflare-playground"), false);
+
+    process.env.CLOUDFLARE_PLAYGROUND_CHROME_PATH = chromiumPath;
+    await readinessBoot.registerNoAuthAutoRoutingReadiness();
+    assert.equal((await poolProviders()).includes("cloudflare-playground"), true);
+
+    delete process.env.CLOUDFLARE_PLAYGROUND_CHROME_PATH;
+    await readinessBoot.registerNoAuthAutoRoutingReadiness();
+    const pool = await poolProviders();
+    assert.ok(pool.includes("cloudflare-playground"));
+    assert.ok(pool.includes("duckduckgo-web"));
+  } finally {
+    if (original === undefined) delete process.env.CLOUDFLARE_PLAYGROUND_CHROME_PATH;
+    else process.env.CLOUDFLARE_PLAYGROUND_CHROME_PATH = original;
+    if (originalGeneric === undefined) delete process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+    else process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH = originalGeneric;
+    await readinessBoot.registerNoAuthAutoRoutingReadiness();
+  }
+});
 
 async function primeDevinStatus(): Promise<void> {
   devinStatus.clearDevinAgenticAuthStatusCache();
@@ -237,9 +323,9 @@ test("no registered Devin probe: devin-cli-agentic stays out even when the CLI i
     assert.equal(noAuthReadiness.isNoAuthProviderReadyForAutoRouting("devin-cli-agentic"), false);
     assert.ok(!(await poolProviders()).includes("devin-cli-agentic"));
     // Providers without a readiness requirement are unaffected by the registry.
-    assert.equal(noAuthReadiness.isNoAuthProviderReadyForAutoRouting("duckduckgo-web"), true);
+    assert.equal(noAuthReadiness.isNoAuthProviderReadyForAutoRouting("aihorde"), true);
   } finally {
-    readinessBoot.registerNoAuthAutoRoutingReadiness();
+    await readinessBoot.registerNoAuthAutoRoutingReadiness();
     restore();
   }
 });
@@ -251,11 +337,11 @@ test("a throwing readiness probe keeps the provider out instead of breaking the 
   try {
     const providers = await poolProviders();
     assert.ok(!providers.includes("devin-cli-agentic"));
-    for (const allowed of ALLOWED_NOAUTH_PROVIDERS) {
+    for (const allowed of AVAILABLE_BROWSER_PROVIDERS) {
       assert.ok(providers.includes(allowed), `${allowed} must stay in the pool`);
     }
   } finally {
-    readinessBoot.registerNoAuthAutoRoutingReadiness();
+    await readinessBoot.registerNoAuthAutoRoutingReadiness();
   }
 });
 
@@ -297,15 +383,15 @@ test("transport gate (flag on): every browser-backed / local-CLI keyless transpo
         `Pool: ${JSON.stringify([...poolProviders])}`
     );
   }
-  assert.ok(poolProviders.has("uncloseai"), "plain-HTTP keyless providers stay in the pool");
+  assert.ok(!poolProviders.has("uncloseai"), "UncloseAI requires a configured key");
 });
 
-test("transport gate (default off): the browser-backed keyless providers stay in the pool", async () => {
+test("transport gate (default off): browser-backed providers with a ready runtime stay in the pool", async () => {
   const combo = await withTransportGate(undefined, () =>
     virtualFactory.createVirtualAutoCombo(undefined)
   );
   const poolProviders = new Set(combo.models.map((m: { providerId: string }) => m.providerId));
-  for (const providerId of ["cloudflare-playground", "duckduckgo-web", "uncloseai"]) {
+  for (const providerId of AVAILABLE_BROWSER_PROVIDERS) {
     assert.ok(poolProviders.has(providerId), `"${providerId}" must stay in the default pool`);
   }
 });

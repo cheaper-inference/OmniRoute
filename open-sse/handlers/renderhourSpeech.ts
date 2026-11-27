@@ -9,10 +9,10 @@ import { errorResponse } from "../utils/error.ts";
 import {
   renderhourBaseUrl,
   renderhourFailure,
-  renderhourNumber,
   renderhourToken,
   runRenderhourJob,
 } from "./mediaGeneration/renderhour.ts";
+import { clampPollIntervalMs, clampPollTimeoutMs } from "../utils/pollBounds.ts";
 
 export async function handleRenderhourSpeech({
   providerConfig,
@@ -37,8 +37,8 @@ export async function handleRenderhourSpeech({
       baseUrl: renderhourBaseUrl(credentials, providerConfig.baseUrl),
       token,
       request: { model: modelId, text },
-      timeoutMs: renderhourNumber(body.timeout_ms, 180_000),
-      pollIntervalMs: renderhourNumber(body.poll_interval_ms, 2000),
+      timeoutMs: clampPollTimeoutMs(body.timeout_ms, 180_000),
+      pollIntervalMs: clampPollIntervalMs(body.poll_interval_ms, 2000),
     });
     if (result.ok === false) return errorResponse(result.status, result.error);
     return audioStreamResponse(await fetch(result.job.outputs[0].url));
