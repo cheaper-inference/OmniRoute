@@ -21,12 +21,14 @@ describe("catalog decideHidePaid", () => {
   });
 
   it("lists a catalog-free model that STRICT still excludes without hard-stop proof", async () => {
-    assert.equal(decideHidePaid(true, "bluesminds", "gpt-4o"), false);
+    // bluesminds/gpt-4o was retired in the November 2026 re-audit; api-airforce is still
+    // catalog-free and publishes no hard-stop guarantee.
+    assert.equal(decideHidePaid(true, "api-airforce", "x-ai/grok-3"), false);
     const { classifyStrictZeroCostCandidate, findBudgetEntry } =
       await import("../../open-sse/services/autoCombo/strictZeroCostFilter.ts");
     const candidate = {
-      provider: "bluesminds",
-      model: "gpt-4o",
+      provider: "api-airforce",
+      model: "x-ai/grok-3",
       connectionId: "c1",
       allowedConnectionIds: ["c1"],
     };

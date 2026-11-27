@@ -79,7 +79,7 @@ export default function CooldownRow({
       <TableCell className="text-text-muted">
         <LastError connection={connection} />
       </TableCell>
-      <TableCell className="text-right">
+      <TableCell align="end">
         <Button
           size="sm"
           variant="secondary"

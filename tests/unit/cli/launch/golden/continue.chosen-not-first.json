@@ -1,0 +1,61 @@
+{
+  "argv": [
+    "--config",
+    "${TMP}/config.yaml"
+  ],
+  "cleanup": {
+    "removeTempDir": true,
+    "revokeSession": true
+  },
+  "env": {
+    "set": {
+      "CONTINUE_GLOBAL_DIR": "${TMP}/home",
+      "CONTINUE_METRICS_ENABLED": "0",
+      "OMNIROUTE_API_KEY": "${TOKEN}"
+    },
+    "unset": []
+  },
+  "modelList": {
+    "injected": 5,
+    "strategy": "inject",
+    "viewHash": "7f4f4066aebfbb84189d2f7f8adeb0a75a997acf4cbeb61c10b01800b593bba3"
+  },
+  "needsTempDir": true,
+  "notes": [
+    "Some models report no context window; used 32768 tokens for them in the Continue config."
+  ],
+  "planVersion": 1,
+  "postExitChecks": [],
+  "preflight": [
+    {
+      "kind": "node-version",
+      "range": ">=20",
+      "why": "Continue CLI needs Node 20+ (docs; engines says >=18)"
+    }
+  ],
+  "secretSites": [
+    {
+      "key": "OMNIROUTE_API_KEY",
+      "kind": "env"
+    }
+  ],
+  "teardown": [],
+  "tempFiles": [
+    {
+      "contents": "name: \"OmniRoute Launch\"\nversion: \"1.0.0\"\nschema: v1\nmodels:\n  - name: openai/gpt-5.2\n    provider: openai\n    model: openai/gpt-5.2\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 400000\n      maxTokens: 100000\n  - name: anthropic/claude-sonnet-4-6\n    provider: openai\n    model: anthropic/claude-sonnet-4-6\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 200000\n      maxTokens: 50000\n  - name: mystery/unknown-context\n    provider: openai\n    model: mystery/unknown-context\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 32768\n      maxTokens: 8192\n  - name: small/ctx-32k\n    provider: openai\n    model: small/ctx-32k\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 32768\n      maxTokens: 8192\n  - name: fastest\n    provider: openai\n    model: fastest\n    apiBase: \"http://127.0.0.1:20128/v1\"\n    apiKey: \"${{ secrets.OMNIROUTE_API_KEY }}\"\n    roles:\n      - chat\n      - edit\n      - apply\n    defaultCompletionOptions:\n      contextLength: 128000\n      maxTokens: 32000\n",
+      "format": "yaml",
+      "mode": 384,
+      "path": "config.yaml",
+      "root": "tmp"
+    },
+    {
+      "contents": "{\"autoUpdateCli\":false}",
+      "format": "json",
+      "mode": 384,
+      "path": "home/index/globalContext.json",
+      "root": "tmp"
+    }
+  ],
+  "tool": "continue",
+  "warnings": []
+}

@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const result = await checkQdrantHealth();
+    const result = await checkQdrantHealth({ allowDisabled: true });
     return NextResponse.json(result);
   } catch (err: unknown) {
     const message = sanitizeErrorMessage(err instanceof Error ? err.message : String(err));

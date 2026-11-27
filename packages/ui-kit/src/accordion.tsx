@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useId, useRef, useState } from "react";
 import type { ComponentProps, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
+import { inertProps } from "./lib/inert";
 import { cn } from "./lib/utils";
 
 export type AccordionType = "single" | "multiple";
@@ -150,7 +151,7 @@ export function AccordionContent({ className, children, ...props }: ComponentPro
       id={`${baseId}-content-${value}`}
       aria-labelledby={`${baseId}-trigger-${value}`}
       aria-hidden={!open}
-      inert={!open || undefined}
+      {...inertProps(!open)}
       data-state={open ? "open" : "closed"}
       className={cn("ci-accordion__content", className)}
     >

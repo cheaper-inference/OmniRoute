@@ -50,19 +50,48 @@ describe("Badge adapter → kit Badge + tone", () => {
     expect(el.textContent).toBe("Expiring");
   });
 
-  it("keeps the legacy pill shape, size classes, className and extra props", () => {
+  it("keeps the legacy pill shape, className and extra props", () => {
     const { getByText, rerender } = render(
-      <Badge size="sm" className="ml-2" title="t" data-testid="b">
+      <Badge className="ml-2" title="t" data-testid="b">
         s
       </Badge>
     );
     const el = getByText("s");
     expect(el.className).toContain("ci-badge--pill");
-    expect(el.className).toContain("text-[10px]");
     expect(el.className).toContain("ml-2");
     expect(el.getAttribute("title")).toBe("t");
     expect(el.getAttribute("data-testid")).toBe("b");
+    // md is the kit default: no size class, no data-size.
+    expect(el.className).not.toContain("ci-badge--sm");
+    expect(el.hasAttribute("data-size")).toBe(false);
     rerender(<Badge size="lg">s</Badge>);
     expect(getByText("s").className).toContain("text-sm");
+  });
+
+  // Kit badge sizes (keak-ai/cheaper-inference-ui-kit `Badge size`): `sm` is the kit's 20px
+  // badge with 12px text. The adapter used to shrink the text to 10px with utilities.
+  it('size="sm" is the kit small badge, not a 10px utility override', () => {
+    const { getByText } = render(<Badge size="sm">s</Badge>);
+    const el = getByText("s");
+    expect(el.className).toContain("ci-badge--sm");
+    expect(el.getAttribute("data-size")).toBe("sm");
+    expect(el.className).not.toContain("text-[10px]");
+    expect(el.className).not.toMatch(/(^|\s)p[xy]-/);
+  });
+
+  it("passes the kit chart-series tones through `tone`, over the variant", () => {
+    for (const tone of ["chart-1", "chart-3", "chart-8"] as const) {
+      const { getByText, unmount } = render(
+        <Badge variant="info" tone={tone}>
+          {tone}
+        </Badge>
+      );
+      const el = getByText(tone);
+      expect(el.className).toContain("ci-badge--secondary");
+      expect(el.className).toContain(`ci-badge--tone-${tone}`);
+      expect(el.className).not.toContain("ci-badge--tone-info");
+      expect(el.getAttribute("data-tone")).toBe(tone);
+      unmount();
+    }
   });
 });

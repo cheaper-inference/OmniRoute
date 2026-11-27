@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
-import { Card, Button, Checkbox, Input } from "@/shared/components";
+import { Card, Button, Checkbox, NumberInput } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { useNotificationStore } from "@/store/notificationStore";
 import {
@@ -87,7 +87,9 @@ export default function AutoDisableCard() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Icon name="block" size={20} className="text-primary" />
-            <h2 className="text-lg">{t("autoDisableBannedAccounts")}</h2>
+            <h2 className="ci-heading" data-size="lg">
+              {t("autoDisableBannedAccounts")}
+            </h2>
           </div>
           {editMode ? (
             <div className="flex gap-2">
@@ -132,20 +134,17 @@ export default function AutoDisableCard() {
 
           <div className="rounded-lg bg-bg-subtle p-4">
             {editMode ? (
-              <Input
-                type="number"
+              <NumberInput
                 label={t("autoDisableThreshold")}
                 hint={t("autoDisableThresholdDesc")}
-                min="1"
-                max="10"
+                min={1}
+                max={10}
                 value={draft.threshold}
-                onChange={(e) =>
-                  setDraft((prev) => ({ ...prev, threshold: parseInt(e.target.value) || 1 }))
-                }
+                onValueChange={(value) => setDraft((prev) => ({ ...prev, threshold: value || 1 }))}
               />
             ) : (
               <>
-                <h3 className="text-xs uppercase mb-2 flex items-center gap-2">
+                <h3 className="ci-eyebrow mb-2 flex items-center gap-2">
                   {t("autoDisableThreshold")}
                 </h3>
                 <span className={`text-sm font-mono ${data.enabled ? "" : "text-text-muted"}`}>

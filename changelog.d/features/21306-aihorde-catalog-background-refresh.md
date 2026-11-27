@@ -1,0 +1,1 @@
+- **feat(models):** opt-in `AIHORDE_CATALOG_BACKGROUND_REFRESH_ENABLED` (default off) lists AI Horde image models from the last snapshot while one refresh runs in the background, so a cold `/v1/models` build no longer waits on the live AI Horde fetch ([#21306](https://github.com/cheaper-inference/OmniRoute/pull/21306))

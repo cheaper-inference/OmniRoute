@@ -5,12 +5,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import QdrantConfigCard from "@/app/(dashboard)/dashboard/memory/components/QdrantConfigCard";
 
 vi.mock("next-intl", () => ({
+  useLocale: () => "en",
   useTranslations: () => (key: string) => key,
 }));
 
-vi.mock("@/shared/components", () => ({
-  Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
+vi.mock("@/shared/components", () => {
+  // The card nests its groups in `Card.Section`, so the mock has both.
+  const Card = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
+  return { Card: Object.assign(Card, { Section: Card }) };
+});
 
 const settings = {
   enabled: false,

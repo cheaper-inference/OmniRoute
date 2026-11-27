@@ -13,6 +13,8 @@ const CODEX_SOL_PAID_PLANS = new Set([
   "team",
   "chatgptteam",
   "business",
+  // Business Premium: OAuth reports `self_serve_business_prolite` (see quotaPlanCapacity.ts).
+  "selfservebusinessprolite",
   "enterprise",
   "edu",
   "education",

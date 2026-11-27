@@ -448,7 +448,8 @@ function shouldPreserveQuotaSignalsFor429(provider?: string | null): boolean {
 export function classifyProviderError(
   statusCode: number,
   responseBody: unknown,
-  provider?: string | null
+  provider?: string | null,
+  upstreamErrorBody?: unknown
 ): ProviderErrorType | null {
   const bodyStr = responseBodyToString(responseBody);
   const creditsExhausted = isCreditsExhaustedForStatus(statusCode, provider, bodyStr);
@@ -501,7 +502,7 @@ export function classifyProviderError(
     return PROVIDER_ERROR_TYPES.MODEL_NOT_FOUND;
   }
 
-  if (isModelScopedAccessDenial(provider, statusCode, responseBody)) {
+  if (isModelScopedAccessDenial(provider, statusCode, responseBody, null, upstreamErrorBody)) {
     return PROVIDER_ERROR_TYPES.MODEL_NOT_FOUND;
   }
 

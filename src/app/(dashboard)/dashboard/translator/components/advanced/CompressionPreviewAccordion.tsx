@@ -1,6 +1,7 @@
 "use client";
 
 import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -151,28 +152,28 @@ function CompressionPreviewContent({ inputContent = "" }: { inputContent?: strin
             className="grid grid-cols-2 md:grid-cols-4 gap-3"
             data-testid="compression-result-grid"
           >
-            <div className="p-3 text-center bg-bg-subtle rounded-lg border border-border">
+            <Card.Section className="text-center">
               <div className="text-xs text-text-muted">{t("compressionOriginal")}</div>
               <div className="text-lg font-semibold">{compressionResult.originalTokens}</div>
               <div className="text-xs text-text-muted">{t("tokens")}</div>
-            </div>
-            <div className="p-3 text-center bg-bg-subtle rounded-lg border border-border">
+            </Card.Section>
+            <Card.Section className="text-center">
               <div className="text-xs text-text-muted">{t("compressionCompressed")}</div>
               <div className="text-lg font-semibold">{compressionResult.compressedTokens}</div>
               <div className="text-xs text-text-muted">{t("tokens")}</div>
-            </div>
-            <div className="p-3 text-center bg-bg-subtle rounded-lg border border-border">
+            </Card.Section>
+            <Card.Section className="text-center">
               <div className="text-xs text-text-muted">{t("compressionSaved")}</div>
               <div className="text-lg font-semibold text-success">
                 {compressionResult.tokensSaved}
               </div>
               <div className="text-xs text-text-muted">{compressionResult.savingsPct}%</div>
-            </div>
-            <div className="p-3 text-center bg-bg-subtle rounded-lg border border-border">
+            </Card.Section>
+            <Card.Section className="text-center">
               <div className="text-xs text-text-muted">{t("compressionDuration")}</div>
               <div className="text-lg font-semibold">{compressionResult.durationMs}</div>
               <div className="text-xs text-text-muted">ms</div>
-            </div>
+            </Card.Section>
           </div>
 
           {compressionResult.techniquesUsed.length > 0 && (

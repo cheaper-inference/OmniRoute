@@ -72,6 +72,66 @@ test("ICU plural / select / rich tags survive a translator that reorders everyth
   assert.ok(out[5]!.startsWith("  ") && out[5]!.endsWith("  "));
 });
 
+test("Google retries multiline CLI help by line when a token ID leaks into prose", async () => {
+  const source = [
+    "Launch a coding tool (auto-starts the gateway, model list from your connected providers):",
+    "  omniroute launch <tool> [options] [-- toolArgs...]",
+    "  omniroute launch --list           list launchable tools",
+    "  omniroute launch <tool> --help    options for a tool launch (--model, --all-models, ...)",
+    "",
+    "Without a tool name, launch starts Claude Code with the options above (deprecated).",
+  ].join("\n");
+  const fetchImpl = async (_url: string, init: { body: string }) => {
+    const queries = new URLSearchParams(init.body).getAll("q");
+    // kn returned all seven spans in order and echoed the final ID as a bare word.
+    const out = queries.map((html) =>
+      html.includes("\n")
+        ? html.replace(/\s*\n\s*/g, " ") + " zqg"
+        : html.replace("options", "ಆಯ್ಕೆಗಳು")
+    );
+    return { ok: true, status: 200, json: async () => out };
+  };
+
+  const [out] = await google.translateStringsWithGoogle([source], "kn", {
+    apiKey: "",
+    fetchImpl,
+    protectedTerms: ["OmniRoute"],
+  });
+  assert.ok(out, "the launch help translation must be restored");
+  assert.equal(out.split("\n").length, source.split("\n").length);
+  assert.equal(out.match(/<tool>/g)?.length, 2);
+  assert.deepEqual(out.match(/--[a-z-]+/g), ["--list", "--help", "--model", "--all-models"]);
+  assert.match(out, /ಆಯ್ಕೆಗಳು/);
+  assert.doesNotMatch(out, /\bzq[a-z]+\b/);
+});
+
+test("Google can reorder command-line placeholders in angle brackets", async () => {
+  const source = "Choose <tool> with <profile>.";
+  const fetchImpl = async (_url: string, init: { body: string }) => {
+    const html = new URLSearchParams(init.body).get("q") ?? "";
+    const [tool, profile] = html.match(/<span translate="no">zq[a-z]+<\/span>/g) ?? [];
+    assert.ok(tool && profile);
+    return { ok: true, status: 200, json: async () => [`With ${profile}, choose ${tool}.`] };
+  };
+
+  const [out] = await google.translateStringsWithGoogle([source], "kn", { apiKey: "", fetchImpl });
+  assert.equal(out, "With <profile>, choose <tool>.");
+});
+
+test("angle placeholder reordering preserves the order of real markup", () => {
+  for (const source of [
+    "Line break <BR> before <img>.",
+    "Read <widget>this</WIDGET>.",
+    'Line break <br> before <widget class="example">.',
+  ]) {
+    const mask = google.maskInline(source);
+    const [first, second] = mask.html.match(/<span translate="no">zq[a-z]+<\/span>/g) ?? [];
+    assert.ok(first && second);
+    assert.equal(mask.restore(`Reordered ${second} ${first}.`), null, source);
+    assert.equal(mask.restore(mask.html), source);
+  }
+});
+
 test("parseIcuMessage keeps the scaffolding verbatim", () => {
   const nodes = google.parseIcuMessage("Used by {count, plural, one {# batch} other {# batches}}");
   assert.equal(nodes[0].text, "Used by ");

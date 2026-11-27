@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="वचन — एक एंडपॉइंट आणि 394 प्रदाते. दुसरे सक्षम लक्ष्य उपलब्ध असेपर्यंत स्वयंचलित फॉलबॅक रूटिंग सुरू ठेवते. सहा आधारस्तंभ: 394 प्रदात्यांमध्ये लवचिक फॉलबॅक · पात्र वर्कलोड्सवर 95% पर्यंत टोकन बचत · 150+ मोफत स्तर आणि 51 आवर्ती/keyless कायमस्वरूपी मोफत प्रदात्यांसह सुरू करण्यासाठी $0 · एका कॉन्फिगद्वारे 39 CLI/एजंट इंटिग्रेशन्स · /v1 वर OpenAI, Claude, Gemini आणि Responses API सुसंगतता · सर्किट ब्रेकर्स, TLS stealth, MCP 110 टूल्स, A2A, मेमरी, guardrails, evals आणि 7,800+ ट्रॅक केलेल्या टेस्ट फाइल्समधील 56,000+ स्थिर टेस्ट घोषणांसह प्रॉडक्शन नियंत्रणे."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="वचन — एक एंडपॉइंट आणि 394 प्रदाते. दुसरे सक्षम लक्ष्य उपलब्ध असेपर्यंत स्वयंचलित फॉलबॅक रूटिंग सुरू ठेवते. सहा आधारस्तंभ: 394 प्रदात्यांमध्ये लवचिक फॉलबॅक · पात्र वर्कलोड्सवर 95% पर्यंत टोकन बचत · 150+ मोफत स्तर आणि 40 आवर्ती/keyless कायमस्वरूपी मोफत प्रदात्यांसह सुरू करण्यासाठी $0 · एका कॉन्फिगद्वारे 39 CLI/एजंट इंटिग्रेशन्स · /v1 वर OpenAI, Claude, Gemini आणि Responses API सुसंगतता · सर्किट ब्रेकर्स, TLS stealth, MCP 110 टूल्स, A2A, मेमरी, guardrails, evals आणि 7,800+ ट्रॅक केलेल्या टेस्ट फाइल्समधील 56,000+ स्थिर टेस्ट घोषणांसह प्रॉडक्शन नियंत्रणे."/>
 
 <br/>
 <br/>
@@ -702,7 +702,7 @@ omniroute configure codex          # तसेच: claude opencode qwen aider go
 
 </div>
 
-> **394 नोंदणीकृत प्रदाते** canonical chat, media, search, local, cloud-agent आणि system संग्रहांमध्ये आहेत; यांपैकी **153 प्रदात्यांच्या discovery metadata मध्ये `hasFree: true` आहे**. Chat model registry मध्ये **239 प्रदाते / 3,059 स्वतंत्र provider-model जोड्या / 1,475 कच्चे model IDs** समाविष्ट आहेत; स्वतंत्र free-budget catalog मध्ये **465 प्रति-मॉडेल नोंदी**, **34 पुनरावर्ती pools** आणि **51 पुनरावर्ती/keyless कायमस्वरूपी मोफत प्रदाते** आहेत. हे भिन्न denominators जाणीवपूर्वक वापरले आहेत; व्याख्या आणि pool-deduped गणना [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) आणि [Free Tiers](docs/reference/FREE_TIERS.md) मध्ये उपलब्ध आहेत.
+> **394 नोंदणीकृत प्रदाते** canonical chat, media, search, local, cloud-agent आणि system संग्रहांमध्ये आहेत; यांपैकी **153 प्रदात्यांच्या discovery metadata मध्ये `hasFree: true` आहे**. Chat model registry मध्ये **239 प्रदाते / 3,059 स्वतंत्र provider-model जोड्या / 1,475 कच्चे model IDs** समाविष्ट आहेत; स्वतंत्र free-budget catalog मध्ये **465 प्रति-मॉडेल नोंदी**, **34 पुनरावर्ती pools** आणि **40 पुनरावर्ती/keyless कायमस्वरूपी मोफत प्रदाते** आहेत. हे भिन्न denominators जाणीवपूर्वक वापरले आहेत; व्याख्या आणि pool-deduped गणना [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) आणि [Free Tiers](docs/reference/FREE_TIERS.md) मध्ये उपलब्ध आहेत.
 
 <div align="center">
 
@@ -1317,7 +1317,7 @@ process द्वारे एका port वर उपलब्ध करून
   <tr><td nowrap><b>रनटाइम</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>भाषा</b></td><td>TypeScript 6.0 — <code>src/</code> आणि <code>open-sse/</code> मध्ये <b>100% TypeScript</b> (v2.0 पासून कोअरमध्ये शून्य <code>any</code>)</td></tr>
   <tr><td nowrap><b>फ्रेमवर्क</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>डेटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिंग) + LowDB (JSON लेगसी) — 147 डोमेन मॉड्यूल्स, 244 माइग्रेशन्स</td></tr>
+  <tr><td nowrap><b>डेटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिंग) + LowDB (JSON लेगसी) — 147 डोमेन मॉड्यूल्स, 252 माइग्रेशन्स</td></tr>
   <tr><td nowrap><b>मेमरी</b></td><td>SQLite FTS5 पूर्ण-मजकूर + int8-क्वांटाइझ्ड व्हेक्टर एम्बेडिंग्ज, टाइपयुक्त क्षय</td></tr>
   <tr><td nowrap><b>स्कीमा</b></td><td>Zod 4 — MCP टूल I/O प्रमाणीकरण + API करार</td></tr>
   <tr><td nowrap><b>प्रोटोकॉल्स</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

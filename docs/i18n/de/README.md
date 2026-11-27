@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Das Versprechen — Ein Endpunkt und 394 Provider. Automatisches Fallback hält das Routing aufrecht, solange ein anderes gesundes Ziel verfügbar ist. Sechs Säulen: ausfallsicheres Fallback über 394 Provider · bis zu 95 % Token-Einsparungen bei geeigneten Workloads · $0 zum Start mit mehr als 150 kostenlosen Kontingenten und 51 dauerhaft kostenlosen Providern mit wiederkehrendem oder schlüssellosem Zugang · 39 CLI-/Agent-Integrationen über eine Konfiguration · Kompatibilität mit den OpenAI-, Claude-, Gemini- und Responses-APIs unter /v1 · Produktionskontrollen einschließlich Circuit Breakern, TLS-Stealth, MCP mit 110 Tools, A2A, Speicher, Guardrails, Evaluierungen und mehr als 56.000 statischen Testdeklarationen über mehr als 7.800 erfasste Testdateien."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Das Versprechen — Ein Endpunkt und 394 Provider. Automatisches Fallback hält das Routing aufrecht, solange ein anderes gesundes Ziel verfügbar ist. Sechs Säulen: ausfallsicheres Fallback über 394 Provider · bis zu 95 % Token-Einsparungen bei geeigneten Workloads · $0 zum Start mit mehr als 150 kostenlosen Kontingenten und 40 dauerhaft kostenlosen Providern mit wiederkehrendem oder schlüssellosem Zugang · 39 CLI-/Agent-Integrationen über eine Konfiguration · Kompatibilität mit den OpenAI-, Claude-, Gemini- und Responses-APIs unter /v1 · Produktionskontrollen einschließlich Circuit Breakern, TLS-Stealth, MCP mit 110 Tools, A2A, Speicher, Guardrails, Evaluierungen und mehr als 56.000 statischen Testdeklarationen über mehr als 7.800 erfasste Testdateien."/>
 
 <br/>
 <br/>
@@ -712,7 +712,7 @@ aus deiner Shell-Historie heraus. → [CLI-Integrationen](docs/guides/CLI-INTEGR
 
 </div>
 
-> **394 registrierte Anbieter** in den kanonischen Sammlungen für Chat, Medien, Suche, lokal, Cloud-Agenten und Systeme, darunter **153 mit `hasFree: true`-Erkennungsmetadaten**. Die Chat-Modellregistrierung umfasst **239 Anbieter / 3.059 eindeutige Anbieter-Modell-Paare / 1.475 rohe Modell-IDs**; der separate Katalog für kostenlose Kontingente enthält **465 Zeilen pro Modell**, **34 wiederkehrende Pools** und **51 wiederkehrende bzw. schlüssellose Anbieter, die dauerhaft kostenlos sind**. Diese Nenner unterscheiden sich absichtlich; Definitionen und pool-bereinigte Berechnungen finden sich in der [Anbieterreferenz](docs/reference/PROVIDER_REFERENCE.md) und unter [Kostenlose Kontingente](docs/reference/FREE_TIERS.md).
+> **394 registrierte Anbieter** in den kanonischen Sammlungen für Chat, Medien, Suche, lokal, Cloud-Agenten und Systeme, darunter **153 mit `hasFree: true`-Erkennungsmetadaten**. Die Chat-Modellregistrierung umfasst **239 Anbieter / 3.059 eindeutige Anbieter-Modell-Paare / 1.475 rohe Modell-IDs**; der separate Katalog für kostenlose Kontingente enthält **465 Zeilen pro Modell**, **34 wiederkehrende Pools** und **40 wiederkehrende bzw. schlüssellose Anbieter, die dauerhaft kostenlos sind**. Diese Nenner unterscheiden sich absichtlich; Definitionen und pool-bereinigte Berechnungen finden sich in der [Anbieterreferenz](docs/reference/PROVIDER_REFERENCE.md) und unter [Kostenlose Kontingente](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1332,7 +1332,7 @@ Kanonische Metriken vom 2026-10-18: **1.976 einzigartige Videos** · **20.220.28
   <tr><td nowrap><b>Laufzeit</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Sprache</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> in <code>src/</code> und <code>open-sse/</code> (seit v2.0 kein <code>any</code> im Kern)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Datenbank</b></td><td>better-sqlite3 (SQLite, WAL-Journaling) + LowDB (JSON-Legacy) — 147 Domänenmodule, 244 Migrationen</td></tr>
+  <tr><td nowrap><b>Datenbank</b></td><td>better-sqlite3 (SQLite, WAL-Journaling) + LowDB (JSON-Legacy) — 147 Domänenmodule, 252 Migrationen</td></tr>
   <tr><td nowrap><b>Speicher</b></td><td>SQLite-FTS5-Volltextsuche + int8-quantisierte Vektoreinbettungen, typisierter Verfall</td></tr>
   <tr><td nowrap><b>Schemas</b></td><td>Zod 4 — MCP-Tool-E/A-Validierung + API-Verträge</td></tr>
   <tr><td nowrap><b>Protokolle</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

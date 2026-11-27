@@ -58,7 +58,8 @@ export function BypassListEditor({ patterns, onSave }: BypassListEditorProps) {
       >
         <Textarea
           id={textareaId}
-          className="min-h-[80px] font-mono text-sm"
+          mono
+          className="min-h-[80px] text-sm"
           placeholder="*.internal.corp&#10;sso.example.com"
           value={userInput}
           onChange={(e) => setUserInput(e.target.value)}

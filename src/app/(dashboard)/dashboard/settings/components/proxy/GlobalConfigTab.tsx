@@ -13,6 +13,7 @@ import {
 import { Badge, Card, Button, Input, Spinner, Toggle, ProxyConfigModal } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { DEFAULT_NEW_CONNECTION_PROXY_ENABLED } from "@/shared/constants/newConnectionProxy.mjs";
+import Notice from "@/shared/components/Notice";
 
 type GlobalProxyConfig = { type: string; host: string; port: number } | null;
 
@@ -293,7 +294,7 @@ export default function GlobalConfigTab() {
             onChange={(e) => setTargetUrl(e.target.value)}
             placeholder="https://api.openai.com/v1/models"
             className="flex-1"
-            inputClassName="font-mono"
+            mono
           />
           <Button
             size="sm"
@@ -306,14 +307,7 @@ export default function GlobalConfigTab() {
           </Button>
         </div>
 
-        {error && (
-          <div
-            role="alert"
-            className="p-3 rounded-lg bg-error-bg border border-error/30 text-sm text-error"
-          >
-            {error}
-          </div>
-        )}
+        {error && <Notice variant="critical">{error}</Notice>}
 
         {testing && !results && (
           <div className="flex items-center gap-2 text-sm text-text-muted py-2" role="status">
@@ -339,16 +333,16 @@ export default function GlobalConfigTab() {
         {results && results.length > 0 && (
           <Table
             scrollbarLabel={t("bulkHealthcheck")}
-            containerClassName="rounded-none border-0"
+            variant="plain"
+            density="compact"
             maxHeight="16rem"
             scrollLabel={t("bulkHealthcheck")}
-            className="text-xs"
           >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("healthcheckStatus")}</TableHead>
                 <TableHead>{t("healthcheckProxyUrl")}</TableHead>
-                <TableHead className="text-right">{t("healthcheckLatency")}</TableHead>
+                <TableHead numeric>{t("healthcheckLatency")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -372,7 +366,7 @@ export default function GlobalConfigTab() {
                     )}
                   </TableCell>
                   <TableCell className="font-mono truncate max-w-xs">{r.proxyUrl}</TableCell>
-                  <TableCell className="text-right text-text-muted">
+                  <TableCell numeric className="text-text-muted">
                     {r.latencyMs !== null ? `${r.latencyMs}ms` : "—"}
                   </TableCell>
                 </TableRow>

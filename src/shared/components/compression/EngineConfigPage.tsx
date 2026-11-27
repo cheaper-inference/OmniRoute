@@ -116,7 +116,7 @@ function renderDiffSegment(
 
   return (
     <div key={`${label}-${index}`} className="rounded border border-border bg-bg p-2">
-      <span className="mr-2 rounded bg-bg-subtle px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+      <span className="mr-2 rounded bg-bg-subtle px-1.5 py-0.5 text-3xs font-semibold uppercase tracking-wide text-text-muted">
         {translateLabel(label)}
       </span>
       <span className="whitespace-pre-wrap break-words text-text-main">{text}</span>

@@ -9,6 +9,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 vi.mock("next-intl", () => ({
+  useLocale: () => "en",
   useTranslations: () => (key: string) => key,
 }));
 
@@ -128,11 +129,17 @@ describe("EditConnectionModal — GitHub AI Credits limit", () => {
     expect(updates.providerSpecificData).toHaveProperty("githubCreditLimit", null);
   });
 
-  it("refuses a negative limit without saving", async () => {
-    const onSave = renderModal(githubConnection());
-    await typeInto(findCreditLimitInput()!, "-3");
+  it("refuses a negative limit: the field does not take the minus sign, so none is saved", async () => {
+    // The limit is the kit numeric field with `min={0}`: a negative number cannot be entered,
+    // so the "not a non-negative number" error of the form has nothing to reject any more.
+    const onSave = renderModal(githubConnection({ githubCreditLimit: 40 }));
+    const input = findCreditLimitInput()!;
+    await typeInto(input, "-3");
+    expect(input.value).toBe("40");
+    expect(view().textContent).not.toContain("aiCreditsLimitInvalid");
     await clickSave();
-    expect(onSave).not.toHaveBeenCalled();
-    expect(view().textContent).toContain("aiCreditsLimitInvalid");
+    expect(onSave).toHaveBeenCalledTimes(1);
+    const updates = onSave.mock.calls[0][0] as { providerSpecificData: Record<string, unknown> };
+    expect(updates.providerSpecificData.githubCreditLimit).toBe(40);
   });
 });
