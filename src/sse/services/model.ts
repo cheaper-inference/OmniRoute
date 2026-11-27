@@ -10,6 +10,7 @@ import { getCachedProviderNodes, getCachedSettings } from "@/lib/db/readCache";
 import { getSyncedAutoAliases } from "@/lib/providerModels/syncedAutoAliases.ts";
 import { getActiveSyncedCatalog } from "@/lib/db/models/activeSyncedCatalog";
 import { getModelCompatOverrides } from "@/lib/db/models/compat";
+import type { SyncedAvailableModel } from "@/lib/db/models/synced";
 import { getNoAuthHydrationProviderIds } from "./noAuthProviderSiblings";
 import { inferGithubUnsyncedTargetFormat } from "./githubResponsesFallback";
 import {
@@ -23,10 +24,15 @@ import {
 import { getLearnedReasoningEffortForModel } from "@omniroute/open-sse/services/learnedReasoningEffortCaps.ts";
 import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { ANTIGRAVITY_MODEL_ALIASES } from "@omniroute/open-sse/config/antigravityModelAliases.ts";
+import {
+  claudeEffortLevelsFor,
+  shouldExposeClaudeEffortVariants,
+} from "@omniroute/open-sse/utils/claudeEffortVariants.ts";
 import { getRegisteredProviderEffortBaseModelId } from "@omniroute/open-sse/utils/registeredEffortVariants.ts";
 import { canGrandfatherProviderPrefix } from "@/lib/providers/providerPrefixCollision";
 import { getReservedProviderPrefixes } from "@/shared/constants/reservedProviderPrefixes";
 import { getProviderByAlias } from "@/shared/constants/providers";
+import { isDisableThinkingLevelVariantsEnabled } from "@/shared/utils/featureFlags";
 import {
   assertMicrosoftDesignerWebProviderAvailable,
   isMicrosoftDesignerWebProviderRetiredError,
@@ -118,8 +124,7 @@ type RuntimeModelMeta = {
   alwaysThinking?: boolean;
   supportedThinkingEfforts?: string[];
   defaultThinkingEffort?: string;
-  // #7694: set when `modelId` carried a `-{effort}` suffix resolved against a synced
-  // model's own `supportedThinkingEfforts` (see `resolveSyncedModelIdAndEffort` below).
+  // Set when a `-{effort}` suffix resolves against declared or generated catalog tiers.
   // Threaded through to `handleChatCore` -> `applyDefaultReasoningEffort` so the suffix
   // becomes `reasoning_effort` only when the request itself carries no reasoning field.
   resolvedThinkingEffort?: string;
@@ -367,6 +372,26 @@ function buildRuntimeModelMeta(
   return metadata;
 }
 
+function applyInferredTargetFormat(
+  metadata: RuntimeModelMeta,
+  syncedMatch: SyncedAvailableModel | undefined,
+  registryMatch: unknown,
+  providerId: string,
+  modelId: string
+): void {
+  const syncedDeclaresChatEndpoint =
+    Array.isArray(syncedMatch?.supportedEndpoints) &&
+    syncedMatch.supportedEndpoints.some(
+      (ep: unknown) =>
+        typeof ep === "string" &&
+        (ep === "chat" || ep.includes("chat/completions") || ep.includes("chat-completions"))
+    );
+  if (!metadata.targetFormat && !syncedDeclaresChatEndpoint && !registryMatch) {
+    const inferredTargetFormat = inferGithubUnsyncedTargetFormat(providerId, modelId);
+    if (inferredTargetFormat) metadata.targetFormat = inferredTargetFormat;
+  }
+}
+
 /**
  * #14393: some live/synced catalogs expose an upstream model id that itself
  * contains a "/" (e.g. logfare's "logfare/auto"). parseModel() unconditionally
@@ -401,6 +426,29 @@ function resolveSyncedMatch(
   if (fallbackMatch) return { match: fallbackMatch, modelId: originalModelId as string };
 
   return { match: undefined, modelId: resolvedModelId };
+}
+
+function resolveGeneratedClaudeEffortVariant(
+  providerId: string,
+  resolvedModelId: string,
+  syncedModels: SyncedAvailableModel[]
+): { baseModelId: string; level: string; liveBase: SyncedAvailableModel } | null {
+  const suffixStart = resolvedModelId.lastIndexOf("-");
+  if (suffixStart <= 0) return null;
+
+  const baseModelId = resolvedModelId.slice(0, suffixStart);
+  const level = resolvedModelId.slice(suffixStart + 1);
+  const liveBase = syncedModels.find((model) => model.id === baseModelId);
+  const bareBase = baseModelId.slice(baseModelId.lastIndexOf("/") + 1);
+  if (
+    liveBase &&
+    shouldExposeClaudeEffortVariants({ id: `${providerId}/${baseModelId}` }) &&
+    claudeEffortLevelsFor(providerId, bareBase).includes(level) &&
+    !isDisableThinkingLevelVariantsEnabled()
+  ) {
+    return { baseModelId, level, liveBase };
+  }
+  return null;
 }
 
 async function lookupModelMeta(
@@ -455,7 +503,7 @@ async function lookupModelMeta(
     }
     // Custom models remain explicit operator overrides even when live discovery
     // is authoritative for the provider.
-    const customMatch = findCustomModelMeta(customModels, resolvedModelId);
+    let customMatch = findCustomModelMeta(customModels, resolvedModelId);
     const syncedResolution = resolveSyncedMatch(
       providerId,
       modelId,
@@ -464,19 +512,34 @@ async function lookupModelMeta(
       syncedModels
     );
     resolvedModelId = syncedResolution.modelId;
-    const syncedMatch = syncedResolution.match;
-    const registryMatch = findRegistryModel(providerId, resolvedModelId);
-    const compatOverrideMatch = Array.isArray(compatOverrides)
-      ? compatOverrides.find((m) => m.id === resolvedModelId || m.id === modelId)
-      : undefined;
+    let syncedMatch = syncedResolution.match;
     const effortBaseModelId = getRegisteredProviderEffortBaseModelId(providerId, modelId);
 
     const liveBackedEffortVariant =
       effortBaseModelId !== null && syncedModels.some((model) => model.id === effortBaseModelId);
 
-    const available =
+    let available =
       !liveCatalog.authoritative || Boolean(customMatch || syncedMatch || liveBackedEffortVariant);
 
+    // The catalog can generate Claude tiers even when the live row declares none.
+    // Only try those tiers after the existing literal and declared tier lookups miss.
+    const generatedVariant =
+      !available && !effort
+        ? resolveGeneratedClaudeEffortVariant(providerId, resolvedModelId, syncedModels)
+        : null;
+    if (generatedVariant) {
+      const { baseModelId, level, liveBase } = generatedVariant;
+      resolvedModelId = baseModelId;
+      effort = level;
+      syncedMatch = liveBase;
+      customMatch = findCustomModelMeta(customModels, baseModelId);
+      available = true;
+    }
+
+    const registryMatch = findRegistryModel(providerId, resolvedModelId);
+    const compatOverrideMatch = Array.isArray(compatOverrides)
+      ? compatOverrides.find((m) => m.id === resolvedModelId || m.id === modelId)
+      : undefined;
     const metadata = buildRuntimeModelMeta(
       customMatch,
       syncedMatch,
@@ -484,17 +547,7 @@ async function lookupModelMeta(
       compatOverrideMatch
     );
     if (effort) metadata.resolvedThinkingEffort = effort;
-    const syncedDeclaresChatEndpoint =
-      Array.isArray(syncedMatch?.supportedEndpoints) &&
-      syncedMatch.supportedEndpoints.some(
-        (ep: unknown) =>
-          typeof ep === "string" &&
-          (ep === "chat" || ep.includes("chat/completions") || ep.includes("chat-completions"))
-      );
-    if (!metadata.targetFormat && !syncedDeclaresChatEndpoint && !registryMatch) {
-      const inferredTargetFormat = inferGithubUnsyncedTargetFormat(providerId, resolvedModelId);
-      if (inferredTargetFormat) metadata.targetFormat = inferredTargetFormat;
-    }
+    applyInferredTargetFormat(metadata, syncedMatch, registryMatch, providerId, resolvedModelId);
 
     return { modelId: resolvedModelId, metadata, available };
   } catch {
