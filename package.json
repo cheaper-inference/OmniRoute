@@ -127,7 +127,7 @@
     "omniroute:verify": "node scripts/check/omniroute-verify.mjs",
     "build:release": "rm -rf .build dist && OMNIROUTE_BUILD_SHA=$(git rev-parse --short HEAD) npm run build && npm run build:cli && node scripts/build/write-build-sha.mjs",
     "bun:release": "bun scripts/release/bun-pack.mjs",
-    "build:native:tproxy": "cd src/mitm/tproxy/native && npx --yes node-gyp rebuild",
+    "build:native:tproxy": "node scripts/build/build-tproxy-native.mjs",
     "start": "node scripts/dev/run-next.mjs start",
     "start:fast": "cross-env OMNIROUTE_SKIP_STANDALONE=1 node scripts/dev/run-next.mjs start",
     "homolog": "node scripts/homolog/run.mjs",
