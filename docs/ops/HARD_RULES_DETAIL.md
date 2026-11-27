@@ -97,12 +97,12 @@ reconciliation (Phase 0a), **immediately cuts the next cycle's branch `release/v
 frozen tip (Phase 0a.0b — bump + living release PR + re-home of open PRs)**, and closes the
 freeze once the release PR squash-merges to `main`.
 
-Before merging **any** PR, every campaign workflow (`/review-prs`, `/review-group-prs`,
+Before merging **any** PR, every campaign workflow (`/review-prs`,
 `/merge-prs`, `/triage-fix-bugs`, `/implement-fix-bugs`, `/triage-features`,
 `/implement-features`, `/green-prs`, `/port-upstream-*`) **MUST** check:
 
 ```bash
-gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
+gh issue list --repo cheaper-inference/OmniRoute --label release-freeze --state open
 ```
 
 If a freeze is active: **NEVER merge into the frozen `release/vX.Y.Z` named in the freeze

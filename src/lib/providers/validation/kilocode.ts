@@ -34,14 +34,19 @@ export async function validateKilocodeProvider({
   // providerSpecificData.baseUrl is `unknown` (persisted JSON) — narrow it before
   // handing it to normalizeBaseUrl(string). A malformed stored value (object, number)
   // must fall back to the registry base URL, not crash the probe (#2463 class).
+  const kiloEntry = getRegistryEntry("kilocode");
   const configuredBaseUrl =
     normalizeBaseUrl(
       typeof providerSpecificData.baseUrl === "string" ? providerSpecificData.baseUrl : ""
     ) ||
-    getRegistryEntry("kilocode")?.baseUrl ||
+    kiloEntry?.baseUrl ||
     "https://api.kilo.ai/api/openrouter/chat/completions";
 
-  const headers = buildBearerHeaders(apiKey, providerSpecificData);
+  // Kilo serves its free models with the registry's anonymous bearer token when no key is
+  // configured — the same fallback DefaultExecutor uses. A supplied key always wins, and
+  // buildBearerHeaders still applies any connection-specific custom user agent.
+  const effectiveApiKey = apiKey || kiloEntry?.anonymousApiKey || "";
+  const headers = buildBearerHeaders(effectiveApiKey, providerSpecificData);
   headers["Content-Type"] = "application/json";
   headers["X-KILOCODE-EDITORNAME"] = "OmniRoute";
 

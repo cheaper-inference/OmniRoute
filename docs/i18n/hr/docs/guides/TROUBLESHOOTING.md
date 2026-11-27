@@ -473,7 +473,7 @@ pogledajte [`docs/guides/KIRO_SETUP.md`](./KIRO_SETUP.md).
 2. **Trajno rješenje:** Izričito se povežite na IPv4 upotrebom `-p 127.0.0.1:20128:20128` u naredbi `docker run`:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Time se nameće povezivanje putem IPv4 te se ujedno izbjegava izlaganje proxy poslužitelja na svim mrežnim sučeljima računala.
 

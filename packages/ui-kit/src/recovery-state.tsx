@@ -11,13 +11,15 @@ export interface RecoveryStateProps extends Omit<ComponentProps<"section">, "tit
   title: string;
   description: string;
   reference?: string;
+  /** Text before `reference`. Defaults to "Support reference". */
+  referenceLabel?: string;
   actions?: ReactNode;
   help?: ReactNode;
   announce?: boolean;
 }
 
 /** Router- and provider-independent recovery for failed pages and sections. */
-export function RecoveryState({ variant = "page", brand, headerAction, icon, eyebrow, title, description, reference, actions, help, announce = true, className, ...props }: RecoveryStateProps) {
+export function RecoveryState({ variant = "page", brand, headerAction, icon, eyebrow, title, description, reference, referenceLabel = "Support reference", actions, help, announce = true, className, ...props }: RecoveryStateProps) {
   const id = useId();
   const Heading = variant === "page" ? "h1" : "h2";
   return <section data-slot="recovery-state" data-variant={variant} className={cn("ci-recovery-state", className)} aria-labelledby={id} {...props}>
@@ -33,7 +35,7 @@ export function RecoveryState({ variant = "page", brand, headerAction, icon, eye
         {actions && <div className="ci-recovery-state__actions">{actions}</div>}
         {(help || reference) && <footer className="ci-recovery-state__footer">
           {help && <div>{help}</div>}
-          {reference && <p className="ci-recovery-state__reference">Support reference <code>{reference}</code></p>}
+          {reference && <p className="ci-recovery-state__reference">{referenceLabel} <code>{reference}</code></p>}
         </footer>}
       </div>
     </div>

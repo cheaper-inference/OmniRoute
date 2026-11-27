@@ -4,14 +4,9 @@
 
 ---
 
-OmniRoute koristi model izdanja s **paralelnim ciklusima**: namjensku granu `release/vX.Y.Z`
-za aktivni ciklus, `main` za objavljenu liniju i nepromjenjivu oznaku
-`vX.Y.Z` kada se taj ciklus objavi. Očekivano je da se commitovi pojavljuju i na `release/*` _i_ na
-`main` — nije riječ o zabuni.
+OmniRoute koristi a** paralelni ciklus** model izdanja: namjenska `release/vX.Y.Z` grana za aktivni ciklus, `main` za objavljenu liniju i nepromjenjiva `vX.Y.Z` oznaka kada se taj ciklus pošalje. Očekivano je vidjeti da komit slijeće na `release/*` _i_ na `main` — nije zabuna.
 
-Pojedinosti za održavatelje nalaze se u datoteci `CLAUDE.md` (Strogo pravilo br. 21) i
-[RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Ova je stranica javni
-sažetak namijenjen doprinositeljima.
+Detalji o održavanju nalaze se u `CLAUDE.md` (Hard Rule #21) i [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Ova stranica je javni sažetak za suradnike.
 
 ## Ukratko
 
@@ -42,25 +37,23 @@ flowchart LR
 `main` nije integracijska grana za svakodnevni rad. PR-ove otvorene prema grani `main`
 obično treba preusmjeriti prije spajanja.
 
-## Zamrzavanje izdanja (paralelni ciklusi)
+## Otpuštanje zamrzavanja (paralelni ciklusi)
 
-Kada se izdanje usklađuje, otvara se označeni problem s oznakom `release-freeze`.
-To **ne zaustavlja razvoj**:
+Kada se izdanje usklađuje, otvara se problem markera s oznakom `release-freeze`. Da** ne zaustavlja razvoj** :
 
-- Zamrznuta grana `release/vX.Y.Z` pripada voditelju izdanja za tu objavu.
-- Grana sljedećeg ciklusa `release/vX+1` stvara se iz zamrznutog vrha kako bi doprinositelji mogli
-  nastaviti dodavati promjene.
-- Otvorene PR-ove koji još uvijek ciljaju zamrznutu granu treba **preusmjeriti** na
-  aktivnu (najvišu) granu `release/v*`.
+- Smrznuti `release/vX.Y.Z` pripada kapetanu za oslobađanje tog broda.
+- `release/vX+1` sljedećeg ciklusa izrezana je iz smrznutog vrha tako da suradnici nastavljaju raditi na slijetanju.
+- Otvoreni PRs koji još uvijek cilja na smrznutu granu trebao bi biti** preusmjereni** na aktivnu (najvišu) `release/v*` granu.
 
-Prije nego što pretpostavite da se željena grana može spajati, provjerite postoji li aktivno zamrzavanje:
+Provjerite postoji li otvoreno zamrzavanje prije nego što pretpostavite da se grana koju želite može spojiti:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Mehanika spajanja (vlasnikova oznaka `queue` → Mergify) dokumentirana je u
-[MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Mehanika spajanja (vlasnička oznaka `queue` → Mergify) dokumentirana je u [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: Mergify red čekanja za spajanje je povučen** (odluka vlasnika). `.mergify.yml` više ne definira red i odbija naredbe Mergify koje spajaju ili prepisuju zahtjev za povlačenjem. Izdanja PRs spajaju se ručno pod skupom pravila repozitorija "Zahtijevaj zelena vrata na aktivnom izdanju" (`Gate / CI` + `Gate / Quality`) dok se omni-queue ne pokrene u načinu rada uživo, a nakon toga kroz omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Oznaka `queue` više ništa ne spaja.
 
 ## Zašto i grana i oznaka?
 

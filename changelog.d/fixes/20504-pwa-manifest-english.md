@@ -1,0 +1,1 @@
+- fix(pwa): restore English name and description in the PWA manifest, which declares lang en (#20504)

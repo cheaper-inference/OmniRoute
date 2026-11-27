@@ -223,6 +223,19 @@ describe("Settings API - persisted preferences", () => {
       );
     });
 
+    test("GET /api/settings omits unsaved outputLimitAdvisory and returns saved booleans", async () => {
+      for (const advisory of [undefined, false, true]) {
+        if (advisory !== undefined) await harness.updateSettings({ outputLimitAdvisory: advisory });
+        const response = await harness.settingsRoute.GET(
+          await makeManagementSessionRequest("http://localhost/api/settings", { method: "GET" })
+        );
+        assert.equal(response.status, 200);
+        const body = (await response.json()) as Record<string, unknown>;
+        assert.equal(Object.hasOwn(body, "outputLimitAdvisory"), advisory !== undefined);
+        assert.equal(body.outputLimitAdvisory, advisory);
+      }
+    });
+
     test("PATCH /api/settings returns Cache-Control: no-store (ported from upstream #951)", async () => {
       const response = await harness.settingsRoute.PATCH(
         await makeManagementSessionRequest("http://localhost/api/settings", {

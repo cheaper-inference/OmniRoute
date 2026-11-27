@@ -12,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import { CardSkeleton } from "@/shared/components/Loading";
+import Badge from "@/shared/components/Badge";
+import IconChip from "@/shared/components/IconChip";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { getProviderDisplayName } from "@/lib/display/names";
@@ -482,13 +484,10 @@ function AccessTabBar({ context }: { context: AccessFormContext }) {
                     white space between flex items is not rendered. */}
             {errorCount > 0 && " "}
             {errorCount > 0 && (
-              <span
-                className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold bg-error text-bg"
-                title={t("errorBadgeLabel", { count: errorCount })}
-              >
+              <Badge size="sm" variant="error" title={t("errorBadgeLabel", { count: errorCount })}>
                 <span aria-hidden="true">{errorCount}</span>
                 <span className="sr-only">{t("errorBadgeLabel", { count: errorCount })}</span>
-              </span>
+              </Badge>
             )}
           </TabsTrigger>
         );
@@ -838,11 +837,13 @@ export default function ApiKeyAccessEditorClient({ apiKeyId }: ApiKeyAccessEdito
   if (notFound) {
     return (
       <Card className="flex flex-col items-center justify-center p-12 text-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-error/10 flex items-center justify-center text-error">
-          <Icon name="key_off" size={24} />
-        </div>
+        <IconChip tone="danger" size="lg" shape="circle">
+          <Icon name="key_off" />
+        </IconChip>
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl text-text-main">{t("keyNotFound")}</h2>
+          <h2 className="ci-heading" data-size="xl">
+            {t("keyNotFound")}
+          </h2>
           <p className="text-sm text-text-muted">{t("keyNotFoundDesc")}</p>
         </div>
         <Link href="/dashboard/api-manager" className={buttonVariants({ variant: "outline" })}>
@@ -857,11 +858,13 @@ export default function ApiKeyAccessEditorClient({ apiKeyId }: ApiKeyAccessEdito
   if (fetchError || !apiKey) {
     return (
       <Card className="flex flex-col items-center justify-center p-12 text-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-error/10 flex items-center justify-center text-error">
-          <Icon name="error" size={24} />
-        </div>
+        <IconChip tone="danger" size="lg" shape="circle">
+          <Icon name="error" />
+        </IconChip>
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl text-text-main">{fetchError || t("failedLoadKey")}</h2>
+          <h2 className="ci-heading" data-size="xl">
+            {fetchError || t("failedLoadKey")}
+          </h2>
         </div>
         <Link href="/dashboard/api-manager" className={buttonVariants({ variant: "outline" })}>
           <Icon name="arrow_back" size={16} />

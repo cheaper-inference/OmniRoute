@@ -309,6 +309,7 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 3. **Ma'lumotlarni ehtiyotkorlik bilan to'ldiring** : mavjud qatorlarni boshqarish uchun `UPDATE ... WHERE ...` foydalaning
 4. **Buyurtma va nomlashni tekshiring** : `npm run test:migrations:fresh` (bo'sh ma'lumotlar bazasidagi barcha migratsiya) va `npm run check:migration-numbering`
 5. **Nusxada sinov** : ishlab chiqarishda hech qachon sinovdan o'tmagan migratsiyalarni amalga oshirmang
+6. **Koddan yaratilgan jadval ham ko'chirishni talab qiladi** : agar modul jadvalni dangasalik bilan yaratsa (`CREATE TABLE IF NOT EXISTS`, o'z-o'zini davolash yo'li sifatida saqlanadi), migratsiya uni bir xil DDL bilan yaratishi kerak. Aks holda, toza o'rnatish va yangilangan o'rnatish, ushbu kod yo'li ishlaganiga qarab, turli sxemalar bilan yakunlanadi. `tests/unit/db/lazy-table-migration-guard.test.ts` `src/` va `open-sse/` ni skanerlaydi va dangasa `CREATE` da migratsiyasiz ishlamay qoladi (#20557). Misol: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Misol:
 

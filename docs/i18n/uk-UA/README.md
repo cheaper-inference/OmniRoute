@@ -93,7 +93,7 @@
 
 [![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Обіцянка — одна кінцева точка та 394 постачальники. Автоматичне резервне перемикання продовжує маршрутизацію, поки доступна інша працездатна ціль. Шість основних переваг: стійке резервне перемикання між 394 постачальниками · до 95% економії токенів для відповідних робочих навантажень · $0 для початку зі 150+ безкоштовними тарифами та 51 постачальником із регулярним або безключовим безкоштовним доступом назавжди · 39 інтеграцій із CLI/агентами через один конфігураційний файл · сумісність з OpenAI, Claude, Gemini та Responses API за адресою /v1 · елементи керування для продакшену, зокрема автоматичні вимикачі, TLS stealth, 110 інструментів MCP, A2A, пам’ять, захисні обмеження, оцінювання та понад 56 000 статичних тестових декларацій у понад 7 800 відстежуваних тестових файлах."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Обіцянка — одна кінцева точка та 394 постачальники. Автоматичне резервне перемикання продовжує маршрутизацію, поки доступна інша працездатна ціль. Шість основних переваг: стійке резервне перемикання між 394 постачальниками · до 95% економії токенів для відповідних робочих навантажень · $0 для початку зі 150+ безкоштовними тарифами та 40 постачальником із регулярним або безключовим безкоштовним доступом назавжди · 39 інтеграцій із CLI/агентами через один конфігураційний файл · сумісність з OpenAI, Claude, Gemini та Responses API за адресою /v1 · елементи керування для продакшену, зокрема автоматичні вимикачі, TLS stealth, 110 інструментів MCP, A2A, пам’ять, захисні обмеження, оцінювання та понад 56 000 статичних тестових декларацій у понад 7 800 відстежуваних тестових файлах."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ omniroute configure codex          # також: claude opencode qwen aider goos
 
 </div>
 
-> **394 зареєстровані провайдери** у канонічних колекціях чатів, медіа, пошуку, локальних, хмарних агентів і систем, зокрема **153 із метаданими виявлення `hasFree: true`**. Реєстр чат-моделей охоплює **239 провайдерів / 3 059 унікальних пар провайдер-модель / 1 475 необроблених ідентифікаторів моделей**; окремий каталог безкоштовних лімітів містить **465 рядків для окремих моделей**, **34 регулярні пули** та **51 регулярного/безключового провайдера, безкоштовного назавжди**. Це різні знаменники за задумом; визначення та розрахунки з дедуплікацією пулів наведено в [Довіднику провайдерів](docs/reference/PROVIDER_REFERENCE.md) і [Безкоштовних рівнях](docs/reference/FREE_TIERS.md).
+> **394 зареєстровані провайдери** у канонічних колекціях чатів, медіа, пошуку, локальних, хмарних агентів і систем, зокрема **153 із метаданими виявлення `hasFree: true`**. Реєстр чат-моделей охоплює **239 провайдерів / 3 059 унікальних пар провайдер-модель / 1 475 необроблених ідентифікаторів моделей**; окремий каталог безкоштовних лімітів містить **465 рядків для окремих моделей**, **34 регулярні пули** та **40 регулярного/безключового провайдера, безкоштовного назавжди**. Це різні знаменники за задумом; визначення та розрахунки з дедуплікацією пулів наведено в [Довіднику провайдерів](docs/reference/PROVIDER_REFERENCE.md) і [Безкоштовних рівнях](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -778,7 +778,7 @@ omniroute configure codex          # також: claude opencode qwen aider goos
   <tr><th align="left">Платформа</th><th align="left">Встановлення</th><th align="left">Особливості</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (глобально)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Одна команда, будь-яка ОС</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (глобально)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Той самий tarball із реєстру, швидше встановлення</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Підтримка кількох архітектур: <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">Підтримка кількох архітектур: <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Настільний застосунок (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Нативне вікно + системний трей — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Рядок меню (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Контролює сервер і автоматично оновлює його — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>нативний <code>arm64</code></td><td align="left">Raspberry Pi, ARM-сервери, Apple Silicon</td></tr>
@@ -1102,7 +1102,7 @@ curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_KEY"
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 `:latest` відповідає найвищій **опублікованій** стабільній версії SemVer. Він не відстежує git `main`. Зафіксуйте `:X.Y.Z` для GitOps. Див. [Канали випусків Docker](docs/guides/DOCKER_GUIDE.md#release-channels). Образ фіксує значення **`OMNIROUTE_MEMORY_MB=1024`**. Цього достатньо для інформаційної панелі та легкого чату. **Агентам для програмування** (`POST /v1/responses` з Claude Code, Codex, Grok, …) потрібна значно більша купа V8, інакше процес завершується з помилкою `FATAL ERROR` приблизно на ~12 ГіБ за наявності двох контекстів великого розміру, що перекриваються. Розмір контейнера має перевищувати розмір купи (власні буфери розташовані за межами V8):
@@ -1116,7 +1116,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 Повна таблиця: [Посібник з Docker — оперативна пам’ять під час виконання](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
@@ -1322,7 +1322,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
   <tr><td nowrap><b>Середовище виконання</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Мова</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> у <code>src/</code> та <code>open-sse/</code> (нуль <code>any</code> у ядрі починаючи з v2.0)</td></tr>
   <tr><td nowrap><b>Фреймворк</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База даних</b></td><td>better-sqlite3 (SQLite, журналювання WAL) + LowDB (застарілий JSON) — 147 доменних модулів, 240 міграцій</td></tr>
+  <tr><td nowrap><b>База даних</b></td><td>better-sqlite3 (SQLite, журналювання WAL) + LowDB (застарілий JSON) — 147 доменних модулів, 252 міграцій</td></tr>
   <tr><td nowrap><b>Пам’ять</b></td><td>Повнотекстовий пошук SQLite FTS5 + векторні ембеддинги з квантуванням int8, типізоване згасання</td></tr>
   <tr><td nowrap><b>Схеми</b></td><td>Zod 4 — перевірка введення/виведення інструментів MCP + контракти API</td></tr>
   <tr><td nowrap><b>Протоколи</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1335,7 +1335,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
   <tr><td nowrap><b>Тестування</b></td><td>Вбудований тестувальник Node.js + Vitest — <b>понад 60 000 статичних оголошень тестів</b> у понад 8 400 відстежуваних файлах тестів (модульні, інтеграційні, E2E, безпеки, екосистеми)</td></tr>
   <tr><td nowrap><b>Платформи</b></td><td>Настільні (Electron) · Android (Termux) · PWA (будь-який браузер)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — автоматична публікація npm + Docker Hub під час випуску</td></tr>
-  <tr><td nowrap><b>Посилання</b></td><td><a href="https://omniroute.online">Вебсайт</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Посилання</b></td><td><a href="https://omniroute.online">Вебсайт</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

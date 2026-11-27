@@ -147,6 +147,8 @@ export type ApplyComboTargetExhaustionOptions = {
   exhaustedLogLevel: "info" | "debug";
   /** Structured error object from upstream response — preferred over raw errorText for classification */
   structuredError?: { code?: string; type?: string; message?: string };
+  /** Parsed error body; `errorText` is only the extracted message. */
+  upstreamErrorBody?: unknown;
 };
 
 export type ComboTargetExhaustionResult = {
@@ -358,7 +360,15 @@ export function applyComboTargetExhaustion(
       .join(" ")
   );
   const quotaMisclassifiedAsAuth = isQuotaOrCreditsError(errorText, structuredError);
-  if (isModelScopedAccessDenial(provider, result.status, errorText, structuredError)) {
+  if (
+    isModelScopedAccessDenial(
+      provider,
+      result.status,
+      errorText,
+      structuredError,
+      opts.upstreamErrorBody
+    )
+  ) {
     return { ...derived, providerExhausted: false };
   }
   if (

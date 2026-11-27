@@ -8,6 +8,7 @@
  * Aliases are stored in the `modelAliases` key-value namespace and seeded by
  * `src/lib/modelAliasSeed.ts`.
  */
+import { isReservedComboName } from "@/lib/combos/autoNames";
 import { getModelAliases } from "@/lib/db/models/aliases";
 import { DEFAULT_MODEL_ALIAS_SEED } from "@/lib/modelAliasSeed";
 import { getComboByName } from "@/lib/db/combos";
@@ -48,7 +49,7 @@ async function loadAliases(): Promise<Record<string, unknown>> {
 export async function resolveModelAliasWithSeedFallback(
   model: string | null | undefined
 ): Promise<string | null | undefined> {
-  if (!model) return model;
+  if (!model || isReservedComboName(model)) return model;
 
   // Combo routing takes precedence over individual model aliases (#10124 / #9020)
   if (model.startsWith("combo/")) return model;

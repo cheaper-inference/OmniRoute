@@ -4,7 +4,7 @@
 
 ---
 
-## ចាប់ផ្ដើមរហ័ស
+## ចាប់ផ្តើមរហ័ស
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## ឯកសារយោង API
+## API ឯកសារយោង
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-អនុគមន៍រោងចក្រដែលបង្កើតវត្ថុ Plugin ជាមួយនឹងតម្លៃលំនាំដើម។
+មុខងាររោងចក្រដែលបង្កើតវត្ថុកម្មវិធីជំនួយជាមួយលំនាំដើម។
 
 **ប៉ារ៉ាម៉ែត្រ៖**
 
-- `name` (string, ចាំបាច់) — ឈ្មោះ Plugin ជាទម្រង់ kebab-case
-- `priority` (number, ស្រេចចិត្ត, លំនាំដើម៖ 100) — តម្លៃទាបជាងដំណើរការមុន
-- `enabled` (boolean, ស្រេចចិត្ត, លំនាំដើម៖ true) — ចាប់ផ្ដើមក្នុងស្ថានភាពបើកដំណើរការឬ?
-- `onRequest` (function, ស្រេចចិត្ត) — ដំណើរការមុនកម្មវិធីដោះស្រាយការជជែក
-- `onResponse` (function, ស្រេចចិត្ត) — ដំណើរការបន្ទាប់ពីកម្មវិធីដោះស្រាយការជជែក
-- `onError` (function, ស្រេចចិត្ត) — ដំណើរការនៅពេលកម្មវិធីដោះស្រាយមានកំហុស
+- `name` (ខ្សែអក្សរ, ទាមទារ) — ឈ្មោះកម្មវិធីជំនួយក្នុង kebab-case
+- `priority` (ចំនួន ស្រេចចិត្ត លំនាំដើម៖ 100) — ដំណើរការទាបជាងមុន។
+- `enabled` (ប៊ូលីន ស្រេចចិត្ត លំនាំដើម៖ ពិត) — ចាប់ផ្តើមបើកដំណើរការ?
+- `onRequest` (មុខងារ ជាជម្រើស) — ដំណើរការមុនពេលអ្នកដោះស្រាយការជជែក
+- `onResponse` (មុខងារ ជាជម្រើស) — ដំណើរការបន្ទាប់ពីអ្នកដោះស្រាយការជជែក
+- `onError` (អនុគមន៍ ជាជម្រើស) — ដំណើរការលើបញ្ហាអ្នកដោះស្រាយ
 
 ### `blockRequest(response?): BlockingHookResult`
 
-ទប់ស្កាត់សំណើ និងអាចត្រឡប់ការឆ្លើយតបផ្ទាល់ខ្លួនជាជម្រើស។
+រារាំងសំណើរ ហើយត្រឡប់ជាជម្រើសវិញនូវការឆ្លើយតបផ្ទាល់ខ្លួន។
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-កែប្រែខ្លឹមសារសំណើ មុនពេលវាទៅដល់អ្នកផ្ដល់សេវា។
+កែប្រែផ្នែកសំណើ មុនពេលវាទៅដល់អ្នកផ្តល់សេវា។
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-ភ្ជាប់ទិន្នន័យមេតាទៅនឹងបរិបទសំណើ។
+ភ្ជាប់ទិន្នន័យមេតាទៅបរិបទសំណើ។
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## បរិបទ Plugin (`PluginContext`)
+## បរិបទកម្មវិធីជំនួយ (`PluginContext`)
 
-| វាល         | ប្រភេទ                    | ការពិពណ៌នា                  |
-| ----------- | ------------------------- | --------------------------- |
-| `requestId` | `string`                  | ឧបករណ៍សម្គាល់សំណើតែមួយគត់   |
-| `model`     | `string`                  | ឈ្មោះម៉ូដែលដែលបានស្នើសុំ    |
-| `provider`  | `string`                  | ID របស់អ្នកផ្ដល់សេវាគោលដៅ   |
-| `body`      | `Record<string, unknown>` | ខ្លឹមសារសំណើ                |
-| `headers`   | `Record<string, string>`  | បឋមកថាសំណើ                  |
-| `metadata`  | `Record<string, unknown>` | ទិន្នន័យមេតាដែលអាចកែប្រែបាន |
-| `timestamp` | `number`                  | ត្រាពេលវេលានៃសំណើ           |
+| វាល          | ប្រភេទ                    | ការពិពណ៌នា                          |
+| ------------ | ------------------------- | ----------------------------------- |
+| `requestId`  | `string`                  | ការកំណត់អត្តសញ្ញាណសំណើតែមួយគត់      |
+| `model`      | `string`                  | ឈ្មោះម៉ូដែលដែលបានស្នើសុំ            |
+| `provider`   | `string`                  | អ្នកផ្តល់គោលដៅ ID                   |
+| `body`       | `Record<string, unknown>` | ស្នើសុំរាងកាយ                       |
+| `headers`    | `Record<string, string>`  | ស្នើសុំចំណងជើង (សូមមើលកំណត់ចំណាំ)   |
+| `metadata`   | `Record<string, unknown>` | ទិន្នន័យមេតាដែលអាចផ្លាស់ប្តូរបាន។   |
+| `timestamp`  | `number`                  | ស្នើសុំត្រាពេលវេលា                  |
+| `apiKeyInfo` | `object` (ស្រេចចិត្ត)     | ទិន្នន័យមេតាគន្លឹះAPI (សូមមើលចំណាំ) |
+
+បរិបទមិនដែលយកព័ត៌មានសម្ងាត់របស់អតិថិជនទេ៖ បឋមកថា `authorization`, `x-api-key`, `proxy-authorization` និង `cookie` ត្រូវបានយកចេញ (ប្រអប់ណាមួយ) ហើយ `apiKeyInfo` រក្សាទិន្នន័យមេតារបស់សោ (ដូចជា `id`, `name` និង `scopes`) ប៉ុន្តែមិនមែនតម្លៃសោ ឬស្នាមម្រាមដៃរបស់វា (`redactPluginContext()` ក្នុង `src/lib/plugins/hooks.ts`) ទេ។ នេះអនុវត្តចំពោះ `onRequest`, `onResponse` និង `onError`។
 
 ## Manifest (`plugin.json`)
 
@@ -138,19 +141,18 @@ Hook អាចត្រូវបានកំណត់រចនាសម្ព័
 }
 ```
 
-## ប្រព័ន្ធសិទ្ធិ
+## ប្រព័ន្ធអនុញ្ញាត
 
-កម្មវិធីជំនួយដំណើរការក្នុងបរិបទ VM ដែលមានការការពារដាច់ដោយឡែក។ ការចូលប្រើធនធានខាងក្រៅតម្រូវឱ្យមានសិទ្ធិច្បាស់លាស់៖
+កម្មវិធីជំនួយគឺ** មិនមែនជាប្រអប់ខ្សាច់ទេ។** . កម្មវិធីជំនួយសកម្មនីមួយៗដំណើរការជាដំណើរការកូន Node.js ធម្មតាដាច់ដោយឡែកមួយ (`loadPlugin()` in `src/lib/plugins/loader.ts`) ក្រោមអ្នកប្រើប្រាស់ប្រព័ន្ធប្រតិបត្តិការដូចគ្នាជាមួយ OmniRoute ដោយគ្មានបរិបទ VM និងគ្មានទង់ការអនុញ្ញាត Node.js ។ កូដកម្មវិធីជំនួយអាចប្រើ `node:fs`, `node:child_process`, `fetch` និង Node.js API ផ្សេងទៀត៖ វាអាចអាន និងសរសេរឯកសារណាមួយដែលអ្នកប្រើប្រាស់ OmniRoute អាច (រួមទាំងថតទិន្នន័យ) ដំណើរការកម្មវិធី និងទៅដល់បណ្តាញ។
 
-| សិទ្ធិ       | ផ្តល់សិទ្ធិឱ្យ                                               |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | ប្រូកស៊ី `process.env` ដែលអាចបានតែអាន                        |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+`requires.permissions` របស់ manifest ទទួលយក `network`, `file-read`, `file-write`, `env` និង `exec` ប៉ុន្តែថ្ងៃនេះមានតែ `env` ប៉ុណ្ណោះដែលមានឥទ្ធិពលនៅពេលដំណើរការ៖
 
-បើគ្មានសិទ្ធិទេ globals ដែលត្រូវគ្នានឹងមិនមាននៅក្នុង sandbox ឡើយ។
+| ការអនុញ្ញាត                                  | ឥទ្ធិពលថ្ងៃនេះ                                                                                                                                                                                                                            |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | ដំណើរការកម្មវិធីជំនួយក៏ទទួលបាន `PORT`, `HOSTNAME`, `TZ` និង `TMPDIR` ផងដែរ។ បើគ្មានវាទេ វាទទួលបានតែ `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` និង `PLUGIN_NAME` (បូក `SystemRoot` និង `windir` នៅលើ Windows) ។ |
+| `network`, `file-read`, `file-write`, `exec` | គ្មាន។ ពួកវាគ្រាន់តែជាការប្រកាសតែប៉ុណ្ណោះ៖ គ្មានអ្វីត្រូវបានរារាំងនៅពេលដែលពួកគេបាត់។                                                                                                                                                      |
+
+ការដំឡើងកម្មវិធីជំនួយគឺដូចជាការដំឡើងកម្មវិធីផ្សេងទៀតនៅលើម៉ាស៊ីន។ ដំឡើងតែកម្មវិធីជំនួយប្រភពដែលអ្នកទុកចិត្តប៉ុណ្ណោះ។
 
 ## គ្រោងការកំណត់រចនាសម្ព័ន្ធ
 
@@ -194,7 +196,7 @@ Hook អាចត្រូវបានកំណត់រចនាសម្ព័
 
 ## ឧទាហរណ៍
 
-### កម្មវិធីកត់ត្រាសំណើ
+### ស្នើសុំអ្នកកាប់ឈើ
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### កម្មវិធីកំណត់អត្រា
+### ដែនកំណត់អត្រា
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 នាទី
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### កម្មវិធីបម្លែងការឆ្លើយតប
+### Transformer ឆ្លើយតប
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

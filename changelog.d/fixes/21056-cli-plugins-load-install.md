@@ -1,0 +1,1 @@
+- fix(cli): CLI plugins are now loaded at startup, `plugin install` uses the directory discovery scans (and `.`/local paths, npm.cmd on Windows), scaffold range matches the host version (#21056)

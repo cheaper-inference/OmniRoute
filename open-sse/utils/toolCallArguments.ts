@@ -1,3 +1,5 @@
+import { chargeRetained } from "./streamRetainedBudget.ts";
+
 /**
  * Accumulate streamed tool-call `arguments` fragments without corrupting them.
  *
@@ -38,17 +40,26 @@ function normalizeIncomingFragment(incoming: unknown): string {
   return "";
 }
 
-export function appendToolCallArgumentDelta(current: unknown, incoming: unknown): string {
+/**
+ * `budgetState` (a per-stream state object) charges the growth against the stream's retained
+ * budget (`chargeRetained`); a refused charge keeps `current` unchanged.
+ */
+export function appendToolCallArgumentDelta(
+  current: unknown,
+  incoming: unknown,
+  budgetState?: object
+): string {
   const existing = typeof current === "string" ? current : "";
   const next = normalizeIncomingFragment(incoming);
 
-  if (!existing) return next;
   if (!next) return existing;
-
-  // Unambiguous snapshot repeat / growth — replace instead of concatenating.
+  // Unambiguous snapshot repeat — nothing new to keep.
   if (next === existing) return existing;
-  if (next.startsWith(existing)) return next;
 
-  // Incremental delta fragment — append verbatim (preserves repeated chars).
-  return existing + next;
+  // Snapshot growth replaces; an incremental delta fragment is appended verbatim
+  // (preserves repeated chars).
+  const grows = !existing || next.startsWith(existing);
+  const grown = grows ? next.length - existing.length : next.length;
+  if (budgetState && !chargeRetained(budgetState, grown)) return existing;
+  return grows ? next : existing + next;
 }

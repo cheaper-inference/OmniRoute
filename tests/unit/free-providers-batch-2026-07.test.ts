@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   FREE_MODEL_BUDGETS,
+  RETIRED_FREE_ROWS,
   computeFreeModelTotals,
 } from "@omniroute/open-sse/config/freeModelCatalog.ts";
 import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry.ts";
@@ -39,21 +40,39 @@ test("providers with no published token quota never inflate the headline", () =>
       rows.every((m) => m.monthlyTokens === 0 && m.creditTokens === 0),
       `${id} has no published token quota — it must not carry invented numbers`
     );
-    assert.ok(rows.every((m) => m.freeType === "recurring-uncapped"));
+    assert.ok(
+      rows.every((m) => m.freeType === "recurring-uncapped" || m.freeType === "discontinued")
+    );
   }
   const totals = computeFreeModelTotals();
-  for (const id of ["ainative", "aion", "sealion", "routeway"]) {
-    assert.ok(totals.uncappedProviders.includes(id), `${id} must surface as uncapped`);
-  }
+  assert.ok(totals.uncappedProviders.includes("sealion"), "sealion must surface as uncapped");
+  // Re-audit 2026-11-23: ainative became a paid plan after a 3-day trial and every routeway id
+  // left its /v1/models (all rows discontinued); aion activates free keys only after a verified
+  // card (gates ["card"]), so none of the three is listed as open to anyone.
+  for (const id of ["ainative", "routeway"])
+    assert.ok(
+      byProvider(id).every((m) => m.freeType === "discontinued"),
+      id
+    );
+  assert.ok(
+    byProvider("aion")
+      .filter((m) => m.freeType !== "discontinued")
+      .every((m) => m.gates?.includes("card"))
+  );
+  for (const id of ["ainative", "aion", "routeway"])
+    assert.ok(!totals.uncappedProviders.includes(id), `${id} is not open to anyone`);
 });
 
-test("nara is a single shared 7M/day pool, counted once", () => {
+test("nara was a single shared 7M/day pool; its free plan now lists no models", () => {
   const rows = byProvider("nara");
   assert.ok(rows.length >= 1);
-  // 7M tokens/day shared across all plan models => 210M/month (re-audited 2026-09-02, GET /api/plans).
+  // 7M tokens/day shared across all plan models => 210M/month (2026-09-02); retired on 2026-11-23
+  // (GET /api/plans → "models":[]), so the pool's last quota lives in the ledger.
   assert.ok(rows.every((m) => m.poolKey === "nara-free"));
-  assert.ok(rows.every((m) => m.monthlyTokens === 210_000_000));
-  assert.ok(rows.every((m) => m.freeType === "recurring-daily"));
+  assert.ok(rows.every((m) => m.monthlyTokens === 0 && m.freeType === "discontinued"));
+  const ledger = RETIRED_FREE_ROWS.filter((r) => r.provider === "nara");
+  assert.equal(ledger.length, rows.length);
+  assert.ok(ledger.every((r) => r.lastListedMonthlyTokens === 210_000_000));
 });
 
 test("every catalog provider id still resolves to a canonical provider", () => {

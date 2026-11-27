@@ -5,6 +5,7 @@
 import { useTranslations } from "next-intl";
 import { Slider } from "@omniroute/ui-kit/slider";
 import Input from "@/shared/components/Input";
+import NumberInput, { whenNumber } from "@/shared/components/NumberInput";
 import Toggle from "@/shared/components/Toggle";
 
 export interface PlaygroundParams {
@@ -54,19 +55,16 @@ function SliderRow({ label, value, min, max, step, onChange }: SliderRowProps) {
     <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs text-text-muted font-medium">{label}</span>
-        <Input
-          type="number"
+        <NumberInput
+          size="xs"
           value={value}
           min={min}
           max={max}
           step={step}
           aria-label={label}
-          onChange={(e) => {
-            const v = parseFloat(e.target.value);
-            if (!isNaN(v)) onChange(Math.min(max, Math.max(min, v)));
-          }}
+          onValueChange={whenNumber((v) => onChange(Math.min(max, Math.max(min, v))))}
           className="w-20 min-w-0"
-          inputClassName="text-xs text-right"
+          inputClassName="text-right"
         />
       </div>
       <Slider
@@ -140,16 +138,13 @@ export default function ParamSliders({ params, setParams }: ParamSlidersProps) {
       />
 
       {/* Seed input */}
-      <Input
+      <NumberInput
         label={t("seed")}
-        type="number"
-        value={params.seed ?? ""}
+        size="xs"
+        precision={0}
+        value={params.seed ?? null}
         placeholder={t("seedPlaceholder")}
-        onChange={(e) => {
-          const raw = e.target.value;
-          update("seed", raw === "" ? null : parseInt(raw, 10));
-        }}
-        inputClassName="text-xs"
+        onValueChange={(seed) => update("seed", seed)}
       />
 
       {/* Stop sequences */}
@@ -159,7 +154,7 @@ export default function ParamSliders({ params, setParams }: ParamSlidersProps) {
         value={params.stop}
         placeholder={t("stopSequencesPlaceholder")}
         onChange={(e) => update("stop", e.target.value)}
-        inputClassName="text-xs"
+        size="xs"
       />
 
       {/* JSON mode toggle */}

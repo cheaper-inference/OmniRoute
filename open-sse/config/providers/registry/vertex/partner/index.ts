@@ -19,6 +19,7 @@ export const vertex_partnerProvider: RegistryEntry = {
     },
     { id: "zai-org/glm-5-maas", name: "GLM 5", targetFormat: "openai" },
     ...VERTEX_XAI_MODELS,
+    { id: "claude-fable-5-2", name: "Claude Fable 5.2", targetFormat: "claude" },
     { id: "claude-fable-5-1", name: "Claude Fable 5.1", targetFormat: "claude" },
     { id: "claude-fable-5", name: "Claude Fable 5", targetFormat: "claude" },
     { id: "claude-opus-5-5", name: "Claude Opus 5.5", targetFormat: "claude" },

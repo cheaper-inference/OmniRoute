@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Προαιρετικό) Αφαίρεση της εικόνας
+docker rmi cheaperinference/omniroute:latest
+# Παλαιότερες εγκαταστάσεις άντλησαν το όνομα παλαιού τύπου:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

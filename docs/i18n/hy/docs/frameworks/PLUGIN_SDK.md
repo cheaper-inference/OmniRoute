@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## API-ի տեղեկատու
+## API Հղում
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Գործարանային ֆունկցիա, որը լռելյայն արժեքներով ստեղծում է Plugin օբյեկտ։
+Գործարանային գործառույթ, որը ստեղծում է Plugin օբյեկտ լռելյայններով:
 
-**Պարամետրեր՝**
+**Պարամետրեր:**
 
-- `name` (string, պարտադիր) — Plugin-ի անունը՝ kebab-case ձևաչափով
-- `priority` (number, ընտրովի, լռելյայն՝ 100) — Ավելի ցածր արժեք ունեցողը գործարկվում է առաջինը
-- `enabled` (boolean, ընտրովի, լռելյայն՝ true) — Սկսե՞լ միացված վիճակում
-- `onRequest` (function, ընտրովի) — Գործարկվում է chat մշակիչից առաջ
-- `onResponse` (function, ընտրովի) — Գործարկվում է chat մշակիչից հետո
-- `onError` (function, ընտրովի) — Գործարկվում է մշակիչի սխալի դեպքում
+- `name` (string, պարտադիր) — Plugin name in kebab-case
+- `priority` (համար, ընտրովի, լռելյայն՝ 100) — Ստորին գործարկվում է առաջինը
+- `enabled` (բուլյան, կամընտիր, լռելյայն՝ ճշմարիտ) — Սկսե՞լ միացվա՞ծ:
+- `onRequest` (գործառույթ, կամընտիր) — Գործում է մինչև չաթի մշակիչը
+- `onResponse` (գործառույթ, կամընտիր) — Գործում է զրույցի կառավարիչից հետո
+- `onError` (գործառույթ, ընտրովի) — Գործում է կարգավորիչի սխալի վրա
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Արգելափակում է հարցումը և, ըստ ցանկության, վերադարձնում հատուկ պատասխան։
+Արգելափակել հարցումը և ցանկության դեպքում վերադարձնել հատուկ պատասխան:
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Փոփոխում է հարցման մարմինը՝ նախքան այն մատակարարին հասնելը։
+Փոփոխեք հարցման մարմինը՝ նախքան այն մատակարարողին հասնելը:
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Մետատվյալներ է կցում հարցման համատեքստին։
+Կցեք մետատվյալները հարցման համատեքստին:
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Plugin-ի համատեքստ (`PluginContext`)
+## Plugin Context (`PluginContext`)
 
-| Դաշտ        | Տեսակ                     | Նկարագրություն             |
-| ----------- | ------------------------- | -------------------------- |
-| `requestId` | `string`                  | Հարցման եզակի նույնացուցիչ |
-| `model`     | `string`                  | Հարցված մոդելի անունը      |
-| `provider`  | `string`                  | Թիրախային մատակարարի ID-ն  |
-| `body`      | `Record<string, unknown>` | Հարցման մարմինը            |
-| `headers`   | `Record<string, string>`  | Հարցման վերնագրերը         |
-| `metadata`  | `Record<string, unknown>` | Փոփոխելի մետատվյալները     |
-| `timestamp` | `number`                  | Հարցման ժամանակային դրոշմը |
+| Դաշտ         | Տեսակ                     | Նկարագրություն                      |
+| ------------ | ------------------------- | ----------------------------------- |
+| `requestId`  | `string`                  | Հարցման եզակի նույնացուցիչ          |
+| `model`      | `string`                  | Պահանջվող մոդելի անվանումը          |
+| `provider`   | `string`                  | Թիրախային մատակարար ID              |
+| `body`       | `Record<string, unknown>` | Հարցման մարմին                      |
+| `headers`    | `Record<string, string>`  | Հարցման վերնագրեր (տես նշումը)      |
+| `metadata`   | `Record<string, unknown>` | Փոփոխական մետատվյալներ              |
+| `timestamp`  | `number`                  | Հարցման ժամանակի դրոշմակնիք         |
+| `apiKeyInfo` | `object` (ըստ ցանկության) | API բանալի մետատվյալներ (տես նշում) |
+
+Համատեքստը երբեք չի կրում հաճախորդի հավատարմագրերը. `authorization`, `x-api-key`, `proxy-authorization` և `cookie` վերնագրերը հանվում են (ցանկացած պատյան), իսկ `apiKeyInfo` պահում է բանալու մետատվյալները (օրինակ՝ `id`, `name` և `scopes`), բայց ոչ հիմնական արժեքը կամ դրա մատնահետքը (`redactPluginContext()` in `src/lib/plugins/hooks.ts`): Սա վերաբերում է `onRequest`, `onResponse` և `onError`:
 
 ## Մանիֆեստ (`plugin.json`)
 
@@ -140,17 +143,16 @@ Hook-երը կարող են կազմաձևվել առաջնահերթությա�
 
 ## Թույլտվությունների համակարգ
 
-Փլագիններն աշխատում են մեկուսացված VM համատեքստում։ Արտաքին ռեսուրսներին հասանելիությունը պահանջում է հստակ թույլտվություններ․
+Պլագիններն են** ավազապատված չէ** . Յուրաքանչյուր ակտիվ փլագին աշխատում է որպես առանձին, սովորական Node.js երեխայի պրոցես (`loadPlugin()` in `src/lib/plugins/loader.ts`) նույն օպերացիոն համակարգի օգտագործողի ներքո, ինչպիսին OmniRoute է, առանց VM համատեքստի և Node.js թույլտվության դրոշների: Plugin կոդը կարող է օգտագործել `node:fs`, `node:child_process`, `fetch` և ցանկացած այլ Node.js API. այն կարող է կարդալ և գրել ցանկացած ֆայլ, որը կարող է OmniRoute օգտագործողը (ներառյալ տվյալների գրացուցակը), գործարկել ծրագրեր և հասնել ցանց:
 
-| Թույլտվություն | Տրամադրում է                                                 |
-| -------------- | ------------------------------------------------------------ |
-| `network`      | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`    | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write`   | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`          | Միայն կարդալու համար նախատեսված `process.env` պրոքսի         |
-| `exec`         | `child_process.exec`, `child_process.execSync`               |
+Մանիֆեստի `requires.permissions` ընդունում է `network`, `file-read`, `file-write`, `env` և `exec`, բայց այսօր միայն `env` է ազդեցություն գործում գործարկման ժամանակ.
 
-Առանց թույլտվության համապատասխան գլոբալ օբյեկտները պարզապես հասանելի չեն մեկուսացված միջավայրում։
+| Թույլտվություն                               | Էֆեկտն այսօր                                                                                                                                                                                                                                  |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Պլագինների գործընթացը նաև ստանում է `PORT`, `HOSTNAME`, `TZ` և `TMPDIR`: Առանց դրա այն ստանում է միայն `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` և `PLUGIN_NAME` (գումարած `SystemRoot` և `windir` Windows ի վրա)։ |
+| `network`, `file-read`, `file-write`, `exec` | Ոչ մեկը: Դրանք միայն հայտարարագրեր են. բացակայելու դեպքում ոչինչ արգելափակված չէ:                                                                                                                                                             |
+
+Փլագինի տեղադրումը նման է հոսթի վրա որևէ այլ ծրագրի տեղադրմանը: Տեղադրեք միայն պլագիններ, որոնց աղբյուրին վստահում եք:
 
 ## Կոնֆիգուրացիայի սխեմա
 
@@ -194,7 +196,7 @@ Hook-երը կարող են կազմաձևվել առաջնահերթությա�
 
 ## Օրինակներ
 
-### Հարցումների գրանցիչ
+### Հայցեք լոգեր
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Հարցումների հաճախականության սահմանափակիչ
+### Գնահատման սահմանափակիչ
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 րոպե
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -228,16 +230,13 @@ export default definePlugin({
     requests.set(key, timestamps);
 
     if (timestamps.length > maxRequests) {
-      return blockRequest({
-        error: "Հարցումների հաճախականության սահմանաչափը գերազանցվել է",
-        status: 429,
-      });
+      return blockRequest({ error: "Rate limit exceeded", status: 429 });
     }
   },
 });
 ```
 
-### Պատասխանի փոխակերպիչ
+### Արձագանքման տրանսֆորմատոր
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

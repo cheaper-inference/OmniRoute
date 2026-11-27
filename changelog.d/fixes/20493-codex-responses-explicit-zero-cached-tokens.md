@@ -1,0 +1,1 @@
+- fix(usage): keep an explicit upstream `cached_tokens: 0` on Responses→Chat usage instead of recording cache-read as unknown (#20493)

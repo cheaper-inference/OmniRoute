@@ -15,7 +15,11 @@
 // both the drawn text and what the outlining step shapes (or, for the code roles, subsets).
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
-import { computeFreeModelTotals } from "../../open-sse/config/freeModelCatalog.ts";
+import {
+  computeFreeModelTotals,
+  isCountingGated,
+  isSocialGated,
+} from "../../open-sse/config/freeModelCatalog.ts";
 import { svgOpen, gridDefs, esc } from "../docs/readme-diagram-theme.mjs";
 import { outlineSvg } from "../docs/readme-outline.mjs";
 
@@ -34,13 +38,15 @@ const cleanName = (r) =>
     .replace(/ —.*$/, "")
     .slice(0, 24);
 
-export function buildBudgetCardModel() {
-  const t = computeFreeModelTotals();
+// Gated rows (identity, payment or social) are absent from the real figure, so the card skips them.
+const isGatedRow = (r) => isCountingGated(r) || isSocialGated(r);
 
+/** @param {ReturnType<typeof computeFreeModelTotals>} [t] totals to draw; defaults to the live catalog */
+export function buildBudgetCardModel(t = computeFreeModelTotals()) {
   // One bar segment per steady pool (largest member), gated rows excluded like the headline.
   const poolMap = new Map();
   for (const r of t.perModel) {
-    if (!STEADY_TYPES.has(r.freeType) || r.eligibilityGate) continue;
+    if (!STEADY_TYPES.has(r.freeType) || isGatedRow(r)) continue;
     const k = r.poolKey || `${r.provider}:${r.modelId}`;
     const cur = poolMap.get(k);
     if (!cur || r.monthlyTokens > cur.monthlyTokens) poolMap.set(k, r);
@@ -55,7 +61,7 @@ export function buildBudgetCardModel() {
   const otMap = new Map();
   for (const r of t.perModel) {
     // Gated rows are excluded here too — they are absent from firstMonthRealisticTokens.
-    if (r.freeType !== "one-time-initial" || r.creditTokens <= 0 || r.eligibilityGate) continue;
+    if (r.freeType !== "one-time-initial" || r.creditTokens <= 0 || isGatedRow(r)) continue;
     const k = r.poolKey || r.provider;
     otMap.set(k, { provider: r.provider, v: Math.max(otMap.get(k)?.v || 0, r.creditTokens) });
   }

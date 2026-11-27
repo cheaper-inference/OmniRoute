@@ -93,7 +93,7 @@
 
 [![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 ![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
 ![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lupaus — yksi päätepiste ja 394 palveluntarjoajaa. Automaattinen varareititys pitää reitityksen toiminnassa, kun toinen terve kohde on käytettävissä. Kuusi pilaria: vikasietoinen varareititys 394 palveluntarjoajan välillä · jopa 95 %:n tokenisäästöt kelvollisissa työkuormissa · aloitus maksutta, yli 150 ilmaistasoa ja 51 toistuvasti saatavilla olevaa tai avaimetonta ikuisesti ilmaista palveluntarjoajaa · 39 CLI-/agentti-integraatiota yhden määrityksen kautta · OpenAI-, Claude-, Gemini- ja Responses API -yhteensopivuus osoitteessa /v1 · tuotantokäytön hallintatoiminnot, kuten piirikytkimet, TLS-stealth, MCP:n 110 työkalua, A2A, muisti, suojaukset, arvioinnit ja yli 56 000 staattista testimäärittelyä yli 7 800 seuratussa testitiedostossa."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lupaus — yksi päätepiste ja 394 palveluntarjoajaa. Automaattinen varareititys pitää reitityksen toiminnassa, kun toinen terve kohde on käytettävissä. Kuusi pilaria: vikasietoinen varareititys 394 palveluntarjoajan välillä · jopa 95 %:n tokenisäästöt kelvollisissa työkuormissa · aloitus maksutta, yli 150 ilmaistasoa ja 40 toistuvasti saatavilla olevaa tai avaimetonta ikuisesti ilmaista palveluntarjoajaa · 39 CLI-/agentti-integraatiota yhden määrityksen kautta · OpenAI-, Claude-, Gemini- ja Responses API -yhteensopivuus osoitteessa /v1 · tuotantokäytön hallintatoiminnot, kuten piirikytkimet, TLS-stealth, MCP:n 110 työkalua, A2A, muisti, suojaukset, arvioinnit ja yli 56 000 staattista testimäärittelyä yli 7 800 seuratussa testitiedostossa."/>
 
 <br/>
 <br/>
@@ -712,7 +712,7 @@ komentorivihistoriastasi. → [CLI-integraatiot](docs/guides/CLI-INTEGRATIONS.md
 
 </div>
 
-> **394 rekisteröityä palveluntarjoajaa** kanonisissa keskustelu-, media-, haku-, paikallis-, pilviagentti- ja järjestelmäkokoelmissa, mukaan lukien **153 palveluntarjoajaa, joilla on `hasFree: true` -hakumetatieto**. Keskustelumallien rekisteri kattaa **239 palveluntarjoajaa / 3 059 erillistä palveluntarjoaja–malli-paria / 1 475 raakaa mallin tunnistetta**; erillisessä maksuttomien budjettien luettelossa on **465 mallikohtaista riviä**, **34 toistuvaa kiintiötä** ja **51 toistuvaa tai avaimetonta ikuisesti maksutonta palveluntarjoajaa**. Nämä ovat tarkoituksella eri nimittäjiä; määritelmät ja kiintiöiden kaksoiskappaleet poistavat laskelmat löytyvät [Palveluntarjoajien viiteoppaasta](docs/reference/PROVIDER_REFERENCE.md) ja [Maksuttomista tasoista](docs/reference/FREE_TIERS.md).
+> **394 rekisteröityä palveluntarjoajaa** kanonisissa keskustelu-, media-, haku-, paikallis-, pilviagentti- ja järjestelmäkokoelmissa, mukaan lukien **153 palveluntarjoajaa, joilla on `hasFree: true` -hakumetatieto**. Keskustelumallien rekisteri kattaa **239 palveluntarjoajaa / 3 059 erillistä palveluntarjoaja–malli-paria / 1 475 raakaa mallin tunnistetta**; erillisessä maksuttomien budjettien luettelossa on **465 mallikohtaista riviä**, **34 toistuvaa kiintiötä** ja **40 toistuvaa tai avaimetonta ikuisesti maksutonta palveluntarjoajaa**. Nämä ovat tarkoituksella eri nimittäjiä; määritelmät ja kiintiöiden kaksoiskappaleet poistavat laskelmat löytyvät [Palveluntarjoajien viiteoppaasta](docs/reference/PROVIDER_REFERENCE.md) ja [Maksuttomista tasoista](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -787,7 +787,7 @@ komentorivihistoriastasi. → [CLI-integraatiot](docs/guides/CLI-INTEGRATIONS.md
   <tr><th align="left">Alusta</th><th align="left">Asennus</th><th align="left">Kohokohdat</th></tr>
   <tr><td align="left" nowrap>📦 <b>npm (globaali)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Yksi komento, mikä tahansa käyttöjärjestelmä</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (globaali)</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">Sama rekisterin tarball, nopeammat asennukset</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Usean arkkitehtuurin tuki: <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … cheaperinference/omniroute</code></td><td align="left">Usean arkkitehtuurin tuki: <b>AMD64 + ARM64</b></td></tr>
   <tr><td align="left" nowrap>🖥️ <b>Työpöytä (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Natiivi ikkuna + ilmoitusalue — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b>Valikkorivi (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Valvoo palvelinta ja päivittää sen automaattisesti — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>natiivi <code>arm64</code></td><td align="left">Raspberry Pi, ARM-palvelimet, Apple Silicon</td></tr>
@@ -1111,7 +1111,7 @@ Käytä näitä vain asiakkailla, jotka eivät voi liittää `Authorization: Bea
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 `:latest` seuraa korkeinta **julkaistua** vakaata SemVer-versiota. Se ei seuraa gitin `main`-haaraa. Kiinnitä GitOps-käyttöä varten versio `:X.Y.Z`. Katso [Docker-julkaisukanavat](docs/guides/DOCKER_GUIDE.md#release-channels). Näköistiedostossa on kiinteä arvo **`OMNIROUTE_MEMORY_MB=1024`**. Se riittää hallintapaneeliin ja kevyeen keskusteluun. **Koodausagentit** (Claude Coden, Codexin, Grokin ja muiden kutsut `POST /v1/responses`-rajapintaan) tarvitsevat huomattavasti suuremman V8-keon, tai prosessi antaa `FATAL ERROR`-virheen noin 12 GiB:n kohdalla kahden päällekkäisen pitkän kontekstin aikana. Mitoita säilö keon kokoa suuremmaksi (natiivipuskurit sijaitsevat V8:n ulkopuolella):
@@ -1125,7 +1125,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 Koko taulukko: [Docker-opas — ajonaikainen RAM](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
@@ -1333,7 +1333,7 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
   <tr><td nowrap><b>Ajoympäristö</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Ohjelmointikieli</b></td><td>TypeScript 6.0 — <b>100 % TypeScriptiä</b> hakemistoissa <code>src/</code> ja <code>open-sse/</code> (ytimessä ei ole yhtään <code>any</code>-tyyppiä versiosta v2.0 lähtien)</td></tr>
   <tr><td nowrap><b>Viitekehys</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL-kirjaus) + LowDB (JSON-perintö) — 147 toimialamoduulia, 240 migraatiota</td></tr>
+  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL-kirjaus) + LowDB (JSON-perintö) — 147 toimialamoduulia, 252 migraatiota</td></tr>
   <tr><td nowrap><b>Muisti</b></td><td>SQLite FTS5 -kokotekstihaku + int8-kvantisoinnit vektoriesityksille, tyypitetty vanheneminen</td></tr>
   <tr><td nowrap><b>Skeemat</b></td><td>Zod 4 — MCP-työkalujen I/O-validointi + API-sopimukset</td></tr>
   <tr><td nowrap><b>Protokollat</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1346,7 +1346,7 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
   <tr><td nowrap><b>Testaus</b></td><td>Node.js-testiajo + Vitest — <b>yli 60 000 staattista testimäärittelyä</b> yli 8 400 seuratun testitiedoston joukossa (yksikkö-, integraatio-, E2E-, tietoturva- ja ekosysteemitestit)</td></tr>
   <tr><td nowrap><b>Alustat</b></td><td>Työpöytä (Electron) · Android (Termux) · PWA (mikä tahansa selain)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automaattinen julkaisu npm:ään + Docker Hubiin julkaisun yhteydessä</td></tr>
-  <tr><td nowrap><b>Linkit</b></td><td><a href="https://omniroute.online">Verkkosivusto</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Linkit</b></td><td><a href="https://omniroute.online">Verkkosivusto</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">
