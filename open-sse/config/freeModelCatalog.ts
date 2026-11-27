@@ -452,6 +452,7 @@ export const FREE_QUOTA_UNIT: Record<string, FreeQuotaUnit> = {
   nara: "tokens",
   groq: "tokens",
   navy: "tokens",
+  llm7: "tokens",
   "cloudflare-ai": "neurons",
   "api-airforce": "requests",
   sambanova: "requests",

@@ -10,7 +10,7 @@ export interface RetiredFreeRow {
   provider: string;
   modelId: string;
   poolKey: string | null;
-  /** The last monthly quota the catalog listed for this row, in its published unit. */
+  /** The last evidenced monthly quota for this row, in its published unit. */
   lastListedMonthlyTokens: number;
   /** ISO date (YYYY-MM-DD) the row left the live catalog. */
   retiredAt: string;
@@ -84,6 +84,15 @@ export const RETIRED_FREE_ROWS: RetiredFreeRow[] = [
     4_500_000,
     "unverifiable",
     "https://api.navy/ (2026-11-23) — HTTP 403 (Cloudflare challenge) to get.mjs, curl and WebFetch; https://api.navy/v1/models publishes no free quota"
+  ),
+  // Keep the last quota LLM7 published. The catalog's former 150M had no supporting evidence.
+  ...block(
+    "llm7",
+    "llm7-free",
+    ["gpt-4o-mini-2024-07-18"],
+    3_000_000,
+    "unverifiable",
+    "https://docs.llm7.io/limits listed 100,000 tokens per 24 hours on 2026-11-18 and answered 404 on 2026-11-23"
   ),
   ...block(
     "bluesminds",

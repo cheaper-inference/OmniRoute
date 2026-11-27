@@ -18,6 +18,7 @@ import {
   resolveFreeQuotaUnit,
   computePublicFreeHeadline,
   computeRowSumMirror,
+  formatTokenHeadline,
   freeTypesInBucket,
   isCountingGated,
   isSocialGated,
@@ -285,10 +286,15 @@ test("public free-token figures after the re-audit", () => {
 test("row-sum reading and retired ledger after the re-audit", () => {
   const m = computeRowSumMirror();
   assert.equal(m.liveTokens, 159_000_000);
-  assert.equal(m.retiredTokens, 11_190_500_000);
-  assert.equal(m.totalTokens, 11_349_500_000);
+  assert.equal(m.retiredTokens, 11_193_500_000);
+  assert.equal(m.totalTokens, 11_352_500_000);
+  assert.equal(formatTokenHeadline(m.totalTokens), "~11.4B");
   assert.equal(Math.round(m.retiredShare * 1000) / 10, 98.6);
-  assert.equal(RETIRED_FREE_ROWS.length, 135);
+  assert.equal(RETIRED_FREE_ROWS.length, 136);
+  assert.deepEqual(
+    m.byProvider.filter((row) => row.provider === "llm7"),
+    [{ provider: "llm7", liveRows: 0, retiredRows: 1, tokens: 3_000_000 }]
+  );
 });
 
 test("catalog counts after the re-audit", () => {
@@ -354,10 +360,27 @@ test("the ledger keeps the last quota of every retired pool row, with its reason
       assert.match(r.evidence, /https:\/\/\S+ .*2026-11-23/);
     }
   }
-  // Rows without a quota (uncapped or credit) and the LLM7 row whose 150M was never the published
-  // quota (owner decision 2026-11-21, PL) stay out of the ledger.
-  for (const p of ["llm7", "ainative", "stepfun", "predibase"])
+  // Rows without a quota (uncapped or credit) stay out of the ledger.
+  for (const p of ["ainative", "stepfun", "predibase"])
     assert.ok(!RETIRED_FREE_ROWS.some((r) => r.provider === p), p);
+});
+
+test("the ledger keeps LLM7's last published quota on one pool row", () => {
+  assert.deepEqual(
+    RETIRED_FREE_ROWS.filter((r) => r.provider === "llm7"),
+    [
+      {
+        provider: "llm7",
+        modelId: "gpt-4o-mini-2024-07-18",
+        poolKey: "llm7-free",
+        lastListedMonthlyTokens: 3_000_000,
+        retiredAt: "2026-11-23",
+        reason: "unverifiable",
+        evidence:
+          "https://docs.llm7.io/limits listed 100,000 tokens per 24 hours on 2026-11-18 and answered 404 on 2026-11-23",
+      },
+    ]
+  );
 });
 
 // --- Ledger rows of the corrected pools and dated evidence ----------------------------------
