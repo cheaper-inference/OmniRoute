@@ -189,12 +189,12 @@ export function locateManagedCoverageFloorClaims(content) {
 
 // --- Free-token figures ---------------------------------------------------------------------
 // The docs publish three token figures with different meanings (Radar v2 plan 01, owner
-// decisions D47 and D48 of 2026-11-21):
+// decisions D47 and D48 of 2026-11-21, updated on 2026-11-26):
 //   headline:steady  the real figure — each shared quota counted once ("~93M real today");
 //   headline:first   the real figure plus one-time signup credits, first month only;
 //   rowSum:live      every live catalog row added up (method page only);
 //   rowSum:total     the big figure — every row added up, ended offers included, the way other
-//                    catalogs count; it is printed first and always with its label;
+//                    catalogs count; its label is inline or in an asterisk footnote;
 //   retiredShare     the share of the big figure that comes from offers that have ended.
 // A figure is a claim only through an explicit anchor next to it. Everything else these files
 // carry is legitimately not a headline and never trips the gate: the theoretical ceiling ("would
@@ -214,6 +214,11 @@ const TOKEN_WINDOW = 80;
 const MARKUP = String.raw`(?:\*\*|<\/?[a-z]{1,8}\/?>|>|\s)`;
 
 const ROW_SUM_TOTAL_AFTER = [
+  { via: "asterisk", pattern: /^(?:\\\*|\*(?!\*))/ },
+  {
+    via: "label",
+    pattern: /^\s+summed\s+across\s+every\s+catalog\s+row,\s+ended\s+offers\s+included/i,
+  },
   {
     via: "label",
     pattern: new RegExp(
@@ -236,11 +241,14 @@ const FIRST_BEFORE =
 const STEADY_AFTER = new RegExp(
   String.raw`^(?:\*\*|<\/?[a-z]{1,8}\/?>|\s){0,12}(?:recurring\s+)?(?:documented\s+)?free\s+tokens` +
     String.raw`|^\s*Tokens\s+\/\s+Month` +
-    String.raw`|^\*{0,2}\s*real\b`,
+    String.raw`|^\*{0,2}\s*real\b` +
+    String.raw`|^\s+counting\s+each\s+shared\s+quota\s+once\b`,
   "i"
 );
 const STEADY_BEFORE =
   /(?:recurring\s+grant[^|\n]*\|\s*\*{0,2}|Recurring\s+quantified\s+grant\s*\|\s*\*{0,2}|headline\s+remains\s*\*{0,2})$/i;
+const STEADY_NOTE_BEFORE =
+  /Counting\s+each\s+shared\s+quota\s+once(?::|,\s+one\s+account\s+per\s+provider\s+reaches\s+about)\s+$/i;
 const RETIRED_SHARE =
   /(\d{1,3}(?:[.,]\d)?)%\s+(?:from\s+offers\s+that\s+(?:no\s+longer\s+exist|have\s+ended)|from\s+retired\s+rows|de\s+ofertas\s+que\s+(?:já\s+acabaram|foram\s+encerradas))/dgi;
 
@@ -260,7 +268,13 @@ function tokenFigureKind(content, m) {
   }
   if (ROW_SUM_LIVE_AFTER.test(after)) return { key: "rowSum:live" };
   if (FIRST_AFTER.test(after) || FIRST_BEFORE.test(before)) return { key: "headline:first" };
-  if (STEADY_AFTER.test(after) || STEADY_BEFORE.test(before)) return { key: "headline:steady" };
+  if (
+    STEADY_AFTER.test(after) ||
+    STEADY_BEFORE.test(before) ||
+    (STEADY_NOTE_BEFORE.test(before) && /^\s+a\s+month\s+today\b/i.test(after))
+  ) {
+    return { key: "headline:steady" };
+  }
   return null;
 }
 

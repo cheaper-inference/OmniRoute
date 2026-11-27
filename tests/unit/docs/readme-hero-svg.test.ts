@@ -79,17 +79,23 @@ test("light and dark palettes are both declared", async () => {
   assert.doesNotMatch(svg.slice(svg.indexOf("</style>")), /#[0-9a-fA-F]{3,8}(?![\w-])/);
 });
 
-test("the hero carries the short pair in one string (D48)", () => {
+test("the hero draws six stats and gives the real figure in the card footnote", async () => {
   const code = (snapshotFacts as { code: Record<string, string> }).code;
-  const big = code.rowSumTotalLabel;
-  const real = `${code.headlineSteadyLabel} real`;
-  let seen = 0;
-  for (const s of Object.values(HERO_COPY).flat()) {
-    if (!s.includes(big)) continue;
-    seen++;
-    assert.ok(s.includes("as others count") && s.includes(real), `pair split: ${s}`);
-  }
-  assert.ok(seen > 0, "the hero draws the big figure with its label and the real one");
+  assert.equal(HERO_COPY.stats.length, 12);
+  assert.deepEqual(HERO_COPY.stats.slice(4, 6), [
+    `${code.rowSumTotalLabel}*`,
+    "FREE TOKENS / MONTH",
+  ]);
+  assert.deepEqual(HERO_COPY.tokenNote, [
+    `* row sum, ended offers included · ${code.headlineSteadyLabel} counting each shared quota once`,
+  ]);
+  assert.ok(!HERO_COPY.stats.some((s) => s.includes(code.headlineSteadyLabel)));
+  const svg = await renderReadmeHero();
+  assert.ok(
+    svg.includes(
+      `${code.rowSumTotalLabel} summed across every catalog row, ended offers included; ${code.headlineSteadyLabel} counting each shared quota once.`
+    )
+  );
   assert.match(HERO_COPY.tools[0], /Antigravity/);
   assert.match(HERO_COPY.tools[0], /FREE Claude \/ GPT \/ Gemini/);
 });

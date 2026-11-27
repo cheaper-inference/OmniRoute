@@ -54,7 +54,7 @@ test("no font is embedded (every string is outlined) and nothing is external", a
   assert.doesNotMatch(style, /font-family|Switzer/, "nothing here is text: no family to name");
   assert.match(svg, /<use href="#g[0-9a-z]+"/, "the Switzer text is drawn as outlines");
   assert.doesNotMatch(svg, /https?:\/\/(?!www\.w3\.org\/2000\/svg)|@import|<script|<foreignObject/);
-  assert.match(svg, /^<svg viewBox="0 0 1200 842" [^>]*role="img"/);
+  assert.match(svg, /^<svg viewBox="0 0 1200 914" [^>]*role="img"/);
   assert.ok(Buffer.byteLength(svg) < 200 * 1024, "must stay under the 200 KB studio target");
 });
 
@@ -77,26 +77,30 @@ test("the counts gate's own readers of this file accept the generated content (s
   }
 });
 
-test("the card draws the owner's block: big figure on top with its label, real right below, dated", () => {
+test("the card highlights the starred row sum and moves the recurring and first-month figures into the footnote", async () => {
   const code = (snapshotFacts as { code: Record<string, never> }).code as Record<string, unknown>;
   const label = (k: string) => String(code[k]);
   const c = buildFreeTierBudgetCopy() as Record<string, string[]>;
   const flat = Object.values(c).flat().join("\n");
-  // D47 (owner, 2026-11-21) with the card texts S-A (owner, 2026-11-24).
-  assert.equal(c.big[0], label("rowSumTotalLabel"));
-  assert.match(c.big.join(" "), /counted the way other catalogs count/i);
-  assert.match(c.big.join(" "), /ended offers included/i);
-  assert.doesNotMatch(c.big.join(" "), /capacity|available|you get/i);
-  assert.deepEqual(c.hero, [label("headlineSteadyLabel")]);
-  assert.match(c.heroLabel.join(""), /^\s*real\b/i);
-  assert.match(flat, /what you can actually use/i);
-  const keys = Object.keys(c);
-  assert.ok(keys.indexOf("big") < keys.indexOf("hero"), "big is declared before hero");
+  assert.deepEqual(c.hero, [`${label("rowSumTotalLabel")}*`]);
+  assert.deepEqual(c.heroLabel, ["FREE TOKENS / MONTH"]);
+  assert.deepEqual(c.note, [
+    "* Sum of every catalog row, ended offers included, the way free-tier catalogs count.",
+    `Counting each shared quota once: ${label("headlineSteadyLabel")} a month today, up to ${label("headlineFirstLabel")} in your first month with signup credits.`,
+  ]);
+  assert.doesNotMatch([...c.hero, ...c.heroLabel].join(" "), /capacity|available|you get|real/i);
+  assert.doesNotMatch(flat, /two ways to count|real today/i);
+  assert.match(c.barTitle.join(""), /^RECURRING QUOTAS · \d+ QUANTIFIED POOLS/);
   assert.ok(
     flat.indexOf(label("rowSumTotalLabel")) < flat.indexOf(label("headlineSteadyLabel")),
     "the big figure comes first"
   );
-  assert.ok(c.heroSub.join("").includes(`${label("headlineFirstLabel")} in your first month`));
+  const svg = await renderReadmeFreeTierBudget();
+  assert.ok(
+    svg.includes(
+      `${label("rowSumTotalLabel")} summed across every catalog row, ended offers included; ${label("headlineSteadyLabel")} counting each shared quota once.`
+    )
+  );
   assert.ok(!flat.includes("~10B"));
   assert.doesNotMatch(flat, /we don't publish that/);
   assert.ok(flat.includes(label("catalogDate")));

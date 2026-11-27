@@ -1,7 +1,7 @@
 // The free-tier surfaces of the README and the reference page (Radar v2, plan 02).
 //
-// The free-token figures follow the owner's decisions of 2026-11-21 (D47: the big figure on top,
-// with its label, the real one right below; D48: one-line surfaces carry the short pair; D49: the
+// The free-token figures follow the owner's decision of 2026-11-26 (starred headline and
+// footnote, full pair in alt text) and the decisions of 2026-11-21 (D49: the
 // growth sentence; D50: the price sentence with its check date; D51: the top of the README keeps
 // its tool line) and the texts approved on 2026-11-24 (option A in every group). Every number is
 // read from the facts snapshot here, never typed: the release refresh moves them.
@@ -176,34 +176,37 @@ test("every ~N token figure in the free-tier sections is classified", () => {
   assert.ok(!README.includes(LIVE), "the live row sum stays on the method page");
 });
 
-test("the big figure never appears without its label and the real one", () => {
+test("the big figure has a section footnote or the full pair in alt text", () => {
   const claims = locateFreeTokenClaims(README) as Claim[];
   const big = claims.filter((c) => c.key === "rowSum:total");
-  assert.ok(big.length >= 3, "the README carries the big figure (hero, block, card alt)");
-  for (const c of big) assert.ok(c.via === "label" || c.via === "short", `${c.text} via ${c.via}`);
+  assert.equal(big.length, 4, "title and three image alt texts");
+  assert.equal(big.filter((c) => c.via === "asterisk").length, 1, "only the title is starred");
   const v = checkRowSumPlacement(README, { methodPage: false });
   assert.equal(v.ok, true, v.detail);
   assert.doesNotMatch(README, /row by row|per live row/i);
-  const pair = `${BIG} as others count · ${REAL} real`;
-  const heroLine = section("hero");
-  assert.ok(heroLine.includes(pair), "the hero alt carries the short pair");
-  const cardAlt = README.split("\n").find((l) => l.includes("free-tier-budget.svg"));
-  assert.ok(cardAlt?.includes(pair), "the card alt carries the short pair");
+  const pair = `${BIG} summed across every catalog row, ended offers included; ${REAL} counting each shared quota once.`;
+  for (const svg of ["readme-hero", "free-tier-budget", "provider-numbers"]) {
+    const alt = README.split("\n").find((l) => l.includes(`${svg}.svg`));
+    assert.ok(alt?.includes(pair), `${svg} alt carries the full pair`);
+  }
 });
 
-test("the big figure comes first, the real one right below, and both equal the card", () => {
+test("the starred title matches the card and its note below the card gives the real figure", () => {
   const block = section("free-tokens");
-  const body = block.slice(block.indexOf("</div>"));
-  const first = body.indexOf(BIG);
-  const real = body.indexOf(REAL);
-  assert.ok(first !== -1 && real > first, "big figure, then the real one");
-  assert.doesNotMatch(body.slice(first + BIG.length, real), /~\d/, "nothing in between");
-  const free = body.indexOf("Everything here is free. No paywall.", real);
-  assert.ok(free > real, "then: Everything here is free");
-  assert.ok(body.indexOf(STAR_INVITE, free) > free, "then: the star invite");
+  assert.ok(block.includes(`## ${BIG}\\* Free Tokens / Month Across Third-Party Free Tiers`));
+  const note = `<sub>\\* Sum of every row in the catalog, ended offers included, the way free-tier catalogs count. Counting each shared quota once, one account per provider reaches about ${REAL} a month today. [How we count →](docs/reference/FREE_TIERS.md#how-we-count)</sub>`;
+  const image = block.indexOf("free-tier-budget.svg");
+  assert.ok(image >= 0 && block.indexOf(note) > image);
+  assert.equal(
+    [...block.matchAll(/\]\(docs\/reference\/FREE_TIERS\.md#how-we-count\)/g)].length,
+    2,
+    "method links in the footnote and caption"
+  );
+  assert.ok(block.indexOf("Everything here is free. No paywall.") < image);
+  assert.ok(block.indexOf(STAR_INVITE) < image);
   const card = buildFreeTierBudgetCopy() as Record<string, string[]>;
-  assert.equal(card.big[0], BIG);
-  assert.equal(card.hero[0], REAL);
+  assert.deepEqual(card.hero, [`${BIG}*`]);
+  assert.ok(card.note[1].includes(`${REAL} a month today`));
 });
 
 test("the big figure is never called capacity or available", () => {

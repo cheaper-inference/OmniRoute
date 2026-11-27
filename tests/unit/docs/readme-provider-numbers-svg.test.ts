@@ -46,11 +46,11 @@ test("the provider figures use separate denominators for offers, rows, IDs and p
   assert.equal(active.value, readmeFact("code.freeAccessRows"));
   assert.equal(distinct.value, readmeFact("code.freeModels"));
   assert.equal(pools.value, readmeFact("code.freePublishedPools"));
-  assert.equal(budget.value, readmeFactText("code.rowSumTotalLabel"));
-  assert.ok(budget.lines[0].startsWith(`${readmeFactText("code.headlineSteadyLabel")} real`));
-  assert.match(
+  assert.equal(budget.value, `${readmeFactText("code.rowSumTotalLabel")}*`);
+  assert.equal(budget.label, "Free tokens a month");
+  assert.equal(
     budget.lines.join(" "),
-    /First month: .+ with signup credits\. Not an OmniRoute allowance\./
+    `* Sum of every catalog row, ended offers included. ${readmeFactText("code.headlineSteadyLabel")} counting each shared quota once. Not an OmniRoute allowance.`
   );
 });
 
@@ -99,6 +99,14 @@ test("the provider figure SVG shows two rows of four outlined cards and embeds t
   assert.match(svg, /@font-face\{font-family:"CI Mono"/);
   assert.match(svg, /<use href="#g[0-9a-z]+"/);
   assert.match(doc.querySelector("desc")?.textContent ?? "", /None of them is added to another\./);
+  assert.ok(
+    doc
+      .querySelector("desc")
+      ?.textContent?.includes(
+        `${readmeFactText("code.rowSumTotalLabel")} summed across every catalog row, ended offers included; ${readmeFactText("code.headlineSteadyLabel")} counting each shared quota once.`
+      )
+  );
+
   assert.ok(Buffer.byteLength(svg) < 200 * 1024);
 });
 

@@ -163,11 +163,13 @@ describe("README generators follow the facts snapshot", () => {
     assert.ok(bumped.hero.stats.includes("987"));
     assert.ok(bumped.hero.stats.includes("76"));
     assert.ok(text.includes("980+"), "the free-offer label follows hasFreeProviders");
-    // D48: the big figure and the real one travel as one string, never split across entries.
-    const pair = Object.values(bumped.hero)
-      .flat()
-      .filter((s) => /~77\.7B as others count · ~2\.5B real/i.test(s));
-    assert.ok(pair.length > 0, "the short pair is one string of the hero copy");
+    assert.deepEqual(bumped.hero.stats.slice(4, 6), [
+      `${changed.code.rowSumTotalLabel}*`,
+      "FREE TOKENS / MONTH",
+    ]);
+    assert.deepEqual(bumped.hero.tokenNote, [
+      `* row sum, ended offers included · ${changed.code.headlineSteadyLabel} counting each shared quota once`,
+    ]);
     assert.ok(!text.includes("~333M"), "the live row sum stays off the hero");
     assert.ok(!/row by row|per live row/i.test(text));
     // D51: the tool line at the top of the README does not change.
@@ -214,10 +216,18 @@ describe("README generators follow the facts snapshot", () => {
       base.budget.heroMeta.join("").includes(`${c.freeAccessRows} catalog rows with free access`)
     );
     const text = flat(bumped.budget);
-    assert.deepEqual(bumped.budget.hero, ["~2.5B"]);
-    assert.equal(bumped.budget.big[0], "~77.7B");
-    assert.ok(text.indexOf("~77.7B") < text.indexOf("~2.5B"), "the big figure comes first");
-    assert.ok(bumped.budget.heroSub.join("").includes("~4.4B in your first month"));
+    assert.deepEqual(bumped.budget.hero, [`${changed.code.rowSumTotalLabel}*`]);
+    assert.ok(
+      text.indexOf(changed.code.rowSumTotalLabel) < text.indexOf(changed.code.headlineSteadyLabel)
+    );
+    assert.ok(
+      bumped.budget.note.join(" ").includes(`${changed.code.headlineSteadyLabel} a month today`)
+    );
+    assert.ok(
+      bumped.budget.note
+        .join(" ")
+        .includes(`${changed.code.headlineFirstLabel} in your first month`)
+    );
     assert.ok(bumped.budget.heroMeta.join("").includes("66 pools with a published quota"));
     assert.ok(bumped.budget.heroMeta.join("").includes("555 catalog rows with free access"));
     assert.ok(bumped.budget.ladder.join("").includes("~333M summed per live row"));

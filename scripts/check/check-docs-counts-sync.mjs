@@ -621,8 +621,10 @@ export function makeInstructionCountFreeValidator(file) {
 // travels alone: it carries its label and the real figure (headline:steady) sits in the same
 // block — or, on a one-line surface (a `#` heading, an `alt="…"` text), on the same line. The
 // row sum of the live catalog (rowSum:live) belongs to the method page. package.json and llm.txt
-// carry no token figure at all; MCP/A2A outputs carry the real figure only. These rules are
-// invariants: they run in both modes.
+// carry no token figure at all; MCP/A2A outputs carry the real figure only.
+// Owner decision (2026-11-26): a starred total can put its label and the real figure in an
+// asterisk footnote in the same section. The note links to the method outside the method page.
+// Alt text still carries the full pair inline, with no asterisk. These invariants run in both modes.
 
 /** Files that must carry the big figure: the two pages that print the D47 block (Radar v2, plan 02). */
 export const ROW_SUM_REQUIRED_FILES = ["README.md", "docs/reference/FREE_TIERS.md"];
@@ -701,14 +703,62 @@ function hasPairedSteady(claim, steady, surface = null) {
     : steady.some((r) => gap(claim, r) <= ROW_SUM_PAIR_DISTANCE);
 }
 
+const CATALOG_ROW_SUM =
+  /\b(?:sum\s+of\s+(?:every|all(?:\s+the)?)\s+(?:catalog\s+rows?|rows?\s+in\s+the\s+catalog)|(?:every|all(?:\s+the)?)\s+(?:catalog\s+)?rows?\s+added\s+up)\b/i;
+const ENDED_OFFERS_INCLUDED = /\bended\s+offers\s+included\b/i;
+const METHOD_LINK =
+  /(?<!!)\[[^\]\n]+\]\(<?(?:[^\s()<>"']*\/)?FREE_TIERS\.md#how-we-count>?\)|<a\s+[^>]*\bhref=["'](?:[^\s<>"']*\/)?FREE_TIERS\.md#how-we-count["']/i;
+const FOOTNOTE_MARKER = String.raw`[ \t]*(?:<sub>[ \t]*)?\\?\*(?!\*)[ \t]*(?=\S)`;
+const FOOTNOTE_START = new RegExp(`^${FOOTNOTE_MARKER}`, "gim");
+// A wrapped note stays together up to the next paragraph, bullet, heading or closing sub tag.
+const FOOTNOTE_END = new RegExp(
+  String.raw`</sub>|\r?\n(?:[ \t]*\r?\n|${FOOTNOTE_MARKER}|[ \t]*#{1,6}[ \t])`,
+  "i"
+);
+
+function footnotesInSection(content, claim, headings) {
+  const headingIndex = headings.findLastIndex((heading) => heading.index <= claim.start);
+  const heading = headings[headingIndex];
+  const start = heading ? heading.index + heading[0].length : 0;
+  // Include nested headings until the next heading at this level or above.
+  const end = headings
+    .slice(headingIndex + 1)
+    .find((next) => !heading || next[1].length <= heading[1].length)?.index;
+  const section = content.slice(start, end);
+  return Array.from(section.matchAll(FOOTNOTE_START), (marker) => {
+    const offset = marker.index + marker[0].length;
+    const [text] = section.slice(offset).split(FOOTNOTE_END, 1);
+    return { text, start: start + offset, end: start + offset + text.length };
+  });
+}
+
+function sectionHeadings(content) {
+  return [...content.matchAll(/^ {0,3}(#{1,6})[ \t]+[^\r\n]*/gm)];
+}
+
+function footnoteProblems(content, claim, steady, headings, methodPage) {
+  const notes = footnotesInSection(content, claim, headings);
+  if (!notes.length) return ["missing an asterisk footnote in the same section"];
+  const missing = notes.map((note) => {
+    const parts = [];
+    if (!CATALOG_ROW_SUM.test(note.text)) parts.push("the sum of every catalog row");
+    if (!ENDED_OFFERS_INCLUDED.test(note.text)) parts.push('"ended offers included"');
+    if (!hasPairedSteady(claim, steady, note)) parts.push("the real figure");
+    if (!methodPage && !METHOD_LINK.test(note.text)) {
+      parts.push("a link to FREE_TIERS.md#how-we-count");
+    }
+    return parts;
+  });
+  const best = missing.reduce((a, b) => (a.length <= b.length ? a : b));
+  return best.map((part) => `the asterisk footnote is missing ${part}`);
+}
+
 /**
- * Placement rules of the row-sum figures in one free-tier document (D47/D48):
- * (1) every rowSum:total has a headline:steady within 600 characters (same line / same alt text
- *     on a one-line surface); (2) outside the method page it comes through its label
- *     (`via` label or short); rowSum:live needs a real figure within 600 characters and stays off
- *     one-line surfaces; (4) no figure quoted from other catalogs and no comparison word in the
- *     120 characters after a row-sum figure; (6) with `totalPublic: false` the big figure and
- *     the share from ended offers fail everywhere.
+ * A starred rowSum:total needs a complete footnote in its section. An unstarred total still
+ * needs its inline label outside the method page and a headline:steady within 600 characters
+ * (same heading or alt text on a one-line surface). A rowSum:live needs the real figure within
+ * 600 characters and stays off one-line surfaces. Quoted figures, nearby comparisons and
+ * retired figures are checked regardless of placement.
  *
  * @param {string} content
  * @param {{ totalPublic?: boolean, methodPage?: boolean }} [opts]
@@ -719,6 +769,7 @@ export function checkRowSumPlacement(content, opts = {}) {
   const claims = locateFreeTokenClaims(content);
   const steady = claims.filter((c) => c.key === "headline:steady");
   const alts = altSpans(content);
+  const headings = claims.some((c) => c.via === "asterisk") ? sectionHeadings(content) : [];
   const problems = [];
   const at = (c) => `"${c.text}" (line ${lineOf(content, c.start)})`;
   const realNear = (c) => hasPairedSteady(c, steady);
@@ -730,7 +781,15 @@ export function checkRowSumPlacement(content, opts = {}) {
         continue;
       }
       const surface = oneLineSurface(content, c.start, alts);
-      if (surface) {
+      if (c.via === "asterisk") {
+        if (surface?.kind === "alt text") {
+          problems.push(`${at(c)}: an asterisk is not allowed in alt text; spell out the pair`);
+        } else {
+          for (const problem of footnoteProblems(content, c, steady, headings, methodPage)) {
+            problems.push(`${at(c)}: ${problem}`);
+          }
+        }
+      } else if (surface) {
         if (!hasPairedSteady(c, steady, surface)) {
           problems.push(
             `${at(c)}: big figure on a one-line surface (${surface.kind}) without the real figure on the same line`
@@ -1220,6 +1279,8 @@ function planFreeTokenEdits(content, totals) {
     (c) => c.key === "headline:steady" && isStaleFreeTokenClaim(c, totals.s)
   );
   const alts = staleSteady.length ? altSpans(content) : [];
+  const headings =
+    staleSteady.length && claims.some((c) => c.via === "asterisk") ? sectionHeadings(content) : [];
   const edits = [];
   for (const c of claims) {
     const live = FREE_TOKEN_TOTAL_OF[c.key](totals);
@@ -1230,7 +1291,11 @@ function planFreeTokenEdits(content, totals) {
       c.key === "rowSum:total" &&
       staleSteady.length > 0 &&
       Math.abs(c.value - live) > c.halfStep &&
-      hasPairedSteady(c, staleSteady, oneLineSurface(content, c.start, alts));
+      (c.via === "asterisk"
+        ? footnotesInSection(content, c, headings).some((note) =>
+            hasPairedSteady(c, staleSteady, note)
+          )
+        : hasPairedSteady(c, staleSteady, oneLineSurface(content, c.start, alts)));
     if (!isStaleFreeTokenClaim(c, live) && !refreshPartner) continue;
     const isShare = c.key === "retiredShare";
     // The locator's span covers the digits. Match the full literal, including its unit and "~".

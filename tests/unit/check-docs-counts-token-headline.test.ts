@@ -530,6 +530,90 @@ test("the big figure never travels without its label and the real one", () => {
   assert.equal(place("~162M summed per live row").ok, false);
 });
 
+const STARRED_BIG = gate.formatTokenHeadline(T.t);
+const NOTE_REAL = gate.formatTokenHeadline(T.s);
+const NOTE_LINK = "[How we count →](docs/reference/FREE_TIERS.md#how-we-count)";
+const FULL_NOTE = `<sub>\\* Sum of every row in the catalog, ended offers included, the way free-tier catalogs count. Counting each shared quota once, one account per provider reaches about ${NOTE_REAL} a month today. ${NOTE_LINK}</sub>`;
+const STARRED_HEADING = `## ${STARRED_BIG}\\* Free Tokens / Month`;
+
+test("a starred figure can use a complete note in the same section", () => {
+  for (const heading of [STARRED_HEADING, STARRED_HEADING.replace("\\*", "*")]) {
+    const content = `${heading}\n\n${"x".repeat(700)}\n\n### Details\n\n${FULL_NOTE}`;
+    assert.deepEqual(
+      claimsLib.locateFreeTokenClaims(content).map((c) => c.key),
+      ["rowSum:total", "headline:steady"]
+    );
+    assert.equal(place(content).ok, true, place(content).detail);
+    assert.equal(place(`## Free tiers\n\nFree tokens: ${STARRED_BIG}*\n\n${FULL_NOTE}`).ok, true);
+  }
+});
+
+for (const [name, note, diagnostic] of [
+  ["no note", "", /missing an asterisk footnote in the same section/],
+  ["no real figure", FULL_NOTE.replace(NOTE_REAL, "an estimate"), /footnote.*real figure/],
+  [
+    "no all-rows label",
+    FULL_NOTE.replace("Sum of every row in the catalog", "Some rows"),
+    /footnote.*sum of every catalog row/,
+  ],
+  [
+    "no ended offers",
+    FULL_NOTE.replace(", ended offers included", ""),
+    /footnote.*ended offers included/,
+  ],
+  ["no method link", FULL_NOTE.replace(NOTE_LINK, ""), /footnote.*link.*FREE_TIERS/],
+  [
+    "a plain-text method path",
+    FULL_NOTE.replace(NOTE_LINK, "FREE_TIERS.md#how-we-count"),
+    /footnote.*link.*FREE_TIERS/,
+  ],
+  [
+    "a note in a sibling section",
+    `## Another section\n\n${FULL_NOTE}`,
+    /missing an asterisk footnote in the same section/,
+  ],
+  [
+    "a note outside the subsection",
+    `### Scope\n\n${STARRED_BIG}*\n\n## Another section\n\n${FULL_NOTE}`,
+    /missing an asterisk footnote in the same section/,
+  ],
+] as const) {
+  test(`a starred figure is rejected with ${name}`, () => {
+    const content =
+      name === "a note outside the subsection"
+        ? `## Free tiers\n\n${note}`
+        : `${STARRED_HEADING}\n\n${note}`;
+    const result = place(content);
+    assert.equal(result.ok, false, result.detail);
+    assert.match(result.detail, diagnostic);
+  });
+}
+
+test("the method page may omit the link from an otherwise complete note", () => {
+  const result = place(`${STARRED_HEADING}\n\n${FULL_NOTE.replace(NOTE_LINK, "")}`, {
+    methodPage: true,
+  });
+  assert.equal(result.ok, true, result.detail);
+});
+
+test("alt text requires the full unstarred pair even with a complete footnote", () => {
+  const alt = `<img alt="Free tokens a month: ${STARRED_BIG} summed across every catalog row, ended offers included; ${NOTE_REAL} counting each shared quota once.">`;
+  assert.equal(place(alt).ok, true, place(alt).detail);
+  for (const star of ["*", "\\*"]) {
+    const result = place(`${alt.replace(STARRED_BIG, STARRED_BIG + star)}\n\n${FULL_NOTE}`);
+    assert.equal(result.ok, false, result.detail);
+    assert.match(result.detail, /asterisk.*alt text/);
+  }
+  const unpaired = place(alt.replace(`; ${NOTE_REAL} counting each shared quota once`, ""));
+  assert.equal(unpaired.ok, false, unpaired.detail);
+  assert.match(unpaired.detail, /real figure on the same line/);
+});
+
+test("a footnote does not exempt an unstarred and unlabeled figure from the existing checks", () => {
+  const heading = STARRED_HEADING.replace("\\*", "");
+  assert.equal(checkHeadline(`${heading}\n\n${FULL_NOTE}${GATED_SUFFIX}`, T).ok, false);
+});
+
 test("comparisons stay generic around the big figure", () => {
   assert.equal(place(`${SHORT_PAIR}, more than anyone`).ok, false);
   assert.equal(place(`${SHORT_PAIR}; nothing else to add`).ok, true);
@@ -629,10 +713,10 @@ test("the README and FREE_TIERS must keep the row-sum figure", () => {
   const freeTiers = readFileSync(path.join(ROOT, "docs/reference/FREE_TIERS.md"), "utf8");
   assert.equal(required.validate(readme).ok, true);
   assert.equal(required.validate(freeTiers).ok, true);
-  // The README with every big figure removed (block, title, alt texts keep only the real one).
+  // The README without the starred total in the title or the totals in alt text.
   const withoutBig = readme
-    .replace(/~\d+(?:\.\d+)?B free tokens \/ month/g, "free tokens / month")
-    .replace(/~\d+(?:\.\d+)?B as [Oo]thers [Cc]ount · /g, "");
+    .replace(/~\d+(?:\.\d+)?[BM]\\\* /g, "")
+    .replace(/~\d+(?:\.\d+)?[BM] summed across every catalog row, ended offers included; /g, "");
   assert.equal(required.validate(withoutBig).ok, false);
   assert.equal(place(readme, { methodPage: false }).ok, true);
   assert.equal(place(freeTiers, { methodPage: true }).ok, true);
@@ -640,7 +724,10 @@ test("the README and FREE_TIERS must keep the row-sum figure", () => {
   const heroAt = readme.indexOf("readme-hero.svg");
   const lineEnd = readme.indexOf("\n", heroAt);
   const heroLine = readme.slice(readme.lastIndexOf("\n", heroAt) + 1, lineEnd);
-  const broken = readme.replace(heroLine, heroLine.replace(/ · ~\d+(?:\.\d+)?M real/, ""));
+  const broken = readme.replace(
+    heroLine,
+    heroLine.replace(/; ~\d+(?:\.\d+)?[BM] counting each shared quota once/, "")
+  );
   assert.notEqual(broken, readme);
   assert.equal(place(broken, { methodPage: false }).ok, false);
 });

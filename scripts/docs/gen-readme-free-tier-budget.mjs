@@ -8,12 +8,9 @@
 // snapshot (scripts/docs/readmeFacts.mjs), so regenerating on any branch reproduces the committed
 // card and only `npm run release:refresh-derived` moves it.
 //
-// The free-token figures follow the owner's decision D47 (2026-11-21) with the card texts S-A
-// (2026-11-24), drawn on the card's existing layout: the right panel shows the big figure on top
-// (every row added up, ended offers included, the way other catalogs count) with its label, the
-// real figure right below it, and a fine line with the live row sum and the catalog date. Every
-// figure is a label the probe formatted (formatTokenHeadline), never one formatted here;
-// fmtTokens() only draws the per-pool segments and the credit chips. Output is committed as docs/diagrams/free-tier-budget.svg;
+// The starred row sum is the headline. The footer explains how it is counted and gives the
+// recurring and first-month figures. Those labels come from the facts probe; fmtTokens()
+// formats only the pool amounts and credit chips. Output lives in docs/diagrams/free-tier-budget.svg.
 // tests/unit/docs/readme-free-tier-budget-svg.test.ts fails when the committed file no longer
 // matches this generator, and runs the counts gate's own validators on it (catalog entries,
 // recurring pools, canonical numbers).
@@ -30,7 +27,7 @@ import { svgOpen, gridDefs, esc, roleWidth } from "./readme-diagram-theme.mjs";
 import { README_FACTS, RF } from "./readmeFacts.mjs";
 
 const W = 1200;
-const H = 842;
+const H = 914;
 const NUMBER_WORDS = [
   "zero",
   "one",
@@ -148,29 +145,16 @@ export function buildFreeTierBudgetModel() {
 
   const copy = {
     kicker: ["FREE-TIER BUDGET · LIVE ON ", "/dashboard/free-tiers"],
-    pill: ["TWO WAYS TO COUNT"],
-    panel: ["FREE TOKENS / MONTH"],
-    big: [
-      RF.rowSumTotalLabel,
-      "COUNTED THE WAY OTHER CATALOGS COUNT",
-      "EVERY ROW ADDED UP · ENDED OFFERS INCLUDED",
-    ],
-    hero: [RF.headlineSteadyLabel],
-    heroLabel: ["REAL TODAY", " · EACH SHARED QUOTA COUNTED ONCE · WHAT YOU CAN ACTUALLY USE"],
-    heroSub: [
-      "up to ",
-      RF.headlineFirstLabel,
-      " in your first month, with one-time signup credits",
-    ],
+    hero: [`${RF.rowSumTotalLabel}*`],
+    heroLabel: ["FREE TOKENS / MONTH"],
     heroMeta: [
       `${RF.freePublishedPools} pools with a published quota`,
       " · ",
       `${RF.freeAccessRows} catalog rows with free access`,
       " · one endpoint",
     ],
-    realRow: ["REAL TODAY · EACH SHARED QUOTA COUNTED ONCE", "WHAT YOU CAN ACTUALLY USE"],
     ladder: [`${RF.rowSumLiveLabel} summed per live row · catalog audited ${RF.catalogDate}`],
-    barTitle: ["WHERE IT COMES FROM · ", `${quantified.length} QUANTIFIED POOLS${capsTitle}`],
+    barTitle: ["RECURRING QUOTAS · ", `${quantified.length} QUANTIFIED POOLS${capsTitle}`],
     barCaption: [
       `each segment = one recurring pool${capsCaption} · widths floored so every pool shows · audited pool budgets below`,
     ],
@@ -194,17 +178,19 @@ export function buildFreeTierBudgetModel() {
       "terms flag",
       " per provider",
     ],
+    note: [
+      "* Sum of every catalog row, ended offers included, the way free-tier catalogs count.",
+      `Counting each shared quota once: ${RF.headlineSteadyLabel} a month today, up to ${RF.headlineFirstLabel} in your first month with signup credits.`,
+    ],
   };
 
-  // Owner-approved title and description (S-A, 2026-11-24). The description is what the counts
-  // gate reads from this file: every figure in it sits next to its anchor.
-  const title = `OmniRoute free-tier budget: ${RF.rowSumTotalLabel} as others count · ${RF.headlineSteadyLabel} real`;
+  const tokenDescription = `${RF.rowSumTotalLabel} summed across every catalog row, ended offers included; ${RF.headlineSteadyLabel} counting each shared quota once.`;
+  const title = `OmniRoute free-tier budget: ${tokenDescription}`;
   const desc =
-    `Free-tier budget card. ${RF.rowSumTotalLabel} free tokens a month counted the way other catalogs count, with every row added up and ended offers included. ` +
-    `${RF.headlineSteadyLabel} real today, each shared quota counted once, which is what you can actually use. ` +
+    `Free tokens a month: ${tokenDescription} ` +
     `Up to ${RF.headlineFirstLabel} in your first month with one-time signup credits. ` +
     `${RF.rowSumLiveLabel} summed per live row. ` +
-    `${RF.freePublishedPools} pools with a published quota and ${RF.freeAccessRows} catalog rows with free access, catalog audited ${RF.catalogDate}.`;
+    `${RF.freePublishedPools} pools with a published quota and ${RF.freeAccessRows} catalog rows with free access, catalog audited ${RF.catalogDate}. The bar shows the pools behind the recurring figure.`;
 
   return {
     copy,
@@ -232,8 +218,7 @@ const dotClass = (i) => (i === 0 ? "accent stroke-ink" : tone(i));
 export async function renderReadmeFreeTierBudget() {
   const M = buildFreeTierBudgetModel();
   const C = M.copy;
-  // The header pill hugs its label, right-aligned to the content edge; the footer note follows LIVE.
-  const pillW = 32 + Math.ceil(roleWidth("lbl", C.pill[0])) + 16;
+  const footerH = 128;
   const footerNoteX = 356 + Math.ceil(roleWidth("lbl", C.footer[1])) + 28;
 
   const base = M.lastRowY; // 572 with five grid rows
@@ -247,9 +232,9 @@ export async function renderReadmeFreeTierBudget() {
     sep: base + 174,
     foot: base + 198,
   };
-  if (Y.foot + 56 > H - 16) {
+  if (Y.foot + footerH > H - 16) {
     throw new Error(
-      `free-tier-budget: ${M.pools.length} pools need ${M.gridRows} grid rows and the footer no longer fits the 842px canvas — grow the viewBox deliberately`
+      `free-tier-budget: ${M.pools.length} pools need ${M.gridRows} grid rows and the footer no longer fits the ${H}px canvas — grow the viewBox deliberately`
     );
   }
 
@@ -304,9 +289,9 @@ export async function renderReadmeFreeTierBudget() {
       `      <stop offset="0%" style="stop-color:var(--surface)" stop-opacity="0.9"/>\n` +
       `      <stop offset="100%" style="stop-color:var(--surface)" stop-opacity="0"/>\n` +
       `    </radialGradient>\n` +
-      `    <path id="ftb-tk1" d="M 44,84 C 150,112 190,146 302,168"/>\n` +
-      `    <path id="ftb-tk2" d="M 30,310 C 136,290 176,240 296,206"/>\n` +
-      `    <path id="ftb-tk3" d="M 96,436 C 186,392 208,308 314,230"/>\n` +
+      `    <path id="ftb-tk1" d="M 376,112 C 480,112 504,144 616,168"/>\n` +
+      `    <path id="ftb-tk2" d="M 392,200 C 480,184 536,176 640,192"/>\n` +
+      `    <path id="ftb-tk3" d="M 376,272 C 480,256 528,232 624,216"/>\n` +
       `    <clipPath id="ftb-bar-shape"><rect x="60" y="372" width="1080" height="18" rx="9"/></clipPath>\n` +
       `    <clipPath id="ftb-bar-reveal">\n` +
       `      <rect x="60" y="372" width="0" height="18">\n` +
@@ -318,37 +303,21 @@ export async function renderReadmeFreeTierBudget() {
       `  <rect x="0" y="0" width="${W}" height="${H}" fill="url(#ftb-grid)"/>\n` +
       // header
       `  <text x="60" y="52" class="kicker">${esc(C.kicker[0])}<tspan style="fill:var(--ink)">${esc(C.kicker[1])}</tspan></text>\n` +
-      `  <g transform="translate(${1140 - pillW},32)">\n` +
-      `    <rect width="${pillW}" height="28" rx="14" class="ok-bg stroke-ok" stroke-width="1" stroke-opacity="0.6"/>\n` +
-      `    <circle cx="18" cy="14" r="3.5" class="ok"><animate attributeName="opacity" values="1;0.35;1" dur="1.6s" repeatCount="indefinite"/></circle>\n` +
-      `    <text x="32" y="18" class="lbl" style="fill:var(--ok)">${esc(C.pill[0])}</text>\n` +
-      `  </g>\n` +
       // hero (left)
       `  <ellipse cx="280" cy="180" rx="270" ry="130" fill="url(#ftb-glow)"><animate attributeName="rx" values="250;290;250" dur="4s" repeatCount="indefinite"/></ellipse>\n` +
       `  <g class="ink">\n` +
       ["ftb-tk1", "ftb-tk2", "ftb-tk3"]
         .map(
           (id, i) =>
-            `    <circle r="3.4"><animateMotion dur="2.4s" repeatCount="indefinite" begin="${(i * 0.8).toFixed(1)}s"><mpath href="#${id}"/></animateMotion>` +
+            `    <circle r="3.4" opacity="0"><animateMotion dur="2.4s" repeatCount="indefinite" begin="${(i * 0.8).toFixed(1)}s"><mpath href="#${id}"/></animateMotion>` +
             `<animate attributeName="opacity" values="0;1;1;0" dur="2.4s" begin="${(i * 0.8).toFixed(1)}s" repeatCount="indefinite"/></circle>`
         )
         .join("\n") +
       `\n  </g>\n` +
       `  <text x="60" y="228" class="headline">${esc(C.hero[0])}</text>\n` +
-      `  <text x="62" y="266" class="kicker"><tspan style="fill:var(--ok)">${esc(C.heroLabel[0])}</tspan>${esc(C.heroLabel[1])}</text>\n` +
-      `  <text x="62" y="298" class="body" style="fill:var(--body)">${esc(C.heroSub[0])}<tspan font-weight="600" style="fill:var(--ok)">${esc(C.heroSub[1])}</tspan>${esc(C.heroSub[2])}</text>\n` +
+      `  <text x="62" y="266" class="kicker">${esc(C.heroLabel[0])}</text>\n` +
       `  <text x="62" y="326" class="label-sm" style="fill:var(--muted)"><tspan style="fill:var(--ink)">${esc(C.heroMeta[0])}</tspan>${esc(C.heroMeta[1])}<tspan style="fill:var(--ink)">${esc(C.heroMeta[2])}</tspan>${esc(C.heroMeta[3])}</text>\n` +
-      // panel · the two ways to count (D47): the big figure on top with its label, the real one
-      // right below, the live row sum and the catalog date on the fine line
-      `  <rect x="680" y="84" width="460" height="216" rx="12" class="surface" stroke-width="1"/>\n` +
-      `  <text x="704" y="116" class="lbl">${esc(C.panel[0])}</text>\n` +
-      `  <text x="704" y="172" class="num" style="fill:var(--muted)">${esc(C.big[0])}</text>\n` +
-      `  <text x="836" y="156" class="label-sm" style="fill:var(--muted)">${esc(C.big[1])}</text>\n` +
-      `  <text x="836" y="176" class="label-sm" style="fill:var(--muted)">${esc(C.big[2])}</text>\n` +
-      `  <text x="704" y="240" class="num" style="fill:var(--ok)">${esc(C.hero[0])}</text>\n` +
-      `  <text x="836" y="224" class="label-sm" style="fill:var(--muted)">${esc(C.realRow[0])}</text>\n` +
-      `  <text x="836" y="244" class="label-sm" style="fill:var(--ok)">${esc(C.realRow[1])}</text>\n` +
-      `  <text x="704" y="280" class="label-sm" style="fill:var(--muted)">${esc(C.ladder[0])}</text>\n` +
+      `  <text x="1140" y="326" text-anchor="end" class="label-sm" style="fill:var(--muted)">${esc(C.ladder[0])}</text>\n` +
       // budget bar
       `  <text x="60" y="356" class="lbl">${esc(C.barTitle[0])}<tspan style="fill:var(--ink)">${esc(C.barTitle[1])}</tspan></text>\n` +
       `  <g clip-path="url(#ftb-bar-shape)">\n` +
@@ -370,7 +339,7 @@ export async function renderReadmeFreeTierBudget() {
       `  <text x="760" y="${Y.boost}" class="label"><tspan style="fill:var(--warn)">${esc(C.boost[0])}</tspan>${esc(C.boost[1])}<tspan style="fill:var(--ok)">${esc(C.boost[2])}</tspan></text>\n` +
       `  <text x="60" y="${Y.sep}" class="label-sm" style="fill:var(--muted)">${esc(C.separately[0])}</text>\n` +
       // footer strip
-      `  <rect x="60" y="${Y.foot}" width="1080" height="56" rx="12" class="surface" stroke-width="1"/>\n` +
+      `  <rect x="60" y="${Y.foot}" width="1080" height="${footerH}" rx="12" class="surface" stroke-width="1"/>\n` +
       `  <text x="84" y="${Y.foot + 22}" class="lbl">${esc(C.footer[0])}</text>\n` +
       `  <rect x="84" y="${Y.foot + 30}" width="240" height="8" rx="4" class="surface-muted rule" stroke-width="1"/>\n` +
       `  <rect x="85" y="${Y.foot + 31}" width="132" height="6" rx="3" class="ink"/>\n` +
@@ -379,6 +348,13 @@ export async function renderReadmeFreeTierBudget() {
       `  <circle cx="344" cy="${Y.foot + 34}" r="3.5" class="ok"><animate attributeName="opacity" values="1;0.3;1" dur="1.2s" repeatCount="indefinite"/></circle>\n` +
       `  <text x="356" y="${Y.foot + 38}" class="lbl" style="fill:var(--ok)">${esc(C.footer[1])}</text>\n` +
       `  <text x="${footerNoteX}" y="${Y.foot + 38}" class="label-sm" style="fill:var(--muted)">${esc(C.footer[2])}<tspan style="fill:var(--warn)">${esc(C.footer[3])}</tspan>${esc(C.footer[4])}</text>\n` +
+      `  <line x1="84" y1="${Y.foot + 56}" x2="1116" y2="${Y.foot + 56}" class="rule" stroke-width="1"/>\n` +
+      C.note
+        .map(
+          (line, i) =>
+            `  <text x="84" y="${Y.foot + 84 + i * 20}" class="label">${esc(line)}</text>\n`
+        )
+        .join("") +
       "</svg>\n"
   );
 }

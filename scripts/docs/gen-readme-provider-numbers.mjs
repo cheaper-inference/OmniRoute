@@ -72,27 +72,22 @@ export async function buildProviderNumbersCards() {
       lines: ["Shared quotas counted once."],
     },
     {
-      value: RF.rowSumTotalLabel,
-      label: "Free tokens a month, as others count",
+      value: `${RF.rowSumTotalLabel}*`,
+      label: "Free tokens a month",
       // Marks the highlighted card: it gets the copper bar the hero uses.
       highlight: true,
-      labelSize: 14.5,
       definitionRole: "cell",
       lines: [
-        `${RF.headlineSteadyLabel} real: each shared quota`,
-        "counted once. Others add",
-        "every row, ended offers included.",
-        `First month: ${RF.headlineFirstLabel} with signup credits.`,
+        "* Sum of every catalog row,",
+        "ended offers included.",
+        `${RF.headlineSteadyLabel} counting each shared quota once.`,
         "Not an OmniRoute allowance.",
       ],
     },
   ];
 }
 
-function card(
-  { value, label, code, lines, highlight, labelSize = 17, definitionRole = "definition" },
-  i
-) {
+function card({ value, label, code, lines, highlight, definitionRole = "definition" }, i) {
   const x = 32 + (i % COLUMNS) * 288;
   const firstRow = i < COLUMNS;
   const rows = code ? [["mono", code]] : [];
@@ -104,7 +99,7 @@ function card(
     `    <rect width="${CARD_W}" height="${CARD_H}" rx="12" class="surface"/>`,
     ...(highlight ? [`    <rect width="6" height="${CARD_H}" rx="3" class="accent"/>`] : []),
     `    <text x="20" y="64" class="num" style="font-size:52px">${esc(String(value))}</text>`,
-    `    <text x="20" y="96" class="h3" style="font-size:${labelSize}px">${esc(label)}</text>`,
+    `    <text x="20" y="96" class="h3" style="font-size:17px">${esc(label)}</text>`,
     ...rows.map(
       ([role, line], j) =>
         `    <text x="20" y="${textY + lineHeight * j}" class="${role}">${esc(line)}</text>`
@@ -115,8 +110,10 @@ function card(
 
 export async function renderReadmeProviderNumbers() {
   const cards = await buildProviderNumbersCards();
-  const desc = cards.map(({ value, label, code, lines }) =>
-    [`${value} ${label}.`, ...(code ? [`${code} flag.`] : []), ...lines].join(" ")
+  const desc = cards.map(({ value, label, code, lines, highlight }) =>
+    highlight
+      ? `Free tokens a month: ${RF.rowSumTotalLabel} summed across every catalog row, ended offers included; ${RF.headlineSteadyLabel} counting each shared quota once. ${lines.at(-1)}`
+      : [`${value} ${label}.`, ...(code ? [`${code} flag.`] : []), ...lines].join(" ")
   );
   return outlineSvg(
     svgOpen({
