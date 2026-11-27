@@ -22,6 +22,9 @@ const { skillRegistry } = await import("../../src/lib/skills/registry.ts");
 const { skillExecutor } = await import("../../src/lib/skills/executor.ts");
 const { encodeSkillToolName } = await import("../../src/lib/skills/injection.ts");
 const { handleChat } = await import("../../src/sse/handlers/chat.ts");
+const { guardrailRegistry, resetGuardrailsForTests } =
+  await import("../../src/lib/guardrails/registry.ts");
+const { VisionBridgeGuardrail } = await import("../../src/lib/guardrails/visionBridge.ts");
 const providerNodeRoute = await import("../../src/app/api/provider-nodes/[id]/route.ts");
 const { initTranslators } = await import("../../open-sse/translator/index.ts");
 const { clearInflight } = await import("../../open-sse/services/requestDedup.ts");
@@ -699,6 +702,106 @@ test("chat pipeline persists Codex responses cache and reasoning tokens to call 
   assert.equal(callLog.tokens.cacheRead, 40);
   assert.equal(callLog.tokens.cacheWrite, 11);
   assert.equal(callLog.tokens.reasoning, 13);
+});
+
+test("auto/vision delivers the original image with a warm caption cache", async (t) => {
+  const model = "auto/vision";
+  const codexModel = "gpt-6.1-terra";
+  const codexToken = "codex-auto-vision-test-token";
+  const image =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+  const codex = await seedConnection("codex", { authType: "oauth", accessToken: codexToken });
+  const textOnly = await seedConnection("mistral", { apiKey: "mistral-auto-vision-test-key" });
+  const apiKey = await seedApiKey({
+    allowedCombos: [model],
+    allowedConnections: [codex.id, textOnly.id],
+    allowedModels: [`codex/${codexModel}`, "mistral/codestral-latest"],
+  });
+  await settingsDb.updateSettings({
+    modalityBridgeVisionEnabled: true,
+    modalityBridgeVisionMode: "describe",
+    modalityBridgeVisionModel: model,
+    modalityBridgeCacheEnabled: true,
+  });
+
+  const described: string[] = [];
+  guardrailRegistry.register(
+    new VisionBridgeGuardrail({
+      deps: {
+        callVisionModel: async (imageUrl) => {
+          described.push(imageUrl);
+          return "A grid of colored shapes.";
+        },
+      },
+    })
+  );
+  t.after(() => resetGuardrailsForTests());
+
+  const upstream = t.mock.method(globalThis, "fetch", async (url, init: RequestInit = {}) => {
+    assert.match(String(url), /\/backend-api\/codex\/responses$/);
+    assert.equal(new Headers(init.headers).get("authorization"), `Bearer ${codexToken}`);
+    return buildOpenAIResponsesSSE({ text: "Vision reply", model: codexModel });
+  });
+  const completionCalls = () =>
+    upstream.mock.calls.filter(({ arguments: [url] }) =>
+      /\/(?:chat\/completions|responses)$/.test(String(url))
+    );
+
+  async function send(question: string) {
+    const response = await handleChat(
+      buildRequest({
+        authKey: apiKey.key,
+        headers: { "x-omniroute-no-cache": "true" },
+        body: {
+          model,
+          stream: false,
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: question },
+                { type: "image_url", image_url: { url: image, detail: "high" } },
+              ],
+            },
+          ],
+        },
+      })
+    );
+    const reply = await response.json();
+    assert.equal(response.status, 200, JSON.stringify(reply));
+    assert.equal(reply.choices[0].message.content, "Vision reply");
+    const call = completionCalls().at(-1);
+    assert.ok(call, "expected an upstream dispatch");
+    const [, init] = call.arguments;
+    const body = JSON.parse(String(init.body));
+    assert.equal(body.model, codexModel);
+    return body.input.find((item: { role?: string }) => item.role === "user").content;
+  }
+
+  const opening = "What is shown in this image?";
+  assert.deepEqual(await send(opening), [
+    { type: "input_text", text: opening },
+    { type: "input_text", text: "[Image 1]: A grid of colored shapes." },
+  ]);
+  assert.deepEqual(described, [image]);
+
+  await settingsDb.updateSettings({ modalityBridgeVisionMode: "auto" });
+  const questions = [
+    opening,
+    "Which shape is below the orange diamond?",
+    "Which shape is left of the red triangle?",
+  ];
+  const dispatched = [];
+  for (const question of questions) dispatched.push(await send(question));
+  assert.deepEqual(
+    dispatched,
+    questions.map((text) => [
+      { type: "input_text", text },
+      { type: "input_image", image_url: image, detail: "high" },
+    ])
+  );
+  assert.deepEqual(described, [image], "only the forced describe control may call the captioner");
+  assert.equal(completionCalls().length, questions.length + 1);
 });
 
 test("chat pipeline applies Codex OAuth fingerprint and priority tier inside combos", async () => {

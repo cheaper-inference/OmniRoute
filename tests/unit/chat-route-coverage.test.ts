@@ -22,6 +22,8 @@ const { getCircuitBreaker, STATE } = await import("../../src/shared/utils/circui
 const { clearProviderFailure } = await import("../../open-sse/services/accountFallback.ts");
 const { getDefaultTaskModelMap, resetTaskRoutingStats, setTaskRoutingConfig } =
   await import("../../open-sse/services/taskAwareRouter.ts");
+const { setExcluded } = await import("../../src/lib/db/autoCandidateOverrides.ts");
+const { replaceSyncedAvailableModelsForConnection } = await import("../../src/lib/db/models.ts");
 
 function buildOpenAIStreamResponse(text = "streamed from openai") {
   return new Response(
@@ -427,6 +429,95 @@ test("handleChat keeps the combo error when the global fallback throws", async (
   assert.equal(attempts, 2);
   assert.match(json.error.message, /primary combo failed/i);
 });
+
+for (const { title, provider, fallbackModel, supportsVision } of [
+  {
+    title: "does not dispatch to a text-only global fallback",
+    provider: "mistral",
+    fallbackModel: "codestral-latest",
+    supportsVision: false,
+  },
+  {
+    title: "allows a native vision global fallback to answer",
+    provider: "claude",
+    fallbackModel: "claude-sonnet-4-6",
+    supportsVision: true,
+  },
+]) {
+  test(`auto/vision exhaustion ${title}`, async () => {
+    const model = "auto/vision";
+    const primaryModel = "gpt-4.1";
+    const imageData =
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+    const image = `data:image/png;base64,${imageData}`;
+    const primary = await seedConnection("openai");
+    const fallback = await seedConnection(provider);
+    const apiKey = await seedApiKey({
+      allowedCombos: [model],
+      allowedConnections: [primary.id, fallback.id],
+      allowedModels: [`openai/${primaryModel}`, `${provider}/${fallbackModel}`],
+    });
+    // Exclude the fallback account from Auto ranking only. The key allows explicit dispatch.
+    await replaceSyncedAvailableModelsForConnection("openai", primary.id, [{ id: primaryModel }]);
+    await setExcluded(apiKey.id, model, fallback.id, true);
+    await settingsDb.updateSettings({
+      globalFallbackModel: `${provider}/${fallbackModel}`,
+      modalityBridgeVisionEnabled: true,
+      modalityBridgeVisionMode: "auto",
+      modalityBridgeVisionModel: model,
+    });
+
+    const attempts: { model: string; content: unknown }[] = [];
+    globalThis.fetch = async (_url, init) => {
+      const body = JSON.parse(String(init?.body));
+      attempts.push({ model: body.model, content: body.messages?.[0]?.content });
+      if (body.model === primaryModel) {
+        return new Response(JSON.stringify({ error: { message: "vision upstream unavailable" } }), {
+          status: 503,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return supportsVision
+        ? buildClaudeResponse("Fallback answered", fallbackModel)
+        : buildOpenAIResponse("Unexpected fallback reply", fallbackModel);
+    };
+
+    const question = "Which shape is below the orange diamond?";
+    const content = [
+      { type: "text", text: question },
+      { type: "image_url", image_url: { url: image } },
+    ];
+    const response = await handleChat(
+      buildRequest({
+        authKey: apiKey.key,
+        body: { model, stream: false, messages: [{ role: "user", content }] },
+      })
+    );
+
+    const primaryAttempts = attempts.filter((attempt) => attempt.model === primaryModel);
+    assert.ok(primaryAttempts.length > 0, "the combo must dispatch before falling back");
+    for (const attempt of primaryAttempts) assert.deepEqual(attempt.content, content);
+
+    if (supportsVision) {
+      assert.deepEqual(attempts, [
+        ...primaryAttempts,
+        {
+          model: fallbackModel,
+          content: [
+            { type: "text", text: question },
+            { type: "image", source: { type: "base64", media_type: "image/png", data: imageData } },
+          ],
+        },
+      ]);
+      assert.equal(response.status, 200);
+      assert.equal((await response.json()).choices[0].message.content, "Fallback answered");
+    } else {
+      assert.deepEqual(attempts, primaryAttempts);
+      assert.equal(response.status, 503);
+      assert.match((await response.json()).error.message, /vision upstream unavailable/i);
+    }
+  });
+}
 
 test("handleChat returns 401 when no provider credentials exist (single-model)", async () => {
   // Upstream port decolua/9router#336 (Ibrahim Ryan): the no-credentials branch

@@ -1,0 +1,1 @@
+- **fix(routing):** Image follow-ups on `auto/vision` keep the original image when Vision Bridge selects the same route. Only targets with native image support can receive it.

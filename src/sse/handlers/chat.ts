@@ -1,4 +1,5 @@
 import { requiresQoderHttpTransport } from "@omniroute/open-sse/services/qoderCapabilities";
+import { supportsNativeVision } from "@omniroute/open-sse/services/combo/mediaCompatibility.ts";
 import { randomUUID } from "crypto";
 import { resolveChatRequestBody } from "./requestBody";
 import { getComboCredentialAvailability } from "./comboCredentialAvailability.ts";
@@ -968,6 +969,9 @@ async function handleChatImplementation(
   // guardrail transformed the payload (describe path) — stamped on the main
   // success exits below via withModalityBridgeHeader().
   const modalityBridgeHeader = buildModalityBridgeResponseHeaders(preCallGuardrails.results);
+  const requireNativeVision = preCallGuardrails.results.some(
+    (result) => result.guardrail === "vision-bridge" && result.meta?.requireNativeVision === true
+  );
   // #12150 P1b: video-bridge log/Memory shadow — undefined on every
   // non-video request. Threaded through handleSingleModelChat's
   // runtimeOptions -> executeChatWithBreaker -> handleChatCore.
@@ -1352,6 +1356,7 @@ async function handleChatImplementation(
             reasoningRequestTags: requestRoutingTags.tags,
             managedLease,
             videoBridgeLog,
+            requireNativeVision,
             // #7360 follow-up: without this, a target dispatch abandoned by
             // targetTimeoutRunner.ts's per-target timeout (comboTargetTimeoutMs)
             // never learns it was abandoned — it only watches the ORIGINAL
@@ -1432,6 +1437,7 @@ async function handleChatImplementation(
                 conversationId,
                 managedLease,
                 videoBridgeLog,
+                requireNativeVision,
               },
               combo.strategy,
               true
@@ -1556,6 +1562,7 @@ async function handleChatImplementation(
           reasoningRequestTags: requestRoutingTags.tags,
           managedLease,
           videoBridgeLog,
+          requireNativeVision,
           previousResponseResumed:
             (body as { _omniroutePreviousResponseResumed?: unknown })
               ._omniroutePreviousResponseResumed === true || undefined,
@@ -1635,6 +1642,8 @@ async function handleSingleModelChat(
     managedLease?: ManagedLeaseDispatchContext | null;
     /** #12150 P1b: video-bridge log/Memory shadow — undefined on every non-video request. */
     videoBridgeLog?: VideoBridgeLog;
+    /** The bridge retained images for the native auto/vision route. */
+    requireNativeVision?: boolean;
     /**
      * rehydrated-continuation flag; noted under the attempt store in
      * handleChatCore. Optional plumbing, no semantics.
@@ -1754,6 +1763,7 @@ async function handleSingleModelChat(
             conversationId: runtimeOptions?.conversationId ?? null,
             managedLease: runtimeOptions.managedLease ?? null,
             videoBridgeLog: runtimeOptions.videoBridgeLog,
+            requireNativeVision: runtimeOptions.requireNativeVision,
             previousResponseResumed: runtimeOptions.previousResponseResumed,
             // #7360 follow-up — see the primary handleSingleModel closure above.
             modelAbortSignal: target?.modelAbortSignal ?? null,
@@ -1809,6 +1819,14 @@ async function handleSingleModelChat(
   });
   const modelPolicyRejection = await resolvedModelGate([`${provider}/${model}`]);
   if (modelPolicyRejection) return modelPolicyRejection;
+  // A global fallback or redirected combo can select a model outside the
+  // original vision pool. Check its resolved transport before sending pixels.
+  if (runtimeOptions.requireNativeVision && !supportsNativeVision(provider, model)) {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, "This target cannot receive native images", {
+      code: "unsupported_media_input",
+      type: "invalid_request_error",
+    });
+  }
   const forceLiveComboTest = runtimeOptions.forceLiveComboTest === true;
   // Agent guard (block mode), on the provider this target resolved to: after the key's own
   // model policy, before any breaker, cooldown or credential is touched.

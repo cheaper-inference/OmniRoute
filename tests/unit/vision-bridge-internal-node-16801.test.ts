@@ -12,6 +12,9 @@ const models = await import("../../src/lib/db/models.ts");
 const combos = await import("../../src/lib/db/combos.ts");
 const core = await import("../../src/lib/db/core.ts");
 const { getResolvedModelCapabilities } = await import("../../src/lib/modelCapabilities.ts");
+const { setModelCapabilityOverride } = await import("../../src/lib/db/modelCapabilityOverrides.ts");
+const { supportsNativeVision } =
+  await import("../../open-sse/services/combo/mediaCompatibility.ts");
 const { getExactCustomModelVisionOverride } =
   await import("../../src/lib/db/models/customVisionOverride.ts");
 const { getComboVisionBridgeDecision, VisionBridgeGuardrail } =
@@ -402,6 +405,51 @@ test("#16801: same public model leaf from a foreign node must not authorize imag
     "the source node has no explicit vision evidence for this model"
   );
   assert.equal(await getComboVisionBridgeDecision("ghost-owner-16801"), "no-vision");
+});
+
+test("native vision routing requires evidence from the node that serves the model", async () => {
+  const nativeNode = "openai-compatible-chat-16801-native-twin";
+  const otherNode = "openai-compatible-chat-16801-other-twin";
+  const model = "vendor/twin-wire-16801";
+  for (const [id, prefix] of [
+    [nativeNode, "nativetwin16801"],
+    [otherNode, "othertwin16801"],
+  ]) {
+    await providers.createProviderNode({
+      id,
+      type: "openai-compatible",
+      prefix,
+      name: prefix,
+      apiType: "chat",
+      baseUrl: "http://127.0.0.1:9/v1",
+    });
+  }
+
+  await models.addCustomModel(
+    nativeNode,
+    model,
+    "Twin model",
+    "manual",
+    "chat-completions",
+    ["chat"],
+    undefined,
+    {},
+    true
+  );
+  await models.addCustomModel(otherNode, model, "Twin model");
+
+  assert.equal(supportsNativeVision(nativeNode, model), true);
+  assert.equal(supportsNativeVision(nativeNode, `nativetwin16801/${model}`), true);
+  assert.equal(supportsNativeVision(otherNode, model), false);
+  assert.equal(supportsNativeVision(null, `othertwin16801/${model}`), false);
+
+  assert.equal(setModelCapabilityOverride(`${otherNode}/${model}`, "vision", true), true);
+  assert.equal(supportsNativeVision(otherNode, model), true);
+  assert.equal(supportsNativeVision(null, `othertwin16801/${model}`), true);
+
+  assert.equal(setModelCapabilityOverride(`${otherNode}/${model}`, "vision", false), true);
+  assert.equal(supportsNativeVision(otherNode, model), false);
+  assert.equal(supportsNativeVision(nativeNode, model), true);
 });
 
 test("#16801: builtin providers keep their original capability verdict", async () => {
