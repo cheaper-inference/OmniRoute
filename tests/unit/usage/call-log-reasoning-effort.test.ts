@@ -1,13 +1,19 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import test from "node:test";
+import { handleChatCore } from "../../../open-sse/handlers/chatCore.ts";
 import { getDbInstance, resetDbInstance } from "../../../src/lib/db/core.ts";
 import {
   clearNoneHonoredCache,
   getNoneHonoredSnapshot,
   readNoneHonored,
 } from "../../../src/lib/db/reasoningEffortCompliance.ts";
-import { closeCallLogSaves, saveCallLog } from "../../../src/lib/usage/callLogs.ts";
+import {
+  closeCallLogSaves,
+  getCallLogs,
+  saveCallLog,
+  waitForCallLogSaves,
+} from "../../../src/lib/usage/callLogs.ts";
 
 const previousOptIn = process.env.OMNIROUTE_LOG_ALL_REASONING_EFFORT;
 
@@ -147,6 +153,84 @@ test("opt-in records failed requests but only successful new samples inform comp
   assert.equal(failure.reasoning_effort_requested, "none");
   await recordEffort(request);
   assert.equal(readNoneHonored(getNoneHonoredSnapshot(), model).sampleSize, 1);
+});
+
+test("a provider stream without a terminal event cannot make a model look compliant", async (t) => {
+  process.env.OMNIROUTE_LOG_ALL_REASONING_EFFORT = "true";
+  const previousDetailedLogging = process.env.ENABLE_REQUEST_LOGS;
+  t.after(() => {
+    if (previousDetailedLogging === undefined) delete process.env.ENABLE_REQUEST_LOGS;
+    else process.env.ENABLE_REQUEST_LOGS = previousDetailedLogging;
+  });
+  process.env.ENABLE_REQUEST_LOGS = "false";
+  const model = "gpt-4o-mini";
+  const body = {
+    model,
+    stream: true,
+    reasoning_effort: "none",
+    messages: [{ role: "user", content: "Hello" }],
+  };
+  const content =
+    'data: {"id":"chatcmpl-effort","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}\n\n';
+  let upstream = content;
+  t.mock.method(
+    globalThis,
+    "fetch",
+    async () => new Response(upstream, { headers: { "Content-Type": "text/event-stream" } })
+  );
+
+  async function call() {
+    const result = await handleChatCore({
+      body: structuredClone(body),
+      modelInfo: { provider: "openai", model, extendedContext: false },
+      credentials: { apiKey: "sk-test", providerSpecificData: {} },
+      log: { debug() {}, info() {}, warn() {}, error() {} },
+      clientRawRequest: {
+        endpoint: "/v1/chat/completions",
+        body: structuredClone(body),
+        headers: new Headers({ accept: "text/event-stream" }),
+      },
+    });
+    assert.ok(result.response);
+    assert.equal(result.response.status, 200);
+    const output = await result.response.text();
+    assert.match(output, /Hello/);
+    assert.match(output, /data: \[DONE\]/);
+    await waitForCallLogSaves(5_000);
+  }
+
+  await call();
+  await call();
+  await call();
+  assert.deepEqual(readNoneHonored(getNoneHonoredSnapshot(), model), {
+    honored: null,
+    sampleSize: 0,
+  });
+  const cutRows = getDbInstance()
+    .prepare("SELECT status FROM call_logs WHERE model = ? AND reasoning_effort_requested = 'none'")
+    .all(model);
+  assert.deepEqual(cutRows, [{ status: 200 }, { status: 200 }, { status: 200 }]);
+
+  upstream = `${content}data: [DONE]\n`;
+  await call();
+  clearNoneHonoredCache();
+  assert.equal(readNoneHonored(getNoneHonoredSnapshot(), model).sampleSize, 1);
+
+  process.env.ENABLE_REQUEST_LOGS = "true";
+  upstream = content;
+  await call();
+  clearNoneHonoredCache();
+  assert.equal(readNoneHonored(getNoneHonoredSnapshot(), model).sampleSize, 1);
+
+  upstream = `${content}data: [DONE]\n`;
+  await call();
+  clearNoneHonoredCache();
+  assert.equal(readNoneHonored(getNoneHonoredSnapshot(), model).sampleSize, 2);
+
+  const rows = await getCallLogs({ limit: 10 });
+  for (const row of rows) {
+    assert.doesNotMatch(JSON.stringify(row.requestSummary), /reasoningEffortAnswerObserved/);
+  }
 });
 
 test("existing encrypted compliance samples remain eligible across response statuses", async () => {

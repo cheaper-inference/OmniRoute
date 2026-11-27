@@ -36,7 +36,7 @@ type ComplianceRow = { model_key: string | null; n: number; violated: number };
 let cached: { at: number; snapshot: NoneHonoredSnapshot } | null = null;
 
 function queryCompliance(db: ReturnType<typeof getDbInstance>, sinceIso: string): ComplianceRow[] {
-  // An encrypted observation still counts. A failed call without one provides no answer to assess.
+  // An opaque observation is already positive evidence, even if the answer failed.
   return db
     .prepare(
       `SELECT COALESCE(NULLIF(TRIM(requested_model), ''), TRIM(model)) AS model_key,
@@ -48,7 +48,14 @@ function queryCompliance(db: ReturnType<typeof getDbInstance>, sinceIso: string)
        FROM call_logs
        WHERE timestamp >= ?
          AND TRIM(LOWER(reasoning_effort_requested)) = 'none'
-         AND (reasoning_encrypted = 1 OR status BETWEEN 200 AND 299)
+         AND (
+           reasoning_encrypted = 1 OR (
+             status BETWEEN 200 AND 299
+             AND CASE WHEN json_valid(request_summary)
+                      THEN json_type(request_summary, '$.reasoningEffortAnswerObserved') = 'true'
+                      ELSE 0 END
+           )
+         )
        GROUP BY model_key`
     )
     .all(sinceIso) as ComplianceRow[];

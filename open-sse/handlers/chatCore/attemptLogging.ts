@@ -262,6 +262,7 @@ export type PersistAttemptLogsArgs = {
   buyerCostMicro?: number | null;
   upstreamHttpSelection?: HttpAttemptSelection | null;
   status: number;
+  upstreamTerminalObserved?: boolean;
   tokens?: unknown;
   usageEstimated?: boolean | null;
   responseBody?: unknown;
@@ -667,6 +668,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     method: "POST",
     path: clientRawRequest?.endpoint || "/v1/chat/completions",
     status,
+    upstreamTerminalObserved: args.upstreamTerminalObserved,
     model,
     requestedModel,
     provider,

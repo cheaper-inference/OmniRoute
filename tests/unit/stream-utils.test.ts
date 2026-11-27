@@ -93,6 +93,82 @@ function parseSillyTavernCustomOpenAIStream(text) {
   return { reasoning, content, events };
 }
 
+for (const mode of ["passthrough", "translate"]) {
+  const isTranslated = mode === "translate";
+  const content = isTranslated
+    ? { candidates: [{ content: { parts: [{ text: "Hello" }] } }] }
+    : {
+        id: "chat_completion_evidence",
+        object: "chat.completion.chunk",
+        choices: [{ index: 0, delta: { content: "Hello" }, finish_reason: null }],
+      };
+  const finish = isTranslated
+    ? { candidates: [{ finishReason: "STOP" }] }
+    : { choices: [{ index: 0, finish_reason: "stop" }] };
+  for (const [label, tail, observed] of [
+    ["cut upstream", "", false],
+    ["buffered upstream finish", `data: ${JSON.stringify(finish)}`, true],
+    ["buffered upstream sentinel", "data: [DONE]\n", true],
+    ["upstream sentinel without a newline", "data: [DONE]", true],
+  ] as const) {
+    test(`${mode} reports terminal evidence for ${label}`, async () => {
+      let terminalObserved: boolean | undefined;
+      let status: number | undefined;
+      const output = await readTransformed([`data: ${JSON.stringify(content)}\n\n`, tail], {
+        mode,
+        targetFormat: isTranslated ? FORMATS.GEMINI : FORMATS.OPENAI,
+        sourceFormat: FORMATS.OPENAI,
+        onComplete(payload) {
+          terminalObserved = payload.upstreamTerminalObserved;
+          status = payload.status;
+        },
+      });
+      assert.match(output, /Hello/);
+      assert.equal(status, 200);
+      assert.equal(terminalObserved, observed);
+    });
+  }
+}
+
+test("a wrapped Gemini terminal event supplies upstream completion evidence", async () => {
+  let terminalObserved: boolean | undefined;
+  await readTransformed(
+    [
+      'data: {"response":{"candidates":[{"content":{"parts":[{"text":"Hello"}]}}]}}\n\n',
+      'data: {"response":{"candidates":[{"finishReason":"STOP"}]}}\n\n',
+    ],
+    {
+      mode: "translate",
+      targetFormat: FORMATS.ANTIGRAVITY,
+      sourceFormat: FORMATS.OPENAI,
+      onComplete(payload) {
+        terminalObserved = payload.upstreamTerminalObserved;
+      },
+    }
+  );
+  assert.equal(terminalObserved, true);
+});
+
+test("an upstream cancellation does not supply successful completion evidence", async () => {
+  let terminalObserved: boolean | undefined;
+  await readTransformed(
+    [
+      'data: {"type":"response.output_text.delta","delta":"Hello"}\n\n',
+      'data: {"type":"response.cancelled","response":{"status":"cancelled"}}\n\n',
+      "data: [DONE]\n\n",
+    ],
+    {
+      mode: "passthrough",
+      clientResponseFormat: FORMATS.OPENAI_RESPONSES,
+      sourceFormat: FORMATS.OPENAI_RESPONSES,
+      onComplete(payload) {
+        terminalObserved = payload.upstreamTerminalObserved;
+      },
+    }
+  );
+  assert.equal(terminalObserved, false);
+});
+
 test("createSSEStream leaves successful pending requests for onComplete finalization", async () => {
   const usageHistory = await import("../../src/lib/usage/usageHistory.ts");
   usageHistory.clearPendingRequests();
