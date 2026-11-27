@@ -1,0 +1,1 @@
+- **fix(catalog):** LLM7's last published free quota (100,000 tokens a day, 3M a month) now sits in the retired-offers ledger, so the row-sum reading counts it like every other ended offer; the real free-token figure is unchanged ([#21425](https://github.com/cheaper-inference/OmniRoute/pull/21425))
