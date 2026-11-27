@@ -1,14 +1,14 @@
 // tests/unit/build/check-secrets.test.ts
 // TDD unit tests for scripts/check/check-secrets.mjs — Task 7.18 gitleaks.
 //
-// Strategy: test the exported pure function without spawning gitleaks.
-// All fixtures are synthetic gitleaks --report-format json outputs.
-//   - parseGitleaksJson() — parses gitleaks findings array
 import test from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   parseGitleaksJson,
   evaluateSecretsRatchet,
@@ -186,6 +186,14 @@ test("parseGitleaksJson: suporta campo file (camelCase) como fallback", () => {
   assert.equal(result.byFile["src/config.js"], 1);
 });
 
+test("parseGitleaksJson: normaliza separadores de caminho do Windows", () => {
+  const reports = [
+    makeFinding({ file: "src\\config\\secrets.ts" }),
+    makeFinding({ file: "src/config/secrets.ts" }),
+  ];
+  assert.deepEqual(parseGitleaksJson(reports).byFile, { "src/config/secrets.ts": 2 });
+});
+
 // ---------------------------------------------------------------------------
 // parseGitleaksJson — entradas inválidas dentro do array
 // ---------------------------------------------------------------------------
@@ -329,3 +337,139 @@ test("readBaselineSecretsValue: JSON inválido retorna null (não lança)", () =
     assert.equal(readBaseline(p), null);
   });
 });
+
+const scanner = fileURLToPath(new URL("../../../scripts/check/check-secrets.mjs", import.meta.url));
+const config = fileURLToPath(new URL("../../../.gitleaks.toml", import.meta.url));
+const hasGitleaks = spawnSync("gitleaks", ["version"]).status === 0;
+
+function withStagedScanRepo(run: (dir: string) => void) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "staged-secret-scan-"));
+  try {
+    run(dir);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+}
+
+function scanStaged(dir: string, env = process.env) {
+  const result = spawnSync(process.execPath, [scanner, "--staged", "--quiet"], {
+    cwd: dir,
+    env,
+    encoding: "utf8",
+  });
+  assert.ifError(result.error);
+  return result;
+}
+
+function runGit(dir: string, ...args: string[]) {
+  const result = spawnSync("git", args, { cwd: dir, encoding: "utf8" });
+  assert.ifError(result.error);
+  assert.equal(result.status, 0, result.stderr);
+}
+
+function initScanRepo(dir: string) {
+  runGit(dir, "init", "-q");
+  fs.copyFileSync(config, path.join(dir, ".gitleaks.toml"));
+}
+
+function writeStagedFixture(dir: string, file: string, text: string) {
+  const target = path.join(dir, file);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.writeFileSync(target, text);
+  runGit(dir, "add", "--", file);
+}
+
+test("--staged --quiet warns and allows commits when Gitleaks is missing", () => {
+  withStagedScanRepo((dir) => {
+    const result = scanStaged(dir, { ...process.env, PATH: dir });
+    assert.equal(result.status, 0);
+    assert.match(result.stderr, /gitleaks.*não encontrado/i);
+  });
+});
+
+test(
+  "--staged distinguishes scanner errors from findings",
+  { skip: process.platform === "win32" },
+  () => {
+    withStagedScanRepo((dir) => {
+      const binary = path.join(dir, "gitleaks");
+      const cases = [
+        { status: 1, report: "[]" },
+        { status: 0, report: "unexpected output" },
+        { status: 0, report: "{}" },
+        { status: 99, report: "[]" },
+        { status: 99, report: "[{}]" },
+      ];
+      for (const { status, report } of cases) {
+        fs.writeFileSync(binary, `#!/bin/sh\nprintf '%s\\n' '${report}'\nexit ${status}\n`, {
+          mode: 0o755,
+        });
+        const result = scanStaged(dir, {
+          ...process.env,
+          PATH: [dir, process.env.PATH].join(path.delimiter),
+        });
+        assert.equal(result.status, 2, `Gitleaks status ${status}, report ${report}`);
+        assert.match(result.stderr, /\[check-secrets.*\].*ERRO/);
+        assert.doesNotMatch(result.stderr, /BLOQUEADO|unexpected output/);
+      }
+    });
+  }
+);
+
+test(
+  "--staged blocks new synthetic credentials in source and tests",
+  { skip: !hasGitleaks },
+  () => {
+    withStagedScanRepo((dir) => {
+      initScanRepo(dir);
+      const files = ["src/distributed.ts", "src/coverageHelper.ts", "tests/new.ts"];
+      for (const file of files) {
+        const body = createHash("sha256").update(file).digest("hex").slice(0, 36);
+        const syntheticPat = ["ghp", body].join("_");
+        writeStagedFixture(dir, file, `export const value = "${syntheticPat}";\n`);
+        fs.writeFileSync(path.join(dir, file), "// Clean unstaged worktree contents\n");
+      }
+      const result = scanStaged(dir);
+      assert.equal(result.status, 1, result.stderr);
+      for (const file of files) {
+        assert.ok(result.stderr.includes(`[github-pat] ${file}:1`), result.stderr);
+      }
+      assert.doesNotMatch(result.stderr, /ghp_/);
+    });
+  }
+);
+
+test("--staged allows the documented curl placeholder", { skip: !hasGitleaks }, () => {
+  withStagedScanRepo((dir) => {
+    initScanRepo(dir);
+    const placeholder = ["your", "api", "key"].join("-");
+    writeStagedFixture(
+      dir,
+      "docs/reference/API_REFERENCE.md",
+      `curl http://localhost:20128/v1/models -H "Authorization: Bearer ${placeholder}"\n`
+    );
+    const result = scanStaged(dir);
+    assert.equal(result.status, 0, result.stderr);
+  });
+});
+
+test(
+  "--staged allows a redaction fixture and detects a new credential at the same path",
+  { skip: !hasGitleaks },
+  () => {
+    withStagedScanRepo((dir) => {
+      initScanRepo(dir);
+      const file = "tests/fixtures/perplexity-web-stream-error-boundary.fixture.ts";
+      const fixture = ["sk", "zone", "secret", "h19rT8"].join("-");
+      writeStagedFixture(dir, file, `const api_key = "${fixture}";\n`);
+      const clean = scanStaged(dir);
+      assert.equal(clean.status, 0, clean.stderr);
+
+      const newValue = createHash("sha256").update(file).digest("hex").slice(0, 32);
+      writeStagedFixture(dir, file, `const api_key = "${newValue}";\n`);
+      const detected = scanStaged(dir);
+      assert.equal(detected.status, 1, detected.stderr);
+      assert.ok(detected.stderr.includes(`[generic-api-key] ${file}:1`), detected.stderr);
+    });
+  }
+);

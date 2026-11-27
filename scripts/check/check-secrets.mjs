@@ -4,13 +4,13 @@
 //
 // Complementa `check-public-creds.mjs` (Fase 6, cobre credenciais OAuth públicas
 // conhecidas em 2 arquivos específicos): este gate pega a classe geral de secrets —
-// `const API_KEY = "sk-…"`, tokens em config/teste/docs, secrets em histórico.
+// `const API_KEY = "sk-…"` e tokens indevidamente incluídos nos arquivos.
 //
 // Saída (stdout):
 //   secretFindings=N      — número de findings do gitleaks
 //   secretFindings=SKIP reason=binary-absent   — gitleaks não está no PATH
 //
-// Por default é ADVISORY (sai 0 sempre). Passe --ratchet para tornar BLOQUEANTE:
+// A varredura por diretório é ADVISORY. Passe --ratchet para tornar BLOQUEANTE:
 // lê metrics.secretFindings.value de config/quality/quality-baseline.json, compara
 // a contagem MEDIDA e SAI 1 SE — E SOMENTE SE — a medida for MAIOR que o baseline
 // (regressão real, direction:down). Qualquer SKIP gracioso (binário ausente, nenhum
@@ -19,9 +19,10 @@
 //
 // Uso:
 //   node scripts/check/check-secrets.mjs
-//   node scripts/check/check-secrets.mjs --json     # imprime JSON bruto do gitleaks
+//   node scripts/check/check-secrets.mjs --json     # imprime JSON com valores mascarados
 //   node scripts/check/check-secrets.mjs --quiet    # suprime logs de diagnóstico
 //   node scripts/check/check-secrets.mjs --ratchet   # falha (exit 1) numa regressão
+//   node scripts/check/check-secrets.mjs --staged   # 1 para achados, 2 para erro do scanner
 
 import fs from "node:fs";
 import { execFileSync, spawnSync } from "node:child_process";
@@ -33,23 +34,32 @@ const ROOT = process.cwd();
 const QUIET = process.argv.includes("--quiet");
 const PRINT_JSON = process.argv.includes("--json");
 const RATCHET = process.argv.includes("--ratchet");
+const STAGED = process.argv.includes("--staged");
 const GITLEAKS_CONFIG = path.join(ROOT, ".gitleaks.toml");
 const BASELINE_PATH = path.join(ROOT, "config/quality/quality-baseline.json");
 
-// Source directories to scan for secrets. We deliberately scope to the
-// production/source trees instead of scanning the whole working dir:
-//   • `gitleaks dir .` (and `detect --no-git --source .`) WALKS the entire tree
-//     and READS every file — including a real `node_modules/` (90k+ files) when
-//     present (CI runs `npm ci`). gitleaks has no traversal-exclude flag: the
-//     `.gitleaks.toml [allowlist].paths` list filters FINDINGS *after* each file
-//     is read, so it does NOT speed up the walk. The full walk blows past the
-//     timeout in CI (confirmed: ETIMEDOUT) → the gate silently never produces a
-//     value. Scoping the scan to the source dirs keeps it fast (~6s) while still
-//     covering every place an embedded secret would actually be a risk (the same
-//     dirs Hard Rule #8 governs: src/open-sse/electron/bin, plus scripts/).
-//   • We also drop git-history mode (scanning 4500+ commits is slow and grows
-//     unbounded); the current working tree is what ships.
-const SECRET_SCAN_DIRS = ["src", "open-sse", "bin", "electron", "scripts"];
+// The bounded CI scan covers source, deployment and configuration directories.
+// A full directory walk reads node_modules before applying path allowlists and
+// has timed out in CI. The staged scan below covers the index across all paths.
+const SECRET_SCAN_DIRS = [
+  "src",
+  "open-sse",
+  "bin",
+  "electron",
+  "scripts",
+  "packages",
+  "@omniroute",
+  "deploy",
+  "docker",
+  ".github",
+  "config",
+  "contrib",
+  "examples",
+  "skills",
+];
+
+// Gitleaks can exit 1 for operational errors. Reserve a distinct code for findings.
+const STAGED_FINDINGS_EXIT_CODE = 99;
 
 // ---------------------------------------------------------------------------
 // Pure parsing function (exported for tests)
@@ -106,7 +116,7 @@ export function parseGitleaksJson(gitleaksJson) {
     byRule[ruleId] = (byRule[ruleId] ?? 0) + 1;
 
     // Agrupar por arquivo
-    const file = finding.File ?? finding.file ?? "unknown";
+    const file = String(finding.File ?? finding.file ?? "unknown").replaceAll("\\", "/");
     byFile[file] = (byFile[file] ?? 0) + 1;
   }
 
@@ -182,8 +192,7 @@ export function findGitleaks() {
       encoding: "utf8",
       timeout: 5_000,
     });
-    if (result.error?.code === "ENOENT") return null;
-    if (result.status !== null) return "gitleaks"; // encontrado no PATH
+    if (result.error?.code !== "ENOENT") return "gitleaks";
   } catch {
     // noop
   }
@@ -200,14 +209,17 @@ function main() {
 
   if (!gitleaksBin) {
     console.log("secretFindings=SKIP reason=binary-absent");
-    if (!QUIET) {
+    if (STAGED || !QUIET) {
       process.stderr.write(
-        "[check-secrets] SKIP — gitleaks não encontrado no PATH.\n" +
-          "[check-secrets] Instale via: https://github.com/gitleaks/gitleaks\n" +
-          "[check-secrets] SKIP gracioso — sai 0 mesmo com --ratchet (binário ausente nunca bloqueia).\n"
+        "[check-secrets] AVISO: gitleaks não encontrado no PATH. Varredura de segredos ignorada.\n"
       );
     }
     process.exitCode = 0;
+    return;
+  }
+
+  if (STAGED) {
+    process.exitCode = runStagedScan(gitleaksBin);
     return;
   }
 
@@ -240,6 +252,7 @@ function main() {
     const args = [
       "dir",
       dir,
+      "--redact=100",
       "--report-format",
       "json",
       "--report-path",
@@ -314,7 +327,7 @@ function main() {
       process.stderr.write(`[check-secrets] Findings: ${findingCount} (top rules: ${topRules})\n`);
       process.stderr.write(
         "[check-secrets] Para allowlistar findings legítimos (fixtures de teste, creds públicas),\n" +
-          "[check-secrets] adicione entradas em .gitleaks.toml [[allowlist]] com comentário.\n"
+          "[check-secrets] adicione entradas em .gitleaks.toml [[allowlists]] com comentário.\n"
       );
     } else {
       process.stderr.write("[check-secrets] Nenhum finding detectado.\n");
@@ -323,6 +336,85 @@ function main() {
 
   // Medição bem-sucedida → aplica o ratchet (bloqueante só com --ratchet).
   applyRatchet(findingCount);
+}
+
+function runStagedScan(gitleaksBin) {
+  const args = [
+    "git",
+    "--pre-commit",
+    "--staged",
+    "--redact=100",
+    "--exit-code",
+    String(STAGED_FINDINGS_EXIT_CODE),
+    "--report-format",
+    "json",
+    "--report-path",
+    "-",
+    "--no-banner",
+  ];
+  if (fs.existsSync(GITLEAKS_CONFIG)) args.push("--config", GITLEAKS_CONFIG);
+  args.push(".");
+
+  const { status, signal, error, stdout } = spawnSync(gitleaksBin, args, {
+    cwd: ROOT,
+    encoding: "utf8",
+    maxBuffer: 32 * 1024 * 1024,
+    timeout: 60_000,
+  });
+  if (error || (status !== 0 && status !== STAGED_FINDINGS_EXIT_CODE)) {
+    process.stderr.write(
+      `[check-secrets --staged] ERRO ao executar gitleaks (${error?.code ?? signal ?? status}).\n`
+    );
+    return 2;
+  }
+
+  let findings;
+  try {
+    findings = JSON.parse(stdout);
+  } catch {
+    process.stderr.write("[check-secrets --staged] ERRO: JSON inválido do gitleaks.\n");
+    return 2;
+  }
+  // Gitleaks versions may report a clean scan as either [] or null.
+  findings ??= [];
+  if (
+    !Array.isArray(findings) ||
+    findings.some(
+      (item) =>
+        typeof item?.File !== "string" ||
+        !item.File ||
+        typeof item.RuleID !== "string" ||
+        !item.RuleID ||
+        !Number.isInteger(item.StartLine) ||
+        item.StartLine < 1
+    ) ||
+    (status === STAGED_FINDINGS_EXIT_CODE) !== findings.length > 0
+  ) {
+    process.stderr.write(
+      `[check-secrets --staged] ERRO: relatório inconsistente do gitleaks (código ${status}).\n`
+    );
+    return 2;
+  }
+
+  const locations = findings.map(({ File, RuleID, StartLine }) => ({
+    File: File.replaceAll("\\", "/"),
+    RuleID,
+    StartLine,
+  }));
+  if (PRINT_JSON) {
+    console.log(JSON.stringify(locations, null, 2));
+  } else if (!QUIET) {
+    console.log(`stagedSecretFindings=${locations.length}`);
+  }
+  if (!locations.length) return 0;
+
+  process.stderr.write(
+    `[check-secrets] BLOQUEADO — ${locations.length} achado(s) de segredos no stage:\n`
+  );
+  for (const { File, RuleID, StartLine } of locations.slice(0, 20)) {
+    process.stderr.write(`  • [${RuleID}] ${File}:${StartLine}\n`);
+  }
+  return 1;
 }
 
 /**
