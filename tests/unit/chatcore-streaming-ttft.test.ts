@@ -23,9 +23,14 @@ const originalFetch = globalThis.fetch;
 const CONTENT_DELAY_MS = 300;
 // The stream keeps going after the first content, so latency_ms is clearly larger than ttft.
 const TAIL_DELAY_MS = 300;
+// If the client never receives the first content (a regression), release the tail anyway so the
+// test fails on its asserts instead of hanging.
+const FIRST_CONTENT_WAIT_CEILING_MS = 30_000;
 
 const noopLog = () => ({ debug() {}, info() {}, warn() {}, error() {} });
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+// Unref'd so the ceiling timer never keeps the test process alive after the stream ends.
+const ceiling = (ms) => new Promise((resolve) => setTimeout(resolve, ms).unref());
 
 function delayedSse(frames) {
   const encoder = new TextEncoder();
@@ -33,6 +38,7 @@ function delayedSse(frames) {
     new ReadableStream({
       async start(controller) {
         for (const frame of frames) {
+          if (frame.waitFor) await frame.waitFor;
           if (frame.delayMs) await sleep(frame.delayMs);
           controller.enqueue(encoder.encode(frame.text));
         }
@@ -46,7 +52,7 @@ function delayedSse(frames) {
 const responsesEvent = (type, payload) =>
   `event: ${type}\ndata: ${JSON.stringify({ type, ...payload })}\n\n`;
 
-function codexResponsesStream() {
+function codexResponsesStream(firstContentReceived) {
   const response = {
     id: "resp_1",
     object: "response",
@@ -72,6 +78,7 @@ function codexResponsesStream() {
       }),
     },
     {
+      waitFor: firstContentReceived,
       delayMs: TAIL_DELAY_MS,
       text: responsesEvent("response.completed", {
         response: {
@@ -92,24 +99,33 @@ function codexResponsesStream() {
   ]);
 }
 
-function openAiChatStream() {
+function openAiChatStream(firstContentReceived) {
   const chunk = (delta, extra = {}) =>
     `data: ${JSON.stringify({ id: "c1", object: "chat.completion.chunk", created: 1, model: "m", choices: [{ index: 0, delta, finish_reason: null }], ...extra })}\n\n`;
   return delayedSse([
     { text: chunk({ role: "assistant", content: "" }) },
     { delayMs: CONTENT_DELAY_MS, text: chunk({ content: "Hello" }) },
     {
+      waitFor: firstContentReceived,
       delayMs: TAIL_DELAY_MS,
       text: `data: ${JSON.stringify({ id: "c1", object: "chat.completion.chunk", created: 1, model: "m", choices: [{ index: 0, delta: {}, finish_reason: "stop" }], usage: { prompt_tokens: 5, completion_tokens: 1, total_tokens: 6 } })}\n\ndata: [DONE]\n\n`,
     },
   ]);
 }
 
-async function drain(response) {
+async function drain(response, onFirstContent) {
   const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let beforeFirstContent = "";
   for (;;) {
-    const { done } = await reader.read();
+    const { done, value } = await reader.read();
     if (done) break;
+    if (beforeFirstContent === null) continue;
+    beforeFirstContent += decoder.decode(value, { stream: true });
+    if (beforeFirstContent.includes('"content":"Hello"')) {
+      beforeFirstContent = null;
+      onFirstContent();
+    }
   }
 }
 
@@ -124,7 +140,10 @@ async function latestRow(provider, timeoutMs = 4000) {
 }
 
 async function runStreamed({ provider, model, credentials, upstream }) {
-  globalThis.fetch = async () => upstream();
+  // Start the upstream tail delay only once the client has seen the first content.
+  const { promise: firstContentReceived, resolve: onFirstContent } = Promise.withResolvers();
+  const tailGate = Promise.race([firstContentReceived, ceiling(FIRST_CONTENT_WAIT_CEILING_MS)]);
+  globalThis.fetch = async () => upstream(tailGate);
   const body = { model, stream: true, messages: [{ role: "user", content: "hi" }] };
   const result = await handleChatCore({
     body: structuredClone(body),
@@ -139,7 +158,7 @@ async function runStreamed({ provider, model, credentials, upstream }) {
     connectionId: `${provider}-conn`,
   });
   assert.equal(result.success, true, JSON.stringify(result.error ?? result.status));
-  await drain(result.response);
+  await drain(result.response, onFirstContent);
   return latestRow(provider);
 }
 

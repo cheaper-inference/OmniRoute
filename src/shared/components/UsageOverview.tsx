@@ -1,5 +1,6 @@
 "use client";
 import UsageEvidenceNotice from "./UsageEvidenceNotice";
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import Card from "./Card";
 import CachedInputTokens from "./CachedInputTokens";
@@ -16,25 +17,34 @@ type OverviewStats = {
   totalCachedInputTokensComplete?: boolean;
   last10Minutes?: Array<{ requests: number; promptTokens: number }>;
 };
+// The kit sparkline draws with recharts, which loads on demand (client only).
+const Sparkline = dynamic(
+  () => import("@omniroute/ui-kit/reporting-charts").then((m) => m.Sparkline),
+  { ssr: false, loading: () => <div aria-hidden="true" className="h-8" /> }
+);
+
+/** The last nine per-minute values as the kit bar sparkline, named for assistive tech. */
 function MiniBarGraph({
   data,
-  colorClass = "bg-primary",
+  ariaLabel,
+  color,
 }: {
   data: number[];
-  colorClass?: string;
+  /** Receives the plotted values, already joined, and returns the translated name. */
+  ariaLabel: (values: string) => string;
+  /** Bar colour: the same tints the hand-made bars had. */
+  color: string;
 }) {
-  const max = Math.max(...data, 1);
+  const values = data.slice(-9);
   return (
-    <div className="flex items-end gap-1 h-8 w-24">
-      {data.slice(-9).map((val, idx) => (
-        <div
-          key={`bar-${idx}-${val}`}
-          className={`flex-1 rounded-t-sm transition-all duration-500 ${colorClass}`}
-          style={{ height: `${Math.max((val / max) * 100, 5)}%` }}
-          title={String(val)}
-        />
-      ))}
-    </div>
+    <Sparkline
+      variant="bar"
+      height={32}
+      values={values}
+      ariaLabel={ariaLabel(values.join(", "))}
+      color={color}
+      className="w-24 shrink-0"
+    />
   );
 }
 
@@ -56,7 +66,8 @@ export default function UsageOverview({ stats }: { stats: OverviewStats }) {
           </div>
           <MiniBarGraph
             data={(stats.last10Minutes || []).map((m) => m.requests)}
-            colorClass="bg-text-muted/30"
+            ariaLabel={(values) => t("requestsPerMinuteTrend", { values })}
+            color="color-mix(in oklab, var(--color-text-muted) 30%, transparent)"
           />
         </div>
       </Card>
@@ -76,7 +87,8 @@ export default function UsageOverview({ stats }: { stats: OverviewStats }) {
           </div>
           <MiniBarGraph
             data={(stats.last10Minutes || []).map((m) => m.promptTokens)}
-            colorClass="bg-primary/50"
+            ariaLabel={(values) => t("inputTokensPerMinuteTrend", { values })}
+            color="color-mix(in oklab, var(--color-primary) 50%, transparent)"
           />
         </div>
       </Card>

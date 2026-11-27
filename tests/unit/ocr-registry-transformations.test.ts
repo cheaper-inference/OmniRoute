@@ -78,7 +78,7 @@ test("azure DI maps base64/image_url documents to base64Source/urlSource", () =>
 // URL/body/response shapes verified against the upstream reference
 // (litellm/llms/vertex_ai/ocr/deepseek_transformation.py): the endpoint is the
 // generic Vertex "openapi/chat/completions" partner endpoint, the model id is
-// prefixed with "deepseek-ai/", and the OCR document is sent as an
+// sent as supplied (no forced prefix, #20423), and the OCR document is sent as an
 // OpenAI-chat-shaped image_url content part.
 
 test("vertex-deepseek-ocr resolves its own transformation (not the passthrough)", () => {
@@ -96,7 +96,7 @@ test("vertex-deepseek-ocr builds an OpenAI-chat-shaped request against the resol
       "https://aiplatform.googleapis.com/v1/projects/proj-1/locations/us-central1/endpoints/openapi/chat/completions",
     token: "ya29.mock",
     body: { document: { type: "image_url", image_url: "https://x/y.png" } },
-    modelId: "deepseek-ocr-maas",
+    modelId: "my-deployed-ocr",
   });
   assert.equal(
     url,
@@ -105,7 +105,7 @@ test("vertex-deepseek-ocr builds an OpenAI-chat-shaped request against the resol
   assert.equal(init.method, "POST");
   assert.equal((init.headers as Record<string, string>).Authorization, "Bearer ya29.mock");
   const sent = JSON.parse(String(init.body));
-  assert.equal(sent.model, "deepseek-ai/deepseek-ocr-maas");
+  assert.equal(sent.model, "my-deployed-ocr");
   assert.deepEqual(sent.messages, [
     { role: "user", content: [{ type: "image_url", image_url: "https://x/y.png" }] },
   ]);
@@ -118,7 +118,7 @@ test("vertex-deepseek-ocr maps a document_url document to the same image_url con
       "https://aiplatform.googleapis.com/v1/projects/p/locations/us-central1/endpoints/openapi/chat/completions",
     token: "t",
     body: { document: { type: "document_url", document_url: "https://x/d.pdf" } },
-    modelId: "deepseek-ocr-maas",
+    modelId: "my-deployed-ocr",
   });
   const sent = JSON.parse(String(init.body));
   assert.deepEqual(sent.messages[0].content, [{ type: "image_url", image_url: "https://x/d.pdf" }]);

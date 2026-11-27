@@ -56,7 +56,9 @@ export function ProviderSpendCard({
 
   return (
     <Card className="p-5">
-      <h3 className="text-sm text-text-muted uppercase mb-4">{title}</h3>
+      <h3 className="ci-eyebrow mb-4" data-weight="medium">
+        {title}
+      </h3>
       <div className="flex flex-col gap-4 md:flex-row md:items-center">
         <div className="w-full md:w-45 h-45">
           <ResponsiveContainer width="100%" height="100%">
@@ -120,7 +122,9 @@ export function CostTrendCard({
 
   return (
     <Card className="p-5">
-      <h3 className="text-sm text-text-muted uppercase mb-4">{title}</h3>
+      <h3 className="ci-eyebrow mb-4" data-weight="medium">
+        {title}
+      </h3>
       <LineChart
         ariaLabel={title}
         data={chartRows}
@@ -152,7 +156,9 @@ export function WeeklyPatternCard({
 
   return (
     <Card className="p-5">
-      <h3 className="text-sm text-text-muted uppercase mb-4">{title}</h3>
+      <h3 className="ci-eyebrow mb-4" data-weight="medium">
+        {title}
+      </h3>
       <div className="h-40">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={chartTheme.margin}>

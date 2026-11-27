@@ -75,7 +75,8 @@ export const WEB_COOKIE_PROVIDERS = {
     color: "#20808D",
     textIcon: "PW",
     website: "https://www.perplexity.ai",
-    authHint: "Paste your __Secure-next-auth.session-token cookie value from perplexity.ai",
+    authHint:
+      "Paste the current Perplexity session cookie header (__Secure-pplx.session.<UUID> and pplx.session-id), or the legacy __Secure-next-auth.session-token, from perplexity.ai",
     subscriptionRisk: true,
     riskNoticeVariant: "webCookie",
     toolCalling: "emulated",
@@ -280,8 +281,9 @@ export const WEB_COOKIE_PROVIDERS = {
     color: "#FFD21E",
     textIcon: "HC",
     website: "https://huggingface.co/chat",
-    hasFree: true,
-    freeNote: "Free LLM chat — no subscription required. Rate limits apply.",
+    hasFree: false,
+    freeNote:
+      "Hugging Face inference now needs purchased credits or a PRO plan (checked 2026-11-23).",
     authHint:
       "Paste the full Cookie header from huggingface.co/chat (DevTools → Network → /chat/conversation → Request Headers → Cookie). It should include hf-chat and may also include token / aws-waf-token.",
     riskNoticeVariant: "webCookie",

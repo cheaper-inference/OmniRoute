@@ -1,0 +1,1 @@
+- **fix(sse):** Cline's free-tier 429 "Daily free limit reached on model X. Try again in 19h 39m" is now read as a `quota_exhausted` model-lockout hint instead of a short generic rate-limit backoff; the hint keeps `body` provenance, so the lockout stays under the operator's max-cooldown cap (30 min by default).

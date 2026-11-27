@@ -15,7 +15,7 @@ const OPTIONS: Array<{ value: UtilizationTimeRange; label: string }> = [
   { value: "30d", label: "30d" },
 ];
 
-/** Time-range tabs over the kit capsule Tabs (role="tablist"/"tab", arrow-key navigation). */
+/** Time-range radio group over the kit SegmentedControl; it keeps its natural width on phones too. */
 export default function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps) {
   return (
     <SegmentedControl
@@ -24,7 +24,7 @@ export default function TimeRangeSelector({ value, onChange }: TimeRangeSelector
       value={value}
       onChange={(next) => onChange(next as UtilizationTimeRange)}
       options={OPTIONS}
-      className="w-auto"
+      className="max-sm:w-auto"
     />
   );
 }

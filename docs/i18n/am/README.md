@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ተስፋው — አንድ መዳረሻ ነጥብ እና 394 አቅራቢዎች። ሌላ ጤናማ መዳረሻ ነጥብ እስካለ ድረስ ራስ-ሰር መተካት መስመራዊ ማስተላለፉን ያስቀጥላል። ስድስት ዋና ነጥቦች፦ በ394 አቅራቢዎች ላይ የሚሰራ ጠንካራ መተካት · ብቁ በሆኑ የሥራ ጫናዎች ላይ እስከ 95% የቶከን ቁጠባ · ከ150+ ነፃ ደረጃዎች እና 51 በየጊዜው የሚሰጡ/ቁልፍ-አልባ ለዘላለም ነፃ አቅራቢዎች ጋር በ$0 መጀመር · በአንድ ቅንብር 39 የCLI/agent ውህደቶች · በ/ v1 ላይ ከOpenAI፣ Claude፣ Gemini እና Responses API ጋር ተኳሃኝነት · የምርት ማስኬጃ መቆጣጠሪያዎች፣ የሰርኪዩት መቆራረጫዎች፣ TLS stealth፣ MCP 110 መሣሪያዎች፣ A2A፣ ማስታወሻ፣ guardrails፣ evals እና በ7,800+ በተከታተሉ የሙከራ ፋይሎች ውስጥ ከ56,000+ የማይንቀሳቀሱ የሙከራ መግለጫዎች።"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ተስፋው — አንድ መዳረሻ ነጥብ እና 394 አቅራቢዎች። ሌላ ጤናማ መዳረሻ ነጥብ እስካለ ድረስ ራስ-ሰር መተካት መስመራዊ ማስተላለፉን ያስቀጥላል። ስድስት ዋና ነጥቦች፦ በ394 አቅራቢዎች ላይ የሚሰራ ጠንካራ መተካት · ብቁ በሆኑ የሥራ ጫናዎች ላይ እስከ 95% የቶከን ቁጠባ · ከ150+ ነፃ ደረጃዎች እና 40 በየጊዜው የሚሰጡ/ቁልፍ-አልባ ለዘላለም ነፃ አቅራቢዎች ጋር በ$0 መጀመር · በአንድ ቅንብር 39 የCLI/agent ውህደቶች · በ/ v1 ላይ ከOpenAI፣ Claude፣ Gemini እና Responses API ጋር ተኳሃኝነት · የምርት ማስኬጃ መቆጣጠሪያዎች፣ የሰርኪዩት መቆራረጫዎች፣ TLS stealth፣ MCP 110 መሣሪያዎች፣ A2A፣ ማስታወሻ፣ guardrails፣ evals እና በ7,800+ በተከታተሉ የሙከራ ፋይሎች ውስጥ ከ56,000+ የማይንቀሳቀሱ የሙከራ መግለጫዎች።"/>
 
 <br/>
 <br/>
@@ -702,7 +702,7 @@ omniroute configure codex          # እንዲሁም: claude opencode qwen aider
 
 </div>
 
-> **394 የተመዘገቡ አቅራቢዎች** በመደበኛ የውይይት፣ የሚዲያ፣ የፍለጋ፣ የአካባቢያዊ፣ የክላውድ-ወኪል እና የስርዓት ስብስቦች ውስጥ ይገኛሉ፤ ከእነዚህም **153 የ`hasFree: true` የግኝት ሜታዳታ የያዙ** ናቸው። የውይይት ሞዴል መዝገቡ **239 አቅራቢዎች / 3,059 የተለያዩ የአቅራቢ-ሞዴል ጥምረቶች / 1,475 ጥሬ የሞዴል መለያዎች** ያካትታል፤ የተለየው የነፃ በጀት ካታሎግ ደግሞ **465 በሞዴል የተደራጁ ረድፎች**፣ **34 ተደጋጋሚ ገንዳዎች** እና **51 ተደጋጋሚ/ቁልፍ-አልባ ሁልጊዜ ነፃ አቅራቢዎች** አሉት። እነዚህ የተለያዩ መለኪያዎች በንድፍ የተለያዩ ናቸው፤ ትርጓሜዎቹ እና በገንዳ የተደጋገሙ ስሌቶች በ[የአቅራቢዎች ማጣቀሻ](docs/reference/PROVIDER_REFERENCE.md) እና [ነፃ ደረጃዎች](docs/reference/FREE_TIERS.md) ውስጥ ይገኛሉ።
+> **394 የተመዘገቡ አቅራቢዎች** በመደበኛ የውይይት፣ የሚዲያ፣ የፍለጋ፣ የአካባቢያዊ፣ የክላውድ-ወኪል እና የስርዓት ስብስቦች ውስጥ ይገኛሉ፤ ከእነዚህም **153 የ`hasFree: true` የግኝት ሜታዳታ የያዙ** ናቸው። የውይይት ሞዴል መዝገቡ **239 አቅራቢዎች / 3,059 የተለያዩ የአቅራቢ-ሞዴል ጥምረቶች / 1,475 ጥሬ የሞዴል መለያዎች** ያካትታል፤ የተለየው የነፃ በጀት ካታሎግ ደግሞ **465 በሞዴል የተደራጁ ረድፎች**፣ **34 ተደጋጋሚ ገንዳዎች** እና **40 ተደጋጋሚ/ቁልፍ-አልባ ሁልጊዜ ነፃ አቅራቢዎች** አሉት። እነዚህ የተለያዩ መለኪያዎች በንድፍ የተለያዩ ናቸው፤ ትርጓሜዎቹ እና በገንዳ የተደጋገሙ ስሌቶች በ[የአቅራቢዎች ማጣቀሻ](docs/reference/PROVIDER_REFERENCE.md) እና [ነፃ ደረጃዎች](docs/reference/FREE_TIERS.md) ውስጥ ይገኛሉ።
 
 <div align="center">
 
@@ -1317,7 +1317,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 እንዲሁ ይ�
   <tr><td nowrap><b>የማስኬጃ አካባቢ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ቋንቋ</b></td><td>TypeScript 6.0 — በ<code>src/</code> እና <code>open-sse/</code> ውስጥ <b>100% TypeScript</b> (ከv2.0 ጀምሮ በዋናው ኮድ ውስጥ ዜሮ <code>any</code>)</td></tr>
   <tr><td nowrap><b>ፍሬምወርክ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>የውሂብ ጎታ</b></td><td>better-sqlite3 (SQLite፣ WAL ጆርናሊንግ) + LowDB (JSON የቆየ ስርዓት) — 147 የዶሜን ሞጁሎች፣ 244 ማይግሬሽኖች</td></tr>
+  <tr><td nowrap><b>የውሂብ ጎታ</b></td><td>better-sqlite3 (SQLite፣ WAL ጆርናሊንግ) + LowDB (JSON የቆየ ስርዓት) — 147 የዶሜን ሞጁሎች፣ 252 ማይግሬሽኖች</td></tr>
   <tr><td nowrap><b>ማህደረ ትውስታ</b></td><td>SQLite FTS5 ሙሉ-ጽሑፍ + int8-quantized የቬክተር ኢምቤዲንጎች፣ የተየበ መቀነስ</td></tr>
   <tr><td nowrap><b>ስኪማዎች</b></td><td>Zod 4 — የMCP መሣሪያ I/O ማረጋገጫ + የAPI ውሎች</td></tr>
   <tr><td nowrap><b>ፕሮቶኮሎች</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

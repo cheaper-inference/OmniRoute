@@ -14,6 +14,7 @@ import Select from "@/shared/components/Select";
 import Textarea from "@/shared/components/Textarea";
 import { cn } from "@/shared/utils/cn";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
 import { useApiKey } from "../../providers/hooks/useApiKey";
 import { useProviderModels } from "../../providers/hooks/useProviderModels";
 import { getProviderAlias } from "@/shared/constants/providers";
@@ -524,9 +525,9 @@ export function LlmChatCard({
       >
         {messages.length === 0 ? (
           <div className="flex h-full min-h-[180px] flex-col items-center justify-center gap-3 p-6 text-center">
-            <div className="size-10 rounded-full bg-accent/10 flex items-center justify-center">
-              <Icon name="forum" size={22} className="text-accent" />
-            </div>
+            <IconChip tone="accent" shape="circle">
+              <Icon name="forum" />
+            </IconChip>
             <p className="text-sm text-text-muted">{t("emptyConversation")}</p>
             <p className="text-xs text-text-muted/70">{t("sendHint")}</p>
           </div>
@@ -567,12 +568,12 @@ export function LlmChatCard({
                   </div>
                   <div className="flex flex-col gap-1 min-w-0 flex-1">
                     <div className="flex items-baseline gap-2 min-w-0">
-                      <span className="text-[10px] uppercase tracking-wider text-text-muted font-medium shrink-0">
+                      <span className="ci-eyebrow shrink-0" data-size="3xs" data-weight="medium">
                         {isUser ? t("you") : isError ? t("errorLabel") : t("assistant")}
                       </span>
                       {!isUser && !isError && msg.model && (
                         <span
-                          className="text-[10px] font-mono text-text-muted/60 truncate"
+                          className="text-3xs font-mono text-text-muted/60 truncate"
                           title={msg.model}
                         >
                           · {msg.model}
@@ -634,7 +635,7 @@ export function LlmChatCard({
 
       {/* Stats row */}
       {stats && (
-        <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+        <div className="flex items-center gap-1.5 text-2xs text-text-muted">
           <Icon name="bolt" size={13} />
           <span>
             {t("statsLine", {

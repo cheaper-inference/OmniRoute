@@ -1,7 +1,19 @@
 /* Public typography roles. These deliberately leave font-size and responsive
-   variants to the component/host. Import through styles.css for font loading. */
+   variants to the component/host. Import through styles.css for font loading.
+
+   Cascade of the tag defaults (the `:where(.ci-theme) …` selectors). They are
+   unlayered, so by default they beat every layered declaration, kit component
+   classes and host utilities alike. Two exits, neither changes that default:
+   - a class that sets all four properties itself (the role classes and
+     `.ci-eyebrow`) is listed in the `:not()` of each default, so it reads
+     the same on any tag;
+   - `data-ci-type-roles="layered"` on a container moves the defaults of its
+     descendants into `@layer utilities.ci-type-roles` (end of this file):
+     still above every `components` rule, below the host's utilities.
+   Keep the layered copy identical to these rules; both modes are measured in
+   tests/visual/css-typography-roles.spec.ts. */
 .type-heading,
-:where(.ci-theme) :is(h1, h2, h3, h4, h5, h6, [role="heading"]) {
+:where(.ci-theme) :is(h1, h2, h3, h4, h5, h6, [role="heading"]):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) {
   font-family: var(--ci-font-ui);
   font-weight: var(--ci-font-weight-medium);
   line-height: var(--ci-type-heading-leading);
@@ -30,7 +42,7 @@
 
 .type-reading,
 :where(.type-reading) :where(p, li, dd, blockquote, pre, code, kbd, samp),
-:where(.ci-theme) :is(pre, code, kbd, samp) {
+:where(.ci-theme) :is(pre, code, kbd, samp):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) {
   font-family: var(--ci-font-ui);
   font-weight: var(--ci-font-weight-regular);
   line-height: var(--ci-type-reading-leading);
@@ -38,7 +50,7 @@
 }
 
 .type-control,
-:where(.ci-theme) :where(button, label, th, [role="button"], [role="tab"], [role="menuitem"], [role="option"]):where(:not(.ci-select__trigger, .ci-searchable-select__trigger--field)) {
+:where(.ci-theme) :where(button, label, th, [role="button"], [role="tab"], [role="menuitem"], [role="option"]):where(:not(.ci-select__trigger, .ci-searchable-select__trigger--field, .type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) {
   font-family: var(--ci-font-ui);
   font-weight: var(--ci-font-weight-medium);
   line-height: var(--ci-type-control-leading);
@@ -46,7 +58,7 @@
 }
 
 .type-data,
-:where(.ci-theme) :is(input, textarea, td) {
+:where(.ci-theme) :is(input, textarea, td):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) {
   font-family: var(--ci-font-ui);
   font-weight: var(--ci-font-weight-regular);
   line-height: var(--ci-type-data-leading);
@@ -54,12 +66,19 @@
 }
 
 .type-caption,
-:where(.ci-theme) :is(small, figcaption, [role="tooltip"]) {
+:where(.ci-theme) :is(small, figcaption, [role="tooltip"]):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) {
   font-family: var(--ci-font-ui);
   font-weight: var(--ci-font-weight-regular);
   line-height: var(--ci-type-caption-leading);
   letter-spacing: var(--ci-type-caption-tracking);
 }
+
+/* `mono` on Input and Textarea. Their rules are in ci-ui.css, inside
+   @layer components, where the unlayered input and textarea default above
+   wins whatever the specificity. What that default sets is repeated here. */
+.ci-input--mono,
+.ci-textarea--mono { font-family: var(--ci-font-code); }
+.ci-textarea--mono { line-height: var(--ci-type-reading-leading); }
 
 /* Use for standalone numeric metrics at 24px and above. Small numbers inherit
    the component weight and leading; text-valued stats use heading/text roles. */
@@ -69,12 +88,95 @@
   line-height: var(--ci-type-metric-leading);
   letter-spacing: var(--ci-type-metric-tracking);
 }
+/* A page number rendered as a <button> keeps the tracking of the link over the control default above. */
+.ci-pagination__link:not(.ci-pagination__link--edge) { letter-spacing: 0em; }
 .type-number,
 .ci-range-calendar__day-button { letter-spacing: 0em; }
+
+/* Component rules that set their own type on an element the tag defaults
+   cover. They are written in @layer components, where the unlayered defaults
+   above would win, so their type declarations are repeated here, and once
+   more in the layered copy below for `data-ci-type-roles="layered"`. Like
+   the defaults, they skip an element that carries a role class or
+   `.ci-eyebrow`. */
+.ci-recovery-state__title:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) { line-height: 1.15; letter-spacing: -.025em; }
+.ci-recovery-state__reference code:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)),
+.ci-secret-value__value:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) { font-family: var(--ci-font-code); }
+.ci-secret-value__value:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) { line-height: var(--ci-type-body-leading); }
+.ci-stacked-chart__legend:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) { line-height: 1.5; }
+.ci-calendar-heatmap__grid th:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) { font-weight: var(--ci-font-weight-regular); }
+.ci-chat-composer .ci-chat-composer__input:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) { line-height: 1.5; }
+.ci-chat-history__group > h3:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) { font-weight: 400; line-height: 1.4; }
+.ci-chat-history .ci-chat-history__row:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) { font-weight: 400; }
+.ci-usage-receipt__heading h3:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) { font-weight: 600; }
+.ci-usage-models th:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)),
+.ci-usage-models td:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) { font-weight: 400; }
+.ci-usage-models tfoot th:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)),
+.ci-usage-models tfoot td:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) { font-weight: 600; }
+.ci-notification-feed__body h3:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) { font-weight: 600; line-height: 24px; }
+.ci-scope-chip:has(.ci-scope-chip__chevron) .ci-scope-chip__summary:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) { font-weight: var(--ci-font-weight-regular); }
+.ci-range-calendar__day--selected:not(.ci-range-calendar__day--range-middle) .ci-range-calendar__day-button:where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow, [data-ci-type-roles="layered"] *)) { font-weight: var(--ci-font-weight-semibold); }
 
 .type-control:is([aria-selected="true"], [aria-pressed="true"], [aria-checked="true"], [aria-current], [data-state="checked"], [data-state="active"]),
 :where(.ci-theme) :is(button, [role="tab"], [role="option"], [role="menuitem"], [role="radio"], [role="checkbox"], [role="menuitemcheckbox"], [role="menuitemradio"]):is([aria-selected="true"], [aria-pressed="true"], [aria-checked="true"], [aria-current], [data-state="checked"], [data-state="active"], [data-active]:not([data-active="false"])) {
   font-weight: var(--ci-font-weight-semibold);
+}
+
+/* The tag defaults and the component rules again for
+   `data-ci-type-roles="layered"`. A sublayer of `utilities` ranks above `base`
+   and `components` whatever the import order, and below the rules a host
+   writes directly in `utilities`. Selected emphasis (the rule above) stays
+   unlayered in both modes. */
+@layer utilities.ci-type-roles {
+  :where(.ci-theme) :is(h1, h2, h3, h4, h5, h6, [role="heading"]):where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) {
+    font-family: var(--ci-font-ui);
+    font-weight: var(--ci-font-weight-medium);
+    line-height: var(--ci-type-heading-leading);
+    letter-spacing: var(--ci-type-heading-tracking);
+  }
+  :where(.ci-theme) :is(pre, code, kbd, samp):where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) {
+    font-family: var(--ci-font-ui);
+    font-weight: var(--ci-font-weight-regular);
+    line-height: var(--ci-type-reading-leading);
+    letter-spacing: var(--ci-type-reading-tracking);
+  }
+  :where(.ci-theme) :where(button, label, th, [role="button"], [role="tab"], [role="menuitem"], [role="option"]):where([data-ci-type-roles="layered"] *):where(:not(.ci-select__trigger, .ci-searchable-select__trigger--field, .type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) {
+    font-family: var(--ci-font-ui);
+    font-weight: var(--ci-font-weight-medium);
+    line-height: var(--ci-type-control-leading);
+    letter-spacing: var(--ci-type-control-tracking);
+  }
+  :where(.ci-theme) :is(input, textarea, td):where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) {
+    font-family: var(--ci-font-ui);
+    font-weight: var(--ci-font-weight-regular);
+    line-height: var(--ci-type-data-leading);
+    letter-spacing: var(--ci-type-data-tracking);
+  }
+  :where(.ci-theme) :is(small, figcaption, [role="tooltip"]):where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) {
+    font-family: var(--ci-font-ui);
+    font-weight: var(--ci-font-weight-regular);
+    line-height: var(--ci-type-caption-leading);
+    letter-spacing: var(--ci-type-caption-tracking);
+  }
+
+  /* The component rules again, after the defaults they override. */
+  .ci-recovery-state__title:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) { line-height: 1.15; letter-spacing: -.025em; }
+  .ci-recovery-state__reference code:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)),
+  .ci-secret-value__value:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) { font-family: var(--ci-font-code); }
+  .ci-secret-value__value:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) { line-height: var(--ci-type-body-leading); }
+  .ci-stacked-chart__legend:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) { line-height: 1.5; }
+  .ci-calendar-heatmap__grid th:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) { font-weight: var(--ci-font-weight-regular); }
+  .ci-chat-composer .ci-chat-composer__input:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) { line-height: 1.5; }
+  .ci-chat-history__group > h3:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) { font-weight: 400; line-height: 1.4; }
+  .ci-chat-history .ci-chat-history__row:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) { font-weight: 400; }
+  .ci-usage-receipt__heading h3:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) { font-weight: 600; }
+  .ci-usage-models th:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)),
+  .ci-usage-models td:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) { font-weight: 400; }
+  .ci-usage-models tfoot th:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)),
+  .ci-usage-models tfoot td:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) { font-weight: 600; }
+  .ci-notification-feed__body h3:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) { font-weight: 600; line-height: 24px; }
+  .ci-scope-chip:has(.ci-scope-chip__chevron) .ci-scope-chip__summary:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) { font-weight: var(--ci-font-weight-regular); }
+  .ci-range-calendar__day--selected:not(.ci-range-calendar__day--range-middle) .ci-range-calendar__day-button:where([data-ci-type-roles="layered"] *):where(:not(.type-heading, .type-body, .type-reading, .type-control, .type-data, .type-caption, .ci-eyebrow)) { font-weight: var(--ci-font-weight-semibold); }
 }
 
 @layer base {

@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Solījums — viens galapunkts un 394 pakalpojumu sniedzēji. Automātiska atkāpšanās nodrošina maršrutēšanu, kamēr ir pieejams cits darbspējīgs mērķis. Seši pīlāri: noturīga atkāpšanās starp 394 pakalpojumu sniedzējiem · līdz 95% žetonu ietaupījums piemērotām slodzēm · $0 sākšanai ar vairāk nekā 150 bezmaksas līmeņiem un 51 periodiski vai bez atslēgas pieejamu pakalpojumu sniedzēju, kas vienmēr ir bezmaksas · 39 CLI/aģentu integrācijas, izmantojot vienu konfigurāciju · OpenAI, Claude, Gemini un Responses API saderība adresē /v1 · ražošanas vadīklas, tostarp ķēdes pārtraucēji, TLS stealth, MCP 110 rīki, A2A, atmiņa, aizsargmehānismi, novērtējumi un vairāk nekā 56 000 statisku testu deklarāciju vairāk nekā 7800 izsekotos testu failos."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Solījums — viens galapunkts un 394 pakalpojumu sniedzēji. Automātiska atkāpšanās nodrošina maršrutēšanu, kamēr ir pieejams cits darbspējīgs mērķis. Seši pīlāri: noturīga atkāpšanās starp 394 pakalpojumu sniedzējiem · līdz 95% žetonu ietaupījums piemērotām slodzēm · $0 sākšanai ar vairāk nekā 150 bezmaksas līmeņiem un 40 periodiski vai bez atslēgas pieejamu pakalpojumu sniedzēju, kas vienmēr ir bezmaksas · 39 CLI/aģentu integrācijas, izmantojot vienu konfigurāciju · OpenAI, Claude, Gemini un Responses API saderība adresē /v1 · ražošanas vadīklas, tostarp ķēdes pārtraucēji, TLS stealth, MCP 110 rīki, A2A, atmiņa, aizsargmehānismi, novērtējumi un vairāk nekā 56 000 statisku testu deklarāciju vairāk nekā 7800 izsekotos testu failos."/>
 
 <br/>
 <br/>
@@ -702,7 +702,7 @@ parāda precīzu vidi/argumentus pirms izpildes, un `--api-key-env NAME` pasarg�
 
 </div>
 
-> **394 reģistrēti nodrošinātāji** kanoniskajās tērzēšanas, multivides, meklēšanas, lokālajās, mākoņa aģentu un sistēmas kolekcijās, tostarp **153 ar `hasFree: true` atklāšanas metadatiem**. Tērzēšanas modeļu reģistrā ir **239 nodrošinātāji / 3,059 atšķirīgi nodrošinātāja–modeļa pāri / 1,475 neapstrādāti modeļu ID**; atsevišķajā bezmaksas budžeta katalogā ir **465 rindas katram modelim**, **34 periodiski baseini** un **51 periodisks vai bez atslēgas pieejams bezmaksas uz visiem laikiem nodrošinātājs**. Šie saucēji pēc definīcijas atšķiras; definīcijas un ar baseinu dublikātiem apvienotie aprēķini ir pieejami [Nodrošinātāju atsaucē](docs/reference/PROVIDER_REFERENCE.md) un [Bezmaksas līmeņos](docs/reference/FREE_TIERS.md).
+> **394 reģistrēti nodrošinātāji** kanoniskajās tērzēšanas, multivides, meklēšanas, lokālajās, mākoņa aģentu un sistēmas kolekcijās, tostarp **153 ar `hasFree: true` atklāšanas metadatiem**. Tērzēšanas modeļu reģistrā ir **239 nodrošinātāji / 3,059 atšķirīgi nodrošinātāja–modeļa pāri / 1,475 neapstrādāti modeļu ID**; atsevišķajā bezmaksas budžeta katalogā ir **465 rindas katram modelim**, **34 periodiski baseini** un **40 periodisks vai bez atslēgas pieejams bezmaksas uz visiem laikiem nodrošinātājs**. Šie saucēji pēc definīcijas atšķiras; definīcijas un ar baseinu dublikātiem apvienotie aprēķini ir pieejami [Nodrošinātāju atsaucē](docs/reference/PROVIDER_REFERENCE.md) un [Bezmaksas līmeņos](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1325,7 +1325,7 @@ Kanoniskie rādītāji 2026-10-18: **1.976 unikāli videoklipi** · **20.220.289
   <tr><td nowrap><b>Izpildlaiks</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Valoda</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> visā <code>src/</code> un <code>open-sse/</code> (kopš v2.0 kodolā nav neviena <code>any</code>)</td></tr>
   <tr><td nowrap><b>Ietvars</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Datubāze</b></td><td>better-sqlite3 (SQLite, WAL žurnalēšana) + LowDB (mantots JSON) — 147 domēna moduļi, 244 migrācijas</td></tr>
+  <tr><td nowrap><b>Datubāze</b></td><td>better-sqlite3 (SQLite, WAL žurnalēšana) + LowDB (mantots JSON) — 147 domēna moduļi, 252 migrācijas</td></tr>
   <tr><td nowrap><b>Atmiņa</b></td><td>SQLite FTS5 pilnteksta meklēšana + int8 kvantizēti vektoru iegulumi, tipizēta dilšana</td></tr>
   <tr><td nowrap><b>Shēmas</b></td><td>Zod 4 — MCP rīku I/O validācija + API līgumi</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

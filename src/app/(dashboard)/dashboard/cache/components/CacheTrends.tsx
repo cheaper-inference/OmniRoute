@@ -42,7 +42,9 @@ export default function CacheTrends({
     >
       <div className="flex items-center gap-2">
         <Icon name="timeline" size={16} className="text-text-muted" />
-        <h2 className="text-sm">{t("trend24h")}</h2>
+        <h2 className="ci-heading" data-size="sm">
+          {t("trend24h")}
+        </h2>
       </div>
 
       {loading ? (
@@ -107,7 +109,7 @@ export default function CacheTrends({
                         style={{ height: `${height - cachedHeight}%` }}
                       />
                     </div>
-                    <span className="text-[10px] text-text-muted truncate w-full text-center">
+                    <span className="text-3xs text-text-muted truncate w-full text-center">
                       {hour.split(":")[0]}
                     </span>
                   </div>
