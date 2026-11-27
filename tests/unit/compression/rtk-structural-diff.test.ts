@@ -481,6 +481,53 @@ describe("structural flag capture", () => {
     assert.ok(!toolText(explicitOff).includes("+4 -3"));
   });
 
+  it("never consults the flag resolver unless an RTK step has enableRenderers on", async () => {
+    let calls = 0;
+    setFlagResolver(() => {
+      calls++;
+      return true;
+    });
+    const off = { enabled: true, applyToToolResults: true, enableRenderers: false };
+    const cases: Array<[string, Record<string, unknown>]> = [
+      ["rtk, renderers off", { rtkConfig: off }],
+      ["rtk, default config", { rtkConfig: undefined }],
+      ["rtk, tool results off", { rtkConfig: { ...rtkConfig, applyToToolResults: false } }],
+    ];
+    for (const [label, extra] of cases) {
+      const cfg = { ...config, memoizeCompressionResults: false, ...extra } as CompressionConfig;
+      const sync = applyCompression(bodyOf(), "rtk", { config: cfg });
+      const remote = await applyCompressionAsync(bodyOf(), "rtk", { config: cfg });
+      assert.ok(!toolText(sync).includes("+4 -3"), label);
+      assert.ok(!toolText(remote).includes("+4 -3"), label);
+      assert.equal(calls, 0, label);
+    }
+    for (const pipeline of [[{ engine: "rtk" }], undefined]) {
+      const stacked = {
+        ...config,
+        defaultMode: "stacked",
+        memoizeCompressionResults: false,
+        stackedPipeline: pipeline,
+        rtkConfig: off,
+      } as unknown as CompressionConfig;
+      applyCompression(bodyOf(), "stacked", { config: stacked });
+      await applyCompressionAsync(bodyOf(), "stacked", { config: stacked });
+      assert.equal(calls, 0, "stacked, renderers off");
+    }
+    // a step that turns the renderers on by itself is enough to ask for the flag
+    const stepOn = {
+      ...config,
+      memoizeCompressionResults: false,
+      stackedPipeline: [{ engine: "rtk", config: { enableRenderers: true } }],
+      rtkConfig: off,
+    } as unknown as CompressionConfig;
+    const result = applyCompression(bodyOf(), "stacked", { config: stepOn });
+    assert.ok(calls >= 1);
+    assert.ok(toolText(result).includes("+4 -3"));
+    calls = 0;
+    applyCompression(bodyOf(), "rtk", { config });
+    assert.ok(calls >= 1, "rtk with renderers on asks for the flag");
+  });
+
   it("a resolver that throws fails closed", () => {
     setFlagResolver(() => {
       throw new Error("resolver down");
