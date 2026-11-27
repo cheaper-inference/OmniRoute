@@ -23,6 +23,7 @@ import { Input as KitInput } from "@omniroute/ui-kit/input";
 import { Badge, Button, Checkbox, FilterPills } from "@/shared/components";
 import ModelComboBadge from "./ModelComboBadge";
 import ModelCompatPopover from "./ModelCompatPopover";
+import type { ModelVisibilityFilter, ModelVisibilityMode } from "@/shared/utils/modelVisibility";
 import {
   ContextWindowOverrideEditButton,
   ContextWindowOverrideField,
@@ -106,14 +107,17 @@ export interface ModelVisibilityToolbarProps {
   onTestAll?: () => void;
   testingAll?: boolean;
   testProgress?: { done: number; total: number } | null;
-  visibilityFilter?: "all" | "visible" | "hidden";
-  onVisibilityFilterChange?: (filter: "all" | "visible" | "hidden") => void;
+  visibilityFilter?: ModelVisibilityFilter;
+  onVisibilityFilterChange?: (filter: ModelVisibilityFilter) => void;
   autoHideFailed?: boolean;
   onAutoHideFailedChange?: (v: boolean) => void;
   freeFilter?: "all" | "free" | "paid";
   onFreeFilterChange?: (filter: "all" | "free" | "paid") => void;
   sortFreeFirst?: boolean;
   onSortFreeFirstChange?: (v: boolean) => void;
+  /** Bulk action: mark every listed model `combos_only` (reachable from combos only). */
+  onCombosOnly?: () => void;
+  combosOnlyDisabled?: boolean;
 }
 
 export function ModelVisibilityToolbar({
@@ -137,6 +141,8 @@ export function ModelVisibilityToolbar({
   onFreeFilterChange,
   sortFreeFirst,
   onSortFreeFirstChange,
+  onCombosOnly,
+  combosOnlyDisabled,
 }: ModelVisibilityToolbarProps) {
   return (
     <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -157,10 +163,11 @@ export function ModelVisibilityToolbar({
           options={[
             { value: "all", label: providerText(t, "showAllModels", "All") },
             { value: "visible", label: providerText(t, "showVisibleOnly", "Visible") },
+            { value: "combos_only", label: providerText(t, "showCombosOnly", "Combos only") },
             { value: "hidden", label: providerText(t, "showHiddenOnly", "Hidden") },
           ]}
           value={visibilityFilter}
-          onChange={(v) => onVisibilityFilterChange(v as "all" | "visible" | "hidden")}
+          onChange={(v) => onVisibilityFilterChange(v as ModelVisibilityFilter)}
         />
       )}
       {freeFilter !== undefined && onFreeFilterChange && (
@@ -243,6 +250,22 @@ export function ModelVisibilityToolbar({
       >
         <span>{providerText(t, "hideAllModels", "Hide all")}</span>
       </Button>
+      {onCombosOnly && (
+        <Button
+          size="sm"
+          variant="outline"
+          icon="call_split"
+          onClick={onCombosOnly}
+          disabled={combosOnlyDisabled}
+          title={providerText(
+            t,
+            "combosOnlyAllTooltip",
+            "Keep these models reachable from combos only — hidden from /v1/models and direct calls"
+          )}
+        >
+          <span>{providerText(t, "combosOnlyAll", "Combos only")}</span>
+        </Button>
+      )}
       <span className="whitespace-nowrap text-xs text-text-muted">
         {providerText(t, "modelsActiveCount", "{active}/{total} active", {
           active: activeCount,
@@ -258,7 +281,14 @@ export function ModelVisibilityToolbar({
 // ---------------------------------------------------------------------------
 
 export interface ModelRowProps {
-  model: { id: string; name?: string; source?: string; isHidden?: boolean };
+  model: {
+    id: string;
+    name?: string;
+    source?: string;
+    isHidden?: boolean;
+    /** Three-state visibility with the provider default already applied (dashboard). */
+    visibilityMode?: ModelVisibilityMode;
+  };
   fullModel: string;
   provider: string;
   alias?: string;
@@ -276,6 +306,8 @@ export interface ModelRowProps {
   getUpstreamHeadersRecord: (protocol: string) => Record<string, string>;
   compatDisabled?: boolean;
   onToggleHidden?: (modelId: string, hidden: boolean) => Promise<void>;
+  /** Set the row's three-state visibility (`visible` | `combos_only` | `hidden`). */
+  onSetVisibility?: (modelId: string, mode: ModelVisibilityMode) => Promise<void>;
   togglingHidden?: boolean;
   onTestModel?: (modelId: string, fullModel: string) => Promise<void>;
   testStatus?: "ok" | "error" | "quota" | null;
@@ -306,6 +338,7 @@ export default function ModelRow({
   saveModelCompatFlags,
   compatDisabled,
   onToggleHidden,
+  onSetVisibility,
   togglingHidden,
   onTestModel,
   testStatus,
@@ -316,6 +349,11 @@ export default function ModelRow({
   endpointInfo,
 }: ModelRowProps) {
   const isHidden = Boolean(model.isHidden);
+  // Three-state visibility drives the badge and the eye/combos control. `combos_only` is not
+  // hidden (a stored combo still reaches it), so the row keeps full opacity and says so.
+  const visibilityMode: ModelVisibilityMode =
+    model.visibilityMode ?? (isHidden ? "hidden" : "visible");
+  const isCombosOnly = visibilityMode === "combos_only";
   const contextEditor = useContextWindowOverrideEditor({
     modelId: model.id,
     override: contextWindowOverride,
@@ -361,7 +399,7 @@ export default function ModelRow({
   return (
     <div
       className={`relative flex h-full w-full min-w-0 flex-col gap-1.5 rounded-lg border border-border px-3 py-2 hover:bg-sidebar/50 transition-opacity ${
-        isHidden ? "opacity-50" : ""
+        isHidden ? "opacity-50" : isCombosOnly ? "border-dashed" : ""
       }`}
     >
       {/* Line 1: icon + full model name (wraps, never cut); copy pinned to the top-right corner. */}
@@ -389,6 +427,27 @@ export default function ModelRow({
           (the actions drop to their own row) instead of spilling into the next card (#19543). */}
       <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 pl-6">
         <ModelSourceBadge source={model.source} />
+        {visibilityMode !== "visible" && (
+          <Badge
+            size="sm"
+            variant={visibilityMode === "hidden" ? "default" : "warning"}
+            icon={visibilityMode === "hidden" ? "visibility_off" : "call_split"}
+            className="shrink-0 whitespace-nowrap"
+            title={
+              isCombosOnly
+                ? providerText(
+                    t,
+                    "combosOnlyBadgeTooltip",
+                    "Reachable only from combos — hidden from /v1/models and direct calls"
+                  )
+                : providerText(t, "hiddenBadgeTooltip", "Hidden from /v1/models and combos")
+            }
+          >
+            {isCombosOnly
+              ? providerText(t, "combosOnlyBadge", "Combos only")
+              : providerText(t, "hiddenBadge", "Hidden")}
+          </Badge>
+        )}
         {onSaveContextWindowOverride && (
           <ContextWindowOverrideField
             editor={contextEditor}
@@ -503,13 +562,20 @@ export default function ModelRow({
               )}
             </Button>
           )}
-          {onToggleHidden && (
+          {/* Three-state visibility: the eye toggles visible/hidden exactly as before, and the
+              extra button moves the row to `combos_only` (or back). Rendered only when the
+              caller wired the three-state handler; the legacy props keep working unchanged. */}
+          {(onSetVisibility || onToggleHidden) && (
             <Button
               variant="ghost"
               size="icon-2xs"
               tone="muted"
               icon={isHidden ? "visibility_off" : "visibility"}
-              onClick={() => onToggleHidden(model.id, !isHidden)}
+              onClick={() =>
+                onSetVisibility
+                  ? onSetVisibility(model.id, isHidden ? "visible" : "hidden")
+                  : onToggleHidden?.(model.id, !isHidden)
+              }
               disabled={togglingHidden}
               title={
                 isHidden
@@ -521,7 +587,39 @@ export default function ModelRow({
                   ? providerText(t, "showModel", "Show model")
                   : providerText(t, "hideModel", "Hide model")
               }
-            ></Button>
+            />
+          )}
+          {onSetVisibility && (
+            <Button
+              variant="ghost"
+              size="icon-2xs"
+              tone="muted"
+              icon="call_split"
+              onClick={() => onSetVisibility(model.id, isCombosOnly ? "visible" : "combos_only")}
+              disabled={togglingHidden || isHidden}
+              className={
+                isCombosOnly ? "text-warning aria-disabled:opacity-40" : "aria-disabled:opacity-40"
+              }
+              title={
+                isCombosOnly
+                  ? providerText(t, "makeVisibleModel", "Make this model directly callable")
+                  : providerText(
+                      t,
+                      "makeCombosOnlyModel",
+                      "Keep this model for combos only — hide it from /v1/models and direct calls"
+                    )
+              }
+              aria-label={
+                isCombosOnly
+                  ? providerText(t, "makeVisibleModel", "Make this model directly callable")
+                  : providerText(
+                      t,
+                      "makeCombosOnlyModel",
+                      "Keep this model for combos only — hide it from /v1/models and direct calls"
+                    )
+              }
+              aria-pressed={isCombosOnly}
+            />
           )}
           <ModelCompatPopover
             t={t}

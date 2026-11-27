@@ -34,6 +34,11 @@ import {
   type CompatModelRow,
 } from "../providerPageHelpers";
 import { ModelVisibilityToolbar } from "./ModelRow";
+import {
+  matchesVisibilityFilter,
+  type ModelVisibilityFilter,
+  type ModelVisibilityMode,
+} from "@/shared/utils/modelVisibility";
 import { sortModelsFreeFirst, isModelFreeBadge } from "@/shared/utils/freeModels";
 import { useStrictFreeBadge } from "./useStrictFreeBadge";
 import PassthroughModelRow from "./PassthroughModelRow";
@@ -77,6 +82,12 @@ export interface PassthroughModelsSectionProps {
   isModelHidden: (modelId: string) => boolean;
   onToggleHidden: (modelId: string, hidden: boolean) => Promise<void>;
   onBulkToggleHidden: (modelIds: string[], hidden: boolean) => Promise<void>;
+  /** Three-state visibility (provider default included). Absent keeps the list two-state. */
+  resolveModelVisibility?: (modelId: string) => ModelVisibilityMode;
+  /** Set one model's three-state visibility. */
+  onSetVisibility?: (modelId: string, mode: ModelVisibilityMode) => Promise<void>;
+  /** Bulk three-state write ("Combos only" in the toolbar). */
+  onBulkSetVisibility?: (modelIds: string[], mode: ModelVisibilityMode) => Promise<void>;
   bulkTogglePending?: boolean;
   togglingModelId?: string | null;
   onTestModel?: (modelId: string, fullModel: string) => Promise<void>;
@@ -126,6 +137,9 @@ export default function PassthroughModelsSection({
   isModelHidden,
   onToggleHidden,
   onBulkToggleHidden,
+  resolveModelVisibility,
+  onSetVisibility,
+  onBulkSetVisibility,
   bulkTogglePending,
   togglingModelId,
   onTestModel,
@@ -149,7 +163,7 @@ export default function PassthroughModelsSection({
   const autoHideFailed =
     autoHideFailedProp !== undefined ? autoHideFailedProp : localAutoHideFailed;
   const setAutoHideFailed = onAutoHideFailedChange ?? setLocalAutoHideFailed;
-  const [visibilityFilter, setVisibilityFilter] = useState<"all" | "visible" | "hidden">("all");
+  const [visibilityFilter, setVisibilityFilter] = useState<ModelVisibilityFilter>("all");
   const [freeFilter, setFreeFilter] = useState<"all" | "free" | "paid">("all");
   const [sortFreeFirst, setSortFreeFirst] = useState(false);
   const notify = useNotificationStore();
@@ -254,6 +268,8 @@ export default function PassthroughModelsSection({
       source: string;
       isFree: boolean;
       isHidden: boolean;
+      /** Effective three-state visibility (provider default already applied). */
+      visibilityMode: ModelVisibilityMode;
       supportsVision?: boolean;
     }> = [];
     const seenModelIds = new Set<string>();
@@ -271,6 +287,10 @@ export default function PassthroughModelsSection({
       const defaultAlias = getDefaultModelAlias(model);
       const fullModel =
         fullModelByModelId.get(model.id) || `${providerAlias}/${defaultAlias || model.id}`;
+      // When the page supplies the three-state resolver, it wins: a `combos_only` row is not
+      // hidden (a combo still reaches it) while `hidden` is hidden everywhere.
+      const visibilityMode: ModelVisibilityMode =
+        resolveModelVisibility?.(model.id) ?? (isModelHidden(model.id) ? "hidden" : "visible");
       rows.push({
         modelId: model.id,
         fullModel,
@@ -287,7 +307,8 @@ export default function PassthroughModelsSection({
           },
           { strict: strictFreeBadge }
         ),
-        isHidden: isModelHidden(model.id),
+        isHidden: visibilityMode === "hidden",
+        visibilityMode,
         supportsVision: model.supportsVision,
       });
       seenModelIds.add(model.id);
@@ -315,6 +336,8 @@ export default function PassthroughModelsSection({
       const displayAlias = getDisplayModelAlias(modelId, alias as string);
       if (!displayAlias) continue;
       const customModel = customModelMap.get(modelId);
+      const visibilityMode: ModelVisibilityMode =
+        resolveModelVisibility?.(modelId) ?? (isModelHidden(modelId) ? "hidden" : "visible");
       rows.push({
         modelId,
         fullModel: fmStr,
@@ -331,7 +354,8 @@ export default function PassthroughModelsSection({
           },
           { strict: strictFreeBadge }
         ),
-        isHidden: isModelHidden(modelId),
+        isHidden: visibilityMode === "hidden",
+        visibilityMode,
         supportsVision: customModel?.supportsVision,
       });
       seenModelIds.add(modelId);
@@ -350,6 +374,7 @@ export default function PassthroughModelsSection({
     customModelMap,
     customModels,
     isModelHidden,
+    resolveModelVisibility,
     providerAlias,
     providerAliases,
     providerId,
@@ -364,12 +389,7 @@ export default function PassthroughModelsSection({
       source: model.source,
     });
 
-    const matchesVisibility =
-      visibilityFilter === "all"
-        ? true
-        : visibilityFilter === "visible"
-          ? !model.isHidden
-          : model.isHidden;
+    const matchesVisibility = matchesVisibilityFilter(visibilityFilter, model.visibilityMode);
 
     const matchesFreeFilter =
       freeFilter === "all" ? true : freeFilter === "free" ? model.isFree : !model.isFree;
@@ -435,10 +455,15 @@ export default function PassthroughModelsSection({
             activeCount={activeCount}
             totalCount={allModels.length}
             onSelectAll={() =>
-              onBulkToggleHidden(
-                filteredModels.map((m) => m.modelId),
-                false
-              )
+              onBulkSetVisibility
+                ? onBulkSetVisibility(
+                    filteredModels.map((m) => m.modelId),
+                    "visible"
+                  )
+                : onBulkToggleHidden(
+                    filteredModels.map((m) => m.modelId),
+                    false
+                  )
             }
             onDeselectAll={() =>
               onBulkToggleHidden(
@@ -446,6 +471,16 @@ export default function PassthroughModelsSection({
                 true
               )
             }
+            onCombosOnly={
+              onBulkSetVisibility
+                ? () =>
+                    onBulkSetVisibility(
+                      filteredModels.map((m) => m.modelId),
+                      "combos_only"
+                    )
+                : undefined
+            }
+            combosOnlyDisabled={bulkTogglePending || filteredModels.length === 0}
             selectAllDisabled={bulkTogglePending || filteredModels.length === 0}
             deselectAllDisabled={bulkTogglePending || filteredModels.length === 0}
             onTestAll={handleTestAll}
@@ -461,7 +496,16 @@ export default function PassthroughModelsSection({
           />
           <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
             {displayModels.map(
-              ({ modelId, fullModel, alias, isHidden, source, isFree, supportsVision }) => {
+              ({
+                modelId,
+                fullModel,
+                alias,
+                isHidden,
+                visibilityMode,
+                source,
+                isFree,
+                supportsVision,
+              }) => {
                 const discovered = availableModels.find((row) => row.id === modelId);
                 const selected = customModelMap.get(modelId);
                 const catalog = catalogModels.find((row) => row.id === modelId);
@@ -500,6 +544,7 @@ export default function PassthroughModelsSection({
                     source={source}
                     isFree={isFree}
                     isHidden={isHidden}
+                    visibilityMode={visibilityMode}
                     combos={comboUsage?.[modelId]}
                     copied={copied}
                     onCopy={onCopy}
@@ -515,6 +560,7 @@ export default function PassthroughModelsSection({
                     saveModelCompatFlags={saveModelCompatFlags}
                     compatDisabled={compatSavingModelId === modelId}
                     onToggleHidden={onToggleHidden}
+                    onSetVisibility={onSetVisibility}
                     togglingHidden={togglingModelId === modelId}
                     onTestModel={onTestModel}
                     testStatus={modelTestStatus?.[modelId] ?? null}

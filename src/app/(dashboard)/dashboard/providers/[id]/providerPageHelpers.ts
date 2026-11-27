@@ -12,7 +12,11 @@ import {
   type ModelCompatProtocolKey,
 } from "@/shared/constants/modelCompat";
 import { type ModelSupportedEndpoint } from "@/shared/constants/modelSupportedEndpoints";
-import { isHiddenForModality } from "@/shared/utils/modelVisibility";
+import {
+  isHiddenForModality,
+  resolveExplicitVisibility,
+  type ModelVisibilityMode,
+} from "@/shared/utils/modelVisibility";
 import {
   getClaudeCodeCompatibleRequestDefaults as _getClaudeCodeCompatibleRequestDefaults,
   getCodexRequestDefaults as _getCodexRequestDefaults,
@@ -91,6 +95,10 @@ export type CompatModelRow = {
   isHidden?: boolean;
   /** #12172: per-modality visibility overrides (`{ chat: true }`) — see `isHiddenForModality`. */
   hiddenModalities?: Record<string, boolean>;
+  /** Three-state visibility for the whole model — wildcard over every modality. */
+  visibilityMode?: ModelVisibilityMode;
+  /** Three-state visibility scoped per modality; wins over `visibilityMode`. */
+  visibilityModalities?: Record<string, ModelVisibilityMode>;
   upstreamHeaders?: Record<string, string>;
   compatByProtocol?: CompatByProtocolMap;
   /** #2905: per-model upstream wire-format override. */ targetFormat?: string;
@@ -650,6 +658,53 @@ export function isModelHiddenFn(
   if (overrideHidden !== undefined) return overrideHidden;
 
   return false;
+}
+
+/**
+ * Which store states a model's visibility, in the same precedence `isModelHiddenFn` reads:
+ * the operator-declared custom row first, then the compat override, else nothing.
+ */
+function readVisibilityRow(
+  modelId: string,
+  customMap: CompatModelMap,
+  overrideMap: CompatModelMap
+): CompatModelRow | undefined {
+  return customMap.get(modelId) || overrideMap.get(modelId);
+}
+
+/**
+ * The dashboard's three-state visibility for one model.
+ *
+ * - An explicit per-model statement (`visibilityMode` / `visibilityModalities.chat`, or the
+ *   legacy `isHidden` / `hiddenModalities.chat` flags) wins, verbatim.
+ * - Otherwise the provider-level default (`settings.combosOnlyProviders`) applies.
+ * - Otherwise visible.
+ *
+ * Kept a pure function of the two compat maps so the row, the filter, the bulk action and
+ * the tests all agree — mirrors `resolveModelVisibility` on the server.
+ */
+export function resolveModelVisibilityFn(
+  modelId: string,
+  customMap: CompatModelMap,
+  overrideMap: CompatModelMap,
+  providerCombosOnly = false
+): ModelVisibilityMode {
+  const row = readVisibilityRow(modelId, customMap, overrideMap);
+  const explicit = row ? resolveExplicitVisibility(row, DASHBOARD_MODEL_MODALITY) : null;
+  if (explicit) return explicit;
+  return providerCombosOnly ? "combos_only" : "visible";
+}
+
+/** True when the model is only reachable from a combo (not from `/v1/models` or a direct call). */
+export function isModelCombosOnlyFn(
+  modelId: string,
+  customMap: CompatModelMap,
+  overrideMap: CompatModelMap,
+  providerCombosOnly = false
+): boolean {
+  return (
+    resolveModelVisibilityFn(modelId, customMap, overrideMap, providerCombosOnly) === "combos_only"
+  );
 }
 
 /** Providers whose runtime normalizes tool call ids when no flag is set (mirrors getModelNormalizeToolCallId). */

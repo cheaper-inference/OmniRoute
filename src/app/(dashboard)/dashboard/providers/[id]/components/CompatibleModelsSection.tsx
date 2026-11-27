@@ -24,6 +24,11 @@ import {
   type CompatModelRow,
 } from "../providerPageHelpers";
 import { ModelVisibilityToolbar } from "./ModelRow";
+import {
+  matchesVisibilityFilter,
+  type ModelVisibilityFilter,
+  type ModelVisibilityMode,
+} from "@/shared/utils/modelVisibility";
 import { useStrictFreeBadge } from "./useStrictFreeBadge";
 import { useModelVisionOverrides } from "../hooks/useModelVisionOverrides";
 import { useModelOutputOverrides } from "../hooks/useModelOutputOverrides";
@@ -73,6 +78,12 @@ export interface CompatibleModelsSectionProps {
   isModelHidden: (modelId: string) => boolean;
   onToggleHidden: (modelId: string, hidden: boolean) => Promise<void>;
   onBulkToggleHidden: (modelIds: string[], hidden: boolean) => Promise<void>;
+  /** Three-state visibility (provider default included). Absent keeps the list two-state. */
+  resolveModelVisibility?: (modelId: string) => ModelVisibilityMode;
+  /** Set one model's three-state visibility. */
+  onSetVisibility?: (modelId: string, mode: ModelVisibilityMode) => Promise<void>;
+  /** Bulk three-state write ("Combos only" in the toolbar). */
+  onBulkSetVisibility?: (modelIds: string[], mode: ModelVisibilityMode) => Promise<void>;
   bulkTogglePending?: boolean;
   togglingModelId?: string | null;
   onTestModel?: (modelId: string, fullModel: string) => Promise<void>;
@@ -120,6 +131,9 @@ export default function CompatibleModelsSection({
   isModelHidden,
   onToggleHidden,
   onBulkToggleHidden,
+  resolveModelVisibility,
+  onSetVisibility,
+  onBulkSetVisibility,
   bulkTogglePending,
   togglingModelId,
   onTestModel,
@@ -135,7 +149,7 @@ export default function CompatibleModelsSection({
   const [adding, setAdding] = useState(false);
   const [importing, setImporting] = useState(false);
   const [modelFilter, setModelFilter] = useState("");
-  const [visibilityFilter, setVisibilityFilter] = useState<"all" | "visible" | "hidden">("all");
+  const [visibilityFilter, setVisibilityFilter] = useState<ModelVisibilityFilter>("all");
   const [freeFilter, setFreeFilter] = useState<"all" | "free" | "paid">("all");
   const [sortFreeFirst, setSortFreeFirst] = useState(false);
 
@@ -168,6 +182,8 @@ export default function CompatibleModelsSection({
       source: string;
       isFree: boolean;
       isHidden: boolean;
+      /** Effective three-state visibility (provider default already applied). */
+      visibilityMode: ModelVisibilityMode;
       supportsVision?: boolean;
     }> = [];
     const seenModelIds = new Set<string>();
@@ -181,6 +197,8 @@ export default function CompatibleModelsSection({
 
     const addModel = (model: CompatModelRow, source: string) => {
       if (!model?.id || seenModelIds.has(model.id)) return;
+      const visibilityMode: ModelVisibilityMode =
+        resolveModelVisibility?.(model.id) ?? (isModelHidden(model.id) ? "hidden" : "visible");
       rows.push({
         modelId: model.id,
         alias: aliasByModelId.get(model.id) || null,
@@ -196,7 +214,8 @@ export default function CompatibleModelsSection({
           },
           { strict: strictFreeBadge }
         ),
-        isHidden: isModelHidden(model.id),
+        isHidden: visibilityMode === "hidden",
+        visibilityMode,
         supportsVision: model.supportsVision,
       });
       seenModelIds.add(model.id);
@@ -224,6 +243,8 @@ export default function CompatibleModelsSection({
       const displayAlias = getDisplayModelAlias(modelId, alias as string);
       if (!displayAlias) continue;
       const customModel = customModelMap.get(modelId);
+      const visibilityMode: ModelVisibilityMode =
+        resolveModelVisibility?.(modelId) ?? (isModelHidden(modelId) ? "hidden" : "visible");
       rows.push({
         modelId,
         alias: displayAlias,
@@ -239,7 +260,8 @@ export default function CompatibleModelsSection({
           },
           { strict: strictFreeBadge }
         ),
-        isHidden: isModelHidden(modelId),
+        isHidden: visibilityMode === "hidden",
+        visibilityMode,
         supportsVision: customModel?.supportsVision,
       });
       seenModelIds.add(modelId);
@@ -258,6 +280,7 @@ export default function CompatibleModelsSection({
     customModels,
     fallbackModels,
     isModelHidden,
+    resolveModelVisibility,
     providerAliases,
     providerStorageAlias,
     strictFreeBadge,
@@ -270,12 +293,7 @@ export default function CompatibleModelsSection({
       alias: model.alias,
       source: model.source,
     });
-    const matchesVisibility =
-      visibilityFilter === "all"
-        ? true
-        : visibilityFilter === "visible"
-          ? !model.isHidden
-          : model.isHidden;
+    const matchesVisibility = matchesVisibilityFilter(visibilityFilter, model.visibilityMode);
     const matchesFreeFilter =
       freeFilter === "all" ? true : freeFilter === "free" ? model.isFree : !model.isFree;
     return matchesQuery && matchesVisibility && matchesFreeFilter;
@@ -428,10 +446,15 @@ export default function CompatibleModelsSection({
             activeCount={activeCount}
             totalCount={allModels.length}
             onSelectAll={() =>
-              onBulkToggleHidden(
-                filteredModels.map((model) => model.modelId),
-                false
-              )
+              onBulkSetVisibility
+                ? onBulkSetVisibility(
+                    filteredModels.map((model) => model.modelId),
+                    "visible"
+                  )
+                : onBulkToggleHidden(
+                    filteredModels.map((model) => model.modelId),
+                    false
+                  )
             }
             onDeselectAll={() =>
               onBulkToggleHidden(
@@ -439,6 +462,16 @@ export default function CompatibleModelsSection({
                 true
               )
             }
+            onCombosOnly={
+              onBulkSetVisibility
+                ? () =>
+                    onBulkSetVisibility(
+                      filteredModels.map((model) => model.modelId),
+                      "combos_only"
+                    )
+                : undefined
+            }
+            combosOnlyDisabled={visibleFilteredCount === 0 || bulkTogglePending}
             selectAllDisabled={hiddenFilteredCount === 0 || bulkTogglePending}
             deselectAllDisabled={visibleFilteredCount === 0 || bulkTogglePending}
             visibilityFilter={visibilityFilter}
@@ -463,7 +496,16 @@ export default function CompatibleModelsSection({
           />
           <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
             {displayModels.map(
-              ({ modelId, alias, displayName, isHidden, source, isFree, supportsVision }) => {
+              ({
+                modelId,
+                alias,
+                displayName,
+                isHidden,
+                visibilityMode,
+                source,
+                isFree,
+                supportsVision,
+              }) => {
                 const fullModel = `${providerDisplayAlias}/${modelId}`;
                 return (
                   <PassthroughModelRow
@@ -496,6 +538,7 @@ export default function CompatibleModelsSection({
                     source={source}
                     isFree={isFree}
                     isHidden={isHidden}
+                    visibilityMode={visibilityMode}
                     combos={comboUsage?.[modelId]}
                     copied={copied}
                     onCopy={onCopy}
@@ -515,6 +558,7 @@ export default function CompatibleModelsSection({
                     saveModelCompatFlags={saveModelCompatFlags}
                     compatDisabled={compatSavingModelId === modelId}
                     onToggleHidden={onToggleHidden}
+                    onSetVisibility={onSetVisibility}
                     togglingHidden={togglingModelId === modelId}
                     onTestModel={onTestModel}
                     testStatus={modelTestStatus?.[modelId] || null}

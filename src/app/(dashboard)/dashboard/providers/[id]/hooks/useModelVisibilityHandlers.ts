@@ -34,6 +34,7 @@ import {
 } from "../providerPageHelpers";
 import type { NotificationStore } from "@/store/notificationStore";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
+import type { ModelVisibilityFilter, ModelVisibilityMode } from "@/shared/utils/modelVisibility";
 
 type NotifyStore = NotificationStore;
 
@@ -46,6 +47,7 @@ export interface ModelCompatSavePatch {
   upstreamHeaders?: Record<string, string>;
   compatByProtocol?: CompatByProtocolMap;
   isHidden?: boolean;
+  visibilityMode?: ModelVisibilityMode | null;
 }
 
 export interface UseModelVisibilityHandlersParams {
@@ -78,17 +80,29 @@ export interface UseModelVisibilityHandlersReturn {
   testingAll: boolean;
   testProgress: { done: number; total: number } | null;
   autoHideFailed: boolean;
-  visibilityFilter: "all" | "visible" | "hidden";
+  visibilityFilter: ModelVisibilityFilter;
   providerAliasEntries: [string, string][];
   setModelFilter: (v: string) => void;
   setAutoHideFailed: (v: boolean) => void;
-  setVisibilityFilter: (v: "all" | "visible" | "hidden") => void;
+  setVisibilityFilter: (v: ModelVisibilityFilter) => void;
   saveModelCompatFlags: (modelId: string, patch: ModelCompatSavePatch) => Promise<void>;
   handleToggleModelHidden: (providerKey: string, modelId: string, hidden: boolean) => Promise<void>;
+  /** Set one model's three-state visibility (`visible` | `combos_only` | `hidden`). */
+  handleSetModelVisibility: (
+    providerKey: string,
+    modelId: string,
+    mode: ModelVisibilityMode
+  ) => Promise<void>;
   handleBulkToggleModelHidden: (
     providerKey: string,
     modelIds: string[],
     hidden: boolean
+  ) => Promise<void>;
+  /** Bulk variant of `handleSetModelVisibility` (used by "Combos only" in the toolbar). */
+  handleBulkSetModelVisibility: (
+    providerKey: string,
+    modelIds: string[],
+    mode: ModelVisibilityMode
   ) => Promise<void>;
   handleClearAllModels: () => Promise<void>;
   onTestModel: (modelId: string, fullModel: string) => Promise<void>;
@@ -127,7 +141,7 @@ export function useModelVisibilityHandlers({
   const [testingAll, setTestingAll] = useState(false);
   const [testProgress, setTestProgress] = useState<{ done: number; total: number } | null>(null);
   const [autoHideFailed, setAutoHideFailed] = useState(false);
-  const [visibilityFilter, setVisibilityFilter] = useState<"all" | "visible" | "hidden">("all");
+  const [visibilityFilter, setVisibilityFilter] = useState<ModelVisibilityFilter>("all");
 
   const providerAliasEntries = useMemo(
     () =>
@@ -212,10 +226,15 @@ export function useModelVisibilityHandlers({
     }
   };
 
-  const handleToggleModelHidden = async (
+  /**
+   * Three-state visibility toggle. `combos_only` keeps the model reachable from a stored
+   * combo while `/v1/models` and a direct call 404 it — the legacy eye toggle is the
+   * `hidden: true/false` special case of this same write.
+   */
+  const handleSetModelVisibility = async (
     providerKey: string,
     modelId: string,
-    hidden: boolean
+    mode: ModelVisibilityMode
   ): Promise<void> => {
     setTogglingModelId(modelId);
     try {
@@ -224,10 +243,10 @@ export function useModelVisibilityHandlers({
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          // #12172: this page manages only Chat models — scope the hide/unhide to
-          // "chat" so it never suppresses an identically-ID'd model registered
-          // under a different modality's registry (e.g. Image).
-          body: JSON.stringify({ isHidden: hidden, modality: "chat" }),
+          // #12172: this page manages only Chat models — scope the write to "chat" so it
+          // never suppresses an identically-ID'd model registered under a different
+          // modality's registry (e.g. Image).
+          body: JSON.stringify({ visibilityMode: mode, modality: "chat" }),
         }
       );
       if (!res.ok) {
@@ -243,19 +262,27 @@ export function useModelVisibilityHandlers({
     }
   };
 
-  const handleBulkToggleModelHidden = async (
+  const handleToggleModelHidden = async (
     providerKey: string,
-    modelIds: string[],
+    modelId: string,
     hidden: boolean
   ): Promise<void> => {
+    await handleSetModelVisibility(providerKey, modelId, hidden ? "hidden" : "visible");
+  };
+
+  const handleBulkSetModelVisibility = async (
+    providerKey: string,
+    modelIds: string[],
+    mode: ModelVisibilityMode
+  ): Promise<void> => {
     if (modelIds.length === 0) return;
-    setBulkVisibilityAction(hidden ? "deselect" : "select");
+    setBulkVisibilityAction(mode === "visible" ? "select" : "deselect");
     try {
       const res = await fetch(`/api/provider-models?provider=${encodeURIComponent(providerKey)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         // #12172: same "chat"-only scoping as the single-model toggle above.
-        body: JSON.stringify({ isHidden: hidden, modelIds, modality: "chat" }),
+        body: JSON.stringify({ visibilityMode: mode, modelIds, modality: "chat" }),
       });
       if (!res.ok) {
         const detail = await res.text().catch(() => "");
@@ -268,6 +295,14 @@ export function useModelVisibilityHandlers({
     } finally {
       setBulkVisibilityAction(null);
     }
+  };
+
+  const handleBulkToggleModelHidden = async (
+    providerKey: string,
+    modelIds: string[],
+    hidden: boolean
+  ): Promise<void> => {
+    await handleBulkSetModelVisibility(providerKey, modelIds, hidden ? "hidden" : "visible");
   };
 
   const handleClearAllModels = async () => {
@@ -461,7 +496,9 @@ export function useModelVisibilityHandlers({
     setVisibilityFilter,
     saveModelCompatFlags,
     handleToggleModelHidden,
+    handleSetModelVisibility,
     handleBulkToggleModelHidden,
+    handleBulkSetModelVisibility,
     handleClearAllModels,
     onTestModel,
     handleTestAll,

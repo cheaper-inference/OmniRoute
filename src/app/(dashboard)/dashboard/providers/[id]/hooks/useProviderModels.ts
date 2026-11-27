@@ -24,6 +24,8 @@ export interface ModelMeta {
   customModels: CompatModelRow[];
   modelCompatOverrides: Array<CompatModelRow & { id: string }>;
   endpointAdapters: Record<string, "available" | "unavailable" | "unknown">;
+  /** Provider-level `combos_only` default (`settings.combosOnlyProviders`). */
+  providerCombosOnly: boolean;
 }
 
 export interface UseProviderModelsReturn {
@@ -48,6 +50,7 @@ export function useProviderModels(
     customModels: [],
     modelCompatOverrides: [],
     endpointAdapters: {},
+    providerCombosOnly: false,
   });
   const [syncedCatalog, setSyncedCatalog] = useState({
     providerId: "",
@@ -136,6 +139,7 @@ export function useProviderModels(
         customModels: data.models || [],
         modelCompatOverrides: data.modelCompatOverrides || [],
         endpointAdapters: data.endpointAdapters || {},
+        providerCombosOnly: data.providerCombosOnly === true,
       });
       try {
         const syncRes = await fetch(
