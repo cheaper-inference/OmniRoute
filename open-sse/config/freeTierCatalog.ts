@@ -29,6 +29,13 @@ export const FREE_TIER_BUDGETS: Record<string, number> = {
   sambanova: 480_000,
   morph: 160_000,
   kiro: 25_000,
+  "zylo-api": 6_000_000,
+  requesty: 4_800_000,
+  routeway: 4_800_000,
+  gitlawb: 3_600_000,
+  onomeo: 3_456_000,
+  dgrid: 2_400_000,
+  "naga-ac": 2_400_000,
 };
 
 /**

@@ -281,6 +281,14 @@ export const FREE_TIER_BOOSTS: Record<
     boostMonthlyTokens: 24_000_000,
     note: "A one-time $10 lifetime top-up raises the free pool from 50 to 1000 requests/day (~24M tokens/month).",
   },
+  // evidence: public-page https://docs.dgrid.ai/ai-gateway/free-models-router.md (2026-11-27)
+  // Qualifying top-ups of at least $5 raise the total to 1,000 requests/day × 800 × 30.
+  dgrid: {
+    provider: "dgrid",
+    boostMonthlyTokens: 24_000_000,
+    gate: "deposit",
+    note: "At least $5 in qualifying top-ups raises the allowance from 100 to 1,000 requests per day.",
+  },
   // evidence: public-page https://xkiro.com (2026-11-23) — "500K free-model tokens a day (1M after
   // Telegram verification)" ⇒ +500K/day × 30 = +15M. A social gate: never in the real figure.
   "xkiro-free": {
@@ -465,6 +473,13 @@ export const FREE_QUOTA_UNIT: Record<string, FreeQuotaUnit> = {
   huggingchat: "credits",
   huggingface: "credits",
   kiro: "credits",
+  "zylo-api": "tokens",
+  requesty: "requests",
+  routeway: "requests",
+  gitlawb: "requests",
+  onomeo: "requests",
+  dgrid: "requests",
+  "naga-ac": "requests",
 };
 
 /** Per-pool override of `FREE_QUOTA_UNIT`, for a pool published in a different unit. */

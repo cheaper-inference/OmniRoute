@@ -2955,30 +2955,21 @@
       "apiKey": {
         "Accept": "text/event-stream",
         "Authorization": "Bearer <TOK>",
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://github.com/Gitlawb/openclaude",
-        "User-Agent": "OpenClaude/1.0 (<OS>; <ARCH>)",
-        "X-Title": "OpenClaude CLI"
+        "Content-Type": "application/json"
       },
       "nonStream": {
         "Authorization": "Bearer <TOK>",
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://github.com/Gitlawb/openclaude",
-        "User-Agent": "OpenClaude/1.0 (<OS>; <ARCH>)",
-        "X-Title": "OpenClaude CLI"
+        "Content-Type": "application/json"
       },
       "oauth": {
         "Accept": "text/event-stream",
         "Authorization": "Bearer <TOK>",
-        "Content-Type": "application/json",
-        "HTTP-Referer": "https://github.com/Gitlawb/openclaude",
-        "User-Agent": "OpenClaude/1.0 (<OS>; <ARCH>)",
-        "X-Title": "OpenClaude CLI"
+        "Content-Type": "application/json"
       }
     },
     "url": {
-      "nonStream": "https://opengateway.gitlawb.com/v1/xiaomi-mimo",
-      "stream": "https://opengateway.gitlawb.com/v1/xiaomi-mimo"
+      "nonStream": "https://api.twigpine.com/v1/chat/completions",
+      "stream": "https://api.twigpine.com/v1/chat/completions"
     }
   },
   "gitlawb-gmi": {
