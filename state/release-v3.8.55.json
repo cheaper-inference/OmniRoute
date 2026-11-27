@@ -49,7 +49,22 @@
     "stage": "testing",
     "startedAt": "2026-11-27T08:52:48.207Z",
     "attempts": 0,
-    "bisect": null
+    "bisect": null,
+    "rerun": {
+      "ref": "omni-queue/release-v3.8.55/b64-0ac5e8efa0be",
+      "requestedAt": "2026-11-27T10:17:16.356Z",
+      "afterMs": 1795774608000,
+      "runIds": [
+        45969116351,
+        45969116311
+      ],
+      "jobs": [
+        "Gate / Quality",
+        "Gate / CI",
+        "Lint",
+        "Fast Quality Gates"
+      ]
+    }
   },
   "baseChecks": [
     {
@@ -149,33 +164,11 @@
     "ciRuns": 69,
     "landedPrs": 62,
     "landedBatches": 19,
-    "redBatches": 13,
+    "redBatches": 14,
     "bisections": 4,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-20T23:55:42.052Z",
-      "type": "checks-green",
-      "batchId": "b16",
-      "prs": [
-        19149
-      ],
-      "sha": "7bca1e353169686029e8beb28165df6007d80470",
-      "detail": "green after re-running Gate / Quality, Fast Quality Gates (flaky)",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44840264562"
-    },
-    {
-      "at": "2026-11-20T23:55:50.715Z",
-      "type": "would-land",
-      "batchId": "b16",
-      "prs": [
-        19149
-      ],
-      "sha": "7bca1e353169686029e8beb28165df6007d80470",
-      "detail": "shadow mode: would merge-ff onto a61261846f87",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44840264562"
-    },
     {
       "at": "2026-11-20T23:57:12.373Z",
       "type": "batch-started",
@@ -2886,8 +2879,38 @@
         "21360": "2026-11-27T01:02:32Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45968879449"
+    },
+    {
+      "at": "2026-11-27T10:17:16.357Z",
+      "type": "checks-red",
+      "batchId": "b64",
+      "prs": [
+        21264,
+        21360,
+        21331,
+        21352,
+        21345
+      ],
+      "sha": "0ac5e8efa0bedabe2c230bacbdc3db3c77b1de56",
+      "detail": "Gate / Quality, Gate / CI, Lint, Fast Quality Gates",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45980752872"
+    },
+    {
+      "at": "2026-11-27T10:17:16.357Z",
+      "type": "flaky-rerun",
+      "batchId": "b64",
+      "prs": [
+        21264,
+        21360,
+        21331,
+        21352,
+        21345
+      ],
+      "sha": "0ac5e8efa0bedabe2c230bacbdc3db3c77b1de56",
+      "detail": "re-running the failed jobs of b64 once (Gate / Quality, Gate / CI, Lint, Fast Quality Gates) before bisecting",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45980752872"
     }
   ],
-  "updatedAt": "2026-11-27T09:54:50.186Z",
+  "updatedAt": "2026-11-27T10:17:59.576Z",
   "batchWindow": 5
 }
