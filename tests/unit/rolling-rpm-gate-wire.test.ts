@@ -5,6 +5,7 @@ import type Bottleneck from "bottleneck";
 const rlm = await import("../../open-sse/services/rateLimitManager.ts");
 const {
   enableRateLimitProtection,
+  disableRateLimitProtection,
   refreshConnectionRateLimits,
   withRateLimit,
   applyRequestQueueSettings,
@@ -200,4 +201,27 @@ test("flag on with the real limiter: calls under the rpm pass and a limiter is b
   refreshConnectionRateLimits(CONN, { rpm: 5 });
   assert.deepEqual(await Promise.all([send(), send()]), ["ok", "ok"]);
   assert.ok(await __getLimiterStateForTests("openai", CONN, "gpt-4"));
+});
+
+test("flag on, connection without rate-limit protection: the gate is skipped even over the rpm", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: 0 });
+  await arm(0);
+  disableRateLimitProtection(CONN);
+  const results = await Promise.all([send(), send(), send(), send()]);
+  assert.deepEqual(results, ["ok", "ok", "ok", "ok"]);
+});
+
+test("flag on: a positive explicit budget still goes through the gate and bounds the wait", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: 0 });
+  await arm(0);
+  await Promise.all([send(), send()]);
+
+  const third = withRateLimit("openai", CONN, "gpt-4", async () => "ok", null, 10_000);
+  const outcome = assert.rejects(
+    third,
+    (error: Error & { code?: string }) => error.code === "RATE_LIMIT_QUEUE_TIMEOUT"
+  );
+  await flush();
+  t.mock.timers.tick(10_000);
+  await outcome;
 });

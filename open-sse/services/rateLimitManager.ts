@@ -930,6 +930,16 @@ function getRollingRpmGate(): RollingRpmGate {
   return rollingRpmGate;
 }
 
+function bypassRollingRpmGate(connectionId, hasBudget: boolean, remainingBudgetMs): boolean {
+  // An exhausted explicit budget fails at once in withBottleneckLimit; the gate would read a
+  // non-positive wait as "no deadline" and could hold the call for a slot first.
+  return (
+    !rollingRpmGateEnabled() ||
+    !enabledConnections.has(connectionId) ||
+    (hasBudget && remainingBudgetMs <= 0)
+  );
+}
+
 export async function withRateLimit(
   provider,
   connectionId,
@@ -941,13 +951,7 @@ export async function withRateLimit(
   opts = undefined
 ) {
   const hasBudget = typeof remainingBudgetMs === "number" && Number.isFinite(remainingBudgetMs);
-  // An exhausted explicit budget fails at once in withBottleneckLimit; the gate would read a
-  // non-positive wait as "no deadline" and could hold the call for a slot first.
-  if (
-    !rollingRpmGateEnabled() ||
-    !enabledConnections.has(connectionId) ||
-    (hasBudget && remainingBudgetMs <= 0)
-  ) {
+  if (bypassRollingRpmGate(connectionId, hasBudget, remainingBudgetMs)) {
     return withBottleneckLimit(
       provider,
       connectionId,
