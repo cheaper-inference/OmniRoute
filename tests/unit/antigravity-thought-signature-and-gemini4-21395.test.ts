@@ -449,3 +449,162 @@ test("ANTIGRAVITY_ALLOW_SIGNATURE_BYPASS=1 explicitly re-enables sentinel for un
     else process.env.ANTIGRAVITY_ALLOW_SIGNATURE_BYPASS = prev;
   }
 });
+
+test("processAntigravitySSEPayload generates distinct fallback IDs for ID-less calls so stored signatures do not collide", () => {
+  const ns = scopeGeminiThoughtSignatureNamespace("conn-21395-uniq", "gemini-4-hydrogen-medium");
+  const c1 = makeCollected(ns);
+  const c2 = makeCollected(ns);
+
+  const makePayload = (sig: string) =>
+    JSON.stringify({
+      response: {
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  thoughtSignature: sig,
+                  functionCall: { name: "get_weather", args: { city: "Tokyo" } },
+                },
+              ],
+            },
+            finishReason: "STOP",
+          },
+        ],
+      },
+    });
+
+  processAntigravitySSEPayload(makePayload("SIG_COLLISION_1"), c1);
+  processAntigravitySSEPayload(makePayload("SIG_COLLISION_2"), c2);
+
+  const id1 = c1.toolCalls[0].id;
+  const id2 = c2.toolCalls[0].id;
+  assert.notEqual(id1, id2, "generated tool-call IDs must be unique across concurrent collections");
+  assert.equal(
+    getGeminiThoughtSignature(buildGeminiThoughtSignatureKey(ns, id1)),
+    "SIG_COLLISION_1"
+  );
+  assert.equal(
+    getGeminiThoughtSignature(buildGeminiThoughtSignatureKey(ns, id2)),
+    "SIG_COLLISION_2"
+  );
+});
+
+test("mixed unsigned-then-signed assistant turn places context text before native functionResponse in user turn", () => {
+  const ns = "conn-21395-mixed:gemini";
+  storeGeminiThoughtSignature(
+    buildGeminiThoughtSignatureKey(ns, "call_signed_second"),
+    "SIG_MIXED_2"
+  );
+
+  const envelope = openaiToAntigravityRequest(
+    "gemini-4-hydrogen-medium",
+    {
+      messages: [
+        { role: "user", content: "Run both tools" },
+        {
+          role: "assistant",
+          content: null,
+          tool_calls: [
+            {
+              id: "call_unsigned_first",
+              type: "function",
+              function: { name: "get_weather", arguments: '{"city":"Paris"}' },
+            },
+            {
+              id: "call_signed_second",
+              type: "function",
+              function: { name: "get_weather", arguments: '{"city":"Tokyo"}' },
+            },
+          ],
+        },
+        { role: "tool", tool_call_id: "call_unsigned_first", content: "Paris 18C" },
+        { role: "tool", tool_call_id: "call_signed_second", content: "Tokyo 22C" },
+      ],
+      tools: [WEATHER_TOOL],
+    },
+    false,
+    { projectId: "proj-21395", _signatureNamespace: ns } as never
+  ) as AntigravityEnvelope;
+
+  const userTurnWithResp = envelope.request.contents.find(
+    (c) => c.role === "user" && c.parts.some((p) => p.functionResponse)
+  );
+  assert.ok(userTurnWithResp, "expected a user turn containing the signed functionResponse");
+  const contextIdx = userTurnWithResp.parts.findIndex(
+    (p) => typeof p.text === "string" && p.text.includes("previous_tool_result_context")
+  );
+  const frIdx = userTurnWithResp.parts.findIndex((p) => Boolean(p.functionResponse));
+  assert.ok(contextIdx >= 0, "unsigned tool result must be preserved as context text");
+  assert.ok(frIdx >= 0, "signed tool result must remain a native functionResponse");
+  assert.ok(
+    contextIdx < frIdx,
+    "non-functionResponse context text must precede native functionResponse parts"
+  );
+});
+
+test("unsigned tool result with image media preserves inlineData alongside context text", () => {
+  const pngBase64 =
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+  const envelope = openaiToAntigravityRequest(
+    "gemini-4-hydrogen-medium",
+    {
+      messages: [
+        { role: "user", content: "Take a screenshot" },
+        {
+          role: "assistant",
+          content: null,
+          tool_calls: [
+            {
+              id: "call_unsigned_img",
+              type: "function",
+              function: { name: "screenshot", arguments: "{}" },
+            },
+          ],
+        },
+        {
+          role: "tool",
+          tool_call_id: "call_unsigned_img",
+          content: [
+            { type: "text", text: "Captured screen" },
+            { type: "image_url", image_url: { url: `data:image/png;base64,${pngBase64}` } },
+          ],
+        },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: { name: "screenshot", parameters: { type: "object", properties: {} } },
+        },
+      ],
+    },
+    false,
+    { projectId: "proj-21395", _signatureNamespace: "conn-21395-img:gemini" } as never
+  ) as AntigravityEnvelope;
+
+  assert.equal(
+    envelope.request.contents.some((c) => c.parts.some((p) => p.functionCall)),
+    false,
+    "unsigned functionCall must remain omitted"
+  );
+  const allUserParts = envelope.request.contents
+    .filter((c) => c.role === "user")
+    .flatMap((c) => c.parts as Array<Record<string, unknown>>);
+  const inlineImg = allUserParts.find(
+    (p) =>
+      p.inlineData &&
+      typeof p.inlineData === "object" &&
+      (p.inlineData as { mimeType?: string; data?: string }).mimeType === "image/png" &&
+      (p.inlineData as { data?: string }).data === pngBase64
+  );
+  assert.ok(inlineImg, "inlineData image media must be preserved for unsigned tool result");
+  assert.ok(
+    allUserParts.some(
+      (p) =>
+        typeof p.text === "string" &&
+        p.text.includes("previous_tool_result_context") &&
+        p.text.includes("Captured screen")
+    ),
+    "escaped context text must accompany the preserved media part"
+  );
+});

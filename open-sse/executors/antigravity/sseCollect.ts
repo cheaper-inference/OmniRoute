@@ -1,5 +1,6 @@
 // Pure SSE-payload -> collected-stream parsing for the Antigravity executor.
 // Extracted verbatim from antigravity.ts (no host state, no fetch/auth).
+import { randomUUID } from "node:crypto";
 import { normalizeOpenAICompatibleFinishReasonString } from "../../utils/finishReason.ts";
 import { stripObfuscationZeroWidth } from "../../utils/zeroWidth.ts";
 import {
@@ -115,9 +116,7 @@ export function processAntigravitySSEPayload(
         if (part.functionCall && typeof part.functionCall.name === "string") {
           const fc = part.functionCall;
           const toolCallId =
-            typeof fc.id === "string" && fc.id.length > 0
-              ? fc.id
-              : `${fc.name}-${Date.now()}-${collected.toolCalls.length}`;
+            typeof fc.id === "string" && fc.id.length > 0 ? fc.id : `${fc.name}-${randomUUID()}`;
           collected.toolCalls.push({
             id: toolCallId,
             index: collected.toolCalls.length,

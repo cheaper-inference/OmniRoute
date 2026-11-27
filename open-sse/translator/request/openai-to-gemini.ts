@@ -685,7 +685,8 @@ function openaiToGeminiBase(
             toolCallIds.some((fid) => hasToolResponse(fid)) || hasSignaturelessTextResponses;
 
           if (hasActualResponses) {
-            const toolParts: GeminiPart[] = [];
+            const nonFunctionResponseParts: GeminiPart[] = [];
+            const nativeFunctionResponseParts: GeminiPart[] = [];
             for (const fid of toolCallIds) {
               const resp = resolveToolResponse(fid);
               if (resp === undefined) continue;
@@ -715,7 +716,8 @@ function openaiToGeminiBase(
                     .map((part) => part.text)
                     .join("\n")
                 : resp;
-              toolParts.push(...media, {
+              nonFunctionResponseParts.push(...media);
+              nativeFunctionResponseParts.push({
                 functionResponse: {
                   ...(toolNameOptions.stripFunctionCallId ? {} : { id: fid }),
                   name: name,
@@ -733,7 +735,7 @@ function openaiToGeminiBase(
               // functionResponse parts missing a matching thoughtSignature.
               // In context mode the matching historical functionCall is omitted,
               // avoiding pseudo tool-call records that Gemini Flash can repeat as
-              // the visible final answer.
+              // the visible final answer. Preserve media parts alongside context text.
               for (const tc of toolCalls) {
                 const id = tc.id as string;
                 if (tc.type !== "function" || !id) continue;
@@ -741,16 +743,25 @@ function openaiToGeminiBase(
                 if (!nativeFunctionCallIds.has(id) && resp !== undefined) {
                   const fn = tc.function as { name?: string } | undefined;
                   const name = turnTcID2Name[id] || tcID2Name[id] || fn?.name || "unknown";
-                  toolParts.push({
+                  const converted = Array.isArray(resp) ? convertOpenAIContentToParts(resp) : [];
+                  const media = converted.filter((part) => part.inlineData || part.fileData);
+                  const resultData = media.length
+                    ? converted
+                        .filter((part) => typeof part.text === "string")
+                        .map((part) => part.text)
+                        .join("\n")
+                    : resp;
+                  nonFunctionResponseParts.push(...media, {
                     text:
                       signaturelessToolCallMode === "text"
-                        ? buildInertHistoricalToolResponseText(name, resp)
-                        : buildHistoricalToolResultContext(name, resp),
+                        ? buildInertHistoricalToolResponseText(name, resultData)
+                        : buildHistoricalToolResultContext(name, resultData),
                   });
                 }
               }
             }
 
+            const toolParts = [...nonFunctionResponseParts, ...nativeFunctionResponseParts];
             if (toolParts.length > 0) {
               result.contents.push({ role: "user", parts: toolParts });
             }
