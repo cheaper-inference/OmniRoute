@@ -1,5 +1,6 @@
 import { FREE_MODEL_BUDGETS, grantsFreeAccess } from "@omniroute/open-sse/config/freeModelCatalog";
 import {
+  getProviderAlias,
   getProviderById,
   isAnthropicCompatibleProvider,
   isClaudeCodeCompatibleProvider,
@@ -118,6 +119,26 @@ export function isFreeModel(provider: string, model: FreeModelCandidate): boolea
   }
   if (isCatalogFreeModel(provider, model.id)) return true;
   return providerHasFreeModels(provider) && hasPayloadFreeEvidence(model);
+}
+
+/**
+ * Drop a leading `<provider id>/` or `<provider alias>/` qualifier from a model id, as the
+ * dashboard's Test buttons send it (e.g. `horde/google/gemma-4-31b`). Only the provider's own
+ * id or alias is stripped, so a model whose first path segment is an upstream vendor
+ * (`google/gemma-4-31b`) is left as is.
+ */
+export function stripProviderQualifier(provider: string, modelId: string): string {
+  const prefix = [provider, getProviderAlias(provider)].find((p) => p && modelId.startsWith(`${p}/`));
+  return prefix ? modelId.slice(prefix.length + 1) : modelId;
+}
+
+/**
+ * hidePaidModels gate for single-model Test dispatches. Accepts the model id bare or
+ * qualified with the provider's id or alias. Stripping cannot make a paid model free: the
+ * unqualified id must still be a free entry for this same provider.
+ */
+export function isFreeTestTarget(provider: string, modelId: string): boolean {
+  return providerHasFreeModels(provider) && isFreeModel(provider, { id: stripProviderQualifier(provider, modelId) });
 }
 
 /** Reusable free predicate for fetched payloads — provider must have a documented free tier. */
