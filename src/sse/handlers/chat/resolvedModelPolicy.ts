@@ -9,6 +9,7 @@
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { supportsNativeVision } from "@omniroute/open-sse/services/combo/mediaCompatibility.ts";
+import { isConnectionDefaultPlaceholder } from "@omniroute/open-sse/services/model.ts";
 import { isModelAllowedForKey, isModelBlockedByPatterns } from "@/lib/db/apiKeys";
 import { resolveEnforcedPolicyKey } from "@/shared/utils/apiKeyPolicy";
 import { getProviderSearchPool } from "@omniroute/open-sse/services/providerConnectionPool.ts";
@@ -247,8 +248,13 @@ export function createDispatchModelGate(
   opts: Parameters<typeof createResolvedModelGate>[0] & { requireNativeVision?: boolean }
 ) {
   const gate = createVisibleResolvedModelGate(opts);
+  // A bare alias can still take its selected connection's concrete default.
+  const isBarePlaceholder = (model: string) =>
+    !opts.modelStr.includes("/") && isConnectionDefaultPlaceholder(model);
+  const waitsForConnectionDefault = isBarePlaceholder(opts.model);
   const nativeVisionRejection = (model: string) =>
-    opts.requireNativeVision && !supportsNativeVision(opts.provider, model)
+    opts.requireNativeVision &&
+    (isBarePlaceholder(model) || !supportsNativeVision(opts.provider, model))
       ? errorResponse(HTTP_STATUS.BAD_REQUEST, "This target cannot receive native images", {
           code: "unsupported_media_input",
           type: "invalid_request_error",
@@ -257,9 +263,10 @@ export function createDispatchModelGate(
 
   return {
     initial: async () =>
-      (await gate([`${opts.provider}/${opts.model}`])) ?? nativeVisionRejection(opts.model),
+      (await gate([`${opts.provider}/${opts.model}`])) ??
+      (waitsForConnectionDefault ? null : nativeVisionRejection(opts.model)),
     effective: async (model: string, requestBodyModel: unknown, incomingModel: unknown) =>
       (await gate(effectivePolicyTargets(opts.provider, model, requestBodyModel, incomingModel))) ??
-      (model !== opts.model ? nativeVisionRejection(model) : null),
+      (waitsForConnectionDefault || model !== opts.model ? nativeVisionRejection(model) : null),
   };
 }

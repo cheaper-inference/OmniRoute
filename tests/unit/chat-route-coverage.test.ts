@@ -23,8 +23,12 @@ const { clearProviderFailure } = await import("../../open-sse/services/accountFa
 const { getDefaultTaskModelMap, resetTaskRoutingStats, setTaskRoutingConfig } =
   await import("../../open-sse/services/taskAwareRouter.ts");
 const { setExcluded } = await import("../../src/lib/db/autoCandidateOverrides.ts");
+const { setModelCapabilityOverride, removeModelCapabilityOverride } =
+  await import("../../src/lib/db/modelCapabilityOverrides.ts");
 const { replaceSyncedAvailableModelsForConnection } = await import("../../src/lib/db/models.ts");
 const { updateProviderConnection } = await import("../../src/lib/db/providers.ts");
+const { supportsNativeVision } =
+  await import("../../open-sse/services/combo/mediaCompatibility.ts");
 
 function buildOpenAIStreamResponse(text = "streamed from openai") {
   return new Response(
@@ -431,7 +435,16 @@ test("handleChat keeps the combo error when the global fallback throws", async (
   assert.match(json.error.message, /primary combo failed/i);
 });
 
-for (const { title, provider, fallbackModel, supportsVision, connectionDefault } of [
+for (const {
+  title,
+  provider,
+  fallbackModel,
+  supportsVision,
+  fallbackAlias,
+  connectionDefault,
+  legacyDefaultOverride,
+  stalePlaceholderVision,
+} of [
   {
     title: "does not dispatch to a text-only global fallback",
     provider: "mistral",
@@ -448,15 +461,43 @@ for (const { title, provider, fallbackModel, supportsVision, connectionDefault }
     title: "does not dispatch when a bare fallback alias swaps to a text-only default",
     provider: "mistral",
     fallbackModel: "mistral-large-latest",
+    fallbackAlias: "legacy-vision-fallback",
     connectionDefault: "codestral-latest",
+    legacyDefaultOverride: true,
     supportsVision: false,
   },
   {
     title: "preserves images when a bare fallback alias swaps to a native vision default",
     provider: "mistral",
     fallbackModel: "mistral-large-latest",
+    fallbackAlias: "legacy-vision-fallback",
+    connectionDefault: "mistral-small-latest",
+    legacyDefaultOverride: true,
+    supportsVision: true,
+  },
+  {
+    title: "preserves images when a placeholder fallback alias resolves to a native vision default",
+    provider: "mistral",
+    fallbackModel: "auto",
+    fallbackAlias: "placeholder-vision-fallback",
     connectionDefault: "mistral-small-latest",
     supportsVision: true,
+  },
+  {
+    title: "does not dispatch when a placeholder fallback alias resolves to a text-only default",
+    provider: "mistral",
+    fallbackModel: "auto",
+    fallbackAlias: "placeholder-vision-fallback",
+    connectionDefault: "codestral-latest",
+    supportsVision: false,
+  },
+  {
+    title: "does not dispatch an unresolved placeholder despite stale vision metadata",
+    provider: "mistral",
+    fallbackModel: "auto",
+    fallbackAlias: "placeholder-vision-fallback",
+    stalePlaceholderVision: true,
+    supportsVision: false,
   },
 ]) {
   test(`auto/vision exhaustion ${title}`, async (t) => {
@@ -467,25 +508,32 @@ for (const { title, provider, fallbackModel, supportsVision, connectionDefault }
     const image = `data:image/png;base64,${imageData}`;
     const primary = await seedConnection("openai");
     const fallback = await seedConnection(provider);
-    const fallbackRequest = connectionDefault
-      ? "legacy-vision-fallback"
-      : `${provider}/${fallbackModel}`;
-    if (connectionDefault) {
+    const fallbackTarget = `${provider}/${fallbackModel}`;
+    const fallbackRequest = fallbackAlias ?? fallbackTarget;
+    if (legacyDefaultOverride) {
       const previous = process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY;
       t.after(() => {
         if (previous === undefined) delete process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY;
         else process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY = previous;
       });
       process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY = "true";
+    }
+    if (connectionDefault) {
       await updateProviderConnection(fallback.id, { defaultModel: connectionDefault });
+    }
+    if (stalePlaceholderVision) {
+      assert.equal(setModelCapabilityOverride(fallbackTarget, "vision", true), true);
+      t.after(() => removeModelCapabilityOverride(fallbackTarget, "vision"));
+      assert.equal(supportsNativeVision(provider, fallbackModel), true);
     }
     const apiKey = await seedApiKey({
       allowedCombos: [model],
       allowedConnections: [primary.id, fallback.id],
       allowedModels: [
         `openai/${primaryModel}`,
-        `${provider}/${fallbackModel}`,
-        ...(connectionDefault ? [fallbackRequest, `${provider}/${connectionDefault}`] : []),
+        fallbackTarget,
+        ...(fallbackAlias ? [fallbackAlias] : []),
+        ...(connectionDefault ? [`${provider}/${connectionDefault}`] : []),
       ],
     });
     // Exclude the fallback account from Auto ranking only. The key allows explicit dispatch.
@@ -493,8 +541,8 @@ for (const { title, provider, fallbackModel, supportsVision, connectionDefault }
     await setExcluded(apiKey.id, model, fallback.id, true);
     await settingsDb.updateSettings({
       globalFallbackModel: fallbackRequest,
-      ...(connectionDefault && {
-        modelAliases: { [fallbackRequest]: `${provider}/${fallbackModel}` },
+      ...(fallbackAlias && {
+        modelAliases: { [fallbackAlias]: fallbackTarget },
       }),
       modalityBridgeVisionEnabled: true,
       modalityBridgeVisionMode: "auto",
