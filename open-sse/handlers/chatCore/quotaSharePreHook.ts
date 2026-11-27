@@ -15,6 +15,11 @@ import type { EnforceDecision } from "@/lib/quota/types";
 // returns (see the `block` branch below). No runtime edge is created —
 // createErrorResult is still loaded through the dynamic import there.
 import type { createErrorResult } from "../../utils/error.ts";
+import {
+  createClientAbortError,
+  isClientAbortError,
+  raceClientAbort,
+} from "../../utils/clientAbort.ts";
 
 type LoggerLike =
   { info?: (...args: unknown[]) => void; warn?: (...args: unknown[]) => void } | null | undefined;
@@ -29,6 +34,7 @@ export async function runQuotaSharePreHook({
   comboExecutionKey,
   finalizePendingRequest,
   log,
+  signal,
 }: {
   apiKeyInfo: { id?: string } | null | undefined;
   credentials: { connectionId?: string } | null | undefined;
@@ -39,26 +45,35 @@ export async function runQuotaSharePreHook({
   comboExecutionKey: string | null;
   finalizePendingRequest: () => void;
   log?: LoggerLike;
+  signal?: AbortSignal | null;
 }): Promise<ReturnType<typeof createErrorResult> | null> {
+  if (signal?.aborted) {
+    const { createErrorResult } = await import("../../utils/error.ts");
+    finalizePendingRequest();
+    return createErrorResult(499, "Request aborted");
+  }
   let quotaSoftDeprioritize = false;
   if (apiKeyInfo?.id && credentials?.connectionId) {
     try {
       const { enforceQuotaShare } = await import("@/lib/quota/enforce");
-      const decision = await enforceQuotaShare({
-        apiKeyId: apiKeyInfo.id,
-        connectionId: credentials.connectionId,
-        provider: provider ?? "unknown",
-        // Resolved model id (post background-redirect / alias) — the same scope the
-        // router/log use. Operators configure per-(key,model) caps against THIS id.
-        model: model || undefined,
-        estimatedCost: {},
-      }).catch((err: unknown): EnforceDecision => {
-        log?.warn?.(
-          "QUOTA_SHARE",
-          `enforceQuotaShare failed; fail-open: ${err instanceof Error ? err.message : String(err)}`
-        );
-        return { kind: "allow" as const };
-      });
+      const decision = await raceClientAbort(
+        enforceQuotaShare({
+          apiKeyId: apiKeyInfo.id,
+          connectionId: credentials.connectionId,
+          provider: provider ?? "unknown",
+          // Resolved model id (post background-redirect / alias) — the same scope the
+          // router/log use. Operators configure per-(key,model) caps against THIS id.
+          model: model || undefined,
+          estimatedCost: {},
+        }).catch((err: unknown): EnforceDecision => {
+          log?.warn?.(
+            "QUOTA_SHARE",
+            `enforceQuotaShare failed; fail-open: ${err instanceof Error ? err.message : String(err)}`
+          );
+          return { kind: "allow" as const };
+        }),
+        signal
+      );
 
       if (decision.kind === "block") {
         const { createErrorResult } = await import("../../utils/error.ts");
@@ -96,6 +111,11 @@ export async function runQuotaSharePreHook({
         );
       }
     } catch (err) {
+      if (signal?.aborted || isClientAbortError(err)) {
+        const { createErrorResult } = await import("../../utils/error.ts");
+        finalizePendingRequest();
+        return createErrorResult(499, "Request aborted");
+      }
       // Outer fail-open guard — should not be reached (inner .catch covers it)
       log?.warn?.(
         "QUOTA_SHARE",
@@ -128,24 +148,35 @@ export async function admitQuotaShareRotation({
   connectionId,
   provider,
   model,
+  signal,
 }: {
   apiKeyInfo: { id?: string } | null | undefined;
   connectionId: string;
   provider: string;
   model: string;
+  signal?: AbortSignal | null;
 }): Promise<boolean> {
+  if (signal?.aborted) {
+    throw createClientAbortError(signal);
+  }
   if (!apiKeyInfo?.id || !connectionId) return true;
   try {
     const { enforceQuotaShare } = await import("@/lib/quota/enforce");
-    const decision = await enforceQuotaShare({
-      apiKeyId: apiKeyInfo.id,
-      connectionId,
-      provider: provider ?? "unknown",
-      model: model || undefined,
-      estimatedCost: {},
-    });
+    const decision = await raceClientAbort(
+      enforceQuotaShare({
+        apiKeyId: apiKeyInfo.id,
+        connectionId,
+        provider: provider ?? "unknown",
+        model: model || undefined,
+        estimatedCost: {},
+      }),
+      signal
+    );
     return decision.kind !== "block";
-  } catch {
+  } catch (err) {
+    if (signal?.aborted || isClientAbortError(err)) {
+      throw isClientAbortError(err) ? err : createClientAbortError(signal);
+    }
     return true;
   }
 }

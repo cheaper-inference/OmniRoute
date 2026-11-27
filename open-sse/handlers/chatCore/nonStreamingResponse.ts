@@ -289,6 +289,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
               connectionId: nextConnectionId,
               provider,
               model,
+              signal: clientRawRequest?.signal,
             }),
         },
         wire: {

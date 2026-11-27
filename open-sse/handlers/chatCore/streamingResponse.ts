@@ -19,6 +19,7 @@ import {
 import { recoverAnthropicThinkingSignature } from "../chatCore/thinkingSignatureRecovery.ts";
 import { runProviderExecutionPipeline } from "../chatCore/providerExecutionPipeline.ts";
 import { admitQuotaShareRotation } from "../chatCore/quotaSharePreHook.ts";
+import { isClientAbortError, raceClientAbort } from "../../utils/clientAbort.ts";
 import { markCodexScopeRateLimited } from "../chatCore/codexFailover.ts";
 import { deleteSessionAccountAffinityBestEffort } from "@/lib/db/sessionAccountAffinity";
 import { buildStreamingResponseHeaders, stripStaleForwardingHeaders } from "./responseHeaders.ts";
@@ -281,6 +282,7 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
             connectionId: nextConnectionId,
             provider,
             model,
+            signal: streamController.signal,
           }),
       },
       wire: {
@@ -740,26 +742,74 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
         }
       : null;
 
-    const newCredentials = (await tokens.refreshWithRetry(
-      () =>
-        tokens.runWithCasGuard(
-          casReread ? { expectedRefreshToken: attemptedRefreshToken, reread: casReread } : null,
-          () =>
-            tokens.runWithOnPersist(persistFn, () => executor.refreshCredentials(credentials, log))
-        ),
-      3,
-      log,
-      provider, // Explicitly pass the provider to avoid universally tripping the "unknown" circuit breaker
-      {
-        ...(casConnectionId ? { connectionId: casConnectionId } : {}),
-        scope: resilienceSettings.tokenRefreshBreaker.scope,
-        failureThreshold: resilienceSettings.tokenRefreshBreaker.failureThreshold,
-        cooldownMs: resilienceSettings.tokenRefreshBreaker.cooldownMs,
-      }
-    )) as null | {
+    const refreshSignal = clientRawRequest?.signal?.aborted
+      ? clientRawRequest.signal
+      : streamController.signal;
+    const abortStreamingRefresh = () => {
+      trackPendingRequest(
+        model,
+        provider,
+        pendingConnId,
+        false,
+        undefined,
+        pendingScope.owner ?? pendingRequestId
+      );
+      streamController.handleError(createSafeAbortError());
+      return {
+        response: createErrorResult(499, "Request aborted"),
+        carry: {
+          upstreamHttpSelection,
+          translatedBody,
+          currentModel,
+          effectiveServiceTier,
+          finalBody,
+          pipelineRecovered,
+          providerHeaders,
+          providerResponse,
+          providerUrl,
+        },
+      };
+    };
+    if (refreshSignal.aborted) return abortStreamingRefresh();
+
+    let newCredentials: null | {
       accessToken?: string;
       copilotToken?: string;
     };
+    try {
+      newCredentials = (await raceClientAbort(
+        tokens.refreshWithRetry(
+          () =>
+            tokens.runWithCasGuard(
+              casReread ? { expectedRefreshToken: attemptedRefreshToken, reread: casReread } : null,
+              () =>
+                tokens.runWithOnPersist(persistFn, () =>
+                  executor.refreshCredentials(credentials, log)
+                )
+            ),
+          3,
+          log,
+          provider, // Explicitly pass the provider to avoid universally tripping the "unknown" circuit breaker
+          {
+            ...(casConnectionId ? { connectionId: casConnectionId } : {}),
+            scope: resilienceSettings.tokenRefreshBreaker.scope,
+            failureThreshold: resilienceSettings.tokenRefreshBreaker.failureThreshold,
+            cooldownMs: resilienceSettings.tokenRefreshBreaker.cooldownMs,
+            signal: refreshSignal,
+          }
+        ),
+        refreshSignal
+      )) as null | {
+        accessToken?: string;
+        copilotToken?: string;
+      };
+    } catch (refreshErr) {
+      if (refreshSignal.aborted || isClientAbortError(refreshErr)) {
+        return abortStreamingRefresh();
+      }
+      throw refreshErr;
+    }
+    if (refreshSignal.aborted) return abortStreamingRefresh();
 
     if (newCredentials?.accessToken || newCredentials?.copilotToken) {
       log?.info?.("TOKEN", `${provider?.toUpperCase()} | refreshed`);
