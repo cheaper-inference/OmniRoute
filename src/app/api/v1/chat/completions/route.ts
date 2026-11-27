@@ -226,7 +226,15 @@ export async function POST(request) {
               return finishAdmission(keyPolicy.rejection);
             }
 
-            const selfHostedResponse = await handleSelfHostedCompletions(request, parsedBody);
+            // Fail closed: a throw here must never fall through to the cloud
+            // pipeline below (the surrounding catch only logs and continues).
+            let selfHostedResponse: Response | null;
+            try {
+              selfHostedResponse = await handleSelfHostedCompletions(request, parsedBody);
+            } catch (error) {
+              console.error("[SELF-HOSTED] Unified entry failed:", error);
+              return finishAdmission(errorResponse(500, "Self-hosted provider entry failed"));
+            }
             if (selfHostedResponse) {
               return finishAdmission(selfHostedResponse);
             }

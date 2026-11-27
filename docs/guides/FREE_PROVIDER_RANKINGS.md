@@ -1,7 +1,7 @@
 ---
 title: "Free Provider Rankings (Arena ELO)"
 version: 3.8.50
-lastUpdated: 2026-08-02
+lastUpdated: 2026-11-24
 ---
 
 # Free Provider Rankings (Arena ELO)
@@ -15,7 +15,7 @@ lastUpdated: 2026-08-02
 
 ## What It Is
 
-OmniRoute registers 394 providers, including 155 catalog entries marked **free/no-auth**
+OmniRoute registers 394 providers, 50 of them with free access
 (no-auth,
 free-tier OAuth, or free-tier API key — see the
 [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) and the full

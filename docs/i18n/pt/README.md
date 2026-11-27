@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="A Promessa — Um endpoint e 394 fornecedores. O fallback automático mantém o encaminhamento enquanto estiver disponível outro destino em bom estado. Seis pilares: fallback resiliente entre 394 fornecedores · até 95% de poupança de tokens em cargas de trabalho elegíveis · $0 para começar, com mais de 150 escalões gratuitos e 51 fornecedores gratuitos recorrentes/sem chave para sempre · 39 integrações de CLI/agentes através de uma única configuração · compatibilidade com as APIs OpenAI, Claude, Gemini e Responses em /v1 · controlos de produção, incluindo disjuntores, furtividade TLS, 110 ferramentas MCP, A2A, memória, guardrails, avaliações e mais de 56 000 declarações de testes estáticos em mais de 7 800 ficheiros de teste monitorizados."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="A Promessa — Um endpoint e 394 fornecedores. O fallback automático mantém o encaminhamento enquanto estiver disponível outro destino em bom estado. Seis pilares: fallback resiliente entre 394 fornecedores · até 95% de poupança de tokens em cargas de trabalho elegíveis · $0 para começar, com mais de 150 escalões gratuitos e 40 fornecedores gratuitos recorrentes/sem chave para sempre · 39 integrações de CLI/agentes através de uma única configuração · compatibilidade com as APIs OpenAI, Claude, Gemini e Responses em /v1 · controlos de produção, incluindo disjuntores, furtividade TLS, 110 ferramentas MCP, A2A, memória, guardrails, avaliações e mais de 56 000 declarações de testes estáticos em mais de 7 800 ficheiros de teste monitorizados."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ do histórico do seu shell. → [Integrações CLI](docs/guides/CLI-INTEGRATIONS
 
 </div>
 
-> **394 fornecedores registados** nas coleções canónicas de chat, multimédia, pesquisa, locais, agentes na nuvem e sistema, incluindo **153 com metadados de descoberta `hasFree: true`**. O registo de modelos de chat abrange **239 fornecedores / 3 059 pares distintos fornecedor-modelo / 1 475 IDs de modelos brutos**; o catálogo separado de orçamento gratuito tem **465 linhas por modelo**, **34 grupos recorrentes** e **51 fornecedores gratuitos para sempre, recorrentes/sem chave**. Estes são denominadores diferentes por definição; as definições e os cálculos sem duplicação de grupos estão disponíveis em [Referência de fornecedores](docs/reference/PROVIDER_REFERENCE.md) e [Escalões gratuitos](docs/reference/FREE_TIERS.md).
+> **394 fornecedores registados** nas coleções canónicas de chat, multimédia, pesquisa, locais, agentes na nuvem e sistema, incluindo **153 com metadados de descoberta `hasFree: true`**. O registo de modelos de chat abrange **239 fornecedores / 3 059 pares distintos fornecedor-modelo / 1 475 IDs de modelos brutos**; o catálogo separado de orçamento gratuito tem **465 linhas por modelo**, **34 grupos recorrentes** e **40 fornecedores gratuitos para sempre, recorrentes/sem chave**. Estes são denominadores diferentes por definição; as definições e os cálculos sem duplicação de grupos estão disponíveis em [Referência de fornecedores](docs/reference/PROVIDER_REFERENCE.md) e [Escalões gratuitos](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

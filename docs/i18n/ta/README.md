@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="வாக்குறுதி — ஒரே endpoint மற்றும் 394 வழங்குநர்கள். மற்றொரு ஆரோக்கியமான இலக்கு கிடைக்கும் வரை தானியங்கி fallback வழியமைப்பைத் தொடரச் செய்கிறது. ஆறு தூண்கள்: 394 வழங்குநர்கள் முழுவதும் மீள்திறன் கொண்ட fallback · தகுதியான பணிச்சுமைகளில் 95% வரை token சேமிப்பு · 150+ இலவச அடுக்குகள் மற்றும் தொடர்ந்து/விசையில்லாமல் எப்போதும் இலவசமான 51 வழங்குநர்களுடன் $0-ல் தொடங்கலாம் · ஒரே config மூலம் 39 CLI/agent ஒருங்கிணைப்புகள் · /v1 இல் OpenAI, Claude, Gemini மற்றும் Responses API இணக்கத்தன்மை · circuit breakers, TLS stealth, MCP 110 கருவிகள், A2A, memory, guardrails, evals மற்றும் 7,800+ கண்காணிக்கப்படும் test கோப்புகளில் 56,000+ நிலையான test அறிவிப்புகள் உள்ளிட்ட production கட்டுப்பாடுகள்."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="வாக்குறுதி — ஒரே endpoint மற்றும் 394 வழங்குநர்கள். மற்றொரு ஆரோக்கியமான இலக்கு கிடைக்கும் வரை தானியங்கி fallback வழியமைப்பைத் தொடரச் செய்கிறது. ஆறு தூண்கள்: 394 வழங்குநர்கள் முழுவதும் மீள்திறன் கொண்ட fallback · தகுதியான பணிச்சுமைகளில் 95% வரை token சேமிப்பு · 150+ இலவச அடுக்குகள் மற்றும் தொடர்ந்து/விசையில்லாமல் எப்போதும் இலவசமான 40 வழங்குநர்களுடன் $0-ல் தொடங்கலாம் · ஒரே config மூலம் 39 CLI/agent ஒருங்கிணைப்புகள் · /v1 இல் OpenAI, Claude, Gemini மற்றும் Responses API இணக்கத்தன்மை · circuit breakers, TLS stealth, MCP 110 கருவிகள், A2A, memory, guardrails, evals மற்றும் 7,800+ கண்காணிக்கப்படும் test கோப்புகளில் 56,000+ நிலையான test அறிவிப்புகள் உள்ளிட்ட production கட்டுப்பாடுகள்."/>
 
 <br/>
 <br/>
@@ -710,7 +710,7 @@ omniroute configure codex          # இதுவும்: claude opencode qwen
 
 </div>
 
-> **394 பதிவுசெய்யப்பட்ட வழங்குநர்கள்**, நியமன chat, media, search, local, cloud-agent மற்றும் system தொகுப்புகள் முழுவதும் உள்ளனர்; இதில் **153 வழங்குநர்கள் `hasFree: true` கண்டறிதல் மெட்டாடேட்டாவைக் கொண்டுள்ளனர்**. Chat model registry-யில் **239 வழங்குநர்கள் / 3,059 தனித்துவமான provider-model ஜோடிகள் / 1,475 மூல model ID-கள்** உள்ளன; தனியான இலவச-பட்ஜெட் பட்டியலில் **ஒவ்வொரு model-க்கும் 465 வரிசைகள்**, **34 தொடர்ச்சியான pool-கள்** மற்றும் **51 தொடர்ச்சியான/keyless free-forever வழங்குநர்கள்** உள்ளனர். இவை வடிவமைப்பின் அடிப்படையில் வெவ்வேறு denominator-களாகும்; வரையறைகள் மற்றும் pool-deduped கணக்கீடுகள் [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) மற்றும் [Free Tiers](docs/reference/FREE_TIERS.md)-ல் உள்ளன.
+> **394 பதிவுசெய்யப்பட்ட வழங்குநர்கள்**, நியமன chat, media, search, local, cloud-agent மற்றும் system தொகுப்புகள் முழுவதும் உள்ளனர்; இதில் **153 வழங்குநர்கள் `hasFree: true` கண்டறிதல் மெட்டாடேட்டாவைக் கொண்டுள்ளனர்**. Chat model registry-யில் **239 வழங்குநர்கள் / 3,059 தனித்துவமான provider-model ஜோடிகள் / 1,475 மூல model ID-கள்** உள்ளன; தனியான இலவச-பட்ஜெட் பட்டியலில் **ஒவ்வொரு model-க்கும் 465 வரிசைகள்**, **34 தொடர்ச்சியான pool-கள்** மற்றும் **40 தொடர்ச்சியான/keyless free-forever வழங்குநர்கள்** உள்ளனர். இவை வடிவமைப்பின் அடிப்படையில் வெவ்வேறு denominator-களாகும்; வரையறைகள் மற்றும் pool-deduped கணக்கீடுகள் [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) மற்றும் [Free Tiers](docs/reference/FREE_TIERS.md)-ல் உள்ளன.
 
 <div align="center">
 

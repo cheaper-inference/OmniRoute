@@ -517,6 +517,24 @@ status and, in live mode, one comment (in shadow mode it is only logged).
   some other way) leaves the queue for good, with both labels removed and one comment (in shadow
   mode, a `would-dequeue` event).
 
+### Automatic labeling for the derived refresh
+
+Only the `derived-refresh-autoland` workflow may apply the `omni-queue` label automatically.
+It labels only the `chore/derived-refresh` robot PR in this repository, targeting the highest `release/vX.Y.Z` branch.
+Every changed file must belong to a derived family and have an unprotected path.
+Any open `release-freeze` issue blocks labeling. An open `base-red` issue blocks its target branch.
+`Gate / CI` and `Gate / Quality` must pass on the current head.
+The PR must be open and ready for review, with no queue or blocking label.
+Every other label application requires the owner's approval for that PR.
+No other session, script or loop may apply the label on its own.
+
+Set the repository Actions variable `DERIVED_REFRESH_AUTOLAND` to `true` to enable labeling.
+Clear it or set a different value to return to dry-run mode.
+Labeling requires a queue approver's token. See the [workflow configuration](../../.github/workflows/derived-refresh-autoland.yml).
+The workflow reports its decision in the run summary, including in dry-run mode.
+In `live` mode the queue can land the labeled PR after its usual checks.
+In `shadow` mode the queue reports its verdict and landing is manual.
+
 ### The PR's own gates (`prChecksRequired`)
 
 What the operator sees: a labeled, approved PR that stays on the dashboard with the reason
@@ -526,14 +544,16 @@ of `prChecksRequired` that is not green, with its state: `failure`, `pending` or
 What it means: a PR enters a batch only when each check in `prChecksRequired` (`Gate / CI`,
 `Gate / Quality` and `API Route Typecheck` in the shipped config) is green on its current head.
 `API Route Typecheck` (`.github/workflows/api-route-typecheck.yml`) runs on every pull request to
-`main` and `release/**`, with no path filter, on `opened`, `synchronize`, `reopened` and
-`ready_for_review` (a draft pull request runs it too). A head on which it never ran reads
-`API Route Typecheck missing` and waits like any other gate that is not green. It stays missing for
-good in three cases: the pull request's base was changed from a branch outside `main` and
-`release/**` (a base change, `edited`, is not one of the workflow's event types), a fork's run that
-waits for a maintainer's approval, and a head with merge conflicts (GitHub runs no `pull_request`
-workflow then). What to do: push a commit (or close and reopen the pull request), approve the
-fork's run, or resolve the conflict. Nothing is done about it by the queue: the
+`main` and `release/**`, with no path filter, on `opened`, `synchronize`, `reopened`,
+`ready_for_review` and a base change (`edited` with `changes.base`, a retarget); a draft pull
+request runs it too. A title/body edit (`edited` without a base change) runs no job of it, nor of
+`ci.yml` and `quality.yml`, and leaves no check under a gate's name (see
+[`docs/architecture/QUALITY_GATES.md`](../architecture/QUALITY_GATES.md#pr-titlebody-edits-and-retargets)).
+A head on which it never ran reads `API Route Typecheck missing` and waits like any other gate that
+is not green. It stays missing for good in two cases: a fork's run that waits for a maintainer's
+approval, and a head with merge conflicts (GitHub runs no `pull_request` workflow then). What to
+do: approve the fork's run, or resolve the conflict (or push a commit, or close and reopen the
+pull request). Nothing is done about it by the queue: the
 label stays, no comment is posted, and the PR becomes eligible by itself once its gates turn green.
 The reason is computed by every tick and shown on the dashboard only; it is never stored in the
 state. `npm run queue -- why <PR>` reads the PR gates the same way and prints each gate's state, so
@@ -551,8 +571,10 @@ How a gate is read, per head (the check runs of the PR's current head SHA):
   (`listWorkflowRuns`): a suite that belongs to a run superseded by a newer run of the same
   workflow and the same event on that head (a newer `pull_request` run after a retarget cancelled
   the older one) is dropped. A `workflow_dispatch` run never supersedes a `pull_request` run, nor
-  the other way round. Until the newest run's gate job has started, the previous run's result is
-  what counts. A listing that fails keeps every suite, the stricter reading.
+  the other way round. A run that concluded `skipped` (every job skipped: the run of a title/body
+  edit) supersedes nothing, so the real runs on that head keep counting; while it is still in
+  progress it supersedes like any run. Until the newest run's gate job has started, the previous
+  run's result is what counts. A listing that fails keeps every suite, the stricter reading.
 
 The PR gates are read when the queue is built, not again right before a green batch lands, and
 never for a PR of the base-repair lane (see [Batch selection](#batch-selection)). The candidate's
@@ -1671,11 +1693,16 @@ action.
       [Ruleset](#ruleset));
    2. make the new branch the default branch;
    3. replace the environment's branch rule with the new branch's exact name (replace it, never add
-      a second rule).
+      a second rule);
+   4. delete the door ruleset of the previous (frozen) release branch. With the environment
+      admitting only the new branch, even a manual `bless` cannot write `omni-queue/land` for the
+      frozen branch, so its door would block the release captain's closing commits. The ruleset
+      "Protect release branches" still prevents deletion and force-push, and only the release
+      captain merges there during the freeze.
 
-   In any other order the new branch is, for a while, the default branch or admitted by the
-   environment without a door: anyone with write access could push an edited `omni-queue.yml` there,
-   and the next scheduled run would read the App's private key.
+   The new branch must have its door before it becomes the default branch or is admitted by the
+   environment. Without the door, anyone with write access could push an edited `omni-queue.yml`
+   there, and the next scheduled run would read the App's private key.
 
 9. Create the labels if they do not exist yet: the queue label (`label`, `omni-queue`), the
    protected-paths approval label (`protectedApprovalLabel`, `protected-approved`), the two lane
@@ -1783,18 +1810,19 @@ Two consequences:
   candidate branches (see [Cut-over and rollback](#cut-over-and-rollback)) need the ruleset to be
   disabled first.
 
-Rulesets stack, and **a ruleset's bypass list only covers that ruleset's own rules**. Three
-existing repository rulesets also match release branches:
+Rulesets stack, and **a ruleset's bypass list only covers that ruleset's own rules**. Two other
+repository rulesets still match release branches. The table also records the former default-branch
+ruleset for rollback.
 
 | Ruleset (id)                                           | Matches                | Rules                                                                                                                                       | Effect on the landing push                                                                                                                                                                                                                  |
 | ------------------------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | "Protect release branches" (15605329)                  | `refs/heads/release/*` | `deletion`, `non_fast_forward`                                                                                                              | None: nobody can delete or force-push a release branch, and the landing push is a fast-forward.                                                                                                                                             |
-| "Require PR on default branch" (21899981)              | `~DEFAULT_BRANCH`      | `pull_request`, no bypass actors                                                                                                            | **Rejects it** on whichever release branch is the default branch (the active release): it has no bypass actor, and a ruleset of ours cannot lift it for the landing actor.                                                                  |
+| "Require PR on default branch" (21899981)              | `~DEFAULT_BRANCH`      | `pull_request`, no bypass actors                                                                                                            | **Rejected it** on whichever release branch was the default branch (the active release): it had no bypass actor, and a ruleset of ours could not lift it for the landing actor.                                                             |
 | "Require green gates on the active release" (27616259) | `~DEFAULT_BRANCH`      | `required_status_checks`: `Gate / CI` and `Gate / Quality`, pinned to GitHub Actions (`integration_id` 15368), not strict; no bypass actors | None: the landing push (`merge-ff`) pushes the candidate itself, and the queue lands a candidate only after its verdict saw both checks green on it from GitHub Actions. The landing-path check accepts it and prints it as an `info` line. |
 
-The status door replaces "Require PR on default branch", so the cut-over removes it (see
-[Cut-over and rollback](#cut-over-and-rollback)). Until it is gone, the landing-path check below
-reports it.
+The status door replaced "Require PR on default branch" at cut-over (see
+[Cut-over and rollback](#cut-over-and-rollback)). If that ruleset is restored, the landing-path
+check below reports it.
 
 `apply-ruleset.mjs` creates the ruleset, updates it when its normalized content drifted, or leaves
 it alone, printing a readable diff:
@@ -2653,6 +2681,13 @@ began "Workflows are being blocked due to a scheduled brownout of the default
 `Approval` job that runs and fails prints `omni-queue approval failed: <message>`.
 
 ## Cut-over and rollback
+
+> **2026-11-25, `release/v3.8.55`.** With the owner's approval at each step, the cut-over applied
+> "omni-queue release protection: release/v3.8.55" (28108528, step 6) at 20:59Z, deleted "Require
+> PR on default branch" (21899981, step 7) at 21:00Z, and merged `mode: "live"` (#20902, step 9) at
+> 21:17Z, with `voice: "owner"` and `signing: "ssh"` from #21205. The first live landing was
+> #21033 at 22:51Z, with a Verified merge commit. The new dashboard is #21239. The owner evaluated step 10
+> and kept his local guard because it also covers release branches without a door.
 
 The cut-over is a separate owner decision, taken after the sandbox rehearsal and a few days of
 shadow mode on the real repository. In order:

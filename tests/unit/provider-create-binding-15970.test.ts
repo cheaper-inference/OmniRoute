@@ -38,6 +38,7 @@ const { waitForConnectionFollowUps } =
 // from a previous test must not be attributed to a later rejected POST.
 const requestFetchCalls = new AsyncLocalStorage<string[]>();
 const fetchCallsByResponse = new WeakMap<Response, string[]>();
+const fetchCallsByPost: string[][] = [];
 let probeDelayMs = 0;
 globalThis.fetch = async (input) => {
   requestFetchCalls.getStore()?.push(String(input instanceof Request ? input.url : input));
@@ -51,22 +52,42 @@ test.beforeEach(() => {
   core.resetDbInstance();
   fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(dataDir, { recursive: true });
+  fetchCallsByPost.length = 0;
   probeDelayMs = 0;
 });
-test.afterEach(async () => {
-  assert.equal(await waitForConnectionFollowUps(10_000), true, "credential probes must settle");
+test.afterEach(async (t) => {
   assert.ok(await waitForCallLogSaves(5_000), "call-log writes must settle before DB reset");
-  // Proxy logs are queued on a separate timer even when health-check logs are hidden.
-  // Discard the fixture queue and invalidate retries before deleting its database.
+  // Discard the queued fixture proxy logs and invalidate any scheduled retries.
   clearProxyLogs();
+  const created = await connections.getProviderConnections();
+  for (const connection of created) {
+    // POST starts inactive and validates in the background. Its DNS lookup can
+    // outlive post()'s observation window, so do not reset the next test's fetch
+    // counter or database until this connection's validation has activated it.
+    // Unsupported probes (the Cloudflare fixture) also activate only on completion.
+    await t.waitFor(
+      async () => {
+        const validated = await connections.getProviderConnectionById(String(connection.id));
+        assert.equal(validated?.isActive, true, "background credential validation must finish");
+      },
+      { timeout: 5000, interval: 10 }
+    );
+  }
+  if (created.length > 0) {
+    const fetchCount = fetchCallsByPost.reduce((total, calls) => total + calls.length, 0);
+    assert.equal(fetchCount, created.length, "each created connection must be probed once");
+  }
 });
 test.after(async () => {
-  await closeCallLogSaves();
-  globalThis.fetch = originalFetch;
-  setGlobalDispatcher(originalDispatcher);
-  core.resetDbInstance();
-  await network.close();
-  fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  try {
+    await closeCallLogSaves();
+  } finally {
+    globalThis.fetch = originalFetch;
+    setGlobalDispatcher(originalDispatcher);
+    core.resetDbInstance();
+    await network.close();
+    fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
 });
 
 async function makeNode(type = "openai-compatible-chat") {
@@ -83,13 +104,9 @@ async function makeNode(type = "openai-compatible-chat") {
   });
 }
 
-/**
- * Submit a synthetic provider through the authenticated management route without model
- * sync. Successful creates wait for automatic credential validation; rejected requests
- * return immediately so tests can assert that no row or upstream call was created.
- */
 async function post(provider: string, providerSpecificData?: Record<string, unknown>, extra = {}) {
   const calls: string[] = [];
+  fetchCallsByPost.push(calls);
   const result = await requestFetchCalls.run(calls, async () =>
     POST(
       await makeManagementSessionRequest("http://localhost/api/providers", {
@@ -106,6 +123,8 @@ async function post(provider: string, providerSpecificData?: Record<string, unkn
     )
   );
   fetchCallsByResponse.set(result, calls);
+  // Accepted requests schedule validation after the response; wait for that specific path
+  // through the tracked follow-up registry, not a timing guess. Rejections are checked separately.
   if (result.status === 201) {
     assert.equal(await waitForConnectionFollowUps(10_000), true, "credential probes must settle");
   }
@@ -260,8 +279,7 @@ test("Cloudflare preserves accountId in the documented nested location", async (
   );
 });
 
-// Keep the synthetic response pending longer than the former 20 ms fixture sleep.
-test("accepted POST settles a slow automatic credential probe before fixture reuse", async () => {
+test("accepted POST fixture settles a slow automatic credential probe before reuse", async () => {
   probeDelayMs = 100;
   await makeNode();
   const result = await post("openai-compatible-chat");
@@ -269,8 +287,5 @@ test("accepted POST settles a slow automatic credential probe before fixture reu
   const [connection] = await connections.getProviderConnections();
   assert.ok(connection.lastTested, "the automatic probe must persist its result before reuse");
   assert.equal(connection.testStatus, "active");
-  assert.ok(
-    (fetchCallsByResponse.get(result)?.length ?? 0) > 0,
-    "the real automatic validation path must run"
-  );
+  assert.equal(fetchCallsByResponse.get(result)?.length, 1, "the probe runs exactly once");
 });

@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ang Pangako — Isang endpoint at 394 provider. Pinananatili ng awtomatikong fallback ang routing habang may isa pang malusog na target na available. Anim na haligi: matatag na fallback sa 394 provider · hanggang 95% pagtitipid sa token para sa mga kwalipikadong workload · $0 para magsimula gamit ang 150+ libreng tier at 51 umuulit/keyless na provider na libre magpakailanman · 39 CLI/agent integration gamit ang isang config · compatibility sa OpenAI, Claude, Gemini at Responses API sa /v1 · mga production control kabilang ang circuit breaker, TLS stealth, MCP 110 tool, A2A, memory, guardrail, eval at 56,000+ static test declaration sa 7,800+ sinusubaybayang test file."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ang Pangako — Isang endpoint at 394 provider. Pinananatili ng awtomatikong fallback ang routing habang may isa pang malusog na target na available. Anim na haligi: matatag na fallback sa 394 provider · hanggang 95% pagtitipid sa token para sa mga kwalipikadong workload · $0 para magsimula gamit ang 150+ libreng tier at 40 umuulit/keyless na provider na libre magpakailanman · 39 CLI/agent integration gamit ang isang config · compatibility sa OpenAI, Claude, Gemini at Responses API sa /v1 · mga production control kabilang ang circuit breaker, TLS stealth, MCP 110 tool, A2A, memory, guardrail, eval at 56,000+ static test declaration sa 7,800+ sinusubaybayang test file."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ mula sa iyong shell history. → [CLI Integrations](docs/guides/CLI-INTEGRATIONS
 
 </div>
 
-> **394 nakarehistrong provider** sa mga canonical na koleksyon ng chat, media, paghahanap, lokal, cloud-agent at system, kabilang ang **153 na may `hasFree: true` na metadata para sa discovery**. Saklaw ng chat model registry ang **239 provider / 3,059 magkakaibang pares ng provider-model / 1,475 raw model ID**; ang hiwalay na catalog ng libreng budget ay may **465 row bawat modelo**, **34 umuulit na pool** at **51 provider na paulit-ulit/keyless at libre magpakailanman**. Magkakaiba ang mga denominator na ito ayon sa disenyo; ang mga depinisyon at kalkulasyong inalisan ng duplicate sa pool ay nasa [Sanggunian ng Provider](docs/reference/PROVIDER_REFERENCE.md) at [Mga Libreng Tier](docs/reference/FREE_TIERS.md).
+> **394 nakarehistrong provider** sa mga canonical na koleksyon ng chat, media, paghahanap, lokal, cloud-agent at system, kabilang ang **153 na may `hasFree: true` na metadata para sa discovery**. Saklaw ng chat model registry ang **239 provider / 3,059 magkakaibang pares ng provider-model / 1,475 raw model ID**; ang hiwalay na catalog ng libreng budget ay may **465 row bawat modelo**, **34 umuulit na pool** at **40 provider na paulit-ulit/keyless at libre magpakailanman**. Magkakaiba ang mga denominator na ito ayon sa disenyo; ang mga depinisyon at kalkulasyong inalisan ng duplicate sa pool ay nasa [Sanggunian ng Provider](docs/reference/PROVIDER_REFERENCE.md) at [Mga Libreng Tier](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

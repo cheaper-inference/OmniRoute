@@ -484,8 +484,18 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "quality:catalog-drift",
+      "command": "node --import tsx/esm scripts/quality/catalog-drift/run.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "quality:collect",
       "command": "node scripts/quality/collect-metrics.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "quality:evidence-age",
+      "command": "node --import tsx/esm scripts/quality/catalog-drift/evidence-age.mjs",
       "disposition": "separately-invoked"
     },
     {
