@@ -512,22 +512,21 @@ function isLiveRecurringQuotaRow(m: FreeModelBudget & { enabled?: boolean }): bo
   );
 }
 
-/** True for a retirement date inside the 12 calendar months that end at `asOf` (UTC). */
-function retiredWindow(asOf: Date): (retiredAt: string) => boolean {
-  const upper = isoDate(asOf);
+/** Exclusive lower bound for the 12-month ended-offer window (UTC). */
+function retiredCutoff(asOf: Date): string {
   const floorDate = new Date(asOf.getTime());
   floorDate.setUTCFullYear(floorDate.getUTCFullYear() - 1);
-  const lower = isoDate(floorDate);
-  return (retiredAt) => retiredAt > lower && retiredAt <= upper;
+  return isoDate(floorDate);
 }
 
 /**
  * Sums the monthly quota of every live row that grants recurring free access, with or without
  * gates and whatever its ToS verdict, WITHOUT pool dedup — the way catalogs that add every row
  * up count. Rows published in requests, credits or neurons count 0 unless `countNonTokenUnits`;
- * signup credits, boosts and `enabled: false` rows never count. Retired ledger rows count their
- * last listed quota for 12 calendar months after `retiredAt`. Never feeds routing or the real
- * figure; it is printed next to the real figure, labelled.
+ * signup credits, boosts and `enabled: false` rows never count as live. For each provider/model
+ * pair, the larger eligible quota wins and contributes its full amount to its own bucket.
+ * Live wins ties. The ledger preserves the peak of a countable live row. Other ledger rows
+ * count for 12 calendar months after `retiredAt`. Routing and the real figure use live data.
  */
 export function computeRowSumMirror(
   opts: {
@@ -551,19 +550,37 @@ export function computeRowSumMirror(
     byProvider.set(provider, cur);
   };
 
-  let liveTokens = 0;
+  const keyOf = (row: { provider: string; modelId: string }) =>
+    JSON.stringify([row.provider, row.modelId]);
+  const quotas = new Map<string, { provider: string; live: number; retired: number }>();
   for (const m of entries) {
     if (!isLiveRecurringQuotaRow(m) || !counts(m)) continue;
-    liveTokens += m.monthlyTokens;
-    bump(m.provider, "liveRows", m.monthlyTokens);
+    const key = keyOf(m);
+    const live = Math.max(quotas.get(key)?.live ?? 0, m.monthlyTokens);
+    quotas.set(key, { provider: m.provider, live, retired: 0 });
   }
 
-  const inWindow = retiredWindow(asOf);
-  let retiredTokens = 0;
+  const through = isoDate(asOf);
+  const cutoff = retiredCutoff(asOf);
   for (const r of retired) {
-    if (!inWindow(r.retiredAt) || !(r.lastListedMonthlyTokens > 0) || !counts(r)) continue;
-    retiredTokens += r.lastListedMonthlyTokens;
-    bump(r.provider, "retiredRows", r.lastListedMonthlyTokens);
+    if (r.retiredAt > through || !(r.lastListedMonthlyTokens > 0) || !counts(r)) continue;
+    const key = keyOf(r);
+    const quota = quotas.get(key) ?? { provider: r.provider, live: 0, retired: 0 };
+    if (quota.live === 0 && r.retiredAt <= cutoff) continue;
+    quota.retired = Math.max(quota.retired, r.lastListedMonthlyTokens);
+    quotas.set(key, quota);
+  }
+
+  let liveTokens = 0;
+  let retiredTokens = 0;
+  for (const { provider, live, retired } of quotas.values()) {
+    if (retired > live) {
+      retiredTokens += retired;
+      bump(provider, "retiredRows", retired);
+    } else {
+      liveTokens += live;
+      bump(provider, "liveRows", live);
+    }
   }
 
   const totalTokens = liveTokens + retiredTokens;

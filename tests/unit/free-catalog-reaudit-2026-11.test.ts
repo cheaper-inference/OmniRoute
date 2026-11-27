@@ -18,6 +18,7 @@ import {
   resolveFreeQuotaUnit,
   computePublicFreeHeadline,
   computeRowSumMirror,
+  formatTokenHeadline,
   freeTypesInBucket,
   isCountingGated,
   isSocialGated,
@@ -287,7 +288,9 @@ test("row-sum reading and retired ledger after the re-audit", () => {
   assert.equal(m.liveTokens, 159_000_000);
   assert.equal(m.retiredTokens, 11_190_500_000);
   assert.equal(m.totalTokens, 11_349_500_000);
-  assert.equal(Math.round(m.retiredShare * 1000) / 10, 98.6);
+  assert.equal(m.realSteadyTokens, 89_780_000);
+  assert.equal(formatTokenHeadline(m.totalTokens), "~11.3B");
+  assert.equal(m.retiredShare, 11_190_500_000 / 11_349_500_000);
   assert.equal(RETIRED_FREE_ROWS.length, 135);
 });
 
@@ -362,7 +365,7 @@ test("the ledger keeps the last quota of every retired pool row, with its reason
 
 // --- Ledger rows of the corrected pools and dated evidence ----------------------------------
 
-test("dead ids of corrected pools keep their last listed quota in the ledger", () => {
+test("retired ids of corrected pools keep their last listed quota in the ledger", () => {
   const expect: Array<[string, number, string, number]> = [
     ["xkiro", 150_000_000, "id-retired", 29],
     ["xkiro", 150_000_000, "paid-only", 1],
@@ -378,7 +381,9 @@ test("dead ids of corrected pools keep their last listed quota in the ledger", (
     for (const r of ledger) {
       assert.equal(r.lastListedMonthlyTokens, tokens, `${provider}/${r.modelId}`);
       const row = rows(provider).find((m) => m.modelId === r.modelId);
-      assert.equal(row?.freeType, "discontinued", `${provider}/${r.modelId} is retired`);
+      if (r.revivedAt === undefined) {
+        assert.equal(row?.freeType, "discontinued", `${provider}/${r.modelId} is retired`);
+      }
       assert.equal(r.poolKey, row?.poolKey);
     }
   }
