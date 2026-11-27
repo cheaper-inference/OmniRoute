@@ -188,6 +188,32 @@ test("rewriteWikiLinks: markdownOnly refreshes .md links on published wiki text 
   assert.equal(rewriteWikiLinks(out, opts), out, "a second refresh changes nothing");
 });
 
+test("rewriteWikiLinks: leaves .md links inside fenced code and inline code untouched", () => {
+  const md = [
+    "See [Tiers](../reference/FREE_TIERS.md) and `[Tiers](../reference/FREE_TIERS.md)`.",
+    "",
+    "```markdown",
+    "[Tiers](../reference/FREE_TIERS.md)",
+    "```",
+    "",
+    "~~~",
+    "[Tiers](../reference/FREE_TIERS.md)",
+    "~~~",
+    "",
+    "[`FREE_TIERS`](../reference/FREE_TIERS.md)",
+  ].join("\n");
+  const out = rewriteWikiLinks(md, {
+    srcFile: "docs/architecture/ARCHITECTURE.md",
+    wikiKeyMap: new Map([["freetiers", "Free-Tiers"]]),
+    wikiPages: new Set(["Free-Tiers"]),
+    markdownOnly: true,
+  });
+  const expected = md
+    .replace("See [Tiers](../reference/FREE_TIERS.md)", "See [Tiers](Free-Tiers)")
+    .replace("[`FREE_TIERS`](../reference/FREE_TIERS.md)", "[`FREE_TIERS`](Free-Tiers)");
+  assert.equal(out, expected);
+});
+
 test("syncHomeCounts: rewrites the cover-page provider/strategy counts", () => {
   const home =
     "Connect every AI tool to 177 providers.\n**177 AI Providers** · **14 Routing Strategies**\n";

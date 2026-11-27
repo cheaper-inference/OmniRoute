@@ -105,6 +105,18 @@ export function toWikiName(basename) {
     .join("-");
 }
 
+const CODE_PLACEHOLDER = /\u0000(\d+)\u0000/g;
+
+/** Swaps fenced code blocks and inline code spans for placeholders so link rewrites skip them. */
+function maskCode(content) {
+  const saved = [];
+  const keep = (m) => `\u0000${saved.push(m) - 1}\u0000`;
+  const masked = content
+    .replace(/^ {0,3}(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:^ {0,3}\1[`~]*[ \t]*$|(?![\s\S]))/gm, keep)
+    .replace(/(`+)(?!`)(?:[^\n]|\n(?![ \t]*\n))*?(?<!`)\1(?!`)/g, keep);
+  return { masked, restore: (text) => text.replace(CODE_PLACEHOLDER, (_, i) => saved[Number(i)]) };
+}
+
 /**
  * Rewrites relative doc and code links in markdown for GitHub Wiki flat structure.
  * - Relative doc links within `docs/` -> `Wiki-Page-Name[#anchor]`. When `wikiPages` is
@@ -112,6 +124,7 @@ export function toWikiName(basename) {
  * - Links to repository source code or root files outside `docs/` -> GitHub blob URL
  * - Non-markdown doc assets (e.g. SVG diagrams) -> Raw GitHub usercontent URL
  * - Pure anchor links (`#section`) and external links (`https://...`) -> untouched
+ * - Links inside fenced code blocks or inline code spans -> untouched
  * - With `markdownOnly`, only `.md` links are rewritten (safe on already-published wiki text)
  */
 export function rewriteWikiLinks(
@@ -164,7 +177,8 @@ export function rewriteWikiLinks(
     return `${repoUrl}/blob/main/${repoRel}${anchorSuffix}`;
   }
 
-  let out = content;
+  const { masked, restore } = maskCode(content);
+  let out = masked;
 
   // 1. Inline links: [text](url "title"?)
   out = out.replace(
@@ -193,7 +207,7 @@ export function rewriteWikiLinks(
     return `<a${before}${newHref}${after}>`;
   });
 
-  return out;
+  return restore(out);
 }
 
 /** Strip YAML frontmatter and prepend the wiki language banner. Pure; exported for tests. */
