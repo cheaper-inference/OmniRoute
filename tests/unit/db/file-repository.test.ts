@@ -4,7 +4,7 @@
  * repository stores exactly what it is given, the facade keeps id/expiry/cursor/owner
  * rules to itself, and the synchronous legacy access is the same SQLite store.
  */
-import test from "node:test";
+import test, { mock } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
@@ -198,4 +198,47 @@ test("facade passes its own cursor resolution to the repository", () => {
     ["a1"]
   );
   assert.deepEqual(ids(facade.listFiles({ apiKeyId: "key-A", after: "b1" })), ["a2", "a1"]);
+});
+
+test("every facade export delegates to the legacy sync repository", () => {
+  const calls: string[] = [];
+  const names = [
+    "insert",
+    "findById",
+    "findContentById",
+    "list",
+    "count",
+    "softDelete",
+    "softDeleteOwnedBy",
+    "softDeleteExpired",
+  ] as const;
+  const spies = names.map((name) => {
+    const original = legacy[name] as (...args: unknown[]) => unknown;
+    return mock.method(legacy, name, (...args: unknown[]) => {
+      calls.push(name);
+      return original(...args);
+    });
+  });
+  try {
+    const created = facade.createFile({ bytes: 1, filename: "spy", purpose: "batch" });
+    facade.getFile(created.id);
+    facade.getFileContent(created.id);
+    facade.listFiles();
+    facade.countFiles();
+    facade.deleteFileOwnedBy(created.id, "key-A");
+    facade.deleteFile(created.id);
+    facade.pruneExpiredFiles(0);
+  } finally {
+    for (const spy of spies) spy.mock.restore();
+  }
+  assert.deepEqual(calls, [
+    "insert",
+    "findById",
+    "findContentById",
+    "list",
+    "count",
+    "softDeleteOwnedBy",
+    "softDelete",
+    "softDeleteExpired",
+  ]);
 });
