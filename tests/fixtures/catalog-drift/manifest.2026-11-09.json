@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-09",
+  "allowedHosts": [
+    "api.llm7.io",
+    "api.xkiro.com",
+    "docs.llm7.io",
+    "docs.mistral.ai",
+    "router.bynara.id",
+    "xkiro.com"
+  ],
+  "probes": [
+    {
+      "id": "mistral-usage-limits",
+      "provider": "mistral",
+      "type": "page-text",
+      "url": "https://docs.mistral.ai/admin/billing-usage/usage-limits",
+      "addedAt": "2026-11-09",
+      "source": "public-docs",
+      "mustContain": ["Free mode lets you create API keys"],
+      "mustNotContain": ["doesn't include API access"],
+      "minTextChars": 20,
+      "backs": [
+        {
+          "provider": "mistral",
+          "poolKey": "mistral",
+          "monthlyTokens": 1000000000
+        }
+      ],
+      "note": "Before uses the September 2 catalog evidence. After uses the November 18 documentation wording, also confirmed on the current public page."
+    },
+    {
+      "id": "nara-plans",
+      "provider": "nara",
+      "type": "json-assert",
+      "url": "https://router.bynara.id/api/plans",
+      "addedAt": "2026-11-09",
+      "source": "public-api",
+      "assertions": [
+        {
+          "path": "data[code=free].models",
+          "op": "lengthAtLeast",
+          "value": 1
+        },
+        {
+          "path": "data[code=free].models",
+          "op": "includesCatalogIds"
+        },
+        {
+          "path": "data[code=free].token_cap_daily",
+          "op": "equals",
+          "value": 7000000
+        }
+      ],
+      "backs": [
+        {
+          "provider": "nara",
+          "poolKey": "nara-free",
+          "monthlyTokens": 210000000
+        }
+      ],
+      "note": "Before uses the eight models in the November 9 catalog. After was written from the 2026-11 research notes recording an empty models array. A November 25 public GET confirmed the path and returned one model."
+    },
+    {
+      "id": "xkiro-models",
+      "provider": "xkiro",
+      "type": "model-list",
+      "url": "https://api.xkiro.com/v1/models",
+      "addedAt": "2026-11-09",
+      "source": "public-api",
+      "filter": {
+        "field": "access_tier",
+        "equals": "free"
+      },
+      "minIds": 3,
+      "note": "Before uses six IDs from the November 9 catalog. After keeps three surviving free IDs confirmed by a November 25 public GET, consistent with the November 18 verification."
+    },
+    {
+      "id": "xkiro-home",
+      "provider": "xkiro",
+      "type": "page-text",
+      "url": "https://xkiro.com/",
+      "addedAt": "2026-11-09",
+      "source": "public-docs",
+      "mustContain": ["Free tokens 5M / day"],
+      "minTextChars": 20,
+      "backs": [
+        {
+          "provider": "xkiro",
+          "poolKey": "xkiro-free",
+          "monthlyTokens": 150000000
+        }
+      ],
+      "note": "Before uses the September 2 catalog evidence. After was written from the 2026-11 research notes. The current home page corroborates the reduced quota with updated wording."
+    },
+    {
+      "id": "llm7-models",
+      "provider": "llm7",
+      "type": "model-list",
+      "url": "https://api.llm7.io/v1/models",
+      "addedAt": "2026-11-09",
+      "source": "public-api",
+      "minIds": 3,
+      "note": "Before includes the four November 9 catalog IDs. After represents their absence recorded in the November 18 verification and confirmed by a November 25 public GET. Other IDs are examples from the current public model list and catalog."
+    },
+    {
+      "id": "llm7-limits",
+      "provider": "llm7",
+      "type": "page-text",
+      "url": "https://docs.llm7.io/limits",
+      "addedAt": "2026-11-09",
+      "source": "public-docs",
+      "minTextChars": 20,
+      "excerpt": {
+        "anchor": "Free token",
+        "chars": 60,
+        "sha256_16": "095de4f41edde3bf"
+      },
+      "backs": [
+        {
+          "provider": "llm7",
+          "poolKey": "llm7-free",
+          "monthlyTokens": 150000000
+        }
+      ],
+      "note": "Before reconstructs the June 17 quota from OmniRoute's FREE_TIERS.md. After was written from the 2026-11 research notes. The historical limits URL returned 404, and current first-party pages confirm the reduced daily quota."
+    }
+  ]
+}

@@ -15456,6 +15456,10 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "Unpriced Usage Budget Policy",
         "description": "How per-key USD limits and shared Team budgets treat successful usage without a known cost. fail_closed (default) blocks unpriced usage. count_as_zero continues inference with an incomplete-cost warning while enforcing known spend; unknown costs may exceed the nominal cap. Known overages and fallback pricing failures still block."
+      },
+      "AIHORDE_CATALOG_BACKGROUND_REFRESH_ENABLED": {
+        "label": "AI Horde Image Catalog Background Refresh",
+        "description": "List AI Horde image models from the last successful snapshot while the catalog refreshes in the background. AI Horde image models are absent from the list until the first refresh succeeds. Off by default."
       }
     }
   },
