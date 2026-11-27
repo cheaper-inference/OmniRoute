@@ -297,6 +297,50 @@ export function isClaudeQuotaMetadata(value: unknown): value is ClaudeQuotaMetad
   );
 }
 
+/** The fields of a quota window that decide whether a Claude limit blocks routing. */
+export type ClaudeQuotaWindow = {
+  remainingPercentage?: number;
+  resetAt?: string | null;
+  fractionReported?: boolean;
+  claudeQuota?: ClaudeQuotaMetadata;
+};
+
+function reportedClaudeQuotaRemaining(quota: ClaudeQuotaWindow): boolean {
+  return quota.fractionReported !== false && (quota.remainingPercentage ?? 0) > 0;
+}
+
+export function isBlockingClaudeQuota(quota: ClaudeQuotaWindow): boolean {
+  const metadata = quota.claudeQuota;
+  if (!metadata?.active) return false;
+  const severity = metadata.severity?.trim().toLowerCase() || null;
+  return severity === null || severity === "critical";
+}
+
+function isPreflightBlockingClaudeQuota(quota: ClaudeQuotaWindow): boolean {
+  // An active critical window with reported remaining quota is a predictive
+  // warning. It must not skip the upstream request, but a later real 429
+  // still classifies from the same active/critical metadata.
+  return isBlockingClaudeQuota(quota) && !reportedClaudeQuotaRemaining(quota);
+}
+
+export function activeClaudeResetMs(
+  quota: ClaudeQuotaWindow,
+  now: number,
+  blocking: (quota: ClaudeQuotaWindow) => boolean = isBlockingClaudeQuota
+): number | null {
+  if (!blocking(quota) || !quota.resetAt) return null;
+  const parsedMs = new Date(quota.resetAt).getTime();
+  const resetMs = Number.isNaN(parsedMs) ? null : parsedMs;
+  return resetMs !== null && resetMs > now ? resetMs : null;
+}
+
+/** Preflight rule: active + (critical | no severity) + no reported quota left + reset in the future. */
+export function isActiveClaudeExhaustion(quota: ClaudeQuotaWindow, now: number): boolean {
+  // Active critical limits can be predictive warnings while quota remains.
+  // Explicit upstream 429s still use activeClaudeResetMs without this preflight guard.
+  return activeClaudeResetMs(quota, now, isPreflightBlockingClaudeQuota) !== null;
+}
+
 export function isExplicitClaudeQuota429Text(errorText: string): boolean {
   return (
     !isClaudeMinuteRateLimitText(errorText) &&

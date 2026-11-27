@@ -33,8 +33,9 @@ export function normalizeUpstreamRequestParams({
   providerSpecificData: Record<string, unknown> | null | undefined;
   log?: LoggerLike;
 }): void {
-  // Rename max_tokens to max_completion_tokens if not supported (#1961)
-  if (!modelSupportsMaxTokens) {
+  // Anthropic Messages requires max_tokens regardless of model capability metadata.
+  // Rename only for other targets when max_tokens is unsupported (#1961).
+  if (!modelSupportsMaxTokens && targetFormat !== FORMATS.CLAUDE) {
     if (translatedBody.max_tokens !== undefined) {
       if (translatedBody.max_completion_tokens === undefined) {
         translatedBody.max_completion_tokens = translatedBody.max_tokens;
@@ -42,7 +43,10 @@ export function normalizeUpstreamRequestParams({
       delete translatedBody.max_tokens;
       log?.debug?.("PARAMS", `Renamed max_tokens to max_completion_tokens for ${model}`);
     }
-  } else if (translatedBody.max_completion_tokens !== undefined) {
+  } else if (
+    (modelSupportsMaxTokens || targetFormat === FORMATS.CLAUDE) &&
+    translatedBody.max_completion_tokens !== undefined
+  ) {
     // Symmetric case (#6912): some providers/models (e.g. Volcengine Ark /
     // DeepSeek) only document the legacy `max_tokens` field and silently
     // ignore an unrecognized `max_completion_tokens`, so a client sending the

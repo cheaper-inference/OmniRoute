@@ -1,0 +1,1 @@
+- **fix(catalog):** keep Codex 872K context window for `codex/gpt-6.1-sol` when `models.dev` syncs the 1,050,000 public-API limit, and include `gpt-6.1-terra` in Codex `ultra` effort extension ([#20437](https://github.com/cheaper-inference/OmniRoute/issues/20437))

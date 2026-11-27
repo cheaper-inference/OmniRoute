@@ -1,4 +1,5 @@
 "use client";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import { useTranslations } from "next-intl";
 import { Kbd, KbdGroup } from "@omniroute/ui-kit/kbd";
 import { Modal } from "@/shared/components";
@@ -18,9 +19,7 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
     <Modal isOpen={isOpen} onClose={onClose} title={t("title")} size="md">
       <div className="flex flex-col gap-5 text-sm">
         <p className="text-text-muted">
-          {t("introPrefix")}{" "}
-          <code className="bg-surface-2 px-1 rounded font-mono text-xs">__client</code>{" "}
-          {t("introSuffix")}
+          {t("introPrefix")} <InlineCode>__client</InlineCode> {t("introSuffix")}
         </p>
 
         <ol className="flex flex-col gap-4 list-none">
@@ -70,11 +69,7 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
               <p className="text-text-muted mt-0.5">
                 {t("step3DescPrefix")} <strong>Application</strong> (Chrome/Edge) {t("or")}{" "}
                 <strong>Storage</strong> (Firefox), {t("step3DescMiddle")} <strong>Cookies</strong>{" "}
-                {t("step3DescSuffix")}{" "}
-                <code className="bg-surface-2 px-1 rounded font-mono text-xs">
-                  .clerk.agent.adapta.one
-                </code>
-                .
+                {t("step3DescSuffix")} <InlineCode>.clerk.agent.adapta.one</InlineCode>.
               </p>
             </div>
           </li>
@@ -85,14 +80,11 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
             </span>
             <div>
               <p className="font-medium">
-                {t("step4Title")}{" "}
-                <code className="bg-surface-2 px-1 rounded font-mono text-xs">__client</code>
+                {t("step4Title")} <InlineCode>__client</InlineCode>
               </p>
               <p className="text-text-muted mt-0.5">
-                {t("step4DescPrefix")}{" "}
-                <code className="bg-surface-2 px-1 rounded font-mono text-xs">__client</code>{" "}
-                {t("step4DescMiddle")} <strong>Value</strong> {t("step4DescSuffix")}{" "}
-                <code className="bg-surface-2 px-1 rounded font-mono text-xs">eyJ...</code>.
+                {t("step4DescPrefix")} <InlineCode>__client</InlineCode> {t("step4DescMiddle")}{" "}
+                <strong>Value</strong> {t("step4DescSuffix")} <InlineCode>eyJ...</InlineCode>.
               </p>
             </div>
           </li>
@@ -105,8 +97,7 @@ export function AdaptaTutorialModal({ isOpen, onClose }: AdaptaTutorialModalProp
               <p className="font-medium">{t("step5Title")}</p>
               <p className="text-text-muted mt-0.5">
                 {t("step5DescPrefix")} <strong>Add Connection</strong>, {t("step5DescMiddle")}{" "}
-                <code className="bg-surface-2 px-1 rounded font-mono text-xs">__client</code>{" "}
-                {t("step5DescSuffix")}
+                <InlineCode>__client</InlineCode> {t("step5DescSuffix")}
               </p>
             </div>
           </li>

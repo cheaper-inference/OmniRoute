@@ -1,0 +1,1 @@
+- **fix(i18n):** Google translation keeps command-line placeholders such as <tool> when a language reorders them, so the nightly refresh no longer stops on the launch help text.

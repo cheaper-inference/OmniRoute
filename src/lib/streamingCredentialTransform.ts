@@ -1,7 +1,15 @@
-import { createSseTextTransform, type FieldCategory } from "./sseTextTransform";
+import {
+  createSseTextTransform,
+  classifyField,
+  omitEmittedOpaqueReasoningFromFlush,
+  type FieldCategory,
+} from "./sseTextTransform";
+import { resolveStreamIndices } from "./streamIndices";
 import {
   bufferField,
+  ensureResponsesTextDeltaIds,
   flushOpenAiTextBuffers,
+  responsesTextTailDelta,
   type BufferedField,
   type TextBuffers,
 } from "./sseTextBuffers";
@@ -379,7 +387,7 @@ function flushResponsesFormat(
       buffers.reasoning = "";
     }
     if (!parts.length) return null;
-    return { type: "response.output_text.delta", output_index: idx, delta: parts.join("") };
+    return responsesTextTailDelta(lastJson, idx, parts.join(""));
   }
   const finalJson = JSON.parse(JSON.stringify(lastJson)) as Record<string, unknown>;
   if (buffers.content) {
@@ -394,6 +402,7 @@ function flushResponsesFormat(
     finalJson.reasoning = buffers.reasoning;
     buffers.reasoning = "";
   }
+  ensureResponsesTextDeltaIds(finalJson, idx);
   return finalJson;
 }
 
@@ -426,56 +435,55 @@ function flushGenericFormat(
   templateJson: Record<string, unknown>
 ): Record<string, unknown> {
   const finalJson = JSON.parse(JSON.stringify(templateJson)) as Record<string, unknown>;
+  omitEmittedOpaqueReasoningFromFlush(finalJson);
   clearStringFields(finalJson);
   populateRemainingBuffers(store, finalJson, 0, 0);
   store.clearAll();
   return finalJson;
 }
 
-function clearStringFields(obj: unknown): void {
+function clearStringFields(obj: unknown, parentKey = ""): void {
   if (!obj || typeof obj !== "object") return;
-  for (const key of Object.keys(obj as Record<string, unknown>)) {
-    const record = obj as Record<string, unknown>;
-    if (typeof record[key] === "string") record[key] = "";
-    else if (record[key] && typeof record[key] === "object") clearStringFields(record[key]);
+  const record = obj as Record<string, unknown>;
+  const isArray = Array.isArray(obj);
+  for (const key of Object.keys(record)) {
+    if (typeof record[key] === "string") {
+      if (classifyField(key, parentKey) !== null) record[key] = "";
+    } else if (record[key] && typeof record[key] === "object") {
+      clearStringFields(record[key], isArray ? parentKey : key);
+    }
   }
-}
-
-function resolveCompositeIndexes(
-  record: Record<string, unknown>,
-  currentChoiceIdx: number,
-  currentToolIdx: number
-): { choiceIdx: number; toolIdx: number } {
-  const indexValue = record.index;
-  if (typeof indexValue !== "number")
-    return { choiceIdx: currentChoiceIdx, toolIdx: currentToolIdx };
-  if (record.delta || record.message || record.finish_reason)
-    return { choiceIdx: indexValue, toolIdx: currentToolIdx };
-  if (record.function || record.id || record.type === "function")
-    return { choiceIdx: currentChoiceIdx, toolIdx: indexValue };
-  return { choiceIdx: indexValue, toolIdx: currentToolIdx };
 }
 
 function populateRemainingBuffers(
   store: ChoiceBufferStore,
   obj: unknown,
   currentChoiceIdx = 0,
-  currentToolIdx = 0
+  currentToolIdx = 0,
+  parentKey = ""
 ): void {
   if (!obj || typeof obj !== "object") return;
   const record = obj as Record<string, unknown>;
-  const { choiceIdx, toolIdx } = resolveCompositeIndexes(record, currentChoiceIdx, currentToolIdx);
+  const { choiceIdx, toolIdx } = resolveStreamIndices(
+    record,
+    currentChoiceIdx,
+    currentToolIdx,
+    parentKey
+  );
   const compositeKey = `${choiceIdx}_${toolIdx}`;
+  const isArray = Array.isArray(obj);
   for (const key of Object.keys(record)) {
     if (typeof record[key] === "string") {
+      const category = classifyField(key, parentKey);
+      if (category === null) continue;
       const choiceBuf = store.get(compositeKey);
-      const bucket = key === "arguments" || key === "partial_json" ? "toolArgs" : "content";
+      const bucket = bufferField(category, key);
       if (choiceBuf[bucket]) {
         record[key] = ((record[key] as string) || "") + choiceBuf[bucket];
         choiceBuf[bucket] = "";
       }
     } else if (record[key] && typeof record[key] === "object") {
-      populateRemainingBuffers(store, record[key], choiceIdx, toolIdx);
+      populateRemainingBuffers(store, record[key], choiceIdx, toolIdx, isArray ? parentKey : key);
     }
   }
 }

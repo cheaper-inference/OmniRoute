@@ -6,12 +6,15 @@ import { resolveUsageProvenance } from "./callContentProvenance";
  * The hot-path writers here are best-effort: the database caps a contended
  * write at 2 s (`busy_timeout = 2000` in `src/lib/db/core.ts`) so a busy disk
  * cannot freeze the event loop. When a write still meets a lock, the first
- * failure is swallowed silently and the entry is attempted once more after a
- * short delay, off the request path (`setTimeout`, never awaited). If the
- * second attempt fails the existing log line is written and the row is
- * dropped. Any other error keeps the current behaviour: logged at once,
- * never retried. If the server stops during the wait the row is lost as
- * before, on a best-effort basis (the timer never keeps the loop alive).
+ * failure is swallowed silently and the entry is attempted again after a
+ * short delay, off the request path (`setTimeout`, never awaited). The generic
+ * scheduler runs one retry. A usage row is billing data, so its writer keeps
+ * retrying on a backoff (`USAGE_RETRY_DELAYS_MS`, about 31 s in all, for a
+ * second writer process that holds the lock longer than one retry). After the
+ * last retry the existing log line is written and the row is dropped. Any
+ * other error keeps the current behaviour: logged at once, never retried. If
+ * the server stops during the wait the row is lost as before, on a
+ * best-effort basis (the timer never keeps the loop alive).
  *
  * @module lib/usage/usageWriteRetry
  */
@@ -35,11 +38,15 @@ import {
 } from "./tokenAccounting";
 import { backfillDuplicateUsageEntry } from "./usageHistory/duplicateEntry";
 import { recordAgentSession } from "./usageHistory/agentSessionUsage";
+import { saveSessionTurn } from "./usageHistory/sessionTurn";
 import type { AgentSessionUsage } from "../db/agentSessions";
 import type { UsageEntry } from "./usageHistory";
 
 /** Delay before the single deferred attempt. Internal, not user-facing. */
 const RETRY_DELAY_MS = 1000;
+
+/** Waits before each retry of a locked usage write: 5 retries, about 31 s in all. */
+export const USAGE_RETRY_DELAYS_MS: readonly number[] = [1000, 2000, 4000, 8000, 16000];
 
 /**
  * True when the error is a database lock, in any shape the supported drivers
@@ -75,11 +82,15 @@ function isLockMessage(message: string): boolean {
  * Legacy natural-key dedup stays on unless the caller owns a physical attempt.
  * `agentSession` holds the request's agent-session counters, priced by the caller before
  * the write; the session is upserted in the same transaction as the row it is linked to.
+ * `sessionTurn` is the redacted turn transcript stored on that session, when it may be logged.
  */
 export type UsageWriteOptions = {
   deduplicate?: boolean;
   agentSession?: AgentSessionUsage | null;
+  sessionTurn?: SessionTurn;
 };
+
+type SessionTurn = Parameters<typeof saveSessionTurn>[2];
 
 /**
  * Single write attempt. Throws on failure so the caller decides between a
@@ -90,7 +101,7 @@ export type UsageWriteOptions = {
  */
 export function attemptWrite(entry: UsageEntry, options: UsageWriteOptions = {}): void {
   const db = getDbInstance();
-  const prepared = prepareEntry(db, entry, options.agentSession ?? null);
+  const prepared = prepareEntry(db, entry, options);
   let inserted = false;
   const deduplicate = options.deduplicate !== false;
 
@@ -119,6 +130,7 @@ type PreparedEntry = {
   tokensInput: number;
   tokensOutput: number;
   agentSession: AgentSessionUsage | null;
+  sessionTurn: SessionTurn;
   accountIdentity: {
     accountKey: string | null;
     accountLabel: string | null;
@@ -129,7 +141,7 @@ type PreparedEntry = {
 function prepareEntry(
   db: ReturnType<typeof getDbInstance>,
   entry: UsageEntry,
-  agentSession: AgentSessionUsage | null
+  options: UsageWriteOptions
 ): PreparedEntry {
   const timestamp = entry.timestamp || new Date().toISOString();
   const connection = entry.connectionId
@@ -145,7 +157,8 @@ function prepareEntry(
     billingTeamId: resolveBillingTeamIdForApiKeyAt(entry.apiKeyId, timestamp),
     tokensInput: getLoggedInputTokens(entry.tokens),
     tokensOutput: getLoggedOutputTokens(entry.tokens),
-    agentSession,
+    agentSession: options.agentSession ?? null,
+    sessionTurn: options.sessionTurn ?? null,
     accountIdentity: connection
       ? resolveUsageAccountIdentity(connection)
       : resolveOrphanedUsageAccountIdentity(entry.provider, entry.connectionId),
@@ -186,6 +199,7 @@ function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEnt
   // Only a row that is actually inserted counts toward its session (dedup no-ops do not).
   // A lock fails the whole write, so the deferred retry replays the row and its session.
   const agentSessionId = recordAgentSession(db, prepared.agentSession, isWriteLockError);
+  saveSessionTurn(db, agentSessionId, prepared.sessionTurn, entry, timestamp);
   db.prepare(
     `
     INSERT INTO usage_history (provider, model, connection_id, account_key, account_label,
@@ -251,25 +265,24 @@ function toFirstToken(entry: UsageEntry): number {
 }
 
 /**
- * Schedule the single deferred retry, off the request path. Never chained:
- * the retry attempts the write once and, on failure, writes the existing log
- * line and stops.
+ * Schedule a deferred retry, off the request path. The task form runs once
+ * and, on failure, reports to `onFinalFailure` and stops. The entry form is
+ * the usage writer: it retries a lock on the `USAGE_RETRY_DELAYS_MS` backoff
+ * and writes the existing log line after the last retry.
  */
 export function scheduleWriteRetry(
   task: () => void,
-  onFinalFailure: (error: unknown) => void
+  onFinalFailure: (error: unknown) => void,
+  delayMs?: number
 ): Promise<void>;
 export function scheduleWriteRetry(entry: UsageEntry, options?: UsageWriteOptions): void;
 export function scheduleWriteRetry(
   taskOrEntry: (() => void) | UsageEntry,
-  optionsOrFailure?: UsageWriteOptions | ((error: unknown) => void)
+  optionsOrFailure?: UsageWriteOptions | ((error: unknown) => void),
+  delayMs: number = RETRY_DELAY_MS
 ): Promise<void> | void {
   if (typeof taskOrEntry !== "function") {
-    const entry = taskOrEntry;
-    void scheduleWriteRetry(
-      () => attemptWrite(entry, typeof optionsOrFailure === "object" ? optionsOrFailure : {}),
-      (retryError) => console.error("Failed to save usage stats:", retryError)
-    );
+    retryUsageWrite(taskOrEntry, typeof optionsOrFailure === "object" ? optionsOrFailure : {}, 0);
     return;
   }
   const task = taskOrEntry;
@@ -283,11 +296,25 @@ export function scheduleWriteRetry(
       } finally {
         resolve();
       }
-    }, RETRY_DELAY_MS);
+    }, delayMs);
     // Allow Node.js to exit naturally even if the timer is still pending
     // (avoids keeping the event loop alive for a stray retry).
     detachTimer(timer);
   });
+}
+
+function retryUsageWrite(entry: UsageEntry, options: UsageWriteOptions, attempt: number): void {
+  void scheduleWriteRetry(
+    () => attemptWrite(entry, options),
+    (retryError) => {
+      if (isWriteLockError(retryError) && attempt + 1 < USAGE_RETRY_DELAYS_MS.length) {
+        retryUsageWrite(entry, options, attempt + 1);
+        return;
+      }
+      console.error("Failed to save usage stats:", retryError);
+    },
+    USAGE_RETRY_DELAYS_MS[attempt]
+  );
 }
 
 type DetachableTimer = { unref?: () => void };

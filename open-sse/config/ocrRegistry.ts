@@ -107,10 +107,10 @@ export const AZURE_DI_TRANSFORMATION: OcrTransformation = {
 };
 
 /**
- * Vertex AI DeepSeek OCR (deepseek-ai/deepseek-ocr-maas), served through Vertex's generic
+ * Vertex AI DeepSeek OCR (self-deployed Model Garden endpoint), served through Vertex's generic
  * OpenAI-compatible partner endpoint ("openapi/chat/completions"). Modeled on litellm's
  * VertexAIDeepSeekOCRConfig (litellm/llms/vertex_ai/ocr/deepseek_transformation.py):
- *   - request: OpenAI chat-completions shape, model prefixed with "deepseek-ai/", the OCR
+ *   - request: OpenAI chat-completions shape, model id sent as supplied, the OCR
  *     document sent as a single image_url content part (document_url documents are mapped to
  *     the same image_url shape — Vertex accepts both gs:// and https:// URLs there).
  *   - response: an OpenAI chat-completions body whose choices[0].message.content is either a
@@ -129,6 +129,14 @@ function vertexDeepseekOcrContent(document: Record<string, unknown> | undefined)
   return { type: "image_url", image_url: url };
 }
 
+/**
+ * Google retired the managed (MaaS) `deepseek-ocr-maas` model on Vertex AI on 2026-10-21; the only
+ * remaining path is a self-deployed DeepSeek-OCR on Model Garden (#20423). The provider therefore
+ * has no built-in model: callers pass `vertex-deepseek-ocr/<deployed-model-id>` plus the dedicated
+ * endpoint in `providerSpecificData.baseUrl`, and the id is sent upstream exactly as supplied.
+ */
+export const VERTEX_DEEPSEEK_RETIRED_MODEL_ID = "deepseek-ocr-maas";
+
 export const VERTEX_DEEPSEEK_TRANSFORMATION: OcrTransformation = {
   buildRequest({ baseUrl, token, body, modelId }) {
     return {
@@ -137,7 +145,7 @@ export const VERTEX_DEEPSEEK_TRANSFORMATION: OcrTransformation = {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          model: `deepseek-ai/${modelId}`,
+          model: modelId,
           messages: [
             {
               role: "user",
@@ -154,7 +162,7 @@ export const VERTEX_DEEPSEEK_TRANSFORMATION: OcrTransformation = {
       choices?: Array<{ message?: { content?: unknown } }>;
       usage?: Record<string, unknown>;
     };
-    const model = r.model ?? "deepseek-ocr-maas";
+    const model = r.model ?? "vertex-deepseek-ocr";
     const content = r.choices?.[0]?.message?.content;
 
     if (typeof content === "string") {
@@ -204,7 +212,7 @@ export const OCR_PROVIDERS: Record<string, OcrProvider> = {
     baseUrl: "",
     authType: "apikey",
     authHeader: "bearer",
-    models: [{ id: "deepseek-ocr-maas", name: "DeepSeek OCR (Vertex AI MaaS)" }],
+    models: [],
     transformation: VERTEX_DEEPSEEK_TRANSFORMATION,
   },
 };

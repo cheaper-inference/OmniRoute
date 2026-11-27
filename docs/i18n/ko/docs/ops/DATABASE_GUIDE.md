@@ -309,6 +309,7 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 3. **신중하게 데이터 백필** : `UPDATE ... WHERE ...` 사용하여 기존 행 처리
 4. **순서와 이름을 확인하세요** : `npm run test:migrations:fresh` (빈 데이터베이스의 모든 마이그레이션) 및 `npm run check:migration-numbering`
 5. **복사본 테스트** : 프로덕션 환경에서는 테스트되지 않은 마이그레이션을 실행하지 마세요.
+6. **코드에서 생성된 테이블에도 마이그레이션이 필요합니다.** : 모듈이 테이블을 느리게 생성하는 경우(`CREATE TABLE IF NOT EXISTS`, 자체 복구 경로로 유지됨) 마이그레이션에서는 동일한 DDL 사용하여 테이블을 생성해야 합니다. 그렇지 않으면 해당 코드 경로가 실행되었는지 여부에 따라 새로 설치와 업그레이드된 설치가 서로 다른 스키마로 종료됩니다. `tests/unit/db/lazy-table-migration-guard.test.ts` `src/` 및 `open-sse/` 스캔하고 마이그레이션(#20557) 없이 게으른 `CREATE` 에서 실패합니다. 예: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 예:
 

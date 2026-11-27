@@ -20,14 +20,14 @@ test.after(async () => {
   else process.env.INITIAL_PASSWORD = ORIGINAL_INITIAL_PASSWORD;
 });
 
-test("#6272: resolveProxyForConnection('noauth', ...) honors a provider-level proxy assigned to 'uncloseai'", async () => {
+test("#6272: resolveProxyForConnection('noauth', ...) honors a provider-level proxy assigned to 'cloudflare-playground'", async () => {
   core.getDbInstance();
   const proxy = { type: "http", host: "127.0.0.1", port: 8888 };
 
   // Reporter's second symptom: "same thing happen when i set the proxy directly
   // in the provider menu" -> assign a provider-scoped proxy to a no-auth
   // provider id, the way Settings -> Providers -> <provider> would persist it.
-  await settingsDb.setProxyForLevel("provider", "uncloseai", proxy);
+  await settingsDb.setProxyForLevel("provider", "cloudflare-playground", proxy);
 
   const resolved = await settingsDb.resolveProxyForConnection("noauth", undefined);
 
@@ -37,12 +37,12 @@ test("#6272: resolveProxyForConnection('noauth', ...) honors a provider-level pr
     `expected the no-auth provider-level proxy to be honored, got level=${resolved?.level} proxy=${JSON.stringify(resolved?.proxy)}`
   );
   assert.equal(resolved?.level, "provider");
-  assert.equal(resolved?.levelId, "uncloseai");
+  assert.equal(resolved?.levelId, "cloudflare-playground");
 });
 
 test("control: resolveProxyForConnection('noauth', ...) still honors the GLOBAL proxy when no no-auth provider proxy is set", async () => {
   core.getDbInstance();
-  await settingsDb.deleteProxyForLevel("provider", "uncloseai");
+  await settingsDb.deleteProxyForLevel("provider", "cloudflare-playground");
   const proxy = { type: "http", host: "10.0.0.1", port: 9999 };
   await settingsDb.setProxyForLevel("global", null, proxy);
 
@@ -54,7 +54,7 @@ test("control: resolveProxyForConnection('noauth', ...) still honors the GLOBAL 
 test("resolveProxyForConnection keeps provider-level no-auth proxies isolated", async () => {
   core.getDbInstance();
   await settingsDb.deleteProxyForLevel("global", null);
-  await settingsDb.setProxyForLevel("provider", "uncloseai", {
+  await settingsDb.setProxyForLevel("provider", "cloudflare-playground", {
     type: "http",
     host: "127.0.0.2",
     port: 8889,
@@ -65,7 +65,11 @@ test("resolveProxyForConnection keeps provider-level no-auth proxies isolated", 
     port: 8890,
   });
 
-  const noAuth = await settingsDb.resolveProxyForConnection("noauth", undefined, "uncloseai");
+  const noAuth = await settingsDb.resolveProxyForConnection(
+    "noauth",
+    undefined,
+    "cloudflare-playground"
+  );
   const ddgw = await settingsDb.resolveProxyForConnection("noauth", undefined, "duckduckgo-web");
 
   assert.equal(noAuth?.proxy?.host, "127.0.0.2");
@@ -74,7 +78,7 @@ test("resolveProxyForConnection keeps provider-level no-auth proxies isolated", 
 
 test("safeResolveProxy keeps the synthetic no-auth connection provider-specific", async () => {
   core.getDbInstance();
-  await settingsDb.setProxyForLevel("provider", "uncloseai", {
+  await settingsDb.setProxyForLevel("provider", "cloudflare-playground", {
     type: "http",
     host: "127.0.0.4",
     port: 8891,
@@ -85,7 +89,7 @@ test("safeResolveProxy keeps the synthetic no-auth connection provider-specific"
     port: 8892,
   });
 
-  const noAuth = await safeResolveProxy("noauth", undefined, "uncloseai");
+  const noAuth = await safeResolveProxy("noauth", undefined, "cloudflare-playground");
   const ddgw = await safeResolveProxy("noauth", undefined, "duckduckgo-web");
 
   assert.equal(noAuth?.proxy?.host, "127.0.0.4");

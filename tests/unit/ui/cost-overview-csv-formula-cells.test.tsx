@@ -115,7 +115,7 @@ async function exportCsvLines(): Promise<string[]> {
     await Promise.resolve();
   });
   const csvButton = Array.from(container.querySelectorAll("button")).find((button) =>
-    button.getAttribute("title")?.includes("CSV")
+    button.getAttribute("aria-label")?.includes("CSV")
   );
   expect(csvButton, "CSV export button should be rendered").not.toBeUndefined();
   await act(async () => {

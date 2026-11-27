@@ -47,7 +47,7 @@ docker run -d --name omniroute \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
   -e ENABLE_CC_COMPATIBLE_PROVIDER=true \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ਮੁੜ-ਚਾਲੂ ਕਰਨ ਤੋਂ ਬਾਅਦ, ਡੈਸ਼ਬੋਰਡ ਮੌਜੂਦਾ OpenAI-ਅਨੁਕੂਲ ਅਤੇ Anthropic-ਅਨੁਕੂਲ ਪ੍ਰਵਾਹਾਂ ਤੋਂ ਇਲਾਵਾ **Claude Code ਅਨੁਕੂਲ ਸ਼ਾਮਲ ਕਰੋ** ਵਿਕਲਪ ਦਿਖਾਉਂਦਾ ਹੈ।

@@ -24,7 +24,7 @@ Bu rəqəmlər ayrıca üçüncü tərəf hesablarını və kataloq üzrə uyğu
 | **+ regional şəxsiyyət yoxlamasının arxasında** | **+~ 6M**          | `modelscope` (Alibaba Cloud məcburi + materik-Çin real adın yoxlanılması). Real təkrarlanan kvota, `gatedRecurringTokens` / `gatedProviders` kimi və idarə panelində göstərilir. Heç vaxt başlıqda cəmlənmir: +~ 6M regional şəxsiyyət yoxlamasının arxasında.                                 |
 | Nəzəri tavan (bütün tarif limitləri, 24/7)      | ~ 10B              | Fasiləsiz istifadə üçün ekstrapolyasiya edilmiş hər bir provayder tarifi limitinin cəmi.** Zəmanət deyil** — bu başlığı yazmayın.                                                                                                                                                              |
 
-**Dürüst başlıq:** _OmniRoute aqreqatları**~ 1.62B ayda sənədləşdirilmiş pulsuz tokenlər** (qeydiyyat kreditləri ilə ilk ayda ~ 2.22B-a qədər) 34 pulsuz səviyyəli hovuz —, üstəgəl daimi pulsuz, heç bir məhdudiyyətsiz təminatçı — və RTK + Caveman sıxışdırması (15-95% token qənaət) bunu daha da genişləndirir._
+**Dürüst başlıq:** _OmniRoute aqreqatları**~ 1.62B ayda sənədləşdirilmiş pulsuz tokenlər** (qeydiyyat kreditləri ilə ilk ayda ~ 2.22B-a qədər) 26 pulsuz səviyyəli hovuz —, üstəgəl daimi pulsuz, heç bir məhdudiyyətsiz təminatçı — və RTK + Caveman sıxışdırması (15-95% token qənaət) bunu daha da genişləndirir._
 
 > **Niyə bu əvvəlki ~ 1.94B-dən aşağı düşdü?** 2026-06-17 yeniləməsi itki deyil, dürüstlük korreksiyasıdır: `gemini` indi hovuzdan çıxarılıb (hər Flash variantını ayrıca hesablamaqla şişirdilib, 462M → 60M), `cloudflare-ai` real 10k-Neurons/day -ə düzəldildi (122M → 30M), bir dəfə qeydiyyatdan `doubao` (recurring deyil) və bağlanma səviyyələri silindi (`chutes`/`phind`/`kluster` dayandırıldı). Qismən `llm7` (düzgün 5M/day → 150M) və yeni pulsuz provayderlər (Kilo, OpenCode Zen, Z.AI GLM-Flash) ilə əvəzlənmişdir.
 >
@@ -38,7 +38,7 @@ Bu rəqəmlər ayrıca üçüncü tərəf hesablarını və kataloq üzrə uyğu
 >
 > **2026-09-03 (#11773) tarixində düzəliş edilib:** `cerebras` 30M/mo təkrarlanan qrantdan (köhnə kartsız 1M tokens/day sınaq) ödəniş üsulu tələb edən birdəfəlik $5 qeydiyyat kreditinə təsnif edildi. LongCat ilə eyni dürüstlük qaydası.
 >
-> **Üstəlik xKiro (03-09-2026):** yeni `xkiro-free` hovuzu (150M/mo) 35-ci təkrarlanan hovuz açarını əlavə edir. GPL-dən əldə edilən provenance/licensing HOLD qalarkən Felo Veb xaric edilir. İndi mənbə xəbər verir** 34 təkrarlanan hovuz açarı** və**~ 1.62B sabit** canlı, CI-qapılı nömrəni — (`check:docs-counts` `computeFreeModelTotals()` dən uzaqlaşarsa, qurma uğursuz olur).
+> **Üstəlik xKiro (03-09-2026):** yeni `xkiro-free` hovuzu (150M/mo) 35-ci təkrarlanan hovuz açarını əlavə edir. GPL-dən əldə edilən provenance/licensing HOLD qalarkən Felo Veb xaric edilir. İndi mənbə xəbər verir** 26 təkrarlanan hovuz açarı** və**~ 1.62B sabit** canlı, CI-qapılı nömrəni — (`check:docs-counts` `computeFreeModelTotals()` dən uzaqlaşarsa, qurma uğursuz olur).
 
 Ən böyük** sənədləşdirilmişdir** ianəçilər: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (hər model üçün beş başlıq), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` xaric edilir — onun 10M LongCat-2.0 qrantı təkrarlanan aylıq büdcə deyil, birdəfəlik, KYC-li qeydiyyat kreditidir.)
 

@@ -559,6 +559,8 @@ Bu proksi:
 
 O'rnatilgan asboblar paneli uchun WebSocket yangilanishlari maxsus portdagi yordamchi server tomonidan amalga oshiriladi ( `src/lib/services/embedWsProxy.ts` ga qarang).
 
+Har bir yangilash tunnel ochilishidan oldin ruxsat etiladi, HTTP oʻrnatish marshruti bilan bir xil qoidalar: peer teskari proksi yoʻnaltiruvchi sarlavhasiz orqa aylana boʻlishi kerak, `Origin` brauzeri asboblar panelida boʻlishi kerak (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` orqaga qaytarish sukut boʻyicha sozlamalarni kengaytiradi) va qoʻngʻiroq qiluvchiga asboblar paneli seansi yoki boshqaruv panelini oʻchirib boʻlmaydigan API kerak boʻladi.
+
 **Xavfsizlik:** O'rnatish proksi-marshrutlari `LOCAL_ONLY_API_PREFIXES` bo'yicha tasniflanadi va ularga faqat orqaga qaytish orqali kirish mumkin. Cloudflare/Ngrok tunnel orqali JWT olgan tajovuzkor o'rnatilgan xizmatlarga proksi-server o'tkaza olmaydi.
 
 ---

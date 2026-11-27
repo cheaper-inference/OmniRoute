@@ -133,7 +133,7 @@ EOF
 ### 2.3 કન્ટેનર શરૂ કરો
 
 ```bash
-docker pull diegosouzapw/omniroute:latest
+docker pull cheaperinference/omniroute:latest
 
 docker run -d \
   --name omniroute \
@@ -141,7 +141,7 @@ docker run -d \
   --env-file /opt/omniroute/.env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ### 2.4 તે ચાલી રહ્યું છે તેની ચકાસણી કરો
@@ -300,13 +300,13 @@ curl -sI https://llms.seudominio.com/health
 ### નવા સંસ્કરણ પર અપગ્રેડ કરો
 
 ```bash
-docker pull diegosouzapw/omniroute:latest
+docker pull cheaperinference/omniroute:latest
 docker stop omniroute && docker rm omniroute
 docker run -d --name omniroute --restart unless-stopped \
   --env-file /opt/omniroute/.env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ### લૉગ્સ જુઓ

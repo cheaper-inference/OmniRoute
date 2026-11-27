@@ -4,6 +4,7 @@ import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { nativeCoverageArgs } from "../../_helpers/nativeCoverageArgs.ts";
 
 const REPO_ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 const CHILD_PATH = "/usr/local/bin:/usr/bin:/bin";
@@ -31,7 +32,14 @@ export function runIsolatedBoundaryFixture({
   try {
     const result = spawnSync(
       process.execPath,
-      ["--import", "tsx/esm", "--test", "--test-reporter=tap", fileURLToPath(fixtureUrl)],
+      [
+        ...nativeCoverageArgs(),
+        "--import",
+        "tsx/esm",
+        "--test",
+        "--test-reporter=tap",
+        fileURLToPath(fixtureUrl),
+      ],
       {
         cwd: REPO_ROOT,
         encoding: "utf8",

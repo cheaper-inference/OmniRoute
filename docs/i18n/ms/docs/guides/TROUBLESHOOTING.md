@@ -470,7 +470,7 @@ lihat [`docs/guides/KIRO_SETUP.md`](./KIRO_SETUP.md).
 2. **Pembaikan kekal:** Ikat kepada IPv4 secara eksplisit dengan menggunakan `-p 127.0.0.1:20128:20128` dalam perintah `docker run` anda:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Ini memaksa pengikatan IPv4 dan turut mengelakkan proksi daripada didedahkan pada semua antara muka hos.
 

@@ -8,8 +8,8 @@ import { Field } from "@omniroute/ui-kit/field";
 import {
   Card,
   Collapsible,
-  Input,
   ModelSelectField,
+  NumberInput,
   Select,
   Textarea,
   Toggle,
@@ -57,9 +57,10 @@ function fromApi(data: Record<string, unknown>): VisionState {
   };
 }
 
-function clampNumber(raw: string, min: number, max: number, fallback: number): number {
-  const parsed = Number.parseInt(raw, 10);
-  return Math.min(max, Math.max(min, Number.isFinite(parsed) ? parsed : fallback));
+// The field already brings an edited value into min/max when the edit ends; an empty field
+// (`null`) falls back to the default. The clamp stays as the last guard before the PATCH.
+function clampNumber(value: number | null, min: number, max: number, fallback: number): number {
+  return Math.min(max, Math.max(min, Math.trunc(value ?? fallback)));
 }
 
 export default function ModalityBridgeVisionTab() {
@@ -109,24 +110,23 @@ export default function ModalityBridgeVisionTab() {
       | "modalityBridgeVisionMaxImages"
       | "modalityBridgeCacheTtlMinutes"
       | "modalityBridgeCacheMaxEntries",
-    raw: string,
+    next: number | null,
     min: number,
     max: number,
     fallback: number
   ) => {
-    const value = clampNumber(raw, min, max, fallback);
+    const value = clampNumber(next, min, max, fallback);
     setLocal({ [key]: value });
     void update({ [key]: value });
   };
 
-  const commitMaxChars = (raw: string) => {
-    const parsed = Number.parseInt(raw, 10);
+  const commitMaxChars = (next: number | null) => {
     // 0 disables the cap and is a valid value in its own right — only values
     // between 1 and 99 (below the schema's floor) get pulled up to 100.
     const value =
-      Number.isFinite(parsed) && parsed <= 0
+      next !== null && next <= 0
         ? 0
-        : clampNumber(raw, 100, 50000, MODALITY_BRIDGE_DEFAULTS.visionMaxChars);
+        : clampNumber(next, 100, 50000, MODALITY_BRIDGE_DEFAULTS.visionMaxChars);
     setLocal({ modalityBridgeVisionMaxChars: value });
     void update({ modalityBridgeVisionMaxChars: value });
   };
@@ -219,50 +219,50 @@ export default function ModalityBridgeVisionTab() {
 
         <Collapsible title={t("modalityBridgeAdvanced")} icon="tune">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <NumberField
-              testId="modality-bridge-timeout"
+            <NumberInput
+              data-testid="modality-bridge-timeout"
               label={t("modalityBridgeTimeoutMs")}
               min={1000}
               max={300000}
               value={settings.modalityBridgeVisionTimeout}
-              onChange={(value) => setLocal({ modalityBridgeVisionTimeout: value })}
-              onBlur={(raw) =>
+              onValueChange={(value) => setLocal({ modalityBridgeVisionTimeout: value ?? 0 })}
+              onValueCommit={(next) =>
                 commitNumber(
                   "modalityBridgeVisionTimeout",
-                  raw,
+                  next,
                   1000,
                   300000,
                   VISION_BRIDGE_DEFAULTS.timeoutMs
                 )
               }
             />
-            <NumberField
-              testId="modality-bridge-max-images"
+            <NumberInput
+              data-testid="modality-bridge-max-images"
               label={t("modalityBridgeMaxImages")}
               min={1}
               max={20}
               value={settings.modalityBridgeVisionMaxImages}
-              onChange={(value) => setLocal({ modalityBridgeVisionMaxImages: value })}
-              onBlur={(raw) =>
+              onValueChange={(value) => setLocal({ modalityBridgeVisionMaxImages: value ?? 0 })}
+              onValueCommit={(next) =>
                 commitNumber(
                   "modalityBridgeVisionMaxImages",
-                  raw,
+                  next,
                   1,
                   20,
                   VISION_BRIDGE_DEFAULTS.maxImagesPerRequest
                 )
               }
             />
-            <NumberField
-              testId="modality-bridge-max-chars"
+            <NumberInput
+              data-testid="modality-bridge-max-chars"
               label={t("visionMaxCharsLabel")}
               hint={t("visionMaxCharsHint")}
               min={0}
               max={50000}
               placeholder="0"
               value={settings.modalityBridgeVisionMaxChars}
-              onChange={(value) => setLocal({ modalityBridgeVisionMaxChars: value })}
-              onBlur={(raw) => commitMaxChars(raw)}
+              onValueChange={(value) => setLocal({ modalityBridgeVisionMaxChars: value ?? 0 })}
+              onValueCommit={(next) => commitMaxChars(next)}
             />
             <div className="md:col-span-2">
               <Toggle
@@ -272,34 +272,34 @@ export default function ModalityBridgeVisionTab() {
                 description={t("modalityBridgeCacheEnabledDesc")}
               />
             </div>
-            <NumberField
-              testId="modality-bridge-cache-ttl"
+            <NumberInput
+              data-testid="modality-bridge-cache-ttl"
               label={t("modalityBridgeCacheTtlMinutes")}
               min={1}
               max={1440}
               value={settings.modalityBridgeCacheTtlMinutes}
-              onChange={(value) => setLocal({ modalityBridgeCacheTtlMinutes: value })}
-              onBlur={(raw) =>
+              onValueChange={(value) => setLocal({ modalityBridgeCacheTtlMinutes: value ?? 0 })}
+              onValueCommit={(next) =>
                 commitNumber(
                   "modalityBridgeCacheTtlMinutes",
-                  raw,
+                  next,
                   1,
                   1440,
                   MODALITY_BRIDGE_DEFAULTS.cacheTtlMinutes
                 )
               }
             />
-            <NumberField
-              testId="modality-bridge-cache-max-entries"
+            <NumberInput
+              data-testid="modality-bridge-cache-max-entries"
               label={t("modalityBridgeCacheMaxEntries")}
               min={10}
               max={5000}
               value={settings.modalityBridgeCacheMaxEntries}
-              onChange={(value) => setLocal({ modalityBridgeCacheMaxEntries: value })}
-              onBlur={(raw) =>
+              onValueChange={(value) => setLocal({ modalityBridgeCacheMaxEntries: value ?? 0 })}
+              onValueCommit={(next) =>
                 commitNumber(
                   "modalityBridgeCacheMaxEntries",
-                  raw,
+                  next,
                   10,
                   5000,
                   MODALITY_BRIDGE_DEFAULTS.cacheMaxEntries
@@ -318,43 +318,4 @@ export default function ModalityBridgeVisionTab() {
 
 function asSettingsRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
-}
-
-interface NumberFieldProps {
-  testId: string;
-  label: string;
-  min: number;
-  max: number;
-  value: number;
-  onChange: (value: number) => void;
-  onBlur: (raw: string) => void;
-  placeholder?: string;
-  hint?: string;
-}
-
-function NumberField({
-  testId,
-  label,
-  min,
-  max,
-  value,
-  onChange,
-  onBlur,
-  placeholder,
-  hint,
-}: NumberFieldProps) {
-  return (
-    <Input
-      type="number"
-      label={label}
-      hint={hint}
-      data-testid={testId}
-      min={min}
-      max={max}
-      placeholder={placeholder}
-      value={value}
-      onChange={(event) => onChange(Number.parseInt(event.currentTarget.value, 10) || 0)}
-      onBlur={(event) => onBlur(event.currentTarget.value)}
-    />
-  );
 }

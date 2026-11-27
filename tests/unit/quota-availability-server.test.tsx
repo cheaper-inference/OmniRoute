@@ -153,28 +153,33 @@ afterEach(() => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
+const urls: string[] = [];
+const fetch = vi.fn((input: string | URL | Request) => {
+  urls.push(typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
+  return Promise.reject(new Error("Network disabled in synthetic test"));
+});
+vi.stubGlobal("fetch", fetch);
+// Collect the real cold graph before starting the timed GET test. Snapshot the
+// import's effects before Vitest clears mock calls at the start of the test.
+const route = await import("@/app/api/usage/availability/route");
+const reasoning = await import("@/lib/db/reasoningCache");
+const coldCleanupCalls = vi.mocked(reasoning.cleanupExpiredReasoning).mock.calls.length;
+const coldAttempts = [...guard.attempts];
+const coldUrls = [...urls];
+
 it("availability GET reads snapshots without fetchers, writes, refreshes or shared-cache mutation", async () => {
-  const urls: string[] = [];
-  const fetch = vi.fn((input: string | URL | Request) => {
-    urls.push(typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
-    return Promise.reject(new Error("Network disabled in synthetic test"));
-  });
   vi.stubGlobal("fetch", fetch);
   // Existing provider-limits GET triggers these same module-initialization version probes.
   const allowed = new Set([
     "https://registry.npmjs.org/@github/copilot/latest",
     "https://api.github.com/repos/openai/codex/releases/latest",
   ]);
-  const route = await import("@/app/api/usage/availability/route");
-  const reasoning = await import("@/lib/db/reasoningCache");
   // Existing provider-limits cold import also cleans expired reasoning rows once.
-  expect(reasoning.cleanupExpiredReasoning).toHaveBeenCalledTimes(
-    guard.attempts.filter((name) => name === "cleanupExpiredReasoning").length
+  expect(coldCleanupCalls).toBe(
+    coldAttempts.filter((name) => name === "cleanupExpiredReasoning").length
   );
-  const coldCleanupCalls = vi.mocked(reasoning.cleanupExpiredReasoning).mock.calls.length;
   expect(coldCleanupCalls).toBeLessThanOrEqual(1);
-  expect(guard.attempts.filter((name) => name !== "cleanupExpiredReasoning")).toEqual([]);
-  const coldUrls = [...urls];
+  expect(coldAttempts.filter((name) => name !== "cleanupExpiredReasoning")).toEqual([]);
   expect(coldUrls.filter((url) => !allowed.has(url))).toEqual([]);
   vi.mocked(reasoning.cleanupExpiredReasoning).mockClear();
   guard.attempts.length = 0;

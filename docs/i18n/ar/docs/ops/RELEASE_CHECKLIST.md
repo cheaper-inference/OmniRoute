@@ -355,111 +355,70 @@ npm run build:release
 
 ---
 
-## اقتطاع 3.9.0 LTS (تمت تجربته في 3.8.58)
+## 3.9.0 قطع LTS (تم التدرب عليه في 3.8.58)
 
-بعد v3.8.59 سيكون الإصدار التالي هو 3.9.0، وستصبح قمته فرعين طويلي الأجل:
-`stable/v3` (خط v3 LTS، ووسم npm ‏`latest`) و`develop` (الإصدار v4، مع رفعه إلى 4.0.0، ووسم npm
-‏`nightly`). يوجد نموذج الفروع/القنوات، والنقل إلى الأمام، والتسميات في
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md)؛ وتوجد الخطة في [ROADMAP](../../ROADMAP.md) (المرحلة 3). يُنفَّذ الاقتطاع مرة واحدة؛
-ويجري 3.8.58 تجربةً شاملة له من البداية إلى النهاية على نسخة متفرعة، بينما يُختتم 3.8.59 باستخدام
-[قائمة تحقق GO/NO-GO](./LTS_GO_NO_GO.md).
+بعد v3.8.59، الإصدار التالي هو 3.9.0، ويصبح طرفه فرعين طويلي العمر: `stable/v3` (خط v3 LTS ، npm `latest`) و `develop` (v4، تم رفعه إلى 4.0.0، npm `nightly`). نموذج branch/channel والمنفذ الأمامي والتسميات موجودة بصيغة [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ؛ الخطة في [ROADMAP](../../ROADMAP.md) (المرحلة 3). يتم القطع مرة واحدة؛ 3.8.58 يتدرب على ذلك من طرف إلى طرف على شوكة، ويغلق 3.8.59 [بقائمة التحقق GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### التشغيل التجريبي (للقراءة فقط، وآمن في أي وقت)
+### التشغيل الجاف (للقراءة فقط، آمن في أي وقت)
 
 ```bash
-npm run release:dry-run-lts-cut                       # الاقتطاع الفعلي: 3.9.0 من HEAD، والوسم السابق v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # تثبيت التزام المصدر
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-لا ينفّذ `scripts/release/dry-run-lts-cut.mjs` أي شيء: فهو يقرأ git و`gh` ويطبع
-التسلسل بالكامل — الشروط المسبقة (إمكانية تحليل المصدر، واحتواء مستودع المصدر على السجل الكامل —
-إذ لا يمكن لنسخة سطحية دفع `stable/v3`، ويرفض الطرف المستقبِل الحزمة عند أول
-أصل مطعَّم، لذا نفّذ الاقتطاع من نسخة كاملة أو نفّذ `git fetch --unshallow origin` أولًا —
-وجود الوسم السابق، وكون `package.json` بالإصدار المستهدف، ووجود مسألة `release-freeze` مفتوحة، وعدم وجود
-مسألة `Release branch not green` مفتوحة
-على فرع إصدار موجود — أما الفرع غير الموجود فيُبلغ عنه بالحالة `?` غير معروف، ولا يُعد
-أخضر أبدًا — وتهيئة قائمة انتظار Mergify ‏`release` (‏G11: ‏`queue_rules`، و`checks_timeout`،
-والتسمية `queue`)، واستمرار مجموعة قواعد `release/*` في حظر الحذف والدفع القسري، وعدم
-وجود `stable/v3` و`develop` بعد)، وخطوتَي الفرعين، ومشغلات سير العمل الخامل
-وشروط `if:` التي تصبح صحيحة (وتلك التي تظل محجوبة بمتغير مستودع أو
-مثبّتة على المستودع الأساسي)، ووسوم dist-tags المتوقعة (`latest` ← 3.9.0، و`next` و
-`nightly` فارغان)، والتراجع. رمز الخروج `0` = ‏`RESULT: READY`، و`1` = فشل شرط مسبق حاجب
-(`✗`)، و`2` = خطأ استخدام. يخفض `--advisory <id,...>` مستوى أحد الفحوصات إلى تحذير (`!`)
-من دون إخفائه.
+`scripts/release/dry-run-lts-cut.mjs` لا ينفذ شيئًا: فهو يقرأ git و `gh` ويطبع الشروط المسبقة — للتسلسل بالكامل (تم حل المصدر، ويحتوي مستودع المصدر على سجل كامل — ولا يمكن لاستنساخ سطحي دفع `stable/v3`، ويرفض الجانب المتلقي الحزمة عند الأصل المطعم الأول، لذلك يتم القطع من استنساخ كامل أو `git fetch --unshallow origin` أول علامة — السابقة موجودة، `package.json` هو الإصدار المستهدف، ومشكلة `release-freeze` مفتوحة، ولا توجد مشكلة `Release branch not green` مفتوحة في فرع إصدار موجود — فرع غير موجود، تقارير `?` غير معروفة، قائمة انتظار — متعددة الاستخدامات لا تصل إلى الإصدار PRs (G11: `config/merge-queue/config.json` صالح، `bases` الخاص به يدير فرع الإصدار، `mode` `live`، التسمية الخاصة به موجودة)، لا تزال مجموعة قواعد `release/*` تحظر الحذف والدفع القسري، و `stable/v3` و `develop` غير موجودين بعد)، خطوتان فرعيتان، التي يطلقها سير العمل الخامل وتتحول شروط `if:` إلى حقيقة (والتي تبقى مُحاطًا بمتغير مستودع أو مُثبت في المستودع الأساسي)، وعلامات التوزيع المتوقعة (`latest` → 3.9.0 و `next` و `nightly` فارغة) والتراجع. الخروج `0` = `RESULT: READY`، `1` = فشل شرط مسبق للحظر (`✗`)، خطأ في استخدام `2` =. يقوم `--advisory <id,...>` بخفض مستوى الشيك إلى تحذير (`!`) دون إخفاءه.
 
-شغّل التشغيل التجريبي للاقتطاع الفعلي بينما لا يزال تجميد إصدار 3.9.0 مفتوحًا — إذ تُنشأ الفروع
-بعد الوسم وقبل أن ترفع المرحلة 12c التجميد.
+قم بتشغيل التشغيل الجاف للقطع الحقيقي بينما لا يزال تجميد الإصدار 3.9.0 مفتوحًا — يتم إنشاء الفروع بعد العلامة وقبل أن ترفع المرحلة 12ج التجميد.
 
-### تجربة 3.8.58 (على نسخة متفرعة فقط)
+### 3.8.58 بروفة (شوكة فقط)
 
 ```bash
-# 1. التشغيل التجريبي على القمة الحالية باستخدام معاملات التجربة
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. التنفيذ مقابل وحدة تحكم بعيدة لنسخة متفرعة (يُرفض origin أو أي وحدة تحكم بعيدة يكون عنوان URL الخاص بها
-#    هو المستودع الأساسي؛ وتطلب كل خطوة تأكيدًا في الطرفية)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. اختبار مسارات العمل الخاملة في النسخة المتفرعة (workflow_dispatch عندما يُبلغ التشغيل التجريبي
-#    عن تثبيت على المستودع الأساسي)، ثم التراجع
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-يُنشأ التزام رفع إصدار develop باستخدام أدوات git منخفضة المستوى (من دون لمس شجرة العمل)، ويرفع إصدارات
-الملفات الخمسة نفسها التي يغيّرها التزام فتح دورة: `package.json`، و`open-sse/package.json`،
-و`electron/package.json`، و`package-lock.json`، و`docs/openapi.yaml`. يُفتح قسم `[4.0.0]`
-في CHANGELOG ونُسخه المترجمة ضمن i18n على `develop` بعد ذلك، وقبل أول
-PR له. لا يغيّر البرنامج النصي وسوم npm dist-tags مطلقًا — اختبرها على حزمة مؤقتة.
+تم إنشاء التزام تطوير العثرة باستخدام git Plumbing (لم يتم لمس أي شجرة عمل) ويطرح نفس الملفات الخمسة كالتزام مفتوح للدورة: `package.json` و `open-sse/package.json` و `electron/package.json` و `package-lock.json` و `docs/openapi.yaml`. يتم فتح قسم `[4.0.0]` CHANGELOG ومرايا i18n الخاصة به على `develop` بعد ذلك، قبل PR الأول. لا يغير البرنامج النصي أبدًا علامات التوزيع npm — التي تتدرب على تلك الموجودة في الحزمة المؤقتة.
 
-### أداة معاينة PR (أنشئها مرة واحدة، وروّج البايتات نفسها)
+### قطعة معاينة PR (يتم إنشاؤها مرة واحدة، والترويج لنفس البايتات)
 
-ينشئ `.github/workflows/preview-artifact.yml` حزمة tarball إنتاجية واحدة من رأس PR
-ويتحقق من ذلك البناء نفسه (#8084، الشريحة (a)). يقتصر ذلك على طلبات PR من المستودع نفسه؛ ولا يُنشر أي شيء.
+تقوم `.github/workflows/preview-artifact.yml` ببناء كرة قطران إنتاجية واحدة من رأس PR وتتحقق من صحة هذا البناء الدقيق (شريحة #8084 (أ)). نفس المستودع PRs فقط؛ لم يتم نشر أي شيء.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # أو أضف التسمية `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # تثبيت المعاينة
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-ينفّذ التشغيل `npm ci`، و`npm run build:release`، و`npm run check:pack-artifact`، ويحزم
-حزمة tarball، ثم ينفّذ `npm run check:pack-boot` (أسرار وهمية ودليل بيانات مؤقت)، ويعيد الحزم،
-ويفشل ما لم تكن البصمة متطابقة، ثم يسجّل `artifact-identity.json` (‏SHA للرأس، وSHA
-للأساس، وتجزئة ملف القفل، والمنصة، والمعمارية، وnode ABI، وأداة التجميع، وسياسة البناء —
-`scripts/release/artifact-identity.mjs`) ويشهد على حزمة tarball في مهمة منفصلة. يعني ترويج
-معاينة تثبيت حزمة tarball تلك: لا تُعِد البناء من المصدر مطلقًا.
+يقوم التشغيل بإجراء `npm ci` و `npm run build:release` و `npm run check:pack-artifact` وحزم كرة القطران وتشغيل `npm run check:pack-boot` (أسرار مزيفة وبيانات سريعة الزوال) وإعادة التعبئة والفشل ما لم يكن الملخص متطابقًا، ثم تسجيل `artifact-identity.json` (head SHA وbase SHA وlockfile hash وplatform وarch وnode ABI وbundler وbuild Policy — `scripts/release/artifact-identity.mjs`) ويشهد على tarball في مهمة منفصلة. الترويج للمعاينة يعني تثبيت كرة القطران هذه: لا تقم أبدًا بإعادة البناء من المصدر.
 
-### الاقتطاع (3.9.0، بعد GO)
+### القطع (3.9.0، بعد GO)
 
-1. تسجيل GO في [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
-2. يطبع `npm run release:dry-run-lts-cut -- --from v3.9.0` النتيجة `RESULT: READY`.
-3. أنشئ الفرعين على `origin` يدويًا باستخدام الأوامر التي يطبعها التشغيل التجريبي — إذ يرفض
-   البرنامج النصي الدفع إلى `origin`. لإعادة استخدام التزام develop خضع للمراجعة، شغّل
-   تجربة `--execute` على قمة 3.9.0 مقابل نسختك المتفرعة أولًا؛ إذ تطبع قيمتَي SHA، ويمكن
-   دفع الالتزامين نفسيهما:
+1. GO المسجلة في [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` يطبع `RESULT: READY`.
+3. قم بإنشاء الفروع على `origin` يدويًا باستخدام الأوامر التي يطبعها التشغيل الجاف — يرفض البرنامج النصي دفعه إلى `origin`. لإعادة استخدام التزام التطوير الذي تمت مراجعته، قم بإجراء بروفة `--execute` على الطرف 3.9.0 مقابل شوكتك أولاً؛ يطبع كلاً من SHAs، ويمكن دفع نفس الالتزامات:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. احمِ `stable/v3` و`develop` (مجموعات القواعد + قائمة انتظار الدمج) قبل وصول أول PR.
-5. تُفعَّل تدفقات العمل الخاملة عند وجود الفرع: `forward-port.yml` (الدفع إلى
-   `stable/v3`)، و`validate-stable-pr.yml` (طلبات PR إلى `stable/v3`)، و`nightly-v4-build.yml`
-   (يبني `develop`). قبل الإطلاق، عيّن سر المستودع `secrets.FORWARD_PORT_TOKEN` (لكي يعمل CI على
-   طلبات PR الخاصة بالنقل إلى الإصدارات اللاحقة)؛ يظل النشر الليلي متوقفًا حتى يعيّن المالك متغير المستودع
-   `vars.NIGHTLY_PUBLISH` إلى `true` ويقبل النشر الموثوق به في npm ملف
-   `nightly-v4-build.yml`. تُحدَّد القناة عبر `scripts/release/dist-tag.mjs`، وهو نفس
-   المحلّل الذي يستخدمه `npm-publish.yml`.
-6. تحقّق من القنوات: يعرض `npm view omniroute dist-tags --json` أن `latest` = 3.9.0، ومن دون
-   `next` / `nightly` حتى يُنشر v4.
-7. التراجع، إذا لزم الأمر: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   و`npm dist-tag add omniroute@3.8.59 latest`.
+4. قم بحماية `stable/v3` و `develop` (قائمة انتظار دمج مجموعات القواعد + ) قبل وصول PR الأول.
+5. يتم تشغيل سير العمل الخامل من خلال وجود الفرع: `forward-port.yml` (ادفع إلى `stable/v3`) و `validate-stable-pr.yml` (PRs إلى `stable/v3`) و `nightly-v4-build.yml` (يبني `develop`). قبل بدء البث المباشر، قم بتعيين سر مستودع `secrets.FORWARD_PORT_TOKEN` (بحيث يعمل CI على المنفذ الأمامي PRs); يظل النشر الليلي متوقفًا حتى يقوم المالك بتعيين متغير المستودع `vars.NIGHTLY_PUBLISH` إلى `true` ويقبل npm Trusted Publishing `nightly-v4-build.yml`. دقة القناة هي `scripts/release/dist-tag.mjs`، وهو نفس المحلل الذي يستخدمه `npm-publish.yml`.
+6. التحقق من القنوات: يعرض `npm view omniroute dist-tags --json` `latest` = 3.9.0 ولا يوجد `next` / `nightly` حتى يتم نشر الإصدار 4.
+7. التراجع، إذا لزم الأمر: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` و `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

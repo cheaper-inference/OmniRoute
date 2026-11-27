@@ -13,9 +13,10 @@ import {
   filterPaidOnlyCandidatesWithDiagnosis,
 } from "../../../open-sse/services/autoCombo/paidModelFilter.ts";
 
-// `agentrouter/claude-opus-4-8` is a documented free model (FREE_MODEL_BUDGETS);
+// `agentrouter/gpt-5.6-sol` is a documented free model (FREE_MODEL_BUDGETS; claude-opus-4-8 was
+// retired in the November 2026 re-audit because agentrouter.org/api/pricing no longer lists it);
 // `openai/gpt-4o` is paid (openai has no documented free models).
-const FREE = { provider: "agentrouter", model: "claude-opus-4-8" };
+const FREE = { provider: "agentrouter", model: "gpt-5.6-sol" };
 const PAID = { provider: "openai", model: "gpt-4o" };
 
 test("hidePaid off returns pool identity with null diagnosis", () => {
@@ -52,7 +53,7 @@ test("hidePaidModels ON drops the paid-only backend, keeps the free one", () => 
   assert.deepEqual(
     result,
     [FREE],
-    "openai/gpt-4o (paid) must be excluded; agentrouter/claude-opus-4-8 (free) kept"
+    "openai/gpt-4o (paid) must be excluded; agentrouter/gpt-5.6-sol (free) kept"
   );
 });
 
@@ -64,7 +65,7 @@ test("hidePaidModels ON with an all-paid pool degrades to an empty pool", () => 
 test("hidePaidModels ON preserves extra candidate fields on kept entries", () => {
   const enriched = {
     provider: "agentrouter",
-    model: "claude-opus-4-8",
+    model: "gpt-5.6-sol",
     connectionId: "abc",
     extra: 1,
   };

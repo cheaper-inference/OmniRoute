@@ -10,6 +10,7 @@ import ModalityBridgeAudioTab from "@/app/(dashboard)/dashboard/settings/compone
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
+  useLocale: () => "en",
 }));
 
 // KEA-7886: the advanced numeric fields live in the kit Accordion (Collapsible adapter), which
