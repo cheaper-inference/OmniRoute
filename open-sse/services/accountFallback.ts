@@ -2347,9 +2347,12 @@ export function checkFallbackError(
       shouldUseQuotaSignal &&
       isCreditsExhaustedForStatus(status, provider, errorStr, structuredError?.code)
     ) {
-      const parsedReset = parseDetailedRetryFromErrorText(errorStr, provider);
-      const resetHintMs =
-        parsedReset?.provenance === "body_iso_reset" ? parsedReset.retryAfterMs : null;
+      const resetHintMs = parseIsoDateTimeResetMs(
+        errorStr,
+        MAX_PROVIDER_COOLDOWN_MS,
+        Date.now(),
+        provider
+      );
       return {
         shouldFallback: true,
         cooldownMs: resetHintMs ?? COOLDOWN_MS.paymentRequired ?? 3600 * 1000, // 1h cooldown unless reset date supplied
@@ -2357,7 +2360,7 @@ export function checkFallbackError(
         ...(resetHintMs
           ? {
               usedUpstreamRetryHint: true,
-              retryHintSource: parsedReset!.provenance,
+              retryHintSource: "body_iso_reset" as const,
               quotaResetHintMs: resetHintMs,
             }
           : {}),

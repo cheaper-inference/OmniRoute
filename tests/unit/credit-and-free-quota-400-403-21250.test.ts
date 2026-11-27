@@ -162,6 +162,23 @@ test("#21250 Anthropic 400 specified API usage limits pauses connection and reta
   }
 });
 
+test("#21250 ISO reset timestamp is retained even when a short retry hint is also present", () => {
+  const { targetMs, prefixed } = buildFutureUsageLimit400(3);
+  const expectedWaitMs = targetMs - Date.now();
+  const mixed = `${prefixed} Please retry in 60s.`;
+
+  const fb = checkFallbackError(400, mixed, 0, "claude-opus-4-6", "anthropic");
+  assert.equal(fb.shouldFallback, true);
+  assert.equal(fb.reason, RateLimitReason.QUOTA_EXHAUSTED);
+  assert.equal(fb.retryHintSource, "body_iso_reset");
+  assert.ok(
+    typeof fb.quotaResetHintMs === "number" &&
+      Math.abs(fb.quotaResetHintMs - expectedWaitMs) < 5_000,
+    `expected quotaResetHintMs ~${expectedWaitMs}ms, got ${fb.quotaResetHintMs}`
+  );
+  assert.equal(fb.cooldownMs, fb.quotaResetHintMs);
+});
+
 test("#21250 unrelated 400 validation, 403 permission, and caller-echoed 400 errors are not classified as quota exhaustion", () => {
   const unrelated400 = JSON.stringify({
     type: "error",
