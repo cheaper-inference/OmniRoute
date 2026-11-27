@@ -3,9 +3,9 @@
 #
 # Why: in a merge-storm, waiting for each PR's CI after each sibling merge costs
 # O(N²) CI runs. The train merges every queued PR into a throwaway worktree cut from
-# the release tip, runs the fast-gates parity suite ONCE on the final result, and
-# prints the evidence block that authorizes `gh pr merge --squash --admin` for each
-# train member (merge-gates.md §7 — owner-approved policy extension of §4, 2026-07-09).
+# the release tip and runs the fast-gates parity suite once on the final result.
+# It prints diagnostic evidence for the owner's dossier for each train member.
+# Merge approval still requires the owner's authorization and the release gates.
 #
 # Designed for the 32-core runner box (192.168.0.113) or any checkout with
 # node_modules. It only READS from origin — it never pushes, never merges PRs, never
@@ -153,7 +153,7 @@ if [ "$PLAN" = "1" ]; then
   echo "[merge-train]     as INHERITED and the train continues; any ADDED violation, more violation"
   echo "[merge-train]     lines, or no recognisable violation line (fail-closed) → exit 2"
   i=$((i + 1))
-  echo "[merge-train] ${i}. green → print --admin evidence per PR; red → exit 2 (bisect + eject)"
+  echo "[merge-train] ${i}. green → print diagnostic evidence per PR for the owner's dossier only. red → exit 2 (operator bisects and ejects)"
   echo "[merge-train] ${i}. teardown: git worktree remove --force (trap EXIT)"
   exit 0
 fi
@@ -408,7 +408,7 @@ if [ ${#INHERITED[@]} -gt 0 ]; then
 else
   echo "[merge-train] ✅ SUITE GREEN on ${TIP}"
 fi
-echo "[merge-train] evidence line for each PR (paste before gh pr merge --squash --admin):"
+echo "[merge-train] Diagnostic evidence per PR for the owner's dossier only. Merge approval is separate."
 for N in "${BOARDED[@]}"; do
   echo "  #${N}: Validated in local merge-train ${LOG} on $(hostname) @ ${TIP} (${MODE_NOTE})"
 done

@@ -155,6 +155,7 @@ function resetState() {
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   delete process.env.RADAR_ENABLED;
   clearAllFeatureFlagOverrides();
+  radarDb.setRadarOptIn(true);
 }
 
 function seedCache(tier: "community" | "live", opts: { generatedAt?: string | null } = {}) {

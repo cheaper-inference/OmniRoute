@@ -31,7 +31,7 @@ export {
   hoistLeadingTextSystemMessages,
   relocateDirectiveOnlyMessages,
 } from "./chatCore/claudeSystemRole.ts";
-import { checkIdempotencyCache } from "./chatCore/idempotency.ts";
+import { checkIdempotencyCache, readIdempotencyResponse } from "./chatCore/idempotency.ts";
 import {
   acquireTurnExecutionWithWait,
   createTurnInProgressResult,
@@ -473,6 +473,8 @@ async function handleChatCoreInner({
   comboName,
   comboStrategy = null,
   isCombo = false,
+  // Virtual routes have no persisted combo settings, even if a legacy row shares the name.
+  isVirtualAutoCombo = false,
   routingComboId = null,
   sessionAffinityKey = null,
   comboStepId = null,
@@ -692,7 +694,7 @@ async function handleChatCoreInner({
   // ── Phase 9.2: Idempotency check ──
   // Resolve the idempotency key once here and reuse it at the Phase 9.2 save site below,
   // rather than re-deriving it. (#3821-review LEDGER-6)
-  const { hit: idempotencyHit, idempotencyKey } = await checkIdempotencyCache({
+  const idempotencyContext = {
     clientRawRequest,
     provider,
     model,
@@ -704,7 +706,8 @@ async function handleChatCoreInner({
     startTime,
     log,
     videoTranscriptSensitive: videoBridgeObserved,
-  });
+  };
+  const { hit: idempotencyHit, idempotencyKey } = await checkIdempotencyCache(idempotencyContext);
   if (idempotencyHit) {
     return idempotencyHit;
   }
@@ -729,7 +732,13 @@ async function handleChatCoreInner({
   // Preserve chatCore's canonical formatting while the guarded body remains byte-stable.
   // prettier-ignore
   try {
-    // T07: Inject connectionId into credentials so executors can rotate API keys
+  // A previous turn may have cached its response while this request waited for the slot.
+  if (idempotencyKey) {
+    const replay = await readIdempotencyResponse(idempotencyKey, idempotencyContext);
+    if (replay) return replay;
+  }
+
+  // T07: Inject connectionId into credentials so executors can rotate API keys
   // using providerSpecificData.extraApiKeys (API Key Round-Robin feature)
   if (connectionId && credentials && !credentials.connectionId) {
     credentials.connectionId = connectionId;
@@ -1493,7 +1502,7 @@ async function handleChatCoreInner({
         compressionComboApplied = true;
         return true;
       };
-      if ((isCombo && comboName) || routingComboId) {
+      if (!isVirtualAutoCombo && ((isCombo && comboName) || routingComboId)) {
         try {
           const { getComboByName } = await import("@/lib/db/combos");
           let comboConfig = await getComboByName(comboName);
@@ -1995,7 +2004,7 @@ async function handleChatCoreInner({
           : "Prompt Compression engines disabled; reactive context compaction is ALSO disabled — large histories will NOT be trimmed before reaching the upstream provider"
       );
     }
-    if (isCombo && comboName) {
+    if (isCombo && comboName && !isVirtualAutoCombo) {
       log?.info?.("CONTEXT", `Attempting to resolve combo limits for comboName=${comboName}`);
       try {
         const { getComboByName } = await import("@/lib/db/combos");
@@ -3205,12 +3214,16 @@ async function handleChatCoreInner({
                 `[provider] Node ${errorConnectionId} ModelScope model quota exhausted (${statusCode}) for ${targetModel} - ${Math.ceil(quotaCooldownMs / 1000)}s (connection stays active)`
               );
             } else if (
+              // #20969: keep the upstream message/status on the model lock — the connection
+              // stays active, so nothing else records why this model is cooling down.
               lockModelIfPerModelQuota(
                 provider,
                 errorConnectionId,
                 model,
                 "quota_exhausted",
-                quotaCooldownMs
+                quotaCooldownMs,
+                undefined,
+                { lastError: persistentMessage, errorCode: statusCode }
               ) ||
               (targetModel &&
                 targetModel !== model &&
@@ -3219,7 +3232,9 @@ async function handleChatCoreInner({
                   errorConnectionId,
                   targetModel,
                   "quota_exhausted",
-                  quotaCooldownMs
+                  quotaCooldownMs,
+                  undefined,
+                  { lastError: persistentMessage, errorCode: statusCode }
                 ))
             ) {
               const quotaScope = getQuotaScopeLabelForProvider(provider, targetModel);

@@ -66,6 +66,30 @@ async function generate(
   }
 }
 
+test("legacy Fal sends OpenAI publisher IDs to the qualified endpoint without an output format", async () => {
+  const endpoint = "openai/gpt-image-2.6/sunburst/text-to-image";
+  const { result, sent } = await generate(
+    `fal-ai/${endpoint}`,
+    {},
+    { images: [{ b64_json: PNG }] }
+  );
+
+  assert.equal(result.success, true);
+  assert.deepEqual(sent, [
+    {
+      url: `https://fal.run/${endpoint}`,
+      body: {
+        prompt: "an animated bird",
+        sync_mode: true,
+        output_format: "png",
+        aspect_ratio: "1:1",
+      },
+    },
+  ]);
+  assert.deepEqual(Object.keys(result.data).sort(), ["created", "data"]);
+  assert.equal(result.data.data[0].b64_json, PNG);
+});
+
 test("legacy Fal preserves a requested GIF and its animation controls", async () => {
   const { result, sent } = await generate(ANIMATION, {
     output_format: "gif",

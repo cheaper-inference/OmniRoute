@@ -8,6 +8,10 @@
  * OpenCode additionally retains explicit conversation identity before body translation.
  */
 import { preserveOpencodeSessionIdentity } from "../../utils/opencodeSessionIdentity.ts";
+import {
+  CODEX_METADATA_CACHE_SESSION_HEADER,
+  preserveCodexMetadataSessionIdentity,
+} from "../../executors/codex/promptCacheKey.ts";
 
 // Pre-compiled set for O(1) internal control-header checks (hot path). These are
 // OmniRoute-only signals: forwarding them upstream would leak routing internals and,
@@ -17,6 +21,7 @@ const INTERNAL_CONTROL_HEADERS = new Set([
   "x-omniroute-lease-generation",
   "x-omniroute-no-log",
   "x-deadline-token",
+  CODEX_METADATA_CACHE_SESSION_HEADER,
 ]);
 
 function isInternalControlHeader(key: string): boolean {
@@ -51,5 +56,6 @@ export function buildExecutorClientHeaders(
   }
 
   preserveOpencodeSessionIdentity(normalized, request);
+  preserveCodexMetadataSessionIdentity(normalized, request);
   return Object.keys(normalized).length > 0 ? normalized : null;
 }

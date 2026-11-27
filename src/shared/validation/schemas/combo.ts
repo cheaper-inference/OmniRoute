@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isReservedComboName } from "@/shared/constants/autoComboNames";
 import {
   ACCOUNT_FALLBACK_STRATEGY_VALUES,
   ROUTING_STRATEGY_VALUES,
@@ -381,7 +382,10 @@ export const comboRuntimeConfigSchema = z
     return config;
   });
 
-export const comboNameSchema = z
+export const RESERVED_COMBO_NAME_MESSAGE =
+  "auto and names starting with auto/ are reserved for the built-in automatic routes";
+
+const comboNameBaseSchema = z
   .string()
   .trim()
   .min(1, "Name is required")
@@ -390,6 +394,11 @@ export const comboNameSchema = z
     /^[a-zA-Z0-9_/.\-\[\] ]+$/,
     "Name can only contain letters, numbers, spaces, -, _, /, ., [ and ]."
   );
+
+export const comboNameSchema = comboNameBaseSchema.refine(
+  (name) => !isReservedComboName(name),
+  RESERVED_COMBO_NAME_MESSAGE
+);
 
 export const comboCapabilityRouteSchema = z
   .object({
@@ -551,7 +560,7 @@ export const updateComboDefaultsSchema = z
 
 export const updateComboSchema = z
   .object({
-    name: comboNameSchema.optional(),
+    name: comboNameBaseSchema.optional(),
     description: z.string().max(2000).optional().nullable(),
     displayName: z.string().trim().max(200).optional().nullable(),
     // An update may not remove every model from a combo, or a working combo

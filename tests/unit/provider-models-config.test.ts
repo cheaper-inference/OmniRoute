@@ -125,14 +125,20 @@ test("GitHub Copilot registry reflects the current supported model lineup", () =
   assert.equal(getModelTargetFormat("gh", "kimi-k3"), "openai");
 });
 
-test("verified Anthropic launch catalogs keep Fable 5.1 first", () => {
-  for (const provider of ["anthropic", "cc", "cw"]) {
+test("verified Anthropic launch catalogs keep the strongest Fable first", () => {
+  for (const provider of ["anthropic", "cc"]) {
     assert.equal(
       getProviderModels(provider)[0]?.id,
-      "claude-fable-5-1",
+      "claude-fable-5-2",
       `${provider} must list the strongest Claude model first`
     );
   }
+  // Claude Web has no verified Fable 5.2 surface, so its strongest listed model stays Fable 5.1.
+  assert.equal(
+    getProviderModels("cw")[0]?.id,
+    "claude-fable-5-1",
+    "cw must list the strongest Claude model first"
+  );
 });
 
 test("Copilot catalogs keep their independently verified defaults", () => {

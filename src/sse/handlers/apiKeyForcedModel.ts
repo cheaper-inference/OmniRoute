@@ -1,5 +1,6 @@
 import { getApiKeyMetadata } from "@/lib/db/apiKeys";
 import { resolvePolicyApiKey } from "@/shared/utils/apiKeyPolicy";
+import { resolveRequiredApiKey } from "@/shared/utils/requiredApiKeyContext";
 
 type ForcedModelLogger = { warn: (tag: string, msg: string) => void };
 
@@ -24,6 +25,9 @@ export async function resolveApiKeyForcedModel(
   request: Request,
   log?: ForcedModelLogger
 ): Promise<string | null> {
+  const requiredKey = resolveRequiredApiKey();
+  if (requiredKey) return (await requiredKey)?.apiKeyInfo.forcedModel || null;
+
   const apiKey = await resolvePolicyApiKey(request);
   if (!apiKey) return null;
   try {

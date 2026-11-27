@@ -22,8 +22,8 @@ test("Docker-client-free CLI target retains every supported AI CLI", () => {
   const clientless = stage("runner-cli-no-docker", "runner-cli");
 
   assert.match(clientless, /FROM runner-cli-core AS runner-cli-no-docker/);
-  assert.doesNotMatch(core, /docker\.io|docker-compose/);
-  assert.doesNotMatch(clientless, /docker\.io|docker-compose/);
+  assert.doesNotMatch(core, /docker-cli|docker-compose|docker\.io/);
+  assert.doesNotMatch(clientless, /docker-cli|docker-compose|docker\.io/);
   for (const cli of ["@openai/codex@", "@anthropic-ai/claude-code@", "droid@", "openclaw@"]) {
     assert.match(core, new RegExp(cli.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
@@ -38,6 +38,6 @@ test("generic runner-cli remains backward compatible with Docker and Compose cli
   const generic = stage("runner-cli");
 
   assert.match(generic, /FROM runner-cli-core AS runner-cli/);
-  assert.match(generic, /apt-get install -y --no-install-recommends docker\.io docker-compose/);
+  assert.match(generic, /^RUN apk add --no-cache docker-cli docker-compose$/m);
   assert.match(generic, /USER node/);
 });

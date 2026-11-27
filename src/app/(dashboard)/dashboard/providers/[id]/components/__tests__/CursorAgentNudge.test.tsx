@@ -29,12 +29,14 @@
 // otherwise terminate a block comment early.)
 import React from "react";
 import { act } from "react";
-import { createRoot, hydrateRoot } from "react-dom/client";
+import { createRoot, hydrateRoot, type Root } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import CursorAgentNudge from "../CursorAgentNudge";
 
 const STORAGE_KEY = "omniroute.cursorAgentNudgeDismissed";
+const DISMISS_EVENT = "omniroute:cursor-agent-nudge-dismissed";
+const mountedRoots = new Map<HTMLDivElement, Root>();
 
 vi.mock("next-intl", () => ({ useTranslations: () => (k: string) => k }));
 
@@ -53,33 +55,46 @@ async function flushEffects() {
   });
 }
 
-function renderNudge(): HTMLDivElement {
+function renderNudge() {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
+  mountedRoots.set(container, root);
   act(() => {
     root.render(<CursorAgentNudge />);
   });
-  return container;
+  return { container, root };
+}
+
+async function unmountNudges() {
+  try {
+    await act(async () => {
+      for (const root of mountedRoots.values()) root.unmount();
+    });
+  } finally {
+    for (const container of mountedRoots.keys()) container.remove();
+    mountedRoots.clear();
+  }
 }
 
 describe("CursorAgentNudge", () => {
   beforeEach(() => {
-    (
-      globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
-    ).IS_REACT_ACT_ENVIRONMENT = true;
+    vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
     localStorage.removeItem(STORAGE_KEY);
   });
 
-  afterEach(() => {
-    document.body.innerHTML = "";
-    localStorage.removeItem(STORAGE_KEY);
-    vi.unstubAllGlobals();
+  afterEach(async () => {
+    try {
+      await unmountNudges();
+    } finally {
+      localStorage.removeItem(STORAGE_KEY);
+      vi.unstubAllGlobals();
+    }
   });
 
   it("renders when cursorAgentAvailable is false", async () => {
     vi.stubGlobal("fetch", mockFetch(false));
-    const container = renderNudge();
+    const { container } = renderNudge();
     await flushEffects();
 
     expect(container.querySelector("[role='complementary']")).not.toBeNull();
@@ -87,7 +102,7 @@ describe("CursorAgentNudge", () => {
 
   it("does not render when cursorAgentAvailable is true", async () => {
     vi.stubGlobal("fetch", mockFetch(true));
-    const container = renderNudge();
+    const { container } = renderNudge();
     await flushEffects();
 
     expect(container.querySelector("[role='complementary']")).toBeNull();
@@ -95,7 +110,7 @@ describe("CursorAgentNudge", () => {
 
   it("does not render while the availability check is still pending or unreachable", async () => {
     vi.stubGlobal("fetch", mockFetch(null)); // res.ok === false -> stays in the "unknown" state
-    const container = renderNudge();
+    const { container } = renderNudge();
     await flushEffects();
 
     expect(container.querySelector("[role='complementary']")).toBeNull();
@@ -115,7 +130,7 @@ describe("CursorAgentNudge", () => {
 
   it("dismiss button hides the banner and persists the dismissal to localStorage", async () => {
     vi.stubGlobal("fetch", mockFetch(false));
-    const container = renderNudge();
+    const { container } = renderNudge();
     await flushEffects();
     expect(container.querySelector("[role='complementary']")).not.toBeNull();
 
@@ -132,7 +147,7 @@ describe("CursorAgentNudge", () => {
   it("stays hidden across a fresh render once dismissed (localStorage persistence — no reappear)", async () => {
     localStorage.setItem(STORAGE_KEY, "true");
     vi.stubGlobal("fetch", mockFetch(false)); // still "unavailable" — dismissal alone must suppress it
-    const container = renderNudge();
+    const { container } = renderNudge();
     await flushEffects();
 
     expect(container.querySelector("[role='complementary']")).toBeNull();
@@ -140,15 +155,8 @@ describe("CursorAgentNudge", () => {
 
   it("stays hidden after an actual unmount+remount of the same dismissed state", async () => {
     vi.stubGlobal("fetch", mockFetch(false));
-    const first = document.createElement("div");
-    document.body.appendChild(first);
-    const firstRoot = createRoot(first);
-    act(() => {
-      firstRoot.render(<CursorAgentNudge />);
-    });
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
+    const { container: first, root: firstRoot } = renderNudge();
+    await flushEffects();
     const dismissButton = first.querySelector("button");
     act(() => {
       dismissButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -156,9 +164,10 @@ describe("CursorAgentNudge", () => {
     act(() => {
       firstRoot.unmount();
     });
+    mountedRoots.delete(first);
     first.remove();
 
-    const second = renderNudge();
+    const { container: second } = renderNudge();
     await flushEffects();
     expect(second.querySelector("[role='complementary']")).toBeNull();
   });
@@ -176,6 +185,8 @@ describe("CursorAgentNudge", () => {
     container.innerHTML = serverHtml;
     document.body.appendChild(container);
 
+    const addListener = vi.spyOn(window, "addEventListener");
+    const removeListener = vi.spyOn(window, "removeEventListener");
     const errors: unknown[][] = [];
     const originalConsoleError = console.error;
     console.error = (...args: unknown[]) => {
@@ -183,11 +194,20 @@ describe("CursorAgentNudge", () => {
     };
 
     try {
-      act(() => {
-        hydrateRoot(container, <CursorAgentNudge />);
+      await act(async () => {
+        mountedRoots.set(container, hydrateRoot(container, <CursorAgentNudge />));
       });
+      await flushEffects();
+      expect(container.querySelector("[role='complementary']")).not.toBeNull();
+
+      const handler = addListener.mock.calls.find(([name]) => name === DISMISS_EVENT)?.[1];
+      expect(typeof handler).toBe("function");
+      await unmountNudges();
+      expect(removeListener).toHaveBeenCalledWith(DISMISS_EVENT, handler);
     } finally {
       console.error = originalConsoleError;
+      addListener.mockRestore();
+      removeListener.mockRestore();
     }
 
     const hydrationWarnings = errors.filter((args) =>

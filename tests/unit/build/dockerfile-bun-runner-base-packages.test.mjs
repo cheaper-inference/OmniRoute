@@ -14,39 +14,41 @@ function stage(dockerfile, name) {
   return (end === -1 ? rest : rest.slice(0, end)).filter((line) => !/^\s*#/.test(line)).join("\n");
 }
 
-/** Package names of every `apt-get install` in a stage (flags and shell operators dropped). */
-function aptPackages(body) {
-  const packages = [];
-  for (const match of body.matchAll(/apt-get install((?:[^\n]*\\\n)*[^\n]*)/g)) {
-    for (const word of match[1].replace(/\\\n/g, " ").split(/\s+/)) {
-      if (word === "&&") break;
-      if (word && !word.startsWith("-")) packages.push(word);
-    }
-  }
-  return packages;
+/** Package names of every `apk add` in a stage. */
+function apkPackages(body) {
+  return [...body.replace(/\\\n/g, " ").matchAll(/\bapk add\s+([^&;|\n]+)/g)].flatMap((match) =>
+    match[1]
+      .trim()
+      .split(/\s+/)
+      .filter((word) => !word.startsWith("-"))
+  );
 }
 
-const bunRunner = stage(read("Dockerfile.bun"), "runner-base");
+const bunDockerfile = read("Dockerfile.bun");
 
-test("Bun runner-base upgrades the base image packages, like the Node base stage", () => {
-  // 3.8.54-bun shipped apt, libapt-pkg7.0 and zlib1g with a published trixie fix
-  // because only the builder stage ran `apt-get upgrade`.
-  assert.match(bunRunner, /apt-get update \\\n\s*&& apt-get upgrade -y \\/);
+test("Bun runner-base inherits runtime-os and the Node build base still upgrades its packages", () => {
+  assert.match(bunDockerfile, /^FROM runtime-os AS runner-base$/m);
   assert.match(stage(read("Dockerfile"), "base"), /apt-get upgrade -y/);
 });
 
-test("Bun runner-base installs only what the runtime uses", () => {
-  // curl (libcurl4 → Kerberos libraries) and the sqlite3 CLI were never used inside the
-  // container — the healthcheck is `bun healthcheck.mjs` and the database is bun:sqlite —
-  // and the Node runner ships neither.
-  assert.deepEqual(aptPackages(bunRunner), ["libsecret-1-0", "ca-certificates"]);
-  assert.match(bunRunner, /CMD bun healthcheck\.mjs/);
-  assert.doesNotMatch(bunRunner, /\bcurl\b/);
+test("Bun runtime-os and runner-base install only what the runtime uses", () => {
+  const runtimeOs = stage(bunDockerfile, "runtime-os");
+  const bunRunner = stage(bunDockerfile, "runner-base");
+  assert.match(runtimeOs, /\bapk add --no-cache\b/);
+  assert.deepEqual(apkPackages(runtimeOs), [
+    "libsecret",
+    "libstdc++",
+    "ca-certificates-bundle",
+    "tzdata",
+  ]);
+  assert.deepEqual(apkPackages(bunRunner), []);
+  assert.doesNotMatch(`${runtimeOs}\n${bunRunner}`, /\bcurl\b|(?<![\w-])sqlite3(?![\w-])/);
+  assert.match(bunRunner, /HEALTHCHECK[^\n]*\\\n\s*CMD bun healthcheck\.mjs\b/);
 });
 
 test("Bun runner-base proves bun:sqlite works without the sqlite3 package", () => {
   assert.match(
-    bunRunner,
+    stage(bunDockerfile, "runner-base"),
     /RUN bun -e "import \{ Database \} from 'bun:sqlite';[^"]*SELECT 1[^"]*"/
   );
 });

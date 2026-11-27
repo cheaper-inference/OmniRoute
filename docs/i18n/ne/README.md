@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="वाचा — एउटा एन्डपोइन्ट र 394 प्रदायकहरू। अर्को स्वस्थ लक्ष्य उपलब्ध रहँदासम्म स्वचालित फलब्याकले रुटिङ कायम राख्छ। छ वटा स्तम्भहरू: 394 प्रदायकहरूमा बलियो फलब्याक · योग्य वर्कलोडहरूमा 95% सम्म टोकन बचत · 150+ निःशुल्क तहहरू र 51 आवर्ती/keyless सधैँ निःशुल्क प्रदायकहरूसहित सुरु गर्न $0 · एउटै कन्फिगरेसनमार्फत 39 CLI/agent एकीकरणहरू · /v1 मा OpenAI, Claude, Gemini र Responses API अनुकूलता · circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals तथा 7,800+ ट्र्याक गरिएका test files मा 56,000+ static test declarations सहितका उत्पादन नियन्त्रणहरू।"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="वाचा — एउटा एन्डपोइन्ट र 394 प्रदायकहरू। अर्को स्वस्थ लक्ष्य उपलब्ध रहँदासम्म स्वचालित फलब्याकले रुटिङ कायम राख्छ। छ वटा स्तम्भहरू: 394 प्रदायकहरूमा बलियो फलब्याक · योग्य वर्कलोडहरूमा 95% सम्म टोकन बचत · 150+ निःशुल्क तहहरू र 40 आवर्ती/keyless सधैँ निःशुल्क प्रदायकहरूसहित सुरु गर्न $0 · एउटै कन्फिगरेसनमार्फत 39 CLI/agent एकीकरणहरू · /v1 मा OpenAI, Claude, Gemini र Responses API अनुकूलता · circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals तथा 7,800+ ट्र्याक गरिएका test files मा 56,000+ static test declarations सहितका उत्पादन नियन्त्रणहरू।"/>
 
 <br/>
 <br/>
@@ -711,7 +711,7 @@ omniroute configure codex          # साथै: claude opencode qwen aider go
 
 </div>
 
-> **394 दर्ता भएका प्रदायकहरू** क्यानोनिकल chat, media, search, local, cloud-agent र system संग्रहहरूमा समावेश छन्, जसमा **153 मा `hasFree: true` डिस्कभरी मेटाडेटा** छ। chat model registry मा **239 प्रदायक / 3,059 अलग प्रदायक-मोडल जोडी / 1,475 कच्चा मोडल ID** समावेश छन्; छुट्टै free-budget catalog मा **465 प्रति-मोडल पङ्क्ति**, **34 पुनरावर्ती पूल** र **51 पुनरावर्ती/keyless सदैव-निःशुल्क प्रदायकहरू** छन्। यी उद्देश्यपूर्वक फरक हरहरू हुन्; परिभाषा र pool-deduped गणनाहरू [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) र [Free Tiers](docs/reference/FREE_TIERS.md) मा उपलब्ध छन्।
+> **394 दर्ता भएका प्रदायकहरू** क्यानोनिकल chat, media, search, local, cloud-agent र system संग्रहहरूमा समावेश छन्, जसमा **153 मा `hasFree: true` डिस्कभरी मेटाडेटा** छ। chat model registry मा **239 प्रदायक / 3,059 अलग प्रदायक-मोडल जोडी / 1,475 कच्चा मोडल ID** समावेश छन्; छुट्टै free-budget catalog मा **465 प्रति-मोडल पङ्क्ति**, **34 पुनरावर्ती पूल** र **40 पुनरावर्ती/keyless सदैव-निःशुल्क प्रदायकहरू** छन्। यी उद्देश्यपूर्वक फरक हरहरू हुन्; परिभाषा र pool-deduped गणनाहरू [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) र [Free Tiers](docs/reference/FREE_TIERS.md) मा उपलब्ध छन्।
 
 <div align="center">
 

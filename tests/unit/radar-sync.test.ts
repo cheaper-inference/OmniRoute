@@ -406,9 +406,10 @@ test("syncRadar: valid sig over garbage JSON => invalid_schema, cache untouched"
   assert.equal(cacheWritten, false, "cache must NOT be written on invalid schema");
 });
 
-test("syncRadar: version floor — same version => stale, cache untouched", async () => {
+test("syncRadar: same version renews fetchedAt without rewriting the payload", async () => {
   const sig = signBytes(FIXTURE_BYTES);
   let cacheWritten = false;
+  const touched: string[] = [];
 
   const result = await syncMod.syncRadar({
     getFlag: () => true,
@@ -416,12 +417,14 @@ test("syncRadar: version floor — same version => stale, cache untouched", asyn
     getCache: () => ({
       version: "2026.08.01.1",
       tier: "community",
-      payload: "{}",
+      payload: FIXTURE_STRING,
       signature: "old-sig",
     }),
     setCache: () => {
       cacheWritten = true;
     },
+    touchCache: (fetchedAt) => touched.push(fetchedAt),
+    now: () => new Date("2026-11-21T13:00:00Z"),
     fetch: (() =>
       Promise.resolve(
         mockResponse(FIXTURE_BYTES, { "x-omniroute-feed-signature": sig })
@@ -429,7 +432,9 @@ test("syncRadar: version floor — same version => stale, cache untouched", asyn
   });
 
   assert.equal(result.status, "stale");
+  assert.deepEqual(result, { status: "stale" });
   assert.equal(cacheWritten, false, "cache must NOT be overwritten with same version");
+  assert.deepEqual(touched, ["2026-11-21T13:00:00.000Z"]);
 });
 
 test("syncRadar: same version upgrades a validated v1 cache to the negotiated v2 artifact", async () => {
@@ -469,6 +474,7 @@ test("syncRadar: same-version v2 cannot replace an existing validated v2 cache",
   const v2Bytes = v2FixtureBytes();
   const sig = signBytes(v2Bytes);
   let cacheWritten = false;
+  const touched: string[] = [];
 
   const result = await syncMod.syncRadar({
     getFlag: () => true,
@@ -482,6 +488,8 @@ test("syncRadar: same-version v2 cannot replace an existing validated v2 cache",
     setCache: () => {
       cacheWritten = true;
     },
+    touchCache: (fetchedAt) => touched.push(fetchedAt),
+    now: () => new Date("2026-11-21T13:00:00Z"),
     fetch: (() =>
       Promise.resolve(
         mockResponse(v2Bytes, {
@@ -493,11 +501,13 @@ test("syncRadar: same-version v2 cannot replace an existing validated v2 cache",
 
   assert.equal(result.status, "stale");
   assert.equal(cacheWritten, false);
+  assert.deepEqual(touched, ["2026-11-21T13:00:00.000Z"]);
 });
 
-test("syncRadar: version floor — incoming older => stale", async () => {
+test("syncRadar: older version is rejected and does not renew fetchedAt", async () => {
   const sig = signBytes(FIXTURE_BYTES);
   let cacheWritten = false;
+  const touched: string[] = [];
 
   const result = await syncMod.syncRadar({
     getFlag: () => true,
@@ -511,6 +521,7 @@ test("syncRadar: version floor — incoming older => stale", async () => {
     setCache: () => {
       cacheWritten = true;
     },
+    touchCache: (fetchedAt) => touched.push(fetchedAt),
     fetch: (() =>
       Promise.resolve(
         mockResponse(FIXTURE_BYTES, { "x-omniroute-feed-signature": sig })
@@ -519,6 +530,7 @@ test("syncRadar: version floor — incoming older => stale", async () => {
 
   assert.equal(result.status, "stale");
   assert.equal(cacheWritten, false, "cache must NOT be overwritten with older version");
+  assert.deepEqual(touched, []);
 });
 
 test("syncRadar: an entitlement downgrade replaces a newer live cache with community", async () => {

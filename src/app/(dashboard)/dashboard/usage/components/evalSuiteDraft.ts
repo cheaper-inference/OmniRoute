@@ -3,7 +3,15 @@
  * be read (and tested) in one place. A case needs a name, at least one prompt and an expected
  * value. Its model is optional: the runner sends the case to the run's target and, on "Suite
  * defaults" with no model on the case, to its built-in default (src/lib/evals/runtime.ts).
+ * Suite name, description and case name also carry the save route's length limits
+ * (formLimits.ts), flagged as they are typed rather than only after a refused save.
  */
+
+import {
+  EVAL_CASE_NAME_MAX_LENGTH,
+  EVAL_SUITE_DESCRIPTION_MAX_LENGTH,
+  EVAL_SUITE_NAME_MAX_LENGTH,
+} from "@/shared/constants/formLimits";
 
 export interface SuiteCaseDraftFields {
   id: string;
@@ -45,4 +53,25 @@ export function validateSuiteDraft(draft: SuiteDraftFields): SuiteDraftErrors {
 
 export function hasSuiteDraftErrors(errors: SuiteDraftErrors): boolean {
   return errors.name || Object.keys(errors.cases).length > 0;
+}
+
+/**
+ * The length of `value` once trimmed (the request carries the trimmed value, so that is what the
+ * save schema measures) when it exceeds `max`; `null` when it fits.
+ */
+export function lengthOverLimit(value: string, max: number): number | null {
+  const length = value.trim().length;
+  return length > max ? length : null;
+}
+
+export function suiteDraftExceedsLimits(
+  draft: SuiteDraftFields & { description: string }
+): boolean {
+  return (
+    lengthOverLimit(draft.name, EVAL_SUITE_NAME_MAX_LENGTH) !== null ||
+    lengthOverLimit(draft.description, EVAL_SUITE_DESCRIPTION_MAX_LENGTH) !== null ||
+    draft.cases.some(
+      (draftCase) => lengthOverLimit(draftCase.name, EVAL_CASE_NAME_MAX_LENGTH) !== null
+    )
+  );
 }

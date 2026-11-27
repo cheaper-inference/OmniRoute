@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Promisiunea — Un singur endpoint și 394 de furnizori. Fallback-ul automat menține direcționarea atât timp cât este disponibilă o altă țintă funcțională. Șase piloni: fallback rezilient între 394 de furnizori · economii de până la 95% la tokenuri pentru sarcini eligibile · 0 $ pentru început, cu peste 150 de niveluri gratuite și 51 de furnizori recurenți/fără cheie, gratuiți pentru totdeauna · 39 de integrări CLI/agent printr-o singură configurație · compatibilitate cu OpenAI, Claude, Gemini și Responses API la /v1 · controale pentru producție, inclusiv întrerupătoare de circuit, discreție TLS, MCP cu 110 instrumente, A2A, memorie, mecanisme de protecție, evaluări și peste 56.000 de declarații de testare statică în peste 7.800 de fișiere de testare urmărite."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Promisiunea — Un singur endpoint și 394 de furnizori. Fallback-ul automat menține direcționarea atât timp cât este disponibilă o altă țintă funcțională. Șase piloni: fallback rezilient între 394 de furnizori · economii de până la 95% la tokenuri pentru sarcini eligibile · 0 $ pentru început, cu peste 150 de niveluri gratuite și 40 de furnizori recurenți/fără cheie, gratuiți pentru totdeauna · 39 de integrări CLI/agent printr-o singură configurație · compatibilitate cu OpenAI, Claude, Gemini și Responses API la /v1 · controale pentru producție, inclusiv întrerupătoare de circuit, discreție TLS, MCP cu 110 instrumente, A2A, memorie, mecanisme de protecție, evaluări și peste 56.000 de declarații de testare statică în peste 7.800 de fișiere de testare urmărite."/>
 
 <br/>
 <br/>
@@ -711,7 +711,7 @@ previzualizează exact env/args fără a executa, iar `--api-key-env NAME` păst
 
 </div>
 
-> **394 de furnizori înregistrați** în colecțiile canonice de chat, media, căutare, locale, agenți cloud și sistem, inclusiv **153 care conțin metadatele de descoperire `hasFree: true`**. Registrul modelelor de chat acoperă **239 de furnizori / 3.059 de perechi distincte furnizor-model / 1.475 de ID-uri brute de modele**; catalogul separat de bugete gratuite are **465 de rânduri per model**, **34 de fonduri recurente** și **51 de furnizori recurenți/gratui pentru totdeauna, fără cheie**. Aceștia sunt numitori diferiți în mod intenționat; definițiile și calculele deduplicate pe fonduri se găsesc în [Referința furnizorilor](docs/reference/PROVIDER_REFERENCE.md) și [Nivelurile gratuite](docs/reference/FREE_TIERS.md).
+> **394 de furnizori înregistrați** în colecțiile canonice de chat, media, căutare, locale, agenți cloud și sistem, inclusiv **153 care conțin metadatele de descoperire `hasFree: true`**. Registrul modelelor de chat acoperă **239 de furnizori / 3.059 de perechi distincte furnizor-model / 1.475 de ID-uri brute de modele**; catalogul separat de bugete gratuite are **465 de rânduri per model**, **34 de fonduri recurente** și **40 de furnizori recurenți/gratui pentru totdeauna, fără cheie**. Aceștia sunt numitori diferiți în mod intenționat; definițiile și calculele deduplicate pe fonduri se găsesc în [Referința furnizorilor](docs/reference/PROVIDER_REFERENCE.md) și [Nivelurile gratuite](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
