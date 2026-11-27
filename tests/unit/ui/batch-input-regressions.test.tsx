@@ -67,6 +67,7 @@ function mount(element: React.ReactNode) {
   return el;
 }
 async function pick(el: HTMLElement, file: File) {
+  expect(el.isConnected).toBe(true);
   const input = el.querySelector('input[type="file"]')!;
   Object.defineProperty(input, "files", { configurable: true, value: [file] });
   await act(async () => {
@@ -77,6 +78,7 @@ async function pick(el: HTMLElement, file: File) {
   expect(el.textContent).not.toContain("wizardInputReading");
 }
 async function click(el: HTMLElement, key: string) {
+  expect(el.isConnected).toBe(true);
   const button = Array.from(el.querySelectorAll("button")).find((b) =>
     b.textContent?.includes(key)
   )!;
@@ -84,11 +86,21 @@ async function click(el: HTMLElement, key: string) {
   expect(button.disabled).toBe(false);
   await act(async () => button.click());
 }
-async function select(el: HTMLElement, index: number, value: string) {
+function getSelect(el: HTMLElement, label: string): HTMLSelectElement {
+  expect(el.isConnected).toBe(true);
+  const control = Array.from(el.querySelectorAll("select")).find(
+    (select) =>
+      select.getAttribute("aria-label") === label ||
+      Array.from(select.labels ?? []).some((node) => node.textContent?.trim() === label)
+  );
+  if (!control) throw new Error(`Missing select: ${label}`);
+  return control;
+}
+async function select(el: HTMLElement, label: string, value: string) {
+  const control = getSelect(el, label);
   await act(async () => {
-    const s = el.querySelectorAll("select")[index];
-    s.value = value;
-    s.dispatchEvent(new Event("change", { bubbles: true }));
+    control.value = value;
+    control.dispatchEvent(new Event("change", { bubbles: true }));
   });
 }
 afterEach(() => {
@@ -136,6 +148,7 @@ test.each([
       })
     );
     const onCreated = vi.fn();
+    const openDialogs = new Set(document.body.querySelectorAll<HTMLElement>('[role="dialog"]'));
     mount(
       <NewBatchWizard
         onClose={() => {}}
@@ -143,10 +156,12 @@ test.each([
         availableProviders={[{ id: "openai", name: "OpenAI", models: ["gpt-4o"] }]}
       />
     );
-    // The wizard renders inside the kit Modal (KEA-7886), which portals to document.body,
-    // so its controls are queried there instead of in the mount container.
-    const el = document.body;
+    const el = Array.from(document.body.querySelectorAll<HTMLElement>('[role="dialog"]')).find(
+      (dialog) => !openDialogs.has(dialog)
+    );
+    if (!el) throw new Error("New batch wizard dialog not rendered");
     async function next() {
+      expect(el.isConnected).toBe(true);
       const button = Array.from(el.querySelectorAll("button")).find(
         (b) => b.textContent === "wizardNext"
       )!;
@@ -154,15 +169,15 @@ test.each([
       expect(button.getAttribute("aria-disabled")).toBeNull();
       await act(async () => button.click());
     }
-    await select(el, 0, "openai");
-    await select(el, 2, "gpt-4o");
+    await select(el, "wizardProviderLabel", "openai");
+    expect(getSelect(el, "wizardModelLabel").value).toBe("gpt-4o");
     await next();
     if (kind === "csv") await click(el, "wizardInputKindCsv");
     const file = inputFile(content, name);
     await pick(el, file);
     if (kind === "csv") {
-      await select(el, 0, "custom_id");
-      await select(el, 1, "body.messages[0].content");
+      await select(el, "id", "custom_id");
+      await select(el, "prompt", "body.messages[0].content");
       await click(el, "wizardCsvApplyMapping");
     }
     await next();
@@ -171,19 +186,20 @@ test.each([
     expect(submitted).toBeDefined();
     const uploaded = await readText(submitted!);
     expect(uploaded.includes("[...sample only...]")).toBe(false);
-    const parsed = uploaded
-      .trim()
-      .split("\n")
-      .map((line) => JSON.parse(line));
-    expect(parsed).toHaveLength(rows);
-    expect(parsed.map((row) => row.custom_id)).toEqual(
-      Array.from({ length: rows }, (_, i) => `req-${i}`)
-    );
+    const lines = uploaded.trim().split("\n");
+    expect(lines).toHaveLength(rows);
     if (kind === "jsonl") {
       expect(uploaded === content).toBe(true);
       expect(submitted!.size).toBe(file.size);
     } else {
-      expect(parsed.every((row) => row.body.messages[0].content === "hello".repeat(20))).toBe(true);
+      const expectedPrompt = "hello".repeat(20);
+      const mismatchedRow = lines.findIndex((line, index) => {
+        const row = JSON.parse(line);
+        return (
+          row.custom_id !== `req-${index}` || row.body?.messages?.[0]?.content !== expectedPrompt
+        );
+      });
+      expect(mismatchedRow, "index of the first CSV row with unexpected contents").toBe(-1);
       expect(file.text).toHaveBeenCalledOnce();
     }
     expect(onCreated).toHaveBeenCalledWith("batch-test");
