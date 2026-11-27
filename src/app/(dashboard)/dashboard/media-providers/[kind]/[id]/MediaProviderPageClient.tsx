@@ -8,6 +8,7 @@ import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import EmptyState from "@/shared/components/EmptyState";
 import Icon from "@/shared/components/Icon";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import MediaProviderHeader from "../../components/MediaProviderHeader";
 import MediaProviderKindNav from "../../components/MediaProviderKindNav";
 import type { MediaKind } from "../../components/mediaKinds";
@@ -84,7 +85,9 @@ function renderPlayground(
         <div className="flex flex-col gap-2 border border-dashed border-border rounded-xl p-6">
           <div className="flex items-center gap-2 text-text-muted">
             <Icon name="image_search" size={20} />
-            <h3 className="text-sm font-medium">{bridgeCopy.imageToText.title}</h3>
+            <h3 className="ci-heading" data-size="sm">
+              {bridgeCopy.imageToText.title}
+            </h3>
           </div>
           <p className="text-xs text-text-muted">{bridgeCopy.imageToText.description}</p>
           <Link
@@ -191,7 +194,7 @@ export default function MediaProviderPageClient({
         ) : (
           <div className="flex flex-col divide-y divide-border rounded-xl border border-border overflow-hidden">
             {connections.map((conn) => (
-              <div key={conn.id} className="flex items-center gap-3 px-4 py-3 bg-bg-card">
+              <div key={conn.id} className="flex items-center gap-3 px-4 py-3 bg-surface">
                 <span
                   className={`size-2 rounded-full shrink-0 ${
                     conn.testStatus === "active" || conn.testStatus === "success"
@@ -214,7 +217,7 @@ export default function MediaProviderPageClient({
         imageToText: {
           title: t("imageToText"),
           description: t.rich("imageToTextBridgeAvailable", {
-            code: (chunks) => <code className="rounded bg-bg-subtle px-1 font-mono">{chunks}</code>,
+            code: (chunks) => <InlineCode>{chunks}</InlineCode>,
           }),
           cta: t("imageToTextBridgeCta"),
         },

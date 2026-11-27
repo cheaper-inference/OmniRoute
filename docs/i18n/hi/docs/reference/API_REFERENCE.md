@@ -815,76 +815,180 @@ OpenAI-संगत बैच प्रोसेसिंग।
 
 ---
 
-## API खोजें
+## खोज API
 
-Web/search प्रदाता अमूर्त (टैविली, ब्रेव, एक्सा, सर्पर, आदि)।
+वेब/खोज प्रदाता एब्स्ट्रैक्शन (Tavily, Brave, Exa, Serper आदि)।
 
-| तरीका | पथ                     | विवरण                                                                                          |
-| ----- | ---------------------- | ---------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | कॉन्फ़िगर किए गए खोज प्रदाताओं की + क्षमताओं की सूची बनाएं                                     |
-| POST  | `/v1/search`           | `v1SearchSchema` द्वारा मान्य एक खोज क्वेरी — बॉडी चलाएँ, caching/coalescing का समर्थन करता है |
-| GET   | `/v1/search/analytics` | प्रति-प्रदाता hit/latency/cache आँकड़े                                                         |
+| विधि | पथ | विवरण |
+| ------ | ---------------------- | ------ ------------------------------------------------------------------------------ |
+| GET | `/v1/search` | कॉन्फ़िगर किए गए खोज प्रदाताओं और उनकी क्षमताओं की सूची |
+| POST | `/v1/search` | खोज क्वेरी चलाएँ — बॉडी का सत्यापन `v1SearchSchema` द्वारा किया जाता है, कैशिंग/कोएलसिंग समर्थित है |
+| GET | `/v1/search/analytics` | प्रति-प्रदाता हिट/लेटेंसी/कैश आँकड़े |
 
-**प्रामाणिक:** बियरर API कुंजी (`extractApiKey` + `isValidApiKey`)। खोज नीति `enforceApiKeyPolicy` के माध्यम से लागू की गई।
+**प्रमाणीकरण:** Bearer API key (`extractApiKey` + `isValidApiKey`)। खोज नीति `enforceApiKeyPolicy` के माध्यम से लागू की जाती है।
 
-**स्वतः चयन:** `provider` के बिना, कॉन्फ़िगर किए गए कनेक्शन वाला सबसे सस्ता प्रदाता पहले चलता है और अगला सबसे सस्ता फेलओवर है। नि:शुल्क अंतिम-रिज़ॉर्ट प्रदाताओं (`duckduckgo-free`) का उपयोग केवल तभी किया जाता है जब कुछ और कॉन्फ़िगर नहीं किया जाता है। एक स्व-होस्टेड SearXNG तब कॉन्फ़िगर किया गया माना जाता है जब उसका कनेक्शन एक वास्तविक `baseUrl` (कैटलॉग डिफ़ॉल्ट `http://localhost:8888/search` नहीं) को संग्रहीत करता है: यह तब कुंजी वाले से आगे $0 प्रदाता के रूप में रैंक करता है, जिसमें सबसे सस्ता कुंजी प्रदाता फेलओवर के रूप में होता है, जिसमें SearXNG 400, 401, 403 या 404 का उत्तर देता है। एक `baseUrl` जो वैध `http(s)` URL नहीं है या जो क्लाउड-मेटाडेटा पते पर इंगित करता है गिनती नहीं. एक SearXNG कनेक्शन जो टोकन को संग्रहीत करता है वह इस प्रकार केवल `https://` या लूपबैक `http://` पर रैंक करता है। रिमोट प्लेन `http://` पर यह कभी भी फेलओवर नहीं होता है और अंतिम उपाय रहता है, इसका उपयोग केवल तब किया जाता है जब कोई अन्य प्रदाता कॉन्फ़िगर नहीं किया जाता है या जब नाम से अनुरोध किया जाता है, इसलिए यह उन दो मामलों में क्लीयरटेक्स्ट में टोकन भेजता है।
+### नामित खोज/फ़ेच संयोजन
 
-### एक्सा और टैविली `provider_options`
+`POST /v1/search` और `POST /v1/web/fetch`, दोनों `model` को सहेजे गए कॉम्बो नाम के रूप में स्वीकार करते हैं।
+`model` या स्पष्ट `provider` में से किसी एक का उपयोग करें; दोनों भेजने पर `400` लौटता है।
+दोनों में से कोई भी फ़ील्ड न होने पर, मौजूदा स्वचालित प्रदाता चयन पहले की तरह बना रहता है।
 
-Exa और Tavily एक नामांकित बैग से प्रदाता-विशिष्ट फ़ील्ड पढ़ते हैं: `provider_options.exa` (या `provider_options["exa-search"]`) और `provider_options.tavily` (या `provider_options["tavily-search"]`)। केवल नीचे दी गई कुंजियाँ अग्रेषित की जाती हैं। प्रत्येक को `open-sse/handlers/search/providerOptionsPassthrough.ts` में अपने स्वयं के Zod स्कीमा के विरुद्ध जांचा जाता है, और गलत प्रकार वाली एक कुंजी हटा दी जाती है। ऑथ, बेस URL, `stream` और `outputSchema` सहित किसी भी अन्य कुंजी को नजरअंदाज कर दिया जाता है। अन्य प्रदाताओं द्वारा उपयोग की जाने वाली फ़्लैट कुंजियाँ (`cx`, `depth`, ...) पहले की तरह काम करती हैं।
+Combo Builder और उसका Add Model कैटलॉग, कनेक्ट किए गए प्रदाताओं के लिए नेटिव वेब-ऑपरेशन प्रविष्टियाँ दिखाते हैं, भले ही उनके पास LLM मॉडल सूची न हो। Serper में **Web search** दिखता है;
+Tavily में **Web search / Page extraction** दिखता है, और केवल-फ़ेच प्रदाताओं में **Page extraction** दिखता है।
+प्रविष्टि और अकाउंट सामान्य रूप से चुनें। एकल Tavily प्रविष्टि दोनों वेब एंडपॉइंट के लिए काम करती है;
+ये ऑपरेशन प्रविष्टियाँ केवल-चैट क्लाइंट चयनकर्ताओं या चैट मॉडल प्रोब में नहीं जोड़ी जातीं।
 
-| प्रदाता | शीर्ष-स्तरीय फ़ील्ड                                                                                                                                                                                                                                                                                                                                                       | नेस्टेड                                                                                                                                  |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| उदाहरण  | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (फ्लैट आदिम), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                   | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` डिफ़ॉल्ट `{ text: true, highlights: true }` पर विलय हो गया |
-| तवीली   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                        |
+उदाहरण के लिए, इन क्रमबद्ध लक्ष्यों के साथ `shared-free` नाम का **priority** कॉम्बो बनाएँ:
 
-सामान्य फ़ील्ड हमेशा जीतते हैं: `query`, `max_results`, `filters` (डोमेन), `country` और `search_type` से प्राप्त विषय। Exa पर, `search_type: "news"` `category: "news"` रखता है। टैविली `search_type: "finance"` (`topic: "finance"`) को भी स्वीकार करता है।
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
 
-फ़ायरक्रॉल खोज लागत 10 लौटाए गए परिणामों के प्रति आरंभिक ब्लॉक में दर्ज की जाती है, $0.002 (2 क्रेडिट) प्रति ब्लॉक और कम से कम एक ब्लॉक प्रति कॉल ( [फ़ायरक्रॉल बिलिंग](https://docs.firecrawl.dev/billing) ): 11 परिणामों की लागत $0.004 है।
+फिर प्रत्येक सरफ़ेस पर उसी नाम का उपयोग करें:
 
-जेनेरिक `time_range` अब दोनों प्रदाताओं तक पहुँचता है: Exa को `startPublishedDate` (ISO टाइमस्टैम्प) मिलता है और Tavily को `start_date` (`YYYY-MM-DD`) मिलता है। `provider_options` में एक स्पष्ट तारीख मैप की गई तारीख को ओवरराइड करती है।
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
 
-परीक्षा परिणाम `id`, `highlights` (प्रत्येक हाइलाइट, न केवल `snippet` के रूप में उपयोग किया जाने वाला पहला), `highlight_scores`, `summary`, `subpages`, `entities` और `extras` `provider_raw` में रखते हैं। Tavily परिणाम `images` और `favicon` रखते हैं।
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
 
-लिंकअप खोज लागत `depth` `fast` और `standard` के लिए $0.005 और `deep` के लिए $0.05 ( [लिंकअप मूल्य निर्धारण](https://docs.linkup.so/pages/documentation/development/pricing) ) दर्ज की गई है, चाहे `depth` `provider_options` से आता हो या कनेक्शन की सेटिंग्स से।
+खोज Tavily और फिर Serper पर विचार करती है; फ़ेच Tavily और फिर Jina Reader पर विचार करता है;
+चैट समर्पित खोज/फ़ेच प्रदाताओं को छोड़कर OpenAI पर विचार करती है। संगतता खोज/फ़ेच एक्ज़ीक्यूटर रजिस्ट्री से आती है,
+न कि मॉडल नाम में मौजूद शब्दों से। फ़िल्टरिंग क्रेडेंशियल चयन और डिस्पैच से पहले होती है, और सहेजे गए कॉम्बो में कभी
+कोई बदलाव नहीं करती।
 
-Exa `type: "lite"` (Exa 3.0) फ़ील्ड के एक छोटे सेट को स्वीकार करता है और कोई अन्य फ़ील्ड सेट होने पर पूरे अनुरोध को अस्वीकार कर देता है। लाइट के लिए, `additionalQueries`, `systemPrompt` और `text` और `highlights` को छोड़कर प्रत्येक `contents` कुंजी को कॉल से पहले हटा दिया जाता है। बहिष्कृत `subpages`, `subpageTarget`, `highlights.numSentences` और `highlights.highlightsPerUrl` अब अग्रेषित नहीं किए जाते हैं।
+गैर-चैट क्षमता रूट `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used`, और `p2c` का समर्थन करते हैं। केवल-चैट संश्लेषण रणनीतियाँ जैसे
+`fusion`, `pipeline`, और `context-relay` को गैर-चैट रूट पर अस्वीकार कर दिया जाता है, न कि
+चुपचाप खोज या जनरेट किए गए मीडिया पर लागू किया जाता है।
+मौजूदा कॉम्बो इंजन अपस्ट्रीम कोटा विफलताओं सहित क्रमबद्ध फ़ॉलबैक को संभालता है,
+और स्टेप ID, अकाउंट पिन, प्रति-स्टेप अकाउंट अनुमतिसूचियाँ, नेस्टेड संदर्भ,
+कॉलर कनेक्शन/कोटा स्कोप और कॉम्बो एक्सेस नीति को बनाए रखता है। परिणाम अपना नेटिव
+खोज/फ़ेच स्कीमा बनाए रखते हैं, जिसमें वास्तविक प्रदाता भी शामिल होता है; `X-OmniRoute-Combo-Trace` रूटिंग निर्णय की पहचान करता है।
+अज्ञात कॉम्बो `404` लौटाते हैं; निष्क्रिय कॉम्बो और ऐसे संयोजन जिनमें कोई संगत लक्ष्य नहीं है, `400` लौटाते हैं।
 
-एक्सा को छोड़कर, लागत लेखांकन फ्लैट रजिस्ट्री `costPerQuery` है, जो एक्सा के स्वयं के मूल्य निर्धारण का पालन करता है: `auto` के लिए $ 0.007 प्रति कॉल (और विरासत `fast`) या `lite` (और विरासत `instant`) के लिए $ 0.004, 10 परिणामों को कवर करता है; प्रत्येक अगले परिणाम के लिए $0.001; और `contents.summary` सेट होने पर लौटाए गए परिणाम के लिए $0.001। Tavily को `search_depth` `basic`, `fast` और `ultra-fast` के लिए 1 क्रेडिट ($0.008) और `advanced` ( [Tavily API क्रेडिट](https://docs.tavily.com/documentation/api-credits) ) के लिए 2 क्रेडिट ($0.016) पर दर्ज किया गया है। `auto_parameters: true` के साथ एक कॉल जिसे टैविली ने उन्नत में अपग्रेड किया है, अभी भी 1 क्रेडिट पर रिकॉर्ड किया जाता है।
+प्रत्येक कॉम्बो प्रयास में एक स्पष्ट प्रदाता का उपयोग होता है। यह कॉम्बो के पीछे छिपे नेटिव स्वचालित
+प्रदाता पूल को शुरू नहीं कर सकता। स्पष्ट-प्रदाता अनुरोध अपना मौजूदा एकल-प्रदाता व्यवहार बनाए रखते हैं।
+समर्पित खोज/फ़ेच प्रदाताओं को लक्ष्य बनाने वाले सीधे चैट अनुरोध, OpenAI-शैली एक्ज़ीक्यूटर में फ़ॉलबैक होने के बजाय,
+कार्रवाई योग्य JSON `400` लौटाते हैं।
+
+### क्षमता-विशिष्ट कॉम्बो रूट
+
+सहेजे गए कॉम्बो में एक `routes` ऑब्जेक्ट हो सकता है, जिसकी कुंजियाँ API क्षमताएँ होती हैं। प्रत्येक रूट की
+अपनी लक्ष्य सूची, रणनीति और रनटाइम कॉन्फ़िगरेशन होता है। शीर्ष-स्तरीय `models`, `strategy`, और `config`
+लीगेसी-संगत चैट योजना बने रहते हैं; `routes` के बिना पुराने कॉम्बो पहले की तरह बिना किसी बदलाव के काम करते रहते हैं।
+
+समर्थित रूट कुंजियाँ `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations`, और `audio-generation` हैं। एंडपॉइंट प्रोजेक्शन क्रेडेंशियल चयन, स्कोरिंग या डिस्पैच से पहले होता है।
+नेस्टेड कॉम्बो संदर्भ उसी क्षमता के लिए चाइल्ड कॉम्बो का रूट चुनते हैं।
+
+`POST /v1/music/generations` और `POST /v1/ocr`, `model` में कॉम्बो नाम स्वीकार करते हैं। नेटिव
+ElevenLabs-संगत `POST /v1/music`, `model_id` में कॉम्बो नाम भी स्वीकार करता है, लेकिन इस नेटिव एंडपॉइंट पर
+प्रयोग योग्य प्रत्येक लक्ष्य ElevenLabs संगीत मॉडल होना चाहिए, ताकि उसका बाइनरी रिस्पॉन्स कॉन्ट्रैक्ट
+सुरक्षित रहे। `POST /v1/sound-generation`, इसी नेटिव-बाइनरी बाध्यता के अंतर्गत `model_id` में
+`audio-generation` कॉम्बो स्वीकार करता है। विषम संगीत प्रदाताओं के लिए `/v1/music/generations` का उपयोग करें।
+
+**स्वतः-चयन:** `provider` के बिना, कॉन्फ़िगर किए गए कनेक्शन वाला सबसे सस्ता प्रदाता पहले चलता है
+और अगला सबसे सस्ता फ़ेलओवर होता है। मुफ़्त अंतिम-उपाय प्रदाता (`duckduckgo-free`) का उपयोग केवल तब किया जाता है
+जब अन्य कुछ भी कॉन्फ़िगर न हो। स्व-होस्टेड SearXNG को तब कॉन्फ़िगर किया हुआ माना जाता है जब उसका
+कनेक्शन वास्तविक `baseUrl` (कैटलॉग डिफ़ॉल्ट `http://localhost:8888/search` नहीं) संग्रहीत करता हो: तब
+यह की-आधारित प्रदाताओं से पहले $0 प्रदाता के रूप में रैंक करता है, और सबसे सस्ता की-आधारित प्रदाता फ़ेलओवर होता है,
+जिसमें SearXNG के 400, 401, 403 या 404 उत्तर देने की स्थिति भी शामिल है। ऐसा `baseUrl` जो मान्य `http(s)` URL
+न हो या क्लाउड-मेटाडेटा पते की ओर संकेत करता हो, मान्य नहीं माना जाता। टोकन संग्रहीत करने वाला SearXNG कनेक्शन
+इस तरह केवल `https://` या लूपबैक `http://` पर रैंक करता है। रिमोट सामान्य `http://` पर यह कभी फ़ेलओवर नहीं होता
+और अंतिम-उपाय बना रहता है; इसका उपयोग केवल तब किया जाता है जब कोई अन्य प्रदाता कॉन्फ़िगर न हो या
+नाम से अनुरोध किया गया हो, इसलिए इन दोनों स्थितियों में यह टोकन को क्लियरटेक्स्ट में भेजता है।
+
+### Exa और Tavily `provider_options`
+
+Exa और Tavily नेमस्पेस वाले बैग से प्रदाता-विशिष्ट फ़ील्ड पढ़ते हैं:
+`provider_options.exa` (या `provider_options["exa-search"]`) और `provider_options.tavily`
+(या `provider_options["tavily-search"]`)। केवल नीचे दी गई कुंजियाँ फ़ॉरवर्ड की जाती हैं। प्रत्येक कुंजी
+`open-sse/handlers/search/providerOptionsPassthrough.ts` में अपने Zod स्कीमा के विरुद्ध जाँची जाती है,
+और गलत प्रकार वाली कुंजी हटा दी जाती है। प्रमाणीकरण, बेस URL,
+`stream` और `outputSchema` सहित कोई भी अन्य कुंजी अनदेखी की जाती है। अन्य प्रदाताओं द्वारा उपयोग की जाने वाली फ़्लैट कुंजियाँ (`cx`, `depth`, ...) पहले की तरह काम करती हैं।
+
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                     |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (फ़्लैट प्रिमिटिव), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` डिफ़ॉल्ट `{ text: true, highlights: true }` पर मर्ज किया गया |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                          |
+
+जेनेरिक फ़ील्ड हमेशा प्रभावी रहते हैं: `query`, `max_results`, `filters` (डोमेन), `country` और
+`search_type` से प्राप्त विषय। Exa पर `search_type: "news"` से `category: "news"` बना रहता है।
+Tavily `search_type: "finance"` (`topic: "finance"`) भी स्वीकार करता है।
+
+Firecrawl खोज की लागत लौटाए गए परिणामों के प्रत्येक शुरू किए गए 10-परिणाम ब्लॉक के लिए दर्ज की जाती है,
+प्रति ब्लॉक $0.002 (2 क्रेडिट), और प्रत्येक कॉल के लिए कम-से-कम एक ब्लॉक दर्ज किया जाता है
+([Firecrawl billing](https://docs.firecrawl.dev/billing)): 11 परिणामों की लागत $0.004 है।
+
+जेनेरिक `time_range` अब दोनों प्रदाताओं तक पहुँचता है: Exa को `startPublishedDate` (ISO timestamp)
+और Tavily को `start_date` (`YYYY-MM-DD`) मिलता है। `provider_options` में दी गई स्पष्ट तिथि
+मैप की गई तिथि को ओवरराइड करती है।
+
+Exa परिणाम `id`, `highlights` (हर हाइलाइट, न कि केवल `snippet` के रूप में उपयोग की गई पहली हाइलाइट),
+`highlight_scores`, `summary`, `subpages`, `entities` और `extras` को `provider_raw` में बनाए रखते हैं।
+Tavily परिणाम `images` और `favicon` को बनाए रखते हैं।
+
+Linkup खोज की लागत `depth` के लिए `fast` और `standard` पर $0.005 तथा
+`deep` पर $0.05 दर्ज की जाती है
+([Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing)),
+चाहे `depth` `provider_options` से आया हो या कनेक्शन की सेटिंग से।
+
+Exa `type: "lite"` (Exa 3.0) फ़ील्ड के एक छोटे सेट को स्वीकार करता है और कोई अन्य फ़ील्ड सेट होने पर
+पूरे अनुरोध को अस्वीकार कर देता है। lite के लिए, कॉल से पहले `additionalQueries`, `systemPrompt` और
+`text` तथा `highlights` के अलावा प्रत्येक `contents` कुंजी हटा दी जाती है। अप्रचलित
+`subpages`, `subpageTarget`, `highlights.numSentences` और `highlights.highlightsPerUrl` अब
+फ़ॉरवर्ड नहीं किए जाते।
+
+लागत का हिसाब फ़्लैट रजिस्ट्री `costPerQuery` के अनुसार किया जाता है, सिवाय Exa के, जो Exa की अपनी
+प्राइसिंग का पालन करता है: `auto` (और पुराना `fast`) के लिए प्रति कॉल $0.007 या `lite` (और पुराना
+`instant`) के लिए $0.004, जिसमें 10 परिणाम शामिल हैं; प्रत्येक अतिरिक्त परिणाम के लिए $0.001;
+और `contents.summary` सेट होने पर प्रत्येक लौटाए गए परिणाम के लिए $0.001। Tavily के लिए
+`search_depth` `basic`, `fast` और `ultra-fast` पर 1 क्रेडिट ($0.008), तथा `advanced` पर 2 क्रेडिट
+($0.016) दर्ज किए जाते हैं
+([Tavily API credits](https://docs.tavily.com/documentation/api-credits))। `auto_parameters: true` वाली
+कॉल में Tavily द्वारा advanced पर अपग्रेड किए जाने पर भी 1 क्रेडिट ही दर्ज किया जाता है।
 
 ---
 
 ## Web Fetch API
 
-कॉन्फ़िगर किए गए वेब-फ़ेच प्रदाता (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract) के माध्यम से URL से
-सामग्री निकालें।
+कॉन्फ़िगर किए गए web-fetch provider (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch) के माध्यम से URL से सामग्री निकालें।
 
-Parallel Extract (`parallel-search`, Parallel Search जैसी ही API key) केवल Markdown
-लौटाता है — कोई भी अन्य `format` होने पर `400` लौटता है — और सामग्री को 100,000
-अक्षरों तक सीमित करता है। जब लक्ष्य पृष्ठ को स्वयं निकाला नहीं जा सकता, तो upstream इसे HTTP 200 के
-अंदर रिपोर्ट करता है; OmniRoute इसे निश्चित संदेश के साथ `422` के रूप में प्रस्तुत करता है।
+Parallel Extract (`parallel-search`, Parallel Search के समान API key) केवल Markdown
+रिटर्न करता है — कोई अन्य `format` एक `400` है — और सामग्री को 100,000 वर्णों तक सीमित करता है। जब लक्ष्य पेज को स्वयं extract नहीं किया जा सकता, तो upstream इसकी सूचना HTTP 200 के अंदर देता है;
+OmniRoute इसे एक निश्चित संदेश के साथ `422` के रूप में प्रस्तुत करता है।
 
-| Method | Path            | Description                                                                    |
-| ------ | --------------- | ------------------------------------------------------------------------------ |
-| POST   | `/v1/web/fetch` | URL फ़ेच/स्क्रैप करें — body का सत्यापन `v1WebFetchSchema` द्वारा किया जाता है |
+Keenable Fetch (`keenable-search`) भी केवल Markdown रिटर्न करता है (कोई अन्य `format` एक
+`400` है) और सामग्री को 100,000 वर्णों तक सीमित करता है। यह key के बिना काम करता है: बिना connection के स्पष्ट रूप से
+`provider: "keenable-search"` अनुरोध करने पर Keenable का keyless endpoint उपयोग होता है
+(प्रति-IP rate limits)। कॉन्फ़िगर की गई key केवल इन सीमाओं को हटाती है; auto-select, Keenable का उपयोग केवल तब करता है जब key कॉन्फ़िगर की गई हो।
 
-**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`)। नीति `enforceApiKeyPolicy` के माध्यम से लागू की जाती है।
+| Method | Path            | Description                                                                       |
+| ------ | --------------- | --------------------------------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | URL fetch/scrape करें — body का validation `v1WebFetchSchema` द्वारा किया जाता है |
 
-**कोटा-जागरूक फ़ॉलबैक (#8297):** जब कोई स्पष्ट `provider` नहीं दिया जाता है, तो pool
+**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`)। Policy को `enforceApiKeyPolicy` के माध्यम से लागू किया जाता है।
+
+Named combinations ऊपर दिए गए [`model` routing contract](#named-searchfetch-combinations)
+का उपयोग करते हैं और fetch-विशिष्ट options तथा responses को बनाए रखते हैं।
+
+**Quota-aware fallback (#8297):** जब `provider` या `model` में से कोई भी नहीं दिया गया हो, तो pool
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) को निश्चित
-प्राथमिकता क्रम (fill-first) में
-चलाया जाता है — rate-limited लेकिन कॉन्फ़िगर किए गए provider को अनुरोध को शॉर्ट-सर्किट करने के
-बजाय छोड़ दिया जाता है, और पुनः प्रयास योग्य/कोटा upstream विफलता (HTTP 429 हमेशा; Firecrawl/Tavily/TinyFish के
-कोटा-शैली वाले free tiers के लिए 402/403 —
-Jina Reader के लिए नहीं, और साधारण 400 bad request के लिए कभी नहीं) अनुरोध के समय अगले
-ऐसे credential वाले provider तक पहुँचती है जिसे अभी तक आज़माया नहीं गया है। जब pool में प्रत्येक provider
-समाप्त हो जाता है, तो endpoint पिछले सामान्य `400` के बजाय एकल `429` (`Retry-After`
-header के साथ) लौटाता है। जब स्पष्ट `provider` का अनुरोध किया जाता है, तो कोई
-मौन फ़ॉलबैक नहीं होता — rate-limited या विफल स्पष्ट provider अपनी त्रुटि (`429` यदि rate-limited हो, अन्यथा upstream status) प्रस्तुत करता है।
-
----
+`parallel-search` → `keenable-search`) को निश्चित
+priority order (fill-first) में देखा जाता है — rate-limited लेकिन configured provider को request को
+short-circuit करने के बजाय छोड़ दिया जाता है, और retryable/quota upstream failure
+(HTTP 429 हमेशा; Firecrawl/Tavily/TinyFish quota-style free tiers के लिए 402/403 —
+Jina Reader के लिए नहीं, और सामान्य 400 bad request के लिए कभी नहीं) request के समय अगले
+untried credentialed provider तक पहुँच जाता है। जब pool का प्रत्येक provider समाप्त हो जाता है, तो endpoint पिछले generic `400` के
+बजाय एकल `429` (`Retry-After` header के साथ) रिटर्न करता है। जब कोई स्पष्ट `provider` अनुरोधित हो, तो
+कोई silent fallback नहीं होता — rate-limited या विफल explicit
+provider अपनी स्वयं की error दिखाता है (rate-limited होने पर `429`, अन्यथा upstream status)।
 
 ## WebSocket Streaming
 
@@ -960,34 +1064,35 @@ ChatGPT `codex.rate_limits` + `response.created` लौटाता है औ�
 
 ## कोटा और समस्याओं की रिपोर्टिंग
 
-| विधि | पथ                  | विवरण                                                                                          |
-| ---- | ------------------- | ---------------------------------------------------------------------------------------------- |
-| GET  | `/v1/quotas/check`  | पंजीकृत कुंजी जारी करने से पहले `provider` + `accountId` के लिए कोटा का पूर्व-सत्यापन          |
-| POST | `/v1/issues/report` | GitHub को कोटा/कुंजी जारी करने की विफलता की रिपोर्ट करें (`GITHUB_ISSUES_REPO` + token आवश्यक) |
+| Method | Path                | Description                                                                                   |
+| ------ | ------------------- | --------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | पंजीकृत कुंजी जारी करने से पहले `provider` + `accountId` के लिए कोटा का पूर्व-सत्यापन         |
+| POST   | `/v1/issues/report` | GitHub को कोटा/कुंजी जारी करने की विफलता की रिपोर्ट करें (`GITHUB_ISSUES_REPO` + टोकन आवश्यक) |
 
-**प्रमाणीकरण:** Bearer API कुंजी (`isAuthenticated`)।
+**प्रमाणीकरण:** `/v1/quotas/check` Bearer API कुंजी (`isAuthenticated`) लेता है। `/v1/issues/report`
+केवल प्रबंधन के लिए है (`requireManagementAuth`), ठीक `/api/v1/registered-keys` की तरह: डैशबोर्ड सत्र,
+स्थानीय CLI टोकन, या `manage`/`admin` स्कोप वाली API कुंजी; केवल inference वाली API कुंजियों को `403` मिलता है।
 
 ### कोटा सत्र पुनर्प्राप्ति (वैकल्पिक)
 
-एक नॉन-स्ट्रीमिंग `POST /v1/chat/completions` या `POST /v1/responses` अनुरोध, जो
-टर्मिनल कोटा त्रुटि (`402`/`429`/`503`, जिसके बॉडी में कोटा या क्रेडिट समाप्त होने की सूचना हो)
-के साथ विफल होता है, उसे त्रुटि लौटाने के बजाय बाद में दोबारा चलाने के लिए रोका जा सकता है। कॉलर
-प्रति अनुरोध तीन हेडर के साथ इसे सक्षम करता है:
+एक गैर-स्ट्रीमिंग `POST /v1/chat/completions` या `POST /v1/responses`, जो
+टर्मिनल कोटा त्रुटि (`402`/`429`/`503`, जिसके बॉडी में कोटा या क्रेडिट समाप्त होने की बात हो) के साथ विफल होता है,
+त्रुटि लौटाने के बजाय बाद में चलाने और पुनः चलाने के लिए रोका जा सकता है। कॉलर प्रत्येक अनुरोध के लिए तीन हेडर के
+साथ इसे सक्षम करता है:
 
-| हेडर                         | मान                                         |
-| ---------------------------- | ------------------------------------------- |
-| `x-omniroute-quota-recovery` | `auto`                                      |
-| `x-omniroute-session`        | सत्र आईडी, `[A-Za-z0-9._:-]{1,128}`         |
-| `x-omniroute-recovery-turn`  | सत्र के भीतर अद्वितीय टर्न आईडी (समान नियम) |
+| Header                       | Value                                      |
+| ---------------------------- | ------------------------------------------ |
+| `x-omniroute-quota-recovery` | `auto`                                     |
+| `x-omniroute-session`        | सत्र आईडी, `[A-Za-z0-9._:-]{1,128}`        |
+| `x-omniroute-recovery-turn`  | सत्र के भीतर अद्वितीय टर्न आईडी (वही नियम) |
 
-केवल `stream: false` वाले टर्न, जिनमें कोई टूल, टूल इतिहास या `previous_response_id` न हो और
-कोई `x-omniroute-connection` पिन न हो, पात्र हैं। साथ ही, `STORAGE_ENCRYPTION_KEY` सेट होना
-आवश्यक है (अनुरोध को अधिकतम 24 घंटे तक एन्क्रिप्टेड रूप में संग्रहीत किया जाता है)। इसके बाद
-प्रतिक्रिया `202` और `recovery.poll` के साथ आती है; पोल करने के लिए
-`GET /v1/quota-recoveries/{id}` का उपयोग करें (लंबित स्थिति में `202`, पूरा होने पर
-पुनर्प्राप्त बॉडी के साथ `200`) या `DELETE` से रद्द करें। टिकट केवल उस API कुंजी को दिखाई देते हैं
-जिसने उन्हें बनाया है। जिस रीप्ले का परिणाम अनिश्चित हो, वह दो बार भेजे जाने के बजाय
-`needs_confirmation` स्थिति में समाप्त होता है। स्रोत: `src/lib/quota/quotaSessionRecovery.ts`।
+केवल `stream: false` वाले टर्न, जिनमें कोई टूल, टूल इतिहास या `previous_response_id` न हो, और
+कोई `x-omniroute-connection` पिन न हो, पात्र हैं। साथ ही, `STORAGE_ENCRYPTION_KEY` सेट होना आवश्यक है
+(अनुरोध को अधिकतम 24 घंटे तक एन्क्रिप्टेड रूप में संग्रहीत किया जाता है)। इसके बाद प्रतिक्रिया `202` होती है और
+`recovery.poll` उपलब्ध होता है; पूर्ण होने तक पोल करने के लिए `GET /v1/quota-recoveries/{id}` का उपयोग करें
+(लंबित होने पर `202`, पूर्ण होने पर पुनर्प्राप्त बॉडी के साथ `200`) या `DELETE` से रद्द करें। टिकट केवल उस API
+कुंजी को दिखाई देते हैं जिसने उन्हें बनाया है। जिस पुनःप्रयोग का परिणाम अनिश्चित हो, वह दो बार भेजे जाने के बजाय
+`needs_confirmation` स्थिति में समाप्त होता है। स्रोत: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1737,17 +1842,21 @@ OmniRoute इवेंट्स (अनुरोध पूर्णता, क�
 
 ## पंजीकृत कुंजियाँ (स्वचालित प्रबंधन)
 
-ऑटो-कुंजी प्रबंधन सबसिस्टम द्वारा बैकिंग प्रोवाइडर/अकाउंट के विरुद्ध API कुंजियाँ जारी करने और रोटेट करने के लिए उपयोग किया जाता है, जिसमें दैनिक/प्रति घंटा कोटा होते हैं।
+दैनिक/प्रति घंटा कोटा के साथ, बैकिंग प्रदाता/खाते के विरुद्ध API कुंजियाँ जारी करने और रोटेट करने के लिए ऑटो-कुंजी प्रबंधन सबसिस्टम द्वारा उपयोग किया जाता है।
 
-| Method | Path                                  | Description                                                                                                                                                                                              |
-| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | पंजीकृत कुंजियों की सूची (केवल मास्क किया गया प्रीफ़िक्स)                                                                                                                                                |
-| POST   | `/api/v1/registered-keys`             | नई पंजीकृत कुंजी जारी करें — बॉडी: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`। रॉ कुंजी **केवल एक बार** लौटाई जाती है। कोटा अस्वीकृति पर `429` लौटाता है। |
-| GET    | `/api/v1/registered-keys/[id]`        | पंजीकृत कुंजी का मेटाडेटा प्राप्त करें (रॉ सामग्री नहीं)                                                                                                                                                 |
-| DELETE | `/api/v1/registered-keys/[id]`        | पंजीकृत कुंजी रद्द करें                                                                                                                                                                                  |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | स्पष्ट रद्दीकरण एंडपॉइंट (DELETE के समान प्रभाव)                                                                                                                                                         |
+| Method | Path                                  | Description                                                                                                                                                                                          |
+| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | पंजीकृत कुंजियों की सूची (केवल मास्क किया हुआ प्रीफ़िक्स)                                                                                                                                            |
+| POST   | `/api/v1/registered-keys`             | नई पंजीकृत कुंजी जारी करें — बॉडी: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`। रॉ कुंजी **केवल एक बार** लौटाता है। कोटा अस्वीकृति पर `429` लौटाता है। |
+| GET    | `/api/v1/registered-keys/[id]`        | पंजीकृत कुंजी का मेटाडेटा प्राप्त करें (कोई रॉ सामग्री नहीं)                                                                                                                                         |
+| DELETE | `/api/v1/registered-keys/[id]`        | पंजीकृत कुंजी रद्द करें                                                                                                                                                                              |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | स्पष्ट रद्दीकरण एंडपॉइंट (DELETE के समान प्रभाव)                                                                                                                                                     |
+| GET    | `/api/v1/providers/[provider]/limits` | प्रदाता की जारीकरण सीमाएँ पढ़ें                                                                                                                                                                      |
+| PUT    | `/api/v1/providers/[provider]/limits` | प्रदाता की जारीकरण सीमाएँ सेट करें — बॉडी: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                   |
+| GET    | `/api/v1/accounts/[id]/limits`        | खाते की जारीकरण सीमाएँ पढ़ें                                                                                                                                                                         |
+| PUT    | `/api/v1/accounts/[id]/limits`        | खाते की जारीकरण सीमाएँ सेट करें — प्रदाता रूट के समान बॉडी                                                                                                                                           |
 
-**प्रमाणीकरण:** प्रबंधन सत्र/API कुंजी (`requireManagementAuth`) — `/api/keys` के समान गार्ड: डैशबोर्ड सत्र, स्थानीय CLI टोकन, या `manage`/`admin` स्कोप वाली API कुंजी; केवल इंफ़रेंस वाली API कुंजियों को `403` मिलता है। `/v1/quotas/check` और `/v1/issues/report` भी देखें।
+**प्रमाणीकरण:** प्रबंधन सत्र/API कुंजी (`requireManagementAuth`) — `/api/keys` के समान गार्ड: डैशबोर्ड सत्र, स्थानीय CLI टोकन, या `manage`/`admin` स्कोप वाली API कुंजी; केवल-अनुमान API कुंजियों को `403` मिलता है। `/v1/quotas/check` और `/v1/issues/report` भी देखें।
 
 ---
 

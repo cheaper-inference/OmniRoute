@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (İsteğe bağlı) İmajı kaldırın
+docker rmi cheaperinference/omniroute:latest
+# Eski kurulumlarda önceki imaj adı kullanılıyordu:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

@@ -116,7 +116,7 @@ function renderDiffSegment(
 
   return (
     <div key={`${label}-${index}`} className="rounded border border-border bg-bg p-2">
-      <span className="mr-2 rounded bg-bg-subtle px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+      <span className="mr-2 rounded bg-bg-subtle px-1.5 py-0.5 text-3xs font-semibold uppercase tracking-wide text-text-muted">
         {translateLabel(label)}
       </span>
       <span className="whitespace-pre-wrap break-words text-text-main">{text}</span>
@@ -475,17 +475,13 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               <div className="flex flex-col gap-1">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-                  {t("original")}
-                </h3>
+                <h3 className="text-xs uppercase text-text-muted">{t("original")}</h3>
                 <pre className="max-h-72 overflow-auto whitespace-pre-wrap break-words rounded border border-border bg-bg p-3 text-text-main">
                   {preview.original ?? ""}
                 </pre>
               </div>
               <div className="flex flex-col gap-1">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-                  {t("compressed")}
-                </h3>
+                <h3 className="text-xs uppercase text-text-muted">{t("compressed")}</h3>
                 <pre className="max-h-72 overflow-auto whitespace-pre-wrap break-words rounded border border-border bg-bg p-3 text-text-main">
                   {preview.compressed ?? ""}
                 </pre>
@@ -493,9 +489,7 @@ export function EngineConfigPage({ engineId }: { engineId: string }) {
             </div>
             {preview.diff && preview.diff.length > 0 && (
               <div className="flex flex-col gap-2" data-testid="compression-preview-diff">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-                  {t("diff")}
-                </h3>
+                <h3 className="text-xs uppercase text-text-muted">{t("diff")}</h3>
                 <div className="flex max-h-72 flex-col gap-2 overflow-auto rounded border border-border p-2">
                   {preview.diff.map((segment, index) =>
                     renderDiffSegment(segment, index, (label) => {

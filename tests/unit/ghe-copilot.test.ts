@@ -383,3 +383,156 @@ test("GheCopilotExecutor.execute does not trigger identity fallback on 403", asy
     globalThis.fetch = originalFetch;
   }
 });
+
+test("GheCopilotExecutor.refreshCopilotToken falls back to /api/v3/copilot_internal/user on 404 (GHE data residency)", async () => {
+  const executor = new GheCopilotExecutor({
+    gheUrl: "https://msft.ghe.com",
+    clientId: "test-client",
+    clientSecret: "test-secret",
+  });
+  const originalFetch = globalThis.fetch;
+  const calledUrls: string[] = [];
+
+  globalThis.fetch = async (url) => {
+    const urlStr = String(url);
+    calledUrls.push(urlStr);
+    if (urlStr.endsWith("/api/v3/copilot_internal/v2/token")) {
+      return new Response(JSON.stringify({ message: "Not Found" }), { status: 404 });
+    }
+    if (urlStr.endsWith("/api/v3/copilot_internal/user")) {
+      return new Response(
+        JSON.stringify({
+          endpoints: {
+            api: "https://copilot-api.msft.ghe.com",
+            proxy: "https://copilot-proxy.msft.ghe.com",
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    return new Response("unexpected", { status: 500 });
+  };
+
+  try {
+    const credentials: ProviderCredentials = {
+      accessToken: "gho_ghe_data_residency_token",
+      providerSpecificData: { gheUrl: "https://msft.ghe.com" },
+    };
+
+    const refreshed = await executor.refreshCredentials(credentials, null);
+    assert.deepEqual(calledUrls, [
+      "https://msft.ghe.com/api/v3/copilot_internal/v2/token",
+      "https://msft.ghe.com/api/v3/copilot_internal/user",
+    ]);
+    assert.ok(refreshed, "refreshCredentials should succeed via copilot_internal/user fallback");
+    assert.equal(refreshed.copilotToken, "gho_ghe_data_residency_token");
+    assert.equal(
+      (refreshed.providerSpecificData as Record<string, unknown>)?.copilotApiUrl,
+      "https://copilot-api.msft.ghe.com"
+    );
+    assert.equal(
+      (refreshed.providerSpecificData as Record<string, unknown>)?.copilotProxyUrl,
+      "https://copilot-proxy.msft.ghe.com"
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("gheCopilot OAuth postExchange falls back to /api/v3/copilot_internal/user when /v2/token returns 404", async () => {
+  const { gheCopilot } = await import("../../src/lib/oauth/providers/ghe-copilot.ts");
+  const originalFetch = globalThis.fetch;
+  const calledUrls: string[] = [];
+
+  globalThis.fetch = async (url) => {
+    const urlStr = String(url);
+    calledUrls.push(urlStr);
+    if (urlStr.endsWith("/api/v3/copilot_internal/v2/token")) {
+      return new Response(JSON.stringify({ message: "Not Found" }), { status: 404 });
+    }
+    if (urlStr.endsWith("/api/v3/copilot_internal/user")) {
+      return new Response(
+        JSON.stringify({
+          endpoints: {
+            api: "https://copilot-api.msft.ghe.com",
+            proxy: "https://copilot-proxy.msft.ghe.com",
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    if (urlStr.endsWith("/api/v3/user")) {
+      return new Response(JSON.stringify({ login: "corpuser", email: "corpuser@example.com" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("unexpected", { status: 500 });
+  };
+
+  try {
+    const tokens = { access_token: "gho_ghe_oauth_token" };
+    const extra = await gheCopilot.postExchange(tokens, { gheUrl: "https://msft.ghe.com" });
+    const mapped = gheCopilot.mapTokens(tokens, extra);
+
+    assert.deepEqual(calledUrls, [
+      "https://msft.ghe.com/api/v3/copilot_internal/v2/token",
+      "https://msft.ghe.com/api/v3/copilot_internal/user",
+      "https://msft.ghe.com/api/v3/user",
+    ]);
+    assert.equal(mapped.providerSpecificData.copilotToken, "gho_ghe_oauth_token");
+    assert.equal(mapped.providerSpecificData.copilotApiUrl, "https://copilot-api.msft.ghe.com");
+    assert.equal(mapped.providerSpecificData.copilotProxyUrl, "https://copilot-proxy.msft.ghe.com");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("refreshCopilotToken service falls back to /copilot_internal/user on 404 for GHE baseUrl", async () => {
+  const { refreshCopilotToken } =
+    await import("../../open-sse/services/tokenRefresh/providers/copilot.ts");
+  const originalFetch = globalThis.fetch;
+  const calledUrls: string[] = [];
+
+  globalThis.fetch = async (url) => {
+    const urlStr = String(url);
+    calledUrls.push(urlStr);
+    if (urlStr.endsWith("/api/v3/copilot_internal/v2/token")) {
+      return new Response(JSON.stringify({ message: "Not Found" }), { status: 404 });
+    }
+    if (urlStr.endsWith("/api/v3/copilot_internal/user")) {
+      return new Response(
+        JSON.stringify({
+          endpoints: {
+            api: "https://copilot-api.msft.ghe.com",
+            proxy: "https://copilot-proxy.msft.ghe.com",
+          },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    return new Response("unexpected", { status: 500 });
+  };
+
+  try {
+    const result = await refreshCopilotToken(
+      "gho_ghe_healthcheck_token",
+      null,
+      null,
+      "https://msft.ghe.com/api/v3"
+    );
+
+    assert.deepEqual(calledUrls, [
+      "https://msft.ghe.com/api/v3/copilot_internal/v2/token",
+      "https://msft.ghe.com/api/v3/copilot_internal/user",
+    ]);
+    assert.equal(result.token, "gho_ghe_healthcheck_token");
+    assert.ok(typeof result.expiresAt === "number" && result.expiresAt > 0);
+    assert.deepEqual(result.endpoints, {
+      api: "https://copilot-api.msft.ghe.com",
+      proxy: "https://copilot-proxy.msft.ghe.com",
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

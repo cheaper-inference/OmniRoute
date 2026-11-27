@@ -558,6 +558,8 @@ Questa delega:
 
 Gli aggiornamenti WebSocket per il dashboard incorporato sono gestiti da un server associato su una porta dedicata (vedi `src/lib/services/embedWsProxy.ts`).
 
+Ogni aggiornamento è autorizzato prima dell'apertura del tunnel, con le stesse regole del percorso di incorporamento HTTP : il peer deve essere di loopback senza intestazione di inoltro proxy inverso, un browser `Origin` deve essere un'origine del dashboard (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` estendono le impostazioni predefinite di loopback) e il chiamante necessita di una sessione del dashboard o di una chiave API con ambito di gestione a meno che l'accesso al dashboard non sia disabilitato.
+
 **Sicurezza:** I percorsi proxy incorporati sono classificati sotto `LOCAL_ONLY_API_PREFIXES` e possono essere raggiunti solo da loopback. Un utente malintenzionato che ottiene uno JWT tramite un tunnel Cloudflare/Ngrok non può accedere ai servizi incorporati.
 
 ---

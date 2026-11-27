@@ -213,7 +213,11 @@ test("AC-10c: BYPASS_PREFIX_NOT_ALLOWED failure writes settings.update_failed", 
 
   // Snapshot untouched.
   const after = await settingsDb.getSettings();
-  assert.deepEqual(after.localOnlyManageScopeBypassPrefixes, ["/api/mcp/"]);
+  // Untouched default: /api/mcp/ plus the read-only /api/resilience/connections (KEA-9357).
+  assert.deepEqual(after.localOnlyManageScopeBypassPrefixes, [
+    "/api/mcp/",
+    "/api/resilience/connections",
+  ]);
 });
 
 test("AC-10d: zod validation failure (wrong type) writes settings.update_failed", async () => {

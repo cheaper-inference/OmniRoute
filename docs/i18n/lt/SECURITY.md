@@ -4,12 +4,12 @@
 
 ---
 
-## Pranešimas apie pažeidžiamumus
+## Pranešimas apie pažeidžiamumą
 
-Jei aptikote „OmniRoute“ saugumo pažeidžiamumą, praneškite apie jį atsakingai:
+Jei aptinkate OmniRoute saugos spragą, praneškite apie tai atsakingai:
 
-1. **NEKURKITE** viešos „GitHub“ problemos
-2. Naudokite [„GitHub“ saugumo įspėjimus](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
+1. **DO NOT** atidaryti viešą GitHub problemą
+2. Naudokite [GitHub saugos patarimus](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
 3. Įtraukite: aprašymą, atkūrimo veiksmus ir galimą poveikį
 
 ## Reagavimo terminai
@@ -29,25 +29,14 @@ Jei aptikote „OmniRoute“ saugumo pažeidžiamumą, praneškite apie jį atsa
 | 3.7.x   | ✅ Saugumo palaikymas                              |
 | < 3.7.0 | ❌ Nepalaikoma                                     |
 
-## LTS palaikymo laikotarpis (v3.9.x)
+## LTS palaikymo langas (v3.9.x)
 
-Po 3.8.59 kita versija yra **3.9.0**; ja atšakoje `stable/v3` pradedama ilgalaikio
-palaikymo linija (žr. [`ROADMAP.md`](ROADMAP.md) → „3 etapas — v3.9.0 LTS“).
+Po 3.8.59 yra kita versija** 3.9.0** , kuris atidaro ilgalaikės palaikymo liniją `stable/v3` atšaka (žr [`ROADMAP.md`](ROADMAP.md) → "3 fazė — v3.9.0 LTS").
 
-- **Ką gauna `stable/v3`:** klaidų taisymus, saugos pataisas ir paslaugų teikėjų atnaujinimus. Naujos
-  funkcijos įtraukiamos į v4 kanalą; LTS linijoje pirmenybė teikiama stabilumui. `npm install omniroute`
-  (`latest` dist-tag) išlieka v3 versijoje per visą v4 ciklą.
-- **Laikotarpio trukmė:** `stable/v3` gauna **saugos pataisas ir kritinių regresijų taisymus
-  12 mėnesių po 3.9.0 išleidimo arba iki 90 dienų po to, kai v4.0.0 paskelbiama kaip `latest` —
-  atsižvelgiant į tai, kuri data yra vėlesnė**. Galutinė pabaigos data įrašoma 3.9.0 laidos pastabose ir
-  [`ROADMAP.md`](ROADMAP.md), kai ši versija išleidžiama.
-- **Pranešimas apie LTS linijos pažeidžiamumą:** naudojamas tas pats kanalas kaip ir bet kuriai kitai versijai —
-  privatus [GitHub saugos pranešimas](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  niekada ne viešas problemos įrašas. Nurodykite, kurią versiją išbandėte (pavyzdžiui, `3.9.2`); pataisos įtraukiamos į
-  `stable/v3` ir perkeliamos į v4.
-- **Saugos atskaitos taškas LTS išleidimo metu:** užfiksuota skaitytuvo būsena, maršrutų apsaugos ir
-  viešųjų prisijungimo duomenų patikros įrodymai pateikiami faile
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **Ką `stable/v3` gauna:** klaidų pataisymai, saugos pataisymai ir teikėjo naujinimai. Naujos funkcijos patenka į v4 kanalą; LTS linija pirmiausia yra stabilumas. `npm install omniroute` ( `latest` dist-tag) išlieka v3 per visą v4 ciklą.
+- **Lango trukmė:** `stable/v3` gauna** saugos pataisymai ir kritinės regresijos 12 mėnesių po 3.9.0 iškirpimo arba iki 90 dienų po 4.0.0 versijos paskelbimo kaip `latest` — atsižvelgiant į tai, kas įvyks vėliau** . Gauta pabaigos data įrašoma į 3.9.0 laidos pastabas ir [`ROADMAP.md`](ROADMAP.md), kai įvyksta iškirpimas.
+- **Pranešimas apie LTS linijos pažeidžiamumą:** tas pats kanalas kaip ir bet kuri kita versija — privatus [GitHub saugos patarimas](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), niekada nėra vieša problema. Pasakykite, kurią versiją išbandėte (pvz., `3.9.2`); pataisymai patenka į `stable/v3` ir yra perkeliami į v4.
+- **Saugumo pradinė linija ties LTS pjūviu:** išmatuota skaitytuvo būsena, maršruto apsaugos ir viešųjų įgaliojimų įrodymai įrašomi į [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 
@@ -211,7 +200,7 @@ docker run -d \
   -e JWT_SECRET="$(openssl rand -base64 48)" \
   -e API_KEY_SECRET="$(openssl rand -hex 32)" \
   -e STORAGE_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ---

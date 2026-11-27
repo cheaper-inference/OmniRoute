@@ -11,14 +11,11 @@ import {
   getDailyUsage,
   getDailyCostRows,
   getHeatmapRows,
-  getModelUsageRows,
-  getProviderCostRows,
   getProviderUsageRows,
   getAccountCostRows,
   getAccountUsageRows,
   getApiKeyUsageRows,
   getApiKeyTotalsRows,
-  getServiceTierUsageRows,
   getApiKeyMetadataRows,
   getWeeklyPatternRows,
   getPresetCostModelRows,
@@ -83,6 +80,19 @@ const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 type PricingByProvider = Record<string, Record<string, Record<string, unknown>>>;
 function appendWhereCondition(whereClause: string, condition: string): string {
   return whereClause ? `${whereClause} AND (${condition})` : `WHERE (${condition})`;
+}
+
+// Mirrors the `${provider}:${normalizedModel}` key built by getCachedInputAnalytics. A row
+// with a missing model (usage writers store `entry.model || null`) maps to "unknown" there,
+// so it must here too instead of dereferencing null (#20453).
+function providerModelCacheKey(
+  provider: unknown,
+  model: unknown,
+  normalizeModel: (model: string) => string
+): string {
+  const providerKey = typeof provider === "string" && provider ? provider : "unknown";
+  const modelKey = typeof model === "string" && model ? normalizeModel(model) : "unknown";
+  return `${providerKey.toLowerCase()}:${modelKey.toLowerCase()}`;
 }
 
 function formatUtcDate(date: Date): string {
@@ -244,6 +254,8 @@ async function computeAnalyticsResponse(
     >;
 
     const dailyRows = getDailyUsage(unifiedSource, unifiedParams);
+    // One grouped scan at day x provider x model x service tier feeds the daily cost, model,
+    // provider cost and service-tier views below. Each used to run the same scan on its own.
     const dailyCostRows = getDailyCostRows(unifiedSource, unifiedParams);
 
     const heatmapStart = new Date();
@@ -268,9 +280,9 @@ async function computeAnalyticsResponse(
 
     const heatmapRows = getHeatmapRows(heatmapConditions, heatmapParams);
 
-    const modelRows = getModelUsageRows(unifiedSource, unifiedParams);
+    const modelRows = [...dailyCostRows].sort((left, right) => right.requests - left.requests);
 
-    const providerCostRows = getProviderCostRows(unifiedSource, unifiedParams);
+    const providerCostRows = dailyCostRows;
 
     const providerRows = getProviderUsageRows(unifiedSource, unifiedParams);
 
@@ -283,7 +295,7 @@ async function computeAnalyticsResponse(
 
     const apiKeyRows = getApiKeyUsageRows(apiKeyWhereClause, params);
 
-    const serviceTierRows = getServiceTierUsageRows(unifiedSource, unifiedParams);
+    const serviceTierRows = dailyCostRows;
 
     const apiKeyMetadataRows = getApiKeyMetadataRows(apiKeyWhereClause, params);
 
@@ -318,6 +330,8 @@ async function computeAnalyticsResponse(
       normalizeModelName
     );
     const summary = {
+      estimated: Number(summaryRow?.estimatedRequests || 0) > 0,
+      unknownEvidence: Number(summaryRow?.unknownEvidenceRequests || 0) > 0,
       ...cachedInput.summary,
       totalRequests: Number(summaryRow?.totalRequests || 0),
       promptTokens: Number(summaryRow?.promptTokens || 0),
@@ -431,10 +445,10 @@ async function computeAnalyticsResponse(
         !includeFlatRateEstimates,
         pricingContext
       );
-      // Keyed by model name alone (not provider) — the table renders one row per
-      // model, so the same model served via multiple provider connections/accounts
-      // must be merged here rather than producing duplicate `key={m.model}` rows.
-      const key = short;
+      // Keyed by provider + normalized model name so multi-provider deployments
+      // retain separate per-provider rows while same-provider raw spelling
+      // variants (e.g. prefixed vs unprefixed, #7535) still merge cleanly.
+      const key = `${provider}:${short}`;
       const existing = modelMap.get(key) || {
         model: short,
         provider,
@@ -467,7 +481,9 @@ async function computeAnalyticsResponse(
 
     const byModel = Array.from(modelMap.values())
       .map((row) => ({
-        ...cachedInput.byModel.find((item) => normalizeModelName(item.model) === row.model),
+        ...(cachedInput.byProviderModel.get(
+          providerModelCacheKey(row.provider, row.model, normalizeModelName)
+        ) ?? cachedInput.byModel.find((item) => normalizeModelName(item.model) === row.model)),
         model: row.model,
         provider: row.provider,
         rawModel: row.rawModel,

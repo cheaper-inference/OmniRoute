@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 const FIXTURE = fileURLToPath(
   new URL("../fixtures/perplexity-web-stream-error-boundary.fixture.ts", import.meta.url)
@@ -41,7 +42,7 @@ function runIsolatedFixture(testRoot: string): Promise<FixtureResult> {
     // Pin the reporter: the assertions read spec output, and Node 22 defaults to tap when stdout is a pipe.
     const child = spawn(
       process.execPath,
-      ["--import", "tsx/esm", "--test", "--test-reporter=spec", FIXTURE],
+      [...nativeCoverageArgs(), "--import", "tsx/esm", "--test", "--test-reporter=spec", FIXTURE],
       {
         cwd: process.cwd(),
         env: childEnv,

@@ -46,23 +46,21 @@ uobičajeni promet prema `/v1/chat/completions`.
 
 ## Postavljanje
 
-1. Otvorite **Nadzorna ploča → Chaos Mode** (`/dashboard/chaos`).
-2. **Uključite ga** — Chaos Mode isporučuje se **onemogućen prema zadanim postavkama** (`enabled: false` u
-   `src/lib/chaos/chaosConfig.ts`). Dok je onemogućen, `POST /api/chaos/run` odgovara s
-   `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
-3. Odaberite sudionike i zadane postavke (trajno se spremaju po instanci putem spremišta postavki):
+1. Otvoriti** Kontrolna ploča → Chaos Mode** (`/dashboard/chaos`).
+2. Okreni ga** na** — Chaos Mode brodovi** onemogućeno prema zadanim postavkama** (`enabled: false` u `src/lib/chaos/chaosConfig.ts`). Dok je onemogućen, `POST /api/chaos/run` odgovara `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
+3. Odaberite sudionike i zadane postavke (trajaju po instanci putem trgovine postavki):
 
-   | Polje               | Značenje                                                                   | Zadano / ograničenja                          |
-   | ------------------- | -------------------------------------------------------------------------- | --------------------------------------------- |
-   | `enabled`           | Glavni prekidač                                                            | `false`                                       |
-   | `defaultMode`       | `parallel` ili `collaborative` (pogledajte u nastavku)                     | `parallel`                                    |
-   | `providerOverrides` | Sudjelovanje po pružatelju (`providerId`, opcionalni `modelId`, `enabled`) | prazno = svaki aktivni pružatelj, najviše 200 |
-   | `systemPrompt`      | Zamjena ugrađenog sistemskog upita za Chaos                                | opcionalno, najviše 10 000 znakova            |
-   | `timeoutMs`         | Najdulje vrijeme po pozivu modela                                          | `120000` (5 000–600 000)                      |
-   | `maxTokens`         | `max_tokens` po pozivu modela                                              | `4096` (256–128 000)                          |
+   | Polje               | Značenje                                                                | Zadano / ograničenja                      |
+   | ------------------- | ----------------------------------------------------------------------- | ----------------------------------------- |
+   | `enabled`           | Glavni prekidač                                                         | `false`                                   |
+   | `defaultMode`       | `parallel` ili `collaborative` (vidi dolje)                             | `parallel`                                |
+   | `providerOverrides` | Sudjelovanje po pružatelju (`providerId`, izborno `modelId`, `enabled`) | prazan = svaki aktivni pružatelj, max 200 |
+   | `systemPrompt`      | Nadjačaj za ugrađeni odziv sustava Chaos                                | izborno, maksimalno 10 000 znakova        |
+   | `timeoutMs`         | Maksimalno vrijeme po pozivu modela                                     | `120000` (5 000–600 000)                  |
+   | `maxTokens`         | `max_tokens` po pozivu modela                                           | `4096` (256–128 000)                      |
 
-4. Pokrenite **test sa same stranice** — ploča s rezultatima prikazuje odgovor,
-   status i trajanje za svakog pružatelja.
+4. Dajte svakom davatelju usluga a** model** . Model pružatelja usluga je `modelId` njegovog omogućenog nadjačavanja na stranici Chaos Mode (pobjeđuje), inače** zadani model** njegove veze. ID pružatelja nikada se ne koristi kao naziv modela. Davatelj s niti je** nije pozvan** : prikazuje se u rezultatima kao `status: "error"` s porukom _"Nije postavljen model za ovog pružatelja usluga. Postavite model za njega na stranici Chaos Mode ili zadani model na vezi."_ i praznim `modelId`, dok ostali pružatelji rade normalno. Ako nijedan odabrani pružatelj nema model, izvođenje ne uspijeva prije bilo kakvog uzlaznog zahtjeva s _"Nijedan pružatelj nema postavljen model. …"_ (HTTP 500 na obje krajnje točke).
+5. Pokreni a** test sa same stranice** — ploča s rezultatima prikazuje odgovor, status i trajanje svakog pružatelja usluga.
 
 ## Načini izvršavanja
 
@@ -76,25 +74,22 @@ uobičajeni promet prema `/v1/chat/completions`.
 
 ### `POST /api/chaos/run` — sesija nadzorne ploče
 
-Autentificirano kolačićem (upravljačka sesija — pogledajte
-[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md)); upotrebljava ga stranica nadzorne ploče.
+Provjera autentičnosti pomoću kolačića (sesija upravljanja — vidi [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) ); koristi stranica nadzorne ploče.
 
 ```jsonc
-// tijelo zahtjeva
+// body
 {
-  "task": "Usporedi pristupe problemu X", // obavezno
-  "providers": ["glm", "kimi"], // opcionalni filtar
-  "mode": "parallel", // opcionalno — nadjačava defaultMode
-  "systemPrompt": "…", // opcionalna zamjena
-  "maxTokens": 4096, // opcionalna zamjena
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
 ### `POST /api/skills/collect/chaos` — API ključ
 
-Varijanta s tokenom Bearer za vanjske pozivatelje. Ključ mora imati **dopuštenje za Chaos Mode**
-(`chaosModeEnabled`), koje je **isključeno prema zadanim postavkama** — omogućite ga za svaki ključ u
-**Nadzorna ploča → API Manager → uređivanje ključa → dopuštenja → Chaos Mode**. Tijelo je jednako kao iznad.
+Varijanta tokena nositelja za vanjske pozivatelje. Ključ mora nositi** Dopuštenje Chaos Mode** (`chaosModeEnabled`), što je** isključeno prema zadanim postavkama** — omogućite ga po ključu** Nadzorna ploča → API Manager → ključ za uređivanje → dopuštenja → Chaos Mode** . Isto tijelo kao gore.
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
@@ -122,15 +117,13 @@ Obje krajnje točke vraćaju isti oblik:
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // samo za način collaborative
+  "summary": "…", // collaborative mode only
 }
 ```
 
 ## Rješavanje problema
 
-- **`400 Chaos Mode is not enabled`** — pogledajte prethodni 2. korak: globalni prekidač je isključen.
-- **API ključ odbijen je na `/api/skills/collect/chaos`** — ključ nema dopuštenje
-  `chaosModeEnabled` za pojedinačni ključ (isključeno prema zadanim postavkama; ovo je postavka, a ne pogreška).
-- **Očekivani pružatelj nedostaje u rezultatima** — provjerite `providerOverrides` na stranici
-  Chaos Mode (onemogućena zamjena isključuje ga) te je li veza s pružateljem
-  aktivna.
+- **`400 Chaos Mode is not enabled`** — korak 2 iznad: globalni prekidač je isključen.
+- **API ključ biva odbijen na `/api/skills/collect/chaos`** — ključu nedostaje dopuštenje `chaosModeEnabled` po ključu (isključeno prema zadanim postavkama; ovo je postavka, a ne pogreška).
+- **Davatelj prikazuje `No model set for this provider`** — postavlja svoj model na stranici Chaos Mode ili zadani model na svojoj vezi (pogledajte Postavljanje, korak 4).
+- **Pružatelj kojeg ste očekivali nedostaje u rezultatima** — provjerite `providerOverrides` na stranici Chaos Mode (onemogućeno nadjačavanje ga isključuje) i je li veza pružatelja aktivna.

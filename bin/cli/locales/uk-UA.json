@@ -12,7 +12,8 @@
     "dryRun": "[симуляція] виконає: {action}",
     "cancelled": "Скасовано.",
     "jsonOpt": "Вивести у форматі JSON",
-    "yesOpt": "Пропустити підтвердження"
+    "yesOpt": "Пропустити підтвердження",
+    "positiveIntegerRequired": "Ліміт має бути додатним цілим числом."
   },
   "setup": {
     "title": "Налаштування OmniRoute",

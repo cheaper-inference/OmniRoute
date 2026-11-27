@@ -5,14 +5,15 @@ import assert from "node:assert/strict";
 import { CodeBuddyCnExecutor } from "../../open-sse/executors/codebuddy-cn.ts";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const HEX32_RE = /^[0-9a-f]{32}$/;
 const creds = { accessToken: "token" };
 const body = { session_id: "sess-cn", messages: [{ role: "user", content: "hi" }] };
 
 test("CodeBuddyCnExecutor sends the X-Conversation-* family", () => {
   const h = new CodeBuddyCnExecutor().buildHeaders(creds, true, null, "glm-5.2", undefined, body);
   assert.match(h["X-Conversation-ID"], UUID_RE);
-  assert.match(h["X-Conversation-Request-ID"], UUID_RE);
-  assert.match(h["X-Conversation-Message-ID"], UUID_RE);
+  assert.match(h["X-Conversation-Request-ID"], HEX32_RE);
+  assert.match(h["X-Conversation-Message-ID"], HEX32_RE);
   assert.equal(h["X-Request-ID"], h["X-Conversation-Message-ID"]);
 });
 

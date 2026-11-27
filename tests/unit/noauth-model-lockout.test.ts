@@ -1,7 +1,7 @@
 /**
  * Tests for #13483: model-only lockout must be enforced for no-auth providers.
  *
- * Before the fix, no-auth providers (uncloseai, duckduckgo-web, etc.) returned
+ * Before the fix, no-auth providers (cloudflare-playground, duckduckgo-web, etc.) returned
  * synthetic "noauth" credentials early in getProviderCredentials, bypassing the
  * model lockout check. A model_capacity lockout was recorded but never enforced
  * — every request retried the same locked model, paying a wasted upstream
@@ -31,7 +31,7 @@ after(() => {
 });
 
 test("#13483: noauth provider reports a model cooldown when model is lockout-blocked", async () => {
-  const provider = "uncloseai";
+  const provider = "cloudflare-playground";
   const model = "locked-passthrough-model";
 
   // Record a model lockout for the synthetic "noauth" connection
@@ -50,7 +50,7 @@ test("#13483: noauth provider reports a model cooldown when model is lockout-blo
 
 test("#13483: noauth provider still works when model is NOT lockout-blocked", async () => {
   clearAllModelLockouts();
-  const provider = "uncloseai";
+  const provider = "cloudflare-playground";
   const model = "some-other-model";
 
   // No lockout recorded — should return synthetic credentials
@@ -60,7 +60,7 @@ test("#13483: noauth provider still works when model is NOT lockout-blocked", as
 
 test("#13483: noauth lockout does not block a different model", async () => {
   clearAllModelLockouts();
-  const provider = "uncloseai";
+  const provider = "cloudflare-playground";
   const lockedModel = "locked-passthrough-model";
   const otherModel = "kimi-latest";
 
@@ -86,18 +86,29 @@ test("#13483: noauth lockout does not affect non-noauth providers", async () => 
   const model = "gpt-4";
 
   // Record lockout for a noauth provider
-  recordModelLockoutFailure("uncloseai", "noauth", model, "model_capacity", 400, 1800_000);
+  recordModelLockoutFailure(
+    "cloudflare-playground",
+    "noauth",
+    model,
+    "model_capacity",
+    400,
+    1800_000
+  );
 
   // openai is NOT a noauth provider — it should not be affected by this check
   // (openai has its own connection-based lockout path; this test just verifies
   // the noauth early-return path doesn't leak lockouts to other providers)
   // We can't easily test openai here without DB connections, but we verify
-  // the uncloseai noauth path specifically.
+  // the cloudflare-playground noauth path specifically.
   const result = (await auth.getProviderCredentials(
-    "uncloseai",
+    "cloudflare-playground",
     null,
     null,
     model
   )) as CooldownOutcome;
-  assert.equal(result?.allRateLimited, true, "uncloseai noauth should respect its own lockout");
+  assert.equal(
+    result?.allRateLimited,
+    true,
+    "cloudflare-playground noauth should respect its own lockout"
+  );
 });

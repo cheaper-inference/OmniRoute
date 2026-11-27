@@ -75,6 +75,19 @@ test("startBisection: halves of the batch, nothing landed, zero steps", () => {
   assert.equal(bisect.steps, 0);
 });
 
+test("startBisection keeps the hang flag (default false) and advanceBisection carries it", () => {
+  assert.equal(startBisection(batchOf(2), "b1").hang, false);
+  const hang = startBisection(batchOf(4), "b2", { hang: true });
+  assert.equal(hang.hang, true);
+  const split = advanceBisection(hang, "red");
+  assert.equal(split.bisect.hang, true, "split in place");
+  const landed = advanceBisection(split.bisect, "green");
+  assert.equal(landed.bisect.hang, true, "after a green segment");
+  const culprit = advanceBisection(landed.bisect, "red");
+  assert.equal(culprit.culprit.n, 2);
+  assert.equal(culprit.bisect.hang, true, "after a culprit");
+});
+
 test("startBisection rejects a batch of 1 (that PR is the culprit) and a missing id", () => {
   assert.throws(() => startBisection(batchOf(1), "b1"), /at least 2/);
   assert.throws(() => startBisection(batchOf(2), ""), /rootBatchId/);

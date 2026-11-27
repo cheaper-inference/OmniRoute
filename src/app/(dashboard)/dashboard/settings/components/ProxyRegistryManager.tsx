@@ -29,6 +29,7 @@ import {
   Textarea,
 } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import SearchableSelectField from "@/shared/components/SearchableSelectField";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useProxyBatchOperations } from "./useProxyBatchOperations";
 import { ProxyStatusBadge } from "./ProxyStatusBadge";
@@ -60,6 +61,7 @@ import {
   repairRelayResponseSchema,
   useProxyBulkImportLimit,
 } from "./proxyRegistryData";
+import Notice from "@/shared/components/Notice";
 
 export default function ProxyRegistryManager({
   onRedeployRelay,
@@ -637,7 +639,9 @@ export default function ProxyRegistryManager({
       <Card className="p-6">
         <div className="mb-4 flex flex-col gap-3">
           <div className="w-full min-w-0">
-            <h3 className="text-lg font-semibold">{t("title")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("title")}
+            </h3>
             <p className="text-sm text-text-muted">{t("description")}</p>
           </div>
           <div className="w-full border-t border-border" aria-hidden="true" />
@@ -748,20 +752,14 @@ export default function ProxyRegistryManager({
         </div>
 
         {error && (
-          <div
-            role="alert"
-            className="mb-3 px-3 py-2 rounded border border-error/30 bg-error-bg text-sm text-error"
-          >
+          <Notice variant="critical" className="mb-3">
             {error}
-          </div>
+          </Notice>
         )}
         {relayTested !== null && relayAlive !== null && (
-          <div
-            role="status"
-            className="mb-3 px-3 py-2 rounded border border-border bg-bg-subtle text-xs text-text-muted"
-          >
+          <Notice className="mb-3">
             {t("relayProbeSummary", { tested: relayTested, alive: relayAlive })}
-          </div>
+          </Notice>
         )}
 
         {loading ? (
@@ -771,7 +769,7 @@ export default function ProxyRegistryManager({
         ) : items.length === 0 ? (
           <EmptyState icon="dns" title={t("noProxies")} />
         ) : (
-          <Table scrollbarLabel={t("title")} containerClassName="rounded-none border-0">
+          <Table scrollbarLabel={t("title")} scrollLabel={t("title")} variant="plain">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-8">
@@ -854,7 +852,7 @@ export default function ProxyRegistryManager({
                         )}
                         {repairErrorById[item.id] && (
                           <span
-                            className="ml-1 text-[10px] text-error"
+                            className="ml-1 text-3xs text-error"
                             title={repairErrorById[item.id]}
                           >
                             {t("relayRepairError")}
@@ -1016,18 +1014,18 @@ export default function ProxyRegistryManager({
               <option value="account">{t("scopeAccount")}</option>
               <option value="combo">{t("scopeCombo")}</option>
             </Select>
-            <Select
+            <SearchableSelectField
               label={t("labelProxy")}
               value={bulkProxyId}
-              onChange={(e) => setBulkProxyId(e.target.value)}
-            >
-              <option value="">{t("clearAssignment")}</option>
-              {items.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name} ({item.type}://{item.host}:{item.port})
-                </option>
-              ))}
-            </Select>
+              onValueChange={setBulkProxyId}
+              options={[
+                { value: "", label: t("clearAssignment"), alwaysVisible: true },
+                ...items.map((item) => ({
+                  value: item.id,
+                  label: `${item.name} (${item.type}://${item.host}:${item.port})`,
+                })),
+              ]}
+            />
           </div>
 
           {bulkScope !== "global" && (
@@ -1178,26 +1176,26 @@ export default function ProxyRegistryManager({
               </div>
 
               <div className="flex flex-col gap-2 pt-2 border-t border-border sm:flex-row sm:items-end">
-                <Select
+                <SearchableSelectField
                   label={t("poolAddLabel")}
                   className="flex-1"
                   value={poolAddProxyId}
-                  onChange={(e) => setPoolAddProxyId(e.target.value)}
+                  onValueChange={setPoolAddProxyId}
                   data-testid="proxy-registry-pool-add-select"
-                >
-                  <option value="">{t("poolSelectProxy")}</option>
-                  {items
-                    .filter(
-                      (item) =>
-                        !poolMembers.includes(item.id) &&
-                        (item.status ?? "").toLowerCase() !== "dead"
-                    )
-                    .map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.name} ({item.type}://{item.host}:{item.port})
-                      </option>
-                    ))}
-                </Select>
+                  options={[
+                    { value: "", label: t("poolSelectProxy"), alwaysVisible: true },
+                    ...items
+                      .filter(
+                        (item) =>
+                          !poolMembers.includes(item.id) &&
+                          (item.status ?? "").toLowerCase() !== "dead"
+                      )
+                      .map((item) => ({
+                        value: item.id,
+                        label: `${item.name} (${item.type}://${item.host}:${item.port})`,
+                      })),
+                  ]}
+                />
                 <Button
                   size="sm"
                   icon="add"
@@ -1237,7 +1235,8 @@ export default function ProxyRegistryManager({
           <Textarea
             aria-labelledby={bulkImportDescId}
             data-testid="proxy-registry-bulk-import-textarea"
-            className="font-mono text-xs leading-relaxed placeholder:whitespace-pre-wrap"
+            mono
+            className="leading-relaxed placeholder:whitespace-pre-wrap"
             rows={14}
             value={bulkImportText}
             placeholder={BULK_IMPORT_PLACEHOLDER}
@@ -1295,7 +1294,7 @@ export default function ProxyRegistryManager({
               scrollbarLabel={t("bulkImportTitle")}
               maxHeight="12rem"
               scrollLabel={t("bulkImportTitle")}
-              className="text-xs"
+              density="compact"
             >
               <TableHeader>
                 <TableRow>
@@ -1311,7 +1310,7 @@ export default function ProxyRegistryManager({
               <TableBody>
                 {bulkImportParsed.map((entry, idx) => (
                   <TableRow key={idx}>
-                    <TableCell className="font-medium text-text-main">{entry.name}</TableCell>
+                    <TableCell className="text-text-main">{entry.name}</TableCell>
                     <TableCell>
                       <Badge size="sm">{entry.type}</Badge>
                     </TableCell>
@@ -1343,16 +1342,13 @@ export default function ProxyRegistryManager({
 
           {/* Import result */}
           {bulkImportResult && (
-            <div
-              role="status"
-              className="px-3 py-2 rounded border border-success/30 bg-success-bg text-sm text-success"
-            >
+            <Notice variant="success">
               {t("bulkImportSuccess", {
                 created: bulkImportResult.created,
                 updated: bulkImportResult.updated,
                 failed: bulkImportResult.failed,
               })}
-            </div>
+            </Notice>
           )}
 
           {/* Actions */}

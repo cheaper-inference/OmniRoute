@@ -1,0 +1,1 @@
+- **fix(translator):** streamed chat completions from Claude models now return `"{}"` as the arguments of a tool call that takes no parameters, matching the non-streamed response. Before, the arguments were an empty string, which is not valid JSON. ([#20152](https://github.com/cheaper-inference/OmniRoute/issues/20152))

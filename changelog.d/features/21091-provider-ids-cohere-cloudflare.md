@@ -1,0 +1,1 @@
+- **feat(sse):** declare Cohere `command-a-plus-05-2026` (Command A+) and Workers AI `@cf/mistralai/mistral-small-3.1-24b-instruct` (128k context) in the provider registry, both confirmed on the providers' public model docs

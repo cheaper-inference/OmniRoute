@@ -2,8 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Progress } from "@omniroute/ui-kit/progress";
 import { PROVIDER_COLORS as CHART_PROVIDER_COLORS } from "@/shared/components/analytics/chartColors";
 import SegmentedControl from "@/shared/components/SegmentedControl";
+import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
@@ -257,7 +259,7 @@ export default function ProviderUtilizationTab() {
                 {t("providerUtilizationNoDataDescription")}
               </p>
             </div>
-            <div className="rounded-lg border border-border bg-surface-2 p-4">
+            <Card.Section>
               <p className="text-xs font-medium text-text-main">
                 {t("providerUtilizationGettingStarted")}
               </p>
@@ -279,11 +281,12 @@ export default function ProviderUtilizationTab() {
                   <span>{t("providerUtilizationStepAutomatic")}</span>
                 </li>
               </ul>
-            </div>
+            </Card.Section>
           </div>
         ) : (
           <div className="flex flex-col gap-5">
             <ProviderCharts
+              ariaLabel={t("providerUtilizationTitle")}
               chartData={chartData}
               providers={data?.providers ?? []}
               providerColors={providerColors}
@@ -323,21 +326,13 @@ export default function ProviderUtilizationTab() {
                           <p className="text-xs text-text-muted">{cardSubtitle}</p>
                         </div>
                       </div>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
-                          point.isExhausted
-                            ? "bg-error/10 text-error"
-                            : isLow
-                              ? "bg-warning/10 text-warning"
-                              : "bg-success/10 text-success"
-                        }`}
-                      >
+                      <Badge variant={point.isExhausted ? "error" : isLow ? "warning" : "success"}>
                         {point.isExhausted
                           ? t("statusExhausted")
                           : isLow
                             ? t("statusLow")
                             : t("statusHealthy")}
-                      </span>
+                      </Badge>
                     </div>
 
                     <div className="flex items-end justify-between gap-3">
@@ -351,19 +346,18 @@ export default function ProviderUtilizationTab() {
                       </div>
                       <div className="text-right text-xs text-text-muted">
                         <p>{formatTooltipTimestamp(point.timestamp, range)}</p>
-                        <p className="mt-1 uppercase tracking-[0.14em]">{point.windowKey}</p>
+                        <p className="ci-eyebrow mt-1">{point.windowKey}</p>
                       </div>
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <div className="h-2 overflow-hidden rounded-full bg-surface-2">
-                        <div
-                          className={`h-full rounded-full transition-all ${
-                            point.isExhausted ? "bg-error" : isLow ? "bg-warning" : "bg-primary"
-                          }`}
-                          style={{ width: `${Math.max(point.remainingPct, 0)}%` }}
-                        />
-                      </div>
+                      <Progress
+                        aria-label={t("remainingQuota")}
+                        aria-valuetext={`${point.remainingPct.toFixed(point.remainingPct < 10 ? 1 : 0)}%`}
+                        value={point.remainingPct}
+                        tone={point.isExhausted ? "danger" : isLow ? "warning" : "default"}
+                        animate={false}
+                      />
                       <div className="flex items-center justify-between text-xs text-text-muted">
                         <span>0%</span>
                         <span>{t("remainingQuota")}</span>

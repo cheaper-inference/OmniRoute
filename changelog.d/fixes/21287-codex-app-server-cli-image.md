@@ -1,0 +1,1 @@
+- **fix(docker):** the `codex-app-server` compose sidecar builds `omniroute:cli-no-docker` (`runner-cli-no-docker` target), which has the Codex CLI, instead of `omniroute:base`, which does not ([#21287](https://github.com/cheaper-inference/OmniRoute/pull/21287), refs #19285)

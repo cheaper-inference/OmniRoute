@@ -9,6 +9,7 @@ import {
   RESPONSES_PREVIOUS_RESPONSE_ID_MODES,
   type ResponsesPreviousResponseIdMode,
 } from "@/shared/constants/responsesPreviousResponseId";
+import IconChip from "@/shared/components/IconChip";
 
 const MODE_SET = new Set<string>(RESPONSES_PREVIOUS_RESPONSE_ID_MODES);
 
@@ -75,11 +76,13 @@ export default function ResponsesStatePolicyTab() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-3">
-        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+        <IconChip>
           <Icon name="account_tree" size={20} />
-        </div>
+        </IconChip>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold">{t("responsesStateTitle")}</h3>
+          <h3 className="ci-heading" data-size="lg">
+            {t("responsesStateTitle")}
+          </h3>
           <p className="text-sm text-text-muted">{t("responsesStateDesc")}</p>
         </div>
         <div className="min-w-[7rem] flex justify-end">

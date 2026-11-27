@@ -1,0 +1,1 @@
+- **fix(security):** The prompt-injection guard now scans both `messages` and `input` when a request carries the two (the Responses translator builds the prompt from `input`), and a string `input` is scanned once instead of twice.

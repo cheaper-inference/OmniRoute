@@ -6,8 +6,17 @@
   "appSlug": "omni-queue",
   "bases": "^release/v\\d+\\.\\d+\\.\\d+$",
   "blockLabels": ["hold", "hold-vps", "do-not-merge", "wip"],
-  "batch": { "maxSize": 6, "minSize": 1, "maxWaitMinutes": 10 },
-  "landing": { "mode": "merge-ff" },
+  "batch": { "maxSize": 12, "minSize": 1, "maxWaitMinutes": 10, "adaptive": true, "startSize": 6 },
+  "landing": {
+    "mode": "merge-ff",
+    "actor": "owner",
+    "identity": {
+      "name": "diegosouzapw",
+      "email": "8016841+diegosouzapw@users.noreply.github.com"
+    },
+    "statusContext": "omni-queue/land",
+    "signing": "ssh"
+  },
   "requiredChecks": [
     "Gate / CI",
     "Gate / Quality",
@@ -17,8 +26,11 @@
   "aggregateChecks": ["Gate / CI", "Gate / Quality"],
   "checksTimeoutMinutes": 240,
   "infraRetries": 1,
+  "flakyReruns": 1,
   "preferGreenPrChecks": true,
   "prGreenCheck": "Gate / Quality",
+  "prChecksRequired": ["Gate / CI", "Gate / Quality", "API Route Typecheck"],
+  "lanes": { "hotfixLabel": "omni-queue-hotfix", "baseRepairLabel": "omni-queue-base-repair" },
   "protectedPaths": [
     "**/AGENTS.md",
     "**/CLAUDE.md",
@@ -40,5 +52,6 @@
     "config/merge-queue/**",
     ".mergify.yml"
   ],
-  "mode": "shadow"
+  "mode": "live",
+  "voice": "owner"
 }
