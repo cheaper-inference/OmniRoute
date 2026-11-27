@@ -12,6 +12,9 @@ process.env.APP_LOG_TO_FILE = "false";
 process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 const core = await import("../../src/lib/db/core.ts");
 const { getCachedInputAnalytics } = await import("../../src/lib/db/cachedInputAnalytics.ts");
+const { deleteWholeDaysBefore } = await import("../../src/lib/db/cleanup/usagePurge.ts");
+const { rollupUsageHistoryBeforeDate } = await import("../../src/lib/usage/aggregateHistory.ts");
+const { saveRequestUsage } = await import("../../src/lib/usage/usageHistory.ts");
 const options = {
   sinceIso: null,
   untilIso: null,
@@ -27,7 +30,9 @@ test.after(() => {
 
 test.beforeEach(() => {
   const db = core.getDbInstance();
-  db.exec("DELETE FROM usage_history; DELETE FROM daily_usage_summary;");
+  db.exec(
+    "DELETE FROM usage_history; DELETE FROM daily_usage_summary; DELETE FROM key_value WHERE namespace = 'usageRollup';"
+  );
 });
 
 function seedRawFixtures() {
@@ -76,10 +81,15 @@ test("archives contribute only complete consistent rows and never leak into key 
   insert.run("unknown", 500, null, 1);
   insert.run("inconsistent", 100, 900, 0);
   insert.run("mixed", 2000, 200, 1);
+  insert.run("legacy-known", 50, 20, null);
   const result = getCachedInputAnalytics(options);
-  assert.equal(result.summary.knownFreshInputTokens, 1400);
+  assert.equal(result.summary.knownFreshInputTokens, 1430);
   assert.equal(result.summary.cachedInputTokensComplete, false);
   assert.equal(result.byModel.find((row) => row.model === "known")?.knownFreshInputTokens, 600);
+  assert.equal(
+    result.byModel.find((row) => row.model === "legacy-known")?.knownFreshInputTokens,
+    30
+  );
   for (const model of ["unknown", "inconsistent", "mixed"]) {
     assert.equal(result.byModel.find((row) => row.model === model)?.knownFreshInputTokens, 0);
   }
@@ -113,6 +123,78 @@ test("malformed source counters never inflate known fresh input", () => {
   for (const row of result.byModel.filter((row) => row.model.startsWith("malformed"))) {
     assert.equal(row.knownFreshInputTokens, 0);
   }
+});
+
+test("usage writes validate the selected cache-read alias and preserve measured zero", async () => {
+  const fixtures = [
+    { model: "negative", aliases: { cacheRead: -50, cached_tokens: 0 }, expected: null },
+    { model: "unparseable", aliases: { cacheRead: "bad", cached_tokens: 0 }, expected: null },
+    { model: "fractional", aliases: { cacheRead: 0.5, cached_tokens: 0 }, expected: null },
+    { model: "unsafe", aliases: { cacheRead: Number.MAX_SAFE_INTEGER + 1 }, expected: null },
+    { model: "zero", aliases: { cacheRead: 0 }, expected: 0 },
+    { model: "positive", aliases: { cacheRead: 0, cached_tokens: "40" }, expected: 40 },
+  ];
+  for (const { model, aliases } of fixtures) {
+    await saveRequestUsage({
+      provider: "fixture",
+      model,
+      tokens: { input: 100, output: 0, ...aliases },
+      timestamp: "2020-01-01T12:00:00.000Z",
+    });
+  }
+  const db = core.getDbInstance();
+  const rows = db.prepare("SELECT model, tokens_cache_read FROM usage_history ORDER BY id").all();
+  assert.deepEqual(
+    rows,
+    fixtures.map(({ model, expected }) => ({ model, tokens_cache_read: expected }))
+  );
+});
+
+test("archive rollup excludes malformed cache reads before they can offset valid counts", async () => {
+  const db = core.getDbInstance();
+  const insert = db.prepare(`INSERT INTO usage_history
+    (provider, model, timestamp, tokens_input, tokens_output, tokens_cache_read, calculated_cost_usd)
+    VALUES ('fixture', ?, '2020-01-01T12:00:00.000Z', 100, 0, ?, 0)`);
+  insert.run("mixed", -50);
+  insert.run("mixed", 100);
+  insert.run("zero", 0);
+  assert.equal((await rollupUsageHistoryBeforeDate(options.rawCutoffDate)).errors, 0);
+  await deleteWholeDaysBefore("usage_history", "timestamp", options.rawCutoffDate);
+
+  const result = getCachedInputAnalytics(options);
+  assert.deepEqual(result.byProviderModel.get("fixture:mixed"), {
+    cachedInputTokens: 100,
+    cachedInputTokensComplete: false,
+    knownFreshInputTokens: 0,
+  });
+  assert.deepEqual(result.byProviderModel.get("fixture:zero"), {
+    cachedInputTokens: 0,
+    cachedInputTokensComplete: true,
+    knownFreshInputTokens: 100,
+  });
+});
+
+test("a late malformed reading keeps the archive's recorded cache subtotal", async () => {
+  const db = core.getDbInstance();
+  const insert = db.prepare(`INSERT INTO usage_history
+    (provider, model, timestamp, tokens_input, tokens_output, tokens_cache_read, calculated_cost_usd)
+    VALUES ('fixture', 'late', '2020-01-01T12:00:00.000Z', 100, 0, ?, 0)`);
+  insert.run(60);
+  assert.equal((await rollupUsageHistoryBeforeDate(options.rawCutoffDate)).errors, 0);
+  await deleteWholeDaysBefore("usage_history", "timestamp", options.rawCutoffDate);
+  assert.deepEqual(getCachedInputAnalytics(options).summary, {
+    cachedInputTokens: 60,
+    cachedInputTokensComplete: true,
+    knownFreshInputTokens: 40,
+  });
+
+  insert.run(-50);
+  assert.equal((await rollupUsageHistoryBeforeDate(options.rawCutoffDate)).errors, 0);
+  assert.deepEqual(getCachedInputAnalytics(options).summary, {
+    cachedInputTokens: 60,
+    cachedInputTokensComplete: false,
+    knownFreshInputTokens: 0,
+  });
 });
 
 test("shared model keeps provider-specific known input through archive and key filtering", () => {

@@ -300,6 +300,9 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
     const { maxId } = db
       .prepare("SELECT COALESCE(MAX(id), 0) AS maxId FROM usage_history")
       .get() as { maxId: number };
+    // Classify each stored counter before summing so malformed rows cannot offset measured reads.
+    const validCacheRead = `typeof(tokens_cache_read) = 'integer'
+      AND tokens_cache_read BETWEEN 0 AND ${Number.MAX_SAFE_INTEGER}`;
     const rows = db
       .prepare(
         `SELECT
@@ -315,10 +318,10 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
           COALESCE(tokens_reasoning, 0) as requestReasoningTokens,
           COALESCE(SUM(tokens_input), 0) as inputTokens,
           COALESCE(SUM(tokens_output), 0) as outputTokens,
-          SUM(tokens_cache_read) as cacheReadTokens,
+          SUM(CASE WHEN ${validCacheRead} THEN tokens_cache_read END) as cacheReadTokens,
           SUM(${ESTIMATED_USAGE_SQL}) as estimatedRequests,
           SUM(${UNKNOWN_USAGE_SQL}) as unknownEvidenceRequests,
-          SUM(CASE WHEN tokens_cache_read IS NULL THEN 1 ELSE 0 END) as cachedInputUnknownRequests,
+          SUM(CASE WHEN ${validCacheRead} THEN 0 ELSE 1 END) as cachedInputUnknownRequests,
           COALESCE(SUM(tokens_cache_creation), 0) as cacheCreationTokens,
           COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
           (COALESCE(provider_cost_usd, calculated_cost_usd) IS NOT NULL) as hasStoredCost,
@@ -440,8 +443,8 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
         cached_input_unknown_requests = excluded.cached_input_unknown_requests,
         total_cost = excluded.total_cost`
     );
-    // A late row is added to the purged day's summary. An unknown (NULL) total
-    // stays unknown: adding to it would publish a partial count.
+    // Coverage metadata lets a known subtotal survive a late batch with no measured reads.
+    // Legacy summaries keep their existing NULL propagation.
     const addLate = db.prepare(
       `INSERT INTO daily_usage_summary
         (provider, model, date, total_requests, total_input_tokens, total_output_tokens, total_cache_read_tokens, total_cost, estimated_requests, unknown_evidence_requests, cached_input_unknown_requests)
@@ -450,7 +453,10 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
         total_requests = daily_usage_summary.total_requests + excluded.total_requests,
         total_input_tokens = daily_usage_summary.total_input_tokens + excluded.total_input_tokens,
         total_output_tokens = daily_usage_summary.total_output_tokens + excluded.total_output_tokens,
-        total_cache_read_tokens = daily_usage_summary.total_cache_read_tokens + excluded.total_cache_read_tokens,
+        total_cache_read_tokens = daily_usage_summary.total_cache_read_tokens + CASE
+          WHEN daily_usage_summary.cached_input_unknown_requests IS NOT NULL
+          THEN COALESCE(excluded.total_cache_read_tokens, 0)
+          ELSE excluded.total_cache_read_tokens END,
         estimated_requests = daily_usage_summary.estimated_requests + excluded.estimated_requests,
         unknown_evidence_requests = daily_usage_summary.unknown_evidence_requests + excluded.unknown_evidence_requests,
         cached_input_unknown_requests = daily_usage_summary.cached_input_unknown_requests + excluded.cached_input_unknown_requests,
