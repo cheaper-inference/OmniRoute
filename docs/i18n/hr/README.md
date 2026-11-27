@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — jedna krajnja točka i 394 pružatelja. Automatsko rezervno usmjeravanje održava usmjeravanje dok je dostupno drugo zdravo odredište. Šest stupova: otporno rezervno usmjeravanje kroz 394 pružatelja · do 95 % uštede tokena na odgovarajućim radnim opterećenjima · 0 USD za početak uz više od 150 besplatnih razina i 51 besplatnog pružatelja koji se periodički obnavljaju ili su trajno besplatni bez ključa · 39 CLI/agentskih integracija kroz jednu konfiguraciju · kompatibilnost s OpenAI, Claude, Gemini i Responses API-jem na /v1 · produkcijske kontrole, uključujući prekidače strujnog kruga, TLS stealth, MCP s 110 alata, A2A, memoriju, zaštitne ograde, evaluacije i više od 56 000 statičkih deklaracija testova u više od 7 800 praćenih datoteka testova."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — jedna krajnja točka i 394 pružatelja. Automatsko rezervno usmjeravanje održava usmjeravanje dok je dostupno drugo zdravo odredište. Šest stupova: otporno rezervno usmjeravanje kroz 394 pružatelja · do 95 % uštede tokena na odgovarajućim radnim opterećenjima · 0 USD za početak uz više od 150 besplatnih razina i 40 besplatnog pružatelja koji se periodički obnavljaju ili su trajno besplatni bez ključa · 39 CLI/agentskih integracija kroz jednu konfiguraciju · kompatibilnost s OpenAI, Claude, Gemini i Responses API-jem na /v1 · produkcijske kontrole, uključujući prekidače strujnog kruga, TLS stealth, MCP s 110 alata, A2A, memoriju, zaštitne ograde, evaluacije i više od 56 000 statičkih deklaracija testova u više od 7 800 praćenih datoteka testova."/>
 
 <br/>
 <br/>
@@ -711,7 +711,7 @@ povijesti vaše ljuske. → [CLI Integracije](docs/guides/CLI-INTEGRATIONS.md)
 
 </div>
 
-> **394 registrirana pružatelja** u kanonskim zbirkama za chat, medije, pretraživanje, lokalne usluge, agente u oblaku i sustav, uključujući **153 pružatelja s metapodatkom otkrivanja `hasFree: true`**. Registar chat modela obuhvaća **239 pružatelja / 3.059 različitih parova pružatelj-model / 1.475 sirovih ID-ova modela**; zasebni katalog besplatnih kvota ima **465 redaka po modelu**, **34 ponavljajuće kvote** i **51 pružatelja s ponavljajućim ili besplatnim pristupom zauvijek bez ključa**. To su namjerno različiti nazivnici; definicije i izračuni s uklonjenim duplikatima kvota nalaze se u dokumentima [Referenca pružatelja](docs/reference/PROVIDER_REFERENCE.md) i [Besplatne razine](docs/reference/FREE_TIERS.md).
+> **394 registrirana pružatelja** u kanonskim zbirkama za chat, medije, pretraživanje, lokalne usluge, agente u oblaku i sustav, uključujući **153 pružatelja s metapodatkom otkrivanja `hasFree: true`**. Registar chat modela obuhvaća **239 pružatelja / 3.059 različitih parova pružatelj-model / 1.475 sirovih ID-ova modela**; zasebni katalog besplatnih kvota ima **465 redaka po modelu**, **34 ponavljajuće kvote** i **40 pružatelja s ponavljajućim ili besplatnim pristupom zauvijek bez ključa**. To su namjerno različiti nazivnici; definicije i izračuni s uklonjenim duplikatima kvota nalaze se u dokumentima [Referenca pružatelja](docs/reference/PROVIDER_REFERENCE.md) i [Besplatne razine](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

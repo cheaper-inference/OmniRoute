@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="La promesa — Un endpoint y 394 proveedores. La conmutación por error automática mantiene el enrutamiento mientras haya disponible otro destino en buen estado. Seis pilares: conmutación por error resiliente entre 394 proveedores · hasta un 95 % de ahorro de tokens en cargas de trabajo elegibles · $0 para empezar, con más de 150 niveles gratuitos y 51 proveedores gratuitos recurrentes o sin clave para siempre · 39 integraciones de CLI/agentes mediante una sola configuración · compatibilidad con las API de OpenAI, Claude, Gemini y Responses en /v1 · controles de producción, incluidos interruptores de circuito, sigilo TLS, MCP con 110 herramientas, A2A, memoria, barreras de seguridad, evaluaciones y más de 56.000 declaraciones de pruebas estáticas en más de 7.800 archivos de pruebas supervisados."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="La promesa — Un endpoint y 394 proveedores. La conmutación por error automática mantiene el enrutamiento mientras haya disponible otro destino en buen estado. Seis pilares: conmutación por error resiliente entre 394 proveedores · hasta un 95 % de ahorro de tokens en cargas de trabajo elegibles · $0 para empezar, con más de 150 niveles gratuitos y 40 proveedores gratuitos recurrentes o sin clave para siempre · 39 integraciones de CLI/agentes mediante una sola configuración · compatibilidad con las API de OpenAI, Claude, Gemini y Responses en /v1 · controles de producción, incluidos interruptores de circuito, sigilo TLS, MCP con 110 herramientas, A2A, memoria, barreras de seguridad, evaluaciones y más de 56.000 declaraciones de pruebas estáticas en más de 7.800 archivos de pruebas supervisados."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ del historial de tu shell. → [Integraciones CLI](docs/guides/CLI-INTEGRATIONS.
 
 </div>
 
-> **394 proveedores registrados** en las colecciones canónicas de chat, multimedia, búsqueda, locales, agentes en la nube y sistema, incluidos **153 que contienen metadatos de descubrimiento `hasFree: true`**. El registro de modelos de chat cubre **239 proveedores / 3,059 pares proveedor-modelo distintos / 1,475 identificadores de modelo sin procesar**; el catálogo independiente de presupuesto gratuito contiene **465 filas por modelo**, **34 grupos recurrentes** y **51 proveedores gratuitos para siempre, recurrentes y sin clave**. Estos son denominadores diferentes por diseño; las definiciones y los cálculos deduplicados por grupo se encuentran en la [Referencia de proveedores](docs/reference/PROVIDER_REFERENCE.md) y [Niveles gratuitos](docs/reference/FREE_TIERS.md).
+> **394 proveedores registrados** en las colecciones canónicas de chat, multimedia, búsqueda, locales, agentes en la nube y sistema, incluidos **153 que contienen metadatos de descubrimiento `hasFree: true`**. El registro de modelos de chat cubre **239 proveedores / 3,059 pares proveedor-modelo distintos / 1,475 identificadores de modelo sin procesar**; el catálogo independiente de presupuesto gratuito contiene **465 filas por modelo**, **34 grupos recurrentes** y **40 proveedores gratuitos para siempre, recurrentes y sin clave**. Estos son denominadores diferentes por diseño; las definiciones y los cálculos deduplicados por grupo se encuentran en la [Referencia de proveedores](docs/reference/PROVIDER_REFERENCE.md) y [Niveles gratuitos](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

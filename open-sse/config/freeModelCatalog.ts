@@ -281,6 +281,14 @@ export const FREE_TIER_BOOSTS: Record<
     boostMonthlyTokens: 24_000_000,
     note: "A one-time $10 lifetime top-up raises the free pool from 50 to 1000 requests/day (~24M tokens/month).",
   },
+  // evidence: public-page https://xkiro.com (2026-11-23) — "500K free-model tokens a day (1M after
+  // Telegram verification)" ⇒ +500K/day × 30 = +15M. A social gate: never in the real figure.
+  "xkiro-free": {
+    provider: "xkiro",
+    boostMonthlyTokens: 15_000_000,
+    gate: "telegram",
+    note: "Verifying the account on Telegram raises the free allowance from 500K to 1M tokens/day (+15M tokens/month; xkiro.com, 2026-11-23).",
+  },
 };
 
 function fmt(n: number): string {
@@ -442,12 +450,11 @@ export const FREE_QUOTA_UNIT: Record<string, FreeQuotaUnit> = {
   xkiro: "tokens",
   mistral: "tokens",
   nara: "tokens",
-  llm7: "tokens",
   groq: "tokens",
   navy: "tokens",
-  sambanova: "tokens",
   "cloudflare-ai": "neurons",
   "api-airforce": "requests",
+  sambanova: "requests",
   bluesminds: "requests",
   "arcee-ai": "requests",
   bazaarlink: "requests",

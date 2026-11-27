@@ -473,6 +473,8 @@ async function handleChatCoreInner({
   comboName,
   comboStrategy = null,
   isCombo = false,
+  // Virtual routes have no persisted combo settings, even if a legacy row shares the name.
+  isVirtualAutoCombo = false,
   routingComboId = null,
   sessionAffinityKey = null,
   comboStepId = null,
@@ -1493,7 +1495,7 @@ async function handleChatCoreInner({
         compressionComboApplied = true;
         return true;
       };
-      if ((isCombo && comboName) || routingComboId) {
+      if (!isVirtualAutoCombo && ((isCombo && comboName) || routingComboId)) {
         try {
           const { getComboByName } = await import("@/lib/db/combos");
           let comboConfig = await getComboByName(comboName);
@@ -1995,7 +1997,7 @@ async function handleChatCoreInner({
           : "Prompt Compression engines disabled; reactive context compaction is ALSO disabled — large histories will NOT be trimmed before reaching the upstream provider"
       );
     }
-    if (isCombo && comboName) {
+    if (isCombo && comboName && !isVirtualAutoCombo) {
       log?.info?.("CONTEXT", `Attempting to resolve combo limits for comboName=${comboName}`);
       try {
         const { getComboByName } = await import("@/lib/db/combos");
@@ -3205,12 +3207,16 @@ async function handleChatCoreInner({
                 `[provider] Node ${errorConnectionId} ModelScope model quota exhausted (${statusCode}) for ${targetModel} - ${Math.ceil(quotaCooldownMs / 1000)}s (connection stays active)`
               );
             } else if (
+              // #20969: keep the upstream message/status on the model lock — the connection
+              // stays active, so nothing else records why this model is cooling down.
               lockModelIfPerModelQuota(
                 provider,
                 errorConnectionId,
                 model,
                 "quota_exhausted",
-                quotaCooldownMs
+                quotaCooldownMs,
+                undefined,
+                { lastError: persistentMessage, errorCode: statusCode }
               ) ||
               (targetModel &&
                 targetModel !== model &&
@@ -3219,7 +3225,9 @@ async function handleChatCoreInner({
                   errorConnectionId,
                   targetModel,
                   "quota_exhausted",
-                  quotaCooldownMs
+                  quotaCooldownMs,
+                  undefined,
+                  { lastError: persistentMessage, errorCode: statusCode }
                 ))
             ) {
               const quotaScope = getQuotaScopeLabelForProvider(provider, targetModel);

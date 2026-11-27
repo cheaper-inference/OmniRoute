@@ -27,7 +27,18 @@ import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { matchesSearch } from "@/shared/utils/turkishText";
 import { focusFirstInvalidField } from "@/shared/utils/focusFirstInvalidField";
 import { EVAL_DEFAULT_CASE_MODEL } from "@/shared/constants/evals";
-import { hasSuiteDraftErrors, validateSuiteDraft, type SuiteDraftErrors } from "./evalSuiteDraft";
+import {
+  EVAL_CASE_NAME_MAX_LENGTH,
+  EVAL_SUITE_DESCRIPTION_MAX_LENGTH,
+  EVAL_SUITE_NAME_MAX_LENGTH,
+} from "@/shared/constants/formLimits";
+import {
+  hasSuiteDraftErrors,
+  lengthOverLimit,
+  suiteDraftExceedsLimits,
+  validateSuiteDraft,
+  type SuiteDraftErrors,
+} from "./evalSuiteDraft";
 
 type EvalTargetType = "suite-default" | "model" | "combo";
 
@@ -680,8 +691,12 @@ export default function EvalsTab() {
     }
 
     // Each missing field is flagged next to itself by the builder; a toast would only repeat
-    // it away from the field. A case's model is optional (see evalSuiteDraft.ts).
-    if (hasSuiteDraftErrors(validateSuiteDraft(suiteDraft))) {
+    // it away from the field. A case's model is optional (see evalSuiteDraft.ts). A value over
+    // its length limit is already flagged as typed; the save is refused the same way.
+    if (
+      hasSuiteDraftErrors(validateSuiteDraft(suiteDraft)) ||
+      suiteDraftExceedsLimits(suiteDraft)
+    ) {
       setShowSuiteErrors(true);
       setRefusedSaves((count) => count + 1);
       return;
@@ -1991,6 +2006,13 @@ function SuiteBuilderModal({
     });
   }
 
+  // Over-limit values are flagged as they are typed (the required checks wait for a refused
+  // save); the message names the field, the limit and the current trimmed length.
+  function tooLongError(field: string, value: string, max: number) {
+    const count = lengthOverLimit(value, max);
+    return count === null ? undefined : tv("maxLength", { field, max, count });
+  }
+
   function getExpectedPlaceholder(strategy: BuilderStrategy) {
     if (strategy === "exact") return t("suiteBuilderCaseExpectedPlaceholderExact");
     if (strategy === "regex") return t("suiteBuilderCaseExpectedPlaceholderRegex");
@@ -2016,13 +2038,21 @@ function SuiteBuilderModal({
             onChange={(event) => onChange({ ...draft, name: event.target.value })}
             placeholder={t("suiteBuilderNamePlaceholder")}
             required
-            error={errors?.name ? t("suiteBuilderNameRequired") : undefined}
+            error={
+              tooLongError(t("suiteBuilderNameLabel"), draft.name, EVAL_SUITE_NAME_MAX_LENGTH) ??
+              (errors?.name ? t("suiteBuilderNameRequired") : undefined)
+            }
           />
           <Input
             label={t("suiteBuilderDescriptionLabel")}
             value={draft.description}
             onChange={(event) => onChange({ ...draft, description: event.target.value })}
             placeholder={t("suiteBuilderDescriptionPlaceholder")}
+            error={tooLongError(
+              t("suiteBuilderDescriptionLabel"),
+              draft.description,
+              EVAL_SUITE_DESCRIPTION_MAX_LENGTH
+            )}
           />
         </div>
 
@@ -2086,9 +2116,14 @@ function SuiteBuilderModal({
                   placeholder={t("suiteBuilderCaseNamePlaceholder")}
                   required
                   error={
-                    caseErrors?.name
+                    tooLongError(
+                      t("suiteBuilderCaseNameLabel"),
+                      draftCase.name,
+                      EVAL_CASE_NAME_MAX_LENGTH
+                    ) ??
+                    (caseErrors?.name
                       ? tv("required", { field: t("suiteBuilderCaseNameLabel") })
-                      : undefined
+                      : undefined)
                   }
                 />
                 <Input

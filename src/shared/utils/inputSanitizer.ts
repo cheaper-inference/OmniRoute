@@ -257,20 +257,24 @@ function collectPartText(part, contents) {
 function extractMessageContents(body) {
   const contents: string[] = [];
 
-  const messageSource = body.messages !== undefined ? body.messages : body.input;
-  const messages = Array.isArray(messageSource)
-    ? messageSource
-    : messageSource === undefined || messageSource === null
-      ? []
-      : [messageSource];
-  for (const msg of messages) {
-    if (typeof msg === "string") {
-      contents.push(msg);
-    } else if (msg && typeof msg.content === "string") {
-      contents.push(msg.content);
-    } else if (msg && Array.isArray(msg.content)) {
-      for (const part of msg.content) {
-        collectPartText(part, contents);
+  // Scan `messages` and `input` both: a body can carry the two, and the Responses
+  // translator builds the upstream prompt from `input` even when `messages` is set.
+  // A string `input` is covered here too, so it is not pushed a second time below.
+  for (const source of [body.messages, body.input]) {
+    const messages = Array.isArray(source)
+      ? source
+      : source === undefined || source === null
+        ? []
+        : [source];
+    for (const msg of messages) {
+      if (typeof msg === "string") {
+        contents.push(msg);
+      } else if (msg && typeof msg.content === "string") {
+        contents.push(msg.content);
+      } else if (msg && Array.isArray(msg.content)) {
+        for (const part of msg.content) {
+          collectPartText(part, contents);
+        }
       }
     }
   }
@@ -284,7 +288,6 @@ function extractMessageContents(body) {
     }
   }
 
-  if (typeof body.input === "string") contents.push(body.input);
   if (typeof body.prompt === "string") contents.push(body.prompt);
   else if (Array.isArray(body.prompt))
     for (const p of body.prompt) {

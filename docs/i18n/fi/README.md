@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lupaus — yksi päätepiste ja 394 palveluntarjoajaa. Automaattinen varareititys pitää reitityksen toiminnassa, kun toinen terve kohde on käytettävissä. Kuusi pilaria: vikasietoinen varareititys 394 palveluntarjoajan välillä · jopa 95 %:n tokenisäästöt kelvollisissa työkuormissa · aloitus maksutta, yli 150 ilmaistasoa ja 51 toistuvasti saatavilla olevaa tai avaimetonta ikuisesti ilmaista palveluntarjoajaa · 39 CLI-/agentti-integraatiota yhden määrityksen kautta · OpenAI-, Claude-, Gemini- ja Responses API -yhteensopivuus osoitteessa /v1 · tuotantokäytön hallintatoiminnot, kuten piirikytkimet, TLS-stealth, MCP:n 110 työkalua, A2A, muisti, suojaukset, arvioinnit ja yli 56 000 staattista testimäärittelyä yli 7 800 seuratussa testitiedostossa."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lupaus — yksi päätepiste ja 394 palveluntarjoajaa. Automaattinen varareititys pitää reitityksen toiminnassa, kun toinen terve kohde on käytettävissä. Kuusi pilaria: vikasietoinen varareititys 394 palveluntarjoajan välillä · jopa 95 %:n tokenisäästöt kelvollisissa työkuormissa · aloitus maksutta, yli 150 ilmaistasoa ja 40 toistuvasti saatavilla olevaa tai avaimetonta ikuisesti ilmaista palveluntarjoajaa · 39 CLI-/agentti-integraatiota yhden määrityksen kautta · OpenAI-, Claude-, Gemini- ja Responses API -yhteensopivuus osoitteessa /v1 · tuotantokäytön hallintatoiminnot, kuten piirikytkimet, TLS-stealth, MCP:n 110 työkalua, A2A, muisti, suojaukset, arvioinnit ja yli 56 000 staattista testimäärittelyä yli 7 800 seuratussa testitiedostossa."/>
 
 <br/>
 <br/>
@@ -712,7 +712,7 @@ komentorivihistoriastasi. → [CLI-integraatiot](docs/guides/CLI-INTEGRATIONS.md
 
 </div>
 
-> **394 rekisteröityä palveluntarjoajaa** kanonisissa keskustelu-, media-, haku-, paikallis-, pilviagentti- ja järjestelmäkokoelmissa, mukaan lukien **153 palveluntarjoajaa, joilla on `hasFree: true` -hakumetatieto**. Keskustelumallien rekisteri kattaa **239 palveluntarjoajaa / 3 059 erillistä palveluntarjoaja–malli-paria / 1 475 raakaa mallin tunnistetta**; erillisessä maksuttomien budjettien luettelossa on **465 mallikohtaista riviä**, **34 toistuvaa kiintiötä** ja **51 toistuvaa tai avaimetonta ikuisesti maksutonta palveluntarjoajaa**. Nämä ovat tarkoituksella eri nimittäjiä; määritelmät ja kiintiöiden kaksoiskappaleet poistavat laskelmat löytyvät [Palveluntarjoajien viiteoppaasta](docs/reference/PROVIDER_REFERENCE.md) ja [Maksuttomista tasoista](docs/reference/FREE_TIERS.md).
+> **394 rekisteröityä palveluntarjoajaa** kanonisissa keskustelu-, media-, haku-, paikallis-, pilviagentti- ja järjestelmäkokoelmissa, mukaan lukien **153 palveluntarjoajaa, joilla on `hasFree: true` -hakumetatieto**. Keskustelumallien rekisteri kattaa **239 palveluntarjoajaa / 3 059 erillistä palveluntarjoaja–malli-paria / 1 475 raakaa mallin tunnistetta**; erillisessä maksuttomien budjettien luettelossa on **465 mallikohtaista riviä**, **34 toistuvaa kiintiötä** ja **40 toistuvaa tai avaimetonta ikuisesti maksutonta palveluntarjoajaa**. Nämä ovat tarkoituksella eri nimittäjiä; määritelmät ja kiintiöiden kaksoiskappaleet poistavat laskelmat löytyvät [Palveluntarjoajien viiteoppaasta](docs/reference/PROVIDER_REFERENCE.md) ja [Maksuttomista tasoista](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

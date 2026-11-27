@@ -1,4 +1,10 @@
 import { registerNoAuthReadiness } from "@omniroute/open-sse/services/autoCombo/noAuthReadiness.ts";
+import { BROWSER_BACKED_NOAUTH_PROVIDER_IDS } from "@omniroute/open-sse/services/autoCombo/emulatedNoAuthAllowlist.ts";
+import {
+  hasPlaywrightChromium,
+  resolveChromiumOverride,
+  resolveCloudflareChromiumOverride,
+} from "@omniroute/open-sse/utils/playwrightChromium.ts";
 import {
   getBinaryGatedLocalCliProviderIds,
   getUnavailableLocalCliProviderKeys,
@@ -15,9 +21,10 @@ import { peekDevinAgenticAuthStatus } from "./devinAgenticAuthStatus";
  * The local CLIs that localCliAvailability can check (auggie, zcode) stay out of every
  * pool, family pools included, while their binary is missing on this host: the same
  * cached verdict that hides them from /v1/models (#18753). Providers it does not check
- * (codex-app-server) stay fail-open, because the CLI may run elsewhere.
+ * (codex-app-server) stay fail-open, because the CLI may run elsewhere. Browser
+ * runtime availability (#19385) is checked at boot and read from memory per request.
  */
-export function registerNoAuthAutoRoutingReadiness(): void {
+export async function registerNoAuthAutoRoutingReadiness(): Promise<void> {
   registerNoAuthReadiness(
     "devin-cli-agentic",
     () => peekDevinAgenticAuthStatus() === "authenticated"
@@ -28,4 +35,14 @@ export function registerNoAuthAutoRoutingReadiness(): void {
       () => !getUnavailableLocalCliProviderKeys().has(providerId)
     );
   }
+  await Promise.all(
+    [...BROWSER_BACKED_NOAUTH_PROVIDER_IDS].map(async (providerId) => {
+      const executablePath =
+        providerId === "cloudflare-playground"
+          ? resolveCloudflareChromiumOverride()
+          : resolveChromiumOverride();
+      const available = await hasPlaywrightChromium(executablePath);
+      registerNoAuthReadiness(providerId, () => available);
+    })
+  );
 }

@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="පොරොන්දුව — එක් endpoint එකක් සහ providers 394ක්. තවත් සෞඛ්ය සම්පන්න target එකක් පවතින තාක් ස්වයංක්රීය fallback මඟින් routing අඛණ්ඩව පවත්වා ගනී. ප්රධාන කුළුණු හය: providers 394ක් හරහා resilient fallback · සුදුසු workloads සඳහා token ඉතිරිකිරීම 95% දක්වා · 150+ නොමිලේ tiers සහ නැවත නැවත භාවිත කළ හැකි/keyless free-forever providers 51ක් සමඟ ආරම්භ කිරීමට $0 · එක් config එකක් හරහා CLI/agent integrations 39ක් · /v1 හි OpenAI, Claude, Gemini සහ Responses API compatibility · circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals සහ tracked test files 7,800+ක් හරහා static test declarations 56,000+ක් ඇතුළුව production controls."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="පොරොන්දුව — එක් endpoint එකක් සහ providers 394ක්. තවත් සෞඛ්ය සම්පන්න target එකක් පවතින තාක් ස්වයංක්රීය fallback මඟින් routing අඛණ්ඩව පවත්වා ගනී. ප්රධාන කුළුණු හය: providers 394ක් හරහා resilient fallback · සුදුසු workloads සඳහා token ඉතිරිකිරීම 95% දක්වා · 150+ නොමිලේ tiers සහ නැවත නැවත භාවිත කළ හැකි/keyless free-forever providers 40ක් සමඟ ආරම්භ කිරීමට $0 · එක් config එකක් හරහා CLI/agent integrations 39ක් · /v1 හි OpenAI, Claude, Gemini සහ Responses API compatibility · circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals සහ tracked test files 7,800+ක් හරහා static test declarations 56,000+ක් ඇතුළුව production controls."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ omniroute configure codex          # මෙයද: claude opencode qwen aider go
 
 </div>
 
-> **ලියාපදිංචි කළ සපයන්නන් 394ක්**, canonical chat, media, search, local, cloud-agent සහ system එකතු හරහා, ඒ අතර **`hasFree: true` discovery metadata සහිත 153ක්** ද ඇතුළත් වේ. Chat model registry තුළ **සපයන්නන් 239ක් / වෙනස් provider-model යුගල 3,059ක් / අමු model ID 1,475ක්** ආවරණය කරයි; වෙනම free-budget catalog තුළ **එක් එක් model පේළි 465ක්**, **නැවත නැවත ලැබෙන pools 34ක්** සහ **නැවත නැවත ලැබෙන/keyless free-forever සපයන්නන් 51ක්** ඇත. මේවා සැලසුම් සහගතව වෙනස් denominators වේ; අර්ථ දැක්වීම් සහ pool-deduped ගණනය කිරීම් [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) සහ [Free Tiers](docs/reference/FREE_TIERS.md) තුළ ඇත.
+> **ලියාපදිංචි කළ සපයන්නන් 394ක්**, canonical chat, media, search, local, cloud-agent සහ system එකතු හරහා, ඒ අතර **`hasFree: true` discovery metadata සහිත 153ක්** ද ඇතුළත් වේ. Chat model registry තුළ **සපයන්නන් 239ක් / වෙනස් provider-model යුගල 3,059ක් / අමු model ID 1,475ක්** ආවරණය කරයි; වෙනම free-budget catalog තුළ **එක් එක් model පේළි 465ක්**, **නැවත නැවත ලැබෙන pools 34ක්** සහ **නැවත නැවත ලැබෙන/keyless free-forever සපයන්නන් 40ක්** ඇත. මේවා සැලසුම් සහගතව වෙනස් denominators වේ; අර්ථ දැක්වීම් සහ pool-deduped ගණනය කිරීම් [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) සහ [Free Tiers](docs/reference/FREE_TIERS.md) තුළ ඇත.
 
 <div align="center">
 
