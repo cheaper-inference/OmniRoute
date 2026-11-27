@@ -3,7 +3,7 @@ import { PROVIDER_MODELS, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models
 import { NOAUTH_PROVIDERS } from "@/shared/constants/providers";
 import { getUnavailableLocalCliProviderKeys } from "@/shared/services/localCliAvailability";
 import { getCombos } from "@/lib/db/combos";
-import { createHiddenModelLookup } from "@/lib/hiddenModelLookup";
+import { createModelVisibilityLookup } from "@/lib/hiddenModelLookup";
 import { getSettings } from "@/lib/db/settings";
 import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
 import { createLazyConnectionView } from "@/lib/db/providers/lazyConnectionView";
@@ -46,8 +46,9 @@ import {
   type SyncedAvailableModel,
   getAllCustomModels,
   getModelAliases,
-  getHiddenModelsByProvider,
+  getModelVisibilityMap,
 } from "@/lib/db/models";
+import { normalizeCombosOnlyProviderSet } from "@/shared/utils/providerCombosOnly";
 import { getAllActiveSyncedModels } from "@/lib/db/models/activeSyncedCatalog";
 import {
   getModelCatalogCacheVersion,
@@ -400,25 +401,34 @@ async function buildUnifiedModelsResponseCore(
     if (++catYieldCount % catYIELD_EVERY === 0) await yieldCatalogBuildTurn();
   };
   try {
-    // #9147/#12172: bulk-load the hidden-model map once PER MODALITY (memoized below,
-    // one SQLite query per modality actually used) instead of `getModelIsHidden()`'s
-    // per-call read — per-modality because chat/images/etc. registries can share a
-    // literal model id and must be hideable independently (#12172). Deliberately kept
-    // INSIDE this try block: the builder's catch below sanitizes a build-time failure
-    // into a 500 instead of a rejected promise.
-    const hiddenModelsByModality = new Map<string, ReturnType<typeof createHiddenModelLookup>>();
-    const getHiddenModelsForModality = (modality: string) => {
-      let m = hiddenModelsByModality.get(modality);
-      if (!m) {
-        m = createHiddenModelLookup(getHiddenModelsByProvider(modality), providerNodes, modality);
-        hiddenModelsByModality.set(modality, m);
-      }
-      return m;
-    };
+    // #9147/#12172: bulk-load the visibility map once PER MODALITY (memoized below, one
+    // SQLite query per modality actually used) instead of `getModelIsHidden()`'s per-call
+    // read — per-modality because chat/images/etc. registries can share a literal model id and
+    // must be hideable independently (#12172). Each lookup carries the three visibility states
+    // (hidden / combos_only / explicit-visible) plus the provider-level `combos_only` default,
+    // so the same query serves both the catalog listing and the combo-target filter.
+    // Deliberately kept INSIDE this try block: the builder's catch below sanitizes a
+    // build-time failure into a 500 instead of a rejected promise.
     let settings: Record<string, any> = {};
     try {
       settings = await getSettings();
     } catch {}
+    // Read BEFORE the memoized lookups below: each one captures the set by value, so building
+    // a lookup first would pin the empty default for the whole catalog build.
+    const combosOnlyProviders = normalizeCombosOnlyProviderSet(settings.combosOnlyProviders);
+    const visibilityByModality = new Map<string, ReturnType<typeof createModelVisibilityLookup>>();
+    const getVisibilityForModality = (modality: string) => {
+      let m = visibilityByModality.get(modality);
+      if (!m) {
+        m = createModelVisibilityLookup(
+          { ...getModelVisibilityMap(modality), combosOnlyProviders },
+          providerNodes,
+          modality
+        );
+        visibilityByModality.set(modality, m);
+      }
+      return m;
+    };
 
     const authRejection = await getModelCatalogAuthRejection(request, settings, {
       ...corsHeaders,
@@ -541,6 +551,22 @@ async function buildUnifiedModelsResponseCore(
     // diverged. Check every key a model could plausibly have been hidden under:
     // the raw key passed in, its resolved canonical provider id, that canonical id's
     // alias, and the compatible-provider-node prefix for either.
+    const keysForProvider = (
+      providerKey: string | null | undefined,
+      canonicalProviderId?: string | null
+    ): string[] => {
+      if (!providerKey) return [];
+      const canonical = canonicalProviderId || resolveCanonicalProviderId(providerKey);
+      const alias = providerIdToAlias[canonical] || providerIdToAlias[providerKey] || undefined;
+      const prefix = providerIdToPrefix[providerKey] || providerIdToPrefix[canonical];
+      const nodePrefix = [providerKey, canonical].includes(providerNodeIdByPrefix[prefix])
+        ? prefix
+        : undefined;
+      return [providerKey, canonical, alias, nodePrefix].filter((k): k is string => Boolean(k));
+    };
+    // Three-state visibility: a `combos_only` model (by its own override or its provider's
+    // default) is listed nowhere publicly, but a stored combo may still dispatch it — so combo
+    // metadata keeps resolving targets through this hidden-only predicate.
     const isModelHiddenStrict = (
       providerKey: string | null | undefined,
       modelId: string,
@@ -548,21 +574,26 @@ async function buildUnifiedModelsResponseCore(
       modality: string = "chat"
     ): boolean => {
       if (!providerKey || !modelId) return false;
-      const canonical = canonicalProviderId || resolveCanonicalProviderId(providerKey);
-      const alias = providerIdToAlias[canonical] || providerIdToAlias[providerKey] || undefined;
-      const prefix = providerIdToPrefix[providerKey] || providerIdToPrefix[canonical];
-      const nodePrefix = [providerKey, canonical].includes(providerNodeIdByPrefix[prefix])
-        ? prefix
-        : undefined;
-      const keysToCheck = [providerKey, canonical, alias, nodePrefix].filter((k): k is string =>
-        Boolean(k)
+      const visibility = getVisibilityForModality(modality);
+      return keysForProvider(providerKey, canonicalProviderId).some((key) =>
+        visibility.isHiddenInCombo(key, modelId)
       );
-      const isHidden = getHiddenModelsForModality(modality);
-      return keysToCheck.some((key) => isHidden(key, modelId));
+    };
+    const isModelDirectBlockedStrict = (
+      providerKey: string | null | undefined,
+      modelId: string,
+      canonicalProviderId?: string | null,
+      modality: string = "chat"
+    ): boolean => {
+      if (!providerKey || !modelId) return false;
+      const visibility = getVisibilityForModality(modality);
+      return keysForProvider(providerKey, canonicalProviderId).some((key) =>
+        visibility.isBlockedFromDirectUse(key, modelId)
+      );
     };
     // `revealHidden` (management catalog only) keeps hidden model rows; combos still drop hidden targets.
     const isModelHiddenBulk: typeof isModelHiddenStrict = (...args) =>
-      !revealHidden && isModelHiddenStrict(...args);
+      !revealHidden && isModelDirectBlockedStrict(...args);
 
     // Get combos
     let combos = [];

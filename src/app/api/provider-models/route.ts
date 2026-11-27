@@ -16,6 +16,10 @@ import {
   mergeModelCompatOverride,
   resetModelEndpointOverride,
   getHiddenModelsByProvider,
+  getModelVisibilityMap,
+  getOverrideVisibilityForModality,
+  setModelVisibility,
+  readStoredVisibility,
   type ModelCompatPatch,
 } from "@/lib/db/models";
 import { clearModelCompatOverrides } from "@/lib/db/models/compat";
@@ -37,7 +41,16 @@ import {
 } from "@/shared/constants/providers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { getRegisteredEndpointAdapterStatuses } from "@/lib/providerModels/endpointAdapterAvailability";
-import { isHiddenForModality } from "@/shared/utils/modelVisibility";
+import {
+  isHiddenForModality,
+  normalizeVisibilityMode,
+  type ModelVisibilityMode,
+} from "@/shared/utils/modelVisibility";
+import { normalizeCombosOnlyProviderSet } from "@/shared/utils/providerCombosOnly";
+import { PROVIDER_ID_TO_ALIAS } from "@omniroute/open-sse/config/providerModels";
+import { getCachedProviderNodes } from "@/lib/db/readCache";
+import { getSettings } from "@/lib/db/settings";
+import { isProviderNodePrefixReserved } from "@/lib/providerNodePrefixes";
 import { clearHealthCheckHiddenMarks } from "@/lib/db/modelHealthAutoHidden";
 export const dynamic = "force-dynamic";
 import { providerModelMutationSchema } from "@/shared/validation/schemas";
@@ -75,26 +88,23 @@ async function tryEachIdForm(
 }
 
 /**
- * Hide or unhide each requested model under its stored (bare) id so a prefixed
- * paste hits the same row the catalog emits. Returns every id form touched:
- * managed aliases are keyed `<storagePrefix>/<storedId>`, so the alias layer
- * gets both forms and a prefixed paste cannot leave the bare row's alias (or
- * vice versa) pointing at a still-visible model.
+ * Persist one visibility mode for each requested model under its stored (bare) id so a
+ * prefixed paste hits the same row the catalog emits. Returns every id form touched:
+ * managed aliases are keyed `<storagePrefix>/<storedId>`, so the alias layer gets both forms
+ * and a prefixed paste cannot leave the bare row's alias (or vice versa) pointing at a
+ * still-visible model.
  */
-async function setHiddenByStoredIds(
+async function setVisibilityByStoredIds(
   provider: string,
   modelIds: string[],
-  isHidden: boolean,
+  mode: ModelVisibilityMode,
   modality: string | undefined
 ): Promise<string[]> {
   const normalizedIds: string[] = [];
   for (const requestedId of modelIds) {
     const modelId = await normalizeNodeModelId(provider, requestedId);
     normalizedIds.push(modelId);
-    const updatedModel = await updateCustomModel(provider, modelId, { isHidden });
-    if (!updatedModel) {
-      mergeModelCompatOverride(provider, modelId, { isHidden, modality });
-    }
+    setModelVisibility(provider, modelId, mode, modality);
     // #11777: a manual hide/unhide makes the user the owner of the visibility state,
     // so the scheduled health check must never restore this model on its own. Clear
     // the mark per completed write: if a later model in the batch throws, the ones
@@ -150,14 +160,24 @@ export async function GET(request) {
             const outputOverride = modelId ? outputOverrides.get(modelId) : undefined;
             const outputFields =
               outputOverride === undefined ? {} : { maxOutputTokenOverride: outputOverride };
+            // Three-state visibility for this row: the operator-declared custom row wins, then
+            // the compat override — the same precedence `getModelIsHidden` reads.
+            const visibilityMode = modelId
+              ? readStoredVisibility(provider, modelId, "chat", {
+                  customModels: models as Array<Record<string, unknown>>,
+                  compatOverrides: modelCompatOverrides,
+                })
+              : null;
+            const visibilityFields = visibilityMode === null ? {} : { visibilityMode };
             return record
               ? {
                   ...model,
                   ...outputFields,
+                  ...visibilityFields,
                   contextWindowOverride: record.realContext,
                   contextWindowOverrideSource: record.source,
                 }
-              : { ...model, ...outputFields };
+              : { ...model, ...outputFields, ...visibilityFields };
           })
         : models;
 
@@ -168,6 +188,51 @@ export async function GET(request) {
     for (const [providerId, hiddenModelIds] of getHiddenModelsByProvider()) {
       if (hiddenModelIds.size > 0) {
         hiddenModelsByProvider[providerId] = [...hiddenModelIds];
+      }
+    }
+    // Three-state visibility for the dashboard: a row can be `visible`, `combos_only` or
+    // `hidden`, and a provider-level default (`combosOnlyProviders`) is inherited by every
+    // model without an explicit override. Returning all three buckets in this same response
+    // lets the client hydrate the state in one fetch instead of N per-model reads.
+    const visibilityMap = getModelVisibilityMap("chat");
+    const toRecord = (map: Map<string, Set<string>>): Record<string, string[]> => {
+      const out: Record<string, string[]> = {};
+      for (const [providerId, modelIds] of map) {
+        if (modelIds.size > 0) out[providerId] = [...modelIds];
+      }
+      return out;
+    };
+    // The provider-level default this page renders as "inherited": every model without its own
+    // override inherits `combos_only`. Resolved here so the dashboard does not need a second
+    // settings round trip, and matched through the same key forms the catalog uses (canonical
+    // id, alias, compatible-node id/prefix).
+    let combosOnlyProvider = false;
+    if (provider) {
+      let configured: unknown = [];
+      try {
+        configured = (await getSettings()).combosOnlyProviders;
+      } catch {
+        configured = [];
+      }
+      const configuredSet = normalizeCombosOnlyProviderSet(configured);
+      if (configuredSet.size > 0) {
+        const providerKeys = new Set<string>([provider]);
+        const alias = PROVIDER_ID_TO_ALIAS[provider];
+        if (typeof alias === "string" && alias) providerKeys.add(alias);
+        try {
+          for (const node of await getCachedProviderNodes()) {
+            const nodeId = typeof node?.id === "string" ? node.id : "";
+            const prefix = typeof node?.prefix === "string" ? node.prefix : "";
+            if (!nodeId || !prefix) continue;
+            if (nodeId === provider || prefix === provider) {
+              providerKeys.add(nodeId);
+              if (!isProviderNodePrefixReserved(prefix)) providerKeys.add(prefix);
+            }
+          }
+        } catch {
+          // Node cache unavailable: the canonical id and alias keys still match.
+        }
+        combosOnlyProvider = [...providerKeys].some((key) => configuredSet.has(key));
       }
     }
 
@@ -191,11 +256,16 @@ export async function GET(request) {
       modelCompatOverrides: modelCompatOverrides.map((override) => ({
         ...override,
         isHidden: isHiddenForModality(override, "chat"),
+        visibilityMode: getOverrideVisibilityForModality(override, "chat"),
       })),
       modelContextOverrides,
       modelOutputOverrides,
       endpointAdapters: provider ? getRegisteredEndpointAdapterStatuses(provider) : {},
       hiddenModelsByProvider,
+      combosOnlyModelsByProvider: toRecord(visibilityMap.combosOnly),
+      explicitVisibleModelsByProvider: toRecord(visibilityMap.explicitVisible),
+      /** Provider-level `combos_only` default (`settings.combosOnlyProviders`) for this provider. */
+      providerCombosOnly: combosOnlyProvider,
     });
   } catch {
     return Response.json(
@@ -544,7 +614,10 @@ export async function PUT(request) {
 
 /**
  * PATCH /api/provider-models?provider=<id>&modelId=<modelId>
- * Body: { isHidden: boolean, modelIds?: string[] }
+ * Body: { visibilityMode: "visible" | "combos_only" | "hidden", modelIds?: string[], modality?: string }
+ *
+ * `isHidden: boolean` is still accepted for older callers and maps onto the same three-state
+ * write (`true` → `hidden`, `false` → `visible`).
  */
 export async function PATCH(request) {
   const authError = await requireManagementAuth(request);
@@ -575,9 +648,32 @@ export async function PATCH(request) {
       );
     }
 
-    if (typeof body.isHidden !== "boolean") {
+    // Three-state visibility (`visible` | `combos_only` | `hidden`) is the primary contract;
+    // the legacy `isHidden` boolean is still accepted and maps onto it (true → hidden,
+    // false → visible), so every existing caller keeps working unchanged.
+    const requestedMode = normalizeVisibilityMode(body.visibilityMode);
+    if (body.visibilityMode !== undefined && requestedMode === null) {
       return Response.json(
-        { error: { message: "isHidden boolean is required", type: "validation_error" } },
+        {
+          error: {
+            message: "visibilityMode must be one of visible, combos_only, hidden",
+            type: "validation_error",
+          },
+        },
+        { status: 400 }
+      );
+    }
+    const visibilityMode: ModelVisibilityMode | null =
+      requestedMode ??
+      (typeof body.isHidden === "boolean" ? (body.isHidden ? "hidden" : "visible") : null);
+    if (visibilityMode === null) {
+      return Response.json(
+        {
+          error: {
+            message: "visibilityMode or isHidden boolean is required",
+            type: "validation_error",
+          },
+        },
         { status: 400 }
       );
     }
@@ -606,28 +702,41 @@ export async function PATCH(request) {
       );
     }
 
-    const aliasTargetIds = await setHiddenByStoredIds(provider, modelIds, body.isHidden, modality);
-    const aliasChanges =
-      body.isHidden === true
-        ? {
-            removed: await deleteManagedAvailableModelAliases(provider, aliasTargetIds),
-            assigned: [],
-          }
-        : {
-            removed: [],
-            assigned: (
-              await syncManagedAvailableModelAliases(provider, aliasTargetIds, {
-                pruneMissing: false,
-              })
-            ).assignedAliases,
-          };
+    // Alias lifecycle follows "callable directly": a `hidden` or `combos_only` model must not
+    // keep a published managed alias (which would be a direct call under another name), and
+    // returning to `visible` republishes them.
+    const callableDirectly = visibilityMode === "visible";
+    const aliasTargetIds = await setVisibilityByStoredIds(
+      provider,
+      modelIds,
+      visibilityMode,
+      modality
+    );
+    const aliasChanges = callableDirectly
+      ? {
+          removed: [],
+          assigned: (
+            await syncManagedAvailableModelAliases(provider, aliasTargetIds, {
+              pruneMissing: false,
+            })
+          ).assignedAliases,
+        }
+      : {
+          removed: await deleteManagedAvailableModelAliases(provider, aliasTargetIds),
+          assigned: [],
+        };
 
     return Response.json({
       ok: true,
       updated: modelIds.length,
+      appliedVisibilityMode: visibilityMode,
       aliasChanges,
       models: await getCustomModels(provider),
-      modelCompatOverrides: getModelCompatOverrides(provider),
+      modelCompatOverrides: getModelCompatOverrides(provider).map((override) => ({
+        ...override,
+        isHidden: isHiddenForModality(override, "chat"),
+        visibilityMode: getOverrideVisibilityForModality(override, "chat"),
+      })),
     });
   } catch (error) {
     console.error("Error patching provider models:", error);
