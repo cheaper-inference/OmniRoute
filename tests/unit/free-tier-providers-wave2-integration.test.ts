@@ -24,6 +24,10 @@ const providers = [
   ],
 ] as const;
 
+// dxnt.com/free (2026-11-23): the signup bonus exists, but "No bonus-eligible
+// models are currently configured", so DXNT offers no usable free access today.
+const NO_FREE_OFFER_TODAY = new Set<string>(["dxnt"]);
+
 for (const [id, endpoint, modelIds] of providers) {
   test(`${id} is wired through registry, metadata, endpoint and default executor`, async () => {
     const registry = REGISTRY[id];
@@ -37,7 +41,7 @@ for (const [id, endpoint, modelIds] of providers) {
     assert.equal(PROVIDER_ENDPOINTS[id], endpoint);
     assert.equal(metadata.id, id);
     assert.equal(metadata.alias, id);
-    assert.equal(metadata.hasFree, true);
+    assert.equal(metadata.hasFree, !NO_FREE_OFFER_TODAY.has(id));
     assert.equal(metadata.passthroughModels, true);
     assert.ok(typeof metadata.freeNote === "string" && metadata.freeNote.length > 0);
     assert.equal(AGGREGATOR_PROVIDER_IDS.has(id), true);

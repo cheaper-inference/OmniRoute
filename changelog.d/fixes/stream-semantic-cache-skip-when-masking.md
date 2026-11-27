@@ -1,0 +1,1 @@
+- **fix(security):** a streamed answer is no longer written to the semantic cache when response PII sanitization or credential redaction runs for that request. The cache stored the assembled raw body while masking rewrote only the live stream, so a later cache hit (streaming or not) replayed the unmasked text.

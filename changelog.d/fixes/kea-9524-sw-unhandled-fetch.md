@@ -1,0 +1,1 @@
+- **fix(pwa):** The service worker only handles static assets and catches every failed fetch, so moving between dashboard pages no longer logs "Uncaught (in promise) TypeError: Failed to fetch" from `sw.js` (KEA-9524)

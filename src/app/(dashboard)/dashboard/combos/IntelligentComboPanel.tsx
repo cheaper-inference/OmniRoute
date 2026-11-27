@@ -1,11 +1,14 @@
 "use client";
 
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Icon from "@/shared/components/Icon";
 
 import { useMemo, useState } from "react";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
+import EmptyState from "@/shared/components/EmptyState";
 import { useNotificationStore } from "@/store/notificationStore";
 import {
   FACTOR_LABELS,
@@ -123,7 +126,7 @@ export default function IntelligentComboPanel({
           <div>
             <div className="flex items-center gap-2">
               <Icon name="auto_awesome" size={18} className="text-primary" />
-              <h2 className="text-lg text-text-main">
+              <h2 className="ci-heading" data-size="lg">
                 {getI18nOrFallback(t, "intelligentPanelTitle", "Intelligent Routing Dashboard")}
               </h2>
             </div>
@@ -134,8 +137,8 @@ export default function IntelligentComboPanel({
                 "Real-time scoring and health status for this auto-routing combo."
               )}
             </p>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-text-muted">
-              <code className="rounded bg-bg-subtle px-2 py-1 text-text-main">{combo?.name}</code>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-2xs text-text-muted">
+              <InlineCode>{combo?.name}</InlineCode>
               <span>{t("intelligentComboCount", { count: allCombos.length })}</span>
               <span>{t("providersInScope", { count: providerScopeCount })}</span>
             </div>
@@ -162,7 +165,7 @@ export default function IntelligentComboPanel({
                 </p>
               </div>
               <div className="rounded-lg bg-bg-subtle px-3 py-2 text-right">
-                <p className="text-[10px] uppercase tracking-wide text-text-muted">
+                <p className="ci-eyebrow" data-size="3xs">
                   {getI18nOrFallback(t, "candidatePoolLabel", "Candidate Pool")}
                 </p>
                 <p className="text-lg font-semibold text-text-main">{providerScopeCount}</p>
@@ -185,7 +188,7 @@ export default function IntelligentComboPanel({
                 </p>
               </div>
               {savingModePack && (
-                <span className="text-[11px] text-text-muted">
+                <span className="text-xs text-text-muted">
                   {getI18nOrFallback(t, "savingModePack", "Saving {pack}…", {
                     pack: savingModePack,
                   }).replace("{pack}", savingModePack)}
@@ -236,59 +239,50 @@ export default function IntelligentComboPanel({
 
             <div className="mt-3 flex flex-col gap-2">
               {providerScores.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-border p-3 text-[11px] text-text-muted">
-                  {getI18nOrFallback(
+                <EmptyState
+                  layout="inline"
+                  border="dashed"
+                  title={getI18nOrFallback(
                     t,
                     "allProvidersEvaluated",
                     "No candidate pool configured. All active providers are evaluated at runtime."
                   )}
-                </div>
+                />
               ) : (
                 providerScores.map((entry) => {
                   const percentage = Math.round(entry.score * 100);
                   return (
-                    <div
-                      key={entry.provider}
-                      className="rounded-lg border border-border bg-surface p-3"
-                    >
+                    <Card.Section key={entry.provider}>
                       <div className="flex items-center justify-between gap-2">
                         <div>
                           <p className="text-xs font-semibold text-text-main">
                             {formatProviderLabel(entry.provider, activeProviders)}
                           </p>
-                          <p className="text-[11px] text-text-muted mt-0.5">{entry.model}</p>
+                          <p className="text-2xs text-text-muted mt-0.5">{entry.model}</p>
                         </div>
-                        <span className="rounded-full bg-primary/10 px-2 py-1 text-[11px] font-semibold text-primary">
+                        <Badge size="sm" variant="primary">
                           {percentage}%
-                        </span>
+                        </Badge>
                       </div>
 
-                      <div
-                        role="progressbar"
+                      <Progress
+                        className="mt-2"
+                        semantics="meter"
+                        animate={false}
+                        value={percentage}
+                        color="var(--color-chart-2)"
                         aria-label={formatProviderLabel(entry.provider, activeProviders)}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-valuenow={percentage}
-                        className="mt-2 h-2 rounded-full bg-bg-subtle overflow-hidden"
-                      >
-                        <div
-                          className="h-full rounded-full bg-chart-2 transition-all"
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
+                      />
 
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {Object.entries(entry.factors).map(([factorKey, factorValue]) => (
-                          <span
-                            key={`${entry.provider}-${factorKey}`}
-                            className="rounded-full bg-bg-subtle px-2 py-1 text-[10px] text-text-muted"
-                          >
+                          <Badge key={`${entry.provider}-${factorKey}`} size="sm">
                             {FACTOR_LABELS[factorKey as keyof typeof FACTOR_LABELS]}{" "}
                             {Math.round(Number(factorValue) * 100)}%
-                          </span>
+                          </Badge>
                         ))}
                       </div>
-                    </div>
+                    </Card.Section>
                   );
                 })
               )}
@@ -312,22 +306,22 @@ export default function IntelligentComboPanel({
             </div>
 
             <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <div className="rounded-lg border border-border bg-surface p-3">
-                <p className="text-[11px] uppercase tracking-wide text-text-muted">
+              <Card.Section>
+                <p className="ci-eyebrow" data-size="2xs">
                   {t("modePack")}
                 </p>
                 <p className="mt-1 text-sm font-semibold text-text-main">
                   {normalizedConfig.modePack}
                 </p>
-              </div>
-              <div className="rounded-lg border border-border bg-surface p-3">
-                <p className="text-[11px] uppercase tracking-wide text-text-muted">
+              </Card.Section>
+              <Card.Section>
+                <p className="ci-eyebrow" data-size="2xs">
                   {getI18nOrFallback(t, "explorationRateLabel", "Exploration Rate")}
                 </p>
                 <p className="mt-1 text-sm font-semibold text-text-main">
                   {Math.round(normalizedConfig.explorationRate * 100)}%
                 </p>
-              </div>
+              </Card.Section>
             </div>
           </Card.Section>
         </div>

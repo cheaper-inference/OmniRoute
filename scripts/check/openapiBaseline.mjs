@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
+import { resolvePullRequestComparison } from "./pullRequestComparison.mjs";
 import { resolveCandidateBase } from "../merge-queue/candidate-base.mjs";
 
 const SHA = /^[0-9a-f]{40}$/;
@@ -31,7 +32,8 @@ export function resolveOpenapiBaseline({
     }
     const event = JSON.parse(readFileSync(env.GITHUB_EVENT_PATH, "utf8"));
     if (eventName === "pull_request") {
-      requestedBase = event.pull_request?.base?.sha;
+      const comparison = resolvePullRequestComparison({ pr: event.pull_request, cwd, env });
+      return { ...comparison, source: eventName };
     } else if (eventName === "merge_group") {
       requestedBase = event.merge_group?.base_sha;
       if (event.merge_group?.head_sha !== candidateSha)
@@ -64,12 +66,8 @@ export function resolveOpenapiBaseline({
     if (!requestedBase) throw new Error("Missing local base reference");
   }
   const baseTipSha = git("rev-parse", "--verify", "--end-of-options", `${requestedBase}^{commit}`);
-  // A PR head may predate the event's base tip. Compare their shared ancestry;
-  // a synthetic merge includes the base, so merge-base returns that pinned base.
-  const baseSha =
-    !eventName || eventName === "pull_request"
-      ? git("merge-base", baseTipSha, candidateSha)
-      : baseTipSha;
+  // Local branch checks retain merge-base semantics. Event comparisons are pinned.
+  const baseSha = !eventName ? git("merge-base", baseTipSha, candidateSha) : baseTipSha;
   if (!SHA.test(baseSha)) throw new Error("No unambiguous comparison base");
   return { baseSha, baseTipSha, candidateSha, source };
 }

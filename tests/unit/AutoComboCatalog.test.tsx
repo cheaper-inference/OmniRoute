@@ -256,14 +256,14 @@ describe("AutoComboCatalog", { timeout: 60_000 }, () => {
     expect(ccLink?.getAttribute("href")).toBe(
       `/dashboard/combos/${encodeURIComponent("auto/gemini")}`
     );
-    expect(geminiCard?.querySelector('button[title="testCombo"]')).toBeTruthy();
-    expect(geminiCard?.querySelector('button[title="duplicateAutoComboTitle"]')).toBeTruthy();
+    expect(geminiCard?.querySelector('button[aria-label="testCombo"]')).toBeTruthy();
+    expect(geminiCard?.querySelector('button[aria-label="duplicateAutoComboTitle"]')).toBeTruthy();
     expect(geminiCard?.textContent).toContain("3 autoCatalogCandidates");
 
     // Bare `auto` cannot be snapshotted by the duplicate endpoint — no copy button.
     const autoCard = findCard(container, "auto");
     expect(autoCard).toBeTruthy();
-    expect(autoCard?.querySelector('button[title="duplicateAutoComboTitle"]')).toBeNull();
+    expect(autoCard?.querySelector('button[aria-label="duplicateAutoComboTitle"]')).toBeNull();
 
     // A family with no live candidates shows the empty-state chip.
     const qwenCard = findCard(container, "auto/qwen");
@@ -281,7 +281,7 @@ describe("AutoComboCatalog", { timeout: 60_000 }, () => {
 
     const geminiCard = findCard(container, "auto/gemini");
     const testButton = geminiCard?.querySelector(
-      'button[title="testCombo"]'
+      'button[aria-label="testCombo"]'
     ) as HTMLButtonElement | null;
     expect(testButton).toBeTruthy();
     await act(async () => {
@@ -298,10 +298,11 @@ describe("AutoComboCatalog", { timeout: 60_000 }, () => {
     });
     await expand(container);
     const geminiCard = findCard(container, "auto/gemini");
-    const testButton = geminiCard?.querySelector('button[title="testCombo"]');
+    const testButton = geminiCard?.querySelector('button[aria-label="testCombo"]');
     // The running state swaps the play glyph for the kit Spinner.
     expect(testButton?.querySelector('[data-slot="spinner"]')).toBeTruthy();
-    expect((testButton as HTMLButtonElement | null)?.disabled).toBe(true);
+    // A titled Button is aria-disabled while inactive (it stays hoverable for its tooltip).
+    expect(testButton?.getAttribute("aria-disabled")).toBe("true");
   });
 
   it("duplicates non-template auto combos with the auto strategy", async () => {
@@ -316,7 +317,7 @@ describe("AutoComboCatalog", { timeout: 60_000 }, () => {
 
     const geminiCard = findCard(container, "auto/gemini");
     const copyButton = geminiCard?.querySelector(
-      'button[title="duplicateAutoComboTitle"]'
+      'button[aria-label="duplicateAutoComboTitle"]'
     ) as HTMLButtonElement | null;
     await act(async () => {
       copyButton?.click();
@@ -343,7 +344,7 @@ describe("AutoComboCatalog", { timeout: 60_000 }, () => {
     const tpl = AUTO_COMBO_TEMPLATES[0];
     const card = findCard(container, tpl.name);
     const copyButton = card?.querySelector(
-      'button[title="duplicateAutoComboTitle"]'
+      'button[aria-label="duplicateAutoComboTitle"]'
     ) as HTMLButtonElement | null;
     await act(async () => {
       copyButton?.click();
@@ -367,7 +368,7 @@ describe("AutoComboCatalog", { timeout: 60_000 }, () => {
     await expand(container);
 
     const copyButton = findCard(container, "auto/gemini")?.querySelector(
-      'button[title="duplicateAutoComboTitle"]'
+      'button[aria-label="duplicateAutoComboTitle"]'
     ) as HTMLButtonElement | null;
     await act(async () => {
       copyButton?.click();

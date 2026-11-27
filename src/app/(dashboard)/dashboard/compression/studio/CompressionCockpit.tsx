@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { NodeTypes } from "@xyflow/react";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
+import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import { FlowCanvas } from "@/shared/components/flow/FlowCanvas";
@@ -49,10 +51,11 @@ function SpeedButton({
   return (
     <Button
       variant={active ? "secondary" : "ghost"}
-      size="sm"
+      size="2xs"
+      tone={active ? undefined : "muted"}
       onClick={onClick}
       aria-pressed={active}
-      className={`h-6 min-h-6 px-2 text-[11px] ${active ? "text-primary" : "text-text-muted"}`}
+      className={active ? "text-primary" : undefined}
     >
       {s}×
     </Button>
@@ -75,11 +78,12 @@ function ViewButton({
   return (
     <Button
       variant={active ? "secondary" : "ghost"}
-      size="sm"
+      size="2xs"
+      tone={active ? undefined : "muted"}
       onClick={onClick}
       data-testid={testId}
       aria-pressed={active}
-      className={`h-6 min-h-6 px-2 text-[11px] ${active ? "text-primary" : "text-text-muted"}`}
+      className={active ? "text-primary" : undefined}
     >
       {label}
     </Button>
@@ -173,14 +177,10 @@ export function CompressionCockpit({ run: runProp }: CompressionCockpitProps) {
     <div className="flex flex-col h-full gap-2" data-testid="compression-cockpit">
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 px-3 py-2 rounded-lg border border-border bg-bg/60 shrink-0">
-        <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">
+        <span className="ci-eyebrow" data-weight="medium">
           {run.mode}
         </span>
-        {run.comboId && (
-          <span className="text-xs text-text-muted px-1.5 py-0.5 rounded bg-border/40 font-mono">
-            {run.comboId}
-          </span>
-        )}
+        {run.comboId && <InlineCode>{run.comboId}</InlineCode>}
         <span className="text-xs text-text-muted font-mono opacity-70 truncate">
           {run.requestId}
         </span>
@@ -211,17 +211,13 @@ export function CompressionCockpit({ run: runProp }: CompressionCockpitProps) {
               onClick={() => setView("waterfall")}
             />
           </div>
-          <span className="text-[11px] text-text-muted">
+          <span className="text-2xs text-text-muted">
             {fmt(run.originalTokens)} → {fmt(run.compressedTokens)} {t("tokenShort")}
           </span>
           <span className="text-xs font-semibold" style={{ color: "var(--orch-status-success)" }}>
             −{run.savingsPercent.toFixed(1)}%
           </span>
-          {isComplete && view === "canvas" && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded border border-border text-text-muted">
-              {t("replayDone")}
-            </span>
-          )}
+          {isComplete && view === "canvas" && <Badge size="sm">{t("replayDone")}</Badge>}
         </div>
       </div>
 
@@ -259,7 +255,7 @@ export function CompressionCockpit({ run: runProp }: CompressionCockpitProps) {
             variant="ghost"
             size="icon-sm"
             onClick={reset}
-            className="text-text-muted"
+            tone="muted"
             aria-label={t("resetReplay")}
           >
             <Icon name="replay" size={16} />
@@ -270,7 +266,7 @@ export function CompressionCockpit({ run: runProp }: CompressionCockpitProps) {
             ))}
           </div>
           {displayRun && currentFrame && (
-            <span className="ml-auto text-[11px] text-text-muted">
+            <span className="ml-auto text-2xs text-text-muted">
               {t("stepProgress", {
                 current: displayRun?.steps.length ?? 0,
                 total: run.steps.length,

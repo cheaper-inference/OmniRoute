@@ -177,7 +177,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
   return (
     <html
       lang={locale}
-      className={dark ? "ci-theme dark" : "ci-theme"}
+      className={dark ? "ci-theme ci-scrollbars dark" : "ci-theme ci-scrollbars"}
       data-theme={dark ? "dark" : "light"}
       data-ci-appearance={palette === "classic" ? undefined : EDITIONS_APPEARANCE_VALUE}
       style={{ colorScheme: dark ? "dark" : "light" }}

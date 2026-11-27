@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ìlérí náà — Ojúlé kan àti àwọn olupese 394. Ìpadà-sẹ́yìn aládàáṣiṣẹ́ ń jẹ́ kí ìdarí máa bá a lọ nígbà tí ibi-afẹ́fẹ́ mìíràn tó ní ìlera bá wà. Àwọn òpó mẹ́fà: ìpadà-sẹ́yìn tó lágbára káàkiri àwọn olupese 394 · ìfipamọ́ tó tó 95% nínú àwọn token fún àwọn iṣẹ́ tó yẹ · $0 láti bẹ̀rẹ̀ pẹ̀lú àwọn ipele ọ̀fẹ́ 150+ àti àwọn olupese 51 tó ń pèsè ọ̀fẹ́ léraléra/tí kò nílò bọtìnì títí láé · àwọn ìṣọ̀kan CLI/agent 39 nípasẹ̀ ètò kan · ìbámu pẹ̀lú OpenAI, Claude, Gemini àti Responses API ní /v1 · àwọn ìṣàkóso fún gbóògì pẹ̀lú circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals àti àwọn ìkéde ìdánwò static 56,000+ káàkiri àwọn fáìlì ìdánwò 7,800+ tí a ń tọ́pa."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ìlérí náà — Ojúlé kan àti àwọn olupese 394. Ìpadà-sẹ́yìn aládàáṣiṣẹ́ ń jẹ́ kí ìdarí máa bá a lọ nígbà tí ibi-afẹ́fẹ́ mìíràn tó ní ìlera bá wà. Àwọn òpó mẹ́fà: ìpadà-sẹ́yìn tó lágbára káàkiri àwọn olupese 394 · ìfipamọ́ tó tó 95% nínú àwọn token fún àwọn iṣẹ́ tó yẹ · $0 láti bẹ̀rẹ̀ pẹ̀lú àwọn ipele ọ̀fẹ́ 150+ àti àwọn olupese 40 tó ń pèsè ọ̀fẹ́ léraléra/tí kò nílò bọtìnì títí láé · àwọn ìṣọ̀kan CLI/agent 39 nípasẹ̀ ètò kan · ìbámu pẹ̀lú OpenAI, Claude, Gemini àti Responses API ní /v1 · àwọn ìṣàkóso fún gbóògì pẹ̀lú circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals àti àwọn ìkéde ìdánwò static 56,000+ káàkiri àwọn fáìlì ìdánwò 7,800+ tí a ń tọ́pa."/>
 
 <br/>
 <br/>
@@ -712,7 +712,7 @@ nínú ìtàn shell rẹ. → [Àwọn Ìṣọ̀kan CLI](docs/guides/CLI-INTEGR
 
 </div>
 
-> **Àwọn olùpèsè 394 tí a forúkọsílẹ̀** kọjá àwọn àkójọpọ̀ canonical chat, media, search, local, cloud-agent àti system, pẹ̀lú **153 tí ó ní metadata ìṣàwárí `hasFree: true`**. Iforúkọsílẹ̀ chat model bo **àwọn olùpèsè 239 / 3,059 ìṣọ̀kan provider-model ọ̀tọ̀ọ̀tọ̀ / 1,475 àwọn ID model aise**; kàtálógì isuna ọ̀fẹ̀ lọ́tọ̀ ní **àwọn ìlà 465 fún model kọ̀ọ̀kan**, **àwọn adágún àtúnṣe 34** àti **àwọn olùpèsè 51 tí ó jẹ́ ọ̀fẹ̀ títí láé, tí wọ́n sì ń ṣe àtúnṣe tàbí tí kò nílò kọ́kọ́rọ̀**. Àwọn wọ̀nyí jẹ́ àwọn ìpìlẹ̀ ìṣírò tó yàtọ̀ nípasẹ̀ ètò; àwọn ìtumọ̀ àti ìṣírò tí a yọ àtúnṣe adágún kúrò wà nínú [Ìtọ́kasí Olùpèsè](docs/reference/PROVIDER_REFERENCE.md) àti [Àwọn Ipele Ọ̀fẹ̀](docs/reference/FREE_TIERS.md).
+> **Àwọn olùpèsè 394 tí a forúkọsílẹ̀** kọjá àwọn àkójọpọ̀ canonical chat, media, search, local, cloud-agent àti system, pẹ̀lú **153 tí ó ní metadata ìṣàwárí `hasFree: true`**. Iforúkọsílẹ̀ chat model bo **àwọn olùpèsè 239 / 3,059 ìṣọ̀kan provider-model ọ̀tọ̀ọ̀tọ̀ / 1,475 àwọn ID model aise**; kàtálógì isuna ọ̀fẹ̀ lọ́tọ̀ ní **àwọn ìlà 465 fún model kọ̀ọ̀kan**, **àwọn adágún àtúnṣe 34** àti **àwọn olùpèsè 40 tí ó jẹ́ ọ̀fẹ̀ títí láé, tí wọ́n sì ń ṣe àtúnṣe tàbí tí kò nílò kọ́kọ́rọ̀**. Àwọn wọ̀nyí jẹ́ àwọn ìpìlẹ̀ ìṣírò tó yàtọ̀ nípasẹ̀ ètò; àwọn ìtumọ̀ àti ìṣírò tí a yọ àtúnṣe adágún kúrò wà nínú [Ìtọ́kasí Olùpèsè](docs/reference/PROVIDER_REFERENCE.md) àti [Àwọn Ipele Ọ̀fẹ̀](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1325,7 +1325,7 @@ Fún runtime headless tí kò ní dashboard, lo profaili Docker `base` (lókè) 
   <tr><td nowrap><b>Àkókò ìṣiṣẹ́</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Èdè</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> káàkiri <code>src/</code> àti <code>open-sse/</code> (kò sí <code>any</code> nínú mojútò láti ìgbà v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Àkójọpọ̀ dátà</b></td><td>better-sqlite3 (SQLite, ìwé-àkọsílẹ̀ WAL) + LowDB (JSON àjọṣe àtijọ́) — àwọn modúlù àgbègbè 147, àwọn ìṣípadà 244</td></tr>
+  <tr><td nowrap><b>Àkójọpọ̀ dátà</b></td><td>better-sqlite3 (SQLite, ìwé-àkọsílẹ̀ WAL) + LowDB (JSON àjọṣe àtijọ́) — àwọn modúlù àgbègbè 147, àwọn ìṣípadà 252</td></tr>
   <tr><td nowrap><b>Ìrántí</b></td><td>SQLite FTS5 fún wíwá nínú gbogbo ọ̀rọ̀ + àwọn ìṣàpẹẹrẹ fekito tí a ṣe ìwọ̀n sí int8, ìdíndínà tí a tẹ̀wé</td></tr>
   <tr><td nowrap><b>Àwọn ètò àgbékalẹ̀</b></td><td>Zod 4 — ìmúdájú I/O irinṣẹ́ MCP + àwọn àdéhùn API</td></tr>
   <tr><td nowrap><b>Àwọn ìlànà</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

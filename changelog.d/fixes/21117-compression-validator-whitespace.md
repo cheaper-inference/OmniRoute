@@ -1,0 +1,1 @@
+- **fix(compression):** Caveman no longer rewrites preserved fenced/inline code blocks when tidying whitespace after restoring them (spaces inside string literals, `__DIR__ . '/app.php'` spacing), so valid preserved code is no longer rejected by the strict validator and falls back to 0% savings ([#21117](https://github.com/cheaper-inference/OmniRoute/issues/21117))

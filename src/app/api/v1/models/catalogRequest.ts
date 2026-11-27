@@ -92,6 +92,26 @@ export async function getModelCatalogAuthRejection(
 }
 
 /**
+ * The key that SCOPES a `/v1/models` listing: its cache bucket and per-key filters.
+ *
+ * `extractApiKey` reads `x-api-key` only next to `anthropic-version` or a Claude
+ * user agent, so a client that discovers models with a bare `x-api-key` used to be
+ * listed as anonymous. Scoping never rejects (an unknown key resolves to no
+ * metadata and the listing is returned unfiltered), so the bare header is accepted
+ * here, but only when the regular extraction found nothing, so it never overrides a
+ * key the regular extraction found.
+ *
+ * Never use this to accept or reject a request; `getModelCatalogAuthRejection`
+ * keeps the stricter `extractApiKey`.
+ */
+export function extractCatalogApiKey(request: Request): string | null {
+  const apiKey = extractApiKey(request);
+  if (apiKey) return apiKey;
+  const bare = request.headers.get("x-api-key")?.trim();
+  return bare ? bare : null;
+}
+
+/**
  * Detect the Codex CLI's model-catalog refresh client. Codex sends an `originator` header
  * of `codex_exec` (codex exec) / `codex_cli_rs` (interactive TUI) — see openai/codex
  * login/src/auth/default_client.rs DEFAULT_ORIGINATOR — and a matching `codex_*`
