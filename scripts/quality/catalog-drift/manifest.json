@@ -20,18 +20,6 @@
     "simplellm.eu",
     "xkiro.com"
   ],
-  "pendingCatalogFix": [
-    {
-      "probeId": "nara-plans",
-      "reason": "The active free plan advertises agnes-2.5-flash and 7M tokens per day. The catalog has no active Nara rows.",
-      "sourceUrl": "https://router.bynara.id/api/plans"
-    },
-    {
-      "probeId": "xkiro-models",
-      "reason": "Eight catalog models are no longer listed among the free models. Only the SenseNova model in the catalog still matches.",
-      "sourceUrl": "https://api.xkiro.com/v1/models"
-    }
-  ],
   "probes": [
     {
       "id": "mistral-usage-limits",
@@ -62,21 +50,31 @@
         {
           "path": "data[code=free].models",
           "op": "lengthEquals",
-          "value": 0
+          "value": 1
         },
         {
           "path": "data[code=free].models",
           "op": "includesCatalogIds"
+        },
+        {
+          "path": "data[code=free].token_cap_daily",
+          "op": "equals",
+          "value": 7000000
+        },
+        {
+          "path": "data[code=free].is_active",
+          "op": "equals",
+          "value": true
         }
       ],
       "backs": [
         {
           "provider": "nara",
           "poolKey": "nara-free",
-          "monthlyTokens": 0
+          "monthlyTokens": 210000000
         }
       ],
-      "note": "The public API lists one model and a 7M-token daily cap on the active free plan. Keep the zero-model assertion until the catalog is reconciled."
+      "note": "The active Free plan lists Agnes 2.5 Flash and 7M tokens per day. The catalog records 210M tokens over 30 days, gated by Telegram verification."
     },
     {
       "id": "xkiro-models",
@@ -90,7 +88,7 @@
         "field": "access_tier",
         "equals": "free"
       },
-      "note": "The API lists 18 free IDs. Eight catalog IDs are missing, and only one catalog ID is still listed as free."
+      "note": "On 2026-11-27 the live list had 38 free chat IDs. The catalog matches those IDs and records eight previously active routes as discontinued."
     },
     {
       "id": "xkiro-home",
@@ -158,7 +156,7 @@
       "filter": {
         "idEndsWith": ":free"
       },
-      "note": "The public list still includes the active Gemma 4 31B free ID. Additional free IDs are reported for review."
+      "note": "On 2026-11-27 the public list had ten :free chat variants with zero prompt and completion prices. Each is in the catalog."
     },
     {
       "id": "openrouter-limits",
@@ -167,7 +165,7 @@
       "url": "https://openrouter.ai/docs/api-reference/limits.md",
       "addedAt": "2026-11-25",
       "source": "public-docs",
-      "mustContain": ["| less than 10 | 20 | 50 |"],
+      "mustContain": ["| less than 10 | 20 | 50 |", "| at least 10 | 20 | 1000 |"],
       "backs": [
         {
           "provider": "openrouter",
@@ -175,7 +173,7 @@
           "monthlyTokens": 1200000
         }
       ],
-      "note": "The account tier below the $10 threshold still has 50 requests/day, supporting the 1.2M-token estimate at 800 tokens per request over 30 days."
+      "note": "The base tier has 50 requests/day, supporting the 1.2M-token estimate at 800 tokens per request over 30 days. The table also gives the higher 1,000 requests/day tier."
     },
     {
       "id": "arcee-models",

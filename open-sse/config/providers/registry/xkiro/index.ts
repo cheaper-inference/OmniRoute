@@ -1,14 +1,8 @@
 import type { RegistryEntry } from "../../shared.ts";
 import { buildOpenAiCompatibleRegistryEntry } from "../../shared.ts";
 
-/**
- * xKiro — OpenAI-compatible gateway (xkiro.com). Free plan: 5M tokens/day per
- * account across the models tagged `access_tier: "free"` on the public
- * `GET https://api.xkiro.com/v1/models` (2026-09-02: 40 rows; context lengths and
- * capabilities below come from that endpoint). `openai/gpt-5.3-codex-spark` is
- * listed free upstream but its provenance is undeclared, so it is not pinned.
- * Bearer auth; `GET /v1/usage` answers 401 without a valid key.
- */
+// xKiro Free shares 500K tokens per day across its zero-price chat models.
+// Voice and other service kinds use the provider's separate API endpoints.
 export const xkiroProvider: RegistryEntry = buildOpenAiCompatibleRegistryEntry({
   id: "xkiro",
   baseUrl: "https://api.xkiro.com/v1/chat/completions",
@@ -266,6 +260,102 @@ export const xkiroProvider: RegistryEntry = buildOpenAiCompatibleRegistryEntry({
       contextLength: 262144,
       toolCalling: true,
       supportsVision: true,
+    },
+    { id: "cohere/aya-expanse-32b", name: "Aya Expanse 32B", contextLength: 128000 },
+    { id: "cohere/aya-vision-32b", name: "Aya Vision 32B", contextLength: 16384 },
+    { id: "cohere/command-a", name: "Command A", contextLength: 288000, toolCalling: true },
+    {
+      id: "cohere/command-a-plus",
+      name: "Command A+",
+      contextLength: 436000,
+      toolCalling: true,
+      supportsVision: true,
+      supportsReasoning: true,
+    },
+    {
+      id: "cohere/command-a-reasoning",
+      name: "Command A Reasoning",
+      contextLength: 288768,
+      toolCalling: true,
+      supportsReasoning: true,
+    },
+    {
+      id: "cohere/command-a-translate",
+      name: "Command A Translate",
+      contextLength: 8992,
+      toolCalling: true,
+    },
+    {
+      id: "cohere/command-a-vision",
+      name: "Command A Vision",
+      contextLength: 128000,
+      supportsVision: true,
+    },
+    {
+      id: "cohere/command-r-08-2024",
+      name: "Command R (08-2024)",
+      contextLength: 128000,
+      toolCalling: true,
+    },
+    {
+      id: "cohere/command-r-plus-08-2024",
+      name: "Command R+ (08-2024)",
+      contextLength: 128000,
+      toolCalling: true,
+    },
+    {
+      id: "cohere/command-r7b-12-2024",
+      name: "Command R7B (12-2024)",
+      contextLength: 132000,
+      toolCalling: true,
+    },
+    {
+      id: "cohere/north-mini-code",
+      name: "North Mini Code",
+      contextLength: 256000,
+      toolCalling: true,
+      supportsReasoning: true,
+    },
+    { id: "cohere/north-small-translate", name: "North Small Translate", contextLength: 32768 },
+    { id: "cohere/tiny-aya-earth", name: "Tiny Aya Earth", contextLength: 8192, toolCalling: true },
+    { id: "cohere/tiny-aya-fire", name: "Tiny Aya Fire", contextLength: 8192, toolCalling: true },
+    {
+      id: "cohere/tiny-aya-global",
+      name: "Tiny Aya Global",
+      contextLength: 8192,
+      toolCalling: true,
+    },
+    { id: "cohere/tiny-aya-water", name: "Tiny Aya Water", contextLength: 8192, toolCalling: true },
+    {
+      id: "qwen/qwen3.7-flash:free",
+      name: "Qwen3.7 Flash",
+      contextLength: 1000000,
+      toolCalling: true,
+      supportsVision: true,
+      supportsReasoning: true,
+    },
+    {
+      id: "qwen/qwen3.8-max-preview:free",
+      name: "Qwen3.8 Max Preview",
+      contextLength: 1000000,
+      toolCalling: true,
+      supportsVision: true,
+      supportsReasoning: true,
+    },
+    {
+      id: "qwen/qwen3.8-omni-flash:free",
+      name: "Qwen3.8 Omni Flash",
+      contextLength: 1000000,
+      toolCalling: true,
+      supportsVision: true,
+      supportsReasoning: true,
+    },
+    {
+      id: "stealth/big-pickle",
+      name: "Big Pickle",
+      contextLength: 200000,
+      toolCalling: true,
+      supportsReasoning: true,
     },
   ],
 });

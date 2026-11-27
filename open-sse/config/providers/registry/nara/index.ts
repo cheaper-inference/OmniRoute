@@ -4,11 +4,9 @@ import { buildOpenAiCompatibleRegistryEntry } from "../../shared.ts";
 /**
  * NaraRouter — OpenAI-compatible aggregator (router.bynara.id).
  *
- * Free key issued after linking a Telegram account. The free plan is one
- * 7M-tokens/day bucket per account (GET /api/plans, 2026-09-02); only the
- * plan's own models are pinned. Context lengths mirror the same models in
- * our own registry (agnes, poolside, novita, stepfun); qwen3.8-27b has no
- * published context yet, so it carries none.
+ * Free accounts must link Telegram before calling the API. The active Free
+ * plan lists Agnes 2.5 Flash with 7M tokens/day (GET /api/plans, 2026-11-27).
+ * The registry also keeps the other pinned routes for accounts with access.
  */
 export const naraProvider: RegistryEntry = buildOpenAiCompatibleRegistryEntry({
   id: "nara",

@@ -276,10 +276,12 @@ export const FREE_TIER_BOOSTS: Record<
     gate?: "deposit" | "telegram" | "discord" | "phone";
   }
 > = {
+  // evidence: https://openrouter.ai/docs/api_reference/limits.md (2026-11-27) — "| At least 10 | 20 | 1000 |".
   "openrouter-free": {
     provider: "openrouter",
     boostMonthlyTokens: 24_000_000,
-    note: "A one-time $10 lifetime top-up raises the free pool from 50 to 1000 requests/day (~24M tokens/month).",
+    gate: "deposit",
+    note: "After $10 in lifetime credit purchases, the documented higher tier raises the free pool from 50 to 1,000 requests per day (~24M tokens/month).",
   },
   // evidence: public-page https://docs.dgrid.ai/ai-gateway/free-models-router.md (2026-11-27)
   // Qualifying top-ups of at least $5 raise the total to 1,000 requests/day × 800 × 30.
@@ -289,13 +291,13 @@ export const FREE_TIER_BOOSTS: Record<
     gate: "deposit",
     note: "At least $5 in qualifying top-ups raises the allowance from 100 to 1,000 requests per day.",
   },
-  // evidence: public-page https://xkiro.com (2026-11-23) — "500K free-model tokens a day (1M after
+  // evidence: public-page https://xkiro.com/ (2026-11-27) — "500K free-model tokens a day (1M after
   // Telegram verification)" ⇒ +500K/day × 30 = +15M. A social gate: never in the real figure.
   "xkiro-free": {
     provider: "xkiro",
     boostMonthlyTokens: 15_000_000,
     gate: "telegram",
-    note: "Verifying the account on Telegram raises the free allowance from 500K to 1M tokens/day (+15M tokens/month; xkiro.com, 2026-11-23).",
+    note: "Verifying the account on Telegram raises the free allowance from 500K to 1M tokens/day (+15M tokens/month; xkiro.com, 2026-11-27).",
   },
 };
 
@@ -485,6 +487,7 @@ export const FREE_QUOTA_UNIT: Record<string, FreeQuotaUnit> = {
   aion: "tokens",
   kenari: "requests",
   scaleway: "tokens",
+  byteplus: "tokens",
 };
 
 /** Per-pool override of `FREE_QUOTA_UNIT`, for a pool published in a different unit. */
