@@ -5,6 +5,7 @@ import http from "node:http";
 import net from "node:net";
 import path from "node:path";
 import { createRequire } from "node:module";
+import { PassThrough, type Duplex } from "node:stream";
 import { fileURLToPath } from "node:url";
 import type { AddressInfo } from "node:net";
 
@@ -14,10 +15,11 @@ const h2cGuard = require("../../scripts/dev/h2c-upgrade-guard.cjs") as {
     req: { headers: Record<string, string | string[] | undefined> },
     socket?: { encrypted?: boolean }
   ) => boolean;
+  withH2cUpgradeGuard: (options?: http.ServerOptions) => http.ServerOptions;
   handleH2cUpgrade: (
     server: http.Server,
     req: http.IncomingMessage,
-    socket: net.Socket,
+    socket: Duplex,
     head: Buffer
   ) => boolean;
 };
@@ -25,7 +27,7 @@ const h2cGuard = require("../../scripts/dev/h2c-upgrade-guard.cjs") as {
 /**
  * HTTP/1.1 clients built on the JDK `java.net.http.HttpClient` (the JetBrains
  * IDEs / Air "Add an AI provider" connection test, among others) default to
- * HTTP/2 and open a cleartext connection with the RFC 9113 §3.2 upgrade dance:
+ * HTTP/2 and open a cleartext connection with an optional h2c upgrade:
  *
  *   POST /v1/messages HTTP/1.1
  *   Connection: Upgrade, HTTP2-Settings
@@ -38,7 +40,7 @@ const h2cGuard = require("../../scripts/dev/h2c-upgrade-guard.cjs") as {
  * was dropped: the client saw "HTTP/1.1 header parser received no bytes".
  *
  * RFC 9110 §7.8 lets a server ignore `Upgrade` and keep answering in HTTP/1.1,
- * so `scripts/dev/h2c-upgrade-guard.cjs` hands such requests back to Node's
+ * so `scripts/dev/h2c-upgrade-guard.cjs` keeps these requests on the
  * HTTP/1.1 parser. These tests drive real sockets through a real http.Server.
  */
 
@@ -48,6 +50,8 @@ type Echo = {
   upgrade: string | null;
   connection: string | null;
   http2Settings: string | null;
+  rawHeaders: string[];
+  headersDistinct: http.IncomingMessage["headersDistinct"];
   body: string;
 };
 
@@ -56,12 +60,15 @@ after(async () => {
   await Promise.all(servers.map((s) => new Promise<void>((resolve) => s.close(() => resolve()))));
 });
 
-// Mirrors the production wiring: the guard runs first inside the `upgrade`
-// listener; whatever it does not claim ends up in the fallback (Next/WS logic),
-// which here records the event and closes the socket exactly like the real
-// fallback does for an upgrade nobody handles.
-async function startServer(opts?: { onUnclaimedUpgrade?: (req: http.IncomingMessage) => void }) {
-  const server = http.createServer((req, res) => {
+// Mirrors the production constructor and legacy upgrade listener. The stub
+// Next/WebSocket handler records any accepted upgrade and closes the socket.
+async function startServer(opts?: {
+  onUnclaimedUpgrade?: (req: http.IncomingMessage) => void;
+  serverOptions?: http.ServerOptions;
+  legacy?: boolean;
+}) {
+  const options = opts?.legacy ? {} : h2cGuard.withH2cUpgradeGuard(opts?.serverOptions);
+  const server = http.createServer(options, (req, res) => {
     const chunks: Buffer[] = [];
     req.on("data", (c) => chunks.push(c));
     req.on("end", () => {
@@ -71,6 +78,8 @@ async function startServer(opts?: { onUnclaimedUpgrade?: (req: http.IncomingMess
         upgrade: req.headers.upgrade ?? null,
         connection: req.headers.connection ?? null,
         http2Settings: (req.headers["http2-settings"] as string | undefined) ?? null,
+        rawHeaders: req.rawHeaders,
+        headersDistinct: req.headersDistinct,
         body: Buffer.concat(chunks).toString("utf8"),
       };
       const payload = JSON.stringify(echo);
@@ -82,7 +91,7 @@ async function startServer(opts?: { onUnclaimedUpgrade?: (req: http.IncomingMess
     });
   });
   server.on("upgrade", (req, socket, head) => {
-    if (h2cGuard.handleH2cUpgrade(server, req, socket as net.Socket, head)) return;
+    if (h2cGuard.handleH2cUpgrade(server, req, socket, head)) return;
     opts?.onUnclaimedUpgrade?.(req);
     socket.destroy();
   });
@@ -147,6 +156,17 @@ function h2cRequest(method: string, url: string, body = "") {
   return `${lines.join("\r\n")}\r\n\r\n${body}`;
 }
 
+const websocketRequest = [
+  "GET /v1/ws HTTP/1.1",
+  "Host: 127.0.0.1",
+  "Connection: Upgrade",
+  "Upgrade: websocket",
+  "Sec-WebSocket-Version: 13",
+  "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==",
+  "",
+  "",
+].join("\r\n");
+
 describe("h2c upgrade guard — isCleartextH2cUpgrade", () => {
   it("matches an Upgrade header that lists only h2c (case-insensitive)", () => {
     assert.equal(h2cGuard.isCleartextH2cUpgrade({ headers: { upgrade: "h2c" } }, {}), true);
@@ -176,11 +196,49 @@ describe("h2c upgrade guard — isCleartextH2cUpgrade", () => {
       false
     );
   });
+
+  it("leaves TLS alone when the upgrade event delivers a wrapped stream", (t) => {
+    const underlying = Object.assign(new net.Socket(), { encrypted: true });
+    const stream = new PassThrough();
+    t.after(() => {
+      stream.destroy();
+      underlying.destroy();
+    });
+    const request = new http.IncomingMessage(underlying);
+    request.headers = { upgrade: "h2c" };
+    const server = http.createServer();
+    const unshift = t.mock.method(stream, "unshift", () => false);
+    const emit = t.mock.method(server, "emit", () => false);
+
+    assert.equal(h2cGuard.handleH2cUpgrade(server, request, stream, Buffer.alloc(0)), false);
+    assert.equal(unshift.mock.callCount(), 0);
+    assert.equal(emit.mock.callCount(), 0);
+  });
+
+  it("forwards the request and receiver to an explicit WebSocket policy", (t) => {
+    const server = http.createServer();
+    const socket = new net.Socket();
+    t.after(() => socket.destroy());
+    const request = new http.IncomingMessage(socket);
+    request.headers = { upgrade: "websocket" };
+    const policy = t.mock.fn((_request: http.IncomingMessage) => false);
+    const { shouldUpgradeCallback } = h2cGuard.withH2cUpgradeGuard({
+      shouldUpgradeCallback: policy,
+    });
+
+    assert.ok(shouldUpgradeCallback);
+    assert.equal(shouldUpgradeCallback.call(server, request), false);
+    assert.equal(policy.mock.callCount(), 1);
+    assert.equal(policy.mock.calls[0].this, server);
+    assert.deepEqual(policy.mock.calls[0].arguments, [request]);
+  });
 });
 
 describe("h2c upgrade guard — real sockets", () => {
   it("answers a POST that carries the h2c upgrade headers and its body in HTTP/1.1", async () => {
-    const { port } = await startServer();
+    const { server, port } = await startServer();
+    let connections = 0;
+    server.on("connection", () => connections++);
     const socket = net.connect(port, "127.0.0.1");
     const read = createReader(socket);
     const body = JSON.stringify({ model: "claude-sonnet-5-5", messages: [] });
@@ -194,6 +252,7 @@ describe("h2c upgrade guard — real sockets", () => {
     assert.equal(echo.method, "POST");
     assert.equal(echo.url, "/v1/messages?beta=true");
     assert.equal(echo.body, body, "the request body must arrive intact");
+    assert.equal(connections, "shouldUpgradeCallback" in server ? 1 : 2);
   });
 
   it("answers a bodiless GET that carries the h2c upgrade headers", async () => {
@@ -209,8 +268,8 @@ describe("h2c upgrade guard — real sockets", () => {
     assert.equal((JSON.parse(res.body) as Echo).url, "/v1/models");
   });
 
-  it("strips the h2c negotiation headers so downstream handlers never see an upgrade", async () => {
-    const { port } = await startServer();
+  it("strips h2c negotiation headers from the parsed request views", async () => {
+    const { server, port } = await startServer();
     const socket = net.connect(port, "127.0.0.1");
     const read = createReader(socket);
     socket.write(h2cRequest("GET", "/v1/models"));
@@ -221,6 +280,13 @@ describe("h2c upgrade guard — real sockets", () => {
     const echo = JSON.parse(res.body) as Echo;
     assert.equal(echo.upgrade, null);
     assert.equal(echo.http2Settings, null);
+    assert.equal(echo.headersDistinct.upgrade, undefined);
+    assert.equal(echo.headersDistinct["http2-settings"], undefined);
+    assert.equal(
+      echo.rawHeaders.some((value, index) => index % 2 === 0 && /^upgrade$/i.test(value)),
+      "shouldUpgradeCallback" in server,
+      "the native path preserves raw wire headers for Node's parser"
+    );
     assert.ok(
       !/upgrade|http2-settings/i.test(echo.connection ?? ""),
       `Connection must not keep the stripped tokens, got: ${echo.connection}`
@@ -246,7 +312,9 @@ describe("h2c upgrade guard — real sockets", () => {
     const res = await read();
     socket.destroy();
     assert.ok(res);
-    assert.equal((JSON.parse(res.body) as Echo).connection, "keep-alive");
+    const echo = JSON.parse(res.body) as Echo;
+    assert.equal(echo.connection, "keep-alive");
+    assert.deepEqual(echo.headersDistinct.connection, ["keep-alive"]);
   });
 
   it("keeps the connection usable for further requests (keep-alive)", async () => {
@@ -264,7 +332,7 @@ describe("h2c upgrade guard — real sockets", () => {
     assert.equal((JSON.parse(second!.body) as Echo).url, "/second");
   });
 
-  it("handles a body that arrives after the headers (nothing buffered in `head`)", async () => {
+  it("handles a body that arrives in a later write than the request headers", async () => {
     const { port } = await startServer();
     const socket = net.connect(port, "127.0.0.1");
     const read = createReader(socket);
@@ -291,23 +359,49 @@ describe("h2c upgrade guard — real sockets", () => {
     });
     const socket = net.connect(port, "127.0.0.1");
     const read = createReader(socket);
-    socket.write(
-      [
-        "GET /v1/ws HTTP/1.1",
-        "Host: 127.0.0.1",
-        "Connection: Upgrade",
-        "Upgrade: websocket",
-        "Sec-WebSocket-Version: 13",
-        "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==",
-        "",
-        "",
-      ].join("\r\n")
-    );
+    socket.write(websocketRequest);
 
     const res = await read();
     socket.destroy();
     assert.equal(res, null, "the stub fallback closes the socket without answering");
     assert.equal(seenUpgrade, "websocket");
+  });
+
+  it("routes WebSocket upgrades according to the Node server's callback support", async () => {
+    let socketServer: http.Server | undefined;
+    const { server, port } = await startServer({
+      serverOptions: {
+        shouldUpgradeCallback(this: http.Server, req) {
+          socketServer = this;
+          return req.headers.upgrade !== "websocket";
+        },
+      },
+    });
+    const socket = net.connect(port, "127.0.0.1");
+    const read = createReader(socket);
+    socket.write(websocketRequest);
+    const res = await read();
+    socket.destroy();
+    if ("shouldUpgradeCallback" in server) {
+      assert.ok(res);
+      assert.equal(res.status, 200);
+      assert.equal((JSON.parse(res.body) as Echo).upgrade, "websocket");
+      assert.equal(socketServer, server);
+    } else {
+      assert.equal(res, null, "older Node versions dispatch to the upgrade listener");
+      assert.equal(socketServer, undefined);
+    }
+  });
+
+  it("serves a bodiless h2c request via the legacy upgrade-event fallback", async () => {
+    const { port } = await startServer({ legacy: true });
+    const socket = net.connect(port, "127.0.0.1");
+    const read = createReader(socket);
+    socket.write(h2cRequest("GET", "/legacy"));
+    const res = await read();
+    socket.destroy();
+    assert.equal(res?.status, 200);
+    assert.equal((JSON.parse(res!.body) as Echo).upgrade, null);
   });
 
   it("baseline: without the guard a listener that does not claim h2c drops the connection", async () => {
@@ -334,6 +428,7 @@ describe("h2c upgrade guard — wiring", () => {
   it("standalone-server-ws.mjs consults the guard first in its upgrade wrapper", () => {
     const source = read("scripts/dev/standalone-server-ws.mjs");
     assert.match(source, /from\s+["']\.\/h2c-upgrade-guard\.cjs["']/);
+    assert.match(source, /args\[0\] = withH2cUpgradeGuard\(args\[0\]\)/);
     const wrapper = source.slice(source.indexOf("function wrapUpgradeListener"));
     const guardAt = wrapper.indexOf("handleH2cUpgrade(");
     const liveWsAt = wrapper.indexOf("LIVE_WS_PORT");
@@ -344,6 +439,7 @@ describe("h2c upgrade guard — wiring", () => {
   it("run-next.mjs (npm start / dev) consults the same guard", () => {
     const source = read("scripts/dev/run-next.mjs");
     assert.match(source, /from\s+["']\.\/h2c-upgrade-guard\.cjs["']/);
+    assert.match(source, /http\.createServer\(\s*withH2cUpgradeGuard\(\),/);
     assert.match(source, /handleH2cUpgrade\(server,\s*req,\s*socket,\s*head\)/);
   });
 });

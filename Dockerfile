@@ -300,7 +300,9 @@ ENV NODE_OPTIONS="--max-old-space-size=${OMNIROUTE_MEMORY_MB}"
 
 # Data directory inside Docker — must match the volume mount in docker-compose.yml
 ENV DATA_DIR=/app/data
-RUN mkdir -p /app/data && chown node:node /app /app/data
+# New Compose named volumes inherit the ownership of their mount points in the image.
+RUN mkdir -p /app/data /run/codex-appserver /home/node/.codex \
+  && chown node:node /app /app/data /run/codex-appserver /home/node/.codex
 
 # #13679: default the PUBLISHED image to requiring an API key. A bare
 # `docker run -p 20128:20128 … cheaperinference/omniroute` (README/QUICK-START
@@ -398,6 +400,8 @@ COPY --from=builder /app/node_modules/playwright ./node_modules/playwright
 # start. The build creates /tmp/.X11-unix owned by `node`, which runs Xvfb.
 # Mode 0755 grants write permission only to the owner.
 # PLAYWRIGHT_BROWSERS_PATH puts the browsers under /home/node, owned by the runtime user.
+# /usr/bin/chromium points to Playwright's build for the system-browser lookups in
+# ChatGPT Web, Codex Web, and the Adobe Firefly login.
 ENV PLAYWRIGHT_BROWSERS_PATH=/home/node/.cache/ms-playwright
 RUN apk add --no-cache fontconfig font-liberation font-opensans gtk-3 mesa mesa-glx \
      so:libnss3.so so:libnssutil3.so so:libsmime3.so so:libnspr4.so \
@@ -412,7 +416,11 @@ RUN apk add --no-cache fontconfig font-liberation font-opensans gtk-3 mesa mesa-
        missing="$(/lib/ld-linux-*.so.* --list "$bin" 2>&1 | grep 'not found' || true)"; \
        if [ -n "$missing" ]; then echo "$bin is missing libraries:"; echo "$missing"; exit 1; fi; \
      done \
+  && ln -sf "$(node -e 'process.stdout.write(require("playwright-core").chromium.executablePath())')" /usr/bin/chromium \
+  && /usr/bin/chromium --version \
   && chown -R node:node /home/node/.cache
+
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
 
 USER node
 

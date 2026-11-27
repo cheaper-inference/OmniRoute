@@ -416,34 +416,38 @@ test("generateSignature namespaces the digest with the apiKeyId as a plaintext p
 test("storeSemanticCacheResponse forwards the apiKeyId into the signature it stores under", () => {
   const signatureArgs: unknown[][] = [];
   const stored: unknown[][] = [];
-  storeSemanticCacheResponse(
-    {
-      enabled: true,
-      body: { messages: [{ role: "user", content: "hi" }], temperature: 0 },
-      headers: {},
-      // A non-object response skips the async dual-layer manager write so this test stays
-      // purely synchronous; the signature/setCachedResponse path is identical.
-      translatedResponse: "cached-text",
-      model: "m",
-      provider: "p",
-      apiKeyId: "key-a",
-      usage: { prompt_tokens: 2, completion_tokens: 3 },
+  const args = {
+    enabled: true,
+    body: { messages: [{ role: "user", content: "hi" }], temperature: 0 },
+    headers: {},
+    // A non-object response skips the async dual-layer manager write so this test stays
+    // purely synchronous; the signature/setCachedResponse path is identical.
+    translatedResponse: "cached-text",
+    model: "m",
+    provider: "p",
+    apiKeyId: "key-a",
+    usage: { prompt_tokens: 2, completion_tokens: 3 },
+  };
+  const deps = {
+    isCacheableForWrite: () => true,
+    isTruncatedCompletion: () => false,
+    isSmallEnoughForSemanticCache: () => true,
+    generateSignature: (...args: unknown[]) => {
+      signatureArgs.push(args);
+      return "sig";
     },
-    {
-      isCacheableForWrite: () => true,
-      isTruncatedCompletion: () => false,
-      isSmallEnoughForSemanticCache: () => true,
-      generateSignature: ((...args: unknown[]) => {
-        signatureArgs.push(args);
-        return "sig";
-      }) as never,
-      setCachedResponse: ((...args: unknown[]) => {
-        stored.push(args);
-      }) as never,
-    }
-  );
+    setCachedResponse: (...args: unknown[]) => {
+      stored.push(args);
+    },
+  };
+
+  storeSemanticCacheResponse(args, deps);
   assert.equal(signatureArgs[0][4], "key-a");
-  assert.deepEqual(stored, [["sig", "m", "cached-text", 5]]);
+  assert.deepEqual(stored, [["sig", "m", "cached-text", 5, undefined, undefined]]);
+
+  storeSemanticCacheResponse({ ...args, originalCostUsd: 0.0125 }, deps);
+  assert.equal(signatureArgs[1][4], "key-a");
+  assert.deepEqual(stored.slice(1), [["sig", "m", "cached-text", 5, undefined, 0.0125]]);
 });
 
 // ─── 5. Self-loop headers ────────────────────────────────────────────────────

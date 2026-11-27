@@ -1,13 +1,13 @@
 // UI review 2026-11-15, defect 13 ("progress bars without semantics"): 41 of the 42 hand-made
-// proportion/quota bars had no `role="progressbar"`, so a screen reader skipped them.
+// proportion/quota bars lacked a `progressbar` or `meter` role, so a screen reader skipped them.
 //
 // This guard parses every dashboard TSX file and enforces three rules:
 //
 //   1. A "fill" element — a JSX element whose inline `style` sets `width` or `flexBasis` to a
 //      percentage — must sit inside (itself, or up to three JSX levels above) an element with
-//      `role="progressbar"` that also carries `aria-valuemin`, `aria-valuemax`, `aria-valuenow`
-//      and an accessible name (`aria-label` or `aria-labelledby`). The 8 px bars the kit covers
-//      are the kit `Progress` instead, which renders the role itself and has no hand-made fill.
+//      `role="progressbar"` or `role="meter"` that also carries `aria-valuemin`, `aria-valuemax`,
+//      `aria-valuenow` and an accessible name (`aria-label` or `aria-labelledby`). The 8 px bars
+//      the kit covers use `Progress`, which renders the role itself and has no hand-made fill.
 //   2. Every kit `<Progress>` is named (`aria-label`, `aria-labelledby` or a visible `label`),
 //      and is not hidden from assistive tech by an `aria-hidden` wrapper.
 //   3. Nothing recolours the kit Progress from the outside (`[&_.ci-progress…]` classes): the
@@ -99,8 +99,8 @@ function enclosingTags(node: JsxTag): JsxTag[] {
   return tags;
 }
 
-function isProgressbar(node: JsxTag, sf: ts.SourceFile): boolean {
-  return /^["']progressbar["']$/.test(attributeText(node, "role", sf));
+function hasBarRole(node: JsxTag, sf: ts.SourceFile): boolean {
+  return /^["'](?:progressbar|meter)["']$/.test(attributeText(node, "role", sf));
 }
 
 function missingBarAttributes(node: JsxTag): string[] {
@@ -136,7 +136,7 @@ function lineOf(node: ts.Node, sf: ts.SourceFile): number {
   return sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1;
 }
 
-test("every hand-made percentage bar is a named role=progressbar", () => {
+test("every hand-made percentage bar is a named progressbar or meter", () => {
   const offenders: string[] = [];
   const usedExceptions = new Set<string>();
   for (const { rel, sf } of FILES) {
@@ -148,14 +148,14 @@ test("every hand-made percentage bar is a named role=progressbar", () => {
       }
       const bar = enclosingTags(node)
         .slice(0, MAX_LEVELS_UP + 1)
-        .find((tag) => isProgressbar(tag, sf));
+        .find((tag) => hasBarRole(tag, sf));
       if (!bar) {
-        offenders.push(`${rel}:${lineOf(node, sf)} fill has no role="progressbar" around it`);
+        offenders.push(`${rel}:${lineOf(node, sf)} fill has no progressbar or meter around it`);
         return;
       }
       const missing = missingBarAttributes(bar);
       if (missing.length > 0) {
-        offenders.push(`${rel}:${lineOf(bar, sf)} progressbar is missing ${missing.join(", ")}`);
+        offenders.push(`${rel}:${lineOf(bar, sf)} bar is missing ${missing.join(", ")}`);
       }
     });
   }
@@ -164,11 +164,11 @@ test("every hand-made percentage bar is a named role=progressbar", () => {
   assert.deepEqual(stale, [], "exceptions that no longer match a percentage-sized element");
 });
 
-test("every role=progressbar written by hand carries its value range and a name", () => {
+test("every hand-made progressbar or meter carries its value range and a name", () => {
   const offenders: string[] = [];
   for (const { rel, sf } of FILES) {
     forEachTag(sf, (node) => {
-      if (!isProgressbar(node, sf)) return;
+      if (!hasBarRole(node, sf)) return;
       const missing = missingBarAttributes(node);
       if (missing.length > 0) {
         offenders.push(`${rel}:${lineOf(node, sf)} is missing ${missing.join(", ")}`);

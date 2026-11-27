@@ -1,0 +1,213 @@
+{
+  "browser": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+  "viewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "locale": "en",
+  "theme": "light",
+  "longFrames": [],
+  "method": "capture-phase event timestamp to second animation frame after committed DOM mutation (conservative paint opportunity estimate)",
+  "samples": [
+    {
+      "id": 1,
+      "kind": "open",
+      "start": 530,
+      "query": "",
+      "domReadyMs": 803.0999999996275,
+      "elapsedMs": 1756.9000000003725,
+      "optionCount": 5001,
+      "first": "Select modelTest Model 00000 · OpenAImodel-00000 · Synthetic QA fixtureTest Model 00001 · OpenAImodel-00001 · Synthetic QA fixture"
+    },
+    {
+      "id": 2,
+      "kind": "filter",
+      "start": 2594.0999999996275,
+      "query": "04999",
+      "domReadyMs": 53.5,
+      "elapsedMs": 97.20000000018626,
+      "optionCount": 2,
+      "first": "Select modelTest Model 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    },
+    {
+      "id": 3,
+      "kind": "open",
+      "start": 3128.5,
+      "query": "",
+      "domReadyMs": 753.5,
+      "elapsedMs": 1733,
+      "optionCount": 5001,
+      "first": "Select modelTest Model 00000 · OpenAImodel-00000 · Synthetic QA fixtureTest Model 00001 · OpenAImodel-00001 · Synthetic QA fixture"
+    },
+    {
+      "id": 4,
+      "kind": "filter",
+      "start": 4903.5,
+      "query": "04999",
+      "domReadyMs": 40.40000000037253,
+      "elapsedMs": 87.29999999981374,
+      "optionCount": 2,
+      "first": "Select modelTest Model 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    },
+    {
+      "id": 5,
+      "kind": "open",
+      "start": 5420.200000000186,
+      "query": "",
+      "domReadyMs": 731.7999999998137,
+      "elapsedMs": 1741.0999999996275,
+      "optionCount": 5001,
+      "first": "Select modelTest Model 00000 · OpenAImodel-00000 · Synthetic QA fixtureTest Model 00001 · OpenAImodel-00001 · Synthetic QA fixture"
+    },
+    {
+      "id": 6,
+      "kind": "filter",
+      "start": 7202,
+      "query": "04999",
+      "domReadyMs": 38.700000000186265,
+      "elapsedMs": 84.40000000037253,
+      "optionCount": 2,
+      "first": "Select modelTest Model 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    },
+    {
+      "id": 7,
+      "kind": "open",
+      "start": 7712.4000000003725,
+      "query": "",
+      "domReadyMs": 701.5999999996275,
+      "elapsedMs": 1649.0999999996275,
+      "optionCount": 5001,
+      "first": "Select modelTest Model 00000 · OpenAImodel-00000 · Synthetic QA fixtureTest Model 00001 · OpenAImodel-00001 · Synthetic QA fixture"
+    },
+    {
+      "id": 8,
+      "kind": "filter",
+      "start": 9404.5,
+      "query": "04999",
+      "domReadyMs": 38.40000000037253,
+      "elapsedMs": 81.59999999962747,
+      "optionCount": 2,
+      "first": "Select modelTest Model 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    },
+    {
+      "id": 9,
+      "kind": "open",
+      "start": 9915.200000000186,
+      "query": "",
+      "domReadyMs": 691.0999999996275,
+      "elapsedMs": 1724.8999999994412,
+      "optionCount": 5001,
+      "first": "Select modelTest Model 00000 · OpenAImodel-00000 · Synthetic QA fixtureTest Model 00001 · OpenAImodel-00001 · Synthetic QA fixture"
+    },
+    {
+      "id": 10,
+      "kind": "filter",
+      "start": 11683.5,
+      "query": "04999",
+      "domReadyMs": 39.59999999962747,
+      "elapsedMs": 87.09999999962747,
+      "optionCount": 2,
+      "first": "Select modelTest Model 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    },
+    {
+      "id": 11,
+      "kind": "open",
+      "start": 12181.299999999814,
+      "query": "",
+      "domReadyMs": 708.1000000005588,
+      "elapsedMs": 1663.1000000005588,
+      "optionCount": 5001,
+      "first": "Select modelTest Model 00000 · OpenAImodel-00000 · Synthetic QA fixtureTest Model 00001 · OpenAImodel-00001 · Synthetic QA fixture"
+    },
+    {
+      "id": 12,
+      "kind": "filter",
+      "start": 13879.5,
+      "query": "04999",
+      "domReadyMs": 37.90000000037253,
+      "elapsedMs": 99.79999999981374,
+      "optionCount": 2,
+      "first": "Select modelTest Model 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    },
+    {
+      "id": 13,
+      "kind": "open",
+      "start": 14400.400000000373,
+      "query": "",
+      "domReadyMs": 691.8999999994412,
+      "elapsedMs": 1627.699999999255,
+      "optionCount": 5001,
+      "first": "Select modelTest Model 00000 · OpenAImodel-00000 · Synthetic QA fixtureTest Model 00001 · OpenAImodel-00001 · Synthetic QA fixture"
+    },
+    {
+      "id": 14,
+      "kind": "filter",
+      "start": 16062.900000000373,
+      "query": "04999",
+      "domReadyMs": 37.5,
+      "elapsedMs": 70.59999999962747,
+      "optionCount": 2,
+      "first": "Select modelTest Model 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    },
+    {
+      "id": 15,
+      "kind": "open",
+      "start": 16584.200000000186,
+      "query": "",
+      "domReadyMs": 765.7000000001863,
+      "elapsedMs": 1731.7999999998137,
+      "optionCount": 5001,
+      "first": "Select modelTest Model 00000 · OpenAImodel-00000 · Synthetic QA fixtureTest Model 00001 · OpenAImodel-00001 · Synthetic QA fixture"
+    },
+    {
+      "id": 16,
+      "kind": "filter",
+      "start": 18350.599999999627,
+      "query": "04999",
+      "domReadyMs": 38.700000000186265,
+      "elapsedMs": 75.5,
+      "optionCount": 2,
+      "first": "Select modelTest Model 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    },
+    {
+      "id": 17,
+      "kind": "open",
+      "start": 18828.400000000373,
+      "query": "",
+      "domReadyMs": 685.3999999994412,
+      "elapsedMs": 1590.0999999996275,
+      "optionCount": 5001,
+      "first": "Select modelTest Model 00000 · OpenAImodel-00000 · Synthetic QA fixtureTest Model 00001 · OpenAImodel-00001 · Synthetic QA fixture"
+    },
+    {
+      "id": 18,
+      "kind": "filter",
+      "start": 20456,
+      "query": "04999",
+      "domReadyMs": 37,
+      "elapsedMs": 66.29999999981374,
+      "optionCount": 2,
+      "first": "Select modelTest Model 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    },
+    {
+      "id": 19,
+      "kind": "open",
+      "start": 20948.400000000373,
+      "query": "",
+      "domReadyMs": 721.7999999998137,
+      "elapsedMs": 1888.2999999998137,
+      "optionCount": 5001,
+      "first": "Select modelTest Model 00000 · OpenAImodel-00000 · Synthetic QA fixtureTest Model 00001 · OpenAImodel-00001 · Synthetic QA fixture"
+    },
+    {
+      "id": 20,
+      "kind": "filter",
+      "start": 22881.400000000373,
+      "query": "04999",
+      "domReadyMs": 73.19999999925494,
+      "elapsedMs": 107.09999999962747,
+      "optionCount": 2,
+      "first": "Select modelTest Model 04999 · OpenAImodel-04999 · Synthetic QA fixture"
+    }
+  ]
+}

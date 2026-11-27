@@ -17,6 +17,7 @@ import {
   normalizeProviderSpecificData,
   sanitizeProviderSpecificDataForResponse,
 } from "@/lib/providers/requestDefaults";
+import { trackCompatibleHeaderOverrides } from "@/lib/providers/compatibleNodeHeaders";
 import {
   buildClaudeExtraUsageStateClearUpdate,
   isClaudeExtraUsageBlockEnabled,
@@ -50,9 +51,10 @@ import { getQuotaCacheState } from "@/domain/quotaCacheState";
 import { retireUnreportedQuotaWindows } from "@/domain/quotaSnapshotPersistence";
 
 // providerSpecificData keys only server-side writers set (key rotation health, Antigravity
-// verification link, Alibaba free-tier quota state). A dashboard form loaded earlier carries
+// verification link, Alibaba free-tier quota state, custom header origins). A form loaded earlier carries
 // stale copies, so PUT keeps the stored value and ignores whatever the client sends.
-const SERVER_OWNED_PSD_KEY = /^(apiKeyHealth|verificationUrl|verificationAt|alibaba(No)?Free.*)$/;
+const SERVER_OWNED_PSD_KEY =
+  /^(apiKeyHealth|verificationUrl|verificationAt|alibaba(No)?Free.*|customHeaderOverrideNames)$/;
 
 function keepServerOwnedPsd(
   merged: Record<string, unknown>,
@@ -358,8 +360,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         }
       }
 
-      updateData.providerSpecificData =
-        normalizeProviderSpecificData(existing.provider, mergedPsd) || {};
+      const normalizedPsd = normalizeProviderSpecificData(existing.provider, mergedPsd) || {};
+      trackCompatibleHeaderOverrides(existing.provider, incomingPsd, existingPsd, normalizedPsd);
+      updateData.providerSpecificData = normalizedPsd;
 
       const psd = updateData.providerSpecificData as Record<string, any>;
       if (psd.apiKeyHealth) {
