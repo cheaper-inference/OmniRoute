@@ -39,10 +39,11 @@
         "labeledAt": "2026-11-27T00:12:22Z"
       }
     ],
-    "stage": "testing",
+    "stage": "landing",
     "startedAt": "2026-11-27T07:45:21.965Z",
     "attempts": 0,
-    "bisect": null
+    "bisect": null,
+    "landAttempts": 1
   },
   "baseChecks": [
     {
@@ -147,17 +148,6 @@
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-20T21:35:53.537Z",
-      "type": "culprit-found",
-      "batchId": "b15",
-      "prs": [
-        19132
-      ],
-      "sha": "07bdafc69c992c76cb5b21e6d16fd062f5637c21",
-      "detail": "Gate / CI, Integration Tests (2/2); shadow mode: label kept, no comment",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44821672881"
-    },
     {
       "at": "2026-11-20T21:36:04.411Z",
       "type": "batch-started",
@@ -2864,8 +2854,25 @@
         "21347": "2026-11-27T00:12:22Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45960446447"
+    },
+    {
+      "at": "2026-11-27T08:51:24.910Z",
+      "type": "checks-green",
+      "batchId": "b63",
+      "prs": [
+        20976,
+        21111,
+        21162,
+        21347
+      ],
+      "sha": "c71f0065a7efe9230ec23b96a12253b050c4d7ad",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45968879449"
     }
   ],
-  "updatedAt": "2026-11-27T08:46:54.074Z",
-  "batchWindow": 4
+  "updatedAt": "2026-11-27T08:51:42.244Z",
+  "batchWindow": 4,
+  "landingsWithoutVerdict": {
+    "count": 1,
+    "since": "2026-11-27T08:51:42.243Z"
+  }
 }
