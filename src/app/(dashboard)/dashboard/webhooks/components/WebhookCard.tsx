@@ -146,7 +146,7 @@ export function WebhookCard({
               </Badge>
             ))}
           </div>
-          <p className="mb-2 text-xs font-medium uppercase tracking-wider text-text-muted">
+          <p className="ci-eyebrow mb-2" data-weight="medium">
             {t("deliveries.title")}
           </p>
           <WebhookDeliveriesPanel webhookId={webhook.id} t={t} />

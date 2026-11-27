@@ -111,7 +111,7 @@ test("openAIChunkToGeminiChunk: final chunk attaches usageMetadata + modelVersio
   assert.deepEqual(out!.candidates[0].content.parts, [{ text: "" }]);
   assert.deepEqual(out!.usageMetadata, {
     promptTokenCount: 12,
-    candidatesTokenCount: 34,
+    candidatesTokenCount: 27,
     totalTokenCount: 46,
     thoughtsTokenCount: 7,
   });
@@ -242,7 +242,7 @@ test("convertOpenAIResponseToGemini: maps cached and reasoning tokens to cachedC
   const body = (await out.json()) as { usageMetadata?: Record<string, number> };
   assert.deepEqual(body.usageMetadata, {
     promptTokenCount: 100,
-    candidatesTokenCount: 20,
+    candidatesTokenCount: 12,
     totalTokenCount: 120,
     thoughtsTokenCount: 8,
     cachedContentTokenCount: 64,
@@ -265,7 +265,7 @@ test("transformOpenAISSEToGeminiSSE: forwards a trailing usage-only chunk (choic
   assert.equal(withUsage.length, 1);
   assert.deepEqual(withUsage[0].usageMetadata, {
     promptTokenCount: 10,
-    candidatesTokenCount: 5,
+    candidatesTokenCount: 3,
     totalTokenCount: 15,
     thoughtsTokenCount: 2,
     cachedContentTokenCount: 3,
@@ -288,7 +288,7 @@ test("transformOpenAISSEToGeminiSSE: usage on the finish chunk carries cachedCon
   assert.equal(withUsage.length, 1);
   assert.deepEqual(withUsage[0].usageMetadata, {
     promptTokenCount: 10,
-    candidatesTokenCount: 5,
+    candidatesTokenCount: 3,
     totalTokenCount: 15,
     thoughtsTokenCount: 2,
     cachedContentTokenCount: 3,

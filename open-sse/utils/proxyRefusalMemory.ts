@@ -369,6 +369,9 @@ export function noteProxyRefusal(
   model?: string | null
 ): number | null {
   if (key === null) return null;
+  // A rotating endpoint hands out a new exit address per connection: a per-IP quota
+  // refusal through it says nothing about the next request. Other kinds still apply.
+  if (kind === "ip_quota_429" && isQuotaRefusalExempt(key)) return null;
   const before = readState(key, kind, nowMs, model);
   const periodMs = insertState(key, kind, nowMs, model);
   if (periodMs < 0) return null;
@@ -385,6 +388,36 @@ export function noteProxyRefusal(
       (model ? ` model=${model}` : "")
   );
   return periodMs;
+}
+
+/**
+ * Replace the set of egress keys exempt from the per-IP quota set-aside (rotating
+ * endpoints) and record the registry generation it was read at. A key that just became
+ * exempt has its quota period ended now, so marking a member takes effect at once.
+ */
+export function replaceQuotaExemptKeys(
+  keys: Iterable<string>,
+  stamp: number,
+  nowMs: number = Date.now()
+): void {
+  const previous = store.quotaExemptKeys ?? new Set<string>();
+  const next = new Set(keys);
+  store.quotaExemptKeys = next;
+  store.quotaExemptStamp = stamp;
+  for (const key of next) {
+    if (!previous.has(key)) noteProxyRecovered(key, "ip_quota_429", nowMs);
+  }
+}
+
+/** True when a per-IP quota refusal through this egress key must not set it aside. */
+export function isQuotaRefusalExempt(key: string | null): boolean {
+  if (key === null) return false;
+  return store.quotaExemptKeys?.has(key) === true;
+}
+
+/** Registry generation the exempt set was last read at, or null before the first sync. */
+export function getQuotaExemptStamp(): number | null {
+  return store.quotaExemptStamp ?? null;
 }
 
 /**
@@ -683,6 +716,13 @@ export function hasProxyRefusals(): boolean {
 export function __resetProxyRefusalMemoryForTesting(): void {
   memory.clear();
   store.modelScopedSeen = false;
+  store.quotaExemptKeys = undefined;
+  store.quotaExemptStamp = undefined;
+}
+
+/** Test-only: how many egress keys are exempt from the per-IP quota set-aside. */
+export function __quotaExemptKeyCountForTesting(): number {
+  return store.quotaExemptKeys?.size ?? 0;
 }
 
 /**

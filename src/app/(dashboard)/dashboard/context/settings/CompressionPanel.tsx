@@ -17,6 +17,7 @@ import { useTranslations, useLocale } from "next-intl";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
 import Input from "@/shared/components/Input";
 import { Skeleton } from "@/shared/components/Loading";
 import Select from "@/shared/components/Select";
@@ -221,7 +222,8 @@ function AutoTriggerInput({
     <Input
       type="number"
       aria-label={ariaLabel}
-      inputClassName="h-8 min-h-8 w-24"
+      size="xs"
+      inputClassName="w-24"
       min={AUTO_TRIGGER_MIN}
       max={AUTO_TRIGGER_MAX}
       value={draft ?? String(value)}
@@ -252,7 +254,7 @@ function AdaptiveContextBudgetDial({
   // the panel has no selected-model context here; 200k is Claude-class default.
   const target = getAdaptiveTargetSummary(contextBudget, 200000);
   return (
-    <div className="mb-4 space-y-2 rounded-md border border-border bg-bg-subtle px-3 py-2">
+    <Card.Section className="mb-4 space-y-2">
       <Select
         compact
         label={t("compressionAdaptiveMode")}
@@ -301,7 +303,7 @@ function AdaptiveContextBudgetDial({
             })
           : t("compressionAdaptiveOff")}
       </div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -619,11 +621,13 @@ export default function CompressionPanel() {
       {/* Master */}
       <div className="mb-5 flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-info/10 p-2 text-info">
-            <Icon name="compress" size={20} />
-          </div>
+          <IconChip tone="info">
+            <Icon name="compress" />
+          </IconChip>
           <div>
-            <h3 className="text-lg">{t("compressionTitle")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("compressionTitle")}
+            </h3>
             <p className="text-sm text-text-muted">{t("compressionDesc")}</p>
             <a
               href="https://github.com/cheaper-inference/OmniRoute/blob/main/docs/compression/COMPRESSION_GUIDE.md"
@@ -659,9 +663,9 @@ export default function CompressionPanel() {
       </div>
 
       {/* Derived pipeline preview */}
-      <div
+      <Card.Section
         data-testid="derived-pipeline-preview"
-        className="mb-4 space-y-1 rounded-md border border-border bg-bg-subtle px-3 py-2 text-xs text-text-muted"
+        className="mb-4 space-y-1 text-xs text-text-muted"
       >
         <div>
           <span className="font-medium text-text-main">{t("compressionEffectivePipeline")}</span>{" "}
@@ -675,7 +679,7 @@ export default function CompressionPanel() {
             {derivedPreviewText(autoTriggerDerived, t)}
           </div>
         )}
-      </div>
+      </Card.Section>
 
       {/* Adaptive context-budget dial — mode/policy persist via PUT contextBudget */}
       <AdaptiveContextBudgetDial
@@ -710,7 +714,8 @@ export default function CompressionPanel() {
                   {engineLabel}
                   <Link
                     href={`/dashboard/context/${id}`}
-                    className="rounded border border-border bg-bg-subtle px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-text-muted hover:border-primary/40 hover:text-primary"
+                    className="ci-eyebrow rounded border border-border bg-bg-subtle px-1.5 py-0.5 hover:border-primary/40 hover:text-primary"
+                    data-size="3xs"
                   >
                     {id}
                   </Link>
@@ -869,7 +874,9 @@ export default function CompressionPanel() {
 
       {/* General */}
       <div className="space-y-3 border-t border-border pt-4">
-        <h4 className="text-sm text-text-main">{t("compressionGeneral")}</h4>
+        <h4 className="ci-heading" data-size="sm">
+          {t("compressionGeneral")}
+        </h4>
         <div className="flex items-center justify-between gap-3">
           <span className="text-sm text-text-muted">{t("compressionAutoTrigger")}</span>
           <div className="flex items-center gap-2">

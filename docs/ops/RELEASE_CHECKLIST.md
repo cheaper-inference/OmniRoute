@@ -6,7 +6,6 @@ lastUpdated: 2026-10-10
 
 # Release Checklist
 
-> **Last updated:** 2026-08-28 — v3.8.51
 > Streamlined release flow that leverages Claude Code skills for automation.
 >
 > **Keep the queue/branch green between releases:** see [RELEASE_GREEN.md](./RELEASE_GREEN.md)
@@ -98,7 +97,14 @@ to the organization repository. It needs the `DOCKERHUB_ORG_USERNAME` /
 mirror skipped" warning and the other registries publish normally. To publish a released
 version there later, run **Actions → Mirror Docker image to the Docker Hub org → Run
 workflow** with `version=X.Y.Z` (and `promote_latest` for the highest stable version): it
-copies the existing images, no rebuild.
+copies the existing images, no rebuild. That repository's Docker Hub overview is set by hand:
+the API that edits it rejects Organization Access Tokens.
+
+The same workflow also copies every release to the legacy GHCR package
+`ghcr.io/diegosouzapw/omniroute` until 2027-06-30, so installs still pinned to it keep updating;
+its index carries a "moved to `ghcr.io/cheaper-inference/omniroute`" description. It needs the
+`GHCR_LEGACY_TOKEN` secret (a classic personal access token of `diegosouzapw` with
+`write:packages`); without it that job skips with a "Legacy GHCR mirror skipped" warning.
 
 ## Hotfix Fast-Lane (label `hotfix`)
 
@@ -189,7 +195,8 @@ Breaking changes: add `BREAKING CHANGE:` footer or `!` after the scope (e.g. `fe
 ### Documentation
 
 - [ ] `npm run check:docs-sync` passes (auto-run by pre-commit)
-- [ ] `npm run check:docs-all` passes (umbrella: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-all` passes. Its advisory `check:deprecated-versions` flags versions
+      explicitly attributed to OmniRoute (3.6.x and earlier) and ignores dates.
 - [ ] `npm run check:env-doc-sync` exits 0 — code ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env contract is intact
 - [ ] `npm run check:doc-links` exits 0 — no broken internal markdown references after restructuring
 - [ ] `docs/architecture/ARCHITECTURE.md` reviewed for storage/runtime drift
@@ -466,7 +473,7 @@ validates that exact build (#8084 slice (a)). Same-repository PRs only; nothing 
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

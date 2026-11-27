@@ -1,0 +1,1 @@
+- **fix(combos):** Preserve the existing output-limit advisory precedence for requests outside Anthropic. With Anthropic, an explicit per-combo setting takes precedence, and an unsaved global `outputLimitAdvisory` is omitted from Settings so automatic fallback remains available.

@@ -106,6 +106,7 @@ describe("ConnectionRow autoSync toggle", () => {
     const button = [...document.querySelectorAll("button")].find((b) =>
       (b.textContent || "").includes("Sync")
     );
-    expect((button as HTMLButtonElement).disabled).toBe(true);
+    // The toggle carries a title, so it is aria-disabled while inactive (it stays hoverable).
+    expect((button as HTMLButtonElement).getAttribute("aria-disabled")).toBe("true");
   });
 });

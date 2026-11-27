@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Alert } from "@omniroute/ui-kit/alert";
 import { Checkbox } from "@omniroute/ui-kit/checkbox";
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
 import Modal from "@/shared/components/Modal";
 import { Spinner } from "@/shared/components/Loading";
+import Badge from "@/shared/components/Badge";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import {
   summarizeKeyTemplatePolicy,
@@ -213,31 +215,17 @@ function SaveKeyAsTemplateForm(props: SaveFormProps) {
 function CapturedPolicySummary({ model }: { model: SaveTemplateModel }) {
   const { t, summaryBadges } = model;
   return (
-    <div className="flex flex-col gap-2 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-2">
       <p className="text-xs font-semibold text-text-main">{t("templateCapturedSnapshotHeading")}</p>
       <div className="flex flex-wrap gap-1.5">
         {summaryBadges.map((b) => (
-          <span
-            key={b.id}
-            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium ${
-              b.tone === "success"
-                ? "bg-success/10 text-success"
-                : b.tone === "warning"
-                  ? "bg-warning/10 text-warning"
-                  : b.tone === "error"
-                    ? "bg-error/10 text-error"
-                    : b.tone === "info"
-                      ? "bg-info/10 text-info"
-                      : "bg-surface-2 text-text-muted"
-            }`}
-          >
-            <Icon name={b.icon} size={12} />
+          <Badge key={b.id} size="sm" variant={b.tone} icon={b.icon}>
             {b.label}
-          </span>
+          </Badge>
         ))}
       </div>
-      <p className="text-[11px] text-text-muted pt-1">{t("templateExclusionsNote")}</p>
-    </div>
+      <p className="text-xs text-text-muted pt-1">{t("templateExclusionsNote")}</p>
+    </Card.Section>
   );
 }
 
@@ -256,7 +244,7 @@ function CaptureWarnings({ model }: { model: SaveTemplateModel }) {
         >
           <div className="flex items-start justify-between gap-2">
             <span className="text-xs text-text-main">{w.message}</span>
-            <code className="text-[10px] font-mono text-text-muted shrink-0">{w.code}</code>
+            <code className="text-3xs font-mono text-text-muted shrink-0">{w.code}</code>
           </div>
           {w.requiresAcknowledgement && (
             <Checkbox
@@ -334,7 +322,7 @@ function CaptureReferenceWarnings({ model }: { model: SaveTemplateModel }) {
       </p>
       {referenceIssues.map((issue) => (
         <p key={`${issue.path}-${issue.code}`} className="text-xs text-warning">
-          <code className="font-mono text-[11px]">{issue.path}</code>: {issue.message}
+          <code className="font-mono text-2xs">{issue.path}</code>: {issue.message}
         </p>
       ))}
     </div>
@@ -372,14 +360,14 @@ function CaptureFormFields({ model }: { model: SaveTemplateModel }) {
       />
 
       {loadingPreview && (
-        <div
-          className="flex items-center gap-2 p-4 rounded-lg border border-border bg-surface/40 text-xs text-text-muted"
+        <Card.Section
+          className="flex items-center gap-2 text-xs text-text-muted"
           role="status"
           aria-live="polite"
         >
           <Spinner size="sm" />
           <span>{t("templateLoadingPreview")}</span>
-        </div>
+        </Card.Section>
       )}
 
       {previewError && (

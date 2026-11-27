@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Alkawarin — Ƙarshen wuri guda da masu samarwa 394. Komawa ta atomatik tana ci gaba da turawa muddin akwai wani manufa mai lafiya. Ginshiƙai shida: komawa mai juriya a faɗin masu samarwa 394 · adana har zuwa kashi 95% na token a ayyukan da suka cancanta · $0 don farawa tare da matakan kyauta sama da 150 da masu samarwa 51 masu maimaituwa/kyauta har abada ba tare da maɓalli ba · haɗin CLI/agent 39 ta hanyar saiti guda · dacewa da OpenAI, Claude, Gemini da Responses API a /v1 · sarrafa matakin samarwa wanda ya haɗa da circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals da ayoyin gwaji na tsaye sama da 56,000 a cikin fayilolin gwaji sama da 7,800 da ake bibiyarsu."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Alkawarin — Ƙarshen wuri guda da masu samarwa 394. Komawa ta atomatik tana ci gaba da turawa muddin akwai wani manufa mai lafiya. Ginshiƙai shida: komawa mai juriya a faɗin masu samarwa 394 · adana har zuwa kashi 95% na token a ayyukan da suka cancanta · $0 don farawa tare da matakan kyauta sama da 150 da masu samarwa 40 masu maimaituwa/kyauta har abada ba tare da maɓalli ba · haɗin CLI/agent 39 ta hanyar saiti guda · dacewa da OpenAI, Claude, Gemini da Responses API a /v1 · sarrafa matakin samarwa wanda ya haɗa da circuit breakers, TLS stealth, MCP 110 tools, A2A, memory, guardrails, evals da ayoyin gwaji na tsaye sama da 56,000 a cikin fayilolin gwaji sama da 7,800 da ake bibiyarsu."/>
 
 <br/>
 <br/>
@@ -702,7 +702,7 @@ yana nuna ainihin muhalli/huɗɗa ba tare da aiwatarwa ba, kuma `--api-key-env N
 
 </div>
 
-> **Masu samarwa 394 da aka yi rajista** a cikin tarin hira, kafofin watsa labarai, bincike, na gida, wakilin gajimare da tsarin, gami da **153 masu ɗauke da metadata na gano `hasFree: true`**. Rijistar samfuran hira ta ƙunshi **masu samarwa 239 / nau’o’in mai samarwa-samfurin 3,059 na musamman / ID na samfura 1,475**; kundin kasafin kyauta na daban yana da **layukan kowane samfur 465**, **tafkunan maimaituwa 34** da **masu samarwa 51 masu maimaituwa/ba tare da maɓalli ba waɗanda kyauta ne har abada**. Waɗannan ma’aunai sun bambanta ne da gangan; ma’anoni da ƙididdigar da aka cire maimaituwar tafkuna suna cikin [Bayani kan Masu Samarwa](docs/reference/PROVIDER_REFERENCE.md) da [Matakan Kyauta](docs/reference/FREE_TIERS.md).
+> **Masu samarwa 394 da aka yi rajista** a cikin tarin hira, kafofin watsa labarai, bincike, na gida, wakilin gajimare da tsarin, gami da **153 masu ɗauke da metadata na gano `hasFree: true`**. Rijistar samfuran hira ta ƙunshi **masu samarwa 239 / nau’o’in mai samarwa-samfurin 3,059 na musamman / ID na samfura 1,475**; kundin kasafin kyauta na daban yana da **layukan kowane samfur 465**, **tafkunan maimaituwa 34** da **masu samarwa 40 masu maimaituwa/ba tare da maɓalli ba waɗanda kyauta ne har abada**. Waɗannan ma’aunai sun bambanta ne da gangan; ma’anoni da ƙididdigar da aka cire maimaituwar tafkuna suna cikin [Bayani kan Masu Samarwa](docs/reference/PROVIDER_REFERENCE.md) da [Matakan Kyauta](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1319,7 +1319,7 @@ Ma'aunai na asali a 2026-10-18: **bidiyoyi na musamman 1.976** · **sanannun kal
   <tr><td nowrap><b>Lokacin gudu</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Harshe</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> a cikin <code>src/</code> da <code>open-sse/</code> (babu <code>any</code> ko ɗaya a cikin ainihin tsarin tun daga v2.0)</td></tr>
   <tr><td nowrap><b>Tsarin aiki</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ma’ajin bayanai</b></td><td>better-sqlite3 (SQLite, rajistar WAL) + LowDB (JSON na gado) — modules na yankin aiki 147, ƙaura 244</td></tr>
+  <tr><td nowrap><b>Ma’ajin bayanai</b></td><td>better-sqlite3 (SQLite, rajistar WAL) + LowDB (JSON na gado) — modules na yankin aiki 147, ƙaura 252</td></tr>
   <tr><td nowrap><b>Ƙwaƙwalwa</b></td><td>Cikakken rubutu na SQLite FTS5 + vector embeddings da aka ƙididdige su da int8, tare da raguwar da aka tsara</td></tr>
   <tr><td nowrap><b>Tsare-tsare</b></td><td>Zod 4 — tantancewar MCP tool I/O + yarjejeniyoyin API</td></tr>
   <tr><td nowrap><b>Ka’idoji</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

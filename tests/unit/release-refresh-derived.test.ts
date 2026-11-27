@@ -137,10 +137,10 @@ describe("argument parsing", () => {
 describe("mirror propagation (conservative)", () => {
   it("finds whole numbers only", () => {
     assert.deepEqual(
-      findNumberOccurrences("393 a3930 1,393 v393 3.393 393.5 (393) ~1.62B", "393"),
+      findNumberOccurrences("393 a3930 1,393 v393 3.393 393.5 (393) ~4.56B", "393"),
       [0, 34]
     );
-    assert.deepEqual(findNumberOccurrences("~1.62B free", "1.62"), [1]);
+    assert.deepEqual(findNumberOccurrences("~4.56B free", "4.56"), [1]);
   });
 
   it("carries a number when source and mirror hold the same occurrences", () => {
@@ -440,10 +440,132 @@ describe("provider reference comparison", () => {
   });
 });
 
+describe("docker-pulls refresh step", () => {
+  const badgePath = "docs/badges/docker-pulls.json";
+
+  it("writes the badge in release and stays clean in nightly when the displayed count is unchanged", async () => {
+    const root = tree({});
+    const written = await refreshDerived({
+      root,
+      only: ["docker-pulls"],
+      fetchDockerPullCounts: async () => ({ total: 2_119_712 }),
+    });
+    const step = written.steps.find((s) => s.id === "docker-pulls")!;
+    assert.equal(step.status, "changed");
+    assert.match(step.detail, /2119712.*2\.1M/);
+    assert.deepEqual(written.changedFiles, [badgePath]);
+    assert.equal(refreshExitCode(written, { check: false }), 0);
+
+    const json = read(root, badgePath)!;
+    assert.deepEqual(JSON.parse(json), {
+      schemaVersion: 1,
+      label: "docker pulls",
+      message: "2.1M",
+      color: "2496ED",
+      namedLogo: "docker",
+      cacheSeconds: 3600,
+    });
+    assert.ok(json.endsWith("\n"));
+
+    const nightly = await refreshDerived({
+      root,
+      profile: "nightly",
+      only: ["docker-pulls"],
+      fetchDockerPullCounts: async () => ({ total: 2_119_713 }),
+    });
+    const unchanged = nightly.steps.find((s) => s.id === "docker-pulls")!;
+    assert.equal(unchanged.status, "clean");
+    assert.match(unchanged.detail, /2119713.*2\.1M/);
+    assert.deepEqual(nightly.changedFiles, []);
+    assert.equal(read(root, badgePath), json);
+  });
+
+  it("skips the network-dependent step in check mode without calling the fetcher", async () => {
+    const root = tree({});
+    let fetchCalls = 0;
+    const result = await refreshDerived({
+      root,
+      check: true,
+      only: ["docker-pulls"],
+      fetchDockerPullCounts: async () => {
+        fetchCalls++;
+        return { total: 10 };
+      },
+    });
+    const step = result.steps.find((s) => s.id === "docker-pulls")!;
+    assert.equal(step.status, "skipped");
+    assert.match(step.detail, /requires network.*excluded from --check/);
+    assert.equal(fetchCalls, 0);
+    assert.deepEqual(result.changedFiles, []);
+    assert.equal(read(root, badgePath), null);
+    assert.equal(refreshExitCode(result, { check: true }), 0);
+  });
+
+  it("keeps the previous badge and exits 0 when Docker Hub is unreachable", async () => {
+    const previous = '{"schemaVersion":1,"label":"docker pulls","message":"2M","color":"2496ED"}\n';
+    const root = tree({ [badgePath]: previous });
+    const result = await refreshDerived({
+      root,
+      only: ["docker-pulls"],
+      fetchDockerPullCounts: async () => {
+        throw new Error("HTTP 503");
+      },
+    });
+    const step = result.steps.find((s) => s.id === "docker-pulls")!;
+    assert.equal(step.status, "skipped");
+    assert.equal(step.detail, `Docker Hub unreachable (HTTP 503): ${badgePath} kept as is`);
+    assert.equal(result.infraError, null);
+    assert.deepEqual(result.changedFiles, []);
+    assert.equal(read(root, badgePath), previous);
+    assert.equal(refreshExitCode(result, { check: false }), 0);
+  });
+});
+
 // Review findings (2026-11-13): the REAL gate plan lists the README mirrors' database row BEFORE
 // README.md. The refresh must still carry everything once, refresh .i18n-state.json and leave no
 // manual item — and must never certify a mirror that kept an old value, nor a stale locale.
 describe("refreshDerived with the real gate plan (README + mirrors + state)", () => {
+  it("refreshes free-token figures in the source docs and their translated mirrors", async () => {
+    const files = {
+      "README.md":
+        '<img alt="~11.4B as others count · ~93M real"> +~6M behind regional identity verification',
+      "docs/i18n/pt-BR/README.md":
+        '<img alt="~11.4B como outros contam · ~93M reais"> Arquivo de ~93MB.',
+      "docs/reference/FREE_TIERS.md":
+        "~93M real today. ~11.4B summed row by row, 98.6% from retired rows. +~6M behind regional identity verification",
+      "docs/i18n/pt-BR/docs/reference/FREE_TIERS.md":
+        "~93M reais hoje. ~11.4B somados linha por linha, 98.6% de ofertas que já acabaram.",
+      "docs/getting-started/FREE-TIERS-GUIDE.md": "~93M real today.",
+      "docs/i18n/pt-BR/docs/getting-started/FREE-TIERS-GUIDE.md": "~93M reais hoje.",
+    };
+    const root = tree(files);
+    const snapshot = loadFactsSnapshot();
+    assert.ok(snapshot);
+    const facts = {
+      ...snapshot,
+      code: {
+        ...snapshot.code,
+        headlineSteady: 89_780_000,
+        rowSumTotal: 11_349_500_000,
+        rowSumRetiredShare: 0.9761,
+      },
+    };
+    const result = await refreshDerived({ root, only: ["numbers"], facts });
+    assert.equal(result.infraError, null);
+    assert.deepEqual(result.changedFiles, Object.keys(files).sort());
+    assert.deepEqual(
+      result.manual.filter((m) => /Live catalog|free-tier headline/i.test(m.label)),
+      []
+    );
+    for (const [file, before] of Object.entries(files)) {
+      const after = before
+        .replace("~11.4B", "~11.3B")
+        .replace("~93M", "~90M")
+        .replace("98.6%", "97.6%");
+      assert.equal(read(root, file), after, file);
+    }
+  });
+
   const REPO = path.resolve(import.meta.dirname, "../..");
   const realFile = (rel: string) => fs.readFileSync(path.join(REPO, rel), "utf8");
   const LOCALES = ["pt-BR", "fa"];
@@ -454,8 +576,10 @@ describe("refreshDerived with the real gate plan (README + mirrors + state)", ()
   // correctly asks for a manual edit (v3.8.55 cut, 2026-11-16: "240 migrations" next to
   // "240 by Dependabot" in the PR census). Those coincidental lines are left out, so the outcome
   // depends on the carry logic, not on what else the live docs happen to say.
-  const isDatabaseRow = (l: string) =>
-    l.includes("<td nowrap><b>") && l.includes("better-sqlite3") && l.includes("LowDB");
+  // Same identity as the production locator (scripts/check/lib/readmeMigrationCount.mjs: the one
+  // table row naming better-sqlite3). The English row no longer names LowDB, which the code
+  // stopped importing; the translated mirrors still do until their next refresh.
+  const isDatabaseRow = (l: string) => l.includes("<td nowrap><b>") && l.includes("better-sqlite3");
   const toDigits = (n: number, zero: number) =>
     String(n).replace(/\d/g, (d) => String.fromCodePoint(zero + Number(d)));
   function withoutCoincidences(text: string, count: number) {

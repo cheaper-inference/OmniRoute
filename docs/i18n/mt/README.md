@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Il-Wegħda — Endpoint wieħed u 394 fornitur. Fallback awtomatiku jżomm ir-routing għaddej sakemm ikun hemm destinazzjoni oħra b’saħħitha disponibbli. Sitt pilastri: fallback reżiljenti bejn 394 fornitur · sa 95% iffrankar fuq it-tokens għal workloads eliġibbli · $0 biex tibda b’aktar minn 150 livell b’xejn u 51 fornitur b’xejn għal dejjem, rikorrenti jew mingħajr ċavetta · 39 integrazzjoni CLI/agent permezz ta’ konfigurazzjoni waħda · kompatibbiltà ma’ OpenAI, Claude, Gemini u Responses API f’/v1 · kontrolli għall-produzzjoni inklużi circuit breakers, stealth TLS, MCP b’110 għodda, A2A, memory, guardrails, evals u aktar minn 56,000 dikjarazzjoni ta’ test statiku f’aktar minn 7,800 fajl tat-test traċċat."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Il-Wegħda — Endpoint wieħed u 394 fornitur. Fallback awtomatiku jżomm ir-routing għaddej sakemm ikun hemm destinazzjoni oħra b’saħħitha disponibbli. Sitt pilastri: fallback reżiljenti bejn 394 fornitur · sa 95% iffrankar fuq it-tokens għal workloads eliġibbli · $0 biex tibda b’aktar minn 150 livell b’xejn u 40 fornitur b’xejn għal dejjem, rikorrenti jew mingħajr ċavetta · 39 integrazzjoni CLI/agent permezz ta’ konfigurazzjoni waħda · kompatibbiltà ma’ OpenAI, Claude, Gemini u Responses API f’/v1 · kontrolli għall-produzzjoni inklużi circuit breakers, stealth TLS, MCP b’110 għodda, A2A, memory, guardrails, evals u aktar minn 56,000 dikjarazzjoni ta’ test statiku f’aktar minn 7,800 fajl tat-test traċċat."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ mill-istorja tas-shell tiegħek. → [CLI Integrations](docs/guides/CLI-INTEGRAT
 
 </div>
 
-> **394-il fornitur irreġistrat** fil-kollezzjonijiet kanoniċi taċ-chat, tal-midja, tat-tiftix, lokali, tal-aġenti tal-cloud u tas-sistema, inklużi **153 li għandhom il-metadejta ta’ skoperta `hasFree: true`**. Ir-reġistru tal-mudelli taċ-chat ikopri **239 fornitur / 3,059 par distinti fornitur-mudell / 1,475 ID mhux ipproċessati tal-mudelli**; il-katalgu separat tal-baġit b’xejn għandu **465 ringiela għal kull mudell**, **34 pool rikorrenti** u **51 fornitur b’xejn għal dejjem rikorrenti/mingħajr ċavetta**. Dawn huma denominaturi differenti skont id-disinn; id-definizzjonijiet u l-kalkoli deduplikati skont il-pool jinsabu fir-[Referenza tal-Fornituri](docs/reference/PROVIDER_REFERENCE.md) u fil-[Livelli B’xejn](docs/reference/FREE_TIERS.md).
+> **394-il fornitur irreġistrat** fil-kollezzjonijiet kanoniċi taċ-chat, tal-midja, tat-tiftix, lokali, tal-aġenti tal-cloud u tas-sistema, inklużi **153 li għandhom il-metadejta ta’ skoperta `hasFree: true`**. Ir-reġistru tal-mudelli taċ-chat ikopri **239 fornitur / 3,059 par distinti fornitur-mudell / 1,475 ID mhux ipproċessati tal-mudelli**; il-katalgu separat tal-baġit b’xejn għandu **465 ringiela għal kull mudell**, **34 pool rikorrenti** u **40 fornitur b’xejn għal dejjem rikorrenti/mingħajr ċavetta**. Dawn huma denominaturi differenti skont id-disinn; id-definizzjonijiet u l-kalkoli deduplikati skont il-pool jinsabu fir-[Referenza tal-Fornituri](docs/reference/PROVIDER_REFERENCE.md) u fil-[Livelli B’xejn](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1316,7 +1316,7 @@ Metriċi kanoniċi fl-2026-10-18: **1.976 vidjo uniku** · **20.220.289 darba ma
   <tr><td nowrap><b>Ambjent ta' tħaddim</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Lingwa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> f'<code>src/</code> u <code>open-sse/</code> (<code>any</code> żero fil-qalba minn v2.0)</td></tr>
   <tr><td nowrap><b>Qafas</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Bażi tad-dejta</b></td><td>better-sqlite3 (SQLite, ġurnalizzazzjoni WAL) + LowDB (JSON legat) — 147-il modulu tad-dominju, 244 migrazzjoni</td></tr>
+  <tr><td nowrap><b>Bażi tad-dejta</b></td><td>better-sqlite3 (SQLite, ġurnalizzazzjoni WAL) + LowDB (JSON legat) — 147-il modulu tad-dominju, 252 migrazzjoni</td></tr>
   <tr><td nowrap><b>Memorja</b></td><td>SQLite FTS5 għal tfittxija b'test sħiħ + embeddings vettorjali kkwantizzati int8, tnaqqis tipizzat</td></tr>
   <tr><td nowrap><b>Skemi</b></td><td>Zod 4 — validazzjoni tal-I/O tal-għodod MCP + kuntratti tal-API</td></tr>
   <tr><td nowrap><b>Protokolli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

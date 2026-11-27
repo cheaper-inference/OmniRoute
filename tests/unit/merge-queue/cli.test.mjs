@@ -199,7 +199,7 @@ test("status shows in-flight state and labeled PRs per discovered base", async (
   fake.addPull({ number: 10, labels: ["omni-queue"], base: { ref: "main" } });
   assert.equal(await run(["status"]), 0);
   const text = lines.out.join("\n");
-  assert.match(text, /^repository acme\/widget · mode shadow · label omni-queue/);
+  assert.match(text, /^repository acme\/widget · mode live · label omni-queue/);
   assert.match(text, /== release\/v3\.8\.54/);
   assert.match(text, /paused: no/);
   assert.match(

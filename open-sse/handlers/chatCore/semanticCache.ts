@@ -1,6 +1,6 @@
 import {
   generateSignature,
-  getCachedResponse,
+  getCachedResponseEntry,
   isCacheableForRead,
   recordSemanticCacheHit,
   outputContractOf,
@@ -99,11 +99,13 @@ export async function checkSemanticCache({
     });
 
     let cached: Record<string, unknown> | null = null;
+    let originalCostUsd: number | null | undefined;
     let hitType: "exact" | "semantic" = "exact";
     let similarity: number | undefined;
 
     if (managerResult.hit && managerResult.entry) {
       cached = managerResult.entry.response;
+      originalCostUsd = managerResult.entry.originalCostUsd;
       hitType = managerResult.type || "exact";
       similarity = managerResult.similarity;
     } else {
@@ -120,10 +122,10 @@ export async function checkSemanticCache({
         outputContractOf(body),
         signatureScopeOf(clientRawRequest?.headers)
       );
-      const legacyCached = getCachedResponse(signature);
-      if (legacyCached) {
-        cached = legacyCached as Record<string, unknown>;
-        hitType = "exact";
+      const legacyEntry = getCachedResponseEntry(signature);
+      if (legacyEntry) {
+        cached = legacyEntry.response as Record<string, unknown>;
+        originalCostUsd = legacyEntry.originalCostUsd;
       }
     }
 
@@ -150,11 +152,14 @@ export async function checkSemanticCache({
       const cachedUsage =
         extractUsageFromResponse(cached, provider) ||
         (cached?.usage as Record<string, unknown> | undefined);
-      const cachedCost = cachedUsage
-        ? await calculateCost(provider, model, cachedUsage as Record<string, number>, {
-            serviceTier: effectiveServiceTier,
-          })
-        : 0;
+      // Older entries and streaming writes can lack the original cost.
+      const cachedCost =
+        originalCostUsd ??
+        (cachedUsage
+          ? await calculateCost(provider, model, cachedUsage as Record<string, number>, {
+              serviceTier: effectiveServiceTier,
+            })
+          : 0);
       persistAttemptLogs({
         status: 200,
         tokens: cached?.usage,

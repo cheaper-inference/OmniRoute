@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="An Gealltanas — Críochphointe amháin agus 394 soláthraí. Coinníonn cúltaca uathoibríoch an ródú ar siúl fad a bhíonn sprioc shláintiúil eile ar fáil. Sé cholún: cúltaca athléimneach ar fud 394 soláthraí · suas le 95% de choigilteas comharthaí ar ualaí oibre incháilithe · $0 le tosú le breis agus 150 sraith saor agus 51 soláthraí saor in aisce go deo, athfhillteach/gan eochair · 39 gcomhtháthú CLI/gníomhaire trí chumraíocht amháin · comhoiriúnacht le OpenAI, Claude, Gemini agus Responses API ag /v1 · rialuithe táirgeachta lena n-áirítear scoradáin chiorcaid, stealth TLS, 110 uirlis MCP, A2A, cuimhne, ráillí cosanta, meastóireachtaí agus breis agus 56,000 dearbhú tástála statacha ar fud breis agus 7,800 comhad tástála rianaithe."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="An Gealltanas — Críochphointe amháin agus 394 soláthraí. Coinníonn cúltaca uathoibríoch an ródú ar siúl fad a bhíonn sprioc shláintiúil eile ar fáil. Sé cholún: cúltaca athléimneach ar fud 394 soláthraí · suas le 95% de choigilteas comharthaí ar ualaí oibre incháilithe · $0 le tosú le breis agus 150 sraith saor agus 40 soláthraí saor in aisce go deo, athfhillteach/gan eochair · 39 gcomhtháthú CLI/gníomhaire trí chumraíocht amháin · comhoiriúnacht le OpenAI, Claude, Gemini agus Responses API ag /v1 · rialuithe táirgeachta lena n-áirítear scoradáin chiorcaid, stealth TLS, 110 uirlis MCP, A2A, cuimhne, ráillí cosanta, meastóireachtaí agus breis agus 56,000 dearbhú tástála statacha ar fud breis agus 7,800 comhad tástála rianaithe."/>
 
 <br/>
 <br/>
@@ -711,7 +711,7 @@ an timpeallacht/args cruinn gan é a rith, agus coimeádann `--api-key-env NAME`
 
 </div>
 
-> **394 soláthraí cláraithe** sna bailiúcháin chanónacha comhrá, meán, cuardaigh, áitiúla, gníomhaire scamall agus chórais, lena n-áirítear **153 a bhfuil meiteashonraí fionnachtana `hasFree: true` acu**. Clúdaíonn clárlann na samhlacha comhrá **239 soláthraí / 3,059 péire soláthraí-samhail ar leith / 1,475 aitheantóir amh samhlacha**; tá **465 ró in aghaidh na samhla**, **34 linn athfhillteach** agus **51 soláthraí saor in aisce go deo athfhillteach/gan eochair** sa chatalóg ar leith um bhuiséad saor in aisce. Is de réir dearaidh atá na hainmneoirí seo éagsúil; tá na sainmhínithe agus na ríomhanna atá bainte de dhúblaigh na linnte le fáil sa [Tagairt Soláthraithe](docs/reference/PROVIDER_REFERENCE.md) agus sna [Sraitheanna Saor in Aisce](docs/reference/FREE_TIERS.md).
+> **394 soláthraí cláraithe** sna bailiúcháin chanónacha comhrá, meán, cuardaigh, áitiúla, gníomhaire scamall agus chórais, lena n-áirítear **153 a bhfuil meiteashonraí fionnachtana `hasFree: true` acu**. Clúdaíonn clárlann na samhlacha comhrá **239 soláthraí / 3,059 péire soláthraí-samhail ar leith / 1,475 aitheantóir amh samhlacha**; tá **465 ró in aghaidh na samhla**, **34 linn athfhillteach** agus **40 soláthraí saor in aisce go deo athfhillteach/gan eochair** sa chatalóg ar leith um bhuiséad saor in aisce. Is de réir dearaidh atá na hainmneoirí seo éagsúil; tá na sainmhínithe agus na ríomhanna atá bainte de dhúblaigh na linnte le fáil sa [Tagairt Soláthraithe](docs/reference/PROVIDER_REFERENCE.md) agus sna [Sraitheanna Saor in Aisce](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1329,7 +1329,7 @@ Méadrachtaí canónacha ar 2026-10-18: **1.976 físeán uathúil** · **20.220.
   <tr><td nowrap><b>Am rite</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Teanga</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> ar fud <code>src/</code> agus <code>open-sse/</code> (<code>any</code> nialasach sa chroílár ó v2.0)</td></tr>
   <tr><td nowrap><b>Creat</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Bunachar sonraí</b></td><td>better-sqlite3 (SQLite, iriseoireacht WAL) + LowDB (JSON oidhreachtúil) — 147 modúl fearainn, 244 imirce</td></tr>
+  <tr><td nowrap><b>Bunachar sonraí</b></td><td>better-sqlite3 (SQLite, iriseoireacht WAL) + LowDB (JSON oidhreachtúil) — 147 modúl fearainn, 252 imirce</td></tr>
   <tr><td nowrap><b>Cuimhne</b></td><td>Téacs iomlán SQLite FTS5 + leabuithe veicteora cainníochtaithe int8, meath clóscríofa</td></tr>
   <tr><td nowrap><b>Scéimeanna</b></td><td>Zod 4 — bailíochtú I/O uirlisí MCP + conarthaí API</td></tr>
   <tr><td nowrap><b>Prótacail</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

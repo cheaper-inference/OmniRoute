@@ -15,6 +15,8 @@ import { cn } from "@/shared/utils/cn";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Notice from "@/shared/components/Notice";
+import { CardSection } from "@/shared/components/Card";
 
 const SETTINGS_ENDPOINT = "/api/cli-tools/grok-build-settings";
 const PRESETS_KEY = "omniroute.grokBuildEndpointPresets";
@@ -378,7 +380,9 @@ export default function GrokBuildToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm">{tool.name}</h3>
+              <h3 className="ci-heading" data-size="sm">
+                {tool.name}
+              </h3>
               <CliStatusBadge
                 effectiveConfigStatus={effectiveConfigStatus}
                 batchStatus={null}
@@ -405,20 +409,17 @@ export default function GrokBuildToolCard({
           )}
 
           {!checking && status && !cliReady && (
-            <div className="flex items-center gap-3 rounded-lg border border-warning/30 bg-warning/10 p-4">
-              <Icon name="warning" className="text-warning" />
-              <div>
-                <p className="font-medium text-warning">
-                  {status.installed
-                    ? t("cliNotRunnable", { tool: "Grok Build" })
-                    : t("cliNotInstalled", { tool: "Grok Build" })}
-                </p>
-                <p className="text-sm text-text-muted">
-                  Direct Apply needs the Grok Build CLI on this computer. Manual Config stays
-                  available.
-                </p>
-              </div>
-            </div>
+            <Notice
+              variant="warning"
+              icon="warning"
+              title={
+                status.installed
+                  ? t("cliNotRunnable", { tool: "Grok Build" })
+                  : t("cliNotInstalled", { tool: "Grok Build" })
+              }
+            >
+              Direct Apply needs the Grok Build CLI on this computer. Manual Config stays available.
+            </Notice>
           )}
 
           {status?.config?.model?.base_url && (
@@ -440,7 +441,7 @@ export default function GrokBuildToolCard({
               id="grok-build-endpoint"
               aria-labelledby="grok-build-endpoint-label"
               className="min-w-0 w-auto flex-1"
-              selectClassName="text-xs"
+              nativeSize="xs"
               value={selectedEndpoint}
               onChange={(event) => setSelectedEndpoint(event.target.value)}
             >
@@ -458,7 +459,7 @@ export default function GrokBuildToolCard({
               <Input
                 aria-label={t("customEndpointAria")}
                 className="min-w-0 w-auto flex-1"
-                inputClassName="text-xs"
+                size="xs"
                 type="url"
                 value={customEndpoint}
                 onChange={(event) => setCustomEndpoint(event.target.value)}
@@ -476,7 +477,7 @@ export default function GrokBuildToolCard({
               id="grok-build-api-key"
               aria-labelledby="grok-build-api-key-label"
               className="min-w-0 w-auto flex-1"
-              selectClassName="text-xs"
+              nativeSize="xs"
               value={effectiveKeyId}
               onChange={(event) => setSelectedKeyId(event.target.value)}
             >
@@ -503,7 +504,7 @@ export default function GrokBuildToolCard({
             <Input
               aria-label={t("mainModelAria")}
               className="min-w-0 w-auto flex-1"
-              inputClassName="text-xs"
+              size="xs"
               value={model}
               onChange={(event) => setModel(event.target.value)}
               placeholder={availableModels[0]?.value || "provider/model-id"}
@@ -523,12 +524,12 @@ export default function GrokBuildToolCard({
           </div>
 
           <div className="my-2 h-px bg-border/50" />
-          <div className="mb-2 text-right text-[11px] font-medium uppercase tracking-wider text-text-muted">
+          <div className="ci-eyebrow mb-2 text-right" data-size="2xs" data-weight="medium">
             Subagent model overrides
           </div>
           {SUBAGENTS.map((type) => (
             <div className={`${rowClass} group`} key={type}>
-              <span className="w-32 shrink-0 truncate text-right text-[11px] font-mono text-text-main opacity-70 transition-opacity group-hover:opacity-100">
+              <span className="w-32 shrink-0 truncate text-right text-2xs font-mono text-text-main opacity-70 transition-opacity group-hover:opacity-100">
                 {modelLabel(type)}
               </span>
               <Icon
@@ -547,7 +548,7 @@ export default function GrokBuildToolCard({
               <Input
                 aria-label={`${modelLabel(type)} model`}
                 className="min-w-0 w-auto flex-1"
-                inputClassName="text-xs"
+                size="xs"
                 value={subagentModels[type] ?? ""}
                 onChange={(event) =>
                   setSubagentModels((current) => ({ ...current, [type]: event.target.value }))
@@ -572,12 +573,12 @@ export default function GrokBuildToolCard({
           ))}
 
           {message && (
-            <p
-              role="status"
-              className={`rounded px-2 py-1.5 text-xs ${message.type === "success" ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
+            <Notice
+              variant={message.type === "success" ? "success" : "critical"}
+              icon={message.type === "success" ? "check_circle" : "error"}
             >
               {message.text}
-            </p>
+            </Notice>
           )}
 
           <div className="flex flex-wrap items-center gap-2">
@@ -621,8 +622,8 @@ export default function GrokBuildToolCard({
           </div>
 
           {showBackups && (
-            <div className="mt-2 rounded-lg border border-border bg-surface p-3">
-              <h4 className="mb-2 flex items-center gap-1 text-xs text-text-main">
+            <CardSection className="mt-2">
+              <h4 className="ci-heading mb-2 flex items-center gap-1 text-text-main" data-size="xs">
                 <Icon name="history" size={14} />
                 {t("configBackups")}
               </h4>
@@ -644,10 +645,9 @@ export default function GrokBuildToolCard({
                       </span>
                       <Button
                         variant="secondary"
-                        size="sm"
+                        size="2xs"
                         disabled={restoringBackup === backup.id}
                         onClick={() => void restoreBackup(backup.id)}
-                        className="h-6 px-2 text-[10px]"
                       >
                         {restoringBackup === backup.id ? "..." : t("restore")}
                       </Button>
@@ -655,7 +655,7 @@ export default function GrokBuildToolCard({
                   ))}
                 </div>
               )}
-            </div>
+            </CardSection>
           )}
         </div>
       )}

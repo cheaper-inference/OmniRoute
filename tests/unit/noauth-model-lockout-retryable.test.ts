@@ -33,7 +33,7 @@ type SelectionOutcome = {
   connectionId?: string;
 } | null;
 
-const PROVIDER = "uncloseai";
+const PROVIDER = "cloudflare-playground";
 const MODEL = "locked-passthrough-model";
 
 beforeEach(() => clearAllModelLockouts());

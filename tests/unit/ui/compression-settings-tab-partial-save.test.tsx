@@ -156,6 +156,13 @@ async function renderTab() {
   await settle();
 }
 
+// A numeric setting follows the typing locally and saves once when the edit ends (blur or
+// Enter), with the value already inside the field's bounds.
+function edit(input: HTMLInputElement, value: string) {
+  fireEvent.change(input, { target: { value } });
+  fireEvent.blur(input);
+}
+
 afterEach(() => {
   vi.restoreAllMocks();
   vi.useRealTimers();
@@ -180,7 +187,7 @@ describe("CompressionSettingsTab saves only what changed", () => {
 
     const view = render(<CompressionSettingsTab />);
     await settle();
-    fireEvent.change(inputFor("compressionCacheTTL"), { target: { value: "10" } });
+    edit(inputFor("compressionCacheTTL"), "10");
     await settle();
     expect(badgeTimers).toHaveLength(1);
 
@@ -225,7 +232,7 @@ describe("CompressionSettingsTab saves only what changed", () => {
       await settle();
       expect(server.stored.cavemanOutputMode).toMatchObject({ autoClarity: false });
 
-      fireEvent.change(inputFor("compressionCacheTTL"), { target: { value: "10" } });
+      edit(inputFor("compressionCacheTTL"), "10");
       await settle();
 
       expect(server.stored.cacheMinutes).toBe(10);
@@ -383,12 +390,43 @@ describe("CompressionSettingsTab saves only what changed", () => {
     );
   }
 
+  it("saves a numeric setting once when the edit ends, not on each keystroke", async () => {
+    const server = startServer();
+    await renderTab();
+    const cache = inputFor("compressionCacheTTL");
+    const putsBefore = server.puts.length;
+
+    fireEvent.change(cache, { target: { value: "1" } });
+    fireEvent.change(cache, { target: { value: "12" } });
+    await settle();
+    expect(cache.value).toBe("12");
+    expect(server.puts).toHaveLength(putsBefore);
+
+    fireEvent.blur(cache);
+    await settle();
+    expect(server.puts.slice(putsBefore)).toEqual([{ cacheMinutes: 12 }]);
+    expect(cache.value).toBe("12");
+  });
+
+  it("brings a numeric setting into its bounds before saving", async () => {
+    const server = startServer();
+    await renderTab();
+    const cache = inputFor("compressionCacheTTL");
+
+    fireEvent.change(cache, { target: { value: "999" } });
+    fireEvent.keyDown(cache, { key: "Enter" });
+    await settle();
+
+    expect(server.puts.at(-1)).toEqual({ cacheMinutes: 60 });
+    expect(cache.value).toBe("60");
+  });
+
   it("leaves outputStyles saved from another tab in place", async () => {
     const server = startServer();
     await renderTab();
     server.write({ outputStyles: [{ id: "caveman", level: "full" }] });
 
-    fireEvent.change(inputFor("compressionCacheTTL"), { target: { value: "10" } });
+    edit(inputFor("compressionCacheTTL"), "10");
     await settle();
 
     expect(server.stored.outputStyles).toEqual([{ id: "caveman", level: "full" }]);
@@ -408,7 +446,7 @@ describe("CompressionSettingsTab saves only what changed", () => {
       },
     });
 
-    fireEvent.change(inputFor("full Summary"), { target: { value: "7" } });
+    edit(inputFor("full Summary"), "7");
     await settle();
 
     expect(server.stored.aggressive).toEqual({
@@ -425,7 +463,7 @@ describe("CompressionSettingsTab saves only what changed", () => {
     await renderTab();
     const cache = inputFor("compressionCacheTTL");
 
-    fireEvent.change(cache, { target: { value: "10" } });
+    edit(cache, "10");
     await settle();
 
     expect(cache.value).toBe("5");
@@ -438,8 +476,8 @@ describe("CompressionSettingsTab saves only what changed", () => {
     const cache = inputFor("compressionCacheTTL");
     const autoTrigger = inputFor("compressionAutoTrigger");
 
-    fireEvent.change(cache, { target: { value: "10" } });
-    fireEvent.change(autoTrigger, { target: { value: "100" } });
+    edit(cache, "10");
+    edit(autoTrigger, "100");
     await settle();
 
     expect(cache.value).toBe("5");
@@ -450,7 +488,7 @@ describe("CompressionSettingsTab saves only what changed", () => {
     expect(screen.queryByText("saved")).toBeNull();
 
     // The next edit starts a new save, which clears the error.
-    fireEvent.change(autoTrigger, { target: { value: "200" } });
+    edit(autoTrigger, "200");
     await settle();
     expect(screen.getByText("saved")).toBeTruthy();
     expect(cache.value).toBe("5");
@@ -461,11 +499,11 @@ describe("CompressionSettingsTab saves only what changed", () => {
     startServer((body) => "autoTriggerTokens" in body);
     await renderTab();
 
-    fireEvent.change(inputFor("compressionCacheTTL"), { target: { value: "10" } });
+    edit(inputFor("compressionCacheTTL"), "10");
     await settle();
     expect(screen.getByText("saved")).toBeTruthy();
 
-    fireEvent.change(inputFor("compressionAutoTrigger"), { target: { value: "100" } });
+    edit(inputFor("compressionAutoTrigger"), "100");
     await settle();
     expect(screen.getByText("saveFailed")).toBeTruthy();
 

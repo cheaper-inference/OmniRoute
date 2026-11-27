@@ -49,6 +49,7 @@ const catalog = {
   ],
   meta: { version: "2026.08.08.1", tier: "community", fetchedAt: "2026-08-08T20:00:00Z" },
 };
+const olderCatalog = { ...catalog, meta: { ...catalog.meta, olderThanRelease: true } };
 
 describe("omniroute_radar_catalog", () => {
   it("is a phase-1 read-only registry tool with the dedicated Radar scope", () => {
@@ -101,6 +102,19 @@ describe("omniroute_radar_catalog", () => {
     );
   });
 
+  it("passes olderThanRelease through when the local catalog reports it", async () => {
+    const fetchJson = vi.fn().mockResolvedValue(olderCatalog);
+    expect((await getMcpRadarCatalog({}, { fetchJson })).meta).toEqual({
+      ...catalog.meta,
+      olderThanRelease: true,
+    });
+  });
+
+  it("keeps the three-key meta when olderThanRelease is absent", async () => {
+    const fetchJson = vi.fn().mockResolvedValue(catalog);
+    expect((await getMcpRadarCatalog({}, { fetchJson })).meta).toEqual(catalog.meta);
+  });
+
   it("allows read:radar and read:* but denies a missing scope when enforcement is active", () => {
     expect(evaluateToolScopes("omniroute_radar_catalog", ["read:radar"], true).allowed).toBe(true);
     expect(evaluateToolScopes("omniroute_radar_catalog", ["read:*"], true).allowed).toBe(true);
@@ -147,5 +161,17 @@ describe("omniroute_radar_catalog MCP dispatch", () => {
     expect(mockFetch.mock.calls[0][1]).not.toMatchObject({ method: "POST" });
     const body = JSON.parse((result.content[0] as { text: string }).text);
     expect(body.models).toHaveLength(2);
+  });
+
+  it("returns meta.olderThanRelease through the tool output schema", async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => olderCatalog });
+    const result = await client.callTool({
+      name: "omniroute_radar_catalog",
+      arguments: { enabledOnly: false },
+    });
+    expect(result.isError).toBeFalsy();
+    const body = JSON.parse((result.content[0] as { text: string }).text);
+    expect(body.meta.olderThanRelease).toBe(true);
+    expect(body.meta.version).toBe("2026.08.08.1");
   });
 });

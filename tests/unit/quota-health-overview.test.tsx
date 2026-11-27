@@ -2,7 +2,12 @@ import { availability, blocker, decision } from "./quota-availability-fixtures";
 import React from "react";
 import "@testing-library/jest-dom/vitest";
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  focusHoverCardTrigger,
+  hoverHoverCardTrigger,
+  waitForHoverCardToClose,
+} from "../_helpers/sharedHoverCard";
 import { NextIntlClientProvider } from "next-intl";
 import en from "../../src/i18n/messages/en.json";
 import zh from "../../src/i18n/messages/zh-CN.json";
@@ -124,7 +129,7 @@ it("keeps known-usable capsules green when the water level is unknown", () => {
 });
 it.each([1, 2, 40, 200])(
   "renders %i fixed-width capsules with inverse cooldown waterlines",
-  (size) => {
+  async (size) => {
     const cs = Array.from({ length: size }, (_, i) => ({
       ...connection,
       id: `id-${i}`,
@@ -150,23 +155,27 @@ it.each([1, 2, 40, 200])(
       `0 / ${size} available`
     );
     expect(document.querySelector("[data-group-counts]")).not.toHaveTextContent(en.common.paused);
-    fireEvent.focus(units()[0]);
-    const tip = screen.getByRole("tooltip");
+    // One kit hover card for every capsule: keyboard focus opens it at once.
+    const tip = focusHoverCardTrigger(units()[0]);
     expect(tip).toHaveTextContent("90%");
     expect(tip).toHaveTextContent(en.usage.healthQuotaExhausted);
     expect(tip).toHaveTextContent(en.usage.healthFiveHour);
     expect(tip).toHaveTextContent("0%");
-    expect(tip.parentElement).toBe(document.body);
+    // The kit card, portaled to the body inside its positioning wrapper.
+    expect(tip).toHaveClass("ci-hover-card");
+    expect(tip.closest("[data-radix-popper-content-wrapper]")?.parentElement).toBe(document.body);
     expect(units()[0]).toHaveAttribute("aria-describedby", tip.id);
     expect(tip).not.toHaveTextContent("@example.test");
     fireEvent.keyDown(document, { key: "Escape" });
     expect(screen.queryByRole("tooltip")).toBeNull();
-    fireEvent.focus(units()[0]);
-    fireEvent.blur(units()[0]);
+    focusHoverCardTrigger(units()[0]);
+    act(() => units()[0].blur());
+    // The kit keeps the card for a moment after the trigger is left, then closes it.
+    await waitForHoverCardToClose();
     expect(screen.queryByRole("tooltip")).toBeNull();
-    fireEvent.mouseEnter(units()[0]);
-    expect(screen.getByRole("tooltip")).toHaveTextContent("90%");
-    fireEvent.mouseLeave(units()[0]);
+    expect(await hoverHoverCardTrigger(units()[0])).toHaveTextContent("90%");
+    fireEvent.pointerLeave(units()[0]);
+    await waitForHoverCardToClose();
     expect(screen.queryByRole("tooltip")).toBeNull();
     fireEvent.click(units()[0]);
     expect(units()[0]).toHaveAttribute("aria-expanded", "true");
@@ -232,8 +241,7 @@ it.each(["en", "zh-CN"])(
     expect(unit).toHaveAttribute("data-kind", "paused");
     expect(unit).toHaveStyle({ background: "var(--color-text-muted)" });
     expect(unit.querySelector("[data-fill]")).toBeNull();
-    fireEvent.focus(unit);
-    expect(screen.getByRole("tooltip")).toHaveTextContent(m.common.paused);
+    expect(focusHoverCardTrigger(unit)).toHaveTextContent(m.common.paused);
     fireEvent.click(unit);
     expect(screen.getByText("details")).toBeTruthy();
     const missing = screen.getByRole("button", { name: new RegExp(m.usage.noQuotaData) });
@@ -243,7 +251,7 @@ it.each(["en", "zh-CN"])(
 );
 it("invalidates open details and preview when filters remove the account", () => {
   const view = localized(<QuotaHealthOverview {...props()} />);
-  fireEvent.focus(units()[0]);
+  focusHoverCardTrigger(units()[0]);
   fireEvent.click(units()[0]);
   view.rerender(wrapper(<QuotaHealthOverview {...props()} connections={[]} />));
   expect(screen.queryByText("details")).toBeNull();
@@ -251,51 +259,44 @@ it("invalidates open details and preview when filters remove the account", () =>
   view.rerender(wrapper(<QuotaHealthOverview {...props()} />));
   expect(screen.queryByText("details")).toBeNull();
 });
-it.each(["en", "zh-CN"])("localizes exact recovery duration and window labels (%s)", (locale) => {
-  const d = {
-    ...data,
-    quotas: [
-      {
-        name: "weekly",
-        remainingPercentage: 0,
-        resetAt: new Date(now + 133 * 60_000).toISOString(),
-      },
-    ],
-  };
-  localized(
-    <QuotaHealthOverview {...props()} accounts={{ [connection.id]: project(connection, d) }} />,
-    locale
-  );
-  fireEvent.mouseEnter(units()[0]);
-  const tip = screen.getByRole("tooltip"),
-    m = locale === "en" ? en : zh;
-  expect(tip).toHaveTextContent(m.usage.healthQuotaExhausted);
-  expect(tip).toHaveTextContent(m.usage.weekly);
-  expect(tip).toHaveTextContent(locale === "en" ? "2 hours, 13 minutes" : "2小时13分钟");
-  expect(tip).not.toHaveTextContent("2099-01-01T");
-});
-it("clamps the portal card inside a 390px viewport using measured geometry", () => {
-  const width = window.innerWidth;
-  Object.defineProperty(window, "innerWidth", { value: 390, configurable: true });
-  vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
-    this: HTMLElement
-  ) {
-    return {
-      left: 380,
-      bottom: 100,
-      width: this.getAttribute("role") === "tooltip" ? 330 : 9,
-      height: 120,
-    } as DOMRect;
-  });
-  try {
-    localized(<QuotaHealthOverview {...props()} />);
-    fireEvent.focus(units()[0]);
-    expect(screen.getByRole("tooltip")).toHaveStyle({ left: "52px" });
-    expect(screen.getByRole("tooltip")).toHaveClass("fixed", "max-w-[calc(100vw-16px)]");
-    expect(document.querySelector("section")).toHaveClass("min-w-0");
-  } finally {
-    Object.defineProperty(window, "innerWidth", { value: width, configurable: true });
+it.each(["en", "zh-CN"])(
+  "localizes exact recovery duration and window labels (%s)",
+  async (locale) => {
+    const d = {
+      ...data,
+      quotas: [
+        {
+          name: "weekly",
+          remainingPercentage: 0,
+          resetAt: new Date(now + 133 * 60_000).toISOString(),
+        },
+      ],
+    };
+    localized(
+      <QuotaHealthOverview {...props()} accounts={{ [connection.id]: project(connection, d) }} />,
+      locale
+    );
+    const tip = await hoverHoverCardTrigger(units()[0]),
+      m = locale === "en" ? en : zh;
+    expect(tip).toHaveTextContent(m.usage.healthQuotaExhausted);
+    expect(tip).toHaveTextContent(m.usage.weekly);
+    expect(tip).toHaveTextContent(locale === "en" ? "2 hours, 13 minutes" : "2小时13分钟");
+    expect(tip).not.toHaveTextContent("2099-01-01T");
   }
+);
+it("hands the card's placement to the kit and bounds it to a 390px viewport", () => {
+  // The card used to compute its own left/top from measured boxes. The kit hover card now
+  // positions it (floating-ui, with collision padding), which jsdom does not lay out: what is
+  // left to pin here is that the card is the kit's, anchored to the capsule, never wider than
+  // the viewport, and that nothing positions it by hand.
+  localized(<QuotaHealthOverview {...props()} />);
+  const tip = focusHoverCardTrigger(units()[0]);
+  expect(tip).toHaveClass("ci-hover-card", "max-w-[calc(100vw-16px)]");
+  expect(tip).not.toHaveClass("fixed");
+  expect(tip).toHaveAttribute("data-align", "start");
+  expect(tip.closest("[data-radix-popper-content-wrapper]")).not.toBeNull();
+  expect(units()[0]).toHaveAttribute("aria-describedby", tip.id);
+  expect(document.querySelector("section")).toHaveClass("min-w-0");
 });
 function LayoutHarness() {
   const { layoutMode, selectLayout } = useQuotaLayout();

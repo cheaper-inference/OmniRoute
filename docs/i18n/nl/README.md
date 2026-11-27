@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="De belofte — Eén endpoint en 394 providers. Automatische fallback houdt de routing actief zolang er een ander gezond doel beschikbaar is. Zes pijlers: veerkrachtige fallback over 394 providers · tot 95% tokenbesparing voor geschikte workloads · $0 om te beginnen met 150+ gratis tiers en 51 terugkerende/keyless-providers die altijd gratis blijven · 39 CLI/agent-integraties via één configuratie · compatibiliteit met OpenAI-, Claude-, Gemini- en Responses API op /v1 · productiecontroles waaronder circuit breakers, TLS-stealth, MCP met 110 tools, A2A, geheugen, guardrails, evals en meer dan 56.000 statische testdeclaraties verspreid over meer dan 7.800 bijgehouden testbestanden."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="De belofte — Eén endpoint en 394 providers. Automatische fallback houdt de routing actief zolang er een ander gezond doel beschikbaar is. Zes pijlers: veerkrachtige fallback over 394 providers · tot 95% tokenbesparing voor geschikte workloads · $0 om te beginnen met 150+ gratis tiers en 40 terugkerende/keyless-providers die altijd gratis blijven · 39 CLI/agent-integraties via één configuratie · compatibiliteit met OpenAI-, Claude-, Gemini- en Responses API op /v1 · productiecontroles waaronder circuit breakers, TLS-stealth, MCP met 110 tools, A2A, geheugen, guardrails, evals en meer dan 56.000 statische testdeclaraties verspreid over meer dan 7.800 bijgehouden testbestanden."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ je shellgeschiedenis. → [CLI-integraties](docs/guides/CLI-INTEGRATIONS.md)
 
 </div>
 
-> **394 geregistreerde providers** verspreid over de canonieke chat-, media-, zoek-, lokale, cloud-agent- en systeemcollecties, waaronder **153 met `hasFree: true`-discoverymetadata**. Het chatmodelregister omvat **239 providers / 3.059 unieke provider-modelparen / 1.475 onbewerkte model-ID's**; de afzonderlijke catalogus voor gratis gebruik bevat **465 rijen per model**, **34 terugkerende pools** en **51 terugkerende providers die voor altijd gratis en zonder sleutel zijn**. Dit zijn bewust verschillende noemers; definities en berekeningen waarbij pools zijn ontdubbeld staan in de [Providerreferentie](docs/reference/PROVIDER_REFERENCE.md) en [Gratis niveaus](docs/reference/FREE_TIERS.md).
+> **394 geregistreerde providers** verspreid over de canonieke chat-, media-, zoek-, lokale, cloud-agent- en systeemcollecties, waaronder **153 met `hasFree: true`-discoverymetadata**. Het chatmodelregister omvat **239 providers / 3.059 unieke provider-modelparen / 1.475 onbewerkte model-ID's**; de afzonderlijke catalogus voor gratis gebruik bevat **465 rijen per model**, **34 terugkerende pools** en **40 terugkerende providers die voor altijd gratis en zonder sleutel zijn**. Dit zijn bewust verschillende noemers; definities en berekeningen waarbij pools zijn ontdubbeld staan in de [Providerreferentie](docs/reference/PROVIDER_REFERENCE.md) en [Gratis niveaus](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1323,7 +1323,7 @@ Canonieke statistieken op 2026-10-18: **1.976 unieke video's** · **20.220.289 b
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Taal</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> in <code>src/</code> en <code>open-sse/</code> (nul <code>any</code> in de core sinds v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journaling) + LowDB (JSON legacy) — 147 domeinmodules, 244 migraties</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journaling) + LowDB (JSON legacy) — 147 domeinmodules, 252 migraties</td></tr>
   <tr><td nowrap><b>Geheugen</b></td><td>SQLite FTS5-volledige tekst + int8-gekwantiseerde vectorrepresentaties, getypeerde vervaging</td></tr>
   <tr><td nowrap><b>Schemata</b></td><td>Zod 4 — MCP-tool-I/O-validatie + API-contracten</td></tr>
   <tr><td nowrap><b>Protocollen</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

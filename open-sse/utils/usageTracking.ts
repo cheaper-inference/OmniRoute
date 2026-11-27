@@ -1153,11 +1153,11 @@ export function logUsage(
     ? normalizedConnectionId.slice(0, 8) + "..."
     : "unknown";
 
-  let msg = `[${getTimeString()}] 📊 ${COLORS.green}[USAGE] ${p} | in=${evidence.input.source === "estimated" ? "~" : ""}${inTokens} | out=${evidence.output.source === "estimated" ? "~" : ""}${outTokens} | account=${accountPrefix}${COLORS.reset}`;
+  let msg = `[${getTimeString()}] 📊 ${COLORS.green}[USAGE] ${p} | in=${evidence.input.source === "estimated" ? "~" : ""}${inTokens} | out=${evidence.output.source === "estimated" ? "~" : ""}${outTokens} | account=${accountPrefix}`;
 
   // Add estimated flag if present
   if (usage.estimated) {
-    msg += ` ${COLORS.yellow}(estimated)${COLORS.reset}`;
+    msg += ` ${COLORS.yellow}(estimated)${COLORS.green}`;
   }
 
   // Add cache info if present (unified from different formats)
@@ -1175,7 +1175,7 @@ export function logUsage(
   const reasoning = usage.reasoning_tokens;
   if (reasoning) msg += ` | reasoning=${reasoning}`;
 
-  console.log(msg);
+  console.log(msg + COLORS.reset);
 
   // Streaming requests persist usage once in chatCore's completion callback.
   // This diagnostic request-log append is separate from durable token accounting.
