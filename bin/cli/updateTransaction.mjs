@@ -38,7 +38,7 @@ import {
   unlinkSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
@@ -1111,7 +1111,7 @@ export async function launchManagedUpdateCoordinator({ plan, runtime, environmen
   const coordinatorPath = join(opDir, "coordinator.mjs");
   copyFileSync(source, coordinatorPath);
 
-  const planFile = join(opDir, "plan.json");
+  const planFile = join(opDir, planFileName(plan.operationId));
   writeFileSync(planFile, `${JSON.stringify({ plan, runtime })}\n`, { mode: 0o600 });
 
   createStateStore(runtime.dataDir, plan.operationId).record({
@@ -1167,24 +1167,73 @@ export async function waitForManagedUpdateOutcome(dataDir, operationId, options 
   }
 }
 
-async function coordinatorMain(planFile) {
-  const input = JSON.parse(readFileSync(planFile, "utf8"));
-  const { plan, runtime } = input;
-  const invalid = validatePlan(plan);
-  if (invalid || !runtime?.dataDir || !runtime?.packageRoot) {
-    process.exitCode = 2;
-    return;
-  }
-  const deps = createDefaultDependencies({ plan, runtime, environment: { ...process.env } });
-  const outcome = await runManagedUpdate(plan, deps);
-  process.exitCode = outcome.status === "updated" ? 0 : 1;
+const PLAN_FILE_PATTERN =
+  /^plan-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\.json$/;
+const MAX_PLAN_PATH_LENGTH = 4096;
+
+/** The only file name the launcher writes the plan to, and the only one the coordinator reads. */
+export function planFileName(operationId) {
+  if (!isOperationId(operationId)) throw new Error("Invalid operation id");
+  return `plan-${operationId}.json`;
 }
 
-// Entry point of the detached copy: `node coordinator.mjs --managed-update-coordinator plan.json`.
+/**
+ * The plan file the coordinator may read, or null. The path comes from a command-line argument,
+ * so it is accepted only when it is a regular file (never a link) with the launcher's own name
+ * pattern, directly inside `expectedDir` (the operation directory the launcher created and the
+ * coordinator copy lives in), and owned by the current user where the platform says so. The
+ * returned path is rebuilt from the resolved directory and the validated name.
+ */
+export function resolveCoordinatorPlanPath(arg, expectedDir, deps = {}) {
+  const realpath = deps.realpathSync ?? realpathSync;
+  const lstat = deps.lstatSync ?? lstatSync;
+  const uid = deps.getuid ? deps.getuid() : process.getuid?.();
+  if (typeof arg !== "string" || arg.length === 0 || arg.length > MAX_PLAN_PATH_LENGTH) return null;
+  if (arg.includes("\0") || typeof expectedDir !== "string" || expectedDir.length === 0)
+    return null;
+  try {
+    const name = basename(arg);
+    if (!PLAN_FILE_PATTERN.test(name)) return null;
+    const realDir = realpath(expectedDir);
+    const candidate = resolve(arg);
+    if (realpath(dirname(candidate)) !== realDir) return null;
+    const accepted = join(realDir, name);
+    if (!accepted.startsWith(realDir.endsWith(sep) ? realDir : `${realDir}${sep}`)) return null;
+    const stats = lstat(accepted);
+    if (!stats.isFile() || stats.isSymbolicLink()) return null;
+    if (uid !== undefined && stats.uid !== uid) return null;
+    return accepted;
+  } catch {
+    return null;
+  }
+}
+
+/** Returns the process exit code: 0 updated, 1 not updated, 2 refused input. */
+export async function coordinatorMain(planArg, expectedDir) {
+  const planFile = resolveCoordinatorPlanPath(planArg, expectedDir);
+  if (!planFile) return 2;
+  let input;
+  try {
+    input = JSON.parse(readFileSync(planFile, "utf8"));
+  } catch {
+    return 2;
+  }
+  const { plan, runtime } = input ?? {};
+  if (validatePlan(plan) || !runtime?.dataDir || !runtime?.packageRoot) return 2;
+  const deps = createDefaultDependencies({ plan, runtime, environment: { ...process.env } });
+  const outcome = await runManagedUpdate(plan, deps);
+  return outcome.status === "updated" ? 0 : 1;
+}
+
+// Entry point of the detached copy: `node coordinator.mjs --managed-update-coordinator plan-<id>.json`.
 // Matching the literal argument (not import.meta.url against argv[1]) keeps it working however
 // the file was reached, symlinks included.
 if (process.argv[2] === COORDINATOR_ARG && process.argv[3]) {
-  coordinatorMain(process.argv[3]).catch(() => {
-    process.exitCode = 1;
-  });
+  coordinatorMain(process.argv[3], dirname(fileURLToPath(import.meta.url)))
+    .then((code) => {
+      process.exitCode = code;
+    })
+    .catch(() => {
+      process.exitCode = 1;
+    });
 }
