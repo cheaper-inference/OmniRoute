@@ -309,6 +309,7 @@ Uża klawżoli `IF NOT EXISTS`, `IF EXISTS`, u `OR IGNORE` / `OR REPLACE` libera
 3. **Imla d-data bir-reqqa** : uża `UPDATE ... WHERE ...` biex timmaniġġja ringieli eżistenti
 4. **Iċċekkja l-ordni u l-ismijiet** : `npm run test:migrations:fresh` (il-migrazzjoni kollha fuq database vojta) u `npm run check:migration-numbering`
 5. **Test fuq kopja** : qatt ma tmexxi migrazzjonijiet mhux ittestjati fuq il-produzzjoni
+6. **Tabella maħluqa mill-kodiċi teħtieġ migrazzjoni wkoll** : jekk modulu joħloq ukoll it-tabella b'mod għażżien (`CREATE TABLE IF NOT EXISTS`, miżmuma bħala mogħdija ta 'awto-fejqan), migrazzjoni trid toħloqha bl-istess DDL. Inkella installazzjoni nadifa u installazzjoni aġġornata jispiċċaw bi skemi differenti, skont jekk dak it-triq tal-kodiċi damx. `tests/unit/db/lazy-table-migration-guard.test.ts` jiskenja `src/` u `open-sse/` u jfalli fuq `CREATE` għażżien mingħajr migrazzjoni (#20557). Eżempju: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Eżempju:
 

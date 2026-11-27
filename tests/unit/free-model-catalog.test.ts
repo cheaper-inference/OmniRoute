@@ -4,6 +4,8 @@ import {
   FREE_MODEL_BUDGETS,
   FREE_TIER_BOOSTS,
   computeFreeModelTotals,
+  computePublicFreeHeadline,
+  freeTypesInBucket,
 } from "../../open-sse/config/freeModelCatalog.ts";
 
 const FREE_TYPES = [
@@ -29,11 +31,22 @@ test("FREE_MODEL_BUDGETS is a non-empty array of well-formed per-model records",
 
 test("computeFreeModelTotals dedupes shared pools AND per-account credits, tiers honestly", () => {
   const t = computeFreeModelTotals();
-  // pool-deduped steady recurring should be in a defensible band (NOT the inflated per-model sum)
-  assert.ok(
-    t.steadyRecurringTokens >= 1_000_000_000 && t.steadyRecurringTokens <= 3_000_000_000,
-    `steady=${t.steadyRecurringTokens}`
+  // Pool-deduped steady recurring (NOT the inflated per-model sum). The value itself is pinned in
+  // free-catalog-reaudit-2026-11.test.ts (re-audit 2026-11-23, ~90M); here: the public figure plus
+  // the ToS-avoid pools, and far below the per-row sum.
+  const avoidOnly = computeFreeModelTotals({
+    entries: FREE_MODEL_BUDGETS.filter((m) => m.tos === "avoid"),
+  });
+  assert.equal(
+    t.steadyRecurringTokens,
+    computePublicFreeHeadline().steadyRecurringTokens + avoidOnly.steadyRecurringTokens
   );
+  const steadyBucket = freeTypesInBucket("steady-monthly");
+  const perRowSum = FREE_MODEL_BUDGETS.filter((m) => steadyBucket.has(m.freeType)).reduce(
+    (sum, m) => sum + m.monthlyTokens,
+    0
+  );
+  assert.ok(t.steadyRecurringTokens < perRowSum, `steady=${t.steadyRecurringTokens}`);
   assert.ok(t.steadyWithRecurringCreditsTokens >= t.steadyRecurringTokens);
   assert.ok(t.firstMonthRealisticTokens >= t.steadyWithRecurringCreditsTokens);
   // one-time credits must be pool-deduped: a multi-model provider's signup credit counts once.

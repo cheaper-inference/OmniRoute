@@ -1,8 +1,10 @@
 "use client";
 
 import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
-import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import Input from "@/shared/components/Input";
+import { webhookUrlFieldFeedback } from "../../../webhookFieldValidation";
+import { useWebhookUrlCheck } from "./useWebhookUrlCheck";
 
 export interface SlackConfig {
   webhookUrl: string;
@@ -12,52 +14,19 @@ interface SlackConfigFormProps {
   value: SlackConfig;
   onChange: (v: SlackConfig) => void;
   t: (key: string) => string;
+  /** Set by a refused Next: an untouched form is not flagged for being empty. */
+  showRequired?: boolean;
 }
 
-type UrlState = "idle" | "checking" | "ok" | "blocked" | "invalid";
-
-export function SlackConfigForm({ value, onChange, t }: SlackConfigFormProps) {
-  const [urlState, setUrlState] = useState<UrlState>("idle");
-
-  useEffect(() => {
-    const url = value.webhookUrl.trim();
-    const controller = new AbortController();
-    const delay = url ? 600 : 0;
-    const timer = setTimeout(async () => {
-      if (!url) {
-        setUrlState("idle");
-        return;
-      }
-      setUrlState("checking");
-      try {
-        const res = await fetch("/api/webhooks/validate-url", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url }),
-          signal: controller.signal,
-        });
-        const data = await res.json().catch(() => ({}));
-        setUrlState(data.valid ? "ok" : data.reason === "blocked_private" ? "blocked" : "invalid");
-      } catch {
-        if (!controller.signal.aborted) setUrlState("invalid");
-      }
-    }, delay);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [value.webhookUrl]);
-
-  const urlHint =
-    urlState === "checking"
-      ? t("validateUrl.checking")
-      : urlState === "ok"
-        ? t("validateUrl.ok")
-        : urlState === "blocked"
-          ? t("validateUrl.blockedPrivate")
-          : urlState === "invalid" && value.webhookUrl.trim()
-            ? t("validateUrl.invalidUrl")
-            : "";
+export function SlackConfigForm({ value, onChange, t, showRequired }: SlackConfigFormProps) {
+  const tv = useTranslations("formValidation");
+  const urlState = useWebhookUrlCheck(value.webhookUrl);
+  const url = webhookUrlFieldFeedback(value.webhookUrl, urlState, {
+    label: t("slack.webhookUrl"),
+    showRequired,
+    t,
+    tv,
+  });
 
   return (
     <div className="space-y-4">
@@ -66,11 +35,14 @@ export function SlackConfigForm({ value, onChange, t }: SlackConfigFormProps) {
         value={value.webhookUrl}
         onChange={(e) => onChange({ webhookUrl: e.target.value })}
         placeholder={t("slack.webhookUrlPlaceholder")}
-        error={urlHint && urlState !== "ok" && urlState !== "checking" ? urlHint : undefined}
+        required
+        error={url.error}
         hint={
           <>
-            {urlHint && (urlState === "ok" || urlState === "checking") && (
-              <span className={`block ${urlState === "ok" ? "text-success" : ""}`}>{urlHint}</span>
+            {url.status && (
+              <span className={`block ${urlState === "ok" ? "text-success" : ""}`}>
+                {url.status}
+              </span>
             )}
             <span className="block">{t("slack.webhookUrlHint")}</span>
           </>

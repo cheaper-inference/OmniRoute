@@ -67,10 +67,6 @@ const DORMANT_TABLES: Record<string, { why: string; module: string }> = {
     why: "runAssessmentMigration() is never called",
     module: "src/domain/assessment/migration.ts",
   },
-  prompt_templates: {
-    why: "nothing imports the prompt-template store",
-    module: "src/lib/db/prompts.ts",
-  },
 };
 
 type RuntimeCreate = { table: string; file: string; line: number };

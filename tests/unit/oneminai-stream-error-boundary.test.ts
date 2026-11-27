@@ -6,6 +6,7 @@ import { join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 const execFileAsync = promisify(execFile);
 const fixturePath = fileURLToPath(
@@ -51,7 +52,14 @@ test(
       try {
         const child = await execFileAsync(
           process.execPath,
-          ["--import", "tsx/esm", "--test", "--test-concurrency=1", fixturePath],
+          [
+            ...nativeCoverageArgs(),
+            "--import",
+            "tsx/esm",
+            "--test",
+            "--test-concurrency=1",
+            fixturePath,
+          ],
           {
             cwd: process.cwd(),
             encoding: "utf8",

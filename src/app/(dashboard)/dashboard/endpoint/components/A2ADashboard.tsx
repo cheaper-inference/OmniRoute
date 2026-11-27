@@ -12,6 +12,7 @@ import {
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Select from "@/shared/components/Select";
+import Badge from "@/shared/components/Badge";
 import { useTranslations } from "next-intl";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 
@@ -85,12 +86,12 @@ const TASK_STATES: Array<"all" | A2ATaskState> = [
   "cancelled",
 ];
 
-function stateClass(state: A2ATaskState) {
-  if (state === "completed") return "bg-success/15 text-success";
-  if (state === "failed") return "bg-error/15 text-error";
-  if (state === "working") return "bg-warning/15 text-warning";
-  if (state === "cancelled") return "bg-surface-2 text-text-muted";
-  return "bg-info/15 text-info";
+function stateVariant(state: A2ATaskState) {
+  if (state === "completed") return "success";
+  if (state === "failed") return "error";
+  if (state === "working") return "warning";
+  if (state === "cancelled") return "default";
+  return "info";
 }
 
 export default function A2ADashboardPage() {
@@ -335,14 +336,16 @@ export default function A2ADashboardPage() {
       </div>
 
       <Card className="p-5">
-        <h2 className="text-lg mb-4">{t("taskStateOverview")}</h2>
+        <h2 className="ci-heading mb-4" data-size="lg">
+          {t("taskStateOverview")}
+        </h2>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {(["submitted", "working", "completed", "failed", "cancelled"] as A2ATaskState[]).map(
             (state) => (
-              <div key={state} className="rounded-lg border border-border p-3 bg-bg">
-                <p className="text-xs text-text-muted uppercase">{t(`state.${state}`)}</p>
+              <Card.Section key={state}>
+                <p className="ci-eyebrow">{t(`state.${state}`)}</p>
                 <p className="text-2xl font-semibold mt-1">{status?.tasks?.counts?.[state] || 0}</p>
-              </div>
+              </Card.Section>
             )
           )}
         </div>
@@ -350,7 +353,9 @@ export default function A2ADashboardPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <Card className="p-5">
-          <h2 className="text-lg mb-3">{t("agentCard")}</h2>
+          <h2 className="ci-heading mb-3" data-size="lg">
+            {t("agentCard")}
+          </h2>
           {status?.agent ? (
             <div className="space-y-2 text-sm">
               <p className="font-semibold">{status.agent.name}</p>
@@ -362,7 +367,7 @@ export default function A2ADashboardPage() {
                 {t("url")}: <span className="font-mono text-xs break-all">{status.agent.url}</span>
               </p>
               <div className="pt-2">
-                <p className="text-xs uppercase text-text-muted mb-1">{t("capabilities")}</p>
+                <p className="ci-eyebrow mb-1">{t("capabilities")}</p>
                 <code className="text-xs break-all">
                   {JSON.stringify(status.capabilities || {}, null, 2)}
                 </code>
@@ -374,7 +379,9 @@ export default function A2ADashboardPage() {
         </Card>
 
         <Card className="p-5">
-          <h2 className="text-lg mb-3">{t("quickValidation")}</h2>
+          <h2 className="ci-heading mb-3" data-size="lg">
+            {t("quickValidation")}
+          </h2>
           <p className="text-sm text-text-muted mb-3">{t("quickValidationDescription")}</p>
           <div className="flex flex-wrap gap-2">
             <Button
@@ -401,7 +408,9 @@ export default function A2ADashboardPage() {
       <Card className="p-5">
         <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
           <div>
-            <h2 className="text-lg">{t("taskManagement")}</h2>
+            <h2 className="ci-heading" data-size="lg">
+              {t("taskManagement")}
+            </h2>
             <p className="text-sm text-text-muted">
               {t("taskSummary", { total: tasksData.total, page: currentPage, totalPages })}
             </p>
@@ -448,7 +457,7 @@ export default function A2ADashboardPage() {
             <Table
               scrollbarLabel={t("taskManagement")}
               scrollLabel={t("taskManagement")}
-              containerClassName="rounded-none border-0"
+              variant="plain"
             >
               <TableHeader>
                 <TableRow>
@@ -464,37 +473,36 @@ export default function A2ADashboardPage() {
                 {tasksData.tasks.map((task) => {
                   const fsmPhase =
                     task.metadata?.fsmPhase || (task.metadata?.workflowFSM as any)?.currentPhase;
-                  let fsmBadgeColor = "bg-surface-2 text-text-muted";
-                  if (fsmPhase === "plan" || fsmPhase === "plan_review")
-                    fsmBadgeColor = "bg-chart-3/15 text-chart-3-ink";
-                  else if (fsmPhase === "execute") fsmBadgeColor = "bg-info/15 text-info";
+                  let fsmVariant: "default" | "info" | "warning" | "success" | "error" = "default";
+                  const fsmPlanning = fsmPhase === "plan" || fsmPhase === "plan_review";
+                  if (fsmPhase === "execute") fsmVariant = "info";
                   else if (
                     ["code_review", "quality_review", "security", "test", "output_review"].includes(
                       fsmPhase
                     )
                   )
-                    fsmBadgeColor = "bg-warning/15 text-warning";
-                  else if (fsmPhase === "done") fsmBadgeColor = "bg-success/15 text-success";
-                  else if (fsmPhase === "failed") fsmBadgeColor = "bg-error/15 text-error";
+                    fsmVariant = "warning";
+                  else if (fsmPhase === "done") fsmVariant = "success";
+                  else if (fsmPhase === "failed") fsmVariant = "error";
 
                   return (
                     <TableRow key={task.id}>
                       <TableCell className="font-mono">{task.id}</TableCell>
                       <TableCell>{task.skill}</TableCell>
                       <TableCell>
-                        <span
-                          className={`text-xs px-2 py-1 rounded-full ${stateClass(task.state)}`}
-                        >
+                        <Badge size="sm" variant={stateVariant(task.state)}>
                           {t(`state.${task.state}`)}
-                        </span>
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         {fsmPhase ? (
-                          <span
-                            className={`text-xs px-2 py-1 rounded border border-current/20 font-medium ${fsmBadgeColor}`}
+                          <Badge
+                            size="sm"
+                            variant={fsmVariant}
+                            tone={fsmPlanning ? "chart-3" : undefined}
                           >
                             {fsmPhase}
-                          </span>
+                          </Badge>
                         ) : (
                           <span className="text-xs text-text-muted">—</span>
                         )}
@@ -559,14 +567,16 @@ export default function A2ADashboardPage() {
       {selectedTask && (
         <Card className="p-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg">{t("taskDetail")}</h2>
+            <h2 className="ci-heading" data-size="lg">
+              {t("taskDetail")}
+            </h2>
             <Button size="sm" variant="secondary" onClick={() => setSelectedTask(null)}>
               {t("close")}
             </Button>
           </div>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            <div className="rounded-lg border border-border p-3 bg-bg">
-              <p className="text-xs uppercase text-text-muted mb-2">{t("metadata")}</p>
+            <Card.Section>
+              <p className="ci-eyebrow mb-2">{t("metadata")}</p>
               <code className="text-xs break-all whitespace-pre-wrap">
                 {JSON.stringify(
                   {
@@ -582,20 +592,20 @@ export default function A2ADashboardPage() {
                   2
                 )}
               </code>
-            </div>
-            <div className="rounded-lg border border-border p-3 bg-bg">
-              <p className="text-xs uppercase text-text-muted mb-2">{t("events")}</p>
+            </Card.Section>
+            <Card.Section>
+              <p className="ci-eyebrow mb-2">{t("events")}</p>
               <code className="text-xs break-all whitespace-pre-wrap">
                 {JSON.stringify(selectedTask.events, null, 2)}
               </code>
-            </div>
+            </Card.Section>
           </div>
-          <div className="rounded-lg border border-border p-3 bg-bg mt-4">
-            <p className="text-xs uppercase text-text-muted mb-2">{t("artifacts")}</p>
+          <Card.Section className="mt-4">
+            <p className="ci-eyebrow mb-2">{t("artifacts")}</p>
             <code className="text-xs break-all whitespace-pre-wrap">
               {JSON.stringify(selectedTask.artifacts, null, 2)}
             </code>
-          </div>
+          </Card.Section>
         </Card>
       )}
       {confirmDialog}
@@ -605,9 +615,9 @@ export default function A2ADashboardPage() {
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-lg border border-border bg-bg p-4">
-      <p className="text-xs text-text-muted uppercase tracking-wide">{label}</p>
+    <Card.Section>
+      <p className="ci-eyebrow">{label}</p>
       <p className="text-xl font-semibold mt-1">{value}</p>
-    </div>
+    </Card.Section>
   );
 }

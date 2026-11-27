@@ -344,9 +344,8 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     format: "syntx-audio",
     models: toSyntxTranscriptionModels(),
   },
-  // Kept last on purpose: the audio/video bridges auto-pick the FIRST catalog
-  // model with usable credentials (selectAudioBridgeModel), so a Gemini key must
-  // not pre-empt the established STT providers' auto-selection order.
+  // Append new providers: the audio/video bridges auto-pick the FIRST catalog
+  // model with usable credentials (selectAudioBridgeModel).
   gemini: {
     id: "gemini",
     baseUrl:
@@ -358,6 +357,15 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     // tagged audio-transcriptions keep having no adapter (#16929).
     modelScoped: true,
     models: [{ id: "gemini-3.5-transcribe-live", name: "Gemini 3.5 Transcribe Live" }],
+  },
+  "minimax-cn": {
+    id: "minimax-cn",
+    baseUrl: "https://api.minimax.cn/v1/speech_to_text",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "minimax-asr",
+    modelScoped: true,
+    models: [{ id: "asr-1.0", name: "MiniMax ASR 1.0 (China)" }],
   },
 };
 

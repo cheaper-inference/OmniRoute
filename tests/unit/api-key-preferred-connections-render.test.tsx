@@ -64,8 +64,9 @@ describe("PreferredConnectionsSection", () => {
     const downA = rowA.getByRole("button", {
       name: messages.common.moveDown,
     }) as HTMLButtonElement;
-    expect(upB.disabled).toBe(true);
-    expect(downA.disabled).toBe(true);
+    // The move buttons carry a title, so they are aria-disabled at the bounds (still hoverable).
+    expect(upB.getAttribute("aria-disabled")).toBe("true");
+    expect(downA.getAttribute("aria-disabled")).toBe("true");
 
     fireEvent.click(rowA.getByRole("button", { name: messages.common.moveUp }));
     expect(handlers.onMovePreferred).toHaveBeenCalledWith("conn-a", -1);

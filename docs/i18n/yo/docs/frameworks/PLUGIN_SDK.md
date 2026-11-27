@@ -4,7 +4,7 @@
 
 ---
 
-## Ìbẹ̀rẹ̀ Kíákíá
+## Ibẹrẹ kiakia
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## Ìtọ́kasí API
+## API Reference
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Ìṣẹ́ factory tí ń ṣẹ̀dá ohun `Plugin` pẹ̀lú àwọn iye àìpé.
+Iṣẹ ile-iṣẹ ti o ṣẹda ohun itanna kan pẹlu awọn aiyipada.
 
-**Àwọn pírámítà:**
+**Awọn paramita:**
 
-- `name` (string, dandan) — Orúkọ plugin ní ìrísí kebab-case
-- `priority` (number, àṣàyàn, iye àìpé: 100) — Iye tí ó kéré máa ṣiṣẹ́ kọ́kọ́
-- `enabled` (boolean, àṣàyàn, iye àìpé: true) — Ṣé kí ó bẹ̀rẹ̀ ní títàn?
-- `onRequest` (function, àṣàyàn) — Ń ṣiṣẹ́ ṣáájú olùtọ́jú ìfọ̀rọ̀wérọ̀
-- `onResponse` (function, àṣàyàn) — Ń ṣiṣẹ́ lẹ́yìn olùtọ́jú ìfọ̀rọ̀wérọ̀
-- `onError` (function, àṣàyàn) — Ń ṣiṣẹ́ nígbà àṣìṣe olùtọ́jú
+- `name` (okun, beere) orukọ itanna — ni kebab-case
+- `priority` (nọmba, iyan, aiyipada: 100) — Isalẹ nṣiṣẹ akọkọ
+- `enabled` (boolean, iyan, aiyipada: otitọ) — Ibẹrẹ ṣiṣẹ bi?
+- `onRequest` (iṣẹ, iyan) — Ṣiṣe ṣaaju oluṣakoso iwiregbe
+- `onResponse` (iṣẹ, iyan) — Ṣiṣe lẹhin oluṣakoso iwiregbe
+- `onError` (iṣẹ, iyan) — Ṣiṣe lori aṣiṣe olutọju
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Dènà ìbéèrè náà, kí o sì dá èsì àkànṣe padà bí o bá fẹ́.
+Dina ibeere naa ki o da esi aṣa pada ni yiyan.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Ṣàtúnṣe ara ìbéèrè náà kí ó tó dé ọ̀dọ̀ olupèsè.
+Ṣe atunṣe ara ibeere ṣaaju ki o de ọdọ olupese.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-So metadata mọ́ àyíká ìbéèrè náà.
+So metadata si ipo ibeere.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Àyíká Plugin (`PluginContext`)
+## Ọrọ itanna (`PluginContext`)
 
-| Ààyè        | Irú                       | Àpèjúwe                    |
-| ----------- | ------------------------- | -------------------------- |
-| `requestId` | `string`                  | Aṣèdámọ̀ ìbéèrè aláìlẹ́gbẹ́   |
-| `model`     | `string`                  | Orúkọ model tí a béèrè fún |
-| `provider`  | `string`                  | ID olupèsè àfojúsùn        |
-| `body`      | `Record<string, unknown>` | Ara ìbéèrè                 |
-| `headers`   | `Record<string, string>`  | Àwọn header ìbéèrè         |
-| `metadata`  | `Record<string, unknown>` | Metadata tí a lè yí padà   |
-| `timestamp` | `number`                  | Àkókò ìbéèrè               |
+| Aaye         | Iru                       | Apejuwe                          |
+| ------------ | ------------------------- | -------------------------------- |
+| `requestId`  | `string`                  | Oto ìbéèrè idamo                 |
+| `model`      | `string`                  | Ti beere orukọ awoṣe             |
+| `provider`   | `string`                  | Olupese afojusun ID              |
+| `body`       | `Record<string, unknown>` | Beere ara                        |
+| `headers`    | `Record<string, string>`  | Beere awọn akọle (wo akọsilẹ)    |
+| `metadata`   | `Record<string, unknown>` | metadata iyipada                 |
+| `timestamp`  | `number`                  | Beere timestamp                  |
+| `apiKeyInfo` | `object` (aṣayan)         | metadata bọtini API (wo akọsilẹ) |
+
+Ayika ko gbe awọn iwe-ẹri alabara: `authorization`, `x-api-key`, `proxy-authorization` ati awọn akọle `cookie` kuro (eyikeyi casing), ati `apiKeyInfo` tọju metadata bọtini (gẹgẹbi `id`, `name` ati `scopes`) ṣugbọn kii ṣe iye bọtini tabi itẹka rẹ (`redactPluginContext()` ni `src/lib/plugins/hooks.ts`). Eyi kan si `onRequest`, `onResponse` ati `onError`.
 
 ## Manifest (`plugin.json`)
 
@@ -138,19 +141,18 @@ Tàbí gẹ́gẹ́ bí àwọn boolean rírọrùn (ipò àṣíwájú àìpé 
 }
 ```
 
-## Ètò Ìgbaniláàyè
+## Gbigbanilaaye System
 
-Àwọn plugin ń ṣiṣẹ́ nínú àyíká VM tí a ya sọ́tọ̀. Ìráyè sí àwọn ohun àmúlò ìta nílò ìgbaniláàyè pàtó:
+Awọn afikun jẹ** ko sandboxed** . Ohun itanna kọọkan n ṣiṣẹ bi lọtọ, ilana ọmọ Node.js lasan (`loadPlugin()` ni `src/lib/plugins/loader.ts`) labẹ olumulo ẹrọ ṣiṣe kanna bi OmniRoute, laisi ipo VM ati ko si awọn asia igbanilaaye Node.js. Awọn koodu itanna le lo `node:fs`, `node:child_process`, `fetch` ati gbogbo Node.js API miiran: o le ka ati kọ faili eyikeyi ti olumulo OmniRoute le (pẹlu itọsọna data), ṣiṣe awọn eto ati de nẹtiwọki.
 
-| Ìgbaniláàyè  | Ohun tí ó fàyè gbà                                           |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Aṣojú `process.env` tí ó jẹ́ kíkà-nìkan                       |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+`requires.permissions` ti ifihan gba `network`, `file-read`, `file-write`, `env` ati `exec`, ṣugbọn loni `env` nikan ni o ni ipa ni akoko asiko:
 
-Láìsí ìgbaniláàyè kan, àwọn global tó bá a mu kò ní sí nínú sandbox náà rárá.
+| Igbanilaaye                                  | Ipa loni                                                                                                                                                                                                                |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Ilana itanna tun gba `PORT`, `HOSTNAME`, `TZ` ati `TMPDIR`. Laisi rẹ, o gba `PATH` nikan, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` ati `PLUGIN_NAME` (pẹlu `SystemRoot` ati `windir` lori Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Ko si. Wọn jẹ awọn ikede nikan: ko si ohun ti o dina mọ nigbati wọn nsọnu.                                                                                                                                              |
+
+Fifi sori ẹrọ itanna kan dabi fifi sori ẹrọ eyikeyi eto miiran lori agbalejo naa. Fi sori ẹrọ awọn afikun nikan ti orisun wọn ti o gbẹkẹle.
 
 ## Schema Ìṣètò
 
@@ -192,9 +194,9 @@ Láìsí ìgbaniláàyè kan, àwọn global tó bá a mu kò ní sí nínú san
 | `onDeactivate`    | Nígbà tí a bá dá plugin dúró                            | `{ name, version, manifest }` |
 | `onUninstall`     | Nígbà tí a bá yọ plugin kúrò (ṣáájú pípa àwọn fáìlì rẹ́) | `{ name, version, manifest }` |
 
-## Àwọn Àpẹẹrẹ
+## Awọn apẹẹrẹ
 
-### Olùkọ Àkọsílẹ̀ Request
+### Beere Logger
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Olùdín Rate Kù
+### Idiwọn Oṣuwọn
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // ìṣẹ́jú 1
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Olùyípadà Response
+### Amunawa idahun
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

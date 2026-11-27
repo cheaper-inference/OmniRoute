@@ -41,7 +41,9 @@ export function HmacRecipeBlock({
   return (
     <div className="space-y-1">
       {title && (
-        <p className="text-xs font-medium uppercase tracking-wider text-text-muted">{title}</p>
+        <p className="ci-eyebrow" data-weight="medium">
+          {title}
+        </p>
       )}
       {tabs.length > 1 && (
         <div className="flex gap-1">

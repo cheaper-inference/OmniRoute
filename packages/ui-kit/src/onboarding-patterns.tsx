@@ -61,9 +61,9 @@ export function SetupLayout({ children, aside, className, headingVariant = "defa
     : <aside className="ci-setup-layout__aside">{aside}</aside>)}</div>;
 }
 
-export interface SetupBenefitsProps { title: string; description?: string; items: readonly { title: string; description: string; icon?: ReactNode }[]; /** Optional follow-up content, aligned to benefit text with a consistent action gap. */ footer?: ReactNode; }
-export function SetupBenefits({ title, description, items, footer }: SetupBenefitsProps) {
-  return <div className="ci-setup-benefits"><h2>{title}</h2>{description && <p>{description}</p>}<ul>{items.map(item => <li key={item.title}>{item.icon && <span aria-hidden>{item.icon}</span>}<div><strong>{item.title}</strong><p>{item.description}</p></div></li>)}</ul>{footer && <div className="ci-setup-benefits__footer" data-icon-aligned={items.some(item => item.icon) || undefined}>{footer}</div>}</div>;
+export interface SetupBenefitsProps { title: string; description?: string; items: readonly { title: string; description: string; icon?: ReactNode }[]; /** Optional follow-up content with a consistent action gap. */ footer?: ReactNode; /** Align the footer with benefit text (default) or the starting icon edge. */ footerAlign?: "text" | "start"; }
+export function SetupBenefits({ title, description, items, footer, footerAlign = "text" }: SetupBenefitsProps) {
+  return <div className="ci-setup-benefits"><h2>{title}</h2>{description && <p>{description}</p>}<ul>{items.map(item => <li key={item.title}>{item.icon && <span aria-hidden>{item.icon}</span>}<div><strong>{item.title}</strong><p>{item.description}</p></div></li>)}</ul>{footer && <div className="ci-setup-benefits__footer" data-icon-aligned={footerAlign === "text" && items.some(item => item.icon) || undefined}>{footer}</div>}</div>;
 }
 
 /** Interface text for SetupProgressCard; `title` and `note` remain separate props. */

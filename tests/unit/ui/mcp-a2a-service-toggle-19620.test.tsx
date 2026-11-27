@@ -4,7 +4,7 @@
 // gone; the switch keeps a translated name that says what it controls and what a press does.
 import React from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen } from "@testing-library/react";
 import messages from "../../../src/i18n/messages/en.json";
 
 vi.mock("@/app/(dashboard)/dashboard/endpoint/components/MCPDashboard", () => ({
@@ -17,15 +17,22 @@ vi.mock("@/app/(dashboard)/dashboard/endpoint/components/A2ADashboard", () => ({
 const { default: McpPage } = await import("../../../src/app/(dashboard)/dashboard/mcp/page");
 const { default: A2APage } = await import("../../../src/app/(dashboard)/dashboard/a2a/page");
 
-function installFetch(settings: Record<string, unknown>) {
+async function renderWithSettings(Page: React.ComponentType, settings: Record<string, unknown>) {
+  const settingsBody = Promise.withResolvers<Record<string, unknown>>();
+  const readSettings = vi.fn(() => settingsBody.promise);
   vi.stubGlobal(
     "fetch",
     vi.fn(async (input: string) => ({
       ok: true,
       status: 200,
-      json: async () => (String(input) === "/api/settings" ? settings : { online: true }),
+      json: String(input) === "/api/settings" ? readSettings : async () => ({ online: true }),
     }))
   );
+  render(<Page />);
+
+  // Flush the actual settings response through React before checking the accessible switch.
+  await act(async () => settingsBody.resolve(settings));
+  expect(readSettings).toHaveBeenCalled();
 }
 
 function expectNoStateText() {
@@ -45,19 +52,17 @@ describe.each([
   { name: "A2A", Page: A2APage, flag: "a2aEnabled", label: a2aLabel },
 ])("$name service toggle", ({ Page, flag, label }) => {
   it("names the disable action and shows no ON text while enabled", async () => {
-    installFetch({ [flag]: true });
-    render(<Page />);
+    await renderWithSettings(Page, { [flag]: true });
 
-    const toggle = await screen.findByRole("switch", { name: `Disable ${label}` });
+    const toggle = screen.getByRole("switch", { name: `Disable ${label}` });
     expect((toggle as HTMLInputElement).checked).toBe(true);
     expectNoStateText();
   });
 
   it("names the enable action and shows no OFF text while disabled", async () => {
-    installFetch({ [flag]: false });
-    render(<Page />);
+    await renderWithSettings(Page, { [flag]: false });
 
-    const toggle = await screen.findByRole("switch", { name: `Enable ${label}` });
+    const toggle = screen.getByRole("switch", { name: `Enable ${label}` });
     expect((toggle as HTMLInputElement).checked).toBe(false);
     expectNoStateText();
   });

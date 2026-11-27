@@ -102,6 +102,20 @@ test("an unknown ingress class gets no invented annotations", () => {
 
 // ── Target profiles ───────────────────────────────────────────────────────────
 
+test("every profile with Ingress enabled generates a ConfigMap that requires API keys", () => {
+  for (const target of deploySpecSchema.shape.target.options) {
+    const spec = defaultSpec(target);
+    if (!spec.ingress.enabled) continue;
+
+    const docs = docsFor({
+      ...spec,
+      ingress: { ...spec.ingress, host: spec.ingress.host ?? "llms.example.com" },
+    });
+    const configMap = ofKind(docs, "ConfigMap");
+    assert.equal(configMap.data?.REQUIRE_API_KEY, "true", `${target}: REQUIRE_API_KEY`);
+  }
+});
+
 test("the vps profile defaults to requiring API keys and TLS", () => {
   const vps = defaultSpec("vps");
   assert.equal(

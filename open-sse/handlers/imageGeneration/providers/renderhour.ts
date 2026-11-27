@@ -10,7 +10,6 @@ import {
   renderhourBaseUrl,
   renderhourConfig,
   renderhourFailure,
-  renderhourNumber,
   renderhourToken,
   runRenderhourJob,
   uploadRenderhourInputs,
@@ -22,6 +21,7 @@ import {
   saveImageErrorResult,
   saveImageSuccessResult,
 } from "../../imageGeneration.ts";
+import { clampPollIntervalMs, clampPollTimeoutMs } from "../../../utils/pollBounds.ts";
 
 const MAX_IMAGES_PER_JOB = 4;
 
@@ -72,8 +72,8 @@ export async function handleRenderhourImageGeneration({
       baseUrl,
       token,
       request,
-      timeoutMs: renderhourNumber(body.timeout_ms, 300_000),
-      pollIntervalMs: renderhourNumber(body.poll_interval_ms, 2000),
+      timeoutMs: clampPollTimeoutMs(body.timeout_ms, 300_000),
+      pollIntervalMs: clampPollIntervalMs(body.poll_interval_ms, 2000),
       log,
       signal,
     });

@@ -65,6 +65,9 @@ export function parseModelScopeRateLimitHeaders(
   };
 }
 
+// A server-sent Retry-After must not park a request for minutes.
+const MAX_RETRY_DELAY_MS = 10_000;
+
 export function classifyModelScope429(
   errorText: string,
   headers: Record<string, string>
@@ -94,7 +97,7 @@ export function getModelScopeRetryDelayMs(
   const retryAfter = headers["retry-after"] ?? null;
   if (retryAfter) {
     const parsed = Number.parseFloat(retryAfter);
-    if (Number.isFinite(parsed) && parsed > 0) return parsed * 1000;
+    if (Number.isFinite(parsed) && parsed > 0) return Math.min(parsed * 1000, MAX_RETRY_DELAY_MS);
   }
   return 3000 * (attempt + 1);
 }

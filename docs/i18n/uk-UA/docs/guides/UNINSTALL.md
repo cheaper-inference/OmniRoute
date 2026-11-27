@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Необов’язково) Видалення образу
+docker rmi cheaperinference/omniroute:latest
+# Старіші інсталяції вилучили застарілу назву:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

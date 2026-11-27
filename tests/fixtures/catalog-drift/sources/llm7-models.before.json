@@ -1,0 +1,22 @@
+{
+  "data": [
+    {
+      "id": "gpt-4o-mini-2024-07-18"
+    },
+    {
+      "id": "gpt-4.1-nano-2025-04-14"
+    },
+    {
+      "id": "deepseek-r1-0528"
+    },
+    {
+      "id": "qwen2.5-coder-32b-instruct"
+    },
+    {
+      "id": "codestral-latest"
+    },
+    {
+      "id": "gpt-oss:20b"
+    }
+  ]
+}

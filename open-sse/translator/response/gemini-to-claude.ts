@@ -143,6 +143,9 @@ export function geminiToClaudeResponse(chunk, state) {
   // Handle Antigravity wrapper
   const response = chunk.response || chunk;
   if (!response || !response.candidates?.[0]) return null;
+  // message_stop closed the stream; a later chunk (for example a trailing usage chunk that
+  // repeats finishReason) must not add events after it.
+  if (state.claudeFinishEmitted) return null;
 
   const results = [];
   const candidate = response.candidates[0];
@@ -202,7 +205,7 @@ export function geminiToClaudeResponse(chunk, state) {
         results.push({
           type: "content_block_start",
           index: idx,
-          content_block: { type: "thinking", thinking: "" },
+          content_block: { type: "thinking", thinking: "", signature: "" },
         });
         results.push({
           type: "content_block_delta",
@@ -499,6 +502,7 @@ export function geminiToClaudeResponse(chunk, state) {
       usage: state.usage || { input_tokens: 0, output_tokens: 0 },
     });
     results.push({ type: "message_stop" });
+    state.claudeFinishEmitted = true;
   }
 
   return results.length > 0 ? results : null;

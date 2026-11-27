@@ -90,7 +90,8 @@ describe("Codex Ping now button", () => {
         connection: { id: "conn-1", provider: "codex", authType: "oauth", isActive: false },
       })
     );
-    expect(pingButton()?.disabled).toBe(true);
+    // The button carries a title, so it is aria-disabled while inactive (it stays hoverable).
+    expect(pingButton()?.getAttribute("aria-disabled")).toBe("true");
   });
 
   it("POSTs to the ping route and shows the localized success message", async () => {

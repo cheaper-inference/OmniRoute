@@ -8,6 +8,7 @@ import {
   manifestRequiresModel,
   resolveManifestTarget,
 } from "../../../bin/cli/cli-manifest.mjs";
+import { launchRegistry } from "../../../bin/cli/launch/registry.mjs";
 import { listRunTargets, resolveRunTarget } from "../../../bin/cli/commands/run.mjs";
 import { listConfigureTargets, SETUP_MODULES } from "../../../bin/cli/commands/configure.mjs";
 import { runCompletionCommand } from "../../../bin/cli/commands/completion.mjs";
@@ -46,9 +47,15 @@ test("neutral manifest is the exact union of every CLI integration surface", () 
     ...CLI_TOOL_IDS,
     ...listCliTools().map((tool) => tool.id),
     ...BUILT_IN_AGENT_IDS,
+    ...listCliIntegrationIds("launch"),
   ]);
   assert.deepEqual([...observed].sort(), Object.keys(CLI_INTEGRATION_MANIFEST).sort());
   assert.deepEqual(manifestIds.sort(), Object.keys(CLI_INTEGRATION_MANIFEST).sort());
+});
+
+test("launch surface matches the launch adapter registry", () => {
+  assert.deepEqual(listManifestTargets("launch"), launchRegistry.ids());
+  assert.deepEqual(listManifestTargets("launch"), listCliIntegrationIds("launch"));
 });
 
 test("each consumer derives its exact capability set from the neutral manifest", () => {

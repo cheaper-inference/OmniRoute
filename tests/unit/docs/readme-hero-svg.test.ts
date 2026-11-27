@@ -78,3 +78,18 @@ test("light and dark palettes are both declared", async () => {
   // after the stylesheet every colour is a var(): no literal hex in the drawing
   assert.doesNotMatch(svg.slice(svg.indexOf("</style>")), /#[0-9a-fA-F]{3,8}(?![\w-])/);
 });
+
+test("the hero carries the short pair in one string (D48)", () => {
+  const code = (snapshotFacts as { code: Record<string, string> }).code;
+  const big = code.rowSumTotalLabel;
+  const real = `${code.headlineSteadyLabel} real`;
+  let seen = 0;
+  for (const s of Object.values(HERO_COPY).flat()) {
+    if (!s.includes(big)) continue;
+    seen++;
+    assert.ok(s.includes("as others count") && s.includes(real), `pair split: ${s}`);
+  }
+  assert.ok(seen > 0, "the hero draws the big figure with its label and the real one");
+  assert.match(HERO_COPY.tools[0], /Antigravity/);
+  assert.match(HERO_COPY.tools[0], /FREE Claude \/ GPT \/ Gemini/);
+});

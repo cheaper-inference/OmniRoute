@@ -114,7 +114,7 @@ function RowShell({
 }) {
   const t = useTranslations("resilienceCooldowns");
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-border p-3">
+    <Card.Section className="flex flex-col gap-2">
       <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-6">{children}</div>
       <div className="flex items-center justify-between gap-3">
         <p role="alert" className="text-xs text-error">
@@ -124,7 +124,7 @@ function RowShell({
           {t("errorRules.remove")}
         </Button>
       </div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -247,7 +247,9 @@ function RulesSection({
   const t = useTranslations("resilienceCooldowns");
   return (
     <section className="flex flex-col gap-3">
-      <h4 className="text-sm text-text-main">{t("errorRules.rulesHeading")}</h4>
+      <h4 className="ci-heading" data-size="sm">
+        {t("errorRules.rulesHeading")}
+      </h4>
       <p className="text-xs text-text-muted">{t("errorRules.matchHint")}</p>
       {rules.length === 0 && (
         <p className="text-sm text-text-muted">{t("errorRules.rulesEmpty")}</p>
@@ -287,7 +289,9 @@ function DefaultsSection({
   const t = useTranslations("resilienceCooldowns");
   return (
     <section className="flex flex-col gap-3">
-      <h4 className="text-sm text-text-main">{t("errorRules.defaultsHeading")}</h4>
+      <h4 className="ci-heading" data-size="sm">
+        {t("errorRules.defaultsHeading")}
+      </h4>
       <p className="text-xs text-text-muted">{t("errorRules.defaultsHint")}</p>
       {defaults.length === 0 && (
         <p className="text-sm text-text-muted">{t("errorRules.defaultsEmpty")}</p>

@@ -4,14 +4,9 @@
 
 ---
 
-OmniRoute verwendet ein **Parallelzyklus**-Release-Modell: einen dedizierten Branch `release/vX.Y.Z`
-für den aktiven Zyklus, `main` für die veröffentlichte Linie und ein unveränderliches
-`vX.Y.Z`-Tag, sobald dieser Zyklus veröffentlicht wird. Dass Commits sowohl auf `release/*` _als auch_ auf
-`main` landen, ist zu erwarten — es handelt sich nicht um eine Verwechslung.
+OmniRoute verwendet a** Parallelzyklus** Release-Modell: ein dedizierter `release/vX.Y.Z` Zweig für den aktiven Zyklus, `main` für die veröffentlichte Zeile und ein unveränderliches `vX.Y.Z` Tag, wenn dieser Zyklus ausgeliefert wird. Es ist zu erwarten, dass Commits auf `release/*` _und_ auf `main` landen, — ist keine Verwechslung.
 
-Details für Maintainer befinden sich in `CLAUDE.md` (Feste Regel Nr. 21) und
-[RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Diese Seite ist die öffentliche,
-an Mitwirkende gerichtete Zusammenfassung.
+Betreuerdetails befinden sich in `CLAUDE.md` (Hard Rule #21) und [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md). Diese Seite ist die öffentliche Zusammenfassung für Mitwirkende.
 
 ## Auf einen Blick
 
@@ -42,25 +37,23 @@ flowchart LR
 `main` ist nicht der Integrations-Branch für die tägliche Entwicklung. PRs, die gegen `main`
 geöffnet werden, müssen vor dem Merge normalerweise auf einen anderen Ziel-Branch umgestellt werden.
 
-## Release-Freeze (parallele Zyklen)
+## Release Freeze (parallele Zyklen)
 
-Wenn ein Release abgeglichen wird, wird ein Markierungs-Issue mit dem Label `release-freeze`
-geöffnet. Das **hält die Entwicklung nicht auf**:
+Wenn ein Release abgeglichen wird, wird ein Markierungsproblem mit der Bezeichnung `release-freeze` geöffnet. Das** stoppt die Entwicklung nicht** :
 
-- Der eingefrorene Branch `release/vX.Y.Z` gehört für dieses Release dem Release-Captain.
-- Der nächste Zyklus `release/vX+1` wird von der eingefrorenen Spitze abgezweigt, damit Mitwirkende ihre
-  Arbeit weiterhin einbringen können.
-- Offene PRs, die weiterhin auf den eingefrorenen Branch abzielen, sollten auf den
-  aktiven (höchsten) Branch `release/v*` **umgestellt** werden.
+- Der gefrorene `release/vX.Y.Z` gehört dem Freilassungskapitän dieses Schiffes.
+- Der `release/vX+1` des nächsten Zyklus wird von der gefrorenen Spitze abgeschnitten, sodass die Mitwirkenden mit der Landungsarbeit fortfahren können.
+- Öffnen Sie PRs, das immer noch auf den eingefrorenen Zweig abzielen sollte** neu ausgerichtet** zum aktiven (höchsten) `release/v*` Zweig.
 
-Prüfe, ob ein offener Freeze besteht, bevor du davon ausgehst, dass der gewünschte Branch zusammengeführt werden kann:
+Überprüfen Sie, ob ein offenes Einfrieren vorliegt, bevor Sie davon ausgehen, dass der gewünschte Zweig zusammengeführt werden kann:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Die Merge-Mechanik (`queue`-Label des Owners → Mergify) ist in
-[MERGE_TRAIN.md](./MERGE_TRAIN.md) dokumentiert.
+Merge-Mechaniken (Eigentümer `queue` label → Mergify) sind in [MERGE_TRAIN.md](./MERGE_TRAIN.md) dokumentiert.
+
+> **19.11.2026: Die Mergify-Merge-Warteschlange wird eingestellt** (Entscheidung des Eigentümers). `.mergify.yml` definiert keine Warteschlange mehr und lehnt die Mergify-Befehle ab, die eine Pull-Anfrage zusammenführen oder neu schreiben. Release- PRs werden manuell unter dem Repository-Regelsatz „Erfordern grüne Gates für das aktive Release“ (`Gate / CI` + `Gate / Quality`) zusammengeführt, bis Omni-Queue im Live-Modus ausgeführt wird, und danach über Omni-Queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Das `queue` Label führt nichts mehr zusammen.
 
 ## Warum sowohl ein Branch als auch ein Tag?
 

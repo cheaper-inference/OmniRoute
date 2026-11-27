@@ -30,7 +30,11 @@ import { getM365FailureScope } from "./m365ErrorPolicy.ts";
 import { isContentPolicyRefusal } from "../utils/contentPolicyError.ts";
 import { isRequestScopedMisalignmentRefusal } from "../utils/providerSafety.ts";
 import { isRegistryPassthroughProvider } from "./passthroughRegistry.ts";
-import { getProviderCategory, isLocalProvider } from "../config/providerRegistry.ts";
+import {
+  getProviderCategory,
+  getRegistryEntry,
+  isLocalProvider,
+} from "../config/providerRegistry.ts";
 import {
   DEFAULT_RESILIENCE_SETTINGS,
   resolveResilienceSettings,
@@ -79,6 +83,10 @@ import {
 } from "./retryAfterJson.ts";
 import { googleDailyQuotaCooldownMs } from "./googleDailyQuota.ts";
 import { isMoonshotAccountBalanceExhausted } from "./usage/moonshotOpenPlatform.ts";
+import {
+  isAnthropicAccountCreditExhausted,
+  isAnthropicCreditProvider,
+} from "./accountFallback/anthropicAccountCredit.ts";
 import { isTpdRateLimit, resolveTpdCooldownMs, nextConfiguredResetMs } from "./dailyQuotaReset.ts";
 
 // Pre-compiled regex constants for hot-path retry parsing (avoid per-call compilation)
@@ -101,6 +109,25 @@ export function retryHintBypassesMaxCooldownMs(
     provenance === "google_rpc_retry_info" ||
     provenance === "body_iso_reset"
   );
+}
+
+/**
+ * A provider that opted in with `RegistryEntry.trustUpstreamResetDate` states its
+ * own unlock instant, so its date is authoritative even when it arrives as prose
+ * in the body (`provenance === "body"`). Without this the operator's
+ * `maxCooldownMs` (30 min by default) would truncate a 9-hour reset, and the
+ * account would be retried while still limited.
+ */
+export function upstreamResetDateIsAuthoritative(
+  provenance: RetryHintProvenance | undefined,
+  provider: string | null | undefined
+): boolean {
+  if (retryHintBypassesMaxCooldownMs(provenance)) return true;
+  return providerTrustsUpstreamResetDate(provider);
+}
+
+function providerTrustsUpstreamResetDate(provider: string | null | undefined): boolean {
+  return Boolean(provider && getRegistryEntry(provider)?.trustUpstreamResetDate);
 }
 
 /** Structured provenances reflect the provider's own reset clock and may shorten an existing model lock (#CO-402). */
@@ -138,9 +165,13 @@ import { resolveApiKeyForbiddenFallback } from "./accountFallback/nonRetryableUp
 import * as exactModelLock from "./accountFallback/exactModelLock.ts";
 import { isCreditsExhaustedWithSharedWallet } from "./accountFallback/sharedWalletCredits.ts";
 import { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
-import { isCreditsExhaustedForStatus } from "./accountFallback/creditsExhaustedForStatus.ts";
+import {
+  isCreditsExhaustedForStatus,
+  quotaTextSignalCountsForStatus,
+} from "./accountFallback/creditsExhaustedForStatus.ts";
 export { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
 import { isMistralAmbiguous401 } from "./accountFallback/mistralAmbiguousAuth.ts";
+import { parseClineTryAgainInMs } from "./accountFallback/clineTryAgainIn.ts";
 import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
 import { boundedMap } from "@/lib/quota/boundedMap";
 // #16797: providerErrorRules.ts stays free of src/ imports; its opt-in flags
@@ -179,6 +210,13 @@ export type ModelLockoutEntry = {
   failureCount: number;
   lastFailureAt: number;
   resetAfterMs: number;
+  /**
+   * #20969: upstream message and status that caused the lock. A model-only lock keeps the
+   * connection active, so `connection.lastError` is never written for it — without these the
+   * all-cooling-down 429 cannot tell the client "add credit" from "wait".
+   */
+  lastError?: string;
+  errorCode?: number;
 };
 export type ModelFailureState = {
   failureCount: number;
@@ -323,6 +361,13 @@ export const ACCOUNT_SUSPENDED_BILLING_PATTERNS = [
   /\bsuspended\b[\s\S]{0,120}?\b(?:spending limit|billing|invoice|payment)\b/i,
   /\b(?:spending limit|billing|invoice|payment)\b[\s\S]{0,120}?\bsuspended\b/i,
 ];
+
+// DashScope (Alibaba Model Studio) reports an unpaid account as 400/403 with code `Arrearage`
+// or `AccessDenied.Unpurchased`. Both stay true until the owner pays, so the key must park.
+// Anchored on the vendor code or its exact sentence, and only on 400/403: a 429 that quotes
+// "good standing" is a throttle, and generic AccessDenied / model_not_found never match.
+export const DASHSCOPE_DEAD_ACCOUNT_RE =
+  /\barrearage\b|please make sure your account is in good standing|accessdenied\.unpurchased|please make sure you are eligible for using the model/i;
 
 // Context overflow patterns — the prompt exceeds the model's maximum context length.
 // Different providers phrase this differently. Used to decide whether a 400 error
@@ -582,24 +627,32 @@ function isCompatibleProvider(provider: string | null | undefined): boolean {
 
 function buildProviderProfile(
   category: "oauth" | "apikey",
-  settings?: Record<string, unknown> | null
+  settings?: Record<string, unknown> | null,
+  providerId?: string | null
 ) {
   const resilience = settings ? resolveResilienceSettings(settings) : DEFAULT_RESILIENCE_SETTINGS;
   const connectionCooldown = resilience.connectionCooldown[category];
   const providerBreaker = resilience.providerBreaker[category];
 
+  // A provider can opt in to trusting its own 429 reset date (see
+  // RegistryEntry.trustUpstreamResetDate). The connection-cooldown setting is
+  // per CATEGORY, so without this a single provider could not opt in without
+  // flipping the policy for every OAuth/API-key provider at once.
+  const trustsUpstreamResetDate = providerTrustsUpstreamResetDate(providerId);
+
   return {
     baseCooldownMs: connectionCooldown.baseCooldownMs,
-    useUpstreamRetryHints: connectionCooldown.useUpstreamRetryHints,
+    useUpstreamRetryHints: connectionCooldown.useUpstreamRetryHints || trustsUpstreamResetDate,
     useUpstream429BreakerHints: connectionCooldown.useUpstream429BreakerHints,
     maxCooldownMs: resolveModelLockoutSettings(settings).maxCooldownMs,
     maxBackoffSteps: connectionCooldown.maxBackoffSteps,
     failureThreshold: providerBreaker.failureThreshold,
     resetTimeoutMs: providerBreaker.resetTimeoutMs,
     transientCooldown: connectionCooldown.baseCooldownMs,
-    rateLimitCooldown: connectionCooldown.useUpstreamRetryHints
-      ? 0
-      : connectionCooldown.baseCooldownMs,
+    rateLimitCooldown:
+      connectionCooldown.useUpstreamRetryHints || trustsUpstreamResetDate
+        ? 0
+        : connectionCooldown.baseCooldownMs,
     maxBackoffLevel: connectionCooldown.maxBackoffSteps,
     circuitBreakerThreshold: providerBreaker.failureThreshold,
     circuitBreakerReset: providerBreaker.resetTimeoutMs,
@@ -619,7 +672,7 @@ function buildProviderProfile(
  */
 export function getProviderProfile(provider: string): ProviderProfile {
   const category = getProviderCategory(provider);
-  return buildProviderProfile(category);
+  return buildProviderProfile(category, null, provider);
 }
 
 // getRuntimeProviderProfile runs several times per request. Reuse the profile built for the
@@ -633,14 +686,14 @@ const runtimeProfileMemo = new WeakMap<
     env: string;
     argv: unknown;
     execArgv: unknown;
-    oauth?: ProviderProfile;
-    apikey?: ProviderProfile;
+    profiles?: Map<string, ProviderProfile>;
   }
 >();
 
 function memoizedProviderProfile(
   category: "oauth" | "apikey",
-  settings: Record<string, unknown>
+  settings: Record<string, unknown>,
+  provider: string | null | undefined
 ): ProviderProfile {
   // Plain member reads, not a destructured process.env: Next's build-time file tracer (@vercel/nft) crashes on a
   // template literal of destructured env bindings ("Cannot convert a Symbol value to a string").
@@ -660,7 +713,15 @@ function memoizedProviderProfile(
     entry = { env, argv: process.argv, execArgv: process.execArgv };
     runtimeProfileMemo.set(settings, entry);
   }
-  return (entry[category] ??= buildProviderProfile(category, settings));
+  // The base's provider id affects trustUpstreamResetDate, so it belongs in the memo key.
+  const profiles = (entry.profiles ??= new Map());
+  const key = `${category}:${provider || ""}`;
+  let profile = profiles.get(key);
+  if (!profile) {
+    profile = buildProviderProfile(category, settings, provider);
+    profiles.set(key, profile);
+  }
+  return profile;
 }
 
 export async function getRuntimeProviderProfile(provider: string | null | undefined) {
@@ -668,7 +729,7 @@ export async function getRuntimeProviderProfile(provider: string | null | undefi
     const { getCachedSettings } = await import("@/lib/db/readCache");
     const settings = await getCachedSettings();
     const category = getProviderCategory(provider || "");
-    return memoizedProviderProfile(category, settings);
+    return memoizedProviderProfile(category, settings, provider);
   } catch {
     return getProviderProfile(provider || "");
   }
@@ -747,7 +808,10 @@ export async function recordCoreOwnedAntigravityQuotaState({
           : (fallback.quotaResetHintMs ?? null),
       maxCooldownMs: profile.maxCooldownMs,
       scope: "exact",
-      exactCooldownIsUpstreamReset: retryHintBypassesMaxCooldownMs(fallback.retryHintSource),
+      exactCooldownIsUpstreamReset: upstreamResetDateIsAuthoritative(
+        fallback.retryHintSource,
+        provider
+      ),
     }
   );
   if (lockout.cooldownMs > 0 && isProviderExhaustedReason(fallback)) {
@@ -909,6 +973,10 @@ export function lockModel(
     failureCount: metadata.failureCount ?? existing?.failureCount ?? 1,
     lastFailureAt: metadata.lastFailureAt ?? now,
     resetAfterMs: metadata.resetAfterMs ?? existing?.resetAfterMs ?? 0,
+    ...(typeof metadata.lastError === "string" && metadata.lastError.length > 0
+      ? { lastError: metadata.lastError }
+      : {}),
+    ...(typeof metadata.errorCode === "number" ? { errorCode: metadata.errorCode } : {}),
   });
 }
 
@@ -1121,14 +1189,15 @@ export function lockModelIfPerModelQuota(
   model: string | null,
   reason: string,
   cooldownMs: number,
-  connectionPassthroughModels?: boolean
+  connectionPassthroughModels?: boolean,
+  metadata: Partial<ModelLockoutEntry> = {}
 ): boolean {
   if (!hasPerModelQuota(provider, model, connectionPassthroughModels) || !model) return false;
   // Skip model-level lock if the entire provider is in circuit-breaker cooldown.
   // The provider cooldown already prevents all requests, so a model lock is redundant.
   if (isProviderInCooldown(provider)) return false;
   const lockFn = getCanonicalLockProvider(provider) === "antigravity" ? lockExactModel : lockModel;
-  lockFn(provider, connectionId, model, reason, cooldownMs);
+  lockFn(provider, connectionId, model, reason, cooldownMs, metadata);
   return true;
 }
 
@@ -1252,6 +1321,8 @@ export function getModelLockoutInfo(
     remainingMs: entry.until - Date.now(),
     lockedAt: new Date(entry.lockedAt).toISOString(),
     failureCount: entry.failureCount,
+    ...(typeof entry.lastError === "string" ? { lastError: entry.lastError } : {}),
+    ...(typeof entry.errorCode === "number" ? { errorCode: entry.errorCode } : {}),
   };
 }
 
@@ -1298,6 +1369,12 @@ export type ModelLockoutInfo = {
   failureCount: number;
   lockedAt: string;
   until: number;
+  /**
+   * Which key namespace this lock lives in. `quota_family` locks cover a whole quota
+   * bucket, so `model` is the bucket name (`codex`/`spark`, `family:gemini`) and not a
+   * callable model id — a probe has to resolve a concrete model first.
+   */
+  scope: exactModelLock.LockoutScope;
 };
 
 /**
@@ -1310,7 +1387,7 @@ export function getAllModelLockouts(): ModelLockoutInfo[] {
     cleanupModelLockKey(key, now);
   }
   for (const [key, entry] of modelLockouts) {
-    const { provider, connectionId, model } = exactModelLock.parseModelLockKey(key);
+    const { provider, connectionId, model, scope } = exactModelLock.parseModelLockKey(key);
     active.push({
       provider,
       connectionId,
@@ -1320,6 +1397,7 @@ export function getAllModelLockouts(): ModelLockoutInfo[] {
       failureCount: entry.failureCount,
       lockedAt: new Date(entry.lockedAt).toISOString(),
       until: entry.until,
+      scope,
     });
   }
   return active;
@@ -1520,6 +1598,8 @@ export function recordProviderSuccess(
  * Reset the shared provider breaker.
  */
 export function clearProviderFailure(provider: string | null | undefined): void {
+  // recordProviderFailure stores its dedupe keys under the canonical id, so resolve an alias first.
+  if (provider) provider = resolveProviderId(provider);
   if (provider) lastNetworkErrorByProvider.delete(provider); // #13887: fresh blip after reset counts
   for (const key of lastConnectionFailure.keys())
     if (provider && key.startsWith(`${provider}:`)) lastConnectionFailure.delete(key);
@@ -1694,6 +1774,10 @@ export function parseDetailedRetryFromErrorText(
   if (isoMs !== null) {
     return { retryAfterMs: isoMs, provenance: "body_iso_reset" };
   }
+
+  // Cline free tier: "Try again in 19h 39m" — `body` provenance, so the operator cap applies.
+  const clineMs = parseClineTryAgainInMs(msg, provider, MAX_PROVIDER_COOLDOWN_MS);
+  if (clineMs !== null) return bodyHint(clineMs);
 
   const countdownMs = parseRelativeCountdownProseMs(msg);
   if (countdownMs !== undefined) return bodyHint(countdownMs);
@@ -2059,7 +2143,13 @@ export function checkFallbackError(
         return { retryAfterMs: Math.min(waitMs, MAX_PROVIDER_COOLDOWN_MS), provenance: "header" };
     }
 
-    const detailedJsonHint = parseDetailedRetryHintFromJsonBody(errorStr, MAX_PROVIDER_COOLDOWN_MS);
+    const detailedJsonHint = parseDetailedRetryHintFromJsonBody(
+      errorStr,
+      MAX_PROVIDER_COOLDOWN_MS,
+      {
+        readDataEnvelope: providerTrustsUpstreamResetDate(provider),
+      }
+    );
     if (detailedJsonHint) {
       return {
         retryAfterMs: detailedJsonHint.retryAfterMs,
@@ -2200,8 +2290,14 @@ export function checkFallbackError(
   }
 
   if (errorText) {
-    // T06 (sub2api #1037): Permanent account deactivation — do NOT retry, mark as permanent failure
-    if (isAccountDeactivated(errorStr)) {
+    // T06 (sub2api #1037): Permanent account deactivation — do NOT retry, mark as permanent failure.
+    // A 408/429/5xx body that merely quotes a ban phrase is a transient failure, not a ban.
+    if (
+      status !== HTTP_STATUS.REQUEST_TIMEOUT &&
+      status !== HTTP_STATUS.RATE_LIMITED &&
+      status < HTTP_STATUS.SERVER_ERROR &&
+      isAccountDeactivated(errorStr)
+    ) {
       return {
         shouldFallback: true,
         cooldownMs: 365 * 24 * 60 * 60 * 1000, // 1 year = effectively permanent
@@ -2230,6 +2326,23 @@ export function checkFallbackError(
     // treat it like a credits-exhausted account so it stops being retried
     // every few minutes until billing is fixed (see ACCOUNT_SUSPENDED_BILLING_PATTERNS).
     if (isAccountSuspendedForBilling(errorStr)) {
+      return {
+        shouldFallback: true,
+        cooldownMs: COOLDOWN_MS.paymentRequired ?? 3600 * 1000, // 1h cooldown
+        reason: RateLimitReason.QUOTA_EXHAUSTED,
+        creditsExhausted: true,
+      };
+    }
+
+    // DashScope unpaid account (400 Arrearage / 403 AccessDenied.Unpurchased): park the key as
+    // credits_exhausted instead of retrying a dead key every few seconds.
+    if (
+      (status === HTTP_STATUS.BAD_REQUEST || status === HTTP_STATUS.FORBIDDEN) &&
+      (DASHSCOPE_DEAD_ACCOUNT_RE.test(errorStr) ||
+        DASHSCOPE_DEAD_ACCOUNT_RE.test(
+          `${structuredError?.code ?? ""} ${structuredError?.type ?? ""}`
+        ))
+    ) {
       return {
         shouldFallback: true,
         cooldownMs: COOLDOWN_MS.paymentRequired ?? 3600 * 1000, // 1h cooldown
@@ -2304,7 +2417,9 @@ export function checkFallbackError(
         reason: RateLimitReason.QUOTA_EXHAUSTED,
         // Only passthrough/aggregator + *-compatible-* keys stay model-scoped; per-model-lock
         // providers (codex, gemini, github, antigravity) keep account-level credits_exhausted.
-        ...(!isPassthroughCreditScope(provider) || isMoonshotAccountBalanceExhausted(errorStr)
+        ...(!isPassthroughCreditScope(provider) ||
+        isMoonshotAccountBalanceExhausted(errorStr) ||
+        (isAnthropicCreditProvider(provider) && isAnthropicAccountCreditExhausted(errorStr))
           ? { creditsExhausted: true }
           : {}),
       };
@@ -2362,8 +2477,20 @@ export function checkFallbackError(
     // UNCONDITIONALLY (not gated by shouldUseQuotaSignal) because it targets
     // apikey-category providers like ollama-cloud, which the oauth-only
     // shouldUseQuotaSignal gate deliberately excludes from the subscription
-    // check above.
-    if (shouldUseQuotaSignal && !isCreditsExhausted(errorStr) && !isDailyQuotaExhausted(errorStr)) {
+    // check above. On 400 none of these quota TEXT signals counts without a structured
+    // code or an allow-listed provider: the message may quote the caller's own input.
+    const quotaTextCounts = quotaTextSignalCountsForStatus(
+      status,
+      provider,
+      errorStr,
+      structuredError?.code
+    );
+    if (
+      quotaTextCounts &&
+      shouldUseQuotaSignal &&
+      !isCreditsExhausted(errorStr) &&
+      !isDailyQuotaExhausted(errorStr)
+    ) {
       const subResult = buildSubscriptionQuotaFallback(
         errorStr,
         getUpstreamRetryHint,
@@ -2373,14 +2500,17 @@ export function checkFallbackError(
       );
       if (subResult) return subResult;
     }
-    const weeklyResult = buildWeeklyQuotaFallback(errorStr, undefined, provider);
+    const weeklyResult = quotaTextCounts
+      ? buildWeeklyQuotaFallback(errorStr, undefined, provider)
+      : null;
     if (weeklyResult) return weeklyResult;
     // Issue #7071 (session usage cap) is the same sibling gap as #3709 above —
     // runs UNCONDITIONALLY for the same reason: apikey-category providers
     // like ollama-cloud are excluded from the oauth-only shouldUseQuotaSignal
     // gate.
-    const sessionResult =
-      buildSessionQuotaFallback(errorStr) ?? buildRolling24hQuotaFallback(errorStr);
+    const sessionResult = quotaTextCounts
+      ? (buildSessionQuotaFallback(errorStr) ?? buildRolling24hQuotaFallback(errorStr))
+      : null;
     if (sessionResult) return sessionResult;
 
     const detectedRetryHint = detectRetryHint();
@@ -2392,6 +2522,7 @@ export function checkFallbackError(
         ? "body"
         : undefined;
     if (
+      quotaTextCounts &&
       shouldUseQuotaSignal &&
       quotaResetHintMs &&
       classifyErrorText(errorStr) === RateLimitReason.QUOTA_EXHAUSTED
@@ -2741,6 +2872,9 @@ export function filterAvailableAccounts<T extends AccountState>(
   const now = Date.now();
   return accounts.filter((acc) => {
     if (excludeId && acc.id === excludeId) return false;
+    if (acc.status === "banned" || acc.status === "expired" || acc.status === "credits_exhausted") {
+      return false;
+    }
     if (acc.rateLimitedUntil) {
       const until = cooldownUntilMs(acc.rateLimitedUntil);
       if (Number.isFinite(until) && until > now) return false;

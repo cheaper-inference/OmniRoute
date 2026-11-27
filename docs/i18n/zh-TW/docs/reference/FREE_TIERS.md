@@ -24,7 +24,7 @@
 | **+進行區域身份檢查**           | **+~ 6M**   | `modelscope` （Alibaba雲綁定+中國大陸實名驗證）。實際經常性配額，以`gatedRecurringTokens` / `gatedProviders`形式公開並顯示在儀表板上。從來沒有總結成標題： +~ 6M背後的區域身份驗證。                                  |
 | 理論上限（所有速率限制， 24/7） | ~ 10B       | 每個提供者速率限制的總和推斷為不間斷使用。**不是保證**—不以此為標題。                                                                                                                                                 |
 
-**誠實的標題：** _OmniRoute 聚合**~ 1.62B 記錄每月免費代幣**（第一個月最多~ 2.22B，擁有註冊積分）跨越 34 個免費池—加上一長串永久免費、無上限的提供者—和RTK + Caveman 壓縮（節省 15–95% 代幣）進一步擴展了這一點。 _
+**誠實的標題：** _OmniRoute 聚合**~ 1.62B 記錄每月免費代幣**（第一個月最多~ 2.22B，擁有註冊積分）跨越 26 個免費池—加上一長串永久免費、無上限的提供者—和RTK + Caveman 壓縮（節省 15–95% 代幣）進一步擴展了這一點。 _
 
 > **為什麼這個從之前的~ 1.94B 下降了。** 2026 年 6 月 17 日的刷新是一次誠實的修正，而不是損失： `gemini`現在已進行池重複數據刪除（通過單獨計算每個 Flash 變體而膨脹，462M → 60M）， `cloudflare-ai`更正為其真實的10k-Neurons/day （122M → `kluster` `doubao` `chutes` `phind`。部分被`llm7` （正確的5M/day → 150M）和新的免費提供者（Kilo、 OpenCode Zen、AI GLM-Flash）抵消。
 >
@@ -38,7 +38,7 @@
 >
 > **於 2026-09-03 (#11773) 更正：** `cerebras`從30M/mo經常性補助金（舊的無卡 1M tokens/day試用）重新分類為需要付款方式的一次性 5 美元註冊信用。與LongCat相同的誠實規則。
 >
-> **加xKiro （2026-09-03）：**新的`xkiro-free`池 (150M/mo) 新增了第 35 個循環池密鑰。 Felo Web 仍被排除在外，而其源自 GPL 的provenance/licensing仍保留在HOLD上。消息來源現在報道**34 個循環池密鑰**和**~ 1.62B 穩定**—即時的 CI 閘控編號（如果與`computeFreeModelTotals()`偏離，則`check:docs-counts`會導致建置失敗）。
+> **加xKiro （2026-09-03）：**新的`xkiro-free`池 (150M/mo) 新增了第 35 個循環池密鑰。 Felo Web 仍被排除在外，而其源自 GPL 的provenance/licensing仍保留在HOLD上。消息來源現在報道**26 個循環池密鑰**和**~ 1.62B 穩定**—即時的 CI 閘控編號（如果與`computeFreeModelTotals()`偏離，則`check:docs-counts`會導致建置失敗）。
 
 最大**有記錄的**貢獻者： `mistral` 1.00B、 `nara` 210M、 `llm7` 150M、 `xkiro` 150M、 `groq` 30M（每個模型五個上限）、 `cloudflare-ai` 30M、 `api-airforce` 24M。 （`longcat`不包括—其 1000 萬LongCat-2.0 贈款是一次性的、經過 KYC 控制的註冊信用，而不是經常性的每月預算。）
 
