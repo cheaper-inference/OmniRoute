@@ -63,12 +63,9 @@ test("matches an alias by its resolved name and source", () => {
     ["name", "@other/native"],
     ["resolved", "https://registry.example.com/native-1.0.0.tgz"],
   ]) {
-    assert.match(
-      checkLockfile(LOCKFILE, lockWith({ [alias]: { ...entry, [field]: value } }), [policy]).join(
-        "\n"
-      ),
-      new RegExp(`${field} changed`)
-    );
+    const lock = lockWith({ [alias]: { ...entry, [field]: value } });
+    const output = checkLockfile(LOCKFILE, lock, [policy]).join("\n");
+    assert.ok(output.includes(`${field} changed`), output);
   }
 });
 
