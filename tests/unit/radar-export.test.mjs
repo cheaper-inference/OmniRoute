@@ -5,7 +5,11 @@ import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import * as catalog from "../../open-sse/config/freeModelCatalog.ts";
+import * as counts from "../../open-sse/config/freeModelCatalog.counts.ts";
+import { buildFreeCatalogFacts } from "../../scripts/release/lib/free-catalog-facts.mjs";
 import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
+import { membershipFromProviderConstants } from "./_helpers/providerAccessMembership.ts";
 
 // Gera o export estável do catálogo (scripts/release/radar-export.mjs) e valida
 // o contrato consumido pelo OmniRoute Radar + a proveniência (D16: desconhecido
@@ -52,6 +56,21 @@ test("radar export satisfies the Radar consumer contract with a fresh catalog", 
   assert.ok(data.totais && typeof data.totais === "object", "totais presente");
   // registry ordenado e sem duplicatas (chaves de provider).
   assert.deepEqual(data.registry, [...data.registry].sort());
+});
+
+test("radar export totals agree with the public free catalog and its steady fact", () => {
+  const { totais } = runExport();
+  const { headlineSteady } = buildFreeCatalogFacts({
+    lib: { catalog, counts },
+    membershipOf: membershipFromProviderConstants,
+    hasFreeIds: new Set(),
+    searchIds: new Set(),
+    audioIds: new Set(),
+    displayName: (id) => id,
+  });
+
+  assert.equal(totais.steadyRecurringTokens, headlineSteady);
+  assert.deepEqual(totais, catalog.computePublicFreeHeadline());
 });
 
 test("radar export provenance never fabricates unknown fields", () => {

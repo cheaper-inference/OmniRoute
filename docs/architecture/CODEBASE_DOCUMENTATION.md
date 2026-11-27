@@ -7,7 +7,6 @@ lastUpdated: 2026-06-28
 # OmniRoute Codebase Documentation
 
 > **Version:** v3.8.51
-> **Last updated:** 2026-06-28
 > **Audience:** Engineers contributing to OmniRoute or building integrations on top of it.
 >
 > For high-level architecture diagrams and the reasoning behind each subsystem, read
@@ -702,6 +701,8 @@ Organized into 6 subfolders by purpose.
   `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
   `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
   `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
+  `check-deprecated-versions.mjs` flags versions explicitly attributed to OmniRoute (3.6.x and
+  earlier). The check ignores dates.
 - **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
 - **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
   `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
