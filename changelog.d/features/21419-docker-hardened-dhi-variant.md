@@ -1,0 +1,1 @@
+- **feat(docker):** opt-in `Dockerfile.hardened` runs OmniRoute on the Docker Hardened Images (DHI) Node runtime for proxy-only deployments: no shell or npm, UID/GID 1000, same runtime defaults; built locally from a `runner-base` image after `docker login dhi.io`, no published tag yet ([#21419](https://github.com/cheaper-inference/OmniRoute/pull/21419))
