@@ -3,58 +3,28 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b60",
+    "batchId": "b61",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b60-20eefcd81b7c",
-    "candidateSha": "20eefcd81b7c46d9b68b444099f728a06e48386d",
-    "baseSha": "9671192011beb2d7f83979f40be488c5da8772b9",
-    "treeSha": "e6be978f1edc54e845dcce4adb9ed7e0ccc4d28b",
+    "candidateRef": "omni-queue/release-v3.8.55/b61-d3f06ea66810",
+    "candidateSha": "d3f06ea668109f8ac1feadfcae25f6ff9b873b5f",
+    "baseSha": "20eefcd81b7c46d9b68b444099f728a06e48386d",
+    "treeSha": "2d4395cf113c696b9a22b703812591d4e46d661e",
     "prs": [
       {
-        "n": 21351,
-        "head": "60271ae2db34793ab3fe35659786f38bd41dfac4",
-        "title": "fix(sse): route the Codex prompt-cache anchor digest through opaqueTokenFingerprint",
+        "n": 21295,
+        "head": "c9b3fd98e0f358f1baef2dba19977fe6fadaf523",
+        "title": "chore(quality): sync the merge-gates template with the live omni-queue rules",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T23:37:00Z"
-      },
-      {
-        "n": 21341,
-        "head": "67eb9b5f7c2be0583c10b646106364cb63e970bd",
-        "title": "fix(sse): enforce strict per-request budgets before auto routing (KEA-9622)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-26T23:37:22Z"
+        "labeledAt": "2026-11-26T23:38:36Z"
       }
     ],
-    "stage": "landing",
-    "startedAt": "2026-11-27T03:47:21.240Z",
+    "stage": "testing",
+    "startedAt": "2026-11-27T05:11:07.652Z",
     "attempts": 0,
     "bisect": {
       "rootBatchId": "b58",
       "segments": [
         [
-          {
-            "n": 21351,
-            "head": "60271ae2db34793ab3fe35659786f38bd41dfac4",
-            "title": "fix(sse): route the Codex prompt-cache anchor digest through opaqueTokenFingerprint",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-26T23:37:00Z"
-          },
-          {
-            "n": 21341,
-            "head": "67eb9b5f7c2be0583c10b646106364cb63e970bd",
-            "title": "fix(sse): enforce strict per-request budgets before auto routing (KEA-9622)",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-26T23:37:22Z"
-          }
-        ],
-        [
-          {
-            "n": 21358,
-            "head": "96d930fa00ddc170988e59c698ecac501f86480c",
-            "title": "docs: trim AGENTS.md and CLAUDE.md to what an agent cannot derive",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-26T23:38:23Z"
-          },
           {
             "n": 21295,
             "head": "c9b3fd98e0f358f1baef2dba19977fe6fadaf523",
@@ -95,13 +65,22 @@
         ]
       ],
       "culprits": [],
-      "landed": [],
-      "steps": 1,
+      "landed": [
+        21351,
+        21341
+      ],
+      "steps": 2,
       "hang": false
-    },
-    "landAttempts": 1
+    }
   },
   "baseChecks": [
+    {
+      "baseSha": "20eefcd81b7c46d9b68b444099f728a06e48386d",
+      "ref": "omni-queue/release-v3.8.55/b60-20eefcd81b7c",
+      "status": "green",
+      "startedAt": "2026-11-27T03:47:21.240Z",
+      "signatures": []
+    },
     {
       "baseSha": "9671192011beb2d7f83979f40be488c5da8772b9",
       "ref": "omni-queue/release-v3.8.55/b57-9671192011be",
@@ -164,13 +143,6 @@
       "status": "green",
       "startedAt": "2026-11-26T09:16:37.864Z",
       "signatures": []
-    },
-    {
-      "baseSha": "d89f84adee8eaa49a7f4b949e628a6f959414c8f",
-      "ref": "omni-queue/release-v3.8.55/b48-d89f84adee8e",
-      "status": "green",
-      "startedAt": "2026-11-26T07:51:41.364Z",
-      "signatures": []
     }
   ],
   "shadow": {
@@ -195,74 +167,15 @@
     }
   },
   "counters": {
-    "batchSeq": 60,
-    "ciRuns": 65,
-    "landedPrs": 51,
-    "landedBatches": 15,
+    "batchSeq": 61,
+    "ciRuns": 66,
+    "landedPrs": 53,
+    "landedBatches": 16,
     "redBatches": 13,
     "bisections": 4,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-20T17:03:51.824Z",
-      "type": "would-land",
-      "batchId": "b13",
-      "prs": [
-        20304,
-        20463,
-        19851,
-        20071,
-        18677,
-        18737,
-        18738,
-        18786,
-        18804
-      ],
-      "sha": "798cc32c81f3e68f0ddc6c4063232dca3da566c2",
-      "detail": "shadow mode: would merge-ff onto 07a790f5c158",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44779446870"
-    },
-    {
-      "at": "2026-11-20T17:05:02.352Z",
-      "type": "batch-started",
-      "batchId": "b14",
-      "prs": [
-        19132,
-        19149
-      ],
-      "sha": "4822c03e1525ef435a088c96d8392a482e03e782",
-      "detail": "2 PR(s) on 07a790f5c158; window 10",
-      "labeledAt": {
-        "19132": "2026-11-20T15:49:45Z",
-        "19149": "2026-11-20T15:49:56Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44779446870"
-    },
-    {
-      "at": "2026-11-20T18:32:01.366Z",
-      "type": "checks-red",
-      "batchId": "b14",
-      "prs": [
-        19132,
-        19149
-      ],
-      "sha": "4822c03e1525ef435a088c96d8392a482e03e782",
-      "detail": "Gate / CI, Package Artifact, Integration Tests (2/2)",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44793573082"
-    },
-    {
-      "at": "2026-11-20T18:32:01.366Z",
-      "type": "flaky-rerun",
-      "batchId": "b14",
-      "prs": [
-        19132,
-        19149
-      ],
-      "sha": "4822c03e1525ef435a088c96d8392a482e03e782",
-      "detail": "re-running the failed jobs of b14 once (Gate / CI, Package Artifact, Integration Tests (2/2)) before a base check",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44793573082"
-    },
     {
       "at": "2026-11-20T18:40:24.380Z",
       "type": "checks-red",
@@ -2913,12 +2826,55 @@
       ],
       "sha": "20eefcd81b7c46d9b68b444099f728a06e48386d",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45944161022"
+    },
+    {
+      "at": "2026-11-27T05:10:45.014Z",
+      "type": "land-blessed",
+      "batchId": "b60",
+      "prs": [
+        21351,
+        21341
+      ],
+      "sha": "20eefcd81b7c46d9b68b444099f728a06e48386d",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45944161022"
+    },
+    {
+      "at": "2026-11-27T05:10:47.724Z",
+      "type": "landed",
+      "batchId": "b60",
+      "prs": [
+        21351,
+        21341
+      ],
+      "sha": "20eefcd81b7c46d9b68b444099f728a06e48386d",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45944161022"
+    },
+    {
+      "at": "2026-11-27T05:10:57.200Z",
+      "type": "pr-dequeued",
+      "batchId": "b58",
+      "prs": [
+        21358
+      ],
+      "detail": "withdrawn: head moved to 9acd2215083c",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45944161022"
+    },
+    {
+      "at": "2026-11-27T05:11:11.180Z",
+      "type": "batch-started",
+      "batchId": "b61",
+      "prs": [
+        21295
+      ],
+      "sha": "d3f06ea668109f8ac1feadfcae25f6ff9b873b5f",
+      "detail": "bisect of b58: 1 PR(s) on 20eefcd81b7c",
+      "labeledAt": {
+        "21295": "2026-11-26T23:38:36Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45944161022"
     }
   ],
-  "updatedAt": "2026-11-27T05:10:41.715Z",
-  "batchWindow": 4,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-27T05:10:41.714Z"
-  }
+  "updatedAt": "2026-11-27T05:12:07.108Z",
+  "batchWindow": 4
 }
