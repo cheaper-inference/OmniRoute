@@ -3,62 +3,35 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b68",
+    "batchId": "b69",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b68-490e5651c3c5",
-    "candidateSha": "490e5651c3c589b7bbf376f342f6a3e9160c173b",
-    "baseSha": "b15b2ee6ac0f57af254be4a3cc60ba8a6cc9a523",
-    "treeSha": "a840303403e450ca591b41f90ab8b940deb19583",
+    "candidateRef": "omni-queue/release-v3.8.55/b69-d7c69c39b9aa",
+    "candidateSha": "d7c69c39b9aa3fec92291fc82f6ae446ceb1d635",
+    "baseSha": "490e5651c3c589b7bbf376f342f6a3e9160c173b",
+    "treeSha": "78b619b52df0a40ace1aa24610f9bd73f7799a5e",
     "prs": [
       {
-        "n": 21352,
-        "head": "2e71918927684659060561614ccab39660f4b1be",
-        "title": "fix(api): refuse a selected Playground key that is gone instead of running without its policy (KEA-9523)",
+        "n": 21428,
+        "head": "6042543264c15f2ca1a22b6d91ded459b1feb519",
+        "title": "chore(release): diegosouzapw-all train of 26 PRs for v3.8.55 (2026-11-27)",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-27T04:28:36Z"
-      },
-      {
-        "n": 21345,
-        "head": "8fbe4785be1d6be723bf7e2e0a58bfa04ff27cde",
-        "title": "fix(translator): list recent translations newest first (KEA-9583)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-27T04:28:45Z"
+        "labeledAt": "2026-11-27T16:06:58Z"
       }
     ],
-    "stage": "landing",
-    "startedAt": "2026-11-27T15:49:22.856Z",
+    "stage": "testing",
+    "startedAt": "2026-11-27T17:34:58.069Z",
     "attempts": 0,
-    "bisect": {
-      "rootBatchId": "b64",
-      "segments": [
-        [
-          {
-            "n": 21352,
-            "head": "2e71918927684659060561614ccab39660f4b1be",
-            "title": "fix(api): refuse a selected Playground key that is gone instead of running without its policy (KEA-9523)",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-27T04:28:36Z"
-          },
-          {
-            "n": 21345,
-            "head": "8fbe4785be1d6be723bf7e2e0a58bfa04ff27cde",
-            "title": "fix(translator): list recent translations newest first (KEA-9583)",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-27T04:28:45Z"
-          }
-        ]
-      ],
-      "culprits": [],
-      "landed": [
-        21360,
-        21331
-      ],
-      "steps": 3,
-      "hang": false
-    },
-    "landAttempts": 1
+    "bisect": null,
+    "lane": "hotfix"
   },
   "baseChecks": [
+    {
+      "baseSha": "490e5651c3c589b7bbf376f342f6a3e9160c173b",
+      "ref": "omni-queue/release-v3.8.55/b68-490e5651c3c5",
+      "status": "green",
+      "startedAt": "2026-11-27T15:49:22.856Z",
+      "signatures": []
+    },
     {
       "baseSha": "b15b2ee6ac0f57af254be4a3cc60ba8a6cc9a523",
       "ref": "omni-queue/release-v3.8.55/b67-b15b2ee6ac0f",
@@ -121,13 +94,6 @@
       "status": "green",
       "startedAt": "2026-11-26T17:11:37.752Z",
       "signatures": []
-    },
-    {
-      "baseSha": "0a1fe5ef8f5cbc5496200314bcec11aba9d545f0",
-      "ref": "omni-queue/release-v3.8.55/b54-0a1fe5ef8f5c",
-      "status": "green",
-      "startedAt": "2026-11-26T15:53:09.248Z",
-      "signatures": []
     }
   ],
   "shadow": {
@@ -152,69 +118,15 @@
     }
   },
   "counters": {
-    "batchSeq": 68,
-    "ciRuns": 73,
-    "landedPrs": 64,
-    "landedBatches": 21,
+    "batchSeq": 69,
+    "ciRuns": 74,
+    "landedPrs": 66,
+    "landedBatches": 22,
     "redBatches": 15,
     "bisections": 5,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-21T06:34:48.890Z",
-      "type": "would-land",
-      "batchId": "b21",
-      "prs": [
-        14667,
-        18122,
-        19403,
-        19542
-      ],
-      "sha": "f5c4de4bb0d31333fb699d401455c899b63e0240",
-      "detail": "shadow mode: would merge-ff onto 76b26b8ead94",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44876156523"
-    },
-    {
-      "at": "2026-11-21T11:00:53.753Z",
-      "type": "batch-started",
-      "batchId": "b22",
-      "prs": [
-        20823,
-        20825,
-        20821,
-        20826,
-        20834,
-        20835
-      ],
-      "sha": "1656a66085161ea40ddd0d2405310ffe196e9786",
-      "detail": "6 PR(s) on 6d3f1d3f70e1; window 6",
-      "labeledAt": {
-        "20821": "2026-11-21T10:59:52Z",
-        "20823": "2026-11-21T10:59:16Z",
-        "20825": "2026-11-21T10:59:23Z",
-        "20826": "2026-11-21T10:59:55Z",
-        "20834": "2026-11-21T11:00:01Z",
-        "20835": "2026-11-21T11:00:06Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44896897130"
-    },
-    {
-      "at": "2026-11-21T11:38:33.770Z",
-      "type": "checks-red",
-      "batchId": "b22",
-      "prs": [
-        20823,
-        20825,
-        20821,
-        20826,
-        20834,
-        20835
-      ],
-      "sha": "1656a66085161ea40ddd0d2405310ffe196e9786",
-      "detail": "Gate / CI, Unit Tests (7/8)",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44900048197"
-    },
     {
       "at": "2026-11-21T11:38:33.770Z",
       "type": "flaky-rerun",
@@ -2863,12 +2775,45 @@
       ],
       "sha": "490e5651c3c589b7bbf376f342f6a3e9160c173b",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46042704639"
+    },
+    {
+      "at": "2026-11-27T17:33:33.008Z",
+      "type": "land-blessed",
+      "batchId": "b68",
+      "prs": [
+        21352,
+        21345
+      ],
+      "sha": "490e5651c3c589b7bbf376f342f6a3e9160c173b",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46042704639"
+    },
+    {
+      "at": "2026-11-27T17:33:37.153Z",
+      "type": "landed",
+      "batchId": "b68",
+      "prs": [
+        21352,
+        21345
+      ],
+      "sha": "490e5651c3c589b7bbf376f342f6a3e9160c173b",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46042704639"
+    },
+    {
+      "at": "2026-11-27T17:35:01.610Z",
+      "type": "batch-started",
+      "batchId": "b69",
+      "prs": [
+        21428
+      ],
+      "sha": "d7c69c39b9aa3fec92291fc82f6ae446ceb1d635",
+      "detail": "1 PR(s) on 490e5651c3c5; lane hotfix",
+      "labeledAt": {
+        "21428": "2026-11-27T16:06:58Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46042704639"
     }
   ],
-  "updatedAt": "2026-11-27T17:33:29.524Z",
-  "batchWindow": 2,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-27T17:33:29.524Z"
-  }
+  "updatedAt": "2026-11-27T17:35:03.491Z",
+  "batchWindow": 2
 }
