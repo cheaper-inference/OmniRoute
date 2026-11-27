@@ -131,13 +131,10 @@ test("getStaticQoderModels exposes the current eleven-model Qoder catalog", () =
     ids,
     qoderProvider.models.map((model) => model.id)
   );
-  // smodel/cmodel (Sonus/Cantus) are static-fallback-only rows: they have no
-  // audited free-budget evidence, so they stay out of FREE_MODEL_BUDGETS. Every
-  // other registry row must keep its free-catalog twin in sync.
-  assert.deepEqual(
-    freeCatalogIds,
-    ids.filter((id) => id !== "smodel" && id !== "cmodel")
-  );
+  // https://docs.qoder.com/qoder/model-selector.md and https://docs.qoder.com/account/pricing.md
+  // (2026-11-27): the current selector confirms DeepSeek-V4-Pro for the tool trial.
+  assert.deepEqual(freeCatalogIds, ["deepseek-v4-pro"]);
+  assert.ok(ids.includes("deepseek-v4-pro"));
   assert.ok(ids.includes("qwen3.8-max-preview"));
   assert.ok(ids.includes("deepseek-v4-flash"));
   assert.ok(!ids.includes("qoder-rome-30ba3b"));

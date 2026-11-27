@@ -44,7 +44,8 @@ test("table hits are untouched", () => {
     ...KNOWN_MODEL_PRICING["longcat-2.0"],
     isEstimated: false,
   });
-  // Spread preserves the quota field and never mutates the shared table.
-  assert.equal(getModelPricing("longcat", "LongCat-2.0").freeQuotaLimit, 10000000);
+  // https://longcat.chat/platform/docs/change-log (2026-11-27): the API uses paid billing.
+  assert.equal(getModelPricing("longcat", "LongCat-2.0").freeQuotaLimit, undefined);
+  assert.equal(getModelPricing("longcat", "LongCat-2.0").isFree, false);
   assert.equal("isEstimated" in KNOWN_MODEL_PRICING["gpt-4o"], false);
 });

@@ -22,8 +22,7 @@ test("FREE_TIER_BUDGETS holds positive integer monthly-token budgets", () => {
   assert.equal(FREE_TIER_BUDGETS["cloudflare-ai"], 22_700_000);
   // #11773: Cerebras is a one-time $5 signup credit, not a recurring monthly grant.
   assert.equal(FREE_TIER_BUDGETS.cerebras, undefined);
-  // LongCat is excluded from this recurring-monthly catalog: its free tier is a
-  // one-time 10M-token signup grant (not recurring), so it must not appear here.
+  // LongCat documents paid API billing: https://longcat.chat/platform/docs/change-log (2026-11-27).
   assert.equal(FREE_TIER_BUDGETS.longcat, undefined);
 });
 

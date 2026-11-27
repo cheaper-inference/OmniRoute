@@ -19,13 +19,20 @@ test("providerHasFreeModels: false for an unknown provider", () => {
 
 test("providerHasFreeModels: resolves a provider alias to its canonical id", () => {
   // "glmcn" is the dashboard alias for the canonical id "glm-cn".
-  assert.equal(providerHasFreeModels("glmcn"), true);
+  // Standard BigModel Flash pricing does not apply to the Coding Plan endpoint.
+  // https://docs.bigmodel.cn/cn/coding-plan/overview.md (2026-11-27).
+  assert.equal(providerHasFreeModels("glmcn"), false);
+  assert.equal(providerHasFreeModels("glmcn"), providerHasFreeModels("glm-cn"));
   // An alias of a provider with no free tier resolves too, and stays false (#19334).
   assert.equal(providerHasFreeModels("ollamacloud"), false);
 });
 
 test("isFreeModel: catalog membership works when called with the provider alias", () => {
-  assert.equal(isFreeModel("glmcn", { id: "glm-4.5-flash" }), true);
+  // https://docs.bigmodel.cn/cn/coding-plan/overview.md (2026-11-27).
+  assert.equal(isFreeModel("glmcn", { id: "glm-4.5-flash" }), false);
+  // Scaleway still includes this model in its signup allowance.
+  // https://www.scaleway.com/en/docs/generative-apis/reference-content/supported-models/ (2026-11-27).
+  assert.equal(isFreeModel("scw", { id: "gpt-oss-120b" }), true);
   assert.equal(isFreeModel("glmcn", { id: "glm-not-in-the-free-catalog" }), false);
   // Ollama Cloud's last catalog row left with its free tier (#19334).
   assert.equal(isFreeModel("ollamacloud", { id: "qwen3.5:397b" }), false);

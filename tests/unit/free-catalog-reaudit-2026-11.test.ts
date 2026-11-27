@@ -295,7 +295,8 @@ test("public free-token figures after the re-audit", () => {
   // E1b adds MegaNova (1.2M), Free.ai (0.8M), and Kenari (1.2M) to both headlines.
   // Aion's 0.6M is card-gated (https://www.aionlabs.ai/docs/rate-limits/, 2026-11-27).
   assert.equal(pub.steadyRecurringTokens, 120_436_000);
-  assert.equal(pub.firstMonthRealisticTokens, 183_936_000);
+  // E2 removes 63.5M from first-month signup pools; Scaleway moves behind a payment method.
+  assert.equal(pub.firstMonthRealisticTokens, 120_436_000);
   assert.equal(pub.gatedRecurringTokens, 6_600_000);
   assert.equal(pub.socialGatedRecurringTokens, 15_000_000);
   // E1a adds the 24M DGrid deposit allowance to the previous 24M.
@@ -319,16 +320,17 @@ test("catalog counts after the re-audit", () => {
   // E1a adds seven quota pools and five API-key offers; Requesty and Onomeo already counted.
   // E1b adds three ungated quota pools and API-key offers. Aion's offer already counted.
   assert.equal(c.publishedQuotaPools, 22);
-  assert.equal(c.providersWithFreeOffer.total, 57);
+  // E2 removes eight API-key offers after rechecking their routes or eligibility.
+  assert.equal(c.providersWithFreeOffer.total, 49);
   assert.deepEqual(c.providersWithFreeOffer.byAccess, {
-    "api-key": 51,
+    "api-key": 43,
     keyless: 5,
     "tool-account": 1,
     "web-chat": 0,
   });
-  // E1b adds 35 access rows, including 33 IDs new to the catalog across all providers.
-  assert.equal(c.accessRows, 287);
-  assert.equal(c.freeModels, 252);
+  // E1b added 35 access rows. E2 removes 65 on net, representing 48 unique model IDs.
+  assert.equal(c.accessRows, 222);
+  assert.equal(c.freeModels, 204);
 });
 
 // --- Retired pools and their ledger --------------------------------------------------------
@@ -453,18 +455,24 @@ test("every free row with a quota carries dated evidence that matches its econom
 
 // --- Card gates and the Telegram bonus ------------------------------------------------------
 
-test("card-gated offers keep their rows and leave every public figure", () => {
-  for (const p of ["vertex", "cerebras", "nebius", "aion"]) {
+test("payment-gated offers keep their rows and stay out of the public token figures", () => {
+  // https://www.scaleway.com/en/docs/billing/how-to/add-payment-method/ (2026-11-27).
+  for (const p of ["cerebras", "aion", "scaleway"]) {
     assert.ok(live(p).length > 0, `${p} stays in the catalog`);
     for (const m of live(p)) assert.deepEqual(m.gates, ["card"], `${p}/${m.modelId}`);
   }
+  // https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/start/express-mode/overview (2026-11-27).
+  assert.equal(live("vertex").length, 5);
+  for (const row of live("vertex")) assert.deepEqual(row.gates, ["new-accounts-only"], row.modelId);
+  // https://docs.tokenfactory.nebius.com/other-capabilities/billing-new.md (2026-11-27).
+  assertRetired("nebius");
   const pub = computePublicFreeHeadline();
   const ungated = computePublicFreeHeadline({
     entries: FREE_MODEL_BUDGETS.map(({ gates: _gates, ...m }) => m),
   });
-  // Vertex (300M) and Nebius (1M) signup credits and Aion's monthly 0.6M sit behind a card.
-  // https://www.aionlabs.ai/docs/rate-limits/ (2026-11-27).
-  assert.equal(ungated.firstMonthRealisticTokens - pub.firstMonthRealisticTokens, 301_600_000);
+  // Scaleway's 1M signup allowance and Aion's monthly 0.6M require a payment method.
+  // https://www.scaleway.com/en/generative-apis-signup/ and https://www.aionlabs.ai/docs/rate-limits/ (2026-11-27).
+  assert.equal(ungated.firstMonthRealisticTokens - pub.firstMonthRealisticTokens, 1_600_000);
   assert.ok(!pub.uncappedProviders.includes("aion"), "aion needs a verified card");
   assert.equal(ungated.steadyRecurringTokens - pub.steadyRecurringTokens, 600_000);
 });

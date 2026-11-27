@@ -50,10 +50,11 @@ describe("TierResolver", () => {
       expect(result.hasFreeTier).toBe(true);
     });
 
-    it("classifies LongCat as free", () => {
+    it("classifies LongCat with its paid API pricing", () => {
+      // https://longcat.chat/platform/docs/change-log (2026-11-27).
       const result = classifyTier("longcat", "LongCat-2.0");
-      expect(result.tier).toBe(PROVIDER_TIER.FREE);
-      expect(result.hasFreeTier).toBe(true);
+      expect(result.tier).toBe(PROVIDER_TIER.CHEAP);
+      expect(result.hasFreeTier).toBe(false);
     });
 
     it("classifies Cloudflare AI as free", () => {
@@ -279,20 +280,14 @@ describe("TierResolver", () => {
   describe("freeProviders from NOAUTH_PROVIDERS (#4517)", () => {
     beforeEach(() => clearTierCache());
 
-    it("LEGACY_FREE_PROVIDERS keeps the historical explicit list", () => {
-      for (const id of [
-        "kiro",
-        "qoder",
-        "pollinations",
-        "longcat",
-        "cloudflare-ai",
-        "nvidia-nim",
-        "groq",
-      ]) {
+    it("LEGACY_FREE_PROVIDERS keeps the other legacy offers and excludes paid LongCat", () => {
+      for (const id of ["kiro", "qoder", "pollinations", "cloudflare-ai", "nvidia-nim", "groq"]) {
         expect(LEGACY_FREE_PROVIDERS.includes(id), `expected ${id} in LEGACY_FREE_PROVIDERS`).toBe(
           true
         );
       }
+      // https://longcat.chat/platform/docs/change-log (2026-11-27).
+      expect(LEGACY_FREE_PROVIDERS).not.toContain("longcat");
     });
 
     it("deriveNoAuthFreeProviders includes all chat-tier noAuth providers", () => {

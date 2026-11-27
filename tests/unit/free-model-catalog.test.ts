@@ -76,11 +76,11 @@ test("recurring-uncapped models are surfaced but NEVER summed into the steady he
     if (m.freeType === "recurring-uncapped")
       assert.equal(m.monthlyTokens, 0, `${m.provider}/${m.modelId} uncapped but counted`);
   }
-  // uncappedProviders is the de-duped provider list and is non-empty (glm-cn, kilo…)
+  // uncappedProviders is the de-duped provider list and is non-empty.
   assert.ok(Array.isArray(t.uncappedProviders) && t.uncappedProviders.length >= 3);
-  for (const p of ["glm-cn", "kilo-gateway"]) {
-    assert.ok(t.uncappedProviders.includes(p), `expected ${p} among uncapped providers`);
-  }
+  assert.ok(t.uncappedProviders.includes("kilo-gateway"));
+  // https://docs.bigmodel.cn/cn/coding-plan/overview.md (2026-11-27).
+  assert.ok(!t.uncappedProviders.includes("glm-cn"), "the China Coding Plan is subscription-only");
   assert.ok(!t.uncappedProviders.includes("tencent"), "retired Hunyuan must not be uncapped");
   // #17028: SiliconFlow's flagship models are priced per token — no recurring free grant.
   assert.ok(!t.uncappedProviders.includes("siliconflow"), "siliconflow must not be uncapped");

@@ -10,8 +10,10 @@ test("kiro freeNote reflects the current 50-credit/month reality + ToS warning",
   assert.match(n, /ToS|proxy/i);
 });
 
-test("longcat freeNote reflects the post-2026-05-29 5M tokens/day reality", () => {
-  assert.match(note("longcat"), /5M tokens\/day|LongCat-2\.0/i);
+test("LongCat freeNote describes paid API billing", () => {
+  // https://longcat.chat/platform/docs/change-log (2026-11-27).
+  assert.match(note("longcat"), /balance top-ups or prepaid token packs/i);
+  assert.doesNotMatch(note("longcat"), /(?:5M|10M).*tokens?/i);
 });
 
 test("cerebras freeNote reflects the $5 card-gated signup credit (#11773)", () => {

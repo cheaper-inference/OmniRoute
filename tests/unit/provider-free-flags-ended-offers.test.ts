@@ -55,11 +55,21 @@ test("duplicate and dead registry entries are deprecated", () => {
   assert.match(clarifai?.deprecationReason ?? "", /no longer resolves/i);
 });
 
-test("credit offers that need a card stay free and say so", () => {
-  for (const id of ["cerebras", "vertex", "nebius", "aion"]) {
+test("confirmed free offers name their payment or account requirements", () => {
+  // https://www.scaleway.com/en/docs/billing/how-to/add-payment-method/ (2026-11-27).
+  for (const id of ["cerebras", "aion", "scaleway"]) {
     assert.equal(getProviderById(id)?.hasFree, true, id);
     assert.match(getProviderById(id)?.freeNote ?? "", /card|payment method/i, id);
   }
+  // https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/start/express-mode/overview (2026-11-27).
+  assert.equal(getProviderById("vertex")?.hasFree, true);
+  assert.match(
+    getProviderById("vertex")?.freeNote ?? "",
+    /express mode.*90 days.*no billing information/i
+  );
+  // https://docs.tokenfactory.nebius.com/other-capabilities/billing-new.md (2026-11-27).
+  assert.equal(getProviderById("nebius")?.hasFree, false);
+  assert.match(getProviderById("nebius")?.freeNote ?? "", /bank card.*Builder Program/i);
   const aion = getProviderById("aion");
   assert.doesNotMatch(aion?.authHint ?? "", /no card/i);
 });
@@ -98,6 +108,17 @@ const OLD_PROMISE: Record<string, RegExp> = {
   navy: /free API key/i,
   llm7: /free token|without API key/i,
   aion: /no card/i,
+  // Provider sources: free-provider-coverage.expectations.ts (E2, 2026-11-27).
+  ai21: /3 months/i,
+  deepinfra: /free signup/i,
+  deepseek: /5M free tokens/i,
+  fireworks: /free starter credits/i,
+  hyperbolic: /\$1-5/i,
+  longcat: /10M-token/i,
+  novita: /\$0\.50 trial/i,
+  nscale: /\$5 free credits/i,
+  scaleway: /Llama 70B/i,
+  vertex: /\$300/i,
 };
 
 test("the onboarding wizard stops promising ended offers", () => {
