@@ -15,9 +15,19 @@ import {
   type RtkRawOutputPointer,
 } from "./rawOutput.ts";
 import { applyRenderer } from "./renderers/index.ts";
+import {
+  tryStructuralRender,
+  type RtkStructuralRuntimeOptions,
+  type RtkTextOptions,
+} from "./renderers/structural.ts";
+import { effectiveMaxLines } from "./intensity.ts";
 import { severityPattern } from "./severityVocabulary.ts";
 import { isTextBlock } from "../../messageContent.ts";
-import { adaptBodyForCompression } from "../../bodyAdapter.ts";
+import {
+  adaptBodyForCompression,
+  CODEX_RESPONSE_ITEM_META,
+  type CodexResponseItemMeta,
+} from "../../bodyAdapter.ts";
 import { isAnthropicToolResultBlock } from "../../toolResultCompressor.ts";
 
 type Message = {
@@ -60,13 +70,25 @@ function hasCacheControlMarker(part: unknown): boolean {
 function resolveToolMeta(
   toolId: string | null,
   lookup: Map<string, ToolMeta>
-): { command: string | null; skipFilters: boolean } {
+): { command: string | null; skipFilters: boolean; toolName: string | null } {
   const meta = toolId ? lookup.get(toolId) : null;
-  if (!meta) return { command: null, skipFilters: false };
+  if (!meta) return { command: null, skipFilters: false, toolName: null };
   if (SHELL_TOOL_NAME_RE.test(meta.toolName.toLowerCase())) {
-    return { command: meta.command, skipFilters: false };
+    return { command: meta.command, skipFilters: false, toolName: meta.toolName };
   }
-  return { command: null, skipFilters: true };
+  return { command: null, skipFilters: true, toolName: meta.toolName };
+}
+
+/**
+ * Whether a role:"tool" message may go through the structural renderers. Chat-shape tool
+ * messages always may. A message synthesized from a Responses output item may only when it is
+ * an eligible `local_shell_call_output`: every other Responses item type stays on the legacy path.
+ */
+function structuralToolResult(message: Message): boolean {
+  if (message.role !== "tool") return false;
+  const meta = (message as Record<symbol, unknown>)[CODEX_RESPONSE_ITEM_META] as
+    CodexResponseItemMeta | undefined;
+  return !meta || (meta.type === "local_shell_call_output" && meta.eligible === true);
 }
 
 export interface RtkProcessResult {
@@ -225,16 +247,84 @@ function processRtkCodeBlocksOnly(
   };
 }
 
-export function processRtkText(
-  text: string,
-  options: { command?: string | null; config?: Partial<RtkConfig>; skipFilters?: boolean } = {}
+/**
+ * Token accounting plus bounded raw-output retention, shared by the legacy pipeline and by an
+ * accepted structural summary (which skips every filter, dedup and truncation step).
+ */
+function finishRtkText(
+  original: string,
+  result: string,
+  config: RtkConfig,
+  command: string | null,
+  originalTokens: number,
+  techniquesUsed: string[],
+  rulesApplied: string[]
 ): RtkProcessResult {
+  const rawOutputPointers: RtkRawOutputPointer[] = [];
+  const compressedTokens = estimateCompressionTokens(result);
+  if (compressedTokens < originalTokens) {
+    const pointer = maybePersistRtkRawOutput(original, {
+      retention: config.rawOutputRetention,
+      command,
+      maxBytes: config.rawOutputMaxBytes,
+    });
+    if (pointer) {
+      rawOutputPointers.push(pointer);
+      techniquesUsed.push("rtk-raw-output-retention");
+      rulesApplied.push("rtk:raw-output-retention");
+    }
+    // #10659: bounded retention — schedule a throttled async purge whenever retention is
+    // on so the store cannot grow unbounded again. Never blocks the hot path.
+    if (config.rawOutputRetention !== "never") {
+      scheduleRtkRawOutputPurge({
+        maxFiles: config.rawOutputMaxFiles,
+        maxAgeDays: config.rawOutputMaxAgeDays,
+      });
+    }
+  }
+  return {
+    text: result,
+    compressed: compressedTokens < originalTokens,
+    originalTokens,
+    compressedTokens,
+    techniquesUsed: [...new Set(techniquesUsed)],
+    rulesApplied: [...new Set(rulesApplied)],
+    ...(rawOutputPointers.length > 0 ? { rawOutputPointers } : {}),
+  };
+}
+
+export function processRtkText(text: string, options: RtkTextOptions = {}): RtkProcessResult {
   const config = mergeRtkConfig(options.config);
   const originalTokens = estimateCompressionTokens(text);
   const techniquesUsed: string[] = [];
   const rulesApplied: string[] = [];
-  const rawOutputPointers: RtkRawOutputPointer[] = [];
   let result = text;
+
+  // Opt-in structural renderers see the original text, before any filter can cut lines.
+  const structural = tryStructuralRender(text, config, options);
+  if (structural.kind === "preserve") {
+    return {
+      text,
+      compressed: false,
+      originalTokens,
+      compressedTokens: originalTokens,
+      techniquesUsed: [],
+      rulesApplied: [],
+    };
+  }
+  if (structural.kind === "rendered") {
+    return finishRtkText(
+      text,
+      structural.text,
+      config,
+      detectCommandType(text, options.command).command,
+      originalTokens,
+      [`rtk-render:${structural.renderer}`],
+      [`rtk:render:${structural.renderer}`]
+    );
+  }
+  // Inputs the structural parsers refused to analyse stay on this path, and are counted.
+  if (structural.reason === "over-budget") rulesApplied.push("rtk:structural:over-budget");
 
   const detection = detectCommandType(text, options.command);
   // #4559: A document/file read (e.g. a Read tool returning a ~147-line code/prose
@@ -370,36 +460,15 @@ export function processRtkText(
     rulesApplied.push("rtk:truncate");
   }
 
-  const compressedTokens = estimateCompressionTokens(result);
-  if (compressedTokens < originalTokens) {
-    const pointer = maybePersistRtkRawOutput(text, {
-      retention: config.rawOutputRetention,
-      command: detection.command,
-      maxBytes: config.rawOutputMaxBytes,
-    });
-    if (pointer) {
-      rawOutputPointers.push(pointer);
-      techniquesUsed.push("rtk-raw-output-retention");
-      rulesApplied.push("rtk:raw-output-retention");
-    }
-    // #10659: bounded retention — schedule a throttled async purge whenever retention is
-    // on so the store cannot grow unbounded again. Never blocks the hot path.
-    if (config.rawOutputRetention !== "never") {
-      scheduleRtkRawOutputPurge({
-        maxFiles: config.rawOutputMaxFiles,
-        maxAgeDays: config.rawOutputMaxAgeDays,
-      });
-    }
-  }
-  return {
-    text: result,
-    compressed: compressedTokens < originalTokens,
+  return finishRtkText(
+    text,
+    result,
+    config,
+    detection.command,
     originalTokens,
-    compressedTokens,
-    techniquesUsed: [...new Set(techniquesUsed)],
-    rulesApplied: [...new Set(rulesApplied)],
-    ...(rawOutputPointers.length > 0 ? { rawOutputPointers } : {}),
-  };
+    techniquesUsed,
+    rulesApplied
+  );
 }
 
 /**
@@ -410,7 +479,8 @@ export function processRtkText(
 function processToolResultBlocks(
   content: Message["content"],
   config: RtkConfig,
-  toolCallLookup: Map<string, ToolMeta>
+  toolCallLookup: Map<string, ToolMeta>,
+  structural: RtkStructuralRuntimeOptions
 ): {
   content: Message["content"];
   compressed: boolean;
@@ -440,12 +510,20 @@ function processToolResultBlocks(
     // The block itself is a cache breakpoint — preserve it byte-for-byte.
     if (hasCacheControlMarker(part)) return part;
     const toolUseId = typeof part.tool_use_id === "string" ? part.tool_use_id : null;
-    const { command, skipFilters } = resolveToolMeta(toolUseId, toolCallLookup);
+    const { command, skipFilters, toolName } = resolveToolMeta(toolUseId, toolCallLookup);
+    const textOptions: RtkTextOptions = {
+      ...structural,
+      config,
+      command,
+      skipFilters,
+      toolName,
+      toolResult: true,
+    };
     const inner = part.content;
 
     if (typeof inner === "string") {
       if (!inner) return part;
-      const processed = processRtkText(inner, { config, command, skipFilters });
+      const processed = processRtkText(inner, textOptions);
       collect(processed);
       if (!processed.compressed) return part;
       compressed = true;
@@ -458,7 +536,7 @@ function processToolResultBlocks(
         if (!isTextBlock(sub) || !sub.text) return sub;
         // A text sub-block can carry its own cache breakpoint — preserve it byte-for-byte.
         if (hasCacheControlMarker(sub)) return sub;
-        const processed = processRtkText(sub.text, { config, command, skipFilters });
+        const processed = processRtkText(sub.text, textOptions);
         collect(processed);
         if (!processed.compressed) return sub;
         blockChanged = true;
@@ -483,7 +561,7 @@ function processToolResultBlocks(
 function processRtkContent(
   content: Message["content"],
   config: RtkConfig,
-  options?: { command?: string | null; skipFilters?: boolean }
+  options?: Omit<RtkTextOptions, "config">
 ): {
   content: Message["content"];
   compressed: boolean;
@@ -508,11 +586,7 @@ function processRtkContent(
     if (!content) {
       return { content, compressed: false, techniquesUsed, rulesApplied, rawOutputPointers };
     }
-    const processed = processRtkText(content, {
-      config,
-      command: options?.command,
-      skipFilters: options?.skipFilters,
-    });
+    const processed = processRtkText(content, { ...options, config });
     collect(processed);
     return {
       content: processed.compressed ? processed.text : content,
@@ -530,11 +604,7 @@ function processRtkContent(
   let compressed = false;
   const nextContent = content.map((part) => {
     if (!isTextBlock(part) || !part.text) return part;
-    const processed = processRtkText(part.text, {
-      config,
-      command: options?.command,
-      skipFilters: options?.skipFilters,
-    });
+    const processed = processRtkText(part.text, { ...options, config });
     collect(processed);
     if (!processed.compressed) return part;
     compressed = true;
@@ -550,21 +620,12 @@ function processRtkContent(
   };
 }
 
-/**
- * Scale a line budget by intensity so minimal / standard / aggressive produce
- * meaningfully different output on truncation-based filters (B-RTK-INTENSITY).
- * Truncation always runs through smartTruncate with priorityPatterns, so error /
- * failure lines survive at EVERY intensity. (Include/collapse filters like docker-logs
- * compress by content, not line budget, so they are intensity-independent by nature.)
- */
-export function effectiveMaxLines(base: number, intensity: string | undefined): number {
-  const factor = intensity === "aggressive" ? 0.5 : intensity === "minimal" ? 1.5 : 1;
-  return Math.max(1, Math.round(base * factor));
-}
-
 export function applyRtkCompression(
   body: Record<string, unknown>,
-  options: { config?: Partial<RtkConfig>; stepConfig?: Record<string, unknown> } = {}
+  options: {
+    config?: Partial<RtkConfig>;
+    stepConfig?: Record<string, unknown>;
+  } & RtkStructuralRuntimeOptions = {}
 ): CompressionResult {
   const start = performance.now();
   const stepConfig =
@@ -585,6 +646,9 @@ export function applyRtkCompression(
   const allTechniques: string[] = [];
   const allRules: string[] = [];
   const rawOutputPointers: RtkRawOutputPointer[] = [];
+  const structural: RtkStructuralRuntimeOptions = {
+    rtkStructuralRenderersEnabled: options.rtkStructuralRenderersEnabled === true,
+  };
 
   // Build tool_call_id → tool metadata lookup from assistant messages.
   // This lets us distinguish bash tool results (which RTK filters are designed for)
@@ -648,7 +712,12 @@ export function applyRtkCompression(
     // role:"user") message. Compress each block's inner text, resolving the shell command
     // per block from the matching assistant `tool_use` (mirrors the OpenAI tool path).
     if (Array.isArray(message.content) && message.content.some(isAnthropicToolResultBlock)) {
-      const processed = processToolResultBlocks(message.content, config, toolCallLookup);
+      const processed = processToolResultBlocks(
+        message.content,
+        config,
+        toolCallLookup,
+        structural
+      );
       allTechniques.push(...processed.techniquesUsed);
       allRules.push(...processed.rulesApplied);
       rawOutputPointers.push(...processed.rawOutputPointers);
@@ -659,12 +728,19 @@ export function applyRtkCompression(
     // OpenAI-shape tool message: resolve metadata from the preceding assistant tool_calls.
     let command: string | null = null;
     let skipFilters = false;
+    let toolName: string | null = null;
     if (message.role === "tool") {
       const callId = typeof message.tool_call_id === "string" ? message.tool_call_id : null;
-      ({ command, skipFilters } = resolveToolMeta(callId, toolCallLookup));
+      ({ command, skipFilters, toolName } = resolveToolMeta(callId, toolCallLookup));
     }
 
-    const processed = processRtkContent(message.content, config, { command, skipFilters });
+    const processed = processRtkContent(message.content, config, {
+      ...structural,
+      command,
+      skipFilters,
+      toolName,
+      toolResult: structuralToolResult(message),
+    });
     allTechniques.push(...processed.techniquesUsed);
     allRules.push(...processed.rulesApplied);
     rawOutputPointers.push(...processed.rawOutputPointers);
@@ -728,6 +804,7 @@ export const rtkEngine: CompressionEngine = {
     return applyRtkCompression(body, {
       config: options?.config?.rtkConfig,
       stepConfig: options?.stepConfig,
+      rtkStructuralRenderersEnabled: options?.rtkStructuralRenderersEnabled,
     });
   },
   compress(body, config) {
@@ -746,6 +823,8 @@ export {
   detectCommandOutput,
   detectCommandType,
 } from "./commandDetector.ts";
+export { effectiveMaxLines } from "./intensity.ts";
+export { RTK_STRUCTURAL_RENDERERS_FLAG, resolveRtkStructuralFlag } from "./structuralFlag.ts";
 export { runRtkFilterTests } from "./verify.ts";
 export {
   maybePersistRtkRawOutput,

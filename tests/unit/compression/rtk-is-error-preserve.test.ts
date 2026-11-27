@@ -128,3 +128,39 @@ test('role:"tool" (OpenAI chat) has no error field and is still compressed', () 
   );
   assert.equal(res.compressed, true);
 });
+
+// With the structural renderers on (feature flag + enableRenderers) a failed block is still
+// returned whole, and a successful sibling is the only one summarised.
+const GIT_DIFF = [
+  "diff --git a/src/app.ts b/src/app.ts",
+  "index 1111111..2222222 100644",
+  "--- a/src/app.ts",
+  "+++ b/src/app.ts",
+  "@@ -1,6 +1,6 @@",
+  " import a from './a';",
+  " import b from './b';",
+  "-const x = 1;",
+  "+const x = 2;",
+  " export function run() {",
+  "   return x;",
+  " }",
+  "",
+].join("\n");
+
+test("is_error stays byte-identical with the structural renderers on; the sibling is summarised", () => {
+  const failed = { type: "tool_result", tool_use_id: "toolu_1", is_error: true, content: GIT_DIFF };
+  const ok = { type: "tool_result", tool_use_id: "toolu_2", content: GIT_DIFF };
+  const body = anthropicBody([failed, ok]);
+  (body.messages as Array<{ content: Block[] }>)[1].content.forEach((part) => {
+    (part.input as { command: string }).command = "git diff";
+  });
+  const res = applyRtkCompression(body, {
+    config: { ...RTK_ON.config, enableRenderers: true },
+    rtkStructuralRenderersEnabled: true,
+  });
+  const out = resultBlocks(res.body as Record<string, unknown>);
+  assert.equal(res.compressed, true);
+  assert.deepEqual(out[0], failed);
+  assert.match(out[1].content as string, /# \+1 -1/);
+  assert.ok(!(out[1].content as string).includes("index 1111111"));
+});

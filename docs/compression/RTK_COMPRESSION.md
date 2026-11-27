@@ -161,6 +161,41 @@ grouping. This is the structural counterpart to `deduplicateThreshold`: dedup ha
 grouping handles "the same shape with small differences". Both flags are part of the `rtkConfig` JSON
 persisted in the `key_value` table (see Configuration above), so the setting survives restarts.
 
+## Structural Renderers (opt-in)
+
+A tool result can be summarised by its format instead of cut by the filters. This is off by
+default and needs all of: the feature flag `OMNIROUTE_RTK_STRUCTURAL_RENDERERS_ENABLED` (see
+[Feature Flags](../reference/FEATURE_FLAGS.md)), `rtkConfig.enableRenderers: true`,
+`rtkConfig.applyToToolResults: true` and a request whose compression policy allows RTK (a `safe`
+request never runs RTK, so it never reaches this path). With any of them off, the output is
+byte-identical to the legacy pipeline. The flag is read once per request at the compression entry
+point and travels with the request to the memoization key and to the compression worker; it cannot
+be set from `stepConfig`.
+
+The first format is a unified `git diff` (`engines/rtk/renderers/gitDiff.ts`, `renderUnifiedDiff`).
+It keeps every file header, significant metadata (created, deleted, renamed, copied and
+mode-changed files), every hunk header and every changed line, adds a `# +N -M` count per file
+computed from the whole input, and drops blob ids and unchanged context. Dispatch lives in
+`engines/rtk/renderers/structural.ts`:
+
+- It runs on the original output, before any filter, dedup or truncation. An accepted summary goes
+  straight to token accounting and raw-output retention.
+- The format comes from the correlated shell command (`git diff` / `git show`) when there is one,
+  otherwise from a diff signature on the first line. Non-shell tools, assistant text and code
+  blocks are never routed here; in a Responses body only an eligible `local_shell_call_output`
+  is. Anthropic `tool_result` blocks marked `is_error: true` or carrying `cache_control` are
+  returned untouched, as before.
+- A recognised diff that cannot be summarised faithfully is returned **unchanged**: combined (merge)
+  diffs, conflict markers, binary sections (`Binary files … differ`, `GIT binary patch`), hunks
+  whose declared line counts do not match, truncated sections or trailing text. The same applies
+  when the summary exceeds `maxLinesPerResult` / `maxCharsPerResult` (after the intensity scaling of
+  `effectiveMaxLines`) or is not smaller in tokens.
+- Analysis ceiling: input over 512 KiB, 8,192 lines or 16 KiB on one line skips the parser and uses
+  the legacy RTK; the rule `rtk:structural:over-budget` is recorded so the incidence can be measured.
+- A project or global filter that matches the command, any explicitly enabled filter, or the matched
+  filter being explicitly disabled keeps the legacy path. The `rtkConfig.renderers` allowlist is
+  matched against the format name (`git-diff`).
+
 ## Code Comment Stripping (`stripCodeComments` / `preserveDocstrings`)
 
 When `rtkConfig.applyToCodeBlocks` is enabled, RTK can also strip comments from fenced code blocks:

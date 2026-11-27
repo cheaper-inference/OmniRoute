@@ -1,7 +1,7 @@
 import type { CommandDetectionResult } from "../commandDetector.ts";
 import type { RtkConfig } from "../../../types.ts";
-import { type RenderResult, NO_RENDER } from "./types.ts";
-import { renderGitDiff } from "./gitDiff.ts";
+import { type RenderResult, type Renderer, NO_RENDER } from "./types.ts";
+import { renderGitDiff, renderUnifiedDiff } from "./gitDiff.ts";
 import { renderTestGreen } from "./testGreen.ts";
 import { renderTerraformPlan } from "./terraformPlan.ts";
 import { renderStructuredTable } from "./structuredTable.ts";
@@ -40,7 +40,11 @@ export function applyRenderer(
 ): RenderResult {
   const r = REGISTRY[detection.type];
   if (!r) return NO_RENDER(text);
-  if (config.renderers && config.renderers.length > 0 && !config.renderers.includes(detection.type)) {
+  if (
+    config.renderers &&
+    config.renderers.length > 0 &&
+    !config.renderers.includes(detection.type)
+  ) {
     return NO_RENDER(text);
   }
   return r(text, detection);
@@ -48,3 +52,14 @@ export function applyRenderer(
 export { type RenderResult } from "./types.ts";
 
 export { REGISTRY };
+
+/**
+ * Structural renderers, keyed by the format name the dispatcher in `structural.ts` selects.
+ * Unlike REGISTRY above they run on the original tool output before any filter, validate the
+ * whole input, and either produce a faithful summary or decline (`changed: false`), in which
+ * case the caller keeps the original untouched. Later renderers (listings, search matches,
+ * status, test results, logs, JSON) join this map; nothing else is shared between them.
+ */
+export const STRUCTURAL_REGISTRY: Record<string, Renderer> = {
+  "git-diff": renderUnifiedDiff,
+};

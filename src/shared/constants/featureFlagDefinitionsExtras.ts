@@ -5,6 +5,7 @@ import { PROXY_REEGRESS_ON_QUOTA_429_FLAG } from "./featureFlagDefinitionsProxyE
 import { QUOTA_DAILY_REVALIDATION_FLAG } from "./featureFlagDefinitionsQuotaRevalidation";
 import { CODEBUDDY_TELEMETRY_ENABLED_FLAG } from "./featureFlagDefinitionsCodebuddy";
 import { AGENT_SESSION_MESSAGES_ENABLED_FLAG } from "./agentSessionFeatureFlagDefinitions";
+import { RTK_STRUCTURAL_RENDERERS_ENABLED_FLAG } from "./featureFlagDefinitionsRtk";
 
 /**
  * Flags kept out of featureFlagDefinitions.ts because that file sits at its file-size cap.
@@ -18,4 +19,5 @@ export const EXTRA_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
   QUOTA_DAILY_REVALIDATION_FLAG,
   CODEBUDDY_TELEMETRY_ENABLED_FLAG,
   AGENT_SESSION_MESSAGES_ENABLED_FLAG,
+  RTK_STRUCTURAL_RENDERERS_ENABLED_FLAG,
 ];

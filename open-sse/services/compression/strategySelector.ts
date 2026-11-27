@@ -65,6 +65,7 @@ import {
   withCompressionEntrypointGuardsAsync,
 } from "./entrypointWrap.ts";
 import { makeMemoKey, memoLookup, memoStore, isDeterministicMode } from "./resultMemo.ts";
+import { rtkRenderersMayRun, withRtkStructuralFlag } from "./engines/rtk/structuralFlag.ts";
 import { applyLossyRequestPolicy } from "./lossyRequestPolicy.ts";
 export { resolveCacheAwareConfig } from "./cacheAwareConfig.ts";
 
@@ -273,6 +274,23 @@ export function selectCompressionStrategy(
     .mode as CompressionMode;
 }
 
+/**
+ * Capture the structural-renderer flag at the entry point, ahead of memoization, the worker job
+ * and engine dispatch. Only RTK-bearing modes get a decision, and the flag is looked up only
+ * when an RTK step has `enableRenderers` on (see rtkRenderersMayRun); every other mode keeps
+ * its options as is.
+ */
+function withStructuralDecision<
+  T extends { rtkStructuralRenderersEnabled?: boolean; config?: CompressionConfig },
+>(mode: CompressionMode, options: T | undefined): T | undefined {
+  if (mode !== "rtk" && mode !== "stacked") return options;
+  const steps =
+    mode === "rtk"
+      ? [{ engine: "rtk" }]
+      : resolveStackSteps(options?.config?.stackedPipeline, options?.config);
+  return withRtkStructuralFlag(options, rtkRenderersMayRun(options?.config?.rtkConfig, steps));
+}
+
 export function applyCompression(
   body: Record<string, unknown>,
   mode: CompressionMode,
@@ -285,6 +303,8 @@ export function applyCompression(
     compressionStage?: CompressionStage;
     config?: CompressionConfig;
     principalId?: string;
+    /** Structural-renderer decision, resolved once at the entry point (see engines/rtk/structuralFlag.ts). */
+    rtkStructuralRenderersEnabled?: boolean;
     /**
      * Opt into the TV1 stacked bail-out (skip-on-throw + min-gain). Default off keeps the
      * legacy behavior. The combo proactive-fallback path enables it so a throwing engine is
@@ -297,7 +317,8 @@ export function applyCompression(
     cachingContext?: CachingDetectionContext;
   }
 ): CompressionResult {
-  return withCompressionEntrypointGuards(body, options, (b) => runCompression(b, mode, options));
+  const resolved = withStructuralDecision(mode, options);
+  return withCompressionEntrypointGuards(body, resolved, (b) => runCompression(b, mode, resolved));
 }
 
 function runCompression(
@@ -312,6 +333,8 @@ function runCompression(
     compressionStage?: CompressionStage;
     config?: CompressionConfig;
     principalId?: string;
+    /** Structural-renderer decision, resolved once at the entry point (see engines/rtk/structuralFlag.ts). */
+    rtkStructuralRenderersEnabled?: boolean;
     bailout?: BailoutConfig;
     riskGate?: RiskGateConfig;
     cachingContext?: CachingDetectionContext;
@@ -335,7 +358,8 @@ function runCompression(
       options.config,
       options.principalId,
       options.model,
-      options.supportsVision
+      options.supportsVision,
+      options.rtkStructuralRenderersEnabled
     );
     const hit = memoLookup(key);
     if (hit) return hit;
@@ -355,6 +379,7 @@ function runCompression(
       // Selecting the "rtk" mode IS the enable signal — run it even if the per-engine
       // rtkConfig.enabled flag is off (that flag gates stacked steps). (B-MODE-ENGINE-DECOUPLE)
       config: { ...(options?.config?.rtkConfig ?? {}), enabled: true },
+      rtkStructuralRenderersEnabled: options?.rtkStructuralRenderersEnabled,
     });
   }
   if (mode === "codex-responses") {
@@ -506,12 +531,15 @@ export async function applyCompressionAsync(
     compressionStage?: CompressionStage;
     config?: CompressionConfig;
     principalId?: string;
+    /** Structural-renderer decision, resolved once at the entry point (see engines/rtk/structuralFlag.ts). */
+    rtkStructuralRenderersEnabled?: boolean;
     onEngineStep?: (step: StackedCompressionStep) => void;
     cachingContext?: CachingDetectionContext;
   }
 ): Promise<CompressionResult> {
-  return withCompressionEntrypointGuardsAsync(body, options, (b) =>
-    runCompressionAsync(b, mode, options)
+  const resolved = withStructuralDecision(mode, options);
+  return withCompressionEntrypointGuardsAsync(body, resolved, (b) =>
+    runCompressionAsync(b, mode, resolved)
   );
 }
 
@@ -531,6 +559,8 @@ async function runCompressionAsync(
     compressionStage?: CompressionStage;
     config?: CompressionConfig;
     principalId?: string;
+    /** Structural-renderer decision, resolved once at the entry point (see engines/rtk/structuralFlag.ts). */
+    rtkStructuralRenderersEnabled?: boolean;
     onEngineStep?: (step: StackedCompressionStep) => void;
     cachingContext?: CachingDetectionContext;
   }
@@ -546,6 +576,9 @@ async function runCompressionAsync(
         targetFormat: options.targetFormat,
         compressionStage: options.compressionStage,
         config: options.config,
+        ...(options.rtkStructuralRenderersEnabled === undefined
+          ? {}
+          : { rtkStructuralRenderersEnabled: options.rtkStructuralRenderersEnabled }),
       }
     : undefined;
   const { isCompressionWorkerEligible } = await import("./compressionWorkerProtocol.ts");
@@ -588,7 +621,8 @@ async function runCompressionAsync(
       options.config,
       options.principalId,
       options.model,
-      options.supportsVision
+      options.supportsVision,
+      options.rtkStructuralRenderersEnabled
     );
     const hit = memoLookup(key);
     if (hit) return hit;
@@ -776,6 +810,8 @@ interface StackOptions {
   riskGate?: RiskGateConfig;
   /** Authenticated principal id — threaded through to CCR engine for store scoping. */
   principalId?: string;
+  /** Structural-renderer decision, resolved once at the entry point (see engines/rtk/structuralFlag.ts). */
+  rtkStructuralRenderersEnabled?: boolean;
   /** F3.3: called once per engine as it completes (live per-engine streaming). */
   onEngineStep?: (step: StackedCompressionStep) => void;
 }
@@ -984,13 +1020,22 @@ function commitStepResult(
   return { body: currentBody, advanced: false };
 }
 
+function withStackStructuralDecision(
+  pipeline: Array<CompressionPipelineStep | string> | undefined,
+  options: StackOptions | undefined
+): StackOptions {
+  const steps = resolveStackSteps(pipeline, options?.config);
+  return withRtkStructuralFlag(options, rtkRenderersMayRun(options?.config?.rtkConfig, steps));
+}
+
 export function applyStackedCompression(
   body: Record<string, unknown>,
   pipeline?: Array<CompressionPipelineStep | string>,
   options?: StackOptions
 ): CompressionResult {
-  return withRiskGate(body, resolveRiskGate(options), (b) =>
-    runStackedCompression(b, pipeline, options)
+  const resolved = withStackStructuralDecision(pipeline, options);
+  return withRiskGate(body, resolveRiskGate(resolved), (b) =>
+    runStackedCompression(b, pipeline, resolved)
   );
 }
 
@@ -1101,8 +1146,9 @@ export async function applyStackedCompressionAsync(
   pipeline?: Array<CompressionPipelineStep | string>,
   options?: StackOptions
 ): Promise<CompressionResult> {
-  return withRiskGateAsync(body, resolveRiskGate(options), (b) =>
-    runStackedCompressionAsync(b, pipeline, options)
+  const resolved = withStackStructuralDecision(pipeline, options);
+  return withRiskGateAsync(body, resolveRiskGate(resolved), (b) =>
+    runStackedCompressionAsync(b, pipeline, resolved)
   );
 }
 

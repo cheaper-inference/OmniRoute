@@ -16,6 +16,8 @@ export interface CompressionWorkerOptions {
   targetFormat?: CompressionWireFormat;
   compressionStage?: CompressionStage;
   config?: CompressionConfig;
+  /** Structural-renderer decision made on the main thread; workers have no flag resolver. */
+  rtkStructuralRenderersEnabled?: boolean;
 }
 export interface CompressionWorkerJob {
   id: number;

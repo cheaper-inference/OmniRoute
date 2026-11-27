@@ -1,0 +1,1 @@
+- **feat(sse):** Opt-in `OMNIROUTE_RTK_STRUCTURAL_RENDERERS_ENABLED` lets RTK summarize `git diff` tool output by structure (every file, hunk and changed line kept, context dropped) and return unusual diffs intact instead of cutting them (#21392).

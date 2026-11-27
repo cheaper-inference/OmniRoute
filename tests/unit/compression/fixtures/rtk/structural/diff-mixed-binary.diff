@@ -1,0 +1,14 @@
+diff --git a/blob.bin b/blob.bin
+index a6a6935..abd1abe 100644
+Binary files a/blob.bin and b/blob.bin differ
+diff --git a/notes.txt b/notes.txt
+index 6611700..90527aa 100644
+--- a/notes.txt
++++ b/notes.txt
+@@ -1,4 +1,5 @@
+ one
+-two changed
++two again
+ three
+ four
++five

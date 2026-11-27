@@ -1,0 +1,10 @@
+diff --git a/app.ts b/app.ts
+index b558808..4a2897d 100644
+--- a/app.ts
++++ b/app.ts
+@@ -6,4 +6,4 @@ export function run() {
+ >>>>>>> feature
+ }
+ 
+-export const NAME = "app2";
++export const NAME = "app3";

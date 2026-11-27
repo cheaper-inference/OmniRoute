@@ -1,0 +1,124 @@
+diff --git a/docs/guide.md b/docs/guide.md
+index ec7b798..da40a11 100644
+--- a/docs/guide.md
++++ b/docs/guide.md
+@@ -5,7 +5,7 @@ Intro line two.
+ 
+ ## Usage
+ 
+-Run the thing.
++Run the thing carefully.
+ Then run it again.
+ 
+ ## Notes
+diff --git a/run.sh b/run.sh
+old mode 100644
+new mode 100755
+diff --git a/src/svc/fresh.ts b/src/svc/fresh.ts
+new file mode 100644
+index 0000000..a52f96b
+--- /dev/null
++++ b/src/svc/fresh.ts
+@@ -0,0 +1,4 @@
++export const FRESH = true;
++export function fresh(): string {
++  return "fresh";
++}
+diff --git a/src/svc/legacy.ts b/src/svc/legacy.ts
+deleted file mode 100644
+index c899281..0000000
+--- a/src/svc/legacy.ts
++++ /dev/null
+@@ -1,30 +0,0 @@
+-export function legacy1(input: number): number {
+-  const base = input * 1;
+-  return base + 1;
+-}
+-
+-export function legacy2(input: number): number {
+-  const base = input * 2;
+-  return base + 2;
+-}
+-
+-export function legacy3(input: number): number {
+-  const base = input * 3;
+-  return base + 3;
+-}
+-
+-export function legacy4(input: number): number {
+-  const base = input * 4;
+-  return base + 4;
+-}
+-
+-export function legacy5(input: number): number {
+-  const base = input * 5;
+-  return base + 5;
+-}
+-
+-export function legacy6(input: number): number {
+-  const base = input * 6;
+-  return base + 6;
+-}
+-
+diff --git a/src/svc/orders.ts b/src/svc/orders.ts
+index 2608e6f..e45fa07 100644
+--- a/src/svc/orders.ts
++++ b/src/svc/orders.ts
+@@ -4,7 +4,7 @@ export function order1(input: number): number {
+ }
+ 
+ export function order2(input: number): number {
+-  const base = input * 2;
++  const base = input * 2 + 1;
+   return base + 2;
+ }
+ 
+@@ -48,3 +48,7 @@ export function order10(input: number): number {
+   return base + 3;
+ }
+ 
++
++export function orderSummary(ids: number[]): string {
++  return ids.map((id) => `order-${id}`).join(",");
++}
+diff --git a/src/svc/rename-me.ts b/src/svc/renamed.ts
+similarity index 95%
+rename from src/svc/rename-me.ts
+rename to src/svc/renamed.ts
+index c7bd538..772b367 100644
+--- a/src/svc/rename-me.ts
++++ b/src/svc/renamed.ts
+@@ -14,7 +14,7 @@ export function moved3(input: number): number {
+ }
+ 
+ export function moved4(input: number): number {
+-  const base = input * 4;
++  const base = input * 4 + 100;
+   return base + 4;
+ }
+ 
+diff --git a/src/util/math.ts b/src/util/math.ts
+index 9d4dca6..9e50dc3 100644
+--- a/src/util/math.ts
++++ b/src/util/math.ts
+@@ -10,7 +10,8 @@ export function calc2(input: number): number {
+ 
+ export function calc3(input: number): number {
+   const base = input * 3;
+-  return base + 3;
++  const bonus = base > 10 ? 2 : 1;
++  return base + 3 + bonus;
+ }
+ 
+ export function calc4(input: number): number {
+@@ -58,8 +59,8 @@ export function calc12(input: number): number {
+   return base + 5;
+ }
+ 
+-export function calc13(input: number): number {
+-  const base = input * 13;
++export function calc13(input: number, scale = 1): number {
++  const base = input * 13 * scale;
+   return base + 6;
+ }
+ 
