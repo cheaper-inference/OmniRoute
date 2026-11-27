@@ -6,7 +6,10 @@ import test, { before, describe } from "node:test";
 import { NextRequest } from "next/server";
 import { x as extractTar } from "tar";
 
-import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
+import {
+  createManagementSessionHeaders,
+  makeManagementSessionRequest,
+} from "../helpers/managementSession.ts";
 
 const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-system-key-backups-"));
 const dataDir = path.join(scratch, "data");
@@ -15,16 +18,23 @@ process.env.API_KEY_SECRET = "system-key-backup-test-api-key";
 process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 process.env.APP_LOG_TO_FILE = "false";
 process.env.CLOUD_URL = "false";
+process.env.REQUIRE_API_KEY = "true";
 delete process.env.INITIAL_PASSWORD;
+delete process.env.OMNIROUTE_API_KEY;
+delete process.env.ROUTER_API_KEY;
 
 const { getDbInstance, resetDbInstance, DB_BACKUPS_DIR } = await import("@/lib/db/core");
 const { openDatabaseAsync } = await import("@/lib/db/adapters/driverFactory");
 const { createApiKey, createSystemApiKey, resolveSystemApiKey } = await import("@/lib/db/apiKeys");
-const { backupDbFileAwaited } = await import("@/lib/db/backup");
+const { backfillApiKeySecretsAtRest, decryptApiKeySecret } =
+  await import("@/lib/db/apiKeys/secretAtRest");
+const { backupDbFileAwaited, SCRUBBED_SYSTEM_API_KEY_MARKER } = await import("@/lib/db/backup");
 const { updateSettings } = await import("@/lib/db/settings");
 const { getCallLogsDir } = await import("@/lib/usage/callLogArtifacts");
+const { runAuthzPipeline } = await import("@/server/authz/pipeline");
 const sqliteExport = await import("@/app/api/db-backups/export/route");
 const fullExport = await import("@/app/api/db-backups/exportAll/route");
+const sqliteImport = await import("@/app/api/db-backups/import/route");
 
 type KeyRow = {
   id: string;
@@ -60,14 +70,57 @@ async function operator(action: "export" | "exportAll") {
   return new NextRequest(request);
 }
 
+async function downloadFullExport() {
+  const response = await fullExport.GET(await operator("exportAll"));
+  assert.equal(response.status, 200);
+  const payload = fs.mkdtempSync(path.join(scratch, "payload-"));
+  const archive = `${payload}.tar.gz`;
+  fs.writeFileSync(archive, Buffer.from(await response.arrayBuffer()));
+  await extractTar({ file: archive, cwd: payload, strip: 1, strict: true });
+  return payload;
+}
+
+async function importDatabase(bytes: Uint8Array<ArrayBuffer>) {
+  const headers = await createManagementSessionHeaders({
+    "content-type": "application/octet-stream",
+  });
+  const response = await sqliteImport.POST(
+    new Request("http://localhost/api/db-backups/import", { method: "POST", headers, body: bytes })
+  );
+  assert.equal(response.status, 200, await response.clone().text());
+  assert.equal((await response.json()).imported, true);
+}
+
+async function assertClientAuthStatus(key: string, status: number) {
+  for (const headers of [{ authorization: `Bearer ${key}` }, { "x-api-key": key }]) {
+    const req = new NextRequest("http://localhost/api/v1/chat/completions", {
+      method: "POST",
+      headers,
+    });
+    assert.equal((await runAuthzPipeline(req, { enforce: true })).status, status);
+  }
+}
+
+function readApiKeysSchema(db: ReturnType<typeof getDbInstance>) {
+  return db
+    .prepare<{ type: string; name: string; sql: string | null }>(
+      `SELECT type, name, sql FROM sqlite_schema
+       WHERE tbl_name = 'api_keys' AND type IN ('table', 'index', 'trigger')
+       ORDER BY type, name`
+    )
+    .all();
+}
+
 async function assertDownloadDatabase(file: string, keys: SystemKey[], ordinary: KeyRow) {
   const db = await openDatabaseAsync(file, { readonly: true });
   try {
+    assert.deepEqual(readApiKeysSchema(db), readApiKeysSchema(getDbInstance()));
     for (const { row } of keys) {
       const downloaded = readKey(db, row.id);
-      assert.equal(downloaded.key === "", true, "system secret is blank");
+      const marker = SCRUBBED_SYSTEM_API_KEY_MARKER + row.id;
+      assert.equal(downloaded.key === marker, true, "system secret is replaced by its marker");
       assert.equal(downloaded.key_prefix === "", true, "system key prefix is blank");
-      assert.deepEqual(downloaded, { ...row, key: "", key_prefix: "" });
+      assert.deepEqual(downloaded, { ...row, key: marker, key_prefix: "" });
     }
     assert.deepEqual(readKey(db, ordinary.id), ordinary);
     assert.equal(db.pragma("integrity_check", { simple: true }), "ok");
@@ -90,6 +143,7 @@ for (const encrypted of [false, true]) {
   describe(encrypted ? "with STORAGE_ENCRYPTION_KEY" : "without STORAGE_ENCRYPTION_KEY", () => {
     const systemKeys: SystemKey[] = [];
     let ordinary: KeyRow;
+    let ordinarySecret: string;
 
     before(async () => {
       fs.mkdirSync(dataDir, { recursive: true });
@@ -98,7 +152,9 @@ for (const encrypted of [false, true]) {
       await updateSettings({ requireLogin: true, setupComplete: true });
 
       const db = getDbInstance();
-      ordinary = readKey(db, (await createApiKey("Ordinary", "backup-test")).id);
+      const client = await createApiKey("Ordinary", "backup-test");
+      ordinary = readKey(db, client.id);
+      ordinarySecret = client.key;
       for (const name of ["System inference", "System evaluation"]) {
         const { id } = await createSystemApiKey(name, "backup-test");
         const binding = await resolveSystemApiKey(id);
@@ -150,14 +206,9 @@ for (const encrypted of [false, true]) {
     });
 
     test("full export removes system credentials from every member and blanks summary prefixes", async () => {
-      const response = await fullExport.GET(await operator("exportAll"));
-      assert.equal(response.status, 200);
-      const archive = path.join(scratch, `export-${encrypted}.tar.gz`);
-      fs.writeFileSync(archive, Buffer.from(await response.arrayBuffer()));
+      const payload = await downloadFullExport();
       await assertLiveKeys();
 
-      const payload = fs.mkdtempSync(path.join(scratch, "payload-"));
-      await extractTar({ file: archive, cwd: payload, strip: 1, strict: true });
       const members = fs.readdirSync(payload, { recursive: true, withFileTypes: true });
       const files = members
         .filter((member) => member.isFile())
@@ -228,5 +279,36 @@ for (const encrypted of [false, true]) {
         assert.equal(fs.existsSync(tmpDir), false, "staging directory was removed");
       });
     }
+
+    test("both downloads can be imported without restoring usable system credentials", async (t) => {
+      const response = await sqliteExport.GET(await operator("export"));
+      assert.equal(response.status, 200);
+      const sqliteBytes = new Uint8Array(await response.arrayBuffer());
+      const payload = await downloadFullExport();
+      const fullExportBytes = new Uint8Array(fs.readFileSync(path.join(payload, "storage.sqlite")));
+
+      for (const [action, bytes] of [
+        ["export", sqliteBytes],
+        ["exportAll", fullExportBytes],
+      ] as const) {
+        await t.test(action, async () => {
+          await importDatabase(bytes);
+          const db = getDbInstance();
+          backfillApiKeySecretsAtRest(db);
+
+          for (const { row } of systemKeys) {
+            const restored = readKey(db, row.id);
+            const marker = SCRUBBED_SYSTEM_API_KEY_MARKER + row.id;
+            assert.equal(restored.source, "system");
+            assert.equal(restored.key_hash, row.key_hash);
+            assert.equal(restored.key.startsWith("enc:v1:"), encrypted);
+            assert.equal(decryptApiKeySecret(restored.key) === marker, true);
+            assert.equal(await resolveSystemApiKey(row.id), null);
+            await assertClientAuthStatus(marker, 401);
+          }
+          await assertClientAuthStatus(ordinarySecret, 200);
+        });
+      }
+    });
   });
 }

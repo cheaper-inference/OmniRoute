@@ -1,1 +1,1 @@
-- **fix(api):** Remove system API key secrets and prefixes from downloadable database backups while keeping private server snapshots complete (KEA-9523).
+- **fix(api):** Remove system API key secrets and prefixes from downloadable database backups while preserving the `api_keys` schema and keeping private server snapshots complete (KEA-9523).

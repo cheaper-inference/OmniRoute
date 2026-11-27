@@ -25,10 +25,8 @@ import {
   resolveDbBackupRetention,
 } from "./backupRetention";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
-import type { SqliteAdapter } from "./adapters/types";
 import { SYSTEM_API_KEY_SOURCE } from "./apiKeys/systemKey";
 import { isEncryptionEnabled } from "./encryption";
-import { getTableColumns, quoteIdentifier } from "./schemaColumns";
 
 type CountRow = { cnt?: number };
 
@@ -755,45 +753,7 @@ export async function restoreDbBackup(
 
 // ──────────────── Export-All helpers (for /api/db-backups/exportAll) ────────────────
 
-/** Let multiple scrubbed system rows share an empty key, while keeping real keys unique. */
-function allowBlankSystemKeysInCopy(db: SqliteAdapter): void {
-  const definition = db
-    .prepare<{ sql: string }>(
-      "SELECT sql FROM sqlite_schema WHERE type = 'table' AND name = 'api_keys'"
-    )
-    .get()?.sql;
-  const inlineUnique = /\bkey\s+TEXT\s+NOT\s+NULL\s+UNIQUE\b/i;
-  if (!definition || !inlineUnique.test(definition)) return;
-
-  const objects = db
-    .prepare<{ sql: string }>(
-      "SELECT sql FROM sqlite_schema WHERE tbl_name = 'api_keys' AND type IN ('index', 'trigger') AND sql IS NOT NULL"
-    )
-    .all();
-  const columns = getTableColumns(db, "api_keys").map(quoteIdentifier).join(", ");
-  // Rebuild on the disposable copy. Disable cascades while replacing the parent
-  // table, and retain the existing columns, indexes and triggers.
-  db.pragma("foreign_keys = OFF");
-  db.pragma("legacy_alter_table = ON");
-  db.transaction(() => {
-    db.exec(
-      definition
-        .replace(
-          /^CREATE TABLE (?:api_keys|"api_keys")(?=\s*\()/i,
-          "CREATE TABLE api_keys_download"
-        )
-        .replace(inlineUnique, "key TEXT NOT NULL")
-    );
-    db.exec(`
-      INSERT INTO api_keys_download (${columns}) SELECT ${columns} FROM api_keys;
-      DROP TABLE api_keys;
-      ALTER TABLE api_keys_download RENAME TO api_keys;
-      CREATE UNIQUE INDEX idx_ak_key_non_scrubbed ON api_keys(key)
-        WHERE key <> '' OR source IS NOT '${SYSTEM_API_KEY_SOURCE}';
-    `);
-    for (const object of objects) db.exec(object.sql);
-  })();
-}
+export const SCRUBBED_SYSTEM_API_KEY_MARKER = "scrubbed-system-key:";
 
 /** Remove system API key secrets from a staged download before publishing it. */
 export async function scrubSystemApiKeySecretsInCopy(filePath: string): Promise<void> {
@@ -807,13 +767,10 @@ export async function scrubSystemApiKeySecretsInCopy(filePath: string): Promise<
     }
     db.pragma("secure_delete = ON");
 
-    const matches = db
-      .prepare<{ count: number }>(
-        "SELECT COUNT(*) AS count FROM api_keys WHERE source = ? OR key = ''"
-      )
-      .get(SYSTEM_API_KEY_SOURCE);
-    if ((matches?.count ?? 0) > 1) allowBlankSystemKeysInCopy(db);
-    db.prepare("UPDATE api_keys SET key = '', key_prefix = '' WHERE source = ?").run(
+    // The row-specific marker satisfies UNIQUE(key). Keeping the original key_hash
+    // makes the marker unusable as a credential, including after an import.
+    db.prepare("UPDATE api_keys SET key = ? || id, key_prefix = '' WHERE source = ?").run(
+      SCRUBBED_SYSTEM_API_KEY_MARKER,
       SYSTEM_API_KEY_SOURCE
     );
     // Rebuild the file to discard stale bytes in freed pages and indexes.

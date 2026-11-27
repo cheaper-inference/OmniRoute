@@ -174,7 +174,7 @@ async function buildFullExportResponse(request: NextRequest): Promise<Response> 
     return NextResponse.json(
       {
         error: "Failed to create full export",
-        details: sanitizeErrorMessage(error),
+        details: sanitizeErrorMessage(error instanceof Error ? error.message : String(error)),
       },
       { status: 500 }
     );
