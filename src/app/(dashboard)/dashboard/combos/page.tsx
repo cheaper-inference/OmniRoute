@@ -2481,8 +2481,10 @@ function ComboFormModal({
   const [showModelSelect, setShowModelSelect] = useState(false);
   const [saving, setSaving] = useState(false);
   const [nameFormatError, setNameError] = useState("");
-  const hasReservedName = isReservedComboName(name.trim());
-  const nameError = hasReservedName ? t("nameReserved") : nameFormatError;
+  const trimmedName = name.trim();
+  const hasDisallowedReservedName =
+    trimmedName !== combo?.name.trim() && isReservedComboName(trimmedName);
+  const nameError = hasDisallowedReservedName ? t("nameReserved") : nameFormatError;
   const [pricingByProvider, setPricingByProvider] = useState({});
   const [modelAliases, setModelAliases] = useState({});
   const [providerNodes, setProviderNodes] = useState([]);
@@ -3516,7 +3518,7 @@ function ComboFormModal({
   };
 
   const handleSave = async () => {
-    if (hasReservedName || !validateName(name)) return;
+    if (hasDisallowedReservedName || !validateName(name)) return;
     if (models.length > 0 && (hasInvalidWeightedTotal || hasCostOptimizedWithoutPricing)) return;
     const drafts: Partial<Record<ComboEndpoint, CapabilityDraft>> = {
       ...capabilityDraftsRef.current,

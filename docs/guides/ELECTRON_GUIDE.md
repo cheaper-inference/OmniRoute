@@ -7,7 +7,6 @@ lastUpdated: 2026-06-28
 # Electron Desktop Guide
 
 > **Source of truth:** `electron/` workspace
-> **Last updated:** 2026-06-28 — v3.8.40
 
 OmniRoute ships a cross-platform desktop app (Windows / macOS / Linux) built on
 **Electron 41** + **electron-builder 26.10**. The desktop app spawns the Next.js

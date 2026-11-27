@@ -125,8 +125,13 @@ export async function PUT(request, { params }) {
         request
       );
     }
-    const comboName = validation.data.name ?? currentCombo.name;
-    if (isReservedComboName(comboName.trim())) {
+    const requestedName = validation.data.name;
+    const comboName = requestedName ?? currentCombo.name;
+    if (
+      requestedName !== undefined &&
+      requestedName !== currentCombo.name.trim() &&
+      isReservedComboName(requestedName)
+    ) {
       return comboErrorResponse(
         "COMBO_002",
         400,
