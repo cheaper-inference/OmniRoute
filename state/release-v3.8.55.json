@@ -82,6 +82,21 @@
       "landed": [],
       "steps": 0,
       "hang": false
+    },
+    "rerun": {
+      "ref": "omni-queue/release-v3.8.55/b65-3a815de23db1",
+      "requestedAt": "2026-11-27T13:09:57.915Z",
+      "afterMs": 1795784970000,
+      "runIds": [
+        45994618409,
+        45994618193
+      ],
+      "jobs": [
+        "Gate / CI",
+        "Gate / Quality",
+        "Fast Quality Gates",
+        "Lint"
+      ]
     }
   },
   "baseChecks": [
@@ -182,50 +197,11 @@
     "ciRuns": 70,
     "landedPrs": 62,
     "landedBatches": 19,
-    "redBatches": 14,
+    "redBatches": 15,
     "bisections": 5,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-21T01:12:06.738Z",
-      "type": "batch-started",
-      "batchId": "b18",
-      "prs": [
-        20776,
-        20819,
-        20820,
-        20823,
-        20824,
-        20825
-      ],
-      "sha": "3917441ded0b24fa5a761f0e22eeb73ddc6286a9",
-      "detail": "6 PR(s) on 355eb07c36fc; window 6",
-      "labeledAt": {
-        "20776": "2026-11-20T23:33:39Z",
-        "20819": "2026-11-20T23:33:42Z",
-        "20820": "2026-11-20T23:33:44Z",
-        "20823": "2026-11-20T23:33:47Z",
-        "20824": "2026-11-20T23:33:50Z",
-        "20825": "2026-11-20T23:33:54Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44848555822"
-    },
-    {
-      "at": "2026-11-21T02:19:30.900Z",
-      "type": "checks-green",
-      "batchId": "b18",
-      "prs": [
-        20776,
-        20819,
-        20820,
-        20823,
-        20824,
-        20825
-      ],
-      "sha": "3917441ded0b24fa5a761f0e22eeb73ddc6286a9",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44855215576"
-    },
     {
       "at": "2026-11-21T02:19:39.364Z",
       "type": "land-rejected",
@@ -2924,8 +2900,34 @@
         "21360": "2026-11-27T01:02:32Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45994526013"
+    },
+    {
+      "at": "2026-11-27T13:09:57.915Z",
+      "type": "checks-red",
+      "batchId": "b65",
+      "prs": [
+        21264,
+        21360,
+        21331
+      ],
+      "sha": "3a815de23db1efaeb3fd34ccf196efc616132490",
+      "detail": "Gate / CI, Gate / Quality, Fast Quality Gates, Lint",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46004687751"
+    },
+    {
+      "at": "2026-11-27T13:09:57.915Z",
+      "type": "flaky-rerun",
+      "batchId": "b65",
+      "prs": [
+        21264,
+        21360,
+        21331
+      ],
+      "sha": "3a815de23db1efaeb3fd34ccf196efc616132490",
+      "detail": "re-running the failed jobs of b65 once (Gate / CI, Gate / Quality, Fast Quality Gates, Lint) before bisecting",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46004687751"
     }
   ],
-  "updatedAt": "2026-11-27T12:59:23.352Z",
+  "updatedAt": "2026-11-27T13:10:45.085Z",
   "batchWindow": 2
 }
