@@ -110,33 +110,22 @@ Quy tắc 75 phút không phát hiện được một build mà GitHub đã từ
   phút để được ghi xuống tmpfs và 2 phút để tải lên từ đĩa.
 - VPS `.15` chỉ dành cho homologation — tuyệt đối không chạy runner CI.
 
-## Luồng hosted (runner do GitHub lưu trữ)
+## Làn đường được lưu trữ (Người chạy được lưu trữ trên GitHub)
 
-Repository thuộc tổ chức `cheaper-inference`, sử dụng gói **Team**: **60 công việc hosted chạy đồng thời**, được dùng chung cho mọi repository trong tổ chức, mọi lượt kiểm tra PR, mọi workflow được kích hoạt khi push và thiết lập mặc định của CodeQL. Các số liệu dưới đây được đo trên gói **Pro** (40 công việc hosted chạy đồng thời). Theo số liệu đo ngày 2026-10-18 trong một
-chiến dịch merge (~10 lượt merge/giờ trên `release/v3.8.52`): **2.500 lượt chạy workflow được tạo trong
-24 giờ**, 44 lượt push lên nhánh trong 6 giờ, **106 công việc hosted nằm trong hàng đợi** trong khi các lượt kiểm tra PR phải chờ
-hàng giờ và các PR được merge mà không có chúng. Chín workflow được kích hoạt sau mỗi lượt push lên nhánh:
+Kho lưu trữ thuộc về tổ chức `cheaper-inference`, trên** Đội** kế hoạch:** 60 công việc được lưu trữ đồng thời** , được chia sẻ bởi mọi kho lưu trữ trong tổ chức, mọi lần kiểm tra PR, mọi quy trình làm việc được kích hoạt đẩy và thiết lập mặc định của CodeQL. Các số liệu dưới đây được đo trên** chuyên nghiệp** kế hoạch (40 công việc được lưu trữ đồng thời). Được đo vào ngày 18-10-2026 trong một chiến dịch hợp nhất (~ 10 merges/hour trên `release/v3.8.52`):** 2.500 lượt chạy quy trình công việc được tạo trong 24 giờ** , 44 lần đẩy tới nhánh trong 6 giờ,** 106 công việc được lưu trữ đã được xếp hàng đợi** trong khi kiểm tra PR phải chờ hàng giờ và PRs được hợp nhất mà không có chúng. Chín quy trình công việc được thực hiện trong mỗi lần đẩy tới chi nhánh:
 
-| mỗi lượt push lên `release/v*`              | công việc hosted | kết quả trong đợt quá tải                                               | kể từ 2026-10-18                                                                 |
-| ------------------------------------------- | ---------------: | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `ci.yml` (ma trận đầy đủ)                   |        tối đa 30 | bị lượt push tiếp theo hủy, 24 trên 24 trong một ngày                   | không khởi chạy khi push lên `release/**` (lượt chạy PR + Release-Green)         |
-| `quality.yml`                               |               ~6 | bị hủy, 23 trên 23                                                      | không khởi chạy khi push lên `release/**`                                        |
-| `Release-Green` `--quick`                   |                0 | chạy trên `omni-build`, 97 trên 100 bị hủy                              | slot `omni-release`, không bao giờ bị hủy, các lượt chờ được gộp lại             |
-| `Lock released branch`, `OpenSSF Scorecard` |                2 | một lượt chạy nằm trong hàng đợi cho mỗi lượt push                      | một lượt chạy trên mỗi ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)  |
-| `Release acceptance` (báo cáo ngầm)         |                1 | một `npm ci` hosted cho mỗi lượt push, không bao giờ bị hủy             | không thay đổi — ứng viên để áp dụng bộ lọc `paths:`                             |
-| `Publish to Docker Hub` → `Deploy to VPS`   |                2 | bị hủy theo mỗi lượt push; nhánh amd64 tranh chấp trên `omni-build`     | không thay đổi — kênh triển khai của chủ sở hữu                                  |
-| Thiết lập mặc định CodeQL (`dynamic`)       |                4 | `javascript-typescript`, `actions`, `c-cpp`, `python` cho mỗi lượt push | không thay đổi — Cài đặt → Bảo mật mã; `c-cpp`/`python` không quét được gì ở đây |
+| mỗi lần đẩy tới `release/v*`                | công việc được lưu trữ | kết quả dưới cơn bão                                              | kể từ 2026-10-18                                                                          |
+| ------------------------------------------- | ---------------------: | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `ci.yml` (ma trận đầy đủ)                   |             lên tới 30 | bị hủy bởi lần đẩy tiếp theo, 24 trên 24 trong một ngày           | không bắt đầu khi đẩy `release/**` (PR run + Release-Green)                               |
+| `quality.yml`                               |                     ~6 | đã hủy, 23 trên 23                                                | chưa bắt đầu khi đẩy `release/**`                                                         |
+| `Release-Green` `--quick`                   |                      0 | chạy trên `omni-build`, đã hủy 97 trên 100                        | khe `omni-release`, không bao giờ bị hủy, đang chờ xử lý bị sập                           |
+| `Lock released branch`, `OpenSSF Scorecard` |                      2 | một lần chạy xếp hàng cho mỗi lần đẩy                             | một lần chạy cho mỗi lượt giới thiệu (`tests/unit/build/hosted-lane-concurrency.test.ts`) |
+| `Release acceptance` (báo cáo bóng tối)     |                      1 | một `npm ci` được lưu trữ trên mỗi lần đẩy, không bao giờ bị hủy  | ứng cử viên — không thay đổi cho bộ lọc `paths:`                                          |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                      2 | bị hủy mỗi lần đẩy; Chân AMD64 thi đấu trên `omni-build`          | kênh triển khai của chủ sở hữu — không thay đổi                                           |
+| thiết lập mặc định CodeQL (`dynamic`)       |                      4 | `javascript-typescript`, `actions`, `c-cpp`, `python` mỗi lần đẩy | không thay đổi cài đặt — Bảo mật mã → ; `c-cpp`/`python` quét không có gì ở đây           |
 
-`tests/unit/build/push-storm-diet.test.ts` cố định trigger push chỉ dành cho `main` của `ci.yml` và
-`quality.yml`. Tác dụng phụ: Codecov không còn nhận được bản tải coverage cơ sở cho mỗi lượt push lên nhánh release (bước này
-chỉ mang tính thông tin và có `continue-on-error`); cổng coverage trong repo và bình luận PR
-không bị ảnh hưởng.
+`tests/unit/build/push-storm-diet.test.ts` ghim trình kích hoạt đẩy `main` -only `ci.yml` và `quality.yml`. Tác dụng phụ: Codecov không còn nhận được lượt tải lên cơ sở cho mỗi lần phát hành (bước này mang tính chất cung cấp thông tin và `continue-on-error`); cổng bảo hiểm trong repo và nhận xét PR không bị ảnh hưởng.
 
-**Tăng thêm năng lực self-hosted không giải quyết được hàng đợi hosted.** Devbox
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) có thể chạy một runner, nhưng các phiên agent hiện đã
-duy trì mức tải 20–26, container của agent không có Docker daemon, và luồng đang bão hòa
-là luồng hosted. Máy `.113` còn trống 71 GB và có mức tải 5–8 tại cùng thời điểm; giới hạn của máy này
-là ngân sách bộ nhớ cho mỗi listener nêu trên (tối đa 6 listener), không phải CPU. Các biện pháp còn lại
-thuộc về quy trình: merge các PR trong chiến dịch thông qua hàng đợi Mergify (`label=queue`, các batch dùng chung
-một lượt chạy CI `merge_group` thay vì một lượt chạy cho mỗi PR cộng thêm một lượt cho mỗi lần push), tinh giản các ngôn ngữ
-trong thiết lập mặc định của CodeQL, và lọc `release-acceptance.yml` theo các tệp mà nó đọc.
+**Dung lượng tự lưu trữ nhiều hơn không khắc phục được hàng đợi được lưu trữ.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) có thể lưu trữ một trình chạy, nhưng các phiên tác nhân đã giữ tải ở mức 20–26, vùng chứa tác nhân không có daemon Docker và làn bão hòa là làn được lưu trữ. Hộp `.113` có 71 GB trống và tải 5–8 cùng lúc; ràng buộc của nó là ngân sách bộ nhớ cho mỗi người nghe ở trên (mức trần cho 6 người nghe), không phải CPU. Các đòn bẩy còn lại là các quy trình: chiến dịch đất PRs thông qua hàng đợi Hợp nhất (`label=queue`, các đợt chia sẻ một lần chạy `merge_group` CI thay vì một lần chạy trên mỗi PR cộng với một lần chạy trên mỗi lần đẩy), cắt bớt ngôn ngữ thiết lập mặc định CodeQL và lọc `release-acceptance.yml` theo các tệp mà nó đọc.
+
+> **19-11-2026: hàng đợi hợp nhất Hợp nhất đã ngừng hoạt động** (quyết định của chủ sở hữu). `.mergify.yml` không còn xác định hàng đợi và từ chối các lệnh Hợp nhất hợp nhất hoặc viết lại yêu cầu kéo. Bản phát hành PRs được hợp nhất bằng tay theo bộ quy tắc kho lưu trữ "Yêu cầu cổng xanh trên bản phát hành đang hoạt động" (`Gate / CI` + `Gate / Quality`) cho đến khi hàng đợi omni chạy ở chế độ trực tiếp và sau đó thông qua hàng đợi omni ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Đòn bẩy Hợp nhất ở trên không còn tồn tại.

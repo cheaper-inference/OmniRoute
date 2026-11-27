@@ -325,3 +325,76 @@ test("token-header signal is keyed by (provider, connectionId)", () => {
   // A provider with no token headers stored → null.
   assert.equal(getTokenHeaderSaturation("openai", "never-seen"), null);
 });
+
+// ─── Real fetch Headers: what the response handler actually passes ───────────
+const TOKENS_75 = { "x-ratelimit-limit-tokens": "1000", "x-ratelimit-remaining-tokens": "250" };
+test("a fetch Headers instance yields the token-header signal", () => {
+  _clearRateLimitHeaders();
+  storeRateLimitHeaders("hdr-conn-1", "openai", new Headers(TOKENS_75));
+  const sig = getTokenHeaderSaturation("openai", "hdr-conn-1");
+  assert.ok(sig, "expected a token-header signal from a Headers instance");
+  assert.ok(Math.abs(sig!.saturation - 0.75) < 1e-9);
+});
+test("a Response's headers drive the request-header fallback of getSaturation", async () => {
+  _clearSaturationCache();
+  _clearRateLimitHeaders();
+  const upstream = new Response(null, {
+    headers: {
+      "anthropic-ratelimit-requests-limit": "100",
+      "anthropic-ratelimit-requests-remaining": "30",
+    },
+  });
+  storeRateLimitHeaders("hdr-conn-2", "anthropic", upstream.headers);
+  satMod.__setAnthropicSaturationDepsForTests({
+    loadConnection: async () => ({ id: "hdr-conn-2", provider: "anthropic", authType: "apikey" }),
+    fetchUsage: async () => ({ message: "no plan window" }),
+  });
+  let val: number;
+  try {
+    val = await getSaturation("hdr-conn-2", "anthropic", {
+      unit: "requests",
+      window: "hourly",
+    });
+  } finally {
+    satMod.__setAnthropicSaturationDepsForTests(null);
+  }
+  assert.ok(Math.abs(val - 0.7) < 1e-9, `expected ≈0.7, got ${val}`);
+});
+test("exhausted window from a Headers instance reads as fully saturated", () => {
+  _clearRateLimitHeaders();
+  const headers = new Headers({
+    "anthropic-ratelimit-tokens-limit": "1000",
+    "anthropic-ratelimit-tokens-remaining": "0",
+    "anthropic-ratelimit-tokens-reset": "2026-01-01T00:00:30Z",
+  });
+  storeRateLimitHeaders("hdr-conn-3", "anthropic", headers);
+  const sig = getTokenHeaderSaturation("anthropic", "hdr-conn-3");
+  assert.equal(sig?.saturation, 1);
+  assert.equal(sig?.resetAt, Date.parse("2026-01-01T00:00:30Z"));
+});
+test("case-insensitive: mixed-case names on a plain object are read", () => {
+  _clearRateLimitHeaders();
+  storeRateLimitHeaders("hdr-conn-4", "openai", {
+    "X-RateLimit-Limit-Tokens": "1000",
+    "X-RateLimit-Remaining-Tokens": "100",
+  });
+  const sig = getTokenHeaderSaturation("openai", "hdr-conn-4");
+  assert.ok(sig && Math.abs(sig.saturation - 0.9) < 1e-9);
+});
+test("real usage still wins when the headers came from a Headers instance", async () => {
+  _clearSaturationCache();
+  _clearRateLimitHeaders();
+  __setGenericUsageFetcherForTests(async () => ({ percentUsed: 0.5 }));
+  storeRateLimitHeaders("hdr-conn-5", "openai", new Headers(TOKENS_75));
+  const val = await getSaturation("hdr-conn-5", "openai", { unit: "tokens", window: "hourly" });
+  assert.ok(Math.abs(val - 0.5) < 1e-9, `expected usage ≈0.5 to win, got ${val}`);
+});
+test("no rate-limit headers: a Headers instance stores nothing and does not throw", () => {
+  _clearRateLimitHeaders();
+  storeRateLimitHeaders(
+    "hdr-conn-6",
+    "openai",
+    new Headers({ "content-type": "application/json" })
+  );
+  assert.equal(getTokenHeaderSaturation("openai", "hdr-conn-6"), null);
+});

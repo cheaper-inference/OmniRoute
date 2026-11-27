@@ -72,11 +72,11 @@ test("explicit project headers win over the prompt-derived project", () => {
   const context = extractAgentContext(claudeCodeBody("/Users/dev/work/acme"), {
     ...claudeHeaders,
     "x-omniroute-project": "omniroute",
-    "X-OmniRoute-Project-Repo": "github.com/diegosouzapw/OmniRoute",
+    "X-OmniRoute-Project-Repo": "github.com/cheaper-inference/OmniRoute",
   });
   assert.equal(context.projectName, "omniroute");
   assert.equal(context.projectSource, "header");
-  assert.equal(context.projectRepo, "github.com/diegosouzapw/OmniRoute");
+  assert.equal(context.projectRepo, "github.com/cheaper-inference/OmniRoute");
   assert.equal(context.projectPath, "/Users/dev/work/acme");
 });
 

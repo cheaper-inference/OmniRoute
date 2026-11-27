@@ -736,7 +736,8 @@ function buildSearxngRequest(
   if (page) qp.set("pageno", String(page));
 
   const headers: Record<string, string> = { Accept: "application/json" };
-  if (params.token) {
+  // The operator token never goes to a caller-chosen base URL.
+  if (params.token && searchBaseUrlGuard(config, params) !== "public-only") {
     headers["Authorization"] = `Bearer ${params.token}`;
   }
 
@@ -1405,7 +1406,8 @@ async function tryZaiMCPProvider(
 type SearchResponseNormalizer = (
   data: unknown,
   query: string,
-  searchType: string
+  searchType: string,
+  domainFilter?: string[]
 ) => { results: SearchResult[]; totalResults: number | null };
 
 const responseNormalizers: Record<string, SearchResponseNormalizer> = {
@@ -1430,17 +1432,20 @@ const responseNormalizers: Record<string, SearchResponseNormalizer> = {
   "xquik-search": (data) => xquikSearch.normalizeXquikSearchResponse(data, makeResult),
   "anysearch-search": (data) => anysearchSearch.normalizeAnysearchSearchResponse(data, makeResult),
   "parallel-search": (data) => parallelSearch.normalizeParallelSearchResponse(data, makeResult),
-  "keenable-search": (data) => keenableSearch.normalizeKeenableSearchResponse(data, makeResult),
+  // Keenable cannot express exclusions or several includes upstream; it filters its results.
+  "keenable-search": (data, _query, _searchType, domainFilter) =>
+    keenableSearch.normalizeKeenableSearchResponse(data, makeResult, domainFilter),
 };
 
 function normalizeResponse(
   providerId: string,
   data: any,
   query: string,
-  searchType: string
+  searchType: string,
+  domainFilter?: string[]
 ): { results: SearchResult[]; totalResults: number | null } {
   const normalizer = responseNormalizers[providerId];
-  if (normalizer) return normalizer(data, query, searchType);
+  if (normalizer) return normalizer(data, query, searchType, domainFilter);
   return { results: [], totalResults: null };
 }
 
@@ -1870,6 +1875,7 @@ async function tryProvider(
     proxyLevel,
     log,
     costContext: { apiKeyId, providerSpecificData },
-    normalize: normalizeResponse,
+    normalize: (providerId, data, normalizedQuery, normalizedType) =>
+      normalizeResponse(providerId, data, normalizedQuery, normalizedType, params.domainFilter),
   });
 }

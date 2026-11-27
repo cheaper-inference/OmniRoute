@@ -93,6 +93,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Security & Transport
+
+WebDAV authentication enforces per-IP failure tracking and lockout (10 failed attempts within a 60-second window triggers a 5-minute lockout with `429 Too Many Requests` and `Retry-After`). Because WebDAV transmits Basic authentication credentials, terminating TLS (or routing over a secure tunnel such as Tailscale or Cloudflare Tunnel) is strongly recommended when accessing the WebDAV endpoint outside loopback.
+
 ### Per-API-key context source (optional)
 
 Obsidian config can be scoped **per API key** via the `api_key_context_sources` table
@@ -158,7 +162,8 @@ in OmniRoute settings.
 
 Read tools require `read:obsidian`; write tools require `write:obsidian`. Enforcement
 is identical to Notion — handled by `withScopeEnforcement()` in
-`open-sse/mcp-server/server.ts`, gated on `OMNIROUTE_MCP_ENFORCE_SCOPES=true`, with
+`open-sse/mcp-server/server.ts`, gated on `OMNIROUTE_MCP_ENFORCE_SCOPES=true` and forced on
+for HTTP/SSE callers whose API key lacks `manage`/`admin`, with
 allowed scopes sourced from `OMNIROUTE_MCP_SCOPES` or the API key's scope context. See
 [MCP-SERVER.md](./MCP-SERVER.md).
 

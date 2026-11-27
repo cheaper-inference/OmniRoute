@@ -4,21 +4,19 @@
  * the Compression Studio (Tela A) so all three flow graphs speak the same
  * color language: green = active, red = error, amber = last-used, muted = idle.
  */
+import { ciTokenReferences } from "@omniroute/ui-kit/tokens";
+
 /**
- * Theme-aware CSS custom properties (light values in `:root`, dark values in `.dark`
- * of `src/app/globals.css`) — the dark values are exactly the old `STATUS_HEX` hexes,
- * so dark mode is byte-identical while light mode finally gets legible contrast.
- * `idle` was already a var, which is the precedent that proves a `var()` resolves in
- * an SVG `stroke` (ReactFlow renders edge `style` onto a real `<path>`).
- *
- * `STATUS_HEX` stays exported for the callers that genuinely need a resolved hex
- * (canvas 2D, string math); it is no longer used here.
+ * The kit's flow-edge tokens (`--ci-flow-edge-*`): the stroke of a connector per state, 3:1 or
+ * better on the canvas and on every content surface in the four themes. `last` is the kit's
+ * `warning` edge (the most recently routed path). A `var()` resolves in an SVG `stroke`
+ * (ReactFlow renders edge `style` onto a real `<path>`).
  */
 export const FLOW_EDGE_COLORS = {
-  active: "var(--orch-status-success)",
-  error: "var(--orch-status-error)",
-  last: "var(--orch-status-warning)",
-  idle: "var(--color-text-muted)",
+  active: ciTokenReferences.flowEdge.active,
+  error: ciTokenReferences.flowEdge.error,
+  last: ciTokenReferences.flowEdge.warning,
+  idle: ciTokenReferences.flowEdge.idle,
 } as const;
 
 /**
@@ -56,5 +54,6 @@ export function edgeStyle(
   if (active) return { stroke: FLOW_EDGE_COLORS.active, strokeWidth: 2.5, opacity: 1 };
   if (last) return { stroke: FLOW_EDGE_COLORS.last, strokeWidth: 1.5, opacity: 0.6 };
   if (healthy) return { stroke: FLOW_EDGE_COLORS.active, strokeWidth: 1.5, opacity: 0.4 };
-  return { stroke: FLOW_EDGE_COLORS.idle, strokeWidth: 1, opacity: 0.3 };
+  // The idle token meets 3:1 by itself: the edge is opaque, not a dimmed text colour.
+  return { stroke: FLOW_EDGE_COLORS.idle, strokeWidth: 1, opacity: 1 };
 }

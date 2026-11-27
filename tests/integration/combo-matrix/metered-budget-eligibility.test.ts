@@ -16,6 +16,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createComboRoutingHarness } from "../_comboRoutingHarness.ts";
 
+// This suite covers budget eligibility. B6's background handoff summary can
+// outlive the harness reset and be counted by the next case's recording fetch.
+const previousUniversalHandoffEnabled = process.env.UNIVERSAL_CONTEXT_HANDOFF_ENABLED;
+process.env.UNIVERSAL_CONTEXT_HANDOFF_ENABLED = "false";
+
 const h = await createComboRoutingHarness("combo-metered-budget");
 const {
   BaseExecutor,
@@ -65,7 +70,15 @@ test.afterEach(async () => {
   await resetStorage();
 });
 test.after(async () => {
-  await h.cleanup();
+  try {
+    await h.cleanup();
+  } finally {
+    if (previousUniversalHandoffEnabled === undefined) {
+      delete process.env.UNIVERSAL_CONTEXT_HANDOFF_ENABLED;
+    } else {
+      process.env.UNIVERSAL_CONTEXT_HANDOFF_ENABLED = previousUniversalHandoffEnabled;
+    }
+  }
 });
 
 test("B1: with allowance remaining, normal routing is unchanged — the metered target still wins", async () => {

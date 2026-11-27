@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   FREE_MODEL_BUDGETS,
+  RETIRED_FREE_ROWS,
   computeFreeModelTotals,
 } from "@omniroute/open-sse/config/freeModelCatalog.ts";
 import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry.ts";
@@ -23,9 +24,17 @@ test("navy is registered as ONE shared pool, never per-model", () => {
   // Upstream free plan: 150K tokens/day => 4.5M/month, drained by a per-model
   // token_multiplier. Summing the ~149 free models would inflate this ~149x —
   // exactly the overcounting we refuse to copy.
-  assert.equal(pool.monthlyTokens, 4_500_000);
-  assert.equal(pool.freeType, "recurring-daily");
+  // Re-audit 2026-11-23: api.navy answered 403 to three methods and its public /v1/models
+  // publishes no quota, so the pool is retired as unverifiable (owner decision 2026-11-21, PN)
+  // and the 4.5M lives in the ledger, still as ONE row.
+  assert.equal(pool.monthlyTokens, 0);
+  assert.equal(pool.freeType, "discontinued");
   assert.equal(pool.poolKey, "navy-free");
+  const ledger = RETIRED_FREE_ROWS.filter((r) => r.provider === "navy");
+  assert.deepEqual(
+    ledger.map((r) => [r.modelId, r.poolKey, r.lastListedMonthlyTokens, r.reason]),
+    [["shared-pool", "navy-free", 4_500_000, "unverifiable"]]
+  );
 });
 
 test("ovhcloud and aihorde are keyless (no API key required)", () => {
@@ -49,7 +58,14 @@ test("providers without a published TOKEN quota never inflate the headline", () 
       rows.every((m) => m.monthlyTokens === 0 && m.creditTokens === 0),
       `${id} has no published token quota — it must not carry invented numbers`
     );
-    assert.ok(rows.every((m) => m.freeType === "recurring-uncapped"));
+    // requesty/openai/gpt-oss-120b left the free list (re-audit 2026-11-23): discontinued.
+    assert.ok(
+      rows.every((m) => m.freeType === "recurring-uncapped" || m.freeType === "discontinued")
+    );
+    assert.ok(
+      rows.some((m) => m.freeType === "recurring-uncapped"),
+      `${id} keeps a live row`
+    );
   }
 
   const totals = computeFreeModelTotals();

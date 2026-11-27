@@ -31,7 +31,6 @@
         "prettier",
         "husky",
         "lint-staged",
-        "cross-env",
         "concurrently",
         "wait-on",
         "c8",

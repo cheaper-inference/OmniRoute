@@ -4,7 +4,7 @@
 
 ---
 
-## ፈጣን አጀማመር
+## ፈጣን ጅምር
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,20 +25,20 @@ export default definePlugin({
 });
 ```
 
-## የAPI ማጣቀሻ
+## API ማጣቀሻ
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-ነባሪ ቅንብሮች ያሉት Plugin ነገርን የሚፈጥር የፋብሪካ ፈንክሽን።
+ከነባሪዎች ጋር ተሰኪ ነገርን የሚፈጥር የፋብሪካ ተግባር።
 
-**መለኪያዎች፦**
+**መለኪያዎች፡-**
 
-- `name` (string, አስፈላጊ) — በkebab-case የተጻፈ የPlugin ስም
-- `priority` (number, አማራጭ, ነባሪ፦ 100) — ዝቅተኛው ቀድሞ ይሰራል
-- `enabled` (boolean, አማራጭ, ነባሪ፦ true) — እንደነቃ ይጀምር?
-- `onRequest` (function, አማራጭ) — ከchat handler በፊት ይሰራል
-- `onResponse` (function, አማራጭ) — ከchat handler በኋላ ይሰራል
-- `onError` (function, አማራጭ) — የhandler ስህተት ሲኖር ይሰራል
+- `name` (ሕብረቁምፊ፣ ያስፈልጋል) — የተሰኪ ስም በ kebab-case
+- `priority` (ቁጥር፣ አማራጭ፣ ነባሪ፡ 100) — ዝቅተኛው መጀመሪያ ይሰራል
+- `enabled` (ቦሊያን፣ አማራጭ ያልሆነ፣ ነባሪ፡ እውነት) — ነቅቷል?
+- `onRequest` (ተግባር፣ አማራጭ) — ከቻት ተቆጣጣሪ በፊት ይሰራል
+- `onResponse` (ተግባር፣ አማራጭ) — ከቻት ተቆጣጣሪ በኋላ ይሰራል
+- `onError` (ተግባር፣ አማራጭ) — በተቆጣጣሪ ስህተት ላይ ይሰራል
 
 ### `blockRequest(response?): BlockingHookResult`
 
@@ -46,15 +46,15 @@ export default definePlugin({
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-ጥያቄው ወደ provider ከመድረሱ በፊት የጥያቄውን ይዘት ያሻሽሉ።
+የጥያቄውን አካል ወደ አቅራቢው ከመድረሱ በፊት ያሻሽሉ።
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-metadataን ከጥያቄው context ጋር ያያይዙ።
+ከጥያቄው አውድ ጋር ሜታዳታን ያያይዙ።
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## የPlugin Context (`PluginContext`)
+## ተሰኪ አውድ (`PluginContext`)
 
-| መስክ         | ዓይነት                      | መግለጫ               |
-| ----------- | ------------------------- | ------------------ |
-| `requestId` | `string`                  | ልዩ የጥያቄ መለያ        |
-| `model`     | `string`                  | የተጠየቀው የmodel ስም   |
-| `provider`  | `string`                  | የዒላማ provider ID   |
-| `body`      | `Record<string, unknown>` | የጥያቄ ይዘት           |
-| `headers`   | `Record<string, string>`  | የጥያቄ headers       |
-| `metadata`  | `Record<string, unknown>` | ሊለወጥ የሚችል metadata |
-| `timestamp` | `number`                  | የጥያቄ timestamp     |
+| መስክ          | ዓይነት                      | መግለጫ                       |
+| ------------ | ------------------------- | -------------------------- |
+| `requestId`  | `string`                  | ልዩ የጥያቄ መለያ                |
+| `model`      | `string`                  | የተጠየቀው የሞዴል ስም             |
+| `provider`   | `string`                  | የዒላማ አቅራቢ ID               |
+| `body`       | `Record<string, unknown>` | አካል ይጠይቁ                   |
+| `headers`    | `Record<string, string>`  | ራስጌዎችን ይጠይቁ (ማስታወሻ ይመልከቱ)  |
+| `metadata`   | `Record<string, unknown>` | ተለዋዋጭ ዲበ ውሂብ               |
+| `timestamp`  | `number`                  | የጊዜ ማህተም ይጠይቁ              |
+| `apiKeyInfo` | `object` (አማራጭ)           | API ቁልፍ ዲበዳታ (ማስታወሻ ይመልከቱ) |
+
+ዐውደ-ጽሑፉ የደንበኛውን ምስክርነቶች በፍፁም አይይዝም `authorization`፣ `x-api-key`፣ `proxy-authorization` እና `cookie` ራስጌዎች ተወግደዋል (ማንኛውም መያዣ)፣ እና `apiKeyInfo` የቁልፉን ሜታዳታ (እንደ `id`፣ `name` እና `scopes` ያሉ) ያቆያል፣ ነገር ግን የቁልፍ እሴቱ ወይም የጣት አሻራው (`redactPluginContext()` in `src/lib/plugins/hooks.ts`) አይደለም። ይህ `onRequest`, `onResponse` እና `onError` ላይ ተፈጻሚ ይሆናል.
 
 ## Manifest (`plugin.json`)
 
@@ -140,17 +143,16 @@ Hooks በቅድሚያ ሊዋቀሩ ይችላሉ (ዝቅተኛ = ቀድሞ ይሰ
 
 ## የፈቃድ ስርዓት
 
-ፕለጊኖች በsandbox በተከለለ VM አውድ ውስጥ ይሰራሉ። ውጫዊ ሀብቶችን ለመድረስ ግልጽ ፈቃዶች ያስፈልጋሉ፦
+ተሰኪዎች ናቸው።** ማጠሪያ አይደለም** . እያንዳንዱ ንቁ ፕለጊን እንደ የተለየ፣ ተራ Node.js ልጅ ሂደት (`loadPlugin()` in `src/lib/plugins/loader.ts`) በተመሳሳይ ስርዓተ ክወና ተጠቃሚ እንደ OmniRoute ይሰራል፣ ያለ VM አውድ እና Node.js ፍቃድ ባንዲራዎች የሉትም። ተሰኪ ኮድ `node:fs`, `node:child_process`, `fetch` እና ሁሉም Node.js API መጠቀም ይችላል: OmniRoute ተጠቃሚው የሚችለውን ማንኛውንም ፋይል ማንበብ እና መፃፍ ይችላል (የውሂብ ማውጫን ጨምሮ) ፕሮግራሞችን ማስኬድ እና አውታረ መረቡ ላይ መድረስ ይችላል።
 
-| ፈቃድ          | የሚፈቅዳቸው                                                      |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | ለንባብ ብቻ የሆነ `process.env` proxy                              |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+አንጸባራቂው `requires.permissions` `network`፣ `file-read`፣ `file-write`፣ `env` እና `exec` ይቀበላል፣ ዛሬ ግን `env` ብቻ በ runtime ላይ ተጽእኖ ይኖረዋል
 
-ፈቃድ ከሌለ፣ ተዛማጅ globals በsandbox ውስጥ አይገኙም።
+| ፍቃድ                                          | ውጤት ዛሬ                                                                                                                                                                                               |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | የፕለጊኑ ሂደት `PORT`፣ `HOSTNAME`፣ `TZ` እና `TMPDIR` ይቀበላል። ያለሱ, `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` እና `PLUGIN_NAME` (በተጨማሪም `SystemRoot` እና `windir` Windows ላይ) ይቀበላል. |
+| `network`, `file-read`, `file-write`, `exec` | ምንም። መግለጫዎች ብቻ ናቸው፡ ሲጎድሉ ምንም ነገር አይታገድም።                                                                                                                                                             |
+
+ፕለጊን መጫን ሌላ ማንኛውንም ፕሮግራም በአስተናጋጁ ላይ እንደ መጫን ነው። ምንጫቸውን የምታምኗቸውን ፕለጊኖች ብቻ ጫን።
 
 ## የውቅረት Schema
 
@@ -194,7 +196,7 @@ Hooks በቅድሚያ ሊዋቀሩ ይችላሉ (ዝቅተኛ = ቀድሞ ይሰ
 
 ## ምሳሌዎች
 
-### የጥያቄ Logger
+### Loggerን ይጠይቁ
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### የRate Limiter
+### ደረጃ ወሰን
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 ደቂቃ
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### የምላሽ Transformer
+### ምላሽ ትራንስፎርመር
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

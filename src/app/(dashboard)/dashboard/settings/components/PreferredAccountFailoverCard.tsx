@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Card, Input } from "@/shared/components";
+import { Button, Card, Input, NumberInput, whenNumber } from "@/shared/components";
 import type { PreferredAccountFailoverSettings } from "@/lib/resilience/settings/types";
-import { BooleanField, NumberField } from "./ResilienceFields";
+import { BooleanField } from "./ResilienceFields";
 
 type OverrideKind = "provider" | "model";
 
@@ -56,13 +56,15 @@ function OverrideRow({
     <div className="flex flex-wrap items-end gap-2">
       <span className="min-w-0 flex-1 break-all text-sm">{id}</span>
       <div className="w-40">
-        <NumberField
+        <NumberInput
           label="Timeout"
           value={ms}
           min={0}
           max={120000}
           suffix="ms"
-          onChange={(next) => onChange({ ...value, [id]: next > 0 && next < 500 ? 500 : next })}
+          onValueChange={whenNumber((next) =>
+            onChange({ ...value, [id]: next > 0 && next < 500 ? 500 : next })
+          )}
         />
       </div>
       <Button
@@ -110,8 +112,10 @@ function OverrideEditor({
   };
 
   return (
-    <div className="space-y-3 rounded-xl border border-border p-3">
-      <h3 className="text-sm">{kind === "provider" ? "Provider overrides" : "Model overrides"}</h3>
+    <Card.Section className="space-y-3">
+      <h3 className="ci-heading" data-size="sm">
+        {kind === "provider" ? "Provider overrides" : "Model overrides"}
+      </h3>
       <p className="text-xs text-text-muted">
         {kind === "provider"
           ? "Example: codex or antigravity. Overrides the provider default."
@@ -140,13 +144,13 @@ function OverrideEditor({
           />
         </div>
         <div className="w-40">
-          <NumberField
+          <NumberInput
             label="Timeout"
             value={timeoutMs}
             min={0}
             max={120000}
             suffix="ms"
-            onChange={(next) => setTimeoutMs(next > 0 && next < 500 ? 500 : next)}
+            onValueChange={whenNumber((next) => setTimeoutMs(next > 0 && next < 500 ? 500 : next))}
           />
         </div>
         <Button size="sm" variant="secondary" disabled={disabled} onClick={add}>
@@ -158,7 +162,7 @@ function OverrideEditor({
           {error}
         </p>
       )}
-    </div>
+    </Card.Section>
   );
 }
 
@@ -185,7 +189,7 @@ export default function PreferredAccountFailoverCard({
 
   return (
     <Card className="space-y-4 p-6">
-      <h2 className="text-lg">
+      <h2 className="ci-heading" data-size="lg">
         {label("preferredAccountFailoverTitle", "Preferred account failover")}
       </h2>
       <p className="text-sm text-text-muted">
@@ -201,13 +205,13 @@ export default function PreferredAccountFailoverCard({
           checked={draft.enabled}
           onChange={(enabled) => setDraft({ ...draft, enabled })}
         />
-        <NumberField
+        <NumberInput
           label={label("preferredAccountDefaultTimeout", "Other providers: default timeout")}
           value={draft.defaultTimeoutMs}
           min={500}
           max={120000}
           suffix="ms"
-          onChange={(defaultTimeoutMs) => setDraft({ ...draft, defaultTimeoutMs })}
+          onValueChange={whenNumber((defaultTimeoutMs) => setDraft({ ...draft, defaultTimeoutMs }))}
         />
       </div>
       <OverrideEditor

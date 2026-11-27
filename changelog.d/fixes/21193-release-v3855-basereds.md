@@ -1,0 +1,1 @@
+- Fix the migration gate's pre-commit test setup and give the 60,000-row batch upload test more time on hosted CI runners.

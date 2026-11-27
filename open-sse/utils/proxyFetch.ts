@@ -106,7 +106,7 @@ export function resolveProxyForRequest(targetUrl) {
 export async function runWithProxyContext(
   proxyConfig,
   fn,
-  opts?: { directFallbackOnUnreachable?: boolean }
+  opts?: { directFallbackOnUnreachable?: boolean; noFastFail?: boolean }
 ) {
   if (typeof fn !== "function") {
     throw new TypeError("runWithProxyContext requires a callback function");
@@ -160,7 +160,9 @@ export async function runWithProxyContext(
         );
         return runDirect();
       }
-    } else if (new URL(resolvedProxyUrl).protocol !== "socks5:") {
+    } else if (opts?.noFastFail !== true && new URL(resolvedProxyUrl).protocol !== "socks5:") {
+      // #20626: committed requests (OAuth refresh) skip the probe race so a
+      // dispatched, possibly token-rotating response is never discarded.
       // Fire the probe WITHOUT awaiting; dispatch optimistically below.
       unreachableProbe = isProxyReachable(resolvedProxyUrl);
     }
@@ -252,6 +254,15 @@ export async function runWithProxyContext(
     }
     return winner.value;
   });
+}
+
+/**
+ * #20626: run a committed request (OAuth refresh / token exchange) through the
+ * proxy WITHOUT the fast-fail probe race — the response of a dispatched refresh
+ * may carry a rotated refresh token and must never be discarded.
+ */
+export function runCommittedWithProxyContext(proxyConfig, fn) {
+  return runWithProxyContext(proxyConfig, fn, { noFastFail: true });
 }
 
 /** Run a request with an explicit direct-egress sentinel, bypassing proxy env/context lookup. */

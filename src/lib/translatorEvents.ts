@@ -31,8 +31,16 @@ export function getTranslationEvents(limit = DEFAULT_TRANSLATION_EVENT_LIMIT) {
       : DEFAULT_TRANSLATION_EVENT_LIMIT;
 
   const events = ensureEventsBuffer();
+  const sortedEvents = events.toSorted((a, b) => {
+    const aTime = new Date(a.timestamp).getTime();
+    const bTime = new Date(b.timestamp).getTime();
+
+    if (Number.isNaN(aTime)) return Number.isNaN(bTime) ? 0 : 1;
+    return Number.isNaN(bTime) ? -1 : bTime - aTime;
+  });
+
   return {
-    events: events.slice(0, boundedLimit),
+    events: sortedEvents.slice(0, boundedLimit),
     total: events.length,
   };
 }

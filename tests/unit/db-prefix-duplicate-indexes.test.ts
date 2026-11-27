@@ -66,3 +66,90 @@ test("the queries the dropped indexes served still use an index", () => {
     assert.ok(!/SCAN (usage_history|call_logs)\b(?! USING)/.test(detail), `${sql} -> ${detail}`);
   }
 });
+
+// Migration 047 creates a (provider, model, date[_hour]) index on each usage summary table.
+// Migration 048 adds the same columns twice more: once more as a plain index and once as the
+// UNIQUE index that the rollup's ON CONFLICT needs. The UNIQUE index already serves every lookup
+// the plain ones did, so the two plain copies only add B-tree writes for each new bucket.
+const SUMMARY_DUPLICATES = [
+  "idx_daily_usage_provider_model_date",
+  "idx_daily_usage_provider_model_date_composite",
+  "idx_hourly_usage_provider_model_date",
+  "idx_hourly_usage_provider_model_date_composite",
+];
+const SUMMARY_UNIQUE = ["idx_daily_usage_unique", "idx_hourly_usage_unique"];
+
+function recreateSummaryDuplicates() {
+  const db = core.getDbInstance();
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_daily_usage_provider_model_date ON daily_usage_summary(provider, model, date);
+    CREATE INDEX IF NOT EXISTS idx_daily_usage_provider_model_date_composite ON daily_usage_summary(provider, model, date);
+    CREATE INDEX IF NOT EXISTS idx_hourly_usage_provider_model_date ON hourly_usage_summary(provider, model, date_hour);
+    CREATE INDEX IF NOT EXISTS idx_hourly_usage_provider_model_date_composite ON hourly_usage_summary(provider, model, date_hour);
+  `);
+}
+
+test("a fresh database keeps one provider/model/date index per summary table", () => {
+  const names = indexNames();
+  for (const name of SUMMARY_DUPLICATES)
+    assert.equal(names.has(name), false, `${name} must not exist`);
+  for (const name of SUMMARY_UNIQUE) assert.ok(names.has(name), `${name} must stay`);
+});
+
+test("an upgraded database loses the duplicate summary indexes at boot", () => {
+  recreateSummaryDuplicates();
+  assert.equal(indexNames().has("idx_daily_usage_provider_model_date"), true, "precondition");
+  core.resetDbInstance();
+
+  const names = indexNames();
+  for (const name of SUMMARY_DUPLICATES)
+    assert.equal(names.has(name), false, `${name} survived boot`);
+  for (const name of SUMMARY_UNIQUE) assert.ok(names.has(name), `${name} must stay`);
+});
+
+test("the duplicates stay when the UNIQUE index they overlap is missing", () => {
+  const db = core.getDbInstance();
+  db.exec("DROP INDEX IF EXISTS idx_daily_usage_unique");
+  recreateSummaryDuplicates();
+  core.resetDbInstance();
+
+  const names = indexNames();
+  assert.equal(names.has("idx_daily_usage_provider_model_date"), true, "no lookup is left bare");
+  assert.equal(names.has("idx_hourly_usage_provider_model_date"), false);
+  // Restore the schema for the tests below.
+  core
+    .getDbInstance()
+    .exec(
+      "CREATE UNIQUE INDEX IF NOT EXISTS idx_daily_usage_unique ON daily_usage_summary(provider, model, date)"
+    );
+  core.getDbInstance().exec("DROP INDEX IF EXISTS idx_daily_usage_provider_model_date");
+  core.getDbInstance().exec("DROP INDEX IF EXISTS idx_daily_usage_provider_model_date_composite");
+});
+
+test("summary lookups and the rollup upsert still use the UNIQUE index", () => {
+  const db = core.getDbInstance();
+  const plan = (sql: string) =>
+    (db.prepare(`EXPLAIN QUERY PLAN ${sql}`).all() as Array<{ detail: string }>)
+      .map((row) => row.detail)
+      .join(" | ");
+  const daily = plan(
+    "SELECT * FROM daily_usage_summary WHERE provider = 'openai' AND model = 'm' AND date >= '2026-01-01'"
+  );
+  const hourly = plan(
+    "SELECT * FROM hourly_usage_summary WHERE provider = 'openai' AND model = 'm' AND date_hour >= '2026-01-01 00:00:00'"
+  );
+  assert.match(daily, /idx_daily_usage_unique/, daily);
+  assert.match(hourly, /idx_hourly_usage_unique/, hourly);
+
+  const upsert = db.prepare(
+    `INSERT INTO daily_usage_summary (provider, model, date, total_requests)
+     VALUES ('openai', 'm', '2026-01-01', ?)
+     ON CONFLICT(provider, model, date) DO UPDATE SET total_requests = total_requests + excluded.total_requests`
+  );
+  upsert.run(2);
+  upsert.run(3);
+  const row = db
+    .prepare("SELECT COUNT(*) AS n, SUM(total_requests) AS requests FROM daily_usage_summary")
+    .get() as { n: number; requests: number };
+  assert.deepEqual({ n: row.n, requests: row.requests }, { n: 1, requests: 5 });
+});

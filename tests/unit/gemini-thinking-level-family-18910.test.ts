@@ -106,7 +106,7 @@ test("Claude path keeps the numeric off-switch for gemini-3.8-flash-high budget_
 
 // ── B. Gemini 4 and later majors get thinkingLevel low when off ──────
 
-test("gemini-4 family sends only thinkingLevel low for reasoning_effort none", () => {
+test("known Gemini 4 models send thinkingLevel low without thoughts for effort none", () => {
   for (const model of [
     "gemini-4-argon",
     "vertex/gemini-4-argon",
@@ -114,9 +114,9 @@ test("gemini-4 family sends only thinkingLevel low for reasoning_effort none", (
     "gemini-4-argon-low",
   ]) {
     const tc = openaiThinking(model, { max_tokens: 65536, reasoning_effort: "none" });
-    assert.deepEqual(tc, { thinkingLevel: "low" }, model);
+    assert.deepEqual(tc, { thinkingLevel: "low", includeThoughts: false }, model);
     assert.equal(tc?.thinkingBudget, undefined, model);
-    assert.equal(tc?.includeThoughts, undefined, model);
+    assert.equal(tc?.includeThoughts, false, model);
   }
 });
 
@@ -137,7 +137,7 @@ test("gemini-4-argon thinking.budget_tokens 0 is low, 24576 is high", () => {
     max_tokens: 65536,
     thinking: { type: "enabled", budget_tokens: 0 },
   });
-  assert.deepEqual(zero, { thinkingLevel: "low" });
+  assert.deepEqual(zero, { thinkingLevel: "low", includeThoughts: false });
   const high = openaiThinking("gemini-4-argon", {
     max_tokens: 65536,
     thinking: { type: "enabled", budget_tokens: 24576 },
@@ -212,7 +212,10 @@ function translated(model: string, extra: Record<string, unknown>) {
 
 test("Zed uppercases the low level produced for gemini-4-argon none", () => {
   const request = translated("gemini-4-argon", { max_tokens: 64, reasoning_effort: "none" });
-  assert.deepEqual(request.generationConfig?.thinkingConfig, { thinkingLevel: "low" });
+  assert.deepEqual(request.generationConfig?.thinkingConfig, {
+    thinkingLevel: "low",
+    includeThoughts: false,
+  });
   adaptGeminiRequestForZed(request);
   assert.equal(request.generationConfig?.thinkingConfig?.thinkingLevel, "LOW");
 });

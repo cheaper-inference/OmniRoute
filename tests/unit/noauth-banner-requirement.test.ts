@@ -40,13 +40,13 @@ test("an account no-auth banner includes the stored notice beside the account me
       NextIntlClientProvider,
       { locale: "en", timeZone: "UTC", messages: { noAuthProvider: enMessages.noAuthProvider } },
       React.createElement(NoAuthAccountCard, {
-        providerId: "uncloseai",
-        providerName: "UncloseAI",
+        providerId: "cloudflare-playground",
+        providerName: "Cloudflare AI Playground",
         generateAccountId: () => "account-1",
       })
     )
   );
 
   assert.match(html, /Ready to use/);
-  assert.match(html, /UncloseAI needs no API key/);
+  assert.match(html, /Requires Playwright with a Chromium browser on first request/);
 });

@@ -8,7 +8,7 @@ import {
   normalizeKimiDeviceId,
 } from "../../../config/providers/registry/kimi/coding/runtime.ts";
 import { getKimiDeviceModel } from "../../../utils/kimiDevice.ts";
-import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { runCommittedWithProxyContext } from "../../../utils/proxyFetch.ts";
 import type { RefreshLogger } from "../shared.ts";
 
 /**
@@ -55,7 +55,7 @@ export async function refreshKimiCodingToken(
       client_id: PROVIDERS["kimi-coding"]?.clientId || "",
     });
 
-    const response = await runWithProxyContext(proxyConfig, () =>
+    const response = await runCommittedWithProxyContext(proxyConfig, () =>
       fetch(endpoint, {
         method: "POST",
         headers: {

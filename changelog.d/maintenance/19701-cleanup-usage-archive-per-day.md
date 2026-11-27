@@ -1,0 +1,1 @@
+- **perf(db):** Usage-history retention now archives and deletes one UTC day per pass, so a long backlog no longer loads and prices every token-shape group at once. ([#19701](https://github.com/cheaper-inference/OmniRoute/pull/19701))

@@ -91,6 +91,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### An ninh & Vận tải
+
+Xác thực WebDAV thực thi việc theo dõi và khóa lỗi trên mỗi IP (10 lần thử không thành công trong khoảng thời gian 60 giây sẽ kích hoạt khóa 5 phút với `429 Too Many Requests` và `Retry-After`). Vì WebDAV truyền thông tin xác thực Cơ bản nên việc chấm dứt TLS (hoặc định tuyến qua một đường hầm an toàn như Tailscale hoặc Cloudflare Tunnel) được khuyến khích mạnh mẽ khi truy cập điểm cuối WebDAV bên ngoài vòng lặp.
+
 ### Nguồn ngữ cảnh theo từng khóa API (tùy chọn)
 
 Cấu hình Obsidian có thể được giới hạn phạm vi **theo từng khóa API** thông qua bảng `api_key_context_sources`

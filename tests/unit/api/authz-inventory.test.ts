@@ -112,9 +112,10 @@ test("AC-2: bypassEnabled + bypassPrefixes reflect getSettings() (defaults)", as
     bypassEnabled: boolean;
     bypassPrefixes: string[];
   };
-  // Default snapshot: kill-switch ON, single prefix /api/mcp/.
+  // Default snapshot: kill-switch ON, /api/mcp/ plus the read-only
+  // /api/resilience/connections (KEA-9357).
   assert.equal(body.bypassEnabled, true);
-  assert.deepEqual(body.bypassPrefixes, ["/api/mcp/"]);
+  assert.deepEqual(body.bypassPrefixes, ["/api/mcp/", "/api/resilience/connections"]);
 });
 
 test("AC-2: bypassEnabled flips after settings mutation", async () => {

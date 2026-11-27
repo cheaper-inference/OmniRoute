@@ -83,14 +83,14 @@ test("builder returns a connection-scoped 429 envelope near the end of the pause
 test("an unrelated Free pause does not bypass exclusion of a live noauth connection", async () => {
   noteOpencodeFreeTierSkip(PROVIDER);
   const baseline = await auth.getProviderCredentials(
-    "uncloseai",
+    "cloudflare-playground",
     null,
     null,
     "Lorbus/Qwen3.6-27B-int4-AutoRound"
   );
   assert.equal(baseline?.connectionId, "noauth");
   const result = await auth.getProviderCredentials(
-    "uncloseai",
+    "cloudflare-playground",
     "noauth",
     null,
     "Lorbus/Qwen3.6-27B-int4-AutoRound"
@@ -101,14 +101,14 @@ test("an unrelated Free pause does not bypass exclusion of a live noauth connect
 test("an unrelated Free pause does not bypass a live noauth connection allowlist", async () => {
   noteOpencodeFreeTierSkip(PROVIDER);
   const baseline = await auth.getProviderCredentials(
-    "uncloseai",
+    "cloudflare-playground",
     null,
     null,
     "Lorbus/Qwen3.6-27B-int4-AutoRound"
   );
   assert.equal(baseline?.connectionId, "noauth");
   const result = await auth.getProviderCredentials(
-    "uncloseai",
+    "cloudflare-playground",
     null,
     ["conn-other"],
     "Lorbus/Qwen3.6-27B-int4-AutoRound"

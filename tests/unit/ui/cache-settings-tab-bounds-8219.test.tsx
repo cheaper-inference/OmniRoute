@@ -11,6 +11,7 @@ import CacheSettingsTab from "@/app/(dashboard)/dashboard/settings/components/Ca
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
+  useLocale: () => "en",
   useFormatter: () => ({ number: (value: number) => String(value) }),
 }));
 
@@ -135,6 +136,24 @@ describe("CacheSettingsTab TTL bounds", () => {
       "maximum bound error to render"
     );
 
+    expect(getSaveButton(container).disabled).toBe(true);
+  });
+
+  // The field is the kit NumberInput, which would bring an out-of-range value into its bounds
+  // when the field is left. This screen validates the range itself, so the typed value and its
+  // message must survive the blur instead of being replaced by the nearest valid number.
+  it("keeps an out-of-range value and its error after the field is left", async () => {
+    const container = await render();
+    await waitFor(() => getInput(container).value === "1500", "initial TTL to load");
+
+    await setInputValue(container, "70000");
+    act(() => {
+      getInput(container).focus();
+      getInput(container).blur();
+    });
+
+    expect(getInput(container).value).toBe("70000");
+    expect(container.textContent).toContain("modelCatalogTtlMaximumError");
     expect(getSaveButton(container).disabled).toBe(true);
   });
 
