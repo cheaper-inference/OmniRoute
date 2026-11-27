@@ -1,0 +1,1 @@
+- **fix(combos):** Anthropic requests with an oversized `max_tokens` ceiling can fall back to model-specific output caps when every otherwise-compatible target would be excluded only for output length. Full-budget targets remain preferred, and explicitly disabling `outputLimitAdvisory` retains strict behavior.

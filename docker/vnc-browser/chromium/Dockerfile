@@ -18,7 +18,7 @@
 #
 # Alpine/Debian package mirrors are unreachable from the build sandbox, so we
 # extend a prebuilt image rather than apt/apk-installing anything.
-FROM linuxserver/chromium:latest
+FROM linuxserver/chromium:version-075b0b99@sha256:6d2a8da6a45d4083a7287211a619ca29fdb518ebea0ef562c27392ba2f6698d2
 
 COPY cdp-bridge.py /usr/local/bin/cdp-bridge.py
 COPY svc-de-run /etc/s6-overlay/s6-rc.d/svc-de/run

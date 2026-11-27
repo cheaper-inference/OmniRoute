@@ -25,6 +25,7 @@ function upload(records: unknown) {
       files: [
         {
           name: "fixture.json",
+          type: "application/json",
           size: 200,
           text: async () => JSON.stringify(records),
         },
@@ -63,6 +64,7 @@ test("malformed JSON cannot enable import", async () => {
       files: [
         {
           name: "fixture.json",
+          type: "application/json",
           size: 10,
           text: async () => "not-json",
         },

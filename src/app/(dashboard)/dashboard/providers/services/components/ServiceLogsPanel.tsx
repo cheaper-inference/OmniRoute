@@ -14,7 +14,7 @@ interface ServiceLogsPanelProps {
 function LogLineRow({ line, locale }: { line: LogLine; locale: string }) {
   const ts = new Date(line.ts).toLocaleTimeString(locale, { hour12: false });
   return (
-    <div className="flex gap-2 text-[11px] leading-5 font-mono hover:bg-bg-subtle/50 px-2">
+    <div className="flex gap-2 text-2xs leading-5 font-mono hover:bg-bg-subtle/50 px-2">
       <span className="text-text-muted shrink-0 select-none">{ts}</span>
       <span
         className={cn(

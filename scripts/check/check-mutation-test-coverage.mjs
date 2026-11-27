@@ -29,6 +29,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { isMainModule } from "../lib/is-main-module.mjs";
 import {
   isUnitTestCandidate,
   moduleFragment,
@@ -133,7 +134,7 @@ async function main() {
   process.exit(0);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (isMainModule(import.meta.url)) {
   main().catch((err) => {
     console.error(`[mutation-test-coverage] could not load ${STRYKER_CONFIG_FILE}:`, err);
     process.exit(1);

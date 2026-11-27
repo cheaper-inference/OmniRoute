@@ -22,8 +22,15 @@ test("onomeo contributes its free models to the catalog", () => {
 });
 
 test("onomeo entries are recurring-uncapped with no invented token figure", () => {
+  // Re-audit 2026-11-23 (https://onomeo.com/api/info `freeModels`): of the catalog ids only auto and
+  // glm-4.7-flash are still free; the other 11 stay as discontinued (no quota, so no ledger row).
+  const live = onomeo.filter((m) => m.freeType !== "discontinued").map((m) => m.modelId);
+  assert.deepEqual(live.sort(), ["auto", "glm-4.7-flash"]);
   for (const m of onomeo) {
-    assert.equal(m.freeType, "recurring-uncapped", `${m.modelId} freeType`);
+    assert.ok(
+      m.freeType === (live.includes(m.modelId) ? "recurring-uncapped" : "discontinued"),
+      `${m.modelId} freeType`
+    );
     assert.equal(m.monthlyTokens, 0, `${m.modelId} must not claim a monthly token budget`);
     assert.equal(m.creditTokens, 0, `${m.modelId} must not claim credits`);
     assert.equal(m.poolKey, "onomeo", `${m.modelId} must share the single onomeo pool`);

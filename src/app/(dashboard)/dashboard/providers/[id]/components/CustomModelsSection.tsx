@@ -1,5 +1,7 @@
 "use client";
 
+import Card from "@/shared/components/Card";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Icon from "@/shared/components/Icon";
 /**
  * CustomModelsSection — Issue #3501 Phase 1e
@@ -12,7 +14,7 @@ import Icon from "@/shared/components/Icon";
  */
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Button, CapabilityBadge, Checkbox, Input, Select } from "@/shared/components";
+import { Badge, Button, CapabilityBadge, Checkbox, Input, Select } from "@/shared/components";
 import {
   normalizeModelSupportedEndpoints,
   type ModelSupportedEndpoint,
@@ -461,7 +463,7 @@ export default function CustomModelsSection({
 
   return (
     <div className="mt-6 pt-6 border-t border-border">
-      <h3 className="text-sm mb-3 flex items-center gap-2">
+      <h3 className="ci-heading mb-3 flex items-center gap-2" data-size="sm">
         <Icon name="tune" size={16} className="text-primary" />
         {t("customModels")}
       </h3>
@@ -617,26 +619,25 @@ export default function CustomModelsSection({
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium truncate">{model.name || model.id}</p>
                   <div className="flex items-center gap-1 mt-1 flex-wrap">
-                    <code className="text-xs text-text-muted font-mono bg-sidebar px-1.5 py-0.5 rounded">
-                      {fullModel}
-                    </code>
+                    <InlineCode className="text-text-muted">{fullModel}</InlineCode>
                     <Button
                       variant="ghost"
-                      size="icon-sm"
+                      size="icon-2xs"
+                      tone="muted"
                       icon={copied === copyKey ? "check" : "content_copy"}
                       onClick={() => onCopy(fullModel, copyKey)}
-                      className="size-6 min-h-6 rounded text-text-muted"
                       title={t("copyModel")}
                       aria-label={t("copyModel")}
                     />
                     {model.apiFormat === "responses" && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-info/15 text-info font-medium">
+                      <Badge variant="info" size="sm">
                         {t("responses")}
-                      </span>
+                      </Badge>
                     )}
                     {hasSyncedBase && (
-                      <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium"
+                      <Badge
+                        variant="primary"
+                        size="sm"
                         title={providerText(
                           t,
                           "overridesUpstreamModelHint",
@@ -644,15 +645,12 @@ export default function CustomModelsSection({
                         )}
                       >
                         {providerText(t, "overridesUpstreamModel", "Overrides upstream")}
-                      </span>
+                      </Badge>
                     )}
                     {model.targetFormat && (
-                      <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-success/15 text-success font-medium"
-                        title={t("targetFormatHint")}
-                      >
+                      <Badge variant="success" size="sm" title={t("targetFormatHint")}>
                         {`→ ${targetFormatLabel(model.targetFormat, t)}`}
-                      </span>
+                      </Badge>
                     )}
                     {typeof model.contextWindowOverride === "number" && (
                       <CapabilityBadge
@@ -682,9 +680,9 @@ export default function CustomModelsSection({
                       </CapabilityBadge>
                     )}
                     {model.isFree === true && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-success/15 text-success font-medium">
+                      <Badge variant="success" size="sm">
                         {t("freeBadge")}
-                      </span>
+                      </Badge>
                     )}
                     {model.supportedEndpoints?.includes("embeddings") && (
                       <CapabilityBadge
@@ -721,33 +719,24 @@ export default function CustomModelsSection({
                       </CapabilityBadge>
                     )}
                     {anyNormalizeCompatBadge(model.id!, customMap, overrideMap) && (
-                      <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-bg-subtle text-text-muted font-medium"
-                        title={t("normalizeToolCallIdLabel")}
-                      >
+                      <Badge size="sm" title={t("normalizeToolCallIdLabel")}>
                         ID×9
-                      </span>
+                      </Badge>
                     )}
                     {anyNoPreserveCompatBadge(model.id!, customMap, overrideMap) && (
-                      <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-chart-2/15 text-chart-2-ink font-medium"
-                        title={t("compatDoNotPreserveDeveloper")}
-                      >
+                      <Badge tone="chart-2" size="sm" title={t("compatDoNotPreserveDeveloper")}>
                         {t("compatBadgeNoPreserve")}
-                      </span>
+                      </Badge>
                     )}
                     {anyUpstreamHeadersBadge(model.id!, customMap, overrideMap) && (
-                      <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-chart-3/15 text-chart-3-ink font-medium"
-                        title={t("compatUpstreamHeadersLabel")}
-                      >
+                      <Badge tone="chart-3" size="sm" title={t("compatUpstreamHeadersLabel")}>
                         {t("compatBadgeUpstreamHeaders")}
-                      </span>
+                      </Badge>
                     )}
                   </div>
 
                   {editingModelId === model.id && (
-                    <div className="mt-3 min-w-0 max-w-full rounded-lg border border-border bg-bg-subtle p-3">
+                    <Card.Section className="mt-3 min-w-0 max-w-full">
                       <div className={FORMAT_FIELDS_GRID}>
                         <div className="min-w-0 lg:w-[11rem] lg:shrink-0">
                           <Select
@@ -880,16 +869,16 @@ export default function CustomModelsSection({
                           </Button>
                         </div>
                       </div>
-                    </div>
+                    </Card.Section>
                   )}
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon-2xs"
+                    tone="muted"
                     icon="edit"
                     onClick={() => beginEdit(model)}
-                    className="size-6 min-h-6 rounded text-text-muted"
                     title={t("edit")}
                     aria-label={t("edit")}
                   />
@@ -922,21 +911,22 @@ export default function CustomModelsSection({
                   />
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon-2xs"
+                    tone="muted"
                     icon={model.isHidden ? "visibility_off" : "visibility"}
                     onClick={() => handleToggleHidden(model.id!, !model.isHidden)}
                     disabled={togglingModelId === model.id}
-                    className="size-6 min-h-6 rounded text-text-muted disabled:opacity-50"
+                    className="aria-disabled:opacity-50"
                     title={model.isHidden ? t("unhideModel") : t("hideModel")}
                     aria-label={model.isHidden ? t("unhideModel") : t("hideModel")}
                   />
                   {hasSyncedBase && (
                     <Button
                       variant="ghost"
-                      size="icon-sm"
+                      size="icon-2xs"
                       icon="restart_alt"
                       onClick={() => handleResetToUpstreamDefaults(model.id!)}
-                      className="size-6 min-h-6 rounded text-warning hover:bg-warning-bg"
+                      className="text-warning hover:bg-warning-bg"
                       title={providerText(
                         t,
                         "resetToUpstreamDefaults",
@@ -951,10 +941,9 @@ export default function CustomModelsSection({
                   )}
                   <Button
                     variant="destructive-ghost"
-                    size="icon-sm"
+                    size="icon-2xs"
                     icon="delete"
                     onClick={() => handleRemove(model.id!)}
-                    className="size-6 min-h-6 rounded"
                     title={t("removeCustomModel")}
                     aria-label={t("removeCustomModel")}
                   />

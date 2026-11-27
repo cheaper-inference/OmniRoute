@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import {
   Table,
@@ -11,10 +11,13 @@ import {
   TableRow,
 } from "@omniroute/ui-kit/table";
 import Icon from "@/shared/components/Icon";
+import Notice from "@/shared/components/Notice";
 import { Spinner } from "@/shared/components/Loading";
 import { Card, Badge, Button, Input, Select, Modal } from "@/shared/components";
 import EmptyState from "@/shared/components/EmptyState";
+import { FileTrigger } from "@/shared/components/FileInput";
 import InfoTooltip from "@/shared/components/InfoTooltip";
+import Pager from "@/shared/components/Pager";
 import EditMemoryModal from "../EditMemoryModal";
 
 interface Memory {
@@ -90,7 +93,6 @@ export default function MemoriesTab() {
   const [summarizeCandidates, setSummarizeCandidates] = useState<string[]>([]);
   const [summarizeDryRunLoading, setSummarizeDryRunLoading] = useState(false);
   const [summarizeRunLoading, setSummarizeRunLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [importStatus, setImportStatus] = useState<string>("");
 
   const fetchMemories = useCallback(async () => {
@@ -155,14 +157,7 @@ export default function MemoriesTab() {
     }
   };
 
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const handleImportFile = async (file: File) => {
     setIsSubmitting(true);
     setImportStatus("");
     let skipped = 0;
@@ -207,7 +202,6 @@ export default function MemoriesTab() {
       setImportStatus(t("importError"));
     } finally {
       setIsSubmitting(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -342,21 +336,16 @@ export default function MemoriesTab() {
           </Button>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {/* kit-exception: Hidden picker behind the toolbar Import button, which also shows the import's
-              loading state; the pick imports at once, so a kit FileInput status line has no role here. */}
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            accept=".json"
-            className="hidden"
-          />
           <Button variant="outline" size="sm" onClick={handleExport}>
             {t("export")}
           </Button>
-          <Button variant="outline" size="sm" onClick={handleImportClick} loading={isSubmitting}>
-            {t("import")}
-          </Button>
+          {/* The pick imports at once: the kit FileTrigger opens the picker from the button, which
+              also shows the import's loading state. */}
+          <FileTrigger accept=".json" onFilesChange={(files) => void handleImportFile(files[0])}>
+            <Button variant="outline" size="sm" loading={isSubmitting}>
+              {t("import")}
+            </Button>
+          </FileTrigger>
           <Button
             variant="outline"
             size="sm"
@@ -371,11 +360,7 @@ export default function MemoriesTab() {
         </div>
       </div>
 
-      {importStatus && (
-        <div className="p-3 rounded-lg bg-bg-subtle border border-border/60 text-xs text-text-muted">
-          {importStatus}
-        </div>
-      )}
+      {importStatus && <Notice>{importStatus}</Notice>}
 
       {/* Stats cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -416,7 +401,9 @@ export default function MemoriesTab() {
       <Card>
         <div className="p-4">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-lg">{t("memories")}</h2>
+            <h2 className="ci-heading" data-size="lg">
+              {t("memories")}
+            </h2>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
                 icon="search"
@@ -458,11 +445,7 @@ export default function MemoriesTab() {
             </div>
           ) : (
             <>
-              <Table
-                aria-label={t("memories")}
-                scrollbarLabel={t("memories")}
-                containerClassName="rounded-none border-0"
-              >
+              <Table aria-label={t("memories")} scrollbarLabel={t("memories")} variant="plain">
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("type")}</TableHead>
@@ -523,24 +506,7 @@ export default function MemoriesTab() {
                 <div className="text-sm text-text-muted">
                   {t("pageInfo", { page, totalPages, total })}
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={page === 1}
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  >
-                    {t("previous")}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={page >= totalPages}
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  >
-                    {t("next")}
-                  </Button>
-                </div>
+                <Pager page={page} pageCount={totalPages} onPageChange={setPage} />
               </div>
             </>
           )}

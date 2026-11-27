@@ -15,6 +15,7 @@
  * `./tokenAccounting` accept both and extract the right fields.
  */
 import type { AgentContext } from "./usageHistory/agentSessionUsage";
+import type { AgentSessionTurn } from "@omniroute/open-sse/handlers/chatCore/agentSessionTurn.ts";
 
 export interface UsageEntry {
   provider?: string | null;
@@ -47,4 +48,5 @@ export interface UsageEntry {
   cpaAuthIndex?: string | null;
   /** Coding-agent session/project; recorded atomically with this usage row. */
   agentContext?: AgentContext | null;
+  sessionTurn?: AgentSessionTurn | null; // stored only for keyed, non-noLog requests
 }

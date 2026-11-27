@@ -224,7 +224,7 @@ export default function FreeProviderRankingsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <div
-                          className="ci-brand-tint bg-[var(--ci-brand-subtle)] w-6 h-6 rounded flex items-center justify-center text-[10px] font-semibold text-text-main"
+                          className="ci-brand-tint bg-[var(--ci-brand-subtle)] w-6 h-6 rounded flex items-center justify-center text-3xs font-semibold text-text-main"
                           style={brandTintVars(provider.color) as CSSProperties}
                         >
                           {provider.textIcon || provider.name.charAt(0)}
@@ -285,7 +285,7 @@ export default function FreeProviderRankingsPage() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div
-                            className="ci-brand-tint bg-[var(--ci-brand-subtle)] w-6 h-6 rounded flex items-center justify-center text-[10px] font-semibold text-text-main"
+                            className="ci-brand-tint bg-[var(--ci-brand-subtle)] w-6 h-6 rounded flex items-center justify-center text-3xs font-semibold text-text-main"
                             style={brandTintVars(provider.color) as CSSProperties}
                           >
                             {provider.textIcon || provider.name.charAt(0)}

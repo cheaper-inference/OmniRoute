@@ -45,7 +45,7 @@ omniroute-cmd-myplugin/
   "version": "0.1.0",
   "type": "module",
   "main": "index.mjs",
-  "engines": { "omniroute": ">=4.0.0" },
+  "engines": { "omniroute": ">=3.8.0" },
   "keywords": ["omniroute-plugin", "omniroute-cmd"]
 }
 ```
@@ -57,7 +57,7 @@ export const meta = {
   name: "myplugin",
   version: "0.1.0",
   description: "My plugin for OmniRoute",
-  omnirouteApi: ">=4.0.0",
+  omnirouteApi: ">=3.8.0",
 };
 
 export function register(program, ctx) {
@@ -94,8 +94,11 @@ The `ctx` object passed to `register(program, ctx)`:
 
 Plugins are discovered from:
 
-1. `~/.omniroute/plugins/<name>/` — user-local installs
-2. `OMNIROUTE_PLUGIN_PATH` env var — custom directory
+1. `~/.omniroute/plugins/node_modules/<name>/` — where `omniroute plugin install` puts packages (an npm `--prefix`, not `npm -g`)
+2. `~/.omniroute/plugins/<name>/` — hand-copied plugin directories
+3. `OMNIROUTE_PLUGIN_PATH` env var — custom directory
+
+Symlinked directories (what npm creates for `plugin install ./dir`) are followed.
 
 Both are **CLI-only**. The server-side plugin runtime (the marketplace/`plugin.json`
 plugins that run inside the proxy) has its own scanner with its own override,

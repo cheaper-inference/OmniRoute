@@ -1,0 +1,1 @@
+- **fix(mcp):** one skill with a duplicate MCP tool name no longer stops the later skills from getting tools. The duplicate is skipped and logged. ([#19542](https://github.com/cheaper-inference/OmniRoute/pull/19542))

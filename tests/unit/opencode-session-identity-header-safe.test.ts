@@ -6,7 +6,8 @@ import path from "node:path";
 
 process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "or9r-session-header-safe-"));
 
-const { forwardOpencodeClientHeaders } = await import("../../open-sse/utils/opencodeHeaders.ts");
+const { forwardOpencodeClientHeaders, resolveOpencodeCliDefaults } =
+  await import("../../open-sse/utils/opencodeHeaders.ts");
 const { preserveOpencodeSessionIdentity, resolveOpencodeSessionIdentity } =
   await import("../../open-sse/utils/opencodeSessionIdentity.ts");
 
@@ -55,6 +56,27 @@ for (const [name, value] of [
     assert.ok(headers["x-opencode-session"]);
   });
 }
+
+test("CLI synthesis off: a non-Latin-1 body session id still yields a header-safe value", () => {
+  const previous = process.env.OPENCODE_SYNTHESIZE_CLI_HEADERS;
+  process.env.OPENCODE_SYNTHESIZE_CLI_HEADERS = "false";
+  try {
+    const cliDefaults = resolveOpencodeCliDefaults("opencode-go", false);
+    assert.equal(cliDefaults, undefined, "synthesis is disabled");
+    const first = outbound({ session_id: "会话" }, cliDefaults);
+    const second = outbound({ session_id: "会话" }, cliDefaults);
+    assert.doesNotThrow(() => new Headers(first));
+    assert.match(first["x-opencode-session"], /^[\x20-\xff]+$/);
+    assert.equal(first["x-opencode-session"], second["x-opencode-session"]);
+    assert.equal(
+      outbound({ session_id: "conv-abc_123" }, cliDefaults)["x-opencode-session"],
+      "conv-abc_123"
+    );
+  } finally {
+    if (previous === undefined) delete process.env.OPENCODE_SYNTHESIZE_CLI_HEADERS;
+    else process.env.OPENCODE_SYNTHESIZE_CLI_HEADERS = previous;
+  }
+});
 
 test("Latin-1 and ASCII ids pass through unchanged", () => {
   assert.equal(resolveOpencodeSessionIdentity({}, { session_id: "conv-abc_123" }), "conv-abc_123");

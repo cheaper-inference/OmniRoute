@@ -85,14 +85,14 @@ async function refreshAttemptsFor({ provider, model, credentials, status, body }
 
 test("a request-scoped refusal on the no-auth connection starts no refresh", async () => {
   const credentials = await auth.getProviderCredentials(
-    "uncloseai",
+    "cloudflare-playground",
     null,
     null,
     "Lorbus/Qwen3.6-27B-int4-AutoRound"
   );
   assert.equal(credentials?.connectionId, "noauth");
   const attempts = await refreshAttemptsFor({
-    provider: "uncloseai",
+    provider: "cloudflare-playground",
     model: "Lorbus/Qwen3.6-27B-int4-AutoRound",
     credentials,
     status: 403,
@@ -103,14 +103,14 @@ test("a request-scoped refusal on the no-auth connection starts no refresh", asy
 
 test("a plain 401 on the no-auth connection starts no refresh (nothing to refresh)", async () => {
   const credentials = await auth.getProviderCredentials(
-    "uncloseai",
+    "cloudflare-playground",
     null,
     null,
     "Lorbus/Qwen3.6-27B-int4-AutoRound"
   );
   assert.equal(credentials?.connectionId, "noauth");
   const attempts = await refreshAttemptsFor({
-    provider: "uncloseai",
+    provider: "cloudflare-playground",
     model: "Lorbus/Qwen3.6-27B-int4-AutoRound",
     credentials,
     status: 401,

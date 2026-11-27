@@ -124,7 +124,10 @@ describe("OpenAI usage that already includes the cache write", () => {
   test("streaming: the write is subtracted when no marker says it is outside", () => {
     const state: Record<string, unknown> & { usage?: Usage } = { toolCalls: new Map() };
     openaiToClaudeResponse({ choices: [], usage: folded }, state);
-    assert.deepEqual(state.usage, expectedClaudeUsage(WRITE_HEAVY));
+    assert.deepEqual(state.usage, {
+      ...expectedClaudeUsage(WRITE_HEAVY),
+      cache_read_input_tokens: 0,
+    });
   });
 
   test("non-streaming: the write is subtracted when no marker says it is outside", () => {
@@ -141,7 +144,10 @@ describe("OpenAI usage that already includes the cache write", () => {
       FORMATS.OPENAI,
       FORMATS.CLAUDE
     ) as { usage?: unknown };
-    assert.deepEqual(back.usage, expectedClaudeUsage(WRITE_HEAVY));
+    assert.deepEqual(back.usage, {
+      ...expectedClaudeUsage(WRITE_HEAVY),
+      cache_read_input_tokens: 0,
+    });
   });
 });
 
@@ -168,7 +174,7 @@ describe("Anthropic-keyed Responses usage reaches a Claude client exactly", () =
     );
     const state: Record<string, unknown> & { usage?: Usage } = { toolCalls: new Map() };
     openaiToClaudeResponse(openaiChunk, state);
-    assert.deepEqual(state.usage, expectedClaudeUsage(WRITE_HEAVY));
+    assert.deepEqual(state.usage, WRITE_HEAVY);
   });
 
   test("non-streaming: Responses -> OpenAI -> Claude", () => {
@@ -190,7 +196,7 @@ describe("Anthropic-keyed Responses usage reaches a Claude client exactly", () =
       FORMATS.OPENAI_RESPONSES,
       FORMATS.CLAUDE
     ) as { usage?: unknown };
-    assert.deepEqual(back.usage, expectedClaudeUsage(WRITE_HEAVY));
+    assert.deepEqual(back.usage, WRITE_HEAVY);
   });
 
   test("non-streaming: a read larger than the uncached input stays exact", () => {
@@ -215,4 +221,54 @@ describe("Anthropic-keyed Responses usage reaches a Claude client exactly", () =
     ) as { usage?: unknown };
     assert.deepEqual(back.usage, expectedClaudeUsage(usage));
   });
+});
+
+test("non-streaming Chat to Claude distinguishes reported cache reads from unknown", () => {
+  const cases: Array<[Record<string, unknown>, number?]> = [
+    [{ prompt_tokens_details: { cached_tokens: 0 } }, 0],
+    [{ input_tokens_details: { cached_tokens: 0 } }, 0],
+    [{ cache_read_input_tokens: 0 }, 0],
+    [{ cached_tokens: 43264 }, 43264],
+    [{ prompt_tokens_details: { cached_tokens: "43264" }, cached_tokens: 19 }, 43264],
+    [{ input_tokens_details: { cached_tokens: 19 }, cached_tokens: "43264" }, 43264],
+    [{ prompt_tokens_details: { cached_tokens: "0" } }],
+    [{ prompt_tokens_details: { cached_tokens: null } }],
+    [{ prompt_tokens_details: { cached_tokens: -1 }, cached_tokens: Infinity }],
+    [{}],
+  ];
+  for (const [details, cached] of cases) {
+    const response = translateNonStreamingResponse(
+      {
+        id: "chatcmpl-cache-evidence",
+        choices: [{ message: { role: "assistant", content: "OK" }, finish_reason: "stop" }],
+        usage: { prompt_tokens: 50000, completion_tokens: 7, ...details },
+      },
+      FORMATS.OPENAI,
+      FORMATS.CLAUDE
+    );
+    assert.deepEqual(response.usage, {
+      input_tokens: 50000 - (cached ?? 0),
+      output_tokens: 7,
+      ...(cached === undefined ? {} : { cache_read_input_tokens: cached }),
+    });
+  }
+});
+
+test("non-streaming Chat to Claude does not report a fabricated zero after clamping", () => {
+  for (const promptTokens of [undefined, 0, NaN]) {
+    const response = translateNonStreamingResponse(
+      {
+        id: "chatcmpl-cache-no-prompt",
+        choices: [{ message: { role: "assistant", content: "OK" }, finish_reason: "stop" }],
+        usage: {
+          prompt_tokens: promptTokens,
+          completion_tokens: 7,
+          prompt_tokens_details: { cached_tokens: 43264 },
+        },
+      },
+      FORMATS.OPENAI,
+      FORMATS.CLAUDE
+    );
+    assert.deepEqual(response.usage, { input_tokens: 0, output_tokens: 7 });
+  }
 });

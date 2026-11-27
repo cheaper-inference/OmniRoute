@@ -122,3 +122,58 @@ test("still caches a complete assembled streaming body", () => {
   );
   assert.equal(stored.length, 1, "complete streaming response must still be cached");
 });
+
+// A moderation block is re-asked upstream, where a false-positive can clear. Pinned for the
+// cache TTL at temperature 0 it is the same trap as a truncated reply.
+test("does not cache a non-streaming content_filter completion", () => {
+  const stored: unknown[] = [];
+  storeSemanticCacheResponse(
+    {
+      enabled: true,
+      body: { messages: [{ role: "user", content: "hi" }], temperature: 0 },
+      headers: undefined,
+      translatedResponse: {
+        choices: [{ finish_reason: "content_filter", message: { content: "blocked" } }],
+      },
+      model: "gemini-3.5-flash",
+      usage: { prompt_tokens: 10, completion_tokens: 3 },
+    },
+    deps(stored)
+  );
+  assert.equal(stored.length, 0, "content_filter response must not be cached");
+});
+
+test("does not cache a Claude-format refusal (the Claude spelling of content_filter)", () => {
+  const stored: unknown[] = [];
+  storeSemanticCacheResponse(
+    {
+      enabled: true,
+      body: { messages: [{ role: "user", content: "hi" }], temperature: 0 },
+      headers: undefined,
+      translatedResponse: { type: "message", stop_reason: "refusal", content: [] },
+      model: "claude-sonnet-4-5",
+      usage: { prompt_tokens: 10, completion_tokens: 0 },
+    },
+    deps(stored)
+  );
+  assert.equal(stored.length, 0, "refusal response must not be cached");
+});
+
+test("does not cache an assembled streaming body that ended in content_filter", () => {
+  const stored: unknown[] = [];
+  storeStreamingSemanticCacheResponse(
+    {
+      enabled: true,
+      streamStatus: 200,
+      streamResponseBody: {
+        choices: [{ finish_reason: "content_filter", message: { content: "blocked" } }],
+      },
+      body: { messages: [{ role: "user", content: "hi" }], temperature: 0 },
+      headers: undefined,
+      model: "gemini-3.5-flash",
+      streamUsage: { prompt_tokens: 10, completion_tokens: 3 },
+    },
+    deps(stored)
+  );
+  assert.equal(stored.length, 0, "content_filter streaming body must not be cached");
+});

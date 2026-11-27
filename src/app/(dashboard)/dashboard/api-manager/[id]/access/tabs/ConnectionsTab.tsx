@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import ProviderConnectionPermissionList, {
   type ProviderConnection,
@@ -36,7 +37,7 @@ export default function ConnectionsTab({
     <div className="flex flex-col gap-5">
       <TabErrorList errors={errors} />
 
-      <div className="flex flex-col gap-3 p-4 rounded-lg border border-border bg-surface/40">
+      <Card.Section className="flex flex-col gap-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex flex-col gap-1">
             <p className="text-sm font-medium text-text-main">{t("allowedConnections")}</p>
@@ -82,7 +83,7 @@ export default function ConnectionsTab({
             />
           </div>
         )}
-      </div>
+      </Card.Section>
 
       <PreferredConnectionsSection
         connections={allConnections}

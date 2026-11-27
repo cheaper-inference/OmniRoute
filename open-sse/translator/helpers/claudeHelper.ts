@@ -728,18 +728,21 @@ export function prepareClaudeRequest(
         // histories can carry ids with `.`/`:`/`#` (e.g. replayed from another
         // provider), which 400s as TOOL_SCHEMA_INVALID. Rewrite both sides with the
         // same function so tool_use/tool_result pairing survives — the later
-        // ordering passes match on these ids.
-        for (const block of msg.content) {
+        // ordering passes match on these ids. The rewritten block is a copy: the caller's
+        // blocks are shared with later combo targets.
+        msg.content = msg.content.map((block) => {
           if (block.type === "tool_use" && typeof block.id === "string" && block.id) {
-            block.id = sanitizeToolId(block.id);
-          } else if (
+            return { ...block, id: sanitizeToolId(block.id) };
+          }
+          if (
             block.type === "tool_result" &&
             typeof block.tool_use_id === "string" &&
             block.tool_use_id
           ) {
-            block.tool_use_id = sanitizeToolId(block.tool_use_id);
+            return { ...block, tool_use_id: sanitizeToolId(block.tool_use_id) };
           }
-        }
+          return block;
+        });
       }
     }
 

@@ -4,7 +4,8 @@ import { useTranslations } from "next-intl";
 import { DataTableShell } from "@omniroute/ui-kit/data-table-shell";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@omniroute/ui-kit/table";
 import { TableLoadingState } from "@omniroute/ui-kit/table-loading";
-import { Button, EmptyState, Input, Select } from "@/shared/components";
+import { Button, EmptyState, Input, NumberInput, Pager, Select } from "@/shared/components";
+import { fieldNumber, fieldText } from "../numberFieldText";
 import SourceToggleBar, {
   type SourceId,
   ALL_SOURCE_IDS,
@@ -21,7 +22,6 @@ type FreePoolStats = {
 };
 
 const PER_PAGE = 50;
-const MAX_VISIBLE_PAGES = 7;
 
 export default function FreePoolTab() {
   const t = useTranslations("settings");
@@ -203,36 +203,6 @@ export default function FreePoolTab() {
   const notInPoolProxies = proxies.filter((p) => !p.inPool);
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
 
-  // Build visible page range around current page
-  const buildPageRange = (): (number | "ellipsis")[] => {
-    if (totalPages <= MAX_VISIBLE_PAGES) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-    const pages: (number | "ellipsis")[] = [];
-    const half = Math.floor(MAX_VISIBLE_PAGES / 2);
-    let start = Math.max(1, page - half);
-    let end = Math.min(totalPages, page + half);
-
-    // Adjust if near start/end
-    if (page - half < 1) {
-      end = Math.min(totalPages, MAX_VISIBLE_PAGES);
-    }
-    if (page + half > totalPages) {
-      start = Math.max(1, totalPages - MAX_VISIBLE_PAGES + 1);
-    }
-
-    if (start > 1) {
-      pages.push(1);
-      if (start > 2) pages.push("ellipsis");
-    }
-    for (let i = start; i <= end; i++) pages.push(i);
-    if (end < totalPages) {
-      if (end < totalPages - 1) pages.push("ellipsis");
-      pages.push(totalPages);
-    }
-    return pages;
-  };
-
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > totalPages) return;
     setPage(newPage);
@@ -280,11 +250,10 @@ export default function FreePoolTab() {
               className="w-32"
               aria-label={translateOrFallback("proxyFreePoolFilterCountry", "Filter by country")}
             />
-            <Input
-              type="number"
+            <NumberInput
               placeholder={translateOrFallback("proxyFreePoolMinQualityPlaceholder", "Min quality")}
-              value={minQuality}
-              onChange={(e) => setMinQuality(e.target.value)}
+              value={fieldNumber(minQuality)}
+              onValueChange={(value) => setMinQuality(fieldText(value))}
               min={0}
               max={100}
               className="w-32"
@@ -308,49 +277,12 @@ export default function FreePoolTab() {
         }
         pagination={
           totalPages > 1 ? (
-            <nav
-              aria-label={tc("pagination")}
-              className="flex flex-wrap items-center justify-center gap-1 p-2"
-            >
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                icon="chevron_left"
-                onClick={() => handlePageChange(page - 1)}
-                disabled={page <= 1}
-                aria-label={tc("previousPage")}
-              />
-              {buildPageRange().map((p, i) =>
-                p === "ellipsis" ? (
-                  <span
-                    key={`ellipsis-${i}`}
-                    aria-hidden="true"
-                    className="px-1 text-text-muted text-xs"
-                  >
-                    …
-                  </span>
-                ) : (
-                  <Button
-                    key={p}
-                    size="sm"
-                    variant={p === page ? "primary" : "ghost"}
-                    aria-current={p === page ? "page" : undefined}
-                    className="min-w-8 px-2 text-xs"
-                    onClick={() => handlePageChange(p)}
-                  >
-                    {p}
-                  </Button>
-                )
-              )}
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                icon="chevron_right"
-                onClick={() => handlePageChange(page + 1)}
-                disabled={page >= totalPages}
-                aria-label={tc("nextPage")}
-              />
-            </nav>
+            <Pager
+              className="p-2"
+              page={page}
+              pageCount={totalPages}
+              onPageChange={handlePageChange}
+            />
           ) : undefined
         }
       >

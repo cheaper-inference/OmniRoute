@@ -1,0 +1,1 @@
+- fix(proxy): OAuth refresh and token-exchange requests no longer fast-fail on the proxy probe, so a dispatched refresh response (with a rotated refresh token) is never discarded (#20626)

@@ -6,16 +6,20 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  type CardProps as KitCardProps,
 } from "@omniroute/ui-kit/card";
 import { cn } from "@/shared/utils/cn";
 import Icon from "./Icon";
+import IconChip, { type IconChipTone } from "./IconChip";
 
 interface CardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   children?: React.ReactNode;
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
-  /** ICON_MAP name, rendered through <Icon> in the header chip. */
+  /** ICON_MAP name, rendered through <Icon> in the header's kit IconChip. */
   icon?: string;
+  /** Kit IconChip tone of the header icon: a status tone or `chart-N`. Defaults to `neutral`. */
+  iconTone?: IconChipTone;
   action?: React.ReactNode;
   padding?: "none" | "xs" | "sm" | "md" | "lg";
   hover?: boolean;
@@ -42,6 +46,7 @@ function Card({
   title,
   subtitle,
   icon,
+  iconTone,
   action,
   padding = "md",
   hover = false,
@@ -61,9 +66,9 @@ function Card({
       {hasHeader && (
         <CardHeader className="mb-4 flex items-center justify-between gap-3 p-0">
           {icon && (
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-control bg-bg-subtle text-text-muted">
+            <IconChip tone={iconTone}>
               <Icon name={icon} size={20} />
-            </span>
+            </IconChip>
           )}
           <div className="min-w-0 flex-1">
             {title && (
@@ -85,19 +90,24 @@ function Card({
   );
 }
 
-interface CardSectionProps extends React.HTMLAttributes<HTMLDivElement> {
-  children?: React.ReactNode;
-}
+/** The kit Card props, minus the surface: a section is always the inset panel. */
+type CardSectionProps = Omit<KitCardProps, "surface">;
 
-// Sub-component: Bordered section inside Card
-function CardSection({ children, className, ...props }: CardSectionProps) {
+/**
+ * Card.Section — a panel nested one level inside a card or dialog: the kit
+ * `<Card surface="inset">` (flat fill, subtle border, nested radius, 16px padding).
+ *
+ * `title`, `description` and `action` draw the kit's compact header; the other kit Card props
+ * (`footer`, `flush`, `brandColor`) pass through. Without a header the children are direct
+ * children of the panel, so layout classes (`flex gap-2`, `grid`, `space-y-3`) keep acting on
+ * the element that holds them. A nested panel that stays a plain `<div>` takes the same radius
+ * with `rounded-card-nested`.
+ */
+function CardSection({ children, ...props }: CardSectionProps) {
   return (
-    <div
-      className={cn("p-4 rounded-lg", "bg-surface-2", "border border-border", className)}
-      {...props}
-    >
+    <KitCard surface="inset" {...props}>
       {children}
-    </div>
+    </KitCard>
   );
 }
 
