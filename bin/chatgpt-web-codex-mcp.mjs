@@ -52,7 +52,7 @@ export async function startChatGptWebCodexMcp(args = process.argv.slice(2), root
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   startChatGptWebCodexMcp().catch((error) => {
     console.error(
-      `ChatGPT Web (Codex) MCP konnte nicht gestartet werden: ${error?.message || error}`
+      `ChatGPT Web (Codex) MCP failed to start: ${error?.message || error}`
     );
     process.exit(1);
   });
