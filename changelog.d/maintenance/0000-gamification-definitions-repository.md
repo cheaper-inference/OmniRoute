@@ -1,1 +1,0 @@
-- **refactor(db):** Isolate badge definitions, earned badges, invite tokens and community server persistence behind Promise-based repositories while preserving SQL, seed idempotency, redeem conditions, key-hash filtering and synchronous call timing; XP, levels, leaderboard and the token ledger are unchanged (#0000 — thanks @xiaoyaner0201).
