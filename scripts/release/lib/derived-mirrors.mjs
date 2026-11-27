@@ -12,12 +12,12 @@
 //     mirror's source_hash/target_hash; an already drifted source is left to the i18n wave, and
 //     section_hashes are never touched.
 //
-// Mirrors translate the prose around a number but keep the digits, so a number moves to a
-// mirror only when that is provably the same claim. The rule is deliberately conservative:
+// Mirrors translate the prose around a number but can keep the same literal (including token
+// units and percentages). The rule is deliberately conservative:
 // every occurrence of the old literal in the source must be one the plan rewrites, and the
 // mirror must carry exactly as many occurrences as the source did. Anything else (an extra
 // "393" in the mirror, a mirror that dropped the sentence, two different targets for one old
-// value, a non-numeric change) is returned as `manual` and the mirror is left untouched for
+// value, an unsupported literal) is returned as `manual` and the mirror is left untouched for
 // that value — refreshing a translation by guesswork would certify text nobody checked.
 
 import crypto from "node:crypto";
@@ -27,6 +27,7 @@ import { findVersionClaims, rewriteVersionClaims } from "../bump-version-claims.
 
 export const SEMVER_RE = /^\d+\.\d+\.\d+$/;
 const NUMBER_RE = /^\d+(?:[.,]\d+)?$/;
+const FREE_TOKEN_LITERAL_RE = /^(?:~\d+(?:[.,]\d+)?\s?[BM]|\d{1,3}(?:[.,]\d)?%)$/;
 
 export const sha256 = (text) => crypto.createHash("sha256").update(text).digest("hex");
 
@@ -47,13 +48,14 @@ const isDigit = (ch) => ch !== undefined && ch >= "0" && ch <= "9";
 const isWordish = (ch) => ch !== undefined && /[0-9A-Za-z_]/.test(ch);
 
 /**
- * PURE. Start offsets of `literal` (a plain number such as "393" or "1.62") where it stands as a
- * whole number: not glued to a letter/digit before it, not the tail of "3.8.54" or "1,393", and
- * not the head of a longer number ("3930", "393.5"). A unit letter after it ("1.62B") is fine.
+ * PURE. Start offsets of the whole `literal`, such as "393", "4.56", "~93M" or "98.6%".
+ * A bare number can be followed by a unit letter. A token literal already includes its unit,
+ * so "~93M" must end at a word boundary.
  */
 export function findNumberOccurrences(text, literal) {
   const out = [];
   if (!literal) return out;
+  const hasTokenUnit = literal.startsWith("~");
   let at = text.indexOf(literal);
   while (at !== -1) {
     const before = text[at - 1];
@@ -63,6 +65,7 @@ export function findNumberOccurrences(text, literal) {
     const glueAfter =
       isDigit(after) ||
       after === "_" ||
+      (hasTokenUnit && isWordish(after)) ||
       ((after === "." || after === ",") && isDigit(text[at + literal.length + 1]));
     if (!glueBefore && !glueAfter) out.push(at);
     at = text.indexOf(literal, at + 1);
@@ -164,10 +167,11 @@ export function propagateChangesToMirror({
       versionPass = { from: g.from, to, n: inMirror };
       continue;
     }
-    if (!NUMBER_RE.test(g.from)) {
+    const freeTokenLiteral = FREE_TOKEN_LITERAL_RE.test(g.from) && FREE_TOKEN_LITERAL_RE.test(to);
+    if (!NUMBER_RE.test(g.from) && !freeTokenLiteral) {
       manual.push({
         label,
-        detail: `"${g.from}" → "${to}" is not a plain number — not carried to the mirror`,
+        detail: `"${g.from}" → "${to}" is not a supported numeric literal — not carried to the mirror`,
       });
       continue;
     }

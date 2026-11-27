@@ -8,16 +8,20 @@ title: "omni-queue — OmniRoute's own merge queue"
 the Mergify queue described in [MERGE_TRAIN.md](MERGE_TRAIN.md). It ships **inert**: nothing runs
 until the repository variable OMNI_QUEUE_ENABLED is `true` (set it only after the `omni-queue`
 environment exists, see [Before OMNI_QUEUE_ENABLED is set](#before-omni_queue_enabled-is-set)), and
-the default `mode` in `config/merge-queue/config.json` is `shadow` (compose and test, never land).
-Until the owner approves the cut-over (see [Cut-over and rollback](#cut-over-and-rollback)), Mergify
-and the `queue` label stay the default merge path.
+the `mode` in `config/merge-queue/config.json` ships as `live` (green candidates land). Since the
+cut-over (see [Cut-over and rollback](#cut-over-and-rollback)) the queue label is how a pull
+request lands on a release branch, and the status door of the [Ruleset](#ruleset) refuses any
+commit there without the land status. `shadow` (compose and test, never land) is still a supported
+mode: the queue ran in it before the cut-over, and a switch back to it is a way to stop landing
+without stopping the queue (see [Shadow mode and live mode](#shadow-mode-and-live-mode) and
+[Before a mode change or a stop](#before-a-mode-change-or-a-stop)).
 
 > **2026-11-19: the Mergify merge queue is retired** (owner's decision; step 1 of
 > [Cut-over and rollback](#cut-over-and-rollback)). `.mergify.yml` no longer defines a queue and
-> refuses the Mergify commands that merge or rewrite a pull request. Until omni-queue runs in live
-> mode, release PRs are merged by hand under the repository ruleset "Require green gates on the
-> active release" (`Gate / CI` + `Gate / Quality`); mentions below of Mergify as the current merge
-> path describe the state before that date.
+> refuses the Mergify commands that merge or rewrite a pull request. From then until omni-queue ran
+> in live mode, release PRs were merged by hand under the repository ruleset "Require green gates on
+> the active release" (`Gate / CI` + `Gate / Quality`); mentions below of Mergify as the current
+> merge path describe the state before 2026-11-19.
 
 ## Why
 
@@ -335,7 +339,7 @@ and rotate it before then.
 
 ### Signed merge commits (`landing.signing`)
 
-With `landing.signing: "ssh"` (shipped `none`) the queue signs every merge commit it composes:
+With the shipped `landing.signing: "ssh"`, the queue signs every merge commit it composes:
 batch candidates, bisection halves and recompositions, in shadow and in live mode
 (`composeCandidate` in `scripts/merge-queue/compose.mjs`, `git commit-tree -S`). The commits carry
 `landing.identity`, so `signing: "ssh"` is refused unless `landing.actor` is `owner`: GitHub
@@ -404,7 +408,7 @@ rotated, revoked". If the key leaks, remove it from the account and rotate at on
 
 ### Who speaks (`voice`)
 
-The top-level `voice` key (shipped `app`) chooses whose token performs the queue's writes that
+The top-level `voice` key (shipped `owner`) chooses whose token performs the queue's writes that
 people read on GitHub (`scripts/merge-queue/voice.mjs`). With `app`, every one is the App's
 (`omni-queue[bot]`). With `owner`, they go out with the owner's `OMNI_QUEUE_LAND_TOKEN`, the token the
 tick already holds for the landing (no second token secret), whatever `landing.actor` says. The
@@ -455,7 +459,7 @@ reason codes come from `INELIGIBLE_REASONS` in `scripts/merge-queue/contracts.mj
 | --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
 | open and not a draft                                                                                                                    | `not-open`, `draft`                            |
 | base matches `bases` (default `^release/v\d+\.\d+\.\d+$`)                                                                               | `base-mismatch`                                |
-| carries `label` (`omni-queue` during shadow)                                                                                            | `no-label`                                     |
+| carries `label` (shipped `omni-queue`)                                                                                                  | `no-label`                                     |
 | no label from `blockLabels` (`hold`, `hold-vps`, `do-not-merge`, `wip`)                                                                 | `blocked-label`                                |
 | no open `release-freeze` issue citing the base (Hard Rule #21)                                                                          | `base-frozen`                                  |
 | the label was applied by a login in `approvers`                                                                                         | `label-not-by-approver`                        |
@@ -513,6 +517,24 @@ status and, in live mode, one comment (in shadow mode it is only logged).
   some other way) leaves the queue for good, with both labels removed and one comment (in shadow
   mode, a `would-dequeue` event).
 
+### Automatic labeling for the derived refresh
+
+Only the `derived-refresh-autoland` workflow may apply the `omni-queue` label automatically.
+It labels only the `chore/derived-refresh` robot PR in this repository, targeting the highest `release/vX.Y.Z` branch.
+Every changed file must belong to a derived family and have an unprotected path.
+Any open `release-freeze` issue blocks labeling. An open `base-red` issue blocks its target branch.
+`Gate / CI` and `Gate / Quality` must pass on the current head.
+The PR must be open and ready for review, with no queue or blocking label.
+Every other label application requires the owner's approval for that PR.
+No other session, script or loop may apply the label on its own.
+
+Set the repository Actions variable `DERIVED_REFRESH_AUTOLAND` to `true` to enable labeling.
+Clear it or set a different value to return to dry-run mode.
+Labeling requires a queue approver's token. See the [workflow configuration](../../.github/workflows/derived-refresh-autoland.yml).
+The workflow reports its decision in the run summary, including in dry-run mode.
+In `live` mode the queue can land the labeled PR after its usual checks.
+In `shadow` mode the queue reports its verdict and landing is manual.
+
 ### The PR's own gates (`prChecksRequired`)
 
 What the operator sees: a labeled, approved PR that stays on the dashboard with the reason
@@ -522,14 +544,16 @@ of `prChecksRequired` that is not green, with its state: `failure`, `pending` or
 What it means: a PR enters a batch only when each check in `prChecksRequired` (`Gate / CI`,
 `Gate / Quality` and `API Route Typecheck` in the shipped config) is green on its current head.
 `API Route Typecheck` (`.github/workflows/api-route-typecheck.yml`) runs on every pull request to
-`main` and `release/**`, with no path filter, on `opened`, `synchronize`, `reopened` and
-`ready_for_review` (a draft pull request runs it too). A head on which it never ran reads
-`API Route Typecheck missing` and waits like any other gate that is not green. It stays missing for
-good in three cases: the pull request's base was changed from a branch outside `main` and
-`release/**` (a base change, `edited`, is not one of the workflow's event types), a fork's run that
-waits for a maintainer's approval, and a head with merge conflicts (GitHub runs no `pull_request`
-workflow then). What to do: push a commit (or close and reopen the pull request), approve the
-fork's run, or resolve the conflict. Nothing is done about it by the queue: the
+`main` and `release/**`, with no path filter, on `opened`, `synchronize`, `reopened`,
+`ready_for_review` and a base change (`edited` with `changes.base`, a retarget); a draft pull
+request runs it too. A title/body edit (`edited` without a base change) runs no job of it, nor of
+`ci.yml` and `quality.yml`, and leaves no check under a gate's name (see
+[`docs/architecture/QUALITY_GATES.md`](../architecture/QUALITY_GATES.md#pr-titlebody-edits-and-retargets)).
+A head on which it never ran reads `API Route Typecheck missing` and waits like any other gate that
+is not green. It stays missing for good in two cases: a fork's run that waits for a maintainer's
+approval, and a head with merge conflicts (GitHub runs no `pull_request` workflow then). What to
+do: approve the fork's run, or resolve the conflict (or push a commit, or close and reopen the
+pull request). Nothing is done about it by the queue: the
 label stays, no comment is posted, and the PR becomes eligible by itself once its gates turn green.
 The reason is computed by every tick and shown on the dashboard only; it is never stored in the
 state. `npm run queue -- why <PR>` reads the PR gates the same way and prints each gate's state, so
@@ -547,8 +571,10 @@ How a gate is read, per head (the check runs of the PR's current head SHA):
   (`listWorkflowRuns`): a suite that belongs to a run superseded by a newer run of the same
   workflow and the same event on that head (a newer `pull_request` run after a retarget cancelled
   the older one) is dropped. A `workflow_dispatch` run never supersedes a `pull_request` run, nor
-  the other way round. Until the newest run's gate job has started, the previous run's result is
-  what counts. A listing that fails keeps every suite, the stricter reading.
+  the other way round. A run that concluded `skipped` (every job skipped: the run of a title/body
+  edit) supersedes nothing, so the real runs on that head keep counting; while it is still in
+  progress it supersedes like any run. Until the newest run's gate job has started, the previous
+  run's result is what counts. A listing that fails keeps every suite, the stricter reading.
 
 The PR gates are read when the queue is built, not again right before a green batch lands, and
 never for a PR of the base-repair lane (see [Batch selection](#batch-selection)). The candidate's
@@ -1206,7 +1232,7 @@ differ.
 | Key                      | Type                                                         | Default                                                                    | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | ------------------------ | ------------------------------------------------------------ | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `schemaVersion`          | `1`                                                          | none; shipped `1`                                                          | Version of the config format.                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `mode`                   | `shadow` or `live`                                           | none; shipped `shadow`                                                     | `shadow` composes and tests but never lands or changes a PR; `live` lands (see [Shadow mode and live mode](#shadow-mode-and-live-mode)).                                                                                                                                                                                                                                                                                                                  |
+| `mode`                   | `shadow` or `live`                                           | none; shipped `live`                                                       | `shadow` composes and tests but never lands or changes a PR; `live` lands (see [Shadow mode and live mode](#shadow-mode-and-live-mode)).                                                                                                                                                                                                                                                                                                                  |
 | `label`                  | label name                                                   | none; shipped `omni-queue`                                                 | The queue label. Repeated as a literal in the job filters of `omni-queue.yml` (see [Eligibility](#eligibility)).                                                                                                                                                                                                                                                                                                                                          |
 | `protectedApprovalLabel` | label name, different from `label`                           | none; shipped `protected-approved`                                         | Second label a PR that touches `protectedPaths` needs. Also repeated in the job filters.                                                                                                                                                                                                                                                                                                                                                                  |
 | `approvers`              | list of logins, at least one                                 | none; shipped `["diegosouzapw"]`                                           | Whose queue, protected-approval and lane labels count; also who may dispatch a `bless`.                                                                                                                                                                                                                                                                                                                                                                   |
@@ -1221,7 +1247,7 @@ differ.
 | `landing.mode`           | `merge-ff` or `squash-api`                                   | none; shipped `merge-ff`                                                   | How a green batch lands (see [Landing modes](#landing-modes-landingmode)).                                                                                                                                                                                                                                                                                                                                                                                |
 | `landing.actor`          | `app` or `owner`                                             | `app`; shipped `owner`                                                     | Whose token lands: the App's, or `OMNI_QUEUE_LAND_TOKEN` (see [Who lands](#who-lands-landingactor)).                                                                                                                                                                                                                                                                                                                                                      |
 | `landing.identity`       | `{name, email}`, the email a `@users.noreply.github.com` one | none; required with `actor: "owner"`, refused otherwise                    | Identity of the queue's merge commits when the owner lands.                                                                                                                                                                                                                                                                                                                                                                                               |
-| `landing.signing`        | `none` or `ssh`                                              | `none`; shipped `none`                                                     | `ssh` signs every merge commit the queue composes with the key of the secret OMNI_QUEUE_SIGNING_KEY; refused unless `landing.actor` is `owner` (see [Signed merge commits](#signed-merge-commits-landingsigning)).                                                                                                                                                                                                                                        |
+| `landing.signing`        | `none` or `ssh`                                              | `none`; shipped `ssh`                                                      | `ssh` signs every merge commit the queue composes with the key of the secret OMNI_QUEUE_SIGNING_KEY; refused unless `landing.actor` is `owner` (see [Signed merge commits](#signed-merge-commits-landingsigning)).                                                                                                                                                                                                                                        |
 | `landing.statusContext`  | `omni-queue/<name>`, `[A-Za-z0-9._/-]{1,100}`                | `omni-queue/land`; shipped `omni-queue/land`                               | The land status the release ruleset requires. Must not be a required, aggregate or approval context.                                                                                                                                                                                                                                                                                                                                                      |
 | `requiredChecks`         | list of check names, at least one                            | none; shipped three checks                                                 | Checks that must conclude `success` on a candidate (see [Accepting a candidate](#accepting-a-candidate)).                                                                                                                                                                                                                                                                                                                                                 |
 | `advisoryChecks`         | list of check names, none in `requiredChecks`                | none; shipped `Build (advisory)`                                           | Checks whose failure does not make a candidate red.                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -1234,7 +1260,7 @@ differ.
 | `prChecksRequired`       | list of distinct check names                                 | `[]`; shipped `Gate / CI`, `Gate / Quality`, `API Route Typecheck`         | Green on a PR head to enter a batch: worst of the suites reporting it; if they disagree, a run superseded by a newer run of the same workflow and event drops ([Eligibility](#eligibility)).                                                                                                                                                                                                                                                              |
 | `protectedPaths`         | list of globs, at least one                                  | none; shipped the agent-instruction surfaces and the queue's control plane | A PR that touches one also needs `protectedApprovalLabel` (see [Eligibility](#eligibility)).                                                                                                                                                                                                                                                                                                                                                              |
 | `lanes.hotfixLabel`      | label name, distinct from every other label of the config    | no `lanes` = no lanes; shipped `omni-queue-hotfix`                         | Applied by an approver to an eligible PR: at the next batch start it is composed alone, ahead of the FIFO. Never replaces what is in flight. Repeated in the tick's job filter.                                                                                                                                                                                                                                                                           |
-| `voice`                  | `app` or `owner`                                             | `app`; shipped `app`                                                       | Whose token posts the queue's comments, removes its labels and writes its issues: the App's, or `OMNI_QUEUE_LAND_TOKEN`, with a fallback to the App's (see [Who speaks](#who-speaks-voice)).                                                                                                                                                                                                                                                              |
+| `voice`                  | `app` or `owner`                                             | `app`; shipped `owner`                                                     | Whose token posts the queue's comments, removes its labels and writes its issues: the App's, or `OMNI_QUEUE_LAND_TOKEN`, with a fallback to the App's (see [Who speaks](#who-speaks-voice)).                                                                                                                                                                                                                                                              |
 | `lanes.baseRepairLabel`  | label name, distinct from every other label of the config    | no `lanes` = no lanes; shipped `omni-queue-base-repair`                    | Applied by an approver: composed alone (PR gates not required), the only work of a `base-red` pause; its landing lifts the pause. Never in a FIFO batch. Repeated in the tick's job filter. A repair that fails like the base is not composed again at that head (`repairTried`): push a fix (a new head is tried again), or remove this label (anyone who can label the PR can): the PR rejoins the FIFO.                                                |
 
 ## CLI
@@ -1334,12 +1360,12 @@ is written](#before-the-land-status-is-written) runs again.
 
 ## Shadow mode and live mode
 
-- **`shadow`** (default): the queue composes candidates, runs the full CI on them, bisects and
+- **`shadow`**: the queue composes candidates, runs the full CI on them, bisects and
   classifies exactly as in live mode, but never lands and never changes a pull request. A green
   candidate produces a `would-land` event; each PR head settled that way is skipped until it
   changes. Use it to compare the batches the queue would land with the merges Mergify actually
   performs.
-- **`live`**: green candidates land through `landing.mode`.
+- **`live`** (the shipped mode): green candidates land through `landing.mode`.
 - During shadow, the queue label is `omni-queue`, distinct from Mergify's `queue`, so the two
   never act on the same PR by accident.
 
@@ -1667,11 +1693,16 @@ action.
       [Ruleset](#ruleset));
    2. make the new branch the default branch;
    3. replace the environment's branch rule with the new branch's exact name (replace it, never add
-      a second rule).
+      a second rule);
+   4. delete the door ruleset of the previous (frozen) release branch. With the environment
+      admitting only the new branch, even a manual `bless` cannot write `omni-queue/land` for the
+      frozen branch, so its door would block the release captain's closing commits. The ruleset
+      "Protect release branches" still prevents deletion and force-push, and only the release
+      captain merges there during the freeze.
 
-   In any other order the new branch is, for a while, the default branch or admitted by the
-   environment without a door: anyone with write access could push an edited `omni-queue.yml` there,
-   and the next scheduled run would read the App's private key.
+   The new branch must have its door before it becomes the default branch or is admitted by the
+   environment. Without the door, anyone with write access could push an edited `omni-queue.yml`
+   there, and the next scheduled run would read the App's private key.
 
 9. Create the labels if they do not exist yet: the queue label (`label`, `omni-queue`), the
    protected-paths approval label (`protectedApprovalLabel`, `protected-approved`), the two lane
@@ -1779,18 +1810,19 @@ Two consequences:
   candidate branches (see [Cut-over and rollback](#cut-over-and-rollback)) need the ruleset to be
   disabled first.
 
-Rulesets stack, and **a ruleset's bypass list only covers that ruleset's own rules**. Three
-existing repository rulesets also match release branches:
+Rulesets stack, and **a ruleset's bypass list only covers that ruleset's own rules**. Two other
+repository rulesets still match release branches. The table also records the former default-branch
+ruleset for rollback.
 
 | Ruleset (id)                                           | Matches                | Rules                                                                                                                                       | Effect on the landing push                                                                                                                                                                                                                  |
 | ------------------------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | "Protect release branches" (15605329)                  | `refs/heads/release/*` | `deletion`, `non_fast_forward`                                                                                                              | None: nobody can delete or force-push a release branch, and the landing push is a fast-forward.                                                                                                                                             |
-| "Require PR on default branch" (21899981)              | `~DEFAULT_BRANCH`      | `pull_request`, no bypass actors                                                                                                            | **Rejects it** on whichever release branch is the default branch (the active release): it has no bypass actor, and a ruleset of ours cannot lift it for the landing actor.                                                                  |
+| "Require PR on default branch" (21899981)              | `~DEFAULT_BRANCH`      | `pull_request`, no bypass actors                                                                                                            | **Rejected it** on whichever release branch was the default branch (the active release): it had no bypass actor, and a ruleset of ours could not lift it for the landing actor.                                                             |
 | "Require green gates on the active release" (27616259) | `~DEFAULT_BRANCH`      | `required_status_checks`: `Gate / CI` and `Gate / Quality`, pinned to GitHub Actions (`integration_id` 15368), not strict; no bypass actors | None: the landing push (`merge-ff`) pushes the candidate itself, and the queue lands a candidate only after its verdict saw both checks green on it from GitHub Actions. The landing-path check accepts it and prints it as an `info` line. |
 
-The status door replaces "Require PR on default branch", so the cut-over removes it (see
-[Cut-over and rollback](#cut-over-and-rollback)). Until it is gone, the landing-path check below
-reports it.
+The status door replaced "Require PR on default branch" at cut-over (see
+[Cut-over and rollback](#cut-over-and-rollback)). If that ruleset is restored, the landing-path
+check below reports it.
 
 `apply-ruleset.mjs` creates the ruleset, updates it when its normalized content drifted, or leaves
 it alone, printing a readable diff:
@@ -2012,20 +2044,20 @@ and the event.
 
 ## What appears as the owner and what appears as the App
 
-With the shipped config (`landing.actor: "owner"`, `voice: "app"`, `landing.signing: "none"`):
+The table reflects the shipped config (`landing.actor: "owner"`, `voice: "owner"`,
+`landing.signing: "ssh"`).
 
-| On GitHub                                                       | Appears as                               |
-| --------------------------------------------------------------- | ---------------------------------------- |
-| "merged by" on a landed pull request (the `merge-ff` push)      | the owner (`OMNI_QUEUE_LAND_TOKEN`)      |
-| author and committer of the queue's merge commits               | `landing.identity` (the owner), unsigned |
-| every comment on a pull request, every label removal            | the App (`omni-queue[bot]`)              |
-| the dashboard issue, its body, its comments (the stalled alert) | the App                                  |
-| comments on the `base-red` issue, the tree-divergence issue     | the App                                  |
-| commit statuses (`omni-queue/land`, both approvals, a bless)    | the App, always                          |
+| On GitHub                                                    | Appears as                                      |
+| ------------------------------------------------------------ | ----------------------------------------------- |
+| "merged by" on a landed pull request (the `merge-ff` push)   | the owner (`OMNI_QUEUE_LAND_TOKEN`)             |
+| author and committer of the queue's merge commits            | `landing.identity` (the owner), signed with SSH |
+| comments the tick posts on pull requests and label removals  | the owner                                       |
+| new dashboard issues, dashboard body edits and comments      | the owner                                       |
+| comments on the `base-red` issue, the tree-divergence issue  | the owner                                       |
+| commit statuses (`omni-queue/land`, both approvals, a bless) | the App, always                                 |
 
-With `voice: "owner"` the third to fifth rows become the owner (each one the App's again when the
-owner's token is missing or refused), and with `landing.signing: "ssh"` the merge commits are
-signed with the owner's key.
+The tick uses the App for the third to fifth rows when `voice` is `app` or when the owner's token
+is missing or refused. With `landing.signing: "none"`, the merge commits are unsigned.
 
 **Always the App, whatever the config**, and why:
 
@@ -2649,6 +2681,13 @@ began "Workflows are being blocked due to a scheduled brownout of the default
 `Approval` job that runs and fails prints `omni-queue approval failed: <message>`.
 
 ## Cut-over and rollback
+
+> **2026-11-25, `release/v3.8.55`.** With the owner's approval at each step, the cut-over applied
+> "omni-queue release protection: release/v3.8.55" (28108528, step 6) at 20:59Z, deleted "Require
+> PR on default branch" (21899981, step 7) at 21:00Z, and merged `mode: "live"` (#20902, step 9) at
+> 21:17Z, with `voice: "owner"` and `signing: "ssh"` from #21205. The first live landing was
+> #21033 at 22:51Z, with a Verified merge commit. The new dashboard is #21239. The owner evaluated step 10
+> and kept his local guard because it also covers release branches without a door.
 
 The cut-over is a separate owner decision, taken after the sandbox rehearsal and a few days of
 shadow mode on the real repository. In order:

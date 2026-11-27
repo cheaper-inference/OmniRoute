@@ -21,8 +21,9 @@ const { isPaidModelTarget } = await import("../../src/shared/utils/freeModels.ts
 // free tier is recurring and excludes the Pro line; the previous Together target
 // stopped classifying once its one-time signup credit left the catalog (#13407).
 const PAID_TARGET = "gemini/gemini-3.1-pro-preview";
-// A documented free model.
-const FREE_TARGET = "openrouter/auto";
+// A documented free model. (openrouter/auto stopped being one in the November 2026 re-audit: the
+// id is not on https://openrouter.ai/api/v1/models and the auto router can pick paid models.)
+const FREE_TARGET = "cohere/command-a-03-2025";
 // No "/" or "," — a combo/alias name, fails open ("unknown").
 const UNKNOWN_TARGET = "my-combo-alias";
 

@@ -1,8 +1,11 @@
 "use client";
 
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { useTranslations } from "next-intl";
+import { FlowNode, type FlowNodeStatus } from "@omniroute/ui-kit/flow-node";
+import { Progress } from "@omniroute/ui-kit/progress";
+import Badge from "@/shared/components/Badge";
 import { StatusDot } from "@/shared/components/flow/StatusDot";
-import { flowColorAlpha } from "@/shared/components/flow/edgeStyles";
 import { categoricalSlotFor } from "@/shared/utils/categoricalPalette";
 
 // ── Layer pill colours (10-layer model) ───────────────────────────────────
@@ -41,6 +44,15 @@ function getSavingsColor(savingsPercent: number): string {
   return "var(--orch-status-muted)";
 }
 
+/** The same ramp as the kit status tone of the node frame and of its savings line. */
+function getSavingsStatus(savingsPercent: number): FlowNodeStatus | undefined {
+  if (savingsPercent >= 30) return "success";
+  if (savingsPercent >= 15) return "warning";
+  return undefined;
+}
+
+const HANDLE = "!bg-transparent !border-0 !w-0 !h-0";
+
 // ── Node data shape ───────────────────────────────────────────────────────
 
 export interface EngineNodeData {
@@ -60,6 +72,7 @@ export interface EngineNodeData {
 // ── Component ─────────────────────────────────────────────────────────────
 
 export function EngineNode({ data }: NodeProps) {
+  const t = useTranslations("compressionStudio");
   const {
     engine,
     originalTokens,
@@ -78,117 +91,73 @@ export function EngineNode({ data }: NodeProps) {
   const tokIn = originalTokens as number;
   const tokOut = compressedTokens as number;
   const techniques = (techniquesUsed as string[]).slice(0, 2);
-
-  const borderColor = skipped ? "var(--color-border)" : running ? RUNNING_COLOR : color;
+  const hasBody = !skipped || durationMs != null || layers.length > 0;
 
   return (
-    <div
-      className="rounded-lg border-2 bg-bg transition-all duration-300 min-w-[150px] max-w-[180px]"
-      style={{
-        borderColor,
-        boxShadow: running
-          ? `0 0 14px ${flowColorAlpha(RUNNING_COLOR, 25)}`
-          : skipped
-            ? "none"
-            : `0 0 10px ${flowColorAlpha(color, 19)}`,
-      }}
-    >
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="!bg-transparent !border-0 !w-0 !h-0"
-      />
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="!bg-transparent !border-0 !w-0 !h-0"
-      />
-
-      {/* Header */}
-      <div
-        className="flex items-center gap-1.5 px-2.5 pt-2 pb-1"
-        style={{ borderBottom: "1px solid var(--color-border)" }}
+    <>
+      <FlowNode
+        size="sm"
+        className="min-w-[150px] max-w-[180px]"
+        icon={running ? <StatusDot color={RUNNING_COLOR} sizeClass="size-1.5" /> : undefined}
+        title={<span title={engine as string}>{engine as string}</span>}
+        description={
+          techniques.length > 0 ? (
+            <span title={(techniquesUsed as string[]).join(", ")}>{techniques.join(", ")}</span>
+          ) : undefined
+        }
+        meta={skipped ? <Badge size="sm">{t("skipped")}</Badge> : undefined}
+        status={running ? "warning" : skipped ? undefined : getSavingsStatus(savings)}
+        statusLabel={
+          skipped ? undefined : (
+            <span data-testid="savings-percent">{`-${savings.toFixed(1)}%`}</span>
+          )
+        }
+        active={running}
       >
-        {running && <StatusDot color={RUNNING_COLOR} sizeClass="size-1.5" />}
-        <span className="text-xs font-semibold truncate flex-1" title={engine as string}>
-          {engine as string}
-        </span>
-        {skipped && (
-          <span className="text-[10px] text-text-muted px-1 rounded bg-bg-subtle">skip</span>
-        )}
-      </div>
-
-      {/* Body — token bar */}
-      {!skipped && (
-        <div className="px-2.5 py-1.5">
-          <div className="flex justify-between text-[10px] text-text-muted mb-0.5">
-            <span>{tokIn.toLocaleString()}</span>
-            <span>→</span>
-            <span>{tokOut.toLocaleString()}</span>
+        {hasBody ? (
+          <div className="flex flex-col gap-1">
+            {/* Token bar */}
+            {!skipped && (
+              <div>
+                <div className="mb-0.5 flex justify-between text-text-muted">
+                  <span>{tokIn.toLocaleString()}</span>
+                  <span>→</span>
+                  <span>{tokOut.toLocaleString()}</span>
+                </div>
+                <Progress
+                  size="sm"
+                  semantics="meter"
+                  animate={false}
+                  aria-label={engine as string}
+                  aria-valuetext={`${tokIn.toLocaleString()} → ${tokOut.toLocaleString()}`}
+                  value={tokIn > 0 ? tokOut : 1}
+                  max={Math.max(tokIn, 1)}
+                  color={color}
+                />
+              </div>
+            )}
+            {durationMs != null && (
+              <span className="text-text-muted">{(durationMs as number).toFixed(1)}ms</span>
+            )}
+            {/* Layer pills */}
+            {layers.length > 0 && (
+              <div className="flex flex-wrap gap-0.5">
+                {layers.map((layer) => {
+                  const slot = categoricalSlotFor(LAYER_ORDER, layer);
+                  return (
+                    <Badge key={layer} size="sm" tone={slot ? `chart-${slot.token}` : undefined}>
+                      {layer}
+                    </Badge>
+                  );
+                })}
+              </div>
+            )}
           </div>
-          <div
-            role="progressbar"
-            aria-label={engine as string}
-            aria-valuemin={0}
-            aria-valuemax={Math.max(tokIn, tokOut, 1)}
-            aria-valuenow={tokOut}
-            aria-valuetext={`${tokIn.toLocaleString()} → ${tokOut.toLocaleString()}`}
-            className="relative h-1.5 rounded-full overflow-hidden bg-border"
-          >
-            <div
-              className="absolute inset-y-0 left-0 rounded-full"
-              style={{
-                width: tokIn > 0 ? `${(tokOut / tokIn) * 100}%` : "100%",
-                backgroundColor: color,
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Footer */}
-      <div className="px-2.5 pb-2 pt-1 flex flex-col gap-0.5">
-        {!skipped && (
-          <span
-            className="text-[11px] font-semibold"
-            style={{ color }}
-            data-testid="savings-percent"
-          >
-            {`-${savings.toFixed(1)}%`}
-          </span>
-        )}
-        {techniques.length > 0 && (
-          <span
-            className="text-[9px] text-text-muted truncate"
-            title={(techniquesUsed as string[]).join(", ")}
-          >
-            {techniques.join(", ")}
-          </span>
-        )}
-        {durationMs != null && (
-          <span className="text-[9px] text-text-muted">{(durationMs as number).toFixed(1)}ms</span>
-        )}
-        {/* Layer pills */}
-        {layers.length > 0 && (
-          <div className="flex gap-0.5 flex-wrap mt-0.5">
-            {layers.map((layer) => (
-              <span
-                key={layer}
-                className="text-[9px] px-1 rounded-sm font-medium text-text-main"
-                style={{
-                  backgroundColor: flowColorAlpha(
-                    categoricalSlotFor(LAYER_ORDER, layer)?.colorVar ?? "var(--color-text-muted)",
-                    20
-                  ),
-                }}
-              >
-                {layer}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+        ) : undefined}
+      </FlowNode>
+      <Handle type="target" position={Position.Left} className={HANDLE} />
+      <Handle type="source" position={Position.Right} className={HANDLE} />
+    </>
   );
 }
 

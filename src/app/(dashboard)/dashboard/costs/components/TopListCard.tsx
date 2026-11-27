@@ -1,4 +1,4 @@
-import { Card } from "@/shared/components";
+import Card from "@/shared/components/Card";
 import { createCurrencyFormatter } from "../CostOverviewTab";
 
 export interface TopListCardProps {
@@ -36,14 +36,16 @@ export function TopListCard({
 
   return (
     <Card className="p-5">
-      <h3 className="text-sm text-text-muted uppercase mb-4">{title}</h3>
+      <h3 className="ci-eyebrow mb-4" data-weight="medium">
+        {title}
+      </h3>
       <div className="space-y-2">
         {rows.slice(0, 6).map((row) => {
           const qualifier = qualifierKey && row[qualifierKey] ? String(row[qualifierKey]) : "";
           return (
-            <div
+            <Card.Section
               key={qualifier ? `${qualifier}:${String(row[nameKey])}` : String(row[nameKey])}
-              className="flex items-center justify-between gap-3 rounded-lg border border-border bg-bg-subtle px-4 py-3"
+              className="flex items-center justify-between gap-3"
             >
               <span className="text-sm text-text-main truncate">
                 {String(row[nameKey])}
@@ -68,7 +70,7 @@ export function TopListCard({
                   )}
                 </span>
               </div>
-            </div>
+            </Card.Section>
           );
         })}
       </div>

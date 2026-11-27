@@ -290,7 +290,7 @@ git push -u origin feat/your-feature
 
 **Husky hooks**:
 
-- **pre-commit**: lint-staged + `check-docs-sync` + `check:any-budget:t11` + `check:tracked-artifacts`
+- **pre-commit**: lint-staged + `check-docs-sync` + `check:any-budget:t11` + `check:tracked-artifacts` + `check:migration-numbering` (only when the commit stages a file under `src/lib/db/migrations/`; names only, the comparison with the base stays in CI)
 - **commit-msg**: `check:ai-attribution` — rejects AI/bot `Co-Authored-By` trailers and AI-generation footers in the message (Hard Rule #16; human co-authors allowed; also in the `quality.yml` fast-gates loop (PR→`release/**`) and a PR-only `ci.yml` lint step (PR→`main`) — #14436)
 - **pre-push**: intentionally light (PATH/npm sanity only) — `any-budget` + `tracked-artifacts` already run on pre-commit and CI still enforces both; re-running them per push was pure double-pay (was Fase 6A.12 full pre-push gate; folded into pre-commit in #6716).
 
@@ -345,6 +345,14 @@ freeze-gated `fix/release-vX.Y.Z-basereds` PR); a PR opened anyway carries
 Apply the label only to a PR the owner authorized you to land; a PR that touches a protected path
 also needs `protected-approved`, which is the owner's decision per PR. Never push to
 `omni-queue-state` or `omni-queue/**`.
+
+Only the `derived-refresh-autoland` workflow may apply the `omni-queue` label automatically.
+It labels only the `chore/derived-refresh` robot PR when `DERIVED_REFRESH_AUTOLAND` is `true`.
+Every changed file must belong to a derived family and have an unprotected path.
+Any open `release-freeze` issue blocks labeling. An open `base-red` issue blocks its target base.
+`Gate / CI` and `Gate / Quality` must pass on the current head.
+Every other label application requires the owner's approval for that PR.
+No other session, script or loop may apply the label on its own.
 
 ### Sync-back landings are merge commits, never squash
 

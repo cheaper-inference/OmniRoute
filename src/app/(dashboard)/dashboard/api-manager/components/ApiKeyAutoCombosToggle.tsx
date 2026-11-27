@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Toggle from "@/shared/components/Toggle";
 
 import { useTranslations } from "next-intl";
@@ -22,7 +23,7 @@ export function ApiKeyAutoCombosToggle({
   const tSettings = useTranslations("settings");
 
   return (
-    <div className="flex items-start justify-between gap-3 p-3 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex items-start justify-between gap-3">
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium text-text-main">{tSettings("autoCombosTitle")}</p>
         <p className="text-xs text-text-muted">{tSettings("autoCombosDesc")}</p>
@@ -34,6 +35,6 @@ export function ApiKeyAutoCombosToggle({
         onChange={() => onToggle()}
         ariaLabel={tSettings("autoCombosTitle")}
       />
-    </div>
+    </Card.Section>
   );
 }

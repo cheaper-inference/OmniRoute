@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Löftet — En slutpunkt och 394 leverantörer. Automatisk reservroutning fortsätter routningen så länge ett annat friskt mål är tillgängligt. Sex pelare: robust reservroutning över 394 leverantörer · upp till 95 % tokenbesparingar för berättigade arbetsbelastningar · $0 för att komma igång med över 150 kostnadsfria nivåer och 51 återkommande/nyckellösa leverantörer som alltid är kostnadsfria · 39 CLI-/agentintegreringar via en enda konfiguration · kompatibilitet med OpenAI-, Claude-, Gemini- och Responses-API:erna på /v1 · produktionskontroller inklusive kretsbrytare, TLS-stealth, MCP med 110 verktyg, A2A, minne, skyddsräcken, utvärderingar och över 56 000 statiska testdeklarationer över fler än 7 800 spårade testfiler."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Löftet — En slutpunkt och 394 leverantörer. Automatisk reservroutning fortsätter routningen så länge ett annat friskt mål är tillgängligt. Sex pelare: robust reservroutning över 394 leverantörer · upp till 95 % tokenbesparingar för berättigade arbetsbelastningar · $0 för att komma igång med över 150 kostnadsfria nivåer och 40 återkommande/nyckellösa leverantörer som alltid är kostnadsfria · 39 CLI-/agentintegreringar via en enda konfiguration · kompatibilitet med OpenAI-, Claude-, Gemini- och Responses-API:erna på /v1 · produktionskontroller inklusive kretsbrytare, TLS-stealth, MCP med 110 verktyg, A2A, minne, skyddsräcken, utvärderingar och över 56 000 statiska testdeklarationer över fler än 7 800 spårade testfiler."/>
 
 <br/>
 <br/>
@@ -711,7 +711,7 @@ från din shellhistorik. → [CLI-integrationer](docs/guides/CLI-INTEGRATIONS.md
 
 </div>
 
-> **394 registrerade leverantörer** i de kanoniska samlingarna för chatt, media, sökning, lokalt, molnagenter och system, inklusive **153 med `hasFree: true` i upptäcktsmetadata**. Chattmodellregistret omfattar **239 leverantörer / 3 059 distinkta leverantör-modell-par / 1 475 råmodell-ID:n**; den separata katalogen för gratisbudget har **465 rader per modell**, **34 återkommande pooler** och **51 återkommande eller nyckellösa leverantörer som är kostnadsfria för alltid**. Dessa är avsiktligt olika nämnare; definitioner och beräkningar deduplicerade efter pool finns i [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) och [Free Tiers](docs/reference/FREE_TIERS.md).
+> **394 registrerade leverantörer** i de kanoniska samlingarna för chatt, media, sökning, lokalt, molnagenter och system, inklusive **153 med `hasFree: true` i upptäcktsmetadata**. Chattmodellregistret omfattar **239 leverantörer / 3 059 distinkta leverantör-modell-par / 1 475 råmodell-ID:n**; den separata katalogen för gratisbudget har **465 rader per modell**, **34 återkommande pooler** och **40 återkommande eller nyckellösa leverantörer som är kostnadsfria för alltid**. Dessa är avsiktligt olika nämnare; definitioner och beräkningar deduplicerade efter pool finns i [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) och [Free Tiers](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1330,7 +1330,7 @@ Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kä
   <tr><td nowrap><b>Körmiljö</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Språk</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> i <code>src/</code> och <code>open-sse/</code> (noll <code>any</code> i kärnan sedan v2.0)</td></tr>
   <tr><td nowrap><b>Ramverk</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databas</b></td><td>better-sqlite3 (SQLite, WAL-journalföring) + LowDB (äldre JSON) — 147 domänmoduler, 244 migreringar</td></tr>
+  <tr><td nowrap><b>Databas</b></td><td>better-sqlite3 (SQLite, WAL-journalföring) + LowDB (äldre JSON) — 147 domänmoduler, 252 migreringar</td></tr>
   <tr><td nowrap><b>Minne</b></td><td>SQLite FTS5-fulltextsökning + int8-kvantiserade vektorinbäddningar, typad avklingning</td></tr>
   <tr><td nowrap><b>Schema</b></td><td>Zod 4 — validering av MCP-verktygens indata/utdata + API-kontrakt</td></tr>
   <tr><td nowrap><b>Protokoll</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

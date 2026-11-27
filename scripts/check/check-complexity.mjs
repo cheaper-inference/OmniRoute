@@ -6,7 +6,8 @@
 // violations never inflate this baseline.
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { isMainModule } from "../lib/is-main-module.mjs";
 import {
   ESLINT_ARGS,
   countComplexityViolations,
@@ -61,4 +62,4 @@ function main() {
   console.log(`[complexity] OK — ${current} violações (baseline ${baseline.count})`);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (isMainModule(import.meta.url)) main();

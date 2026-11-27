@@ -1282,10 +1282,12 @@
     "scaffold": "Scaffold a new plugin boilerplate"
   },
   "launch": {
-    "description": "Launch Claude Code pointed at OmniRoute (local or remote, with --profile)",
+    "description": "Launch an AI coding tool pointed at OmniRoute: omniroute launch <tool> (Claude Code when no tool is named)",
     "token": "Token the Claude client should send (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute is not reachable at {port}. Start it with 'omniroute serve'.",
-    "notFound": "The 'claude' CLI was not found in PATH."
+    "notFound": "The 'claude' CLI was not found in PATH.",
+    "toolsHelp": "Launch a coding tool (auto-starts the gateway, model list from your connected providers):\n  omniroute launch <tool> [options] [-- toolArgs...]\n  omniroute launch --list           list launchable tools\n  omniroute launch <tool> --help    options for a tool launch (--model, --all-models, ...)\n\nWithout a tool name, launch starts Claude Code with the options above (deprecated).",
+    "gatewayDescription": "Inspect or control the gateway that omniroute launch started"
   },
   "run": {
     "description": "Launch a supported CLI target through OmniRoute"

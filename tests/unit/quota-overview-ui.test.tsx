@@ -3,6 +3,7 @@ import React from "react";
 import "@testing-library/jest-dom/vitest";
 import { afterEach, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { focusHoverCardTrigger, hoverHoverCardTrigger } from "../_helpers/sharedHoverCard";
 import { NextIntlClientProvider } from "next-intl";
 import en from "../../src/i18n/messages/en.json";
 import zh from "../../src/i18n/messages/zh-CN.json";
@@ -89,7 +90,7 @@ afterEach(() => {
 });
 it.each(["en", "zh-CN"])(
   "renders approved capsules, unique count and isolated subpool tooltip (%s)",
-  (locale) => {
+  async (locale) => {
     const m = locale === "en" ? en : zh;
     mount(locale);
     const handle = document.querySelector<HTMLButtonElement>("[data-drag-handle]")!;
@@ -113,12 +114,11 @@ it.each(["en", "zh-CN"])(
     expect(handle).toHaveClass("ci-button");
     expect(handle.querySelector('[data-icon="drag_indicator"]')).not.toBeNull();
     expect(claude.querySelector("[data-partial]")).toBeNull();
-    fireEvent.mouseEnter(claude);
-    const tip = screen.getByRole("tooltip");
+    const tip = await hoverHoverCardTrigger(claude);
     expect(tip).toHaveTextContent("a2@example.test");
     expect(tip.querySelectorAll('[role="progressbar"]')).toHaveLength(1);
     expect(tip.querySelector("[data-other-pool]")).toHaveTextContent("72%");
-    expect(tip.parentElement).toBe(document.body);
+    expect(tip.closest("[data-radix-popper-content-wrapper]")?.parentElement).toBe(document.body);
     fireEvent.keyDown(document, { key: "Escape" });
     expect(screen.queryByRole("tooltip")).toBeNull();
     fireEvent.click(claude);
@@ -355,8 +355,7 @@ it.each(["en", "zh-CN"])(
     expect(document.querySelector("[data-banner]")).toHaveTextContent(
       locale === "en" ? "2 accounts temporarily unavailable" : "2 个号暂时不能用"
     );
-    fireEvent.focus(cooling);
-    expect(screen.getByRole("tooltip")).toHaveTextContent(
+    expect(focusHoverCardTrigger(cooling as HTMLElement)).toHaveTextContent(
       locale === "en" ? "Waited 80%" : "已等 80%"
     );
   }

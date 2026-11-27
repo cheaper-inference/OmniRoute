@@ -10,8 +10,6 @@ lastUpdated: 2026-10-05
 
 Visual guide to every section of the OmniRoute dashboard.
 
-> 📅 **Last updated:** 2026-06-28 — **v3.8.40**
-
 ---
 
 ## ✨ v3.8.0 Highlights

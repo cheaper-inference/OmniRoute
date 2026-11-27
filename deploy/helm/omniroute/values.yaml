@@ -79,8 +79,8 @@ secrets:
 config:
   dataDir: /app/data
   logLevel: info
-  # Turn this on before exposing /v1/* outside the cluster.
-  requireApiKey: false
+  # Require an API key on /v1/* even when Ingress is disabled.
+  requireApiKey: true
   # Comma-separated origins allowed to open the dashboard live WebSocket.
   liveWsAllowedOrigins: "http://localhost:20128,http://127.0.0.1:20128"
   # Graceful-shutdown budget for the in-flight SSE drain only — the WAL

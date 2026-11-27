@@ -7,11 +7,10 @@ lastUpdated: 2026-11-13
 # Repository Map
 
 > **What lives where: every tracked top-level directory and root file, with a one-line purpose.**
-> Last updated: 2026-11-13 (OmniRoute v3.8.54)
 >
 > Use this map to find your way around the codebase, then follow the links to the dedicated docs.
-> File counts were measured with `git ls-files` on the date above. They change with almost every
-> release, so treat them as orders of magnitude.
+> File counts come from `git ls-files` and change with almost every release. Treat them as
+> orders of magnitude.
 
 ## Top-level tree
 

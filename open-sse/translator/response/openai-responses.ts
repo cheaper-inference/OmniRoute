@@ -6,6 +6,7 @@ import { register } from "../registry.ts";
 import { cacheCreationFields, mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { FORMATS } from "../formats.ts";
 import { appendToolCallArgumentDelta } from "../../utils/toolCallArguments.ts";
+import { chargeRetained } from "../../utils/streamRetainedBudget.ts";
 import { translatorToolCallLifecycle } from "./openai-responses/toolCallLifecycle.ts";
 import { projectCompletedStreamError } from "../../utils/streamErrorFormat.ts";
 import { fallbackToolCallId } from "../helpers/toolCallHelper.ts";
@@ -39,6 +40,7 @@ import {
 import { logger } from "../../utils/logger.ts";
 import { plaintextCollaborationFields } from "./openai-responses/collaborationPlaintextMarker.ts";
 import { resolveLocalToolCallIndex } from "./openai-responses/toolCallLocalIndex.ts";
+import { firstReportedCounter } from "../../utils/reportedCounter.ts";
 import {
   synthesizeCompletedToolItem,
   buildFinalChunk,
@@ -472,7 +474,7 @@ function startReasoning(state, emit, idx) {
 
 function emitReasoningDelta(state, emit, text) {
   if (!text) return;
-  state.reasoningBuf += text;
+  if (chargeRetained(state, text.length)) state.reasoningBuf += text;
   emit("response.reasoning_summary_text.delta", {
     type: "response.reasoning_summary_text.delta",
     item_id: state.reasoningId,
@@ -815,7 +817,7 @@ function emitToolCall(state, emit, tc) {
     }
     const rawArgs = repairDoubleEscapedTabs(state, tcIdx, tc.function.arguments);
     const sanitized = escapeJsonStringValues(rawArgs, state.funcArgsEscapeState[tcIdx]);
-    const nextArgs = appendToolCallArgumentDelta(existingArgs, sanitized);
+    const nextArgs = appendToolCallArgumentDelta(existingArgs, sanitized, state);
     const emittedDelta = newArgumentTail(sanitized, nextArgs.length - existingArgs.length);
     state.funcArgsBuf[tcIdx] = nextArgs;
 
@@ -1329,7 +1331,9 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
 
     // #9168: buffer arguments until output_item.done for schema-aware null normalization
     // Previously emitted raw null values for optional enum fields (e.g. isolation: null).
-    entry.argsBuffer = (entry.argsBuffer || "") + argsDelta;
+    if (chargeRetained(state, argsDelta.length)) {
+      entry.argsBuffer = (entry.argsBuffer || "") + argsDelta;
+    }
     return null;
   }
 
@@ -1547,6 +1551,11 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
         responseUsage.input_tokens_details?.cached_tokens ||
         responseUsage.prompt_tokens_details?.cached_tokens ||
         0;
+      const reportedCacheRead = firstReportedCounter(
+        responseUsage.cache_read_input_tokens,
+        responseUsage.input_tokens_details?.cached_tokens,
+        responseUsage.prompt_tokens_details?.cached_tokens
+      );
       const cacheCreationTokens = responseUsage.cache_creation_input_tokens || 0;
       const reasoningTokens =
         responseUsage.output_tokens_details?.reasoning_tokens ||
@@ -1576,9 +1585,9 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
       };
 
       // Add prompt_tokens_details if cache tokens exist
-      if (cacheReadTokens > 0 || cacheCreationTokens > 0) {
+      if (reportedCacheRead !== undefined || cacheReadTokens > 0 || cacheCreationTokens > 0) {
         state.usage.prompt_tokens_details = { ...cacheCreationFields(state.usage) };
-        if (cacheReadTokens > 0) {
+        if (cacheReadTokens > 0 || reportedCacheRead !== undefined) {
           state.usage.prompt_tokens_details.cached_tokens = cacheReadTokens;
         }
         if (cacheCreationTokens > 0) {

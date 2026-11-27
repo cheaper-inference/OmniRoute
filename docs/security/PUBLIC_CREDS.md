@@ -8,12 +8,10 @@ lastUpdated: 2026-08-07
 
 > **Source of truth:** `open-sse/utils/publicCreds.ts`
 > **Tests:** `tests/unit/publicCreds.test.ts`
-> **Last updated:** 2026-08-07 — v3.8.50
 > **Audience:** Engineers integrating providers that ship public OAuth client_id / client_secret / Firebase Web API keys in their public CLIs.
 > **Status:** **MANDATORY** for all new code that embeds upstream identifiers.
 
 ## Why this exists
-
 
 - [OAuth 2.0 for native apps (PKCE)](https://developers.google.com/identity/protocols/oauth2/native-app) — OAuth client_id / client_secret for installed apps are public; PKCE provides the actual security.
 - [Firebase API keys](https://firebase.google.com/docs/projects/api-keys) — Web client identifiers are public by design.

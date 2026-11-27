@@ -68,6 +68,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #13987: System One decisions (/v1/systemone), same
     // scoped quota-preflight credential lookup as /v1/classify (class B).
     "src/app/api/v1/_shared/systemOneRoute.ts": 1,
+    // #18838 (salvage): native OpenAI Decisions (/v1/decisions), the same scoped
+    // quota-preflight lookup as /v1/systemone, handed to the decision credential resolver
+    // inside the key's connection scope; it posts a typed decision, never chat (class B).
+    "src/app/api/v1/_shared/decisionsRoute.ts": 1,
     // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.
@@ -163,8 +167,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "open-sse/handlers/cursorCliProxy.ts": 1,
     "open-sse/services/alibabaFreeTier.ts": 1,
     "open-sse/services/alibabaFreeTierQuotaFetcher.ts": 1,
-    // Family cooldown persist looks the row up to write PSD, not dispatch.
-    "open-sse/services/antigravityFamilyCooldown.ts": 1,
+    // Family cooldown persist looks the row up to write PSD, not dispatch. #20481 adds
+    // clearAntigravityFamilyCooldown, which reads the row to drop one saved family deadline
+    // after a passing quota probe: a PSD state write as well, no dispatch.
+    "open-sse/services/antigravityFamilyCooldown.ts": 2,
     // The quota fetcher re-reads the connection row before writing back a rotated
     // token (the same shape as the family-cooldown persist above). It never picks a
     // connection for dispatch: the caller names the connection it already holds.
@@ -398,6 +404,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/vscode/tagModels.ts": 1,
     "src/lib/warmupScheduler.ts": 1,
     "src/shared/services/codexCatalogRevalidation.ts": 2,
+    // #11777: the scheduled model health check lists opted-in connections and fences each
+    // one with isConnectionUnavailableToAuxiliaryActivity before probing it.
+    "src/shared/services/modelHealthCheckScheduler.ts": 1,
     "src/shared/services/modelSyncScheduler.ts": 1,
     // #15234: Muse session ownership lists the active muse-code OAuth connections only to
     // pick/validate the session's owner account. It selects nothing for dispatch — every
@@ -456,6 +465,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
         "src/lib/usage/providerLimits.ts",
         "src/lib/vncSession/service.ts",
         "src/lib/warmupScheduler.ts",
+        "src/shared/services/modelHealthCheckScheduler.ts",
         "src/shared/services/modelSyncScheduler.ts",
         "src/sse/services/auth.ts",
       ].includes(file)
@@ -568,6 +578,7 @@ test("managed request surfaces are fenced centrally or rejected before independe
     "src/lib/usage/grokResetCredits.ts",
     "src/lib/vncSession/service.ts",
     "src/lib/warmupScheduler.ts",
+    "src/shared/services/modelHealthCheckScheduler.ts",
     "src/shared/services/modelSyncScheduler.ts",
   ].map((file) => fs.readFileSync(path.join(REPO_ROOT, file), "utf8"));
   const unfencedUsageRefreshSource = fs.readFileSync(

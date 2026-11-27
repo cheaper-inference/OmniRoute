@@ -24,7 +24,7 @@ Angka ini menerangkan akaun pihak ketiga yang berasingan dan syarat kelayakan me
 | **+ di sebalik pemeriksaan identiti serantau**      | **+~ 6M**         | `modelscope` (Alibaba Cloud binding + tanah besar-China pengesahan nama sebenar). Kuota berulang sebenar, terdedah sebagai `gatedRecurringTokens` / `gatedProviders` dan pada papan pemuka. Tidak pernah disimpulkan ke dalam tajuk: +~ 6M di belakang pengesahan identiti serantau. |
 | Siling teori (semua had kadar, 24/7)                | ~ 10B             | Jumlah setiap had kadar pembekal diekstrapolasi kepada penggunaan tanpa henti.** Bukan jaminan** — jangan tajuk ini.                                                                                                                                                                 |
 
-**Tajuk jujur:** _Agregat OmniRoute**~ 1.62B mendokumenkan token percuma setiap bulan** (sehingga ~ 2.22B pada bulan pertama anda dengan kredit pendaftaran) merentas 34 kumpulan peringkat percuma — serta ekor panjang pembekal tanpa had — dan RTK + Caveman (penjimatan token 15–95%) yang panjang secara kekal._
+**Tajuk jujur:** _Agregat OmniRoute**~ 1.62B mendokumenkan token percuma setiap bulan** (sehingga ~ 2.22B pada bulan pertama anda dengan kredit pendaftaran) merentas 26 kumpulan peringkat percuma — serta ekor panjang pembekal tanpa had — dan RTK + Caveman (penjimatan token 15–95%) yang panjang secara kekal._
 
 > **Mengapa ini menurun daripada ~ 1.94B sebelumnya.** Muat semula 2026-06-17 ialah pembetulan kejujuran, bukan kerugian: `gemini` kini dikosongkan (telah dinaikkan dengan mengira setiap varian Flash secara berasingan, 462M → 60M), `cloudflare-ai` diperbetulkan kepada 10k-Neurons/day sebenar (122M → 30M), `doubao` diklasifikasikan semula sebagai penandatanganan semula masa penutupan dan (tidak diklasifikasikan semula sebagai satu masa penutupan `chutes`/`phind`/`kluster` dihentikan). Sebahagiannya diimbangi oleh `llm7` ( 5M/day → 150M yang betul) dan pembekal percuma baharu (Kilo, OpenCode Zen, Z.AI GLM-Flash).
 >
@@ -38,7 +38,7 @@ Angka ini menerangkan akaun pihak ketiga yang berasingan dan syarat kelayakan me
 >
 > **Dibetulkan pada 2026-09-03 (#11773):** `cerebras` telah diklasifikasikan semula daripada geran berulang 30M/mo (percubaan tokens/day 1M tanpa kad lama) kepada kredit pendaftaran $5 sekali yang memerlukan kaedah pembayaran. Peraturan kejujuran yang sama seperti LongCat.
 >
-> **Plus xKiro (2026-09-03):** kolam `xkiro-free` baharu (150M/mo) menambah kunci kolam berulang ke-35. Felo Web kekal dikecualikan manakala provenance/licensing terbitan GPL kekal pada HOLD. Sumber itu kini melaporkan** 34 kekunci kolam berulang** dan**~ 1.62B mantap** — nombor langsung, berpagar CI (`check:docs-counts` gagal binaan jika ini hanyut dari `computeFreeModelTotals()`).
+> **Plus xKiro (2026-09-03):** kolam `xkiro-free` baharu (150M/mo) menambah kunci kolam berulang ke-35. Felo Web kekal dikecualikan manakala provenance/licensing terbitan GPL kekal pada HOLD. Sumber itu kini melaporkan** 26 kekunci kolam berulang** dan**~ 1.62B mantap** — nombor langsung, berpagar CI (`check:docs-counts` gagal binaan jika ini hanyut dari `computeFreeModelTotals()`).
 
 Terbesar** didokumenkan** penyumbang: `mistral` 1.00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (lima topi setiap model), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` dikecualikan — pemberian 10M LongCat-2.0nya ialah kredit pendaftaran berpagar KYC sekali sahaja, bukan belanjawan bulanan berulang.)
 
