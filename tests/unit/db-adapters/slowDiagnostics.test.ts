@@ -150,3 +150,148 @@ test("enabled native adapter retains transaction rollback, getters and bound par
   }
   assert.equal(wrapped.open, false);
 });
+
+// The wrapper must not turn "the driver could not answer" into a plain
+// boolean: a caller behind it would lose exactly the distinction the tri-state
+// read exists to carry.
+test("the diagnostics wrapper forwards the tri-state open read", () => {
+  const { db } = fixture();
+  const wrapped = instrumentSqliteAdapter(db, { thresholdMs: 200, now: () => 0, log: () => {} });
+  assert.equal(
+    wrapped.readOpenWitness?.(),
+    "open",
+    "an adapter without the read answers through open"
+  );
+
+  const unreadable: SqliteAdapter = { ...db, readOpenWitness: () => "unreadable" };
+  const wrappedUnreadable = instrumentSqliteAdapter(unreadable, {
+    thresholdMs: 200,
+    now: () => 0,
+    log: () => {},
+  });
+  assert.equal(wrappedUnreadable.readOpenWitness?.(), "unreadable");
+});
+
+// A delegate without the reader answers through `open`, and a falsy non-boolean
+// is not evidence of closure: the wrapper must not turn it into "closed".
+test("the diagnostics wrapper keeps a non-boolean delegate answer unreadable", () => {
+  const { db } = fixture();
+  const legacy = { ...db, open: undefined } as unknown as SqliteAdapter;
+  const wrapped = instrumentSqliteAdapter(legacy, {
+    thresholdMs: 200,
+    now: () => 0,
+    log: () => {},
+  });
+  assert.equal(wrapped.readOpenWitness?.(), "unreadable");
+  // `open` is a boolean on this interface: an unreadable delegate must not turn
+  // the wrapper's own `open` into undefined for callers that read it.
+  assert.equal(typeof wrapped.open, "boolean");
+  assert.equal(wrapped.open, true);
+
+  const closed = { ...db, open: false } as SqliteAdapter;
+  const wrappedClosed = instrumentSqliteAdapter(closed, {
+    thresholdMs: 200,
+    now: () => 0,
+    log: () => {},
+  });
+  assert.equal(wrappedClosed.readOpenWitness?.(), "closed");
+});
+
+// Same guard on the wrapper's fallback: a delegate whose `open` getter throws
+// must answer unreadable rather than letting the exception out.
+test("the diagnostics wrapper survives a throwing legacy open getter", () => {
+  const { db } = fixture();
+  const legacy = { ...db } as SqliteAdapter;
+  Object.defineProperty(legacy, "open", {
+    get() {
+      throw new Error("legacy open exploded");
+    },
+    configurable: true,
+  });
+  const wrapped = instrumentSqliteAdapter(legacy, {
+    thresholdMs: 200,
+    now: () => 0,
+    log: () => {},
+  });
+  assert.equal(wrapped.readOpenWitness?.(), "unreadable");
+});
+
+test("the wrapper forwards the close checkpoint option to the wrapped adapter", () => {
+  const seen: Array<{ checkpoint?: boolean } | undefined> = [];
+  const { db } = fixture();
+  db.close = (options) => {
+    seen.push(options);
+  };
+  const wrapped = instrumentSqliteAdapter(db, {
+    thresholdMs: 200,
+    now: () => 0,
+    log: () => {},
+  });
+
+  wrapped.close({ checkpoint: false });
+  wrapped.close();
+
+  assert.deepEqual(seen, [{ checkpoint: false }, undefined]);
+});
+
+test("a delegate whose witness throws reads as unreadable, not an escape", () => {
+  const { db } = fixture();
+  db.readOpenWitness = () => {
+    throw new Error("PRIVATE_WITNESS_FAILURE");
+  };
+  const wrapped = instrumentSqliteAdapter(db, {
+    thresholdMs: 200,
+    now: () => 0,
+    log: () => {},
+  });
+
+  assert.equal(wrapped.readOpenWitness(), "unreadable");
+});
+
+test("a delegate whose witness getter throws reads as unreadable", () => {
+  const { db } = fixture();
+  Object.defineProperty(db, "readOpenWitness", {
+    configurable: true,
+    get() {
+      throw new Error("PRIVATE_GETTER_FAILURE");
+    },
+  });
+  const wrapped = instrumentSqliteAdapter(db, {
+    thresholdMs: 200,
+    now: () => 0,
+    log: () => {},
+  });
+
+  assert.equal(wrapped.readOpenWitness(), "unreadable");
+});
+
+test("a delegate whose open getter throws reads as open, not an escape", () => {
+  const { db } = fixture();
+  Object.defineProperty(db, "open", {
+    configurable: true,
+    get() {
+      throw new Error("PRIVATE_OPEN_FAILURE");
+    },
+  });
+  const wrapped = instrumentSqliteAdapter(db, {
+    thresholdMs: 200,
+    now: () => 0,
+    log: () => {},
+  });
+
+  assert.equal(wrapped.readOpenWitness(), "unreadable");
+  assert.equal(wrapped.open, true);
+});
+
+test("a closed delegate reads closed through both surfaces", () => {
+  const { db } = fixture();
+  Object.defineProperty(db, "open", { value: false, configurable: true });
+  const wrapped = instrumentSqliteAdapter(db, {
+    thresholdMs: 200,
+    now: () => 0,
+    log: () => {},
+  });
+
+  assert.equal(wrapped.readOpenWitness(), "closed");
+  assert.equal(wrapped.open, false);
+});
