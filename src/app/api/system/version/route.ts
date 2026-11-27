@@ -1,5 +1,7 @@
 /**
  * GET  /api/system/version  — Returns current version and latest available on npm
+ *                             (`?operationId=<uuid>` with MANAGED_UPDATE_ROLLBACK_ENABLED on:
+ *                             the durable verdict of a managed update)
  * POST /api/system/version  — Triggers a deployment-aware background update
  *
  * Security: Requires admin authentication (same as other management routes).
@@ -30,6 +32,8 @@ import { resolveGlobalOmniroutePath } from "@/lib/system/globalPackagePath";
 import { restartRunningServer } from "@/lib/system/processManagerRestart";
 import { formatUpdateInstallError } from "@/lib/system/updateInstallError";
 import { APP_CONFIG } from "@/shared/constants/appConfig";
+import { isManagedUpdateRollbackEnabled } from "@/lib/system/managedUpdate";
+import { managedUpdateResponse, managedUpdateStateResponse } from "@/lib/system/managedUpdateHttp";
 // #5542 — On Windows npm is `npm.cmd`; Node ≥24 refuses to execFile a `.cmd` without
 // a shell (nodejs/node#52554 → "spawn npm ENOENT"). buildNpmExecOptions enables the
 // shell on win32 only; SERVICE_VERSION_PATTERN keeps the shell-joined version safe.
@@ -71,6 +75,12 @@ async function getNews() {
 export async function GET(req: NextRequest) {
   if (!(await isAuthenticated(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Managed update verdict, read by id after the server restarts. Flag off: ignored.
+  const operationIdParam = new URL(req.url).searchParams.get("operationId");
+  if (operationIdParam !== null && isManagedUpdateRollbackEnabled()) {
+    return managedUpdateStateResponse(operationIdParam);
   }
 
   const current = getCurrentVersion();
@@ -162,6 +172,11 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
+
+  // Managed update with automatic recovery (flag off, or any environment outside its cut:
+  // no response here, and everything below runs exactly as before).
+  const managedResponse = await managedUpdateResponse(config.mode, current, latest);
+  if (managedResponse) return managedResponse;
 
   // Socket-free Docker image update: drop a request file in DATA_DIR for the host watcher,
   // which pulls the image and recreates the container. The dashboard then polls GET.

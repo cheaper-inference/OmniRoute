@@ -15509,6 +15509,15 @@ paths:
         `releaseChannel` and `channels` are additive (rail 3.8.54); `channel` keeps meaning the
         deployment mode used by the dashboard updater.
       x-loopback-only: true
+      parameters:
+        - name: operationId
+          in: query
+          required: false
+          description: >-
+            With MANAGED_UPDATE_ROLLBACK_ENABLED on, returns the durable verdict of a managed update
+            (`status` running, updated, rolled-back, manual-recovery or unsupported) instead of the
+            version payload. Ignored while the flag is off.
+          schema: { type: string, format: uuid }
       responses:
         "200":
           description: OK
@@ -15556,16 +15565,43 @@ paths:
                       lts: { type: string }
         "304":
           description: Not modified (If-None-Match matched the ETag).
+        "400":
+          description: Malformed operationId (managed update verdict).
         "401":
           description: Unauthorized
+        "404":
+          description: Unknown update operation (managed update verdict).
     post:
       tags:
         - System
       summary: "POST system › version"
+      description: >-
+        Starts a deployment-aware update. With MANAGED_UPDATE_ROLLBACK_ENABLED on and a global npm
+        install on Linux under the CLI-managed service, the update is handed to a detached
+        coordinator that restores the previous version and data if the new one cannot be proven
+        ready: the answer is 202 with an `operationId` to follow through
+        `GET /api/system/version?operationId=`. Every other case keeps the previous contract.
       x-loopback-only: true
       responses:
         "200":
           description: OK
+        "202":
+          description: Managed update accepted; follow it by operationId.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, operationId, status]
+                properties:
+                  success: { type: boolean }
+                  operationId: { type: string, format: uuid }
+                  status: { type: string, enum: [accepted] }
+                  message: { type: string }
+                  from: { type: string }
+                  to: { type: string }
+                  channel: { type: string, enum: [npm-managed] }
+        "409":
+          description: Managed update refused before any change (another update is running, or not enough disk space).
   /api/tools/agent-bridge/agents/{id}:
     parameters:
       - $ref: "#/components/parameters/ResourceId"

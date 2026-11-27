@@ -1,0 +1,1 @@
+- **feat(cli):** Opt-in `omniroute update --rollback-on-failure` and `MANAGED_UPDATE_ROLLBACK_ENABLED` restore the previous version and data when an update fails to come up, for global npm installs on Linux running `omniroute serve --daemon`; the dashboard shows the recovered version or the manual-recovery steps (#21391).

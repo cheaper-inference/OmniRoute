@@ -342,7 +342,60 @@ omniroute update --dry-run
 
 Other `omniroute update` flags (verified in source): `--check` (exit 1 if
 outdated), `--apply` (install without prompting), `--changelog`, `--no-backup`,
-`--yes`.
+`--yes`, `--rollback-on-failure` (see below).
+
+### Recovering from a failed update: `--rollback-on-failure`
+
+`omniroute update --rollback-on-failure` (off by default) installs the exact new
+version and, if it cannot be proven healthy, puts the previous version and its
+data back. The dashboard update button does the same when the feature flag
+`MANAGED_UPDATE_ROLLBACK_ENABLED` is on (see
+[`FEATURE_FLAGS.md`](../reference/FEATURE_FLAGS.md)). With the option or the
+flag off, `omniroute update` and the dashboard behave exactly as before.
+
+**Supported:** a global npm install on Linux, running as the CLI-managed
+service (`omniroute serve --daemon`, the pid file under `DATA_DIR/server/`).
+**Not supported** (the update keeps today's flow, with a message saying why):
+Docker, Electron, Windows, installs from source, the foreground supervisor
+(`omniroute serve` without `--daemon`), and services run by systemd or pm2. A
+supported host is refused before anything changes when another managed update is
+running or when the disk cannot hold the snapshot.
+
+What it does, in order:
+
+1. Pre-flight: checks the cut above, the installed version, the service
+   environment (data directory, port, no TLS) and the free disk space.
+2. Starts a detached coordinator that runs from a copy outside the package tree,
+   because `npm install -g` replaces that tree. It takes an exclusive lock and
+   records its state in `DATA_DIR/managed-update/<operation id>/state.json`.
+3. Stops the service, then copies `DATA_DIR` (without `managed-update/`) and the
+   installed package into that operation directory.
+4. Runs `npm install -g omniroute@<exact version> --include=optional --legacy-peer-deps`,
+   starts the service again and waits up to 3 minutes for readiness.
+5. Readiness means a process that is not one of the stopped ones, the target
+   version on disk, and `/api/health/ping` answering 200 (it checks SQLite). The
+   200 of an old process never counts.
+6. If that fails, it stops the candidate, moves the candidate's data and the
+   failed package tree aside (`candidate-data/` and `<package>.failed-<id>`; they
+   are kept for diagnosis, never deleted), restores the snapshot once, starts the
+   previous version and proves it ready the same way.
+
+The result is one of `updated`, `rolled-back` (exit 1, the previous version is
+running again), `manual-recovery` (exit 1) or `unsupported`. After
+`manual-recovery` the snapshot is preserved and the command prints the steps;
+in short: run `omniroute stop`, move the current `DATA_DIR` contents aside (do not
+delete them), copy `DATA_DIR/managed-update/<operation id>/data-snapshot/` back,
+reinstall the previous version if needed (`npm install -g omniroute@<previous>`),
+then `omniroute serve --daemon`. A copy of the previous package is next to the
+data snapshot (`previous-package/`). On success and on a clean rollback the
+snapshot copies are removed; the state file, the logs and the kept failure
+artifacts stay.
+
+Limits to know about: the service is down while the package is swapped, and the
+candidate answers real traffic during its readiness window. A dashboard session
+sees a short outage; the page keeps the last known phase and reads the final
+result by id (`GET /api/system/version?operationId=<id>`, management auth) once
+the server is back.
 
 ---
 
