@@ -1,0 +1,30 @@
+./package.json
+./README.md
+./src/app/dashboard/providers/components/Button.tsx
+./src/app/dashboard/providers/components/Modal.tsx
+./src/app/dashboard/providers/components/Tabela de preços.tsx
+./src/app/dashboard/providers/components/Cabeçalho.tsx
+./src/app/dashboard/providers/components/index.ts
+./src/app/dashboard/providers/components/forms/Field.tsx
+./src/app/dashboard/providers/components/forms/Select.tsx
+./src/app/dashboard/providers/components/zeta.ts
+./src/app/dashboard/providers/components/forms/validação.ts
+./src/lib/db/migrations/001_init.sql
+./src/lib/db/migrations/002_users.sql
+./src/lib/db/migrations/003_keys.sql
+./src/lib/db/migrations/004_logs.sql
+./src/lib/db/migrations/005_quota.sql
+./src/lib/db/migrations/006_notas.sql
+./src/lib/db/core.ts
+./src/lib/db/keys.ts
+./src/lib/db/logs.ts
+./src/lib/db/relatório final.ts
+./src/shared/utils/formatting/strings.ts
+./src/shared/utils/formatting/dates.ts
+./src/shared/utils/formatting/paths.ts
+./src/shared/utils/formatting/日本語.ts
+./tests/unit/compression/fixtures/a.txt
+./tests/unit/compression/fixtures/b.txt
+./tests/unit/compression/fixtures/c.txt
+./docs/guias/início rápido.md
+./docs/guias/arquitetura.md

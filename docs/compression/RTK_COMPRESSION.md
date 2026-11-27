@@ -194,7 +194,28 @@ computed from the whole input, and drops blob ids and unchanged context. Dispatc
   the legacy RTK; the rule `rtk:structural:over-budget` is recorded so the incidence can be measured.
 - A project or global filter that matches the command, any explicitly enabled filter, or the matched
   filter being explicitly disabled keeps the legacy path. The `rtkConfig.renderers` allowlist is
-  matched against the format name (`git-diff`).
+  matched against the format name (`git-diff`, and the listing formats below).
+
+### File listings
+
+`engines/rtk/renderers/fileListing.ts` summarises directory and file listings. Every name and path
+is kept; only columns that carry no path information are dropped. Allowlist names in parentheses.
+
+| Source (`rtkConfig.renderers` name)                     | Recognised by                                                                                                                                                | Summary                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ls -l` (`shell-ls`)                                    | correlated command with a short option cluster containing `l`                                                                                                | `total` line, then `mode size name` per entry (symlinks keep `name -> target`). Link counts and dates are dropped; an identical owner/group on every line becomes one `owner:group` line, otherwise it stays per entry.                                                        |
+| `find` (`shell-find`)                                   | correlated command                                                                                                                                           | Paths grouped by directory as `dir/ (N)` plus the N indented names, in order of first appearance. A directory with fewer than 3 entries keeps its full paths.                                                                                                                  |
+| `tree` (`shell-tree`)                                   | correlated command, or (no command) a root line, a connector on line 2 and a footer whose counts match                                                       | Two spaces per level instead of drawing characters (Unicode, ASCII and non-breaking-space layouts), `/` after a directory that has children, footer kept verbatim.                                                                                                             |
+| Native `Glob` and directory listings (`native-listing`) | tool name `glob`, `glob_file_search`, `ls`, `list`, `list_dir`, `list_directory`, `listfiles`, `list_files`, `find_files`, `file_search` or `dir` (any case) | One path per line, optionally behind a `Found N files` header whose count must match. Grouped as for `find`, but a run of paths ends when the directory changes, because the order of a Glob result is meaningful. The `tool_result` / tool message envelope is never touched. |
+
+A listing is returned **unchanged** when any line is not classified: a diagnostic
+(`find: …: Permission denied`, `ls: cannot open …`), a truncation note, search matches
+(`path:12:text`), a wrong `Found N` or tree footer count, mixed CRLF/LF endings (a lone CR may be
+part of a name), or an option that changes the layout (`ls -i`/`-R`/`--full-time`, `find -exec`
+/`-printf`/`-print0`/`-ls`, `tree -f`/`-F`/`-s`/`-J`). CRLF listings are read and summarised with
+LF. `ls` without `-l`, a pipe into anything but `head`/`tail`/`sort`/`uniq`/`cat` and a `find` or
+`ls` result with no correlated command stay on the legacy path. Without a saving in tokens, or
+above the RTK line and character limits, the original is kept as well.
 
 ## Code Comment Stripping (`stripCodeComments` / `preserveDocstrings`)
 

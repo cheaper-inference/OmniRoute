@@ -1,0 +1,16 @@
+Found 15 files
+/work/projeto/src/components/Button.tsx
+/work/projeto/src/components/Modal.tsx
+/work/projeto/src/components/Tabela de preços.tsx
+/work/projeto/src/components/forms/Field.tsx
+/work/projeto/src/components/forms/Select.tsx
+/work/projeto/src/lib/db.ts
+/work/projeto/src/lib/http.ts
+/work/projeto/src/lib/logger.ts
+/work/projeto/src/lib/relatório final.ts
+/work/projeto/src/pages/index.tsx
+/work/projeto/src/pages/about.tsx
+/work/projeto/src/lib/utils/日本語.ts
+/work/projeto/src/components/index.ts
+/work/projeto/src/pages/contato & suporte.tsx
+/work/projeto/src/app.ts

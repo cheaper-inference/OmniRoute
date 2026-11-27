@@ -1,0 +1,22 @@
+total 96
+drwxr-xr-x  8 dev  dev      4096 Nov 26 10:15 .
+drwxr-xr-x 21 dev  dev      4096 Nov 20 09:02 ..
+-rw-r--r--  1 dev  dev       312 Nov 26 10:15 .eslintrc.json
+-rw-r--r--  1 dev  dev      1893 Nov 25 17:40 README.md
+drwxr-xr-x  4 dev  dev      4096 Nov 24 08:11 docs
+-rw-r--r--  1 dev  dev      5120 Nov 26 09:58 relatório final.ts
+-rw-r--r--  1 dev  dev       744 Nov 22 14:20 notas de reunião.md
+-rwxr-xr-x  1 dev  dev      2210 Nov 21 11:05 deploy.sh
+lrwxrwxrwx  1 dev  dev        20 Nov 21 11:07 link atual -> relatório final.ts
+-rw-r--r--  1 dev  dev   1048576 Nov 19 16:33 dump.bin
+drwxr-xr-x  6 dev  dev      4096 Nov 26 10:14 src
+drwxr-xr-x  3 dev  dev      4096 Oct  3  2025 tests
+-rw-r--r--  1 dev  dev     18432 Nov 18 12:00 package-lock.json
+-rw-r--r--  1 dev  dev       905 Nov 18 12:00 package.json
+-rw-r--r--  1 dev  dev       211 Sep 30  2025 tsconfig.json
+-rw-r--r--  1 dev  dev        64 Nov 26 10:15 日本語.txt
+-rw-r--r--  1 dev  dev         8 Nov 26 10:15 .env.local
+drwxr-xr-x  2 dev  dev      4096 Nov 17 09:09 scripts
+-rw-r--r--  1 dev  dev      3302 Nov 16 15:45 vitest.config.ts
+-rw-r--r--  1 dev  dev       120 Nov 16 15:44 vite.config.ts
+ls: cannot open directory './secret': Permission denied

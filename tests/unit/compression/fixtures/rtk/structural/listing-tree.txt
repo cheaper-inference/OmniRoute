@@ -1,0 +1,38 @@
+.
+├── README.md
+├── docs
+│   ├── guia rápido.md
+│   ├── 日本語
+│   │   └── índice.md
+│   └── referência
+│       ├── api
+│       │   ├── v1.md
+│       │   └── v2.md
+│       └── cli.md
+├── package.json
+├── src
+│   ├── app.ts
+│   ├── relatório final.ts
+│   ├── components
+│   │   ├── forms
+│   │   │   ├── Field.tsx
+│   │   │   └── Select.tsx
+│   │   ├── Button.tsx
+│   │   ├── Modal.tsx
+│   │   └── Tabela de preços.tsx
+│   ├── lib
+│   │   ├── db.ts
+│   │   ├── http.ts
+│   │   └── logger.ts
+│   └── sub pasta
+│       ├── a.ts
+│       ├── b.ts
+│       └── ñandú.ts
+└── tests
+    ├── db.test.ts
+    ├── http.test.ts
+    └── fixtures
+        ├── um.json
+        └── dois.json
+
+11 directories, 24 files

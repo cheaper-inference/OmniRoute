@@ -5,6 +5,7 @@ import { renderGitDiff, renderUnifiedDiff } from "./gitDiff.ts";
 import { renderTestGreen } from "./testGreen.ts";
 import { renderTerraformPlan } from "./terraformPlan.ts";
 import { renderStructuredTable } from "./structuredTable.ts";
+import { renderFileListing, renderNativeListing } from "./fileListing.ts";
 
 // preenchido nas tasks 2–5
 const REGISTRY: Record<string, (text: string, d: CommandDetectionResult) => RenderResult> = {};
@@ -62,4 +63,8 @@ export { REGISTRY };
  */
 export const STRUCTURAL_REGISTRY: Record<string, Renderer> = {
   "git-diff": renderUnifiedDiff,
+  "shell-ls": renderFileListing,
+  "shell-find": renderFileListing,
+  "shell-tree": renderFileListing,
+  "native-listing": renderNativeListing,
 };

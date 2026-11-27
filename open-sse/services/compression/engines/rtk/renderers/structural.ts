@@ -4,6 +4,13 @@ import { detectCommandType } from "../commandDetector.ts";
 import { matchRtkFilter } from "../filterLoader.ts";
 import { effectiveMaxLines } from "../intensity.ts";
 import { lastCommandSegment } from "../splitCompositeCommand.ts";
+import {
+  NATIVE_LISTING_TOOL_NAMES,
+  hasTreeSignature,
+  listingDialectForCommand,
+  looksLikeNativeListing,
+  type ListingDialect,
+} from "./fileListing.ts";
 import { STRUCTURAL_REGISTRY } from "./index.ts";
 import type { RenderResult, Renderer } from "./types.ts";
 
@@ -75,12 +82,24 @@ interface StructuralRoute {
 type NativeToolRouteSelector = (text: string, toolName: string) => StructuralRoute | null;
 const NATIVE_TOOL_ROUTES: Record<string, NativeToolRouteSelector> = {};
 
+/** Native Glob and the directory-listing tools: a flat list of paths (first-line check only). */
+function nativeListingRoute(text: string): StructuralRoute | null {
+  if (!looksLikeNativeListing(text)) return null;
+  return { type: "native-listing", render: STRUCTURAL_REGISTRY["native-listing"], command: null };
+}
+for (const name of NATIVE_LISTING_TOOL_NAMES) NATIVE_TOOL_ROUTES[name] = nativeListingRoute;
+
 const DIFF_COMMAND_RE = /^git\s+(?:diff|show)\b/i;
 const DIFF_FILE_HEADER_RE = /^diff --(?:git|cc|combined) /m;
 const DIFF_STRONG_START_RE = /^diff --(?:git|cc|combined) /;
 
 function diffRoute(command: string | null): StructuralRoute {
   return { type: "git-diff", render: STRUCTURAL_REGISTRY["git-diff"], command };
+}
+
+function listingRoute(dialect: ListingDialect, command: string | null): StructuralRoute {
+  const type = `shell-${dialect}`;
+  return { type, render: STRUCTURAL_REGISTRY[type], command };
 }
 
 /**
@@ -91,10 +110,14 @@ function diffRoute(command: string | null): StructuralRoute {
 function selectShellRoute(text: string, rawCommand: string | null | undefined, full: boolean) {
   const command = lastCommandSegment(rawCommand?.trim() ?? "") || null;
   if (command) {
-    if (!DIFF_COMMAND_RE.test(command)) return null;
-    return !full || DIFF_FILE_HEADER_RE.test(text) ? diffRoute(command) : null;
+    if (DIFF_COMMAND_RE.test(command)) {
+      return !full || DIFF_FILE_HEADER_RE.test(text) ? diffRoute(command) : null;
+    }
+    const dialect = listingDialectForCommand(command);
+    return dialect ? listingRoute(dialect, command) : null;
   }
-  return DIFF_STRONG_START_RE.test(full ? text : text.slice(0, 16)) ? diffRoute(null) : null;
+  if (DIFF_STRONG_START_RE.test(full ? text : text.slice(0, 16))) return diffRoute(null);
+  return full && hasTreeSignature(text) ? listingRoute("tree", null) : null;
 }
 
 function selectRoute(text: string, options: RtkTextOptions, full: boolean): StructuralRoute | null {
