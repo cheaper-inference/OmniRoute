@@ -1,4 +1,4 @@
-const CACHE_NAME = "omniroute-pwa-v3";
+const CACHE_NAME = "omniroute-pwa-v3-SHDmYsjZkdI38vL2jyNTl";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/icon-512.png", "/apple-touch-icon.png"];
 // Never cache API / proxy surfaces: client-API aliases (/v1, /v1beta, /models, /chat,
 // /responses, /codex) return per-key data, and dashboard/auth pages are session-bound.
