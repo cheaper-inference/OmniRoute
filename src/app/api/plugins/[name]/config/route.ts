@@ -3,7 +3,22 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { getPluginByName, updatePluginConfig } from "@/lib/db/plugins";
+import { validatePluginConfig, type ConfigField } from "@/lib/plugins/manifest";
 import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
+
+const NO_CONFIG_SCHEMA_MESSAGE = "Plugin does not declare any configurable keys";
+
+function parseConfigSchema(raw: string | null | undefined): Record<string, ConfigField> {
+  try {
+    const parsed: unknown = JSON.parse(raw || "{}");
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as Record<string, ConfigField>;
+    }
+  } catch {
+    // A corrupt stored schema declares nothing: fall through to the empty schema.
+  }
+  return {};
+}
 
 export async function OPTIONS() {
   return handleCorsOptions();
@@ -72,33 +87,22 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     });
   }
 
-  // Validate config values against configSchema if defined
-  const configSchema = JSON.parse(plugin.configSchema || "{}");
-  if (Object.keys(configSchema).length > 0) {
-    for (const [key, value] of Object.entries(parsed.data.config)) {
-      const field = configSchema[key];
-      if (!field) continue; // Allow extra keys
-      if (field.type === "number" && typeof value === "number") {
-        if (field.min !== undefined && value < field.min) {
-          return NextResponse.json(buildErrorBody(400, `Config '${key}' must be >= ${field.min}`), {
-            status: 400,
-            headers: CORS_HEADERS,
-          });
-        }
-        if (field.max !== undefined && value > field.max) {
-          return NextResponse.json(buildErrorBody(400, `Config '${key}' must be <= ${field.max}`), {
-            status: 400,
-            headers: CORS_HEADERS,
-          });
-        }
-      }
-      if (field.type === "select" && field.enum && !field.enum.includes(String(value))) {
-        return NextResponse.json(
-          buildErrorBody(400, `Config '${key}' must be one of: ${field.enum.join(", ")}`),
-          { status: 400, headers: CORS_HEADERS }
-        );
-      }
-    }
+  // Only keys the plugin declares in its configSchema may be stored. A plugin without a
+  // schema has no configurable keys, so the write is refused instead of persisting
+  // arbitrary caller-chosen keys.
+  const configSchema = parseConfigSchema(plugin.configSchema);
+  if (Object.keys(configSchema).length === 0) {
+    return NextResponse.json(buildErrorBody(400, NO_CONFIG_SCHEMA_MESSAGE), {
+      status: 400,
+      headers: CORS_HEADERS,
+    });
+  }
+  const validation = validatePluginConfig(parsed.data.config, configSchema);
+  if (validation.valid === false) {
+    return NextResponse.json(buildErrorBody(400, validation.errors.join("; ")), {
+      status: 400,
+      headers: CORS_HEADERS,
+    });
   }
 
   updatePluginConfig(name, parsed.data.config);

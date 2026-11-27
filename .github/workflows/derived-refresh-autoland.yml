@@ -1,0 +1,57 @@
+name: derived-refresh-autoland
+
+# Disabled by default. Set the repository variable DERIVED_REFRESH_AUTOLAND to true to apply labels.
+# Without that exact value or an approver token, this workflow only reports its decision.
+# The checkout uses the default branch SHA from the event and never runs code from the PR.
+
+on:
+  workflow_run:
+    workflows: [CI, Quality Gates]
+    types: [completed]
+    branches: [chore/derived-refresh]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: derived-refresh-autoland
+  cancel-in-progress: false
+
+jobs:
+  autoland:
+    if: >-
+      github.repository == 'cheaper-inference/OmniRoute'
+      && github.ref_name == github.event.repository.default_branch
+      && (github.event_name == 'workflow_dispatch'
+        || (github.event.workflow_run.event == 'pull_request'
+          && github.event.workflow_run.head_repository.full_name == github.repository))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+
+      - name: Decide whether to apply the queue label
+        env:
+          GH_TOKEN: ${{ secrets.DERIVED_REFRESH_PR_TOKEN || secrets.I18N_REFRESH_TOKEN }}
+          DERIVED_REFRESH_READ_TOKEN: ${{ github.token }}
+          DERIVED_REFRESH_AUTOLAND: ${{ vars.DERIVED_REFRESH_AUTOLAND }}
+        run: |
+          set -euo pipefail
+          args=()
+          if [[ -z "${GH_TOKEN:-}" ]]; then
+            args+=(--dry-run)
+            echo "No approver token is configured. Running in dry-run mode." | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+          node scripts/release/derived-refresh-autoland.mjs "${args[@]}" 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"

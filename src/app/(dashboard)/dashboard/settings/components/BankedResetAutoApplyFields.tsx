@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { Input, Toggle } from "@/shared/components";
+import { NumberInput, Toggle } from "@/shared/components";
 import { clampBankedResetNumber } from "./bankedResetAutoApplyClient";
 
 export function BankedResetSection({
@@ -16,7 +16,9 @@ export function BankedResetSection({
   return (
     <section className="flex flex-col gap-3 border-t border-border pt-4 first:border-t-0 first:pt-0">
       <div>
-        <h4 className="text-sm text-text-main">{title}</h4>
+        <h4 className="ci-heading text-text-main" data-size="sm">
+          {title}
+        </h4>
         {description ? <p className="mt-0.5 text-xs text-text-muted">{description}</p> : null}
       </div>
       {children}
@@ -55,8 +57,8 @@ export function BankedResetToggleRow({
 }
 
 /**
- * Integer input that keeps a local draft and commits (clamped to [0, max]) on blur or Enter,
- * never per keystroke. A commit that changes nothing does not save.
+ * Integer field that keeps a local draft and commits (clamped to [0, max]) when the edit ends,
+ * on blur or Enter, never per keystroke. A commit that changes nothing does not save.
  */
 export function BankedResetNumberField({
   label,
@@ -73,25 +75,24 @@ export function BankedResetNumberField({
   disabled?: boolean;
   onCommit: (value: number) => void;
 }) {
-  const [draft, setDraft] = useState(String(value));
+  const [draft, setDraft] = useState<number | null>(value);
 
   // Follows the stored value: after a save, and when a failed save restores the old one.
   const [syncedValue, setSyncedValue] = useState(value);
   if (syncedValue !== value) {
     setSyncedValue(value);
-    setDraft(String(value));
+    setDraft(value);
   }
 
-  const commit = () => {
-    const next = clampBankedResetNumber(draft, max, value);
-    setDraft(String(next));
+  // An empty field goes back to the stored value.
+  const commit = (final: number | null) => {
+    const next = clampBankedResetNumber(final, max, value);
+    setDraft(next);
     if (next !== value) onCommit(next);
   };
 
   return (
-    <Input
-      type="number"
-      inputMode="numeric"
+    <NumberInput
       label={label}
       hint={hint}
       min={0}
@@ -99,11 +100,8 @@ export function BankedResetNumberField({
       step={1}
       value={draft}
       disabled={disabled}
-      onChange={(e) => setDraft(e.target.value)}
-      onBlur={commit}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") commit();
-      }}
+      onValueChange={setDraft}
+      onValueCommit={commit}
     />
   );
 }

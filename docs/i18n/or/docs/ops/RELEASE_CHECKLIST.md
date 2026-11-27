@@ -413,8 +413,7 @@ npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # ଉତ୍ସ commit କ�
 tag ଅଛି, `package.json` ଲକ୍ଷ୍ୟ ସଂସ୍କରଣ ଅଟେ, ଏକ `release-freeze` issue ଖୋଲା ଅଛି, ଏବଂ କୌଣସି ଖୋଲା
 `Release branch not green` issue ନାହିଁ
 ଥିବା release branch ଉପରେ — ଯେଉଁ branch ର ଅସ୍ତିତ୍ୱ ନାହିଁ ସେଠାରେ `?` unknown ରିପୋର୍ଟ ହୁଏ, କେବେ green ନୁହେଁ —
-Mergify `release` queue କନଫିଗର୍ ହୋଇଛି (`queue_rules`, `checks_timeout`,
-label `queue`), `release/*` ruleset ଏପର୍ଯ୍ୟନ୍ତ deletion ଏବଂ force-push କୁ ଅବରୋଧ କରୁଛି, ଏବଂ
+omni-queue ରିଲିଜ୍ ଶାଖାରେ ଟାଣ ଅନୁରୋଧଗୁଡ଼ିକୁ ମିଶ୍ରଣ କରେ (G11: `config/merge-queue/config.json` ବୈଧ, ଏହାର `bases` ରିଲିଜ୍ ଶାଖା ପରିଚାଳନା କରେ, `mode` `live`, ଏହାର ଲେବଲ୍ ବିଦ୍ୟମାନ ଅଛି), `release/*` ruleset ଏପର୍ଯ୍ୟନ୍ତ deletion ଏବଂ force-push କୁ ଅବରୋଧ କରୁଛି, ଏବଂ
 `stable/v3` ଓ `develop` ଏପର୍ଯ୍ୟନ୍ତ ଅବସ୍ଥିତ ନାହିଁ), ଦୁଇଟି branch ପଦକ୍ଷେପ, କେଉଁ dormant-workflow
 triggers ଏବଂ `if:` conditions true ହୁଏ (ଏବଂ କେଉଁଗୁଡ଼ିକ repository variable ଦ୍ୱାରା gated ରହେ କିମ୍ବା canonical repository ରେ
 pinned ହୁଏ), ଆଶାକରାଯାଇଥିବା dist-tags (`latest` → 3.9.0, `next` ଏବଂ `nightly` ଖାଲି) ଏବଂ rollback। Exit `0` = `RESULT: READY`, `1` = ଏକ blocking precondition

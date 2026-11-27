@@ -474,7 +474,7 @@ rasite [`docs/guides/KIRO_SETUP.md`](./KIRO_SETUP.md).
 2. **Nuolatinis sprendimas:** aiškiai susiekite su IPv4, `docker run` komandoje naudodami `-p 127.0.0.1:20128:20128`:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Tai priverstinai susieja su IPv4 ir neleidžia tarpinio serverio pasiekti per visas pagrindinio kompiuterio sąsajas.
 

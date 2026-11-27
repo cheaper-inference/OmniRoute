@@ -69,10 +69,18 @@ test("a client abort ends the 429 retry wait at once", async () => {
 test("a client abort ends the WAF retry wait at once", async () => {
   await withFetch(contentBlocked, WAF, 600, async (calls) => {
     const controller = new AbortController();
-    const settled = execute(controller.signal).then(
-      () => "resolved",
-      () => "rejected"
-    );
+    const settled = new DefaultExecutor("agentrouter")
+      .execute({
+        model: "claude-sonnet-4-5",
+        body: { model: "claude-sonnet-4-5", messages: [{ role: "user", content: "hi" }] },
+        stream: false,
+        credentials: { apiKey: "synth...ey", connectionId: "conn-a" },
+        signal: controller.signal,
+      })
+      .then(
+        () => "resolved",
+        () => "rejected"
+      );
     await new Promise((resolve) => setTimeout(resolve, 50));
     const abortedAt = Date.now();
     controller.abort(new Error("client gone"));

@@ -309,6 +309,7 @@ Sử dụng các mệnh đề `IF NOT EXISTS`, `IF EXISTS` và `OR IGNORE` / `OR
 3. **Chèn lấp dữ liệu cẩn thận** : sử dụng `UPDATE ... WHERE ...` để xử lý các hàng hiện có
 4. **Kiểm tra thứ tự và đặt tên** : `npm run test:migrations:fresh` (tất cả các lần di chuyển trên cơ sở dữ liệu trống) và `npm run check:migration-numbering`
 5. **Kiểm tra trên một bản sao** : không bao giờ chạy các di chuyển chưa được kiểm tra trên sản xuất
+6. **Một bảng được tạo từ mã cũng cần được di chuyển** : nếu một mô-đun cũng tạo bảng một cách lười biếng (`CREATE TABLE IF NOT EXISTS`, được giữ dưới dạng đường dẫn tự phục hồi), quá trình di chuyển phải tạo bảng đó với cùng một DDL. Nếu không, bản cài đặt sạch và bản cài đặt nâng cấp sẽ có các lược đồ khác nhau, tùy thuộc vào việc đường dẫn mã đó có chạy hay không. `tests/unit/db/lazy-table-migration-guard.test.ts` quét `src/` và `open-sse/` và thất bại trên `CREATE` lười biếng mà không di chuyển (#20557). Ví dụ: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Ví dụ:
 

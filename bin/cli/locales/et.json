@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Limiit peab olema positiivne täisarv.",
     "error": "Viga: {message}",
     "serverOffline": "OmniRoute server on offline. Käivita see käsuga: omniroute serve",
     "authRequired": "Autentimine on nõutav. Määra OMNIROUTE_API_KEY või käivita: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[testkäivitus] tehakse {action}",
     "cancelled": "Tühistatud.",
     "jsonOpt": "Väljund JSON-formaadis",
-    "yesOpt": "Jäta kinnitusküsimus vahele"
+    "yesOpt": "Jäta kinnitusküsimus vahele",
+    "positiveIntegerRequired": "Limiit peab olema positiivne täisarv."
   },
   "setup": {
     "title": "OmniRoute seadistus",

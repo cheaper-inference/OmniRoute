@@ -14,7 +14,7 @@
   .ci-loading-screen__art { position: relative; display: grid; width: clamp(6rem, 25svh, 12rem); aspect-ratio: 1; margin: 0 auto 1.75rem; place-items: center; color: var(--ci-color-accent); }
   .ci-loading-screen__halo { position: absolute; inset: -3rem; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--ci-color-accent) 13%, transparent), transparent 68%); animation: ci-loading-breathe 4s ease-in-out infinite; }
   .ci-loading-screen__orbit { position: absolute; inset: 0; border: 1px solid color-mix(in srgb, var(--ci-color-accent) 16%, transparent); border-radius: 50%; animation: ci-spin 9s linear infinite; }
-  .ci-loading-screen__orbit > span { position: absolute; top: -3px; left: calc(50% - 3px); width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 14px color-mix(in srgb, var(--ci-color-accent) 45%, transparent); }
+  .ci-loading-screen__orbit > span { position: absolute; top: -3px; inset-inline-start: calc(50% - 3px); width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 14px color-mix(in srgb, var(--ci-color-accent) 45%, transparent); }
   .ci-loading-screen__orbit--inner { inset: 1rem; border-style: dashed; border-color: color-mix(in srgb, var(--ci-color-accent) 10%, transparent); animation-duration: 14s; animation-direction: reverse; }
   .ci-loading-screen__orbit--inner > span { width: 4px; height: 4px; top: -2px; opacity: .5; }
   .ci-loading-screen__mark { position: relative; width: 36%; animation: ci-loading-breathe 4s ease-in-out infinite; }

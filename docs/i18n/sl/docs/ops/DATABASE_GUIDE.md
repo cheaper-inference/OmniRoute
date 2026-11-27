@@ -309,6 +309,7 @@ Izjemno uporabljajte klavzule `IF NOT EXISTS`, `IF EXISTS` in `OR IGNORE` / `OR 
 3. **Previdno zapolnite podatke** : uporabite `UPDATE ... WHERE ...` za obravnavo obstoječih vrstic
 4. **Preverite vrstni red in poimenovanje** : `npm run test:migrations:fresh` (vse selitve na prazno zbirko podatkov) in `npm run check:migration-numbering`
 5. **Test na kopiji** : nikoli ne izvajajte nepreizkušenih migracij v proizvodnji
+6. **Tudi tabela, ustvarjena iz kode, potrebuje selitev** : če modul tudi leno ustvari tabelo (`CREATE TABLE IF NOT EXISTS`, ki se hrani kot pot samozdravljenja), jo mora selitev ustvariti z istim DDL. V nasprotnem primeru se čista namestitev in nadgrajena namestitev končata z različnimi shemami, odvisno od tega, ali se je ta kodna pot izvajala. `tests/unit/db/lazy-table-migration-guard.test.ts` pregleda `src/` in `open-sse/` in ne uspe na lenem `CREATE` brez selitve (#20557). Primer: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 primer:
 

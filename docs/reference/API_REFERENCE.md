@@ -69,25 +69,26 @@ Content-Type: application/json
 
 ### Custom Headers
 
-| Header                   | Direction | Description                                                                                                                                                                                        |
-| ------------------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Request   | Set to `true` to bypass cache                                                                                                                                                                      |
-| `x-omniroute-no-memory`  | Request   | Set to `true` to skip memory + skills injection for this request (mirrors no-cache; avoids the per-call token/cost overhead)                                                                       |
-| `X-OmniRoute-Progress`   | Request   | Set to `true` for progress events                                                                                                                                                                  |
-| `X-Session-Id`           | Request   | Sticky session key for external session affinity                                                                                                                                                   |
-| `x_session_id`           | Request   | Underscore variant also accepted (direct HTTP)                                                                                                                                                     |
-| `X-OmniRoute-Session-Id` | Request   | Caller-supplied session/conversation tag (also feeds memory). When present, persisted verbatim to `call_logs.session_tag` for per-session cost attribution (#8249) — never synthesized when absent |
-| `Idempotency-Key`        | Request   | Dedup key (5s window)                                                                                                                                                                              |
-| `X-Request-Id`           | Request   | Alternative dedup key                                                                                                                                                                              |
-| `x-omniroute-connection` | Request   | Pin a single-model request to one provider connection (account) by its id — see [Account pinning per request](#account-pinning-per-request)                                                        |
-| `X-OmniRoute-Cache`      | Response  | `HIT` or `MISS` (non-streaming)                                                                                                                                                                    |
-| `X-OmniRoute-Idempotent` | Response  | `true` if deduplicated                                                                                                                                                                             |
-| `X-OmniRoute-Progress`   | Response  | `enabled` if progress tracking on                                                                                                                                                                  |
-| `X-OmniRoute-Session-Id` | Response  | Effective session ID used by OmniRoute                                                                                                                                                             |
-| `X-OmniRoute-Request-Id` | Response  | Request correlation id (when known)                                                                                                                                                                |
-| `X-OmniRoute-Version`    | Response  | OmniRoute build version (always present)                                                                                                                                                           |
-| `X-OmniRoute-Cost-Saved` | Response  | USD the cache avoided on a HIT (cache hits only)                                                                                                                                                   |
-| `X-OmniRoute-Decision`   | Response  | Routing trace: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` is the combo strategy, or `single` for a non-combo request) — always present on completion responses                  |
+| Header                   | Direction | Description                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Request   | Set to `true` to bypass cache                                                                                                                                                                                                                                                                                                                      |
+| `x-omniroute-no-memory`  | Request   | Set to `true` to skip memory + skills injection for this request (mirrors no-cache; avoids the per-call token/cost overhead)                                                                                                                                                                                                                       |
+| `x-omniroute-no-log`     | Request   | Set to `true` to omit request/response payloads from call logs for this inference request (all chat-family routes: Chat Completions, Responses, Messages, Completions, Gemini). Timestamp, model, status, duration and token counts are still recorded. Combine with `x-omniroute-no-memory` and `x-omniroute-no-cache` for a full content opt-out |
+| `X-OmniRoute-Progress`   | Request   | Set to `true` for progress events                                                                                                                                                                                                                                                                                                                  |
+| `X-Session-Id`           | Request   | Sticky session key for external session affinity                                                                                                                                                                                                                                                                                                   |
+| `x_session_id`           | Request   | Underscore variant also accepted (direct HTTP)                                                                                                                                                                                                                                                                                                     |
+| `X-OmniRoute-Session-Id` | Request   | Caller-supplied session/conversation tag (also feeds memory). When present, persisted verbatim to `call_logs.session_tag` for per-session cost attribution (#8249) — never synthesized when absent                                                                                                                                                 |
+| `Idempotency-Key`        | Request   | Dedup key (5s window)                                                                                                                                                                                                                                                                                                                              |
+| `X-Request-Id`           | Request   | Alternative dedup key                                                                                                                                                                                                                                                                                                                              |
+| `x-omniroute-connection` | Request   | Pin a single-model request to one provider connection (account) by its id — see [Account pinning per request](#account-pinning-per-request)                                                                                                                                                                                                        |
+| `X-OmniRoute-Cache`      | Response  | `HIT` or `MISS` (non-streaming)                                                                                                                                                                                                                                                                                                                    |
+| `X-OmniRoute-Idempotent` | Response  | `true` if deduplicated                                                                                                                                                                                                                                                                                                                             |
+| `X-OmniRoute-Progress`   | Response  | `enabled` if progress tracking on                                                                                                                                                                                                                                                                                                                  |
+| `X-OmniRoute-Session-Id` | Response  | Effective session ID used by OmniRoute                                                                                                                                                                                                                                                                                                             |
+| `X-OmniRoute-Request-Id` | Response  | Request correlation id (when known)                                                                                                                                                                                                                                                                                                                |
+| `X-OmniRoute-Version`    | Response  | OmniRoute build version (always present)                                                                                                                                                                                                                                                                                                           |
+| `X-OmniRoute-Cost-Saved` | Response  | USD the cache avoided on a HIT (cache hits only)                                                                                                                                                                                                                                                                                                   |
+| `X-OmniRoute-Decision`   | Response  | Routing trace: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` is the combo strategy, or `single` for a non-combo request) — always present on completion responses                                                                                                                                                                  |
 
 > Nginx note: if you rely on underscore headers (for example `x_session_id`), enable `underscores_in_headers on;`.
 
@@ -385,6 +386,11 @@ reproducible. `n` is capped at 10. The request fails as a whole if any call fail
 of fan-out formats is `SINGLE_IMAGE_FANOUT_FORMATS` in
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
+Codex GPT Image models (`codex/gpt-image-*`) return PNG only: the upstream answers `200` with
+PNG bytes even when `jpeg` or `webp` is requested. A request with any other `output_format`
+(`webp`, `jpeg`, ...) is rejected with HTTP 400 instead of being silently ignored; omit it or
+send `png`. `output_compression` is not forwarded.
+
 ZenMux reuses the existing API-key connection and accepts `zenmux/` or `zm/` prefixes:
 
 - `zenmux/openai/gpt-image-2` uses ZenMux's OpenAI Images API. Options include `size`,
@@ -436,11 +442,11 @@ Content-Type: application/json
 `mistral-ocr-latest`) resolves to its registered provider, and an omitted `model` defaults to
 Mistral (`mistral-ocr-latest`). Registered providers (`open-sse/config/ocrRegistry.ts`):
 
-| Provider id                   | Model id             | `model` value                                               | Notes                                                                                              |
-| ----------------------------- | -------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (or bare `mistral-ocr-latest`) | Synchronous — the response is returned directly from the single upstream call.                     |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                 | Asynchronous upstream (`analyze` + poll) — see below.                                              |
-| `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                     | Synchronous, via Vertex AI's `openapi/chat/completions` partner endpoint — see below for auth/URL. |
+| Provider id                   | Model id                          | `model` value                                               | Notes                                                                                                                                                                                                     |
+| ----------------------------- | --------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mistral`                     | `mistral-ocr-latest`              | `mistral/mistral-ocr-latest` (or bare `mistral-ocr-latest`) | Synchronous — the response is returned directly from the single upstream call.                                                                                                                            |
+| `azure-document-intelligence` | `prebuilt-read`                   | `azure-document-intelligence/prebuilt-read`                 | Asynchronous upstream (`analyze` + poll) — see below.                                                                                                                                                     |
+| `vertex-deepseek-ocr`         | self-deployed (no built-in model) | `vertex-deepseek-ocr/<your-deployed-model-id>`              | Synchronous, via your own Vertex AI Model Garden DeepSeek-OCR endpoint (`openapi/chat/completions` shape); Google retired the managed `deepseek-ocr-maas` on 2026-10-21 (#20423), so that id returns 400. |
 
 All three providers respond in the same Mistral-shaped body:
 
@@ -734,6 +740,9 @@ Upstream contracts: [sound effects](https://elevenlabs.io/docs/api-reference/tex
 | POST   | `/v1/classify`                            | Jina classify (`api.jina.ai`)      |
 | POST   | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`) |
 | POST   | `/v1/moderations`                         | OpenAI Moderations                 |
+| POST   | `/v1/systemone`                           | System One typed decisions         |
+| POST   | `/v1/decisions`                           | OpenAI Decisions (native)          |
+| GET    | `/v1/systemone/models`                    | Decision-model catalog             |
 | GET    | `/v1/models`                              | OpenAI                             |
 | POST   | `/v1/models/query`                        | Filtered model shortlist           |
 | POST   | `/v1/messages/count_tokens`               | Anthropic                          |
@@ -806,6 +815,43 @@ POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 > inherit the node's `apiType`, so an `embeddings` node's models are `type: "embedding"` and a
 > `rerank` node's models are `type: "rerank"` instead of defaulting to chat; an explicit
 > `supportedEndpoints` on a synced or manually added row still takes precedence.
+
+### Typed Decisions
+
+Decision models answer typed questions with calibrated probabilities instead of generating
+text. They are never chat models, and the two wire formats are never translated into each
+other:
+
+- `POST /v1/systemone` — System One `{ model, state, questions: { <id>: … } }` (TypeSafe Jev,
+  OpenRouter decisions, Cloudflare Workers AI, local Ollama).
+- `POST /v1/decisions` — native OpenAI Decisions `{ model, input, questions: [...] }`, served by
+  an `openai` connection. The model is `openai/gpt-6-luna` (the bare `gpt-6-luna` also works).
+  Answers come back in question order, untouched.
+- `GET /v1/systemone/models` — one catalog of both kinds; each row names its `api_format`
+  (`systemone` or `decisions`). `limit` / `after` page the final list. The
+  `X-OmniRoute-Catalog-Status` header reads `complete`, `partial` or `unavailable` (503).
+
+```bash
+POST /v1/decisions {
+  "model": "openai/gpt-6-luna",
+  "input": "My order arrived broken, I want my money back",
+  "questions": [
+    { "type": "predicate", "name": "refund", "instructions": "Does the user ask for a refund?" },
+    { "type": "choice", "name": "team", "instructions": "Which team handles it?",
+      "choices": [{ "value": "billing" }, { "value": "shipping" }] }
+  ]
+}
+```
+
+On `/v1/decisions` the API key's model allowlist, the `decisions` endpoint category, budget and
+connection scope are checked before any credential is read. The credential is the stored
+`openai` connection inside the key's scope (never an environment key); a connection base URL is
+honoured only when it is an `http(s)` URL without credentials, query or fragment that does not
+point at this OmniRoute. The call leaves through the same guarded transport as the `decision`
+auto-router ([AUTO-COMBO](../routing/AUTO-COMBO.md)): provider outbound guard, no retries, no
+redirects, a 5 s timeout and a 64 KB answer cap (a larger answer is a 502). Request bodies are
+limited to 4 MiB. Each call sends a fresh `Idempotency-Key`. Errors carry the upstream status
+only, never its body, the URL, the key or the prompt.
 
 ### Dedicated Provider Routes
 

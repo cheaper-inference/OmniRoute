@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import ProviderConnectionPermissionList from "./ProviderConnectionPermissionList";
@@ -99,7 +100,7 @@ function SelectedConnectionChips() {
 function ConnectionAccessMode() {
   const { t, formState, updateState } = useKeyPolicyEditor();
   return (
-    <div className="flex flex-col gap-3 p-3.5 rounded-lg border border-border bg-surface/40">
+    <Card.Section className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
           <p className="text-sm font-medium text-text-main">{t("allowedConnections")}</p>
@@ -144,6 +145,6 @@ function ConnectionAccessMode() {
       </div>
 
       {!formState.allowAllConnections && <SelectedConnectionChips />}
-    </div>
+    </Card.Section>
   );
 }

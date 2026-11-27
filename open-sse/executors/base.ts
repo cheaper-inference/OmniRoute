@@ -51,6 +51,10 @@ import type { PoolConfig } from "../services/sessionPool/types.ts";
 import type { Session } from "../services/sessionPool/session.ts";
 import { SessionPool } from "../services/sessionPool/sessionPool.ts";
 import { PoolRegistry } from "../services/sessionPool/poolRegistry.ts";
+import {
+  PROXY_FETCH_NO_REPLAY,
+  type FetchWithDispatcherOptions,
+} from "../utils/proxyFetchTransportSupport.ts";
 import { resolveKeyForRequest } from "../services/apiKeyRotator.ts";
 import type { KeyHealth } from "../services/apiKeyRotator.ts";
 import {
@@ -158,8 +162,8 @@ import {
 } from "../services/learnedMaxTokensCaps.ts";
 import {
   applyFieldDowngradeRecovery,
-  dropStrippedFields,
   getLearnedStrippedFields,
+  reapplyStrippedFields,
 } from "./base/fieldDowngradeRecovery.ts";
 import { applyAdvisorUndecryptableRecovery } from "./base/advisorRecovery.ts";
 import { stripRedactThinkingBetaForVisibleThinking } from "./base/redactThinkingBeta.ts";
@@ -241,6 +245,8 @@ export type ExecuteInput = {
   ) => Promise<void> | void;
   /** When true, skip the intra-URL 429 retry in execute() so the caller handles fallback. */
   skipUpstreamRetry?: boolean;
+  /** Custom OpenAI-compatible node: transport recovery resends only a pre-send failure. */
+  nonReplayableRequest?: boolean;
   /** In-process capability; never accepted from an HTTP body or client header. */
   validationDispatch?: StrictValidationDispatch;
   /** Request-scoped id for log attribution; absent off the chat path, never fabricated. */
@@ -803,6 +809,7 @@ export class BaseExecutor {
       upstreamExtraHeaders,
       clientHeaders,
       skipUpstreamRetry = false,
+      nonReplayableRequest = false,
       onCredentialsRefreshed,
       contextEditing,
     } = input;
@@ -1019,7 +1026,8 @@ export class BaseExecutor {
       }
       // Fields an upstream already rejected with a 400 in this execute() stay stripped
       // on a re-run or fallback URL; strippedFields blocks a second strip-and-retry.
-      dropStrippedFields(transformedBody, strippedFields);
+      // Applied again after the Claude block below, which can re-add a stripped field.
+      reapplyStrippedFields(transformedBody, strippedFields);
 
       // Re-synchronize skills beta with the finalized transformed body (#14200):
       syncSkillsBeta(headers, this.provider, transformedBody, usesClaudeCodeProtocol);
@@ -1518,7 +1526,7 @@ export class BaseExecutor {
         // routing mode (grouped/raw/combo) and the native passthrough share,
         // before fingerprinting and CCH signing serialize the body.
         // The Claude Code thinking injection above can re-add a stripped field: drop it again.
-        dropStrippedFields(transformedBody, strippedFields);
+        reapplyStrippedFields(transformedBody, strippedFields);
         if (this.provider === "claude" || this.provider === "anthropic" || usesClaudeCodeProtocol) {
           finalizeClaudeBodyConstraints(transformedBody as Record<string, unknown>);
         }
@@ -1556,6 +1564,7 @@ export class BaseExecutor {
           connectionOptedIn: ccRequestDefaults.redactThinking === true,
           claudeOAuth: this.provider === "claude" && hasClaudeOAuthToken,
         });
+        reapplyStrippedFields(transformedBody, strippedFields);
         stripInternalBodyFields(transformedBody);
 
         const shouldFingerprint =
@@ -1589,7 +1598,12 @@ export class BaseExecutor {
         applyPeerTraceHeader(finalHeaders, clientHeaders, url);
         // Rides `anthropic-usage-limit: slow` once this account accepted the offer.
         const claudeSentSlow = claudeUsageLimit.applyHeader(finalHeaders, activeCredentials);
-        const serializedBody = parseSerializedBody(bodyString);
+        // Without a fingerprint or CCH signing the wire string is exactly
+        // JSON.stringify(transformedBody), so the live object already has the wire
+        // content (and its _toolNameMap); a parse-back would only copy it per attempt.
+        const wireIsLiveJson =
+          !shouldFingerprint && !(usesClaudeCodeProtocol || this.provider === "claude");
+        const serializedBody = wireIsLiveJson ? transformedBody : parseSerializedBody(bodyString);
         // #4307 — Preserve the non-enumerable tool-name cloak/remap reverse map
         // (`_toolNameMap`, set on the live `transformedBody` by
         // remapToolNamesInRequest / cloakThirdPartyToolNames) that the JSON
@@ -1620,10 +1634,11 @@ export class BaseExecutor {
           }
         }
         copilotIdentity.pin(finalHeaders);
-        const fetchOptions: RequestInit = {
+        const fetchOptions: FetchWithDispatcherOptions = {
           method: "POST",
           headers: finalHeaders,
           body: bodyString,
+          ...(nonReplayableRequest ? { [PROXY_FETCH_NO_REPLAY]: true } : {}),
         };
 
         // OpenRouter `:free`-variant local window (#6842): record every dispatch
@@ -1722,7 +1737,11 @@ export class BaseExecutor {
         }
 
         const serializeRetryBody = async (b: unknown) => {
-          let retryBody = JSON.stringify(b);
+          // A retry goes out with the same body-field order as the first send: the order is part of
+          // the CLI fingerprint (see above), and the live body keeps the client's order.
+          let retryBody = shouldFingerprint
+            ? applyFingerprint(fingerprintProvider, {}, b as Record<string, unknown>).bodyString
+            : JSON.stringify(b);
           if (usesClaudeCodeProtocol || this.provider === "claude") {
             retryBody = await signRequestBody(retryBody);
           }
@@ -1840,6 +1859,7 @@ export class BaseExecutor {
         // same URL with exponential backoff before falling through to the
         // 429/401/fallback chain. See docs/security/AGENTROUTER_WAF.md.
         if (
+          this.provider === "agentrouter" &&
           !skipUpstreamRetry &&
           response.status === HTTP_STATUS.BAD_REQUEST &&
           (retryAttemptsByUrl[urlIndex] ?? 0) < BaseExecutor.WAF_RETRY_CONFIG.maxAttempts

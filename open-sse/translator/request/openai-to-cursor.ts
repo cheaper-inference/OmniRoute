@@ -65,6 +65,14 @@ function buildToolResultBlock(toolName: string, toolCallId: string, resultText: 
   ].join("\n");
 }
 
+// A structured tool message carries the first line of its id, so the assistant call it answers
+// must carry the same id, or the pair no longer matches.
+function withPairedId<T extends { id?: unknown }>(toolCall: T): T {
+  return typeof toolCall.id === "string"
+    ? { ...toolCall, id: normalizeToolCallId(toolCall.id) }
+    : toolCall;
+}
+
 function convertMessages(messages, preserveToolResults = false) {
   const result = [];
   // Build a map of tool_call_id -> tool name from assistant tool calls.
@@ -152,7 +160,9 @@ function convertMessages(messages, preserveToolResults = false) {
               toolCallMetaMap.get(normalizeToolCallId(toolCallId));
             const toolName = toolMeta?.name || "tool";
             const toolContent = extractContent(tr.content);
-            parts.push(buildToolResultBlock(toolName, toolCallId, toolContent));
+            // Same id as the assistant call it answers (see withPairedId).
+            const pairedId = preserveToolResults ? normalizeToolCallId(toolCallId) : toolCallId;
+            parts.push(buildToolResultBlock(toolName, pairedId, toolContent));
           }
         }
         const joined = parts.filter(Boolean).join("\n");
@@ -182,14 +192,14 @@ function convertMessages(messages, preserveToolResults = false) {
         } = { role: "assistant", content: content || "" };
         assistantMsg.tool_calls = msg.tool_calls.map((tc) => {
           const { index, ...rest } = tc || {};
-          return rest;
+          return preserveToolResults ? withPairedId(rest) : rest;
         });
         result.push(assistantMsg);
       } else if (msg.role === "assistant" && Array.isArray(msg.content)) {
         const extractedToolCalls = (msg.content as ToolUsePart[])
           .filter((b) => b?.type === "tool_use")
           .map((b) => ({
-            id: b.id || "",
+            id: preserveToolResults ? normalizeToolCallId(b.id) : b.id || "",
             type: "function",
             function: {
               name: b.name || "tool",
