@@ -8,10 +8,10 @@ lastUpdated: 2026-08-22
 
 OmniRoute exposes **two** ways to use OpenAI Codex:
 
-| Provider | How it talks to OpenAI | Usage caveat |
-|---|---|---|
-| **`codex`** | Replays your ChatGPT/OpenAI OAuth token directly to the Responses API | **Yes** — the official session is not authorized for proxy/router use |
-| **`codex-app-server`** | Drives the **Codex CLI's own `codex app-server`** over JSON-RPC/WebSocket; the CLI owns and self-refreshes its OAuth (`~/.codex/auth.json`) exactly like an interactive `codex` session | **No** — OmniRoute never replays a token to the API |
+| Provider               | How it talks to OpenAI                                                                                                                                                                  | Usage caveat                                                          |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| **`codex`**            | Replays your ChatGPT/OpenAI OAuth token directly to the Responses API                                                                                                                   | **Yes** — the official session is not authorized for proxy/router use |
+| **`codex-app-server`** | Drives the **Codex CLI's own `codex app-server`** over JSON-RPC/WebSocket; the CLI owns and self-refreshes its OAuth (`~/.codex/auth.json`) exactly like an interactive `codex` session | **No** — OmniRoute never replays a token to the API                   |
 
 Because `codex-app-server` never replays a token, it does not carry the
 session-replay usage caveat. It does require a **Codex CLI reachable at the
@@ -38,8 +38,8 @@ configured app-server URL**, and that CLI must be **signed in**.
 - The sidecar listens **only** on the internal compose network
   (`ws://codex-app-server:1456`) behind a capability token. It is **never**
   published to the host or internet.
-- The Codex CLI is baked into `omniroute:base`, so no codex install is needed on
-  the host or the user's machine when you run the sidecar.
+- The sidecar uses `omniroute:cli-no-docker`, built from the `runner-cli-no-docker`
+  target, which includes the Codex CLI.
 
 ## 2. Bring it up
 
@@ -58,13 +58,13 @@ The sidecar mints its WS capability token on first boot (into the shared
 1. In the dashboard, add a connection for **OpenAI Codex (App-Server)**. No API
    key or token is required (it's a no-auth provider — the sidecar owns auth).
 2. If the sidecar's Codex CLI is **not yet signed in**, the connection health
-   check reports *"running but not signed in"* (not a red auth error). Use
+   check reports _"running but not signed in"_ (not a red auth error). Use
    **Sign in with ChatGPT**: this runs the standard Codex device-OAuth in your
    browser and then writes `~/.codex/auth.json` into the shared volume via
    **Apply auth** (the same one login serves both the `codex` and
    `codex-app-server` providers).
 3. Once signed in, the health check goes green (it verifies both `/readyz` **and**
-   `account/read` — i.e. up *and* authenticated) and turns work.
+   `account/read` — i.e. up _and_ authenticated) and turns work.
 
 The dashboard never clobbers a healthy existing `~/.codex/auth.json` — it writes
 only when the file is absent or its token is stale (a backup is always taken).

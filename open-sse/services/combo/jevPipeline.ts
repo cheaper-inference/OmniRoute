@@ -52,6 +52,7 @@ export interface JevPipelineDeps {
   resilienceSettings: ResilienceSettings;
   isModelAvailable?: IsModelAvailable;
   deferContextOverflowWhenCompressible?: boolean;
+  sourceFormat?: string | null;
   traceInvocationId?: string | null;
 }
 
@@ -65,6 +66,8 @@ export async function orderByJevStrategy(
   const { body, combo, log, signal } = deps;
   const partition = await partitionJevTargetsForAsk(initialOrderedTargets, {
     body,
+    sourceFormat: deps.sourceFormat,
+    settings: deps.settings,
     config: deps.config as Record<string, unknown> | null | undefined,
     resilienceSettings: deps.resilienceSettings,
     log,

@@ -7,7 +7,6 @@ lastUpdated: 2026-06-28
 # Compliance & Audit
 
 > **Source of truth:** `src/lib/compliance/`, `src/app/api/compliance/`
-> **Last updated:** 2026-06-28 — v3.8.40
 
 OmniRoute records administrative actions, authentication events, provider
 credential lifecycle changes, and MCP tool invocations to SQLite-backed audit

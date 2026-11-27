@@ -261,7 +261,7 @@ Runs on every PR to `main`. Blocks merge on failure.
 | ↳ `check:docs-sync`            | CHANGELOG / OpenAPI version consistency; release mode also the 66 `llm.txt` mirrors and translated CHANGELOG sections (PR mode: mirrors agree)    | Yes                        |
 | ↳ `check:docs-counts`          | Counts in prose (provider count, migration count, etc.). Two modes: `pr` on feature PRs, `release` elsewhere — see "Derived values" below         | Yes                        |
 | ↳ `check:env-doc-sync`         | Every env var in `.env.example` is documented in a docs table, and vice versa                                                                     | Yes                        |
-| ↳ `check:deprecated-versions`  | No deprecated version strings in docs                                                                                                             | Yes                        |
+| ↳ `check:deprecated-versions`  | Flags versions explicitly attributed to OmniRoute (3.6.x and earlier). Ignores dates.                                                             | Only with `--strict`       |
 | ↳ `check:doc-links`            | Internal markdown links in docs resolve to real files (`[text]`/`(path)` form)                                                                    | Yes                        |
 | ↳ `check:fabricated-docs`      | Routes, env vars, CLI commands, hook names, and file paths cited in docs exist in the codebase. Hard gate via `--strict`; soft-fail without flag. | Yes (via `--strict` in CI) |
 | `check:cli-i18n`               | CLI `t()` keys exist in `bin/cli/locales/en.json` (both modes); pt-BR / zh-CN / zh-TW parity with `en.json` in release mode only                  | Yes                        |
