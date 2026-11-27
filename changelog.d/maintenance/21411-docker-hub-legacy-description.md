@@ -1,0 +1,1 @@
+- **chore(docker):** the legacy `diegosouzapw/omniroute` Docker Hub repository now gets the same short description as npm and OmniCopilot, "OmniRoute by Cheaper Inference. Created by Diego Souza. …" ([#21411](https://github.com/cheaper-inference/OmniRoute/pull/21411))
