@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="वादा — एक एंडपॉइंट और 394 प्रदाता। जब कोई अन्य स्वस्थ लक्ष्य उपलब्ध रहता है, तो स्वचालित फ़ॉलबैक रूटिंग जारी रखता है। छह स्तंभ: 394 प्रदाताओं में मज़बूत फ़ॉलबैक · योग्य वर्कलोड पर 95% तक टोकन बचत · 150+ मुफ़्त टियर और 51 आवर्ती/कीलेस हमेशा-मुफ़्त प्रदाताओं के साथ शुरुआत करने के लिए $0 · एक कॉन्फ़िगरेशन के ज़रिए 39 CLI/एजेंट इंटीग्रेशन · /v1 पर OpenAI, Claude, Gemini और Responses API संगतता · सर्किट ब्रेकर, TLS stealth, MCP के 110 टूल, A2A, मेमोरी, गार्डरेल, evals और 7,800+ ट्रैक किए गए टेस्ट फ़ाइलों में 56,000+ स्थिर टेस्ट घोषणाओं सहित प्रोडक्शन नियंत्रण।"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="वादा — एक एंडपॉइंट और 394 प्रदाता। जब कोई अन्य स्वस्थ लक्ष्य उपलब्ध रहता है, तो स्वचालित फ़ॉलबैक रूटिंग जारी रखता है। छह स्तंभ: 394 प्रदाताओं में मज़बूत फ़ॉलबैक · योग्य वर्कलोड पर 95% तक टोकन बचत · 150+ मुफ़्त टियर और 40 आवर्ती/कीलेस हमेशा-मुफ़्त प्रदाताओं के साथ शुरुआत करने के लिए $0 · एक कॉन्फ़िगरेशन के ज़रिए 39 CLI/एजेंट इंटीग्रेशन · /v1 पर OpenAI, Claude, Gemini और Responses API संगतता · सर्किट ब्रेकर, TLS stealth, MCP के 110 टूल, A2A, मेमोरी, गार्डरेल, evals और 7,800+ ट्रैक किए गए टेस्ट फ़ाइलों में 56,000+ स्थिर टेस्ट घोषणाओं सहित प्रोडक्शन नियंत्रण।"/>
 
 <br/>
 <br/>
@@ -711,7 +711,7 @@ omniroute configure codex          # साथ ही: claude opencode qwen aide
 
 </div>
 
-> **394 पंजीकृत प्रदाता** canonical chat, media, search, local, cloud-agent और system संग्रहों में उपलब्ध हैं, जिनमें **153 में `hasFree: true` डिस्कवरी मेटाडेटा शामिल है**। चैट मॉडल रजिस्ट्री में **239 प्रदाता / 3,059 विशिष्ट provider-model जोड़ियाँ / 1,475 raw model IDs** शामिल हैं; अलग free-budget catalog में **465 प्रति-मॉडल पंक्तियाँ**, **34 आवर्ती पूल** और **51 आवर्ती/keyless free-forever प्रदाता** हैं। ये जानबूझकर अलग-अलग हर हैं; परिभाषाएँ और pool-deduped गणनाएँ [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) और [Free Tiers](docs/reference/FREE_TIERS.md) में उपलब्ध हैं।
+> **394 पंजीकृत प्रदाता** canonical chat, media, search, local, cloud-agent और system संग्रहों में उपलब्ध हैं, जिनमें **153 में `hasFree: true` डिस्कवरी मेटाडेटा शामिल है**। चैट मॉडल रजिस्ट्री में **239 प्रदाता / 3,059 विशिष्ट provider-model जोड़ियाँ / 1,475 raw model IDs** शामिल हैं; अलग free-budget catalog में **465 प्रति-मॉडल पंक्तियाँ**, **34 आवर्ती पूल** और **40 आवर्ती/keyless free-forever प्रदाता** हैं। ये जानबूझकर अलग-अलग हर हैं; परिभाषाएँ और pool-deduped गणनाएँ [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) और [Free Tiers](docs/reference/FREE_TIERS.md) में उपलब्ध हैं।
 
 <div align="center">
 

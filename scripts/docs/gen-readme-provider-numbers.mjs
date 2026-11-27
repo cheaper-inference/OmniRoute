@@ -1,38 +1,26 @@
 // README provider figures in the Cheaper Inference UI Kit style. The totals with release
-// facts come from readmeFacts.mjs. Provider category sizes and hasFree flags come from
-// src/shared/constants/providers.ts; distinct active IDs come from FREE_MODEL_BUDGETS,
-// excluding discontinued rows before deduplicating by modelId across providers.
+// facts come from readmeFacts.mjs. Provider category sizes come from
+// src/shared/constants/providers.ts.
 //
 //   node --import tsx/esm scripts/docs/gen-readme-provider-numbers.mjs [--out path.svg]
 
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { fmtTokens } from "./gen-readme-free-tier-budget.mjs";
 import { esc, gridDefs, svgOpen } from "./readme-diagram-theme.mjs";
 import { outlineSvg } from "./readme-outline.mjs";
 import { readmeFact, RF } from "./readmeFacts.mjs";
 
 const W = 1200;
-const H = 544;
+const H = 576;
 const CARD_W = 272;
+const CARD_H = 216;
 const COLUMNS = 4;
 const TITLE = "What each number counts";
 const SUBTITLE = "None of them is added to another.";
 
 export async function buildProviderNumbersCards() {
-  const [providers, { FREE_MODEL_BUDGETS }] = await Promise.all([
-    import("../../src/shared/constants/providers.ts"),
-    import("../../open-sse/config/freeModelCatalog.data.ts"),
-  ]);
+  const providers = await import("../../src/shared/constants/providers.ts");
   const count = (collection) => Object.keys(collection).length;
-  const freeOffers = Object.values(providers.AI_PROVIDERS).filter(
-    ({ hasFree }) => hasFree === true
-  );
-  const activeRows = FREE_MODEL_BUDGETS.filter(({ freeType }) => freeType !== "discontinued");
-  const distinctIds = new Set(activeRows.map(({ modelId }) => modelId));
-  const totalEntries = readmeFact("code.entries");
-  const discontinued = readmeFact("code.freeTierBudget.discontinued");
-  const activeEntries = totalEntries - discontinued;
 
   return [
     {
@@ -47,15 +35,21 @@ export async function buildProviderNumbersCards() {
       ],
     },
     {
-      value: freeOffers.length,
+      value: RF.hasFreeLabel,
       label: "Flagged with a free offer",
       code: "hasFree",
-      lines: ["Trials, signup credits and", "limited plans count."],
+      lines: ["Trials, signup credits, search,", "voice and media count."],
     },
     {
-      value: readmeFact("code.freeTierCount"),
-      label: "In the free-tier catalog",
-      lines: ["Documented per model,", "including signup credits."],
+      value: RF.freeProvidersTotal,
+      label: "With free access",
+      lines: [
+        `${readmeFact("code.freeProviders.apiKey")} with an API key`,
+        `${readmeFact("code.freeProviders.keyless")} without a key`,
+        `${readmeFact("code.freeProviders.toolAccount")} through a tool account`,
+        `${readmeFact("code.freeProviders.webChat")} through a web chat`,
+        "Catalogued, not tested per call.",
+      ],
     },
     {
       value: RF.freeForever,
@@ -63,46 +57,53 @@ export async function buildProviderNumbersCards() {
       lines: ["Free daily, monthly or keyless.", "No trial or eligibility gate."],
     },
     {
-      value: activeEntries,
-      label: "Active free model entries",
-      lines: [`Provider/model rows: ${totalEntries} total`, `minus ${discontinued} discontinued.`],
+      value: RF.freeAccessRows,
+      label: "Catalog rows with free access",
+      lines: ["One row per provider and model."],
     },
     {
-      value: distinctIds.size,
-      label: "Distinct free model IDs",
-      lines: [`${activeEntries} active entries deduplicated`, "by model ID across providers."],
+      value: RF.freeModels,
+      label: "Distinct free models",
+      lines: ["The rows grouped by model ID."],
     },
     {
-      value: readmeFact("code.freePools"),
-      label: "Recurring free pools",
+      value: RF.freePublishedPools,
+      label: "Pools with a published quota",
       lines: ["Shared quotas counted once."],
     },
     {
-      value: `~${fmtTokens(readmeFact("code.freeSteady"))}`,
-      label: "Recurring free tokens / month",
+      value: RF.rowSumTotalLabel,
+      label: "Free tokens a month, as others count",
+      // Marks the highlighted card; the dark-theme polish draws its accent from this flag.
       highlight: true,
+      labelSize: 14.5,
+      definitionRole: "cell",
       lines: [
-        "Pool-deduplicated. First month:",
-        `~${fmtTokens(readmeFact("code.freeFirst"))} with signup credits.`,
+        `${RF.headlineSteadyLabel} real: each shared quota`,
+        "counted once. Others add",
+        "every row, ended offers included.",
+        `First month: ${RF.headlineFirstLabel} with signup credits.`,
         "Not an OmniRoute allowance.",
       ],
     },
   ];
 }
 
-function card({ value, label, code, lines, highlight }, i) {
+function card({ value, label, code, lines, labelSize = 17, definitionRole = "definition" }, i) {
   const x = 32 + (i % COLUMNS) * 288;
   const firstRow = i < COLUMNS;
   const rows = code ? [["mono", code]] : [];
-  rows.push(...lines.map((line) => ["definition", line]));
+  rows.push(...lines.map((line) => [definitionRole, line]));
+  const textY = 124;
+  const lineHeight = 18;
   return [
     `  <g class="provider-stat" transform="translate(${x},${firstRow ? 96 : 328})">`,
-    `    <rect width="${CARD_W}" height="${firstRow ? 216 : 184}" rx="12" class="surface"/>`,
-    `    <text x="20" y="64" class="num" style="font-size:52px${highlight ? ";fill:var(--ok)" : ""}">${value}</text>`,
-    `    <text x="20" y="96" class="h3">${esc(label)}</text>`,
+    `    <rect width="${CARD_W}" height="${CARD_H}" rx="12" class="surface"/>`,
+    `    <text x="20" y="64" class="num" style="font-size:52px">${esc(String(value))}</text>`,
+    `    <text x="20" y="96" class="h3" style="font-size:${labelSize}px">${esc(label)}</text>`,
     ...rows.map(
       ([role, line], j) =>
-        `    <text x="20" y="${124 + 18 * j}" class="${role}">${esc(line)}</text>`
+        `    <text x="20" y="${textY + lineHeight * j}" class="${role}">${esc(line)}</text>`
     ),
     "  </g>\n",
   ].join("\n");

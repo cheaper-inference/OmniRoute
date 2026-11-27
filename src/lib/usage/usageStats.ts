@@ -10,6 +10,7 @@ import { ESTIMATED_USAGE_SQL, UNKNOWN_USAGE_SQL } from "../db/usageEvidenceAggre
 
 import { getDbInstance } from "../db/core";
 import { getApiKeys } from "../db/apiKeys";
+import { getRecentUsageRows } from "../db/usageRecentStats";
 import { getPendingRequests } from "./usageHistory";
 import { getAccountDisplayName } from "@/lib/display/names";
 import { calculateCost } from "./costCalculator";
@@ -668,32 +669,7 @@ export async function getUsageStats() {
     }
   }
 
-  const recentRows = db
-    .prepare(
-      `
-        SELECT
-          strftime('%Y-%m-%dT%H:%M:00.000Z', timestamp) as minute,
-          provider,
-          model,
-          COALESCE(service_tier, 'standard') as service_tier,
-          COUNT(*) as request_count,
-          COALESCE(SUM(tokens_input), 0) as tokens_input,
-          COALESCE(SUM(tokens_output), 0) as tokens_output,
-          COALESCE(SUM(tokens_cache_read), 0) as tokens_cache_read,
-          COALESCE(SUM(tokens_cache_creation), 0) as tokens_cache_creation,
-          COALESCE(SUM(tokens_reasoning), 0) as tokens_reasoning,
-          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_input ELSE 0 END), 0) as cost_tokens_input,
-          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_output ELSE 0 END), 0) as cost_tokens_output,
-          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_read ELSE 0 END), 0) as cost_tokens_cache_read,
-          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_creation ELSE 0 END), 0) as cost_tokens_cache_creation,
-          COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_reasoning ELSE 0 END), 0) as cost_tokens_reasoning,
-          COALESCE(SUM(COALESCE(provider_cost_usd, calculated_cost_usd)), 0.0) as stored_cost
-        FROM usage_history
-        WHERE timestamp >= ? AND timestamp <= ?
-        GROUP BY minute, provider, model, service_tier
-      `
-    )
-    .all(tenMinutesAgo.toISOString(), now.toISOString()) as unknown[];
+  const recentRows = getRecentUsageRows(tenMinutesAgo.toISOString(), now.toISOString());
 
   for (const rowRaw of recentRows) {
     const row = asRecord(rowRaw);

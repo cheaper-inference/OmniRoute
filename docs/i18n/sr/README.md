@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — Jedna krajnja tačka i 394 provajdera. Automatski rezervni mehanizam održava usmeravanje dok je dostupno drugo ispravno odredište. Šest stubova: otporno rezervno usmeravanje kroz 394 provajdera · do 95% uštede tokena na podobnim radnim opterećenjima · $0 za početak uz više od 150 besplatnih nivoa i 51 besplatnog provajdera koji se trajno nude bez pretplate/ključa · 39 CLI/agentskih integracija kroz jednu konfiguraciju · kompatibilnost sa OpenAI, Claude, Gemini i Responses API interfejsima na /v1 · kontrole za produkciju, uključujući prekidače kola, TLS prikrivanje, MCP sa 110 alata, A2A, memoriju, zaštitne mehanizme, evaluacije i više od 56.000 statičkih deklaracija testova kroz više od 7.800 praćenih datoteka testova."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — Jedna krajnja tačka i 394 provajdera. Automatski rezervni mehanizam održava usmeravanje dok je dostupno drugo ispravno odredište. Šest stubova: otporno rezervno usmeravanje kroz 394 provajdera · do 95% uštede tokena na podobnim radnim opterećenjima · $0 za početak uz više od 150 besplatnih nivoa i 40 besplatnog provajdera koji se trajno nude bez pretplate/ključa · 39 CLI/agentskih integracija kroz jednu konfiguraciju · kompatibilnost sa OpenAI, Claude, Gemini i Responses API interfejsima na /v1 · kontrole za produkciju, uključujući prekidače kola, TLS prikrivanje, MCP sa 110 alata, A2A, memoriju, zaštitne mehanizme, evaluacije i više od 56.000 statičkih deklaracija testova kroz više od 7.800 praćenih datoteka testova."/>
 
 <br/>
 <br/>
@@ -711,7 +711,7 @@ omniroute configure codex          # такође: claude opencode qwen aider go
 
 </div>
 
-> **394 регистрована провајдера** у канонским колекцијама за ћаскање, медије, претрагу, локалне и cloud агенте и системске функције, укључујући **153 провајдера са метаподацима за откривање `hasFree: true`**. Регистар модела за ћаскање обухвата **239 провајдера / 3.059 различитих парова провајдер-модел / 1.475 необрађених ID-јева модела**; засебни каталог са бесплатним буџетом има **465 редова по моделу**, **34 периодична фонда** и **51 провајдера са бесплатним приступом заувек, без периодичне накнаде и без кључа**. Ово су различити имениоци по дизајну; дефиниције и израчунавања са уклоњеним дупликатима фондова налазе се у [Референци провајдера](docs/reference/PROVIDER_REFERENCE.md) и [Бесплатним нивоима](docs/reference/FREE_TIERS.md).
+> **394 регистрована провајдера** у канонским колекцијама за ћаскање, медије, претрагу, локалне и cloud агенте и системске функције, укључујући **153 провајдера са метаподацима за откривање `hasFree: true`**. Регистар модела за ћаскање обухвата **239 провајдера / 3.059 различитих парова провајдер-модел / 1.475 необрађених ID-јева модела**; засебни каталог са бесплатним буџетом има **465 редова по моделу**, **34 периодична фонда** и **40 провајдера са бесплатним приступом заувек, без периодичне накнаде и без кључа**. Ово су различити имениоци по дизајну; дефиниције и израчунавања са уклоњеним дупликатима фондова налазе се у [Референци провајдера](docs/reference/PROVIDER_REFERENCE.md) и [Бесплатним нивоима](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

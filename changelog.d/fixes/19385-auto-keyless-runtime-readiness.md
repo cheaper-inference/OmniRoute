@@ -1,0 +1,1 @@
+- **fix(auto):** Cloudflare AI Playground and DuckDuckGo AI Chat join automatic routing only when the server finds Playwright and an executable Chromium binary. UncloseAI now requires an existing API key after the public beta closed, and its keyless offer has been retired. ([#19385](https://github.com/cheaper-inference/OmniRoute/issues/19385))

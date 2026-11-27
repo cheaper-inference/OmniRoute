@@ -127,6 +127,11 @@ const FACTS = {
   },
 };
 
+// Every README carries the big free-token figure with its label and the real one (D47/D48; the
+// "Row-sum figure required" invariant runs in both modes). Fixture READMEs carry the short pair so
+// the tests keep judging what they are about; ~1.4B matches FACTS.code.headlineSteady.
+const PAIR = "~9.9B as others count · ~1.4B real\n";
+
 const mem =
   (files: Record<string, string | null>): Reader =>
   (file) =>
@@ -180,6 +185,14 @@ test("every check declares its scope, and every derived check has a locator", ()
     "free-forever providers (live code)": "derived",
     "free-tier catalog entries (live code)": "derived",
     "recurring pools (live code)": "derived",
+    "providers with free access (live code)": "derived",
+    "free providers with an API key (live code)": "derived",
+    "free providers without a key (live code)": "derived",
+    "free providers through a tool account (live code)": "derived",
+    "free providers through a web chat (live code)": "derived",
+    "pools with a published quota (live code)": "derived",
+    "catalog rows with free access (live code)": "derived",
+    "distinct free models (live code)": "derived",
     "hard-stop-guaranteed entries (live code)": "derived",
     "training-disclosure entries (live code)": "derived",
     "Free provider rankings sortBy (live code)": "invariant",
@@ -319,8 +332,8 @@ test("pr: a deleted file and an unchanged file are not judged", () => {
 
 test("pr: writer branches may write managed numbers", () => {
   const files = {
-    readBase: mem({ "README.md": "OmniRoute routes 392 providers.\n" }),
-    readHead: mem({ "README.md": "OmniRoute routes 393 providers.\n" }),
+    readBase: mem({ "README.md": "OmniRoute routes 392 providers.\n" + PAIR }),
+    readHead: mem({ "README.md": "OmniRoute routes 393 providers.\n" + PAIR }),
     changedFiles: ["README.md"],
   };
   for (const branch of [
@@ -420,7 +433,7 @@ test("release: code facts that cannot be collected exit 2 as infrastructure, not
     mode: "release",
     facts: { ...FACTS, code: null },
     factsError: { kind: "exit", detail: "probe exited 1" },
-    readHead: mem({ ...locales, "README.md": "OmniRoute routes 392 providers.\n" }),
+    readHead: mem({ ...locales, "README.md": "OmniRoute routes 392 providers.\n" + PAIR }),
   });
   assert.equal(both.exitCode, 1);
   assert.equal(both.strict, 1);
@@ -506,14 +519,14 @@ test("planDerivedRewrites + release mode clear every rewritable STRICT drift (re
   assert.deepEqual(gate.planDerivedRewrites({ facts: shifted, readFile: overlay }).files, []);
 });
 
-test("planDerivedRewrites keeps a mirror's own digits and leaves the rounded headline to a human", () => {
+test("planDerivedRewrites keeps a mirror's own digits, refreshes the headline and reports gated drift", () => {
   const persian = mirrorRow("۲۳۹");
   const plan = gate.planDerivedRewrites({
     facts: { ...FACTS, migrations: 240 },
     readFile: mem({
       "docs/i18n/fa/README.md": persian,
       "docs/reference/FREE_TIERS.md":
-        "About ~9.9B free tokens a month, +~6M behind regional identity verification.\n",
+        "About ~9.9B free tokens a month, +~7M behind regional identity verification.\n",
     }),
   });
   const fa = plan.files.find((f) => f.path === "docs/i18n/fa/README.md");
@@ -534,10 +547,15 @@ test("planDerivedRewrites keeps a mirror's own digits and leaves the rounded hea
   assert.ok(
     plan.manual.some(
       (m) =>
-        m.path === "docs/reference/FREE_TIERS.md" && m.label === "Free-tier headline (live catalog)"
+        m.path === "docs/reference/FREE_TIERS.md" &&
+        m.label === "Free-tier headline (live catalog)" &&
+        /stale gated figure/.test(m.detail)
     )
   );
-  assert.ok(!plan.files.some((f) => f.path === "docs/reference/FREE_TIERS.md"));
+  assert.equal(
+    plan.files.find((f) => f.path === "docs/reference/FREE_TIERS.md")?.after,
+    "About ~1.4B free tokens a month, +~7M behind regional identity verification.\n"
+  );
 });
 
 // --- shared locators ---------------------------------------------------------------------
@@ -594,7 +612,7 @@ function prRepo(
   const origin = path.join(dir, "origin");
   fs.mkdirSync(origin);
   git(origin, "init", "-q");
-  commitFile(origin, "README.md", "OmniRoute routes 392 providers.\n", "c1");
+  commitFile(origin, "README.md", "OmniRoute routes 392 providers.\n" + PAIR, "c1");
   const eventBase = commitFile(origin, "notes.txt", "base\n", "c2");
   git(origin, "switch", "-q", "-c", "feat/x");
   commitFile(origin, feature.file, feature.content, "feature");
@@ -630,7 +648,7 @@ const prEnv = (baseSha: string) => ({
 });
 
 test("fetch-depth 2 + BASE_SHA: the base resolves on GitHub's PR merge commit", () => {
-  const repo = prRepo({ file: "README.md", content: "OmniRoute routes 393 providers.\n" });
+  const repo = prRepo({ file: "README.md", content: "OmniRoute routes 393 providers.\n" + PAIR });
   try {
     const ci = ciCheckout(repo, 2);
     assert.equal(
@@ -658,7 +676,7 @@ test("a base that moved after the event: the merge commit's first parent is the 
   // The release refresh rewrote README.md on main after the PR event; the PR touched notes only.
   const repo = prRepo(
     { file: "notes.txt", content: "feature\n" },
-    { file: "README.md", content: "OmniRoute routes 395 providers.\n" }
+    { file: "README.md", content: "OmniRoute routes 395 providers.\n" + PAIR }
   );
   try {
     for (const depth of [2, null]) {
@@ -677,7 +695,7 @@ test("pr base: unresolvable in CI is exit 2; local, no-PR and queue runs skip th
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "docs-counts-nobase-"));
   try {
     git(dir, "init", "-q");
-    commitFile(dir, "README.md", "OmniRoute routes 392 providers.\n", "only");
+    commitFile(dir, "README.md", "OmniRoute routes 392 providers.\n" + PAIR, "only");
 
     const ci = gate.runCountsGate({ mode: "pr", root: dir, env: prEnv("0".repeat(40)) });
     assert.equal(ci.exitCode, 2, ci.lines.join("\n"));
@@ -794,9 +812,9 @@ test("pr: a declared batch (the merge train) skips the managed-value diff", () =
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "docs-counts-batch-"));
   try {
     git(dir, "init", "-q");
-    commitFile(dir, "README.md", "OmniRoute routes 392 providers.\n", "base");
+    commitFile(dir, "README.md", "OmniRoute routes 392 providers.\n" + PAIR, "base");
     const baseSha = git(dir, "rev-parse", "HEAD");
-    commitFile(dir, "README.md", "OmniRoute routes 395 providers.\n", "nightly refresh");
+    commitFile(dir, "README.md", "OmniRoute routes 395 providers.\n" + PAIR, "nightly refresh");
     // Detached, as the train's worktree is: no branch name tells a writer from a feature.
     git(dir, "checkout", "-q", "--detach");
 

@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="وعدہ — ایک endpoint اور 394 providers۔ خودکار fallback اس وقت تک routing جاری رکھتا ہے جب تک کوئی دوسرا صحت مند target دستیاب ہو۔ چھ ستون: 394 providers میں resilient fallback · اہل workloads پر 95% تک token savings · 150+ free tiers اور 51 recurring/keyless free-forever providers کے ساتھ شروع کرنے کے لیے $0 · ایک config کے ذریعے 39 CLI/agent integrations · /v1 پر OpenAI، Claude، Gemini اور Responses API compatibility · production controls، جن میں circuit breakers، TLS stealth، MCP کے 110 tools، A2A، memory، guardrails، evals، اور 7,800+ tracked test files میں 56,000+ static test declarations شامل ہیں۔"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="وعدہ — ایک endpoint اور 394 providers۔ خودکار fallback اس وقت تک routing جاری رکھتا ہے جب تک کوئی دوسرا صحت مند target دستیاب ہو۔ چھ ستون: 394 providers میں resilient fallback · اہل workloads پر 95% تک token savings · 150+ free tiers اور 40 recurring/keyless free-forever providers کے ساتھ شروع کرنے کے لیے $0 · ایک config کے ذریعے 39 CLI/agent integrations · /v1 پر OpenAI، Claude، Gemini اور Responses API compatibility · production controls، جن میں circuit breakers، TLS stealth، MCP کے 110 tools، A2A، memory، guardrails، evals، اور 7,800+ tracked test files میں 56,000+ static test declarations شامل ہیں۔"/>
 
 <br/>
 <br/>
@@ -706,7 +706,7 @@ omniroute configure codex          # یہ بھی: claude opencode qwen aider goo
 
 </div>
 
-> **394 رجسٹرڈ فراہم کنندگان** کینونیکل چیٹ، میڈیا، سرچ، لوکل، کلاؤڈ-ایجنٹ اور سسٹم کلیکشنز میں شامل ہیں، جن میں **153 کے پاس `hasFree: true` دریافت میٹا ڈیٹا موجود ہے**۔ چیٹ ماڈل رجسٹری میں **239 فراہم کنندگان / 3,059 منفرد فراہم کنندہ-ماڈل جوڑے / 1,475 خام ماڈل IDs** شامل ہیں؛ الگ مفت بجٹ کیٹلاگ میں **465 فی-ماڈل قطاریں**، **34 بار بار آنے والے پولز** اور **51 بار بار آنے والے/کی لیس ہمیشہ مفت فراہم کنندگان** شامل ہیں۔ یہ مختلف ڈینومینیٹرز جان بوجھ کر رکھے گئے ہیں؛ تعریفیں اور پول-ڈی ڈپلیکیٹ کیے گئے حسابات [فراہم کنندہ حوالہ](docs/reference/PROVIDER_REFERENCE.md) اور [مفت درجات](docs/reference/FREE_TIERS.md) میں موجود ہیں۔
+> **394 رجسٹرڈ فراہم کنندگان** کینونیکل چیٹ، میڈیا، سرچ، لوکل، کلاؤڈ-ایجنٹ اور سسٹم کلیکشنز میں شامل ہیں، جن میں **153 کے پاس `hasFree: true` دریافت میٹا ڈیٹا موجود ہے**۔ چیٹ ماڈل رجسٹری میں **239 فراہم کنندگان / 3,059 منفرد فراہم کنندہ-ماڈل جوڑے / 1,475 خام ماڈل IDs** شامل ہیں؛ الگ مفت بجٹ کیٹلاگ میں **465 فی-ماڈل قطاریں**، **34 بار بار آنے والے پولز** اور **40 بار بار آنے والے/کی لیس ہمیشہ مفت فراہم کنندگان** شامل ہیں۔ یہ مختلف ڈینومینیٹرز جان بوجھ کر رکھے گئے ہیں؛ تعریفیں اور پول-ڈی ڈپلیکیٹ کیے گئے حسابات [فراہم کنندہ حوالہ](docs/reference/PROVIDER_REFERENCE.md) اور [مفت درجات](docs/reference/FREE_TIERS.md) میں موجود ہیں۔
 
 <div align="center">
 

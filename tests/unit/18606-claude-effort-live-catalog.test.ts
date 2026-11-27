@@ -78,10 +78,18 @@ test("an explicit synced suffixed id stays literal", async () => {
   assert.equal(info.resolvedThinkingEffort, undefined);
 });
 
-test("a non-Claude provider does not gain undeclared effort aliases", async () => {
-  await seed("github", ["claude-haiku-5-5"]);
-  const info = await getModelInfo("github/claude-haiku-5-5-low");
-  assert.equal(info.errorType, "model_not_found");
+test("a Claude effort ID advertised for GitHub resolves against its live base", async () => {
+  const base = "claude-haiku-5-5";
+  await seed("github", [base]);
+  const baseId = `github/${base}`;
+  const variantId = `${baseId}-low`;
+  const catalog = appendClaudeEffortVariants([{ id: baseId }]);
+  assert.ok(catalog.some(({ id }) => id === variantId));
+
+  const info = await getModelInfo(variantId);
+  assert.equal(info.provider, "github", info.errorMessage);
+  assert.equal(info.model, base);
+  assert.equal(info.resolvedThinkingEffort, "low");
 });
 
 test("an unadvertised effort is still rejected", async () => {

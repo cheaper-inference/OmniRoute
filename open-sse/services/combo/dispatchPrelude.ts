@@ -1000,6 +1000,8 @@ async function orderRuntimeUnitsForStrategy(
     body,
     comboName: combo.name,
     config,
+    settings,
+    sourceFormat: args.sourceFormat,
     resilienceSettings: args.resilienceSettings,
     allCombos: allCombos ?? [],
     apiKeyAllowedConnections: args.apiKeyAllowedConnections,

@@ -107,8 +107,10 @@ test("no provider loses its free status without a recorded decision", () => {
       "predibase",
       "routeway",
       "stepfun",
+      // #19385: UncloseAI ended its public beta and now requires an API key.
+      "uncloseai",
     ],
-    "only the providers retired by the November 2026 re-audit are discontinued across the board"
+    "only providers with a recorded decision are discontinued across the board"
   );
 });
 

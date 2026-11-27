@@ -53,6 +53,7 @@ import { fileURLToPath } from "node:url";
 import { buildReadmeMigrationChecks } from "./lib/readmeMigrationCount.mjs";
 import {
   SVG_CANONICAL_PATTERNS,
+  applyEdits,
   locateCoverageFloorClaims,
   locateManagedCoverageFloorClaims,
   locateFreeTokenClaims,
@@ -253,6 +254,11 @@ function describeLive(key, live) {
     : `${formatTokenHeadline(live)} (${live} tokens)`;
 }
 
+function isStaleFreeTokenClaim(claim, live) {
+  const margin = claim.key === "retiredShare" ? 0.1 : 0.005 * live;
+  return Number.isFinite(live) && Math.abs(claim.value - live) > claim.halfStep + margin;
+}
+
 /**
  * Judges every free-token claim of `content` against the live value of its kind.
  * `totals`: s real, m first month, g regional-identity gated, l live row sum, t row sum with
@@ -270,8 +276,7 @@ export function checkFreeTierHeadline(content, totals) {
     const live = FREE_TOKEN_TOTAL_OF[c.key](totals);
     if (!Number.isFinite(live)) continue;
     judged.set(c.key, live);
-    const tolerance = c.key === "retiredShare" ? c.halfStep + 0.1 : c.halfStep + 0.005 * live;
-    if (Math.abs(c.value - live) > tolerance) stale.push(c);
+    if (isStaleFreeTokenClaim(c, live)) stale.push(c);
   }
   if (stale.length) {
     const quoted = [...new Set(stale.map((c) => `${c.text} (${FREE_TOKEN_KIND_NAME[c.key]})`))];
@@ -619,8 +624,8 @@ export function makeInstructionCountFreeValidator(file) {
 // carry no token figure at all; MCP/A2A outputs carry the real figure only. These rules are
 // invariants: they run in both modes.
 
-/** Files that must carry the big figure (filled by the PR that writes the D47 block). */
-export const ROW_SUM_REQUIRED_FILES = [];
+/** Files that must carry the big figure: the two pages that print the D47 block (Radar v2, plan 02). */
+export const ROW_SUM_REQUIRED_FILES = ["README.md", "docs/reference/FREE_TIERS.md"];
 // Trees whose *.ts sources produce MCP/A2A output text. Test files are not outputs: a test that
 // pins "the output never says ~11.4B as others count" has to spell the string.
 const ROW_SUM_FORBIDDEN_TREES = ["open-sse/mcp-server", "src/lib/a2a"];
@@ -690,6 +695,12 @@ function oneLineSurface(content, index, alts) {
 
 const gap = (a, b) => (b.start >= a.end ? b.start - a.end : a.start >= b.end ? a.start - b.end : 0);
 
+function hasPairedSteady(claim, steady, surface = null) {
+  return surface
+    ? steady.some((r) => r.start >= surface.start && r.end <= surface.end)
+    : steady.some((r) => gap(claim, r) <= ROW_SUM_PAIR_DISTANCE);
+}
+
 /**
  * Placement rules of the row-sum figures in one free-tier document (D47/D48):
  * (1) every rowSum:total has a headline:steady within 600 characters (same line / same alt text
@@ -710,7 +721,7 @@ export function checkRowSumPlacement(content, opts = {}) {
   const alts = altSpans(content);
   const problems = [];
   const at = (c) => `"${c.text}" (line ${lineOf(content, c.start)})`;
-  const realNear = (c) => steady.some((r) => gap(c, r) <= ROW_SUM_PAIR_DISTANCE);
+  const realNear = (c) => hasPairedSteady(c, steady);
 
   for (const c of claims) {
     if (c.key === "rowSum:total") {
@@ -720,7 +731,7 @@ export function checkRowSumPlacement(content, opts = {}) {
       }
       const surface = oneLineSurface(content, c.start, alts);
       if (surface) {
-        if (!steady.some((r) => r.start >= surface.start && r.end <= surface.end)) {
+        if (!hasPairedSteady(c, steady, surface)) {
           problems.push(
             `${at(c)}: big figure on a one-line surface (${surface.kind}) without the real figure on the same line`
           );
@@ -1203,6 +1214,33 @@ function assembleChecks(facts) {
 
 const finiteOrUndefined = (value) => (Number.isFinite(value) ? value : undefined);
 
+function planFreeTokenEdits(content, totals) {
+  const claims = locateFreeTokenClaims(content);
+  const staleSteady = claims.filter(
+    (c) => c.key === "headline:steady" && isStaleFreeTokenClaim(c, totals.s)
+  );
+  const alts = staleSteady.length ? altSpans(content) : [];
+  const edits = [];
+  for (const c of claims) {
+    const live = FREE_TOKEN_TOTAL_OF[c.key](totals);
+    if (!Number.isFinite(live)) continue;
+    // When the real figure needs a rewrite, refresh its partner too if it rounds differently,
+    // even when the validation margin still accepts the old total.
+    const refreshPartner =
+      c.key === "rowSum:total" &&
+      staleSteady.length > 0 &&
+      Math.abs(c.value - live) > c.halfStep &&
+      hasPairedSteady(c, staleSteady, oneLineSurface(content, c.start, alts));
+    if (!isStaleFreeTokenClaim(c, live) && !refreshPartner) continue;
+    const isShare = c.key === "retiredShare";
+    // The locator's span covers the digits. Match the full literal, including its unit and "~".
+    const start = isShare ? c.start : c.start - 1;
+    const to = isShare ? `${live.toFixed(1)}%` : formatTokenHeadline(live);
+    edits.push({ start, end: start + c.text.length, to });
+  }
+  return edits;
+}
+
 // The three documents that print the free-token figures. The README must state the real figure
 // and the gated one; the reference page must state the gated one; the guide carries no gated
 // line. Facts missing (pr mode builds with `code: {}`; the committed snapshot gains the
@@ -1240,8 +1278,9 @@ function freeTierHeadlineChecks(f) {
       validate,
       extract: (content) => [...locateFreeTokenClaims(content), ...locateGatedClaims(content)],
       plan: (content) => {
-        const v = validate(content);
-        return { edits: [], manual: v.ok ? [] : [v.detail] };
+        const edits = planFreeTokenEdits(content, totals);
+        const v = validate(applyEdits(content, edits));
+        return { edits, manual: v.ok ? [] : [v.detail] };
       },
     };
   };
@@ -1255,6 +1294,50 @@ function freeTierHeadlineChecks(f) {
     entry({ file: "docs/reference/FREE_TIERS.md", gated: true, requiredKeys: ["gated"] }),
     entry({ file: "docs/getting-started/FREE-TIERS-GUIDE.md", gated: false, requiredKeys: [] }),
   ];
+}
+
+const FREE_COUNT_DOCS = ["README.md", "docs/reference/FREE_TIERS.md"];
+const FREE_COUNT_CARD = "docs/diagrams/free-tier-budget.svg";
+const FREE_PROVIDER_COUNT_DOCS = [
+  ...FREE_COUNT_DOCS,
+  "docs/getting-started/SELF_HOST_GUIDE.md",
+  "docs/guides/FREE_PROVIDER_RANKINGS.md",
+  "docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md",
+];
+
+/** The public free-catalog counts, one claim per published sentence. */
+function freeCatalogCountClaims(f, claim) {
+  const p = f.freeProviders ?? {};
+  return [
+    [p.total, "providers with free access", /(\d+) (?:providers )?with free access\b/gi],
+    [p.apiKey, "free providers with an API key", /(\d+) with an API key\b/gi],
+    [p.keyless, "free providers without a key", /(\d+) without a key\b/gi],
+    [p.toolAccount, "free providers through a tool account", /(\d+) through a tool account\b/gi],
+    [p.webChat, "free providers through a web chat", /(\d+) through a web chat\b/gi],
+    [
+      f.freePublishedPools,
+      "pools with a published quota",
+      /(\d+) pools with a published quota\b/gi,
+    ],
+    [f.freeAccessRows, "catalog rows with free access", /(\d+) catalog rows with free access\b/gi],
+    [f.freeModels, "distinct free models", /(\d+) distinct free models?\b/gi],
+  ].map(([expected, what, pattern]) => {
+    const files =
+      what === "providers with free access"
+        ? FREE_PROVIDER_COUNT_DOCS
+        : what === "pools with a published quota" || what === "catalog rows with free access"
+          ? [...FREE_COUNT_DOCS, FREE_COUNT_CARD]
+          : FREE_COUNT_DOCS;
+    const check = claim(expected, what, { pattern }, files);
+    if (Number.isFinite(expected)) return check;
+    // A facts document without this count (pr mode, an older snapshot) leaves the claim
+    // unjudged instead of comparing it with `undefined` or planning a rewrite to it.
+    return {
+      ...check,
+      validate: () => ({ ok: true, detail: `no ${what} fact — not judged` }),
+      plan: () => ({ edits: [], manual: [] }),
+    };
+  });
 }
 
 function buildCodeFactChecks(facts) {
@@ -1437,6 +1520,11 @@ function buildCodeFactChecks(facts) {
       },
       ["README.md", "docs/diagrams/free-tier-budget.svg", "docs/reference/FREE_TIERS.md"]
     ),
+    // Public free-catalog counts (Radar v2, plan 02): providers with free access by access type,
+    // catalog rows with free access, pools with a published quota and distinct free models. Each
+    // sentence spells its unit, so one count can never be read as another ("214 catalog rows with
+    // free access" is not a provider count). Facts come from computeFreeCatalogCounts().
+    ...freeCatalogCountClaims(f, claim),
     // The reference page says what an entry vouches for. These two facts are
     // curated by hand rather than inferred, so the page quotes their counts —
     // and quoting a count is how a page goes stale. The patterns are deliberately
@@ -1519,8 +1607,8 @@ function buildCodeFactChecks(facts) {
 /**
  * Pure rewrite plan (nothing is written): the edits that bring every derived claim to `facts`.
  * Applying `files[].after` and running the release mode on the result clears every STRICT drift
- * the plan rewrites; whatever cannot be rewritten safely (mode pack names, a stale rounded
- * headline, a missing required sentence, release-only checks) is listed in `manual`.
+ * the plan rewrites; whatever cannot be rewritten safely (mode pack names, a gated token
+ * figure, a missing required sentence, release-only checks) is listed in `manual`.
  *
  * @param {{ facts: object, readFile: (path: string) => string | null }} args
  */
