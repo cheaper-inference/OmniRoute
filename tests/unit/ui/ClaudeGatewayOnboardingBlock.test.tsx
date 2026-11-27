@@ -48,7 +48,7 @@ async function renderBlock() {
 }
 
 function enterWindow(container: HTMLElement, value: string) {
-  const input = container.querySelector<HTMLInputElement>('input[type="number"]');
+  const input = container.querySelector<HTMLInputElement>("input");
   expect(input, "the auto-compact window field must exist").not.toBeNull();
   // React tracks the value through its own setter; set the native one and fire `input`.
   const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;

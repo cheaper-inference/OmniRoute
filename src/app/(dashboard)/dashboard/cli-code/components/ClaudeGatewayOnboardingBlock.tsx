@@ -6,7 +6,7 @@ import Icon from "@/shared/components/Icon";
 import { buildClaudeDiscoverySettingsSnippet } from "@/shared/services/claudeCliConfig";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
-import Input from "@/shared/components/Input";
+import NumberInput from "@/shared/components/NumberInput";
 
 /**
  * ClaudeGatewayOnboardingBlock — the copy-paste `settings.json` fragment that points
@@ -21,13 +21,13 @@ import Input from "@/shared/components/Input";
 export default function ClaudeGatewayOnboardingBlock({ baseUrl }: { baseUrl: string }) {
   const t = useTranslations("cliTools");
   const [copied, setCopied] = useState(false);
-  // Empty means "not set": Number("") is 0, so the empty field must map to undefined.
-  const [compactWindow, setCompactWindow] = useState("");
+  // null means "not set": an empty field has no number.
+  const [compactWindow, setCompactWindow] = useState<number | null>(null);
 
   const snippet = buildClaudeDiscoverySettingsSnippet({
     baseUrl,
     apiKeyPlaceholder: t("ccOnboardingKeyPlaceholder"),
-    autoCompactWindow: compactWindow === "" ? undefined : Number(compactWindow),
+    autoCompactWindow: compactWindow ?? undefined,
   });
 
   const handleCopy = async () => {
@@ -50,11 +50,11 @@ export default function ClaudeGatewayOnboardingBlock({ baseUrl }: { baseUrl: str
         </Button>
       </div>
 
-      <Input
-        type="number"
+      <NumberInput
         label={t("ccOnboardingWindowLabel")}
+        min={0}
         value={compactWindow}
-        onChange={(e) => setCompactWindow(e.target.value)}
+        onValueChange={setCompactWindow}
         className="mb-2"
       />
 
