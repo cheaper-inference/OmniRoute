@@ -643,6 +643,9 @@ lanes.
   (below).
 - **Hotfix.** The PR gates (`prChecksRequired`) still apply. Under any pause nothing is composed,
   hotfixes included.
+  The lane is for one urgent fix: a merge train never takes it and enters the FIFO like any other
+  pull request (owner's decision, 2026-11-27). The queue does not enforce this; the approver who
+  applies `omni-queue-hotfix` does.
 - **Base repair.** Its PR gates (`prChecksRequired`) are not required. Under a `base-red` pause
   it is the only work of the base: the tick follows a repair in flight (and the base check of a
   red repair) and composes a new repair batch. Under any other
