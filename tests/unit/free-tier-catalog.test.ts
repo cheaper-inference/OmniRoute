@@ -10,7 +10,8 @@ test("FREE_TIER_BUDGETS holds positive integer monthly-token budgets", () => {
   // 2026-09-02 re-audit: gemini + ollama-cloud left (no published cap), nara joined;
   // #12591 then dropped cerebras (one-time credit) → 17 legacy keys. 2026-11-23 re-audit: the map
   // mirrors the per-model catalog; ended offers and doubao (no recurring quota) left → 10 keys.
-  assert.equal(Object.keys(FREE_TIER_BUDGETS).length, 10);
+  // E1a adds seven provider budgets: 10 → 17.
+  assert.equal(Object.keys(FREE_TIER_BUDGETS).length, 17);
   for (const [id, tokens] of Object.entries(FREE_TIER_BUDGETS)) {
     assert.ok(Number.isInteger(tokens) && tokens > 0, `${id} must be a positive integer`);
   }
@@ -35,17 +36,18 @@ test("computeFreeTierTotals sums the documented budgets", () => {
   const t = computeFreeTierTotals();
   // 2026-11-23 re-audit: 10 providers; 24 + 24 + 22.7 + 15 + 1.44 + 1.2 + 0.8 + 0.48 + 0.16 +
   // 0.025 = 89,805,000 (the legacy map now mirrors the per-model catalog, ToS-avoid kiro included).
-  assert.equal(t.providerCount, 10);
-  assert.equal(t.documentedMonthlyTokens, 89_805_000);
+  // E1a adds 27,456,000 to the old 89,805,000 total.
+  assert.equal(t.providerCount, 17);
+  assert.equal(t.documentedMonthlyTokens, 117_261_000);
   assert.equal(typeof t.headline, "string");
-  assert.match(t.headline, /over 90M /);
+  assert.match(t.headline, /over 117M /);
 });
 
 test("computeFreeTierTotals can exclude ToS-avoid providers", () => {
   const all = computeFreeTierTotals();
   const clean = computeFreeTierTotals({ excludeTosAvoid: true });
   assert.equal(all.documentedMonthlyTokens - clean.documentedMonthlyTokens, 25_000);
-  assert.equal(clean.documentedMonthlyTokens, 89_780_000);
-  // 2026-11-23 re-audit: 10 legacy providers, minus kiro (ToS avoid) → 9.
-  assert.equal(clean.providerCount, 9);
+  assert.equal(clean.documentedMonthlyTokens, 117_236_000);
+  // E1a: 17 legacy provider budgets, minus one ToS-avoid provider.
+  assert.equal(clean.providerCount, 16);
 });

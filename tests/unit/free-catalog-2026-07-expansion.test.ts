@@ -51,14 +51,13 @@ test("ovhcloud and aihorde are keyless (no API key required)", () => {
 test("providers without a published TOKEN quota never inflate the headline", () => {
   // These have a real free tier capped in REQUESTS (or a queue), not tokens.
   // Registering a guessed token figure is how a catalog starts lying.
-  for (const id of ["requesty", "agnes", "glm"]) {
+  for (const id of ["agnes", "glm"]) {
     const rows = byProvider(id);
     assert.ok(rows.length > 0, `${id} must be in the free catalog`);
     assert.ok(
       rows.every((m) => m.monthlyTokens === 0 && m.creditTokens === 0),
       `${id} has no published token quota — it must not carry invented numbers`
     );
-    // requesty/openai/gpt-oss-120b left the free list (re-audit 2026-11-23): discontinued.
     assert.ok(
       rows.every((m) => m.freeType === "recurring-uncapped" || m.freeType === "discontinued")
     );
@@ -68,8 +67,22 @@ test("providers without a published TOKEN quota never inflate the headline", () 
     );
   }
 
+  // https://docs.requesty.ai/features/free-models.md (2026-11-27): 200 requests/day for new organizations.
+  const requesty = byProvider("requesty");
+  assert.ok(requesty.length > 0);
+  for (const row of requesty) {
+    assert.ok(row.freeType === "recurring-daily" || row.freeType === "discontinued");
+    assert.equal(row.monthlyTokens, row.freeType === "recurring-daily" ? 4_800_000 : 0);
+    assert.equal(row.creditTokens, 0);
+  }
+  assert.equal(requesty.filter((row) => row.freeType === "recurring-daily").length, 5);
+
   const totals = computeFreeModelTotals();
-  for (const id of ["requesty", "agnes", "glm"]) {
+  assert.ok(
+    !totals.uncappedProviders.includes("requesty"),
+    "Requesty has a recurring request quota"
+  );
+  for (const id of ["agnes", "glm"]) {
     assert.ok(
       totals.uncappedProviders.includes(id),
       `${id} must still be surfaced as an uncapped provider`

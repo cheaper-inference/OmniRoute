@@ -32,9 +32,8 @@ test("routeway pins a browser User-Agent (Cloudflare rejects non-browser UAs wit
 });
 
 test("providers with no published token quota never inflate the headline", () => {
-  // ainative ("claimed"), aion (per-day request cap), sealion (RPM only),
-  // routeway (RPD): real free access, no verifiable monthly token figure.
-  for (const id of ["ainative", "aion", "sealion", "routeway"]) {
+  // AINative, Aion and SeaLion have no published quota eligible for these rows.
+  for (const id of ["ainative", "aion", "sealion"]) {
     const rows = byProvider(id);
     assert.ok(
       rows.every((m) => m.monthlyTokens === 0 && m.creditTokens === 0),
@@ -46,21 +45,25 @@ test("providers with no published token quota never inflate the headline", () =>
   }
   const totals = computeFreeModelTotals();
   assert.ok(totals.uncappedProviders.includes("sealion"), "sealion must surface as uncapped");
-  // Re-audit 2026-11-23: ainative became a paid plan after a 3-day trial and every routeway id
-  // left its /v1/models (all rows discontinued); aion activates free keys only after a verified
-  // card (gates ["card"]), so none of the three is listed as open to anyone.
-  for (const id of ["ainative", "routeway"])
-    assert.ok(
-      byProvider(id).every((m) => m.freeType === "discontinued"),
-      id
-    );
+  // AINative became paid; Aion requires a verified card.
+  assert.ok(byProvider("ainative").every((m) => m.freeType === "discontinued"));
+  // https://api.routeway.ai/v1/models and https://docs.routeway.ai/getting-started/rate-limits.md
+  // (2026-11-27): eight discontinued ids and seven live ids at 200 requests/day.
+  const routeway = byProvider("routeway");
+  assert.equal(routeway.filter((row) => row.freeType === "discontinued").length, 8);
+  assert.equal(routeway.filter((row) => row.freeType === "recurring-daily").length, 7);
+  for (const row of routeway) {
+    assert.ok(row.freeType === "discontinued" || row.freeType === "recurring-daily");
+    assert.equal(row.monthlyTokens, row.freeType === "recurring-daily" ? 4_800_000 : 0);
+    assert.equal(row.creditTokens, 0);
+  }
   assert.ok(
     byProvider("aion")
       .filter((m) => m.freeType !== "discontinued")
       .every((m) => m.gates?.includes("card"))
   );
   for (const id of ["ainative", "aion", "routeway"])
-    assert.ok(!totals.uncappedProviders.includes(id), `${id} is not open to anyone`);
+    assert.ok(!totals.uncappedProviders.includes(id), `${id} has no uncapped offer`);
 });
 
 test("nara was a single shared 7M/day pool; its free plan now lists no models", () => {

@@ -38,7 +38,7 @@ for (const id of pricedCloudIds) {
   });
 }
 
-test("#17028 seven exact free offers have evidence while regional and account gaps remain debt", () => {
+test("#17028 exact free offers have evidence while regional and account gaps remain debt", () => {
   const policy = JSON.parse(
     readFileSync(
       new URL("../../config/quality/free-catalog-evidence.json", import.meta.url),
@@ -56,13 +56,18 @@ test("#17028 seven exact free offers have evidence while regional and account ga
     "gemini/gemini-2.5-flash",
     "gemini/gemini-2.5-flash-lite",
     "glm-cn/glm-4.5-flash",
-    "requesty/mistral/leanstral-1-5",
-    "requesty/nvidia/nemotron-3-nano-30b-a3b",
+    // https://router.requesty.ai/v1/models (2026-11-27): the two prior ids are retired.
+    "requesty/google/gemma-4-31b-it",
+    "requesty/nvidia/nemotron-3.5-lightning-30b-a3b",
     // November 2026 re-audit: the Aion free key now needs a verified card (gates ["card"]), so
     // the changed economics left debt for a dated record.
     "aion/aion-labs/aion-3.0",
   ]) {
     assert.ok(evidence.has(key), key);
+    assert.equal(policy.debt.includes(key), false, key);
+  }
+  for (const key of ["requesty/mistral/leanstral-1-5", "requesty/nvidia/nemotron-3-nano-30b-a3b"]) {
+    assert.equal(evidence.has(key), false, key);
     assert.equal(policy.debt.includes(key), false, key);
   }
   for (const key of ["agnes-cn/agnes-2.5-flash"]) {
@@ -76,7 +81,8 @@ test("#17028 seven exact free offers have evidence while regional and account ga
 
 test("#17028 Requesty NVIDIA trial retains its published training and use restrictions", () => {
   const row = FREE_MODEL_BUDGETS.find(
-    (model) => model.provider === "requesty" && model.modelId === "nvidia/nemotron-3-nano-30b-a3b"
+    (model) =>
+      model.provider === "requesty" && model.modelId === "nvidia/nemotron-3.5-lightning-30b-a3b"
   );
   assert.ok(row);
   assert.equal(row.trainsOnPrompts, true);

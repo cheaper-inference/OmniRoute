@@ -2565,10 +2565,11 @@ test("gitlawb validator: accepts valid API key via chat/completions probe", asyn
   const calls: Array<{ url: string; headers?: HeadersInit; body?: BodyInit | null }> = [];
   globalThis.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), headers: init.headers || {}, body: init.body });
-    assert.equal(String(url), "https://opengateway.gitlawb.com/v1/xiaomi-mimo/chat/completions");
+    assert.equal(String(url), "https://api.twigpine.com/v1/chat/completions");
     assert.equal((init.headers as Record<string, string>).Authorization, "Bearer glb-valid-key");
     const body = JSON.parse(String(init.body));
-    assert.equal(body.model, "mimo-v2.5-pro");
+    // https://twigpine.com/opengateway/docs (2026-11-27): canonical MiMo model on the new endpoint.
+    assert.equal(body.model, "xiaomi/mimo-v2.6-pro");
     assert.equal(body.messages[0].content, "test");
     assert.equal(body.max_tokens, 1);
     return new Response(JSON.stringify({ choices: [{ message: { content: "ok" } }] }), {
@@ -2584,7 +2585,7 @@ test("gitlawb validator: accepts valid API key via chat/completions probe", asyn
 test("gitlawb validator: 400/422/429 treated as auth success", async () => {
   for (const status of [400, 422, 429]) {
     globalThis.fetch = async (url) => {
-      assert.equal(String(url), "https://opengateway.gitlawb.com/v1/xiaomi-mimo/chat/completions");
+      assert.equal(String(url), "https://api.twigpine.com/v1/chat/completions");
       return new Response(JSON.stringify({ error: "bad request" }), { status });
     };
     const result = await validateProviderApiKey({ provider: "gitlawb", apiKey: "glb-key" });
@@ -2595,7 +2596,7 @@ test("gitlawb validator: 400/422/429 treated as auth success", async () => {
 
 test("gitlawb validator: rejects invalid API key (401)", async () => {
   globalThis.fetch = async (url) => {
-    assert.equal(String(url), "https://opengateway.gitlawb.com/v1/xiaomi-mimo/chat/completions");
+    assert.equal(String(url), "https://api.twigpine.com/v1/chat/completions");
     return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
   };
 
@@ -2606,7 +2607,7 @@ test("gitlawb validator: rejects invalid API key (401)", async () => {
 
 test("gitlawb validator: rejects invalid API key (403)", async () => {
   globalThis.fetch = async (url) => {
-    assert.equal(String(url), "https://opengateway.gitlawb.com/v1/xiaomi-mimo/chat/completions");
+    assert.equal(String(url), "https://api.twigpine.com/v1/chat/completions");
     return new Response(JSON.stringify({ error: "forbidden" }), { status: 403 });
   };
 

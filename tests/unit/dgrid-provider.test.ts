@@ -29,9 +29,10 @@ test("DGrid is registered as a free API-key provider", () => {
   assert.equal(entry.website, "https://dgrid.ai");
   assert.equal(entry.hasFree, true);
   assert.equal(entry.passthroughModels, true);
-  assert.match(entry.freeNote, /10 requests\/minute/);
-  assert.match(entry.freeNote, /100 requests\/day/);
-  assert.match(entry.freeNote, /\$5 lifetime top-up/);
+  assert.match(entry.freeNote, /10 requests per minute/);
+  assert.match(entry.freeNote, /100 requests a day/);
+  // https://docs.dgrid.ai/ai-gateway/free-models-router.md (2026-11-27): qualifying deposits raise the cap.
+  assert.match(entry.freeNote, /\$5 in qualifying top-ups/);
 });
 
 test("DGrid exposes the OpenAI-compatible chat completions endpoint", () => {
