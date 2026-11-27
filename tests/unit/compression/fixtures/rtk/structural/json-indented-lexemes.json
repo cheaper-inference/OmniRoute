@@ -1,0 +1,30 @@
+{
+  "id": 9007199254740993,
+  "ratio": 1.5,
+  "tiny": -0.0,
+  "huge": 1e400,
+  "note": "a  b",
+  "path": "C:\\temp\\ ",
+  "quoted": "she said \"hi  there\"  and left",
+  "unicode": "caf\u00e9 \ud83d\ude00 \u2028  end",
+  "emoji": "nao  muda 😀  tambem",
+  "key": 1,
+  "key": 2,
+  "empty": [],
+  "emptyObject": {},
+  "flags": [true, false, null],
+  "items": [
+    {
+      "name": "alpha",
+      "tags": ["x", "y"],
+      "size": 10
+    },
+    {
+      "name": "beta",
+      "tags": [],
+      "size": 20
+    }
+  ],
+  "zeta": "last",
+  "alpha": "first"
+}

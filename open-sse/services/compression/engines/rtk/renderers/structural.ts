@@ -5,6 +5,7 @@ import { matchRtkFilter } from "../filterLoader.ts";
 import { effectiveMaxLines } from "../intensity.ts";
 import { lastCommandSegment } from "../splitCompositeCommand.ts";
 import { STRUCTURAL_REGISTRY } from "./index.ts";
+import { jsonCommandType, startsLikeJsonContainer } from "./jsonOutput.ts";
 import type { RenderResult, Renderer } from "./types.ts";
 
 /**
@@ -83,6 +84,12 @@ function diffRoute(command: string | null): StructuralRoute {
   return { type: "git-diff", render: STRUCTURAL_REGISTRY["git-diff"], command };
 }
 
+function jsonRoute(command: string, text: string): StructuralRoute | null {
+  const type = jsonCommandType(command);
+  if (!type || !startsLikeJsonContainer(text)) return null;
+  return { type, render: STRUCTURAL_REGISTRY[type], command };
+}
+
 /**
  * Pick the format from the correlated command when there is one, else from a strong signature
  * of the text itself. `full: false` is the cheap pre-check used for over-budget inputs: it never
@@ -91,7 +98,7 @@ function diffRoute(command: string | null): StructuralRoute {
 function selectShellRoute(text: string, rawCommand: string | null | undefined, full: boolean) {
   const command = lastCommandSegment(rawCommand?.trim() ?? "") || null;
   if (command) {
-    if (!DIFF_COMMAND_RE.test(command)) return null;
+    if (!DIFF_COMMAND_RE.test(command)) return jsonRoute(command, text);
     return !full || DIFF_FILE_HEADER_RE.test(text) ? diffRoute(command) : null;
   }
   return DIFF_STRONG_START_RE.test(full ? text : text.slice(0, 16)) ? diffRoute(null) : null;

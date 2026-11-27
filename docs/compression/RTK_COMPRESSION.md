@@ -196,6 +196,31 @@ computed from the whole input, and drops blob ids and unchanged context. Dispatc
   filter being explicitly disabled keeps the legacy path. The `rtkConfig.renderers` allowlist is
   matched against the format name (`git-diff`).
 
+### JSON (`json-output`, `aws`)
+
+`engines/rtk/renderers/jsonOutput.ts` (`renderJsonOutput`) compacts one indented JSON document. It
+validates the whole text with `JSON.parse` and then removes only the whitespace between tokens (space,
+tab, CR, LF) with a linear string-aware scan, so the output is not a re-serialisation: key order,
+duplicate keys, number lexemes (`9007199254740993`, `1.50`, `1E+400`) and string escapes come out
+byte-for-byte as they went in, and whitespace inside strings is kept.
+
+- Routing: the correlated command must be `jq`, `cat <file>.json`, or `aws` with no `--output` flag or
+  `--output json` (any other `--output` stays on the legacy path). The text must start with `{` or
+  `[`. A call with no command is never routed to JSON. The `rtkConfig.renderers` allowlist matches
+  `json-output` for `jq`/`cat` and `aws` for `aws`, the same names the legacy detector uses.
+- Already compact JSON, or a document with no whitespace to remove, is returned **unchanged**. There
+  is no sampling or omission mode.
+- Text that is not exactly one valid document (truncated, trailing comma, several concatenated
+  documents, trailing words) is returned unchanged.
+- A compacted document that does not fit `maxCharsPerResult` is returned unchanged, as for any other
+  format.
+- Input over the analysis ceiling (512 KiB, 8,192 lines, 16 KiB on one line) goes to the legacy RTK
+  without the parser being called (`rtk:structural:over-budget`).
+- With the structural path on, a call routed to JSON no longer reaches the legacy `structured-table`
+  renderer: a JSON array of objects is compacted with every row and column, or kept intact, instead
+  of being cut to a table. The table renderer is unchanged and still serves every other case (flag
+  off, over-budget input, a different command).
+
 ## Code Comment Stripping (`stripCodeComments` / `preserveDocstrings`)
 
 When `rtkConfig.applyToCodeBlocks` is enabled, RTK can also strip comments from fenced code blocks:
