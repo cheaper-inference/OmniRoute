@@ -148,6 +148,20 @@ test("disableNonPublicModels=true + auto/<group> request → not rejected by pub
   }
 });
 
+test("direct dispatch still checks unknown auto IDs against the published model policy", async () => {
+  const created = await apiKeysDb.createApiKey("DNP Direct Auto Key", "machine-dnp-direct-auto");
+  await apiKeysDb.updateApiKeyPermissions(created.id, { disableNonPublicModels: true });
+  apiKeysDb.clearApiKeyCaches();
+
+  const policy = await loadPolicy("dnp-direct-auto");
+  const { rejection } = await policy.enforceApiKeyPolicy(makeRequest(created.key), "auto/mygroup", {
+    directModelDispatch: true,
+  });
+  assert.equal(rejection?.status, 403);
+  const body = (await rejection.json()) as { error: { message: string } };
+  assert.match(body.error.message, /Model "auto\/mygroup" is not allowed for this API key/);
+});
+
 test("reasoning routing preserves auto/* targets during API-key re-check", async () => {
   const created = await apiKeysDb.createApiKey("Reasoning Auto Key", "machine-reasoning-auto");
   await apiKeysDb.updateApiKeyPermissions(created.id, {

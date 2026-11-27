@@ -2,7 +2,7 @@
 
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
-import { Button } from "@/shared/components";
+import { Button, Progress } from "@/shared/components";
 
 /**
  * ConnectionQuotaPanel — per-account usage/limits strip rendered under each
@@ -183,10 +183,10 @@ export default function ConnectionQuotaPanel({
   const refreshControl = onRefresh ? (
     <Button
       variant="ghost"
-      size="icon-sm"
+      size="icon-2xs"
+      tone="muted"
       onClick={onRefresh}
       disabled={refreshing}
-      className="size-6 min-h-6 rounded text-text-muted"
       title={t("quotaRefresh")}
       aria-label={t("quotaRefresh")}
     >
@@ -280,16 +280,16 @@ export default function ConnectionQuotaPanel({
         )}
         {refreshControl}
         {updatedAgo && !refreshing ? (
-          <span className="text-[11px] text-text-muted/70">{updatedAgo}</span>
+          <span className="text-2xs text-text-muted/70">{updatedAgo}</span>
         ) : null}
         {hasDetails && (
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon-2xs"
+            tone="muted"
             icon={expanded ? "expand_less" : "expand_more"}
             aria-expanded={expanded}
             onClick={() => setExpanded((v) => !v)}
-            className="size-6 min-h-6 rounded text-text-muted"
             title={t("quotaDetails")}
             aria-label={t("quotaDetails")}
           />
@@ -321,15 +321,15 @@ export default function ConnectionQuotaPanel({
                 {isCreditRow || remaining === null ? (
                   <span className="flex-1" />
                 ) : (
-                  <span className="h-1.5 flex-1 rounded-full overflow-hidden bg-bg-subtle">
-                    <span
-                      className="block h-full rounded-full"
-                      style={{
-                        width: `${Math.min(100, Math.max(0, remaining))}%`,
-                        background: colors?.bar,
-                      }}
-                    />
-                  </span>
+                  <Progress
+                    size="sm"
+                    semantics="meter"
+                    animate={false}
+                    aria-label={row.displayName || row.name}
+                    value={Math.min(100, Math.max(0, remaining))}
+                    color={colors?.bar}
+                    className="flex-1"
+                  />
                 )}
                 <span
                   className="w-44 shrink-0 text-right tabular-nums text-text-muted"
@@ -337,7 +337,7 @@ export default function ConnectionQuotaPanel({
                 >
                   {renderUsedText(row)}
                   {countdown ? (
-                    <span className="block text-[10px] opacity-70">
+                    <span className="block text-3xs opacity-70">
                       {t("quotaResetIn", { time: countdown })}
                     </span>
                   ) : null}

@@ -35,57 +35,32 @@ npm run test:e2e           # valgfrit, men anbefalet
 /capture-release-evidences-cc
 ```
 
-## npm Trusted Publishing (standard siden v3.8.51) — trinvis efter anmodning, direkte som reserve
+## npm Trusted Publishing (standard siden v3.8.51) — iscenesat på anmodning, direkte som fallback
 
-`npm-publish.yml` udgiver som standard via **npm Trusted Publishing (OIDC)**:
-`stage-npm`-jobbet (hostet af GitHub) udveksler GitHubs id-token med en kortlivet
-npm-legitimationsoplysning til den pågældende kørsel — intet langlivet npm-token i repository-hemmelighederne, ingen 2FA-anmodning, og proveniens er vedhæftet.
-Det er den omgåelse, npm nu tillader, efterhånden som tokens, der springer 2FA over, udfases;
-det genopretter det fuldautomatiske flow, som projektet havde frem til v3.8.48, samtidig med at
-WS1.3-garantien bevares (et lækket token kan ikke udgive alene — der findes intet token).
+`npm-publish.yml` udgiver igennem** npm Trusted Publishing (OIDC)** som standard: `stage-npm` jobbet (github-hostet) udveksler GitHub's id-token med en kortvarig npm-legitimation for den kørsel — ingen langvarig npm-token i repository-hemmelighederne, ingen 2FA-prompt, herkomst vedhæftet. Det er sanktionerne for bypass npm, nu hvor tokens, der springer 2FA over, bliver pensioneret; det genopretter det fuldautomatiske flow, som projektet havde op til v3.8.48, mens WS1.3-garantien bevares (et lækket token kan ikke udgive alene — der er ingen token).
 
-**Engangsopsætning (ejer):** npmjs.com → pakken `omniroute` → Settings → _Trusted
-Publisher_ → GitHub: ejer `diegosouzapw`, repository `OmniRoute`, workflow `npm-publish.yml`
-(miljø: intet). Indtil dette findes, mislykkes det automatiske trin med `ENEEDAUTH`:
-start det igen med `publish_mode=staged` (nedenfor) eller `direct`.
+**Engangsopsætning (ejer):** npmjs.com → pakke `omniroute` → Indstillinger → _Trusted Publisher_ → GitHub: ejer `diegosouzapw`, repo `OmniRoute`, workflow `npm-publish.yml` (miljø: ingen). Indtil det eksisterer, mislykkes det automatiske trin med `ENEEDAUTH`: genudsendelse med `publish_mode=staged` (nedenfor) eller `direct`.
 
-### Trinvis udgivelse (efter anmodning — `publish_mode=staged`)
+### Etapevis udgivelse (efter anmodning — `publish_mode=staged`)
 
-npm-publish-workflowet udgiver ikke længere direkte: Det starter den pakkede tarball
-(`check:pack-boot`) og kører derefter `npm stage publish` — de præcise bytes parkeres i
-registreringsdatabasen og kan **ikke installeres**, før ejeren godkender dem. Den menneskelige 2FA-kontrol
-er flyttet til EFTER beviset, ikke før det.
+npm-publish workflowet udgiver ikke længere direkte: det starter den pakkede tarball (`check:pack-boot`) og kører derefter `npm stage publish` — de nøjagtige bytes er parkeret i registreringsdatabasen,** ikke kan installeres** indtil ejeren godkender det. Den menneskelige 2FA-port flyttede for at AFTER beviset, ikke før det.
 
-**Ejerens flow, efter at workflowet bliver grønt:**
+**Ejerflow efter workflowet bliver grønt:**
 
-1. `npm stage list omniroute` — find stage-id'et (det vises også i workflowoversigten).
-2. Verificér de trinvist klargjorte bytes (anbefalet): `npm stage download <id>`, installér derefter den
-   downloadede tarball i et midlertidigt præfiks, og start den (`npm run check:pack-boot` automatiserer
-   den samme pak→installér→start-vurdering i CI).
-3. `npm stage approve <id>` — 2FA-anmodningen ER udgivelsen. `npm stage reject <id>` kasserer den.
-4. Sikkerhedsnet efter udgivelse: Verifikatoren efter udgivelse (WS1.4 i v3.8.49-planen) installerer den
-   udgivne version fra den offentlige registreringsdatabase i en ren container og starter den.
+1. `npm stage list omniroute` — find fase-id'et (også udskrevet i workflow-oversigten).
+2. Bekræft de trinvise bytes (anbefales): `npm stage download <id>`, installer derefter den downloadede tarball i et midlertidigt præfiks og start den (`npm run check:pack-boot` automatiserer den samme pakke → installer → boot-verdict i CI).
+3. `npm stage approve <id>` — 2FA-prompten IS udgive. `npm stage reject <id>` kasserer.
+4. Post-publish-net: post-publish-verifikatoren (WS1.4 af v3.8.49-planen) installerer den offentliggjorte version fra det offentlige register i en ren beholder og starter den.
 
-**Nødreserve:** `workflow_dispatch` med `publish_mode=direct` genopretter den
-ældre, øjeblikkelige `npm publish` (brug kun dette, hvis den trinvise klargøring selv fejler; dokumentér hvorfor).
+**Nødfald:** `workflow_dispatch` med `publish_mode=direct` gendanner den gamle umiddelbare `npm publish` (bruges kun, hvis selve iscenesættelsen ikke opfører sig; registrer hvorfor).
 
-**Engangssikring (ejer, npmjs.com):** Konfigurér Trusted Publisher for
-`omniroute` i en tilstand, der kun tillader trinvis klargøring, så et lækket langlivet token ikke kan køre `npm publish`
-direkte nogetstedsfra — CI kan kun klargøre trinvist; kun ejerens 2FA kan frigive udgivelsen.
+**Engangshærdning (ejer, npmjs.com):** konfigurer Trusted Publisher til `omniroute` i scene-kun-tilstand, så et lækket langtidsholdbart token ikke kan `npm publish` direkte hvor som helst — CI kun kan scene; kun ejerens 2FA-udgivelser.
 
-**Procedure for defekte artefakter (uændret):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"`
-som standardreaktion (tager få minutter og kan tilbageføres); brug kun `npm unpublish` inden for
-72-timersvinduet/perioden uden afhængige pakker og aldrig som første handling. Docker: Omskriv aldrig et versionstag — tilbagerulning
-sker ved at omdirigere `latest` til den seneste fungerende digest.
+**Broken-artefact playbook (uændret):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` som standardrefleks (minutter, reversibel); `npm unpublish` kun inde i 72h/no-dependents vinduet og aldrig som det første træk. Docker: omskriv aldrig et versionstag — rollback peger `latest` igen til den sidste gode digest.
 
-**Docker Hub `latest` (påkrævet ved hver stabil SemVer-udgivelse):**
-`docker-publish`-workflowet skal tagge **både** `X.Y.Z` og, når
-`should-promote-latest.sh` bekræfter, at dette er den højeste stabile SemVer, `:latest`
-med **samme digest**. Efter jobbet: Hub-`latest`-digesten skal være lig med den nye
-SemVer-digest, og `last_updated` skal være ændret. Lad ikke `:latest` pege på et ældre
-build, mens udgivelsesnoterne omtaler rettelser, som kun findes i git. Compose-
-hurtigstarter bruger `:latest`; GitOps bør fortsat fastlåse `X.Y.Z`. Se
-[Docker-udgivelseskanaler](../guides/DOCKER_GUIDE.md#release-channels) og #10317.
+**Docker Hub `latest` (påkrævet ved hver stabil SemVer -udgivelse):** `docker-publish` -arbejdsgangen skal mærkes** begge** `X.Y.Z` og, når `should-promote-latest.sh` stemmer overens, er dette den højeste stabile SemVer, `:latest` med** samme fordøjelse** . Efter jobbet: Hub `latest` digest er lig med den nye SemVer digest og `last_updated` flyttet. Efterlad ikke `:latest` på en ældre build, mens release notes taler om rettelser, der kun findes på git. Komponér hurtigstarter brug `:latest`; GitOps skal blive ved med at fastgøre `X.Y.Z`. Se [Docker udgivelseskanaler](../guides/DOCKER_GUIDE.md#release-channels) og #10317.
+
+**Docker Hub organisations repository (`cheaperinference/omniroute`):** Docker Hub kan ikke flytte et lager mellem navneområder, så `diegosouzapw/omniroute` beholder sin pull-historik og hver udgivelse, og `mirror-org-dockerhub` -jobbet for `docker-publish` kopierer hver frigivet version (og `:latest` når den promoveres) fra `ghcr.io/cheaper-inference/omniroute` til organisationens lager. Den har brug for `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` -hemmelighederne; uden dem forbliver jobbet grønt med en "Docker Hub org-spejl sprunget over" advarsel, og de andre registre udgiver normalt. Kør for at udgive en udgivet version der senere** Handlinger → Spejl Docker billedet til Docker Hub org → Kør workflow** med `version=X.Y.Z` (og `promote_latest` for den højeste stabile version): den kopierer de eksisterende billeder, ingen genopbygning.
 
 ## Hurtig hotfix-bane (label `hotfix`)
 
@@ -111,209 +86,205 @@ E2E-matrixen over uden nogen label.
 
 ## Detaljeret tjekliste
 
-### Før udgivelse
+### Pre-release
 
-- [ ] Alle PR'er, der er målrettet denne udgivelse, er flettet ind i `release/vX.Y.0`
-- [ ] Alle åbne Linear-/issue-elementer for denne version er lukket eller flyttet til næste milepæl
-- [ ] CI er grøn på grenen `release/vX.Y.0`
-- [ ] Ingen `TODO(release)`-markører i koden: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker-basisimaget er opdateret (aktuelt `node:24.15.0-trixie-slim`)
+- [ ] Alle PRs der er målrettet mod denne udgivelse, fusioneres til `release/vX.Y.0`
+- [ ] Alle åbne Linear/issue elementer for denne version lukkes eller skubbes til næste milepæl
+- [ ] CI grøn på `release/vX.Y.0` gren
+- [ ] Ingen `TODO(release)` -markører i kode: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Docker basebillede opdateret (i øjeblikket `node:24.15.0-trixie-slim`)
 
-### Version og ændringslog
+### Version & Changelog
 
-- [ ] Kør `/version-bump-cc <patch|minor|major>` (Claude Code-færdighed)
-  - Opdaterer versionen i `package.json`, `electron/package.json`
-  - Gendanner `CHANGELOG.md` ud fra Git-commits siden seneste tag
-  - Opdaterer badges i README.md
-- [ ] Gennemgå CHANGELOG.md manuelt, og ryd op i commit-beskeder efter behov
-- [ ] Sørg for, at den seneste semver-sektion i `CHANGELOG.md` svarer til versionen i `package.json`
-- [ ] Behold `## [Unreleased]` som den første sektion i ændringsloggen til kommende arbejde
-- [ ] Opdater `docs/openapi.yaml` → `info.version` skal svare til versionen i `package.json`
+- [ ] Kør `/version-bump-cc <patch|minor|major>` (Claude kode færdighed)
+  - Bump `package.json`, `electron/package.json`
+  - Regenererer `CHANGELOG.md` fra git commits siden sidste tag
+  - Opdaterer README.md badges
+- [ ] Gennemgå CHANGELOG.md manuelt, og ryd op i commit-beskeder, hvis det er nødvendigt
+- [ ] Sørg for, at den seneste semver-sektion i `CHANGELOG.md` er lig med `package.json` versionen
+- [ ] Behold `## [Unreleased]` som den første changelog-sektion for kommende arbejde
+- [ ] Opdater `docs/openapi.yaml` → `info.version` skal svare til `package.json` versionen
 
 ### Kodekvalitet
 
-- [ ] `npm run lint` — 0 fejl (advarslerne fandtes i forvejen)
-- [ ] `npm run typecheck:core` — fejlfri
-- [ ] `npm run typecheck:noimplicit:core` — fejlfri (streng)
-- [ ] `npm run check:cycles:ratchet` — inden for det fastlåste `metrics.cycles`-loft (den rene `check:cycles` afslutter med 1 ved enhver cyklus, #15281)
+- [ ] `npm run lint` — 0 fejl (advarsler er allerede eksisterende)
+- [ ] `npm run typecheck:core` — ren
+- [ ] `npm run typecheck:noimplicit:core` — ren (streng)
+- [ ] `npm run check:cycles:ratchet` — inden for det frosne `metrics.cycles` loft (bare `check:cycles` afslutter 1 på enhver cyklus, #15281)
 - [ ] `npm run check:any-budget:t11` — inden for budgettet
-- [ ] `npm run check:route-validation:t06` — fejlfri
-- [ ] `npm run check:node-runtime` — minimumskravet til understøttet runtime er opfyldt (`>=22.22.2 <23`, `>=24.0.0 <27`, jf. `SUPPORTED_NODE_RANGE` i `src/shared/utils/nodeRuntimeSupport.ts`; afstemt med `engines` i `package.json`)
+- [ ] `npm run check:route-validation:t06` — ren
+- [ ] `npm run check:node-runtime` — understøttet runtime floor met (`>=22.22.2 <23`, `>=24.0.0 <27`, pr. `SUPPORTED_NODE_RANGE` i `src/shared/utils/nodeRuntimeSupport.ts`; justeret med `package.json` `engines`)
 
-### Test
+### Afprøvning
 
-- [ ] `npm run test:unit` — bestået
-- [ ] `npm run test:vitest` — bestået (MCP-server, autoCombo, cache)
-- [ ] `npm run test:coverage` — kravet på 60/60/60/60 er opfyldt (instruktioner/linjer/funktioner/grene)
-- [ ] `npm run test:integration` — bestået (hvis ændringer berører DB/håndteringsfunktioner)
-- [ ] `npm run test:combo:matrix` — bestået (matrix for combo-strategier: dokumenterer deterministisk udvælgelsesbeslutningerne for alle 19 offentlige routingstrategier; kør ved ændringer af combo-routing, strategiopløsning eller fallback-logik)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **valgfri/manuel** (adgangsstyret smoke-test mod reelle upstream-tjenester; henter et skrivebeskyttet DB-snapshot fra VPS'en `root@192.168.0.15`; rammer reelle udbydere og koster kreditter; kører aldrig i CI; springes problemfrit over uden adgangsparameteren)
-- [ ] `npm run test:combo:live:vps` — **valgfri/manuel** (fase 3-VPS-smoke-test i produktion: 7 HTTP-scenarier mod den aktive `.15`-server via ren Node ESM; kræver `ssh root@192.168.0.15`; opretter/sletter kun `__live_test__*`-comboer; rammer reelle udbydere; kører aldrig i CI)
-- [ ] `npm run test:e2e` — bestået (UI-ændringer)
-- [ ] `npm run test:protocols:e2e` — bestået (MCP-/A2A-ændringer)
-- [ ] `npm run test:ecosystem` — bestået
+- [ ] `npm run test:unit` — pass
+- [ ] `npm run test:vitest` — pass (MCP server, autoCombo, cache)
+- [ ] `npm run test:coverage` — gate 60/60/60/60 tilfreds (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — pass (hvis ændringer berør DB / handlere)
+- [ ] `npm run test:combo:matrix` — pass (kombinationsstrategimatrix: beviser alle 22 offentlige routingstrategiers valgbeslutninger deterministisk; køres ved berøring af combo routing, strategiopløsning eller fallback-logik)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (gated real upstream-røg; henter et skrivebeskyttet DB øjebliksbillede fra VPS `root@192.168.0.15`; rammer rigtige udbydere, koster kreditter; kører aldrig i CI; springer rent uden porten)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS live smoke: 7 HTTP scenarier mod live `.15` serveren via almindelig node ESM; kræver `ssh root@192.168.0.15`; creates/deletes kun `__live_test__*` kombinationer; rammer rigtige udbydere; kører aldrig i CI)
+- [ ] `npm run test:e2e` — pass (UI ændringer)
+- [ ] `npm run test:protocols:e2e` — pass (MCP/A2A ændringer)
+- [ ] `npm run test:ecosystem` — pass
 
-### Hooks (valideret af Husky)
+### Kroge (Husky-valideret)
 
-Husky-hooks ligger i `.husky/` og kører automatisk ved Git-handlinger.
+Husky hooks bor i `.husky/` og kører automatisk på git-operationer.
 
 - **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** hurtige, deterministiske kontroller — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktiveret 2026-06-13). Udelader bevidst `test:unit` (langsom; dækket af CI-jobbet `test-unit`).
-  - Kør `npm run test:unit` manuelt, før udgivelsesgrene pushes.
+- **pre-push:** hurtige deterministiske porte — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktiveret 2026-06-13). Udelukker med vilje `test:unit` (langsom; dækket af CI `test-unit` jobbet).
+  - Kør `npm run test:unit` manuelt, før du skubber udløsergrene.
 
-Hvis en hook fejler: Ret det underliggende problem; omgå den ikke med `--no-verify`.
+Hvis en hook fejler: Løs det underliggende problem, undlad at omgå med `--no-verify`.
 
-### Konventionelle commits
+### Konventionelle forpligtelser
 
-Alle commits, der skal med i udgivelsen, skal følge formatet `type(scope): subject`.
+Alle udgivelsesbundne commits skal følge `type(scope): subject` formatet.
 
 **Gyldige typer:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**Gyldige scopes:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**Gyldige omfang:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
-Inkompatible ændringer: Tilføj sidefoden `BREAKING CHANGE:` eller `!` efter scopet (f.eks. `feat(api)!: drop /v0`).
+Bryd ændringer: Tilføj `BREAKING CHANGE:` footer eller `!` efter omfanget (f.eks. `feat(api)!: drop /v0`).
 
 ### Dokumentation
 
-- [ ] `npm run check:docs-sync` består (køres automatisk af pre-commit)
-- [ ] `npm run check:docs-all` består (samlet kontrol: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` afslutter med 0 — kontrakten for miljøvariabler mellem kode ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` er intakt
-- [ ] `npm run check:doc-links` afslutter med 0 — ingen ugyldige interne Markdown-referencer efter omstrukturering
-- [ ] `docs/architecture/ARCHITECTURE.md` er gennemgået for afvigelser i lager/runtime
-- [ ] `docs/guides/TROUBLESHOOTING.md` er gennemgået for afvigelser i miljøvariabler og drift
-- [ ] Hvis `.env.example` er ændret: `docs/reference/ENVIRONMENT.md` er opdateret
-- [ ] Hvis en ny funktion har en UI: `docs/guides/USER_GUIDE.md` omtaler den
-- [ ] Hvis en ny funktion har et API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` er opdateret
-- [ ] Hvis en ny funktion er et modul: Der findes en dedikeret `docs/<MODULE>.md`
-- [ ] Hvis der er en inkompatibel ændring: `docs/guides/TROUBLESHOOTING.md` indeholder en migreringsbemærkning
+- [ ] `npm run check:docs-sync` -pas (automatisk kørsel ved pre-commit)
+- [ ] `npm run check:docs-all` pas (paraply: docs-sync + docs-counts + env-doc-sync + forældede-versioner + doc-links)
+- [ ] `npm run check:env-doc-sync` exits 0 — kode ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env kontrakt er intakt
+- [ ] `npm run check:doc-links` exits 0 — ingen brudte interne markdown-referencer efter omstrukturering
+- [ ] `docs/architecture/ARCHITECTURE.md` anmeldt for storage/runtime drift
+- [ ] `docs/guides/TROUBLESHOOTING.md` gennemgået for env var og operationel drift
+- [ ] Hvis `.env.example` ændres: `docs/reference/ENVIRONMENT.md` opdateret
+- [ ] Hvis en ny funktion har en UI: `docs/guides/USER_GUIDE.md` nævner den
+- [ ] Hvis ny funktion har API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` opdateret
+- [ ] Hvis ny funktion er et modul: dedikeret `docs/<MODULE>.md` findes
+- [ ] Hvis bryde ændring: `docs/guides/TROUBLESHOOTING.md` har migration note
 
 ### i18n
 
-- [ ] `npm run i18n:check` afslutter med 0 — oversættelsestilstanden (`.i18n-state.json`) er synkroniseret med kildedokumenterne (ingen afvigende kilder i streng tilstand; en vejledende advarselstilstand er acceptabel ved dokumentrettelser i sidste øjeblik, men resultatet bør være 0 før tagging)
-- [ ] `npm run i18n:check-ui-coverage` afslutter med 0 — hver UI-lokalitet opfylder eller overstiger minimumskravet på 80 % dækning
-- [ ] `npm run i18n:sync-ui:dry` rapporterer 0 manglende nøgler på tværs af alle 66 mållokaliteter (alle lokaliteter undtagen kilden `en`)
-- [ ] Hvis de engelske kildedokumenter er ændret, skal `npm run i18n:run` køres (kræver `OMNIROUTE_TRANSLATION_API_KEY` i `.env`) før tagging
-- [ ] Oversættelsesbidrag kan udskydes til næste udgivelse, hvis de er mindre væsentlige (registrér det i CHANGELOG)
+- [ ] `npm run i18n:check` afslutter 0 — -oversættelsestilstand (`.i18n-state.json`) synkroniseret med kildedokumenter (ingen afdriftede kilder i streng tilstand; advarselstilstand er acceptabel for dok-touch-ups i sidste øjeblik, men bør være 0 før tagging)
+- [ ] `npm run i18n:check-ui-coverage` afslutter 0 — hver UI lokalitet ved eller over 80 % dækningsgulvet
+- [ ] `npm run i18n:sync-ui:dry` rapporterer 0 manglende nøgler på tværs af alle 66 mållokaliteter (hver lokalitet undtagen `en` kilden)
+- [ ] Hvis engelske kildedokumenter er ændret, skal du køre `npm run i18n:run` (kræver `OMNIROUTE_TRANSLATION_API_KEY` i `.env`) før tagging
+- [ ] Oversættelsesbidrag kan udskydes til næste udgivelse, hvis de er mindre (spor i CHANGELOG)
 
-### Databasemigreringer
+### Database migrationer
 
 - [ ] Hvis `src/lib/db/migrations/` har nye filer:
-  - [ ] Hver migrering er idempotent (`CREATE TABLE IF NOT EXISTS` osv.)
-  - [ ] Migreringer er pakket ind i transaktioner
-  - [ ] Korrekt nummereret (ingen huller i rækkefølgen)
-- [ ] Test på en ny installation: Slet `~/.omniroute/omniroute.db`, og kør `npm run dev`
-- [ ] Test på en eksisterende installation: Sikkerhedskopiér DB'en, kør migreringen, og verificér skemaet
-- [ ] WAL-filer (`-wal`, `-shm`) håndteres korrekt, hvis migreringen omskriver tabeller
+  - [ ] Hver migration er idempotent (`CREATE TABLE IF NOT EXISTS` osv.)
+  - [ ] Migrationer pakket ind i transaktioner
+  - [ ] Nummereret korrekt (ingen mellemrum i rækkefølge)
+- [ ] Test på ny installation: slet `~/.omniroute/omniroute.db` og kør `npm run dev`
+- [ ] Test på eksisterende installation: backup DB, kør migrering, bekræft skema
+- [ ] WAL filer (`-wal`, `-shm`) håndteres korrekt, hvis migration omskriver tabeller
 
 ### Udbyderkatalog (Zod-valideret)
 
-- [ ] `src/shared/constants/providers.ts`-Zod-skemaet er gyldigt ved indlæsning
+- [ ] `src/shared/constants/providers.ts` Zod skema gyldigt på indlæsningstidspunktet
   - [ ] Alle udbydere har obligatoriske felter (`id`, `label`, `kind` osv.)
-  - [ ] `freeNote` er angivet for nye gratis udbydere
-  - [ ] OAuth-udbydere har `oauthConfig` registreret i `src/lib/oauth/constants/oauth.ts`
-- [ ] Hvis en ny udbyder tilføjes: tilsvarende executor i `open-sse/executors/`
-- [ ] Hvis formatet ikke er OpenAI: translator i `open-sse/translator/`
-- [ ] Modeller er registreret i `open-sse/config/providerRegistry.ts`
-- [ ] Enhedstests i `tests/unit/` dækker klassificering og routing af udbydere
+  - [ ] `freeNote` sørgede for nye gratis udbydere
+  - [ ] OAuth -udbydere har `oauthConfig` registreret i `src/lib/oauth/constants/oauth.ts`
+- [ ] Hvis ny udbyder tilføjet: tilsvarende executor i `open-sse/executors/`
+- [ ] Hvis ikke-OpenAI-format: oversætter i `open-sse/translator/`
+- [ ] Modeller registreret i `open-sse/config/providerRegistry.ts`
+- [ ] Enhedstest i `tests/unit/` cover udbyder klassificering og routing
 
 ### Desktop (Electron)
 
-Hvis `electron/` er ændret:
+Hvis `electron/` ændres:
 
-- [ ] `npm run electron:smoke:packaged` består
-- [ ] Builds er testet for mindst én af `:win`, `:mac`, `:linux`
-- [ ] Certifikater til kodesignering er ikke udløbet (hvis der signeres)
-- [ ] Versionen i `electron/package.json` matcher rodprojektets `package.json`
-- [ ] Markøren for den automatiske opdateringskanal er opdateret, hvis der udgives til `stable`
+- [ ] `npm run electron:smoke:packaged` passerer
+- [ ] Bygninger testet for mindst én af `:win`, `:mac`, `:linux`
+- [ ] Kodesigneringscertifikater er ikke udløbet (hvis signering)
+- [ ] `electron/package.json` versionen matcher root `package.json`
+- [ ] Automatisk opdatering af kanalmarkøren opdateres, hvis den frigives til `stable`
 
-### Buildstruktur
+### Byg layout
 
-Repositoryet bruger tre separate outputmapper — bland dem aldrig sammen:
+Depotet bruger tre distinkte output-mapper — blander dem aldrig:
 
-| Mappe     | Formål                                                        | Versionsstyret?  |
-| --------- | ------------------------------------------------------------- | ---------------- |
-| `src/`    | Applikationens kildekode (TypeScript / TSX)                   | Ja               |
-| `.build/` | Midlertidige buildfiler — output fra `next build` (`distDir`) | Nej (gitignored) |
-| `dist/`   | Distribuerbar npm-pakke — samlet af `assembleStandalone`      | Nej (gitignored) |
+| Vejviser  | Formål                                                | Sporet?          |
+| --------- | ----------------------------------------------------- | ---------------- |
+| `src/`    | Applikationskilde (TypeScript / TSX)                  | Ja               |
+| `.build/` | Byg mellemprodukter — `next build` output (`distDir`) | Nej (gitignored) |
+| `dist/`   | Sendbar npm bundle — samlet af `assembleStandalone`   | Nej (gitignored) |
 
-> **Bemærkning til operatøren:** Mappen i det eksterne VPS-image forbliver `/usr/lib/node_modules/omniroute/app/`.
-> Kun buildoutputtet **i repositoryet** er flyttet (`app/` → `dist/`). Deploy-funktionerne bruger rsync til at overføre
-> indholdet af `dist/` til den eksterne `app/`-mappe — ingen ændringer af VPS-stier er nødvendige.
+> **Operatør note:** den eksterne VPS billedmappe forbliver `/usr/lib/node_modules/omniroute/app/`. Kun den** in-repo** build-output flyttet (`app/` → `dist/`). Deploy skills rsync `dist/` indhold i den eksterne `app/` dir — ingen VPS -stiændringer påkrævet.
 
-**Flow med ét build:**
+**Single-build flow:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (oprydning)
-  └─ next build → .build/next/   (midlertidige filer)
-  └─ assembleStandalone          (kopierer standalone + static + public + natives → dist/)
-  └─ skriver dist/BUILD_SHA      (HEAD-markør)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-Kør IKKE `npm run build` efterfulgt af et separat `npm run build:cli` ved deployment — brug
-`npm run build:release`, som udfører et rent rebuild og opretter markøren med én kommando.
+Kør NOT `npm run build` efterfulgt af en separat `npm run build:cli` for at implementere — brug `npm run build:release`, som udfører en ren genopbygning + sentinel i én kommando.
 
-### Validering af artefakter
+### Artefaktvalidering
 
-- [ ] `npm run build:release` lykkes, og `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` er ren — ingen `app.__qa_backup`, `scripts/scratch`, `package-lock.json` eller andre lokale rester
-- [ ] `dist/server.js` findes efter buildet
-- [ ] Valgfri lokal smoke-test af den pakkede runtime: `npm run dev:candidate -- validate` efter `npm run dev:candidate -- build` starter den pakkede tarball med en isoleret `DATA_DIR` og kontrollerer `/api/health` + `/v1/models` (se [Contribution Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] `npm run build:release` lykkes og `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact` clean — no `app.__qa_backup`, `scripts/scratch`, `package-lock.json` eller andre lokale rester
+- [ ] `dist/server.js` eksisterer efter build
+- [ ] Valgfri lokal packed-runtime smoke: `npm run dev:candidate -- validate` efter `npm run dev:candidate -- build` starter den pakkede tarball på en isoleret `DATA_DIR` og tjekker `/api/health` + `/v1/models` (se [Bidrag Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
-### Tagging og udgivelse
+### Tagging og frigivelse
 
-- [ ] Kør `/generate-release-cc` (Claude Code-funktion):
-  - Opretter tagget `vX.Y.Z`
-  - Pusher tag og branch
-  - Opretter en GitHub Release med changelog som brødtekst
-  - Vedhæfter Electron-installationsprogrammer (hvis de er bygget)
-- [ ] Eller gør det manuelt:
+- [ ] Kør `/generate-release-cc` (Claude kode færdighed):
+  - Opretter tag `vX.Y.Z`
+  - Skubber tag og gren
+  - Åbner GitHub Release med ændringslog-body
+  - Vedhæfter Electron installatører (hvis bygget)
+- [ ] Eller manuelt:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Deployment
+### Indsætte
 
-Deploy-funktionerne bruger det lette rsync-flow — ingen `npm pack`, ingen `npm i -g`:
+Implementer færdigheder brug det lette rsync flow — no `npm pack`, no `npm i -g`:
 
-- [ ] Brug den deploy-funktion, der matcher destinationen:
+- [ ] Brug implementeringsevner, der matcher målet:
   - `/deploy-vps-local-cc` — lokal VPS (192.168.0.15)
-  - `/deploy-vps-akamai-cc` — Akamai-VPS (69.164.221.35)
+  - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — begge
-- [ ] Før deployment skal du bekræfte, at `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] Buildet skal køres et sted, hvor `node_modules` er fysisk til stede (primær checkout eller worktree med kørt `npm ci` — IKKE en worktree med symlink)
-- [ ] Udfør en smoke-test af den deployede instans:
-  - Åbn `/dashboard/health` → kontrollér, at versionsstrengen matcher udgivelsen
-  - Kør en `/v1/chat/completions`-anmodning mod en kendt udbyder
-  - Bekræft, at `/api/monitoring/health` returnerer circuit breakers med tilstanden `CLOSED`
-  - Bekræft, at MCP-transporter svarer (`/mcp` HTTP, `/mcp-sse` SSE)
+- [ ] Inden du installerer, skal du bekræfte `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] Build skal køre, hvor `node_modules` er ægte (hovedudtjekning eller `npm ci`'d worktree — NOT et symlinked worktree)
+- [ ] Røgtest implementeret instans:
+  - Åbn `/dashboard/health` → check version string matches release
+  - Kør en `/v1/chat/completions` -anmodning mod en kendt udbyder
+  - Bekræft, `/api/monitoring/health` returnerer `CLOSED` -afbrydere
+  - Bekræft, MCP -transporterne svarer (`/mcp` HTTP, `/mcp-sse` SSE)
 
 ### Efter udgivelsen
 
-- [ ] Kør `/capture-release-evidences-cc` (Claude Code-funktion)
-  - Optager WebP-skærmbilleder/-optagelser af nye funktioner
-  - Vedhæfter dem til udgivelsesnoter/blogindlæg
-- [ ] Opdater GitHub Discussions/Discord med en udgivelsesmeddelelse
-- [ ] Opret en milestone for den næste version
-- [ ] Hvis det er kritisk: fastgør diskussionen, eller opret et indlæg i `news.json` til banneret i appen
+- [ ] Kør `/capture-release-evidences-cc` (Claude kode færdighed)
+  - Indfanger WebP screenshots/recordings af nye funktioner
+  - Vedhæfter til release notes / blogindlæg
+- [ ] Opdater GitHub diskussioner / Discord med udgivelsesmeddelelse
+- [ ] Åben milepæl for næste version
+- [ ] Hvis det er kritisk: fastgør diskussion eller post i `news.json` til banner i appen
 
-### Gate for offentlig lancering af Radar
+### Radar offentlig affyringsport
 
-Radar-meddelelsen er bevidst committet med `active: false`. Aktivering er en separat
-ændring, efter at der foreligger dokumentation for hvert punkt nedenfor:
+Radar-meddelelsen er bevidst begået med `active: false`. Aktivering er en separat ændring, efter hvert punkt nedenfor er dokumenteret:
 
-- [ ] Alle stablede Radar-PR'er er merget, og CI for release-tip er grøn
-- [ ] Deploy og smoke-test OSS Radar-ruterne med `RADAR_ENABLED` fortsat slået fra som standard
-- [ ] Smoke-test `GET /planos`, `/termos`, `/privacidade` og `/reembolso` på den angivne Radar-host
-- [ ] Registrer operatørens identitet/kontaktoplysninger/adresse og en juridisk gennemgang godkendt af ejeren i den private tjeneste
-- [ ] Afprøv Stripe Checkout og den signerede webhook udelukkende i testtilstand
-- [ ] Afprøv én krypteret levering af transaktionsmail med den godkendte afsender/det godkendte domæne
-- [ ] Dokumentér gendannelse fra backup og én overvåget forskningskørsel med et begrænset budget
-- [ ] Godkend gennemgangspolitikken for BRL/PIX, før dokumentation for donationer accepteres
-- [ ] Aktivér først offentlig Checkout, når de foregående gates er bestået, og aktivér derefter det nye `news.json`-ID
-- [ ] Bekræft, at Home-banneret bruger lokaliseret tekst, og at et nyt ID vises igen, efter at et ældre ID er blevet afvist
+- [ ] Alle stablede Radar PRs er slået sammen, og release-tip CI er grøn
+- [ ] Implementer og ryg OSS Radar-ruterne med `RADAR_ENABLED` stadig slukket som standard
+- [ ] Ryg `GET /planos`, `/termos`, `/privacidade` og `/reembolso` på den navngivne radarvært
+- [ ] Pladeoperatør identity/contact/address og ejergodkendt juridisk gennemgang i den private tjeneste
+- [ ] Træn Stripe Checkout og den signerede webhook kun i testtilstand
+- [ ] Træn en krypteret transaktions-e-mail-levering med den godkendte sender/domain
+- [ ] Bevis sikkerhedskopieringsgendannelse og én overvåget, budgetbegrænset undersøgelseskørsel
+- [ ] Godkend BRL/PIX -gennemgangspolitikken, før du accepterer donationsbeviser
+- [ ] Aktiver kun offentlig udtjekning efter de foregående porte, og aktiver derefter den nye `news.json` ID
+- [ ] Bekræft, at hjemmebanneret bruger lokaliseret kopi, og at en ny ID dukker op igen, efter at en ældre ID er afvist
 
 ## Smoke-test af indlejrede tjenester (v3.8.4+)
 
@@ -384,111 +355,70 @@ Før en v3.8.x-udgivelse frigives, skal disse yderligere punkter verificeres:
 
 ---
 
-## 3.9.0 LTS-udskæring (afprøvet i 3.8.58)
+## 3.9.0 LTS cut (øvet i 3.8.58)
 
-Efter v3.8.59 er den næste version 3.9.0, og dens spids bliver til to langlivede branches:
-`stable/v3` (v3 LTS-linjen, npm `latest`) og `develop` (v4, opgraderet til 4.0.0, npm
-`nightly`). Branch-/kanalmodellen, forward-port og labels findes i
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); planen findes i [ROADMAP](../../ROADMAP.md) (fase 3). Udskæringen køres én gang;
-3.8.58 afprøver den fra ende til anden på en fork, og 3.8.59 afsluttes med
-[GO/NO-GO-tjeklisten](./LTS_GO_NO_GO.md).
+Efter v3.8.59 er den næste version 3.9.0, og dens spids bliver to langlivede grene: `stable/v3` (v3 LTS linjen, npm `latest`) og `develop` (v4, stødt til 4.0.0, npm `nightly`). branch/channel modellen, forward-porten og etiketterne er i [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; planen er i [ROADMAP](../../ROADMAP.md) (fase 3). Snittet løber en gang; 3.8.58 øver det ende mod ende på en gaffel, og 3.8.59 lukker med [GO/NO-GO tjeklisten](./LTS_GO_NO_GO.md).
 
-### Prøvekørsel (skrivebeskyttet, sikker når som helst)
+### Tørløb (skrivebeskyttet, sikkert til enhver tid)
 
 ```bash
-npm run release:dry-run-lts-cut                       # den rigtige udskæring: 3.9.0 fra HEAD, forrige tag v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # fastlås kildecommit
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` udfører intet: det læser git og `gh` og udskriver hele
-sekvensen — forudsætninger (kilden kan opløses, kilderepositoriet har fuld historik —
-en shallow clone kan ikke pushe `stable/v3`, den modtagende side afviser pakken ved den første
-grafted parent, så foretag udskæringen fra en fuld klon, eller kør først `git fetch --unshallow origin` — det forrige
-tag findes, `package.json` har målversionen, en `release-freeze`-issue er åben, der er ingen åben
-`Release branch not green`-issue
-på en eksisterende release-branch — en branch, der ikke findes, rapporterer `?` ukendt, aldrig
-grøn — Mergifys `release`-kø er konfigureret (G11: `queue_rules`, `checks_timeout`,
-label `queue`), `release/*`-regelsættet blokerer stadig sletning og force-push, og
-`stable/v3` og `develop` findes endnu ikke), de to branch-trin, hvilke udløsere for inaktive workflows
-og `if:`-betingelser der bliver sande (og hvilke der fortsat er blokeret af en repositorievariabel eller
-fastlåst til det kanoniske repositorium), de forventede dist-tags (`latest` → 3.9.0, `next` og
-`nightly` tomme) samt tilbagerulningen. Afslutningskode `0` = `RESULT: READY`, `1` = en blokerende forudsætning
-mislykkedes (`✗`), `2` = brugsfejl. `--advisory <id,...>` nedgraderer et tjek til en advarsel (`!`)
-uden at skjule det.
+`scripts/release/dry-run-lts-cut.mjs` executes nothing: it reads git and `gh` and prints the whole sequence — preconditions (source resolves, the source repository has full history — a shallow clone cannot push `stable/v3`, the receiving side rejects the pack at the first grafted parent, so cut from a full clone or `git fetch --unshallow origin` first — previous tag exists, `package.json` is the target version, a `release-freeze` issue is open, no open `Release branch not green` issue on an existing release branch — a branch that does not exist reports `?` unknown, never green — omni-queue lands the release PRs (G11: `config/merge-queue/config.json` valid, its `bases` manage the release branch, `mode` `live`, its label exists), the `release/*` ruleset still blocks deletion and force-push, and `stable/v3` and `develop` do not exist yet), the two branch steps, which dormant-workflow triggers and `if:` conditions turn true (and which stay gated by a repository variable or pinned to the canonical repository), the expected dist-tags (`latest` → 3.9.0, `next` and `nightly` empty) and the rollback. Exit `0` = `RESULT: READY`, `1` = a blocking precondition failed (`✗`), `2` = usage error. `--advisory <id,...>` downgrades a check to a warning (`!`) without hiding it.
 
-Kør prøvekørslen for den rigtige udskæring, mens release freeze for 3.9.0 stadig er aktiv — branchene
-oprettes efter tagget og før fase 12c ophæver fastfrysningen.
+Kør det rigtige snits tørløb, mens 3.9.0-frigivelsesfrysningen stadig er åben — grenene oprettes efter mærket og før fase 12c løfter frysepunktet.
 
-### 3.8.58-afprøvning (kun fork)
+### 3.8.58 øve (kun gaffel)
 
 ```bash
-# 1. Prøvekørsel på den aktuelle spids med afprøvningsparametre
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Udfør mod en FORK-remote (origin eller enhver remote, hvis URL er det kanoniske
-#    repositorium, afvises; hvert trin beder om bekræftelse i terminalen)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Afprøv de inaktive workflows i forken (workflow_dispatch, hvor prøvekørslen
-#    rapporterer en fastlåsning til det kanoniske repositorium), og rul derefter tilbage
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Develop-opgraderingscommittet bygges med Git-plumbing (intet working tree berøres) og opgraderer
-de samme fem filer som et commit, der åbner en cyklus: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` og `docs/openapi.yaml`. `[4.0.0]`-
-sektionen i CHANGELOG og dens i18n-spejlinger åbnes efterfølgende på `develop`, før dens første
-PR. Scriptet ændrer aldrig npm-dist-tags — afprøv dem på en midlertidig pakke.
+Development bump commit er bygget med git plumbing (intet arbejdstræ berøres) og bumper de samme fem filer som en cycle-open commit: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` og `docs/openapi.yaml`. `[4.0.0]` CHANGELOG sektionen og dens i18n-spejle åbnes på `develop` bagefter, før dens første PR. Scriptet ændrer aldrig npm dist-tags — øver dem på en scratch-pakke.
 
-### PR-preview-artifakt (byg én gang, promover de samme bytes)
+### PR preview artefakt (byg én gang, promover de samme bytes)
 
-`.github/workflows/preview-artifact.yml` bygger én produktionstarball fra et PR-head og
-validerer præcis dette build (#8084 del (a)). Kun PR'er fra samme repositorium; intet publiceres.
+`.github/workflows/preview-artifact.yml` bygger en produktions-tarball fra et PR -hoved og validerer den nøjagtige build (#8084 slice (a)). Kun samme lager PRs ; intet er offentliggjort.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # eller tilføj labelen `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # preview-installation
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Kørslen udfører `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pakker
-tarballen, kører `npm run check:pack-boot` (falske secrets, midlertidig datamappe), pakker igen og
-mislykkes, medmindre digest-værdien er identisk, hvorefter den registrerer `artifact-identity.json` (head-SHA, base-
-SHA, lockfile-hash, platform, arkitektur, Node ABI, bundler, build-politik —
-`scripts/release/artifact-identity.mjs`) og attesterer tarballen i et separat job. Promovering
-af en preview betyder installation af denne tarball: genbyg aldrig fra kildekoden.
+Kørslen udfører `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pakker tarballen, kører `npm run check:pack-boot` (falske hemmeligheder, flygtige data dir), pakker om og mislykkes, medmindre digest er identisk, og optager derefter `artifact-identity.json` (head SHA, base SHA, lockfile hash, platform, arch, node ABI `scripts/release/artifact-identity.mjs` — et separat job. At promovere en forhåndsvisning betyder at installere denne tarball: genopbygg aldrig fra kilden.
 
-### Udskæringen (3.9.0, efter GO)
+### Snittet (3.9.0, efter GO)
 
-1. GO registreret i [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+1. GO optaget i [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` udskriver `RESULT: READY`.
-3. Opret branchene på `origin` manuelt med de kommandoer, som prøvekørslen udskriver —
-   scriptet nægter at pushe til `origin`. For at genbruge et gennemgået develop-commit skal du først køre
-   `--execute`-afprøvningen på 3.9.0-spidsen mod din fork; den udskriver begge SHA'er, og
-   de samme commits kan pushes:
+3. Opret grenene på `origin` i hånden med kommandoerne dry-run prints — scriptet nægter at skubbe til `origin`. For at genbruge en gennemgået udviklingsindsats skal du først køre `--execute` øvelsen på 3.9.0-spidsen mod din gaffel; den udskriver både SHAs, og de samme commits kan skubbes:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Beskyt `stable/v3` og `develop` (regelsæt + fletningskø), før den første PR lander.
-5. De inaktive workflows aktiveres, når branchene findes: `forward-port.yml` (push til
-   `stable/v3`), `validate-stable-pr.yml` (PR'er til `stable/v3`) og `nightly-v4-build.yml`
-   (bygger `develop`). Før idriftsættelse skal repository-hemmeligheden `secrets.FORWARD_PORT_TOKEN` angives (så CI kører på
-   forward-port-PR'er); natlig publicering forbliver deaktiveret, indtil ejeren angiver repository-variablen
-   `vars.NIGHTLY_PUBLISH` til `true`, og npm Trusted Publishing accepterer
-   `nightly-v4-build.yml`. Kanalbestemmelsen foretages af `scripts/release/dist-tag.mjs`, den samme
-   resolver, som `npm-publish.yml` bruger.
-6. Verificer kanalerne: `npm view omniroute dist-tags --json` viser `latest` = 3.9.0 og ingen
-   `next` / `nightly`, før v4 publiceres.
-7. Tilbagerulning om nødvendigt: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   og `npm dist-tag add omniroute@3.8.59 latest`.
+4. Beskyt `stable/v3` og `develop` (regelsæt + merge queue) før den første PR lander.
+5. De sovende arbejdsgange tænder efter filialeksistens: `forward-port.yml` (push til `stable/v3`), `validate-stable-pr.yml` (PRs til `stable/v3`) og `nightly-v4-build.yml` (bygger `develop`). Inden start, skal du indstille `secrets.FORWARD_PORT_TOKEN` lagerhemmeligheden (så CI kører på forward-port PRs); natlig udgivelse forbliver slukket, indtil ejeren indstiller lagervariablen `vars.NIGHTLY_PUBLISH` til `true`, og npm Trusted Publishing accepterer `nightly-v4-build.yml`. Kanalopløsningen er `scripts/release/dist-tag.mjs`, den samme resolver `npm-publish.yml` bruger.
+6. Bekræft kanalerne: `npm view omniroute dist-tags --json` viser `latest` = 3.9.0 og ingen `next` / `nightly` indtil v4 udgives.
+7. Tilbageføring, hvis nødvendigt: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` og `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

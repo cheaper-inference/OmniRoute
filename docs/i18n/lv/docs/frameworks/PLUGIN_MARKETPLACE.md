@@ -26,31 +26,26 @@ procesos, tāpēc maršruti nav sasniedzami no avota, kas nav atgriezeniskās ci
 avots, neatkarīgi no autentifikācijas. Skatiet
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## Kā viss darbojas kopā
+## Kā tas der Together
 
 ```
-Informācijas panelis (/dashboard/plugins)
-  ├─ Cilne "Instalētie" → GET /api/plugins            (listPlugins)
-  │                       POST /api/plugins/scan      (pluginManager.scan)
-  │                       POST /api/plugins/{name}/activate|deactivate
-  │                       DELETE /api/plugins/{name}   (atinstalēšana)
-  └─ Cilne "Tirgus"      → GET /api/plugins/marketplace
-                            → listMarketplacePlugins()
-                              ├─ nav pielāgota URL → iebūvētais SEED_REGISTRY
-                              └─ pielāgots URL → isSafeMarketplaceUrl() SSRF aizsardzība
-                                               → safeOutboundFetch(guard:"public-only")
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Reģistra slānis** — `src/lib/plugins/marketplace.ts`: uzskaita / meklē
-  katalogā un jebkuras kļūmes gadījumā izmanto sākotnējo reģistru.
-- **Dzīves cikla slānis** — `src/lib/plugins/manager.ts` (`pluginManager` vienīgais eksemplārs):
-  instalēšana, jaunināšana, aktivizēšana, deaktivizēšana, atinstalēšana, skenēšana, ielāde palaišanas laikā.
-- **Manifesta slānis** — `src/lib/plugins/manifest.ts`: Zod shēma un noklusējuma
-  vērtības failam `plugin.json`.
-- **Skeneris** — `src/lib/plugins/scanner.ts`: atrod diskā esošos spraudņus
-  spraudņu direktorijā.
-- **Ielādētājs** — `src/lib/plugins/loader.ts`: palaiž katru spraudni izolētā
-  pakārtotajā procesā un koordinē āķu izsaukumus, izmantojot IPC.
+- **Reģistra slānis** — `src/lib/plugins/marketplace.ts`: uzskaita/meklē katalogu, atgriežoties sēklu reģistrā, ja rodas kāda kļūme.
+- **Dzīves cikla slānis** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): instalēšana, jaunināšana, aktivizēšana, deaktivizēšana, atinstalēšana, skenēšana, startēšanas ielāde.
+- **Manifests slānis** — `src/lib/plugins/manifest.ts`: Zod shēma + noklusējuma iestatījumi priekš `plugin.json`.
+- **Skeneris** — `src/lib/plugins/scanner.ts`: atklāj spraudņus diskā spraudņu direktorijā.
+- **Iekrāvējs** — `src/lib/plugins/loader.ts`: izveido katru spraudni atsevišķā Node.js pakārtotā procesā un starpnieki piesaista zvanus, izmantojot IPC. Bērns nav smilšu kaste (skatiet tālāk sadaļu "Spraudņa izpildes izolācija").
 
 ## Tirgus katalogs
 
@@ -87,34 +82,31 @@ sākotnējo sarakstu.
 
 ## REST API
 
-Visiem galapunktiem ir nepieciešama pārvaldības autentifikācija (`requireManagementAuth`), **un** tie ir
-pieejami tikai no lokālās atgriezeniskās cilpas — `/api/plugins` un `/api/plugins/` ir norādīti
-sarakstā `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
+Visiem galapunktiem ir nepieciešama pārvaldības autentifikācija (`requireManagementAuth`)** un** ir tikai atgriezeniskās saites — `/api/plugins` un `/api/plugins/` ir norādīti `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Galapunkts                       | Metode | Apraksts                                                      |
-| -------------------------------- | ------ | ------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Uzskaitīt instalētos spraudņus (neobligāts `?status=` filtrs) |
-| `/api/plugins`                   | POST   | Instalēt spraudni no absolūta lokālā ceļa                     |
-| `/api/plugins/scan`              | POST   | Skenēt spraudņu direktoriju un reģistrēt jaunus spraudņus     |
-| `/api/plugins/marketplace`       | GET    | Uzskaitīt tirgus kataloga ierakstus                           |
-| `/api/plugins/[name]`            | GET    | Iegūt instalētā spraudņa informāciju                          |
-| `/api/plugins/[name]`            | DELETE | Atinstalēt spraudni                                           |
-| `/api/plugins/[name]/activate`   | POST   | Aktivizēt (ielādēt un reģistrēt āķus)                         |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktivizēt (izsaukt `onDeactivate`, atcelt āķu reģistrāciju) |
-| `/api/plugins/[name]/config`     | GET    | Iegūt spraudņa konfigurāciju un konfigurācijas shēmu          |
-| `/api/plugins/[name]/config`     | PUT    | Atjaunināt spraudņa konfigurāciju (validējot pret shēmu)      |
+| Galapunkts                       | Metode | Apraksts                                                          |
+| -------------------------------- | ------ | ----------------------------------------------------------------- |
+| `/api/plugins`                   | GET    | Uzskaitiet instalētos spraudņus (izvēles `?status=` filtrs)       |
+| `/api/plugins`                   | POST   | Instalējiet spraudni no spraudņa avotu direktorijas               |
+| `/api/plugins/scan`              | POST   | Skenējiet spraudņu direktoriju un reģistrējiet jaunus spraudņus   |
+| `/api/plugins/marketplace`       | GET    | Uzskaitiet tirgus laukuma kataloga ierakstus                      |
+| `/api/plugins/[name]`            | GET    | Iegūstiet informāciju par instalēto spraudni                      |
+| `/api/plugins/[name]`            | DELETE | Atinstalējiet spraudni                                            |
+| `/api/plugins/[name]/activate`   | POST   | Aktivizēt (ielādēt + reģistra āķus)                               |
+| `/api/plugins/[name]/deactivate` | POST   | Deaktivizēt (aizdedzināt `onDeactivate`, atcelt āķu reģistrāciju) |
+| `/api/plugins/[name]/config`     | GET    | Iegūt spraudņa konfigurācijas + konfigurācijas shēmu              |
+| `/api/plugins/[name]/config`     | PUT    | Atjaunināt spraudņa konfigurāciju (validēta saskaņā ar shēmu)     |
 
-`GET /api/plugins` filtrs `status` pieņem vienu no šīm vērtībām:
-`installed` / `active` / `inactive` / `error`. Nederīgas vērtības gadījumā tiek atgriezts `400`.
+Filtrs `GET /api/plugins` `status` pieņem vienu no `installed` / `active` / `inactive` / `error`. Nederīga vērtība atgriež `400`.
 
-### Instalēto spraudņu uzskaitīšana
+### Uzskaitiet instalētos spraudņus
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### Instalēšana no lokāla ceļa
+### Instalējiet no vietējā ceļa
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -123,19 +115,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-Ceļam `path` jābūt **absolūtam**, un tas nedrīkst saturēt `..` pārvietošanās segmentus vai
-nulles baitus (to nodrošina Zod). Avota direktorijā jābūt derīgam
-`plugin.json` (vai tai jābūt šāda faila vecākdirektorijai). Veiksmes gadījumā atbildes kods ir `201`, un tajā ir
-instalētā spraudņa ieraksts.
+`path` ir jābūt an** absolūts** ceļš uz direktoriju** spraudņa avotu direktorijā** : `plugin-sources` blakus spraudņa saknei, tātad `~/.omniroute/plugin-sources/` pēc noklusējuma vai `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/`, ja šis mainīgais ir iestatīts (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Vispirms nokopējiet vai klonējiet spraudni tur. Instalēšana tiek atteikta ar `400` ja ceļš satur `..` vai nulles baitu, atrodas ārpus šī direktorija, tiek atrisināts ārpus tā, izmantojot simbolisko saiti, satur simbolu saiti, kuras mērķis atrodas ārpus tā, vai ja direktorija neeksistē. Avota direktorijā ir jābūt derīgam `plugin.json` (vai jābūt tā vecākam). Ja tas ir izdevies, atbilde ir `201` ar instalēto spraudņa rindu.
 
-### Tirgus pārlūkošana
+Atšķirībā no citiem spraudņu maršrutiem, šim ir nepieciešami pārvaldības akreditācijas dati (informācijas paneļa sesija vai pārvaldības tvēruma API atslēga) pat tad, ja pieteikšanās ir atspējota (`requireLogin=false`): koda instalēšana nekad nav anonīma darbība.
+
+### Pārlūkojiet tirgu
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### Spraudņa konfigurācijas atjaunināšana
+### Atjaunināt spraudņa konfigurāciju
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -144,10 +135,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` validē katru norādīto vērtību pret spraudņa
-`configSchema` (kas deklarēta manifestā): `number` lauki ievēro `min`/`max`,
-bet `select` laukiem jāatbilst deklarētajam `enum`. Atslēgas, kuru shēmā nav,
-ir atļautas.
+`PUT .../config` pārbauda katru norādīto vērtību, salīdzinot ar spraudņa `configSchema` (norādīts manifestā): `number` lauki ievēro `min`/`max`, `select` laukiem ir jāatbilst deklarētajam `enum`. Atslēgas, kas nav iekļautas shēmā, ir atļautas.
 
 ## Konfigurācija
 
@@ -206,82 +194,58 @@ Informācijas paneļa cilnē "Tirgus" ir pieejams šī URL lauks (tas tiek nolas
 
 ## Drošība
 
-### Maršruta līmenis — tikai atgriezeniskās cilpas saskarne
+### Tikai maršruta līmeņa — loopback
 
-Spraudņi izpilda kodu palaistos bērnprocesos, tāpēc visa `/api/plugins`
-virsma ir klasificēta kā `LOCAL_ONLY` (1. līmenis). Atgriezeniskās cilpas ierobežojums tiek
-bez izņēmumiem piemērots **pirms** jebkuras autentifikācijas pārbaudes, tāpēc nopludināts pārvaldības marķieris, kas
-sasniedz ierīci pa tuneli, joprojām nevar instalēt, aktivizēt vai atinstalēt spraudni.
-Skatiet [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) un
-stingros noteikumus Nr. 15 / Nr. 17.
+Spraudņi izpilda kodu radītajos bērnu procesos, tāpēc visa `/api/plugins` virsma tiek klasificēta kā `LOCAL_ONLY` (1. līmenis). Cilpas izpilde darbojas bez nosacījumiem** pirms tam** jebkāda autentifikācijas pārbaude, tāpēc noplūdis pārvaldības marķieris, kas sasniedz lodziņu pa tuneli, joprojām nevar instalēt, aktivizēt vai atinstalēt spraudni. Skatiet [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) un cietos noteikumus #15 / #17.
 
-### Tirgus reģistra SSRF aizsardzība
+### Tirgus reģistra SSRF aizsargs
 
-Pielāgota reģistra URL ir konfigurācija, ko var ietekmēt uzbrucējs, tāpēc pirms
-tā izgūšanas `listMarketplacePlugins()` to apstrādā divos līmeņos:
+Pielāgota reģistra URL konfigurācija ir uzbrucēju ietekmējama, tāpēc pirms tā iegūšanas `listMarketplacePlugins()` palaiž to cauri diviem slāņiem:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
    - Noraida visu, kas nav `http:` / `https:`.
-   - Noraida literālas privātas/atgriezeniskās cilpas/lokālās saites/ULA resursdatora adreses (IPv4 **un** IPv6,
-     tostarp IPv4 kartētas adreses), izmantojot kanonisko `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`).
-   - Atrisina **gan** `A`, **gan** `AAAA` ierakstus un noraida URL, ja **jebkura** atrisinātā
-     adrese ir privāta, tādējādi novēršot publiska resursdatora nosaukuma → privātas IP adreses apiešanas iespēju.
-   - **Kļūmes gadījumā noraida**: DNS atrisināšanas kļūme izraisa URL noraidīšanu.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): izgūšanas laikā atkārtoti piemēro tikai publiskām adresēm paredzēto URL
-   aizsardzību un **bloķē novirzīšanu** (nav iespējama publiskas → privātas adreses `30x`
-   pāreja).
+   - Noraida burtiskus private/loopback/link-local/ULA saimniekus (IPv4** un** IPv6, ieskaitot IPv4-mapped), izmantojot kanonisko `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`).
+   - Atrisina** gan** `A` un `AAAA` ieraksta un noraida, ja** jebkura** atrisinātā adrese ir privāta — kas aizver publiskā resursdatora nosaukuma → privātā IP apiešanu.
+   - **Neizdevās slēgts** : DNS izšķirtspējas kļūme noraida URL.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): atkārtoti lieto tikai publiski pieejamo URL aizsardzību nolasīšanas laikā un** bloķē novirzīšanu** (nav publiska → privātā `30x` pivot).
 
-URL, kas neiztur kādu no šiem līmeņiem, nepārtrauc pieprasījumu — tirgus
-klusi izmanto iebūvēto sākotnējo reģistru un reģistrē brīdinājumu žurnālā.
+URL, kas neizdodas nevienā no slāņiem, neatceļ pieprasījumu. — tirgus klusi atgriežas iebūvētajā sēklu reģistrā un reģistrē brīdinājumu.
 
-> Šī aizsardzība tika pastiprināta PR #3774, lai īpaši atrisinātu A + AAAA ierakstus un izmantotu
-> kanonisko `isPrivateHost`, nevis tikai IPv4 paredzētu pārbaudi.
+> Šis aizsargs tika īpaši nostiprināts PR #3774, lai atrisinātu A + AAAA un izmantotu kanonisko `isPrivateHost`, nevis IPv4-only pārbaudi.
 
-### Spraudņu izpildes izolācija
+### Spraudņa izpildes izolācija
 
-- **Procesu izolācija** — `loadPlugin()` (`src/lib/plugins/loader.ts`) palaiž
-  katru spraudni atsevišķā Node.js bērnprocesā un sazinās, izmantojot IPC.
-  Āķu izsaukumiem ir noildze ar `SIGTERM` → `SIGKILL` eskalāciju.
-- **Vides atļauto vērtību saraksts** — bērnprocess saņem tikai atļauto vides
-  mainīgo kopu; plašāka kopa tiek piešķirta tikai tad, ja manifests pieprasa
-  `env` atļauju.
-- **Ceļu ierobežošana** — instalēšanas/jaunināšanas/atinstalēšanas laikā tiek pārbaudīts, vai spraudņa
-  direktorijs un `manifest.main` tiek atrisināti **pārvaldītā spraudņu saknes direktorija ietvaros**
-  pirms jebkādas kopēšanas vai rekursīvas dzēšanas (aizsardzība pret manipulētiem datubāzes ceļiem un
-  `../` šķērsošanu laukā `manifest.main`). Aktivizēšanas laikā simboliskās saites tiek atrisinātas, izmantojot
-  `realpath`, un tiek atteikta tāda ieejas punkta ielāde, kas atrodas ārpus spraudņa
-  direktorija.
-- **Neobligāta integritātes piesaiste** — manifestā var deklarēt lauku `integrity`
-  (`sha256-<base64>`, SRI formāts). Ja tas ir norādīts, ielādētājs ielādes laikā pārbauda
-  ieejas faila jaucējvērtību un neatbilstības gadījumā atsakās veikt aktivizēšanu. Tā ir
-  brīvprātīgi iespējojama aizsardzība pret manipulācijām, **nevis** drošības robeža — tikai atgriezeniskās cilpas maršrutēšana
-  un atļauju modelis ir faktiskās robežas.
+> **Spraudņi nav smilškastes.** Bērns ir parasts Node.js process, kas darbojas kā OmniRoute lietotājs, bez VM konteksta un bez Node.js atļauju karodziņiem, tāpēc spraudņa kods var lasīt un rakstīt jebkuru failu, ko lietotājs var, palaist programmas un sasniegt tīklu. `requires.permissions` tikai izlemj, kādus vides mainīgos bērns saņem; pārējās atļaujas netiek izpildītas. Instalējiet tikai spraudņus, kuriem uzticaties. Tālāk norādītā procesa robeža ietver avārijas un uzkaras; tā nav drošības robeža.
+
+- **Procesa izolācija** — `loadPlugin()` (`src/lib/plugins/loader.ts`) izveido katru spraudni atsevišķā Node.js bērnprocesā un sazinās, izmantojot IPC. Āķa zvaniem ir noildze ar `SIGTERM` → `SIGKILL` eskalāciju.
+- **Env atļaušanas saraksts** — bērns saņem tikai atļauto vides mainīgo kopu; plašāka kopa tiek piešķirta tikai tad, ja manifestā tiek pieprasīta `env` atļauja.
+- **Instalējiet avota ierobežošanu** — `POST /api/plugins` lasa tikai no spraudņa avotu direktorija (skatiet sadaļu "Instalēšana no vietējā ceļa"): ceļš ir kanonizēts ar `realpath`, tam ir stingri jāpaliek šajā direktorijā, un avota koks, kas satur simbolisku saiti, kas no tā tiek izvadīts, tiek noraidīts, pirms kaut kas tiek kopēts.
+- **Ceļa ierobežošana** — install/upgrade/uninstall apgalvo, ka spraudņa direktorijs un `manifest.main` tiek atrisināti** ietvaros** pārvaldītā spraudņa sakne pirms jebkuras kopēšanas vai rekursīvas dzēšanas (aizsargā pret manipulētiem DB ceļiem un `../` šķērsošanu `manifest.main`). Aktivizēšana atrisina simboliskās saites, izmantojot `realpath`, un atsakās ielādēt ieejas punktu, kas iziet no spraudņa direktorijas.
+- **Papildu integritātes tapa** — manifestā var būt norādīts `integrity` (`sha256-<base64>`, SRI formāts) lauks. Ja ir, ielādētājs pārbauda ievades faila jaucējkodu ielādes laikā un atsakās aktivizēt neatbilstības gadījumā. Tā ir izvēles viltojuma noteikšana,** nē** drošības robeža: tas neierobežo to, ko var darīt ielādēts spraudnis.
+- **Nav klientu akreditācijas datu** — kontekstam, kas nodots `onRequest`, `onResponse` un `onError` ir noņemtas galvenes `authorization`, `x-api-key`, `proxy-authorization` un `cookie`, un atslēgas API ierakstam nav atslēgas vērtības (`redactPluginContext()` in `src/lib/plugins/hooks.ts`).
 
 ## Manifests (`plugin.json`)
 
-Validē `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
+Apstiprinājis `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
 | Lauks              | Tips       | Piezīmes                                                          |
 | ------------------ | ---------- | ----------------------------------------------------------------- |
-| `name`             | virkne     | Obligāts; kebab-case (`^[a-z0-9-]+$`), 1–100 rakstzīmes           |
-| `version`          | virkne     | Obligāts; semver (`MAJOR.MINOR.PATCH`)                            |
-| `description`      | virkne?    | ≤ 500 rakstzīmes                                                  |
-| `author`           | virkne?    | ≤ 200 rakstzīmes                                                  |
-| `license`          | virkne?    | Noklusējuma vērtība ir `MIT`                                      |
-| `main`             | virkne?    | Ieejas fails; noklusējuma vērtība ir `index.js`                   |
-| `source`           | enum?      | `local` \| `marketplace` (noklusējuma vērtība ir `local`)         |
-| `tags`             | virkne[]?  | Meklēšanas tagi                                                   |
+| `name`             | virkne     | Obligāti; kebaba futrālis (`^[a-z0-9-]+$`), 1–100 rakstzīmes      |
+| `version`          | virkne     | Obligāti; semvers (`MAJOR.MINOR.PATCH`)                           |
+| `description`      | aukla?     | ≤ 500 rakstzīmes                                                  |
+| `author`           | aukla?     | ≤ 200 rakstzīmes                                                  |
+| `license`          | aukla?     | Pēc noklusējuma `MIT`                                             |
+| `main`             | aukla?     | Ieejas fails; noklusējuma vērtība ir `index.js`                   |
+| `source`           | enum?      | `local` \| `marketplace` (pēc noklusējuma `local`)                |
+| `tags`             | string[]?  | Meklēt tagus                                                      |
 | `requires`         | objekts?   | `{ omniroute?, permissions[] }`                                   |
-| `hooks`            | objekts?   | Būla vērtības, kas norāda, kurus āķus spraudnis implementē        |
-| `skills`           | objekts[]? | Neobligātas prasmju definīcijas                                   |
-| `enabledByDefault` | boolean?   | Automātiski aktivizēt instalēšanas laikā                          |
+| `hooks`            | objekts?   | Būla vērtības, kas nosaka, kuri āķi tiek ieviesti spraudnis       |
+| `skills`           | objekts[]? | Izvēles prasmju definīcijas                                       |
+| `enabledByDefault` | Būla?      | Automātiska aktivizēšana instalēšanas laikā                       |
 | `configSchema`     | objekts?   | Konfigurācijas lauku karte (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | virkne?    | Neobligāta ieejas faila `sha256-<base64>` piesaiste               |
+| `integrity`        | aukla?     | Izvēles `sha256-<base64>` ievades faila tapa                      |
 
-Atļaujas tiek ņemtas no uzskaitījuma
-`network` / `file-read` / `file-write` / `env` / `exec`.
+Atļaujas tiek iegūtas no enum `network` / `file-read` / `file-write` / `env` / `exec`. Tikai `env` ir izpildlaika efekts (mazliet lielāks vides mainīgo atļaušanas saraksts bērnam); pārējās ir deklarācijas un netiek izpildītas.
 
 ## Dzīves cikla plūsma
 
@@ -342,18 +306,14 @@ Spraudņu metrika un analītika tiek uzskaitīta papildu tabulās
 
 ## Informācijas panelis
 
-Informācijas paneļa lapā `/dashboard/plugins`
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) ir divas cilnes:
+Informācijas paneļa lapa vietnē `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) nodrošina divas cilnes:
 
-- **Instalētie** — uzskaita instalētos spraudņus kopā ar to deklarētajiem āķiem,
-  aktivizēšanas/deaktivizēšanas pārslēgu, atinstalēšanas pogu un darbību
-  "Meklēt spraudņus" (`POST /api/plugins/scan`).
-- **Tirgus** — parāda katalogu no `GET /api/plugins/marketplace` un lauku
-  pielāgota reģistra URL iestatīšanai.
+- **Uzstādīts** — uzskaita instalētos spraudņus ar to deklarētajiem āķiem, activate/deactivate slēdzi, atinstalēšanas pogu un darbību "Skenēt spraudņus" (`POST /api/plugins/scan`).
+- **Tirgus laukums** — parāda katalogu no `GET /api/plugins/marketplace` ar lauku pielāgotā reģistra iestatīšanai URL.
 
-Katra spraudņa konfigurācijas lapa atrodas
-`/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+Lapā vienmēr tiek rādīts brīdinājums, ka spraudņi darbojas ar pilnām OmniRoute procesa privilēģijām.
+
+Katra spraudņa konfigurācijas lapa atrodas `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
 
 ## Skatiet arī
 

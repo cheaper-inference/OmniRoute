@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import React from "react";
 import { cleanup, fireEvent, render } from "@testing-library/react";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 const { default: Input } = await import("@/shared/components/Input");
@@ -66,6 +68,32 @@ describe("Input adapter → kit Field + Input", () => {
     expect(marker?.getAttribute("aria-hidden")).toBe("true");
   });
 
+  it("className lands on the Field wrapper and inputClassName on the <input>, never crossed", () => {
+    const { getByLabelText } = render(
+      <Input id="u" label="URL" className="flex-1 md:col-span-2" inputClassName="text-xs" />
+    );
+    const input = getByLabelText("URL");
+    const field = input.closest<HTMLElement>("[data-slot=field]")!;
+    expect(field.className).toContain("ci-field");
+    expect(field.className).toContain("flex-1");
+    expect(field.className).toContain("md:col-span-2");
+    expect(field.className).not.toContain("text-xs");
+    expect(input.className).toContain("ci-input");
+    expect(input.className).toContain("text-xs");
+    expect(input.className).not.toContain("flex-1");
+    expect(input.className).not.toContain("md:col-span-2");
+  });
+
+  it("inputClassName reaches the <input> inside the icon shell too, not the shell", () => {
+    const { container } = render(<Input icon="search" className="w-64" inputClassName="text-xs" />);
+    const input = container.querySelector("input")!;
+    const shell = container.querySelector<HTMLElement>(".ci-input-shell")!;
+    expect(input.className).toContain("text-xs");
+    expect(shell.className).not.toContain("text-xs");
+    expect(shell.className).not.toContain("w-64");
+    expect(container.querySelector<HTMLElement>("[data-slot=field]")!.className).toContain("w-64");
+  });
+
   it("forwards a ref to the native <input>", () => {
     const ref = React.createRef<HTMLInputElement>();
     render(<Input id="q" aria-label="Query" ref={ref} />);
@@ -99,5 +127,39 @@ describe("Input adapter → kit Field + Input", () => {
     expect(icons).toHaveLength(2);
     expect(icons[1].querySelector("svg.oi-icon")).not.toBeNull();
     expect(getByLabelText("Timeout").getAttribute("data-size")).toBe("default");
+  });
+
+  // Kit `input-mono-xs-ime`: the 32px `xs` control replaces `inputClassName="h-8 text-xs"`.
+  it("forwards size=xs to the kit input and to its icon shell", () => {
+    const { getByLabelText, container, rerender } = render(<Input aria-label="Port" size="xs" />);
+    const bare = getByLabelText("Port");
+    expect(bare.getAttribute("data-size")).toBe("xs");
+    expect(bare.className).toContain("ci-input--xs");
+    rerender(<Input aria-label="Port" size="xs" icon="search" />);
+    expect(container.querySelector(".ci-input-shell")!.className).toContain("ci-input-shell--xs");
+    expect(getByLabelText("Port").className).toContain("ci-input--xs");
+  });
+
+  // `font-mono` has no effect on an <input> (ci-typography.css), so the code font is a prop.
+  it("mono sets the kit code font and turns text assistance off, unless the caller asks for it", () => {
+    const { getByLabelText, rerender } = render(<Input aria-label="Key" mono />);
+    const input = getByLabelText("Key");
+    expect(input.className).toContain("ci-input--mono");
+    expect(input.getAttribute("spellcheck")).toBe("false");
+    expect(input.getAttribute("autocapitalize")).toBe("none");
+    expect(input.getAttribute("autocorrect")).toBe("off");
+    rerender(<Input aria-label="Key" mono spellCheck />);
+    expect(getByLabelText("Key").getAttribute("spellcheck")).toBe("true");
+    rerender(<Input aria-label="Key" />);
+    expect(getByLabelText("Key").className).not.toContain("ci-input--mono");
+    expect(getByLabelText("Key").hasAttribute("spellcheck")).toBe(false);
+  });
+
+  // The rest spread would carry `mono` at run time; the prop has to be typed for callers.
+  it("declares mono and the xs size in its own props", () => {
+    const source = readFileSync(join(process.cwd(), "src/shared/components/Input.tsx"), "utf8");
+    expect(source).toMatch(/\bmono\?: boolean;/);
+    expect(source).toMatch(/\bmono=\{mono\}/);
+    expect(source).toMatch(/`xs`/);
   });
 });

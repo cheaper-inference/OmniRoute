@@ -17,6 +17,27 @@ export type PluginOnRequestGate =
 
 const JSON_HEADERS = { status: 403, headers: { "Content-Type": "application/json" } } as const;
 
+const GENERIC_BLOCK_BODY = JSON.stringify({
+  error: { message: "Request blocked by plugin", type: "plugin_block" },
+});
+
+/**
+ * The 403 for a blocking hook. A plugin response that JSON cannot serialize (BigInt, a cycle)
+ * must still block: it falls back to the generic body instead of throwing into the fail-open
+ * catch below, which would turn the block into an allow.
+ */
+function blockResponse(pluginResponse: unknown): Response {
+  let body = GENERIC_BLOCK_BODY;
+  if (pluginResponse) {
+    try {
+      body = JSON.stringify(pluginResponse) ?? GENERIC_BLOCK_BODY;
+    } catch {
+      // keep the generic body
+    }
+  }
+  return new Response(body, JSON_HEADERS);
+}
+
 export async function runPluginOnRequestHook(args: {
   requestId: string;
   body: unknown;
@@ -40,15 +61,7 @@ export async function runPluginOnRequestHook(args: {
     const pluginResult = await runOnRequest(pluginCtx);
     if (pluginResult?.blocked) {
       args.log?.info?.("PLUGIN", `Request blocked by plugin`);
-      const response = pluginResult.response
-        ? new Response(JSON.stringify(pluginResult.response), JSON_HEADERS)
-        : new Response(
-            JSON.stringify({
-              error: { message: "Request blocked by plugin", type: "plugin_block" },
-            }),
-            JSON_HEADERS
-          );
-      return { blocked: true, response };
+      return { blocked: true, response: blockResponse(pluginResult.response) };
     }
     if (pluginResult?.metadata) {
       Object.assign(pluginCtx.metadata, pluginResult.metadata);

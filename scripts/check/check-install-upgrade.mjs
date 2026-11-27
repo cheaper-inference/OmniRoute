@@ -25,8 +25,13 @@
  *
  * Usage:
  *   node scripts/check/check-install-upgrade.mjs [--from <version>] [--skip-upgrade]
+ *                                                [--tarball <path>]
  *
  * `--from` pins the previous version (default: the current `latest` dist-tag on npm).
+ * `--tarball` (or OMNIROUTE_PACKED_TARBALL) installs an already-packed tarball instead of
+ * packing the tree again — the npm-publish workflow packs once and proves that one file.
+ * Its package.json name/version must match ./package.json. Without it the gate packs
+ * itself, as it always did.
  * Requires `npm run build:cli` first — this is a --with-build gate, like check:pack-boot.
  */
 
@@ -37,6 +42,12 @@ import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { DatabaseSync } from "node:sqlite";
+
+import {
+  obtainTarball,
+  resolvePrebuiltTarballOption,
+  verifyPrebuiltTarball,
+} from "./check-pack-boot.mjs";
 
 const BOOT_DEADLINE_MS = 180_000;
 const POLL_INTERVAL_MS = 2_000;
@@ -98,12 +109,6 @@ function derivePackagedCliToken(prefix, dataDir) {
     // probe running (it will fail loudly on its own) instead of crashing the gate here.
     return null;
   }
-}
-
-function pickTarball(packJson) {
-  const filename = JSON.parse(packJson)?.[0]?.filename;
-  if (!filename) throw new Error("npm pack --json returned no filename");
-  return filename;
 }
 
 /** Free-ish port per phase so a leaked child from a previous run cannot collide. */
@@ -353,7 +358,22 @@ async function main() {
     console.error("[install-upgrade] dist/server.js missing — run `npm run build:cli` first");
     process.exit(2);
   }
-  const version = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8")).version;
+  const rootManifest = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8"));
+  const version = rootManifest.version;
+  let prebuilt;
+  try {
+    prebuilt = resolvePrebuiltTarballOption(args);
+    // Validate before creating the work directory: a bad --tarball fails fast, packs nothing.
+    if (prebuilt) {
+      prebuilt = verifyPrebuiltTarball(prebuilt, {
+        expectedName: rootManifest.name,
+        expectedVersion: version,
+      });
+    }
+  } catch (e) {
+    console.error(`[install-upgrade] FAIL — ${e.message}`);
+    process.exit(1);
+  }
   const allowlist = loadAllowlist(ROOT);
   // NOT os.tmpdir(): on the self-hosted runner /tmp is a 12 GB tmpfs backed by RAM, while
   // the root filesystem has ~66 GB free. This gate needs ~12 GB, so it exhausted the tmpfs
@@ -373,16 +393,21 @@ async function main() {
     // v3.8.50 publish `npm pack` alone took 24m37s, leaving 5 of the step's 30-minute
     // budget for two installs and two boots. Without a duration here the log showed
     // only "packing…" then a timeout, which reads like a hang and is not.
+    // The prebuilt tarball lives outside `tmp`, so the cleanup in `finally` never deletes
+    // the file the publish job still has to upload.
     const packStarted = Date.now();
-    log(`packing v${version}…`);
-    const packOut = execFileSync("npm", ["pack", "--json", "--pack-destination", tmp], {
-      cwd: ROOT,
-      encoding: "utf8",
-      maxBuffer: 128 * 1024 * 1024,
+    if (prebuilt) log(`using prebuilt tarball ${prebuilt} (v${version}) — not packing`);
+    else log(`packing v${version}…`);
+    const { tarball, packed } = obtainTarball({
+      root: ROOT,
+      destDir: tmp,
+      prebuilt,
+      expectedName: rootManifest.name,
+      expectedVersion: version,
     });
-    const tarball = path.join(tmp, pickTarball(packOut));
     const packMb = (fs.statSync(tarball).size / 1024 / 1024).toFixed(1);
-    log(`packed in ${Math.round((Date.now() - packStarted) / 1000)}s (${packMb} MB)`);
+    if (packed) log(`packed in ${Math.round((Date.now() - packStarted) / 1000)}s (${packMb} MB)`);
+    else log(`prebuilt tarball verified (${packMb} MB)`);
 
     // Each install tree is ~3 GB and this run builds two of them, side by side, plus the
     // ~275 MB tarball. On the v3.8.50 publish run that overflowed the runner disk mid-way
@@ -531,11 +556,13 @@ async function main() {
     if (failures.length) {
       console.error(`[install-upgrade] FAIL — ${failures.length} problem(s):`);
       for (const f of failures) console.error(`  ✗ ${f}`);
-      process.exit(1);
+      return 1;
     }
     log("PASS — clean install and upgrade path both boot; schema converges.");
-    process.exit(0);
+    return 0;
   } finally {
+    // Return the verdict instead of exiting here: `process.exit()` inside the `try` skipped
+    // this cleanup and left both install trees behind on every run (#20643).
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 }
@@ -546,8 +573,11 @@ if (
   process.argv[1] &&
   path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname)
 ) {
-  main().catch((err) => {
-    console.error(`[install-upgrade] crashed: ${err?.message ?? err}`);
-    process.exit(1);
-  });
+  main().then(
+    (code) => process.exit(code),
+    (err) => {
+      console.error(`[install-upgrade] crashed: ${err?.message ?? err}`);
+      process.exit(1);
+    }
+  );
 }

@@ -4,13 +4,13 @@
 
 ---
 
-## Melden von Sicherheitslücken
+## Schwachstellen melden
 
 Wenn Sie eine Sicherheitslücke in OmniRoute entdecken, melden Sie diese bitte verantwortungsvoll:
 
-1. **ERSTELLEN SIE KEIN** öffentliches GitHub-Issue
-2. Verwenden Sie [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Geben Sie Folgendes an: Beschreibung, Schritte zur Reproduktion und potenzielle Auswirkungen
+1. **DO NOT** Öffnen Sie eine öffentliche GitHub Ausgabe
+2. Verwenden Sie [GitHub Sicherheitshinweise](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Dazu gehören: Beschreibung, Reproduktionsschritte und mögliche Auswirkungen
 
 ## Reaktionszeitplan
 
@@ -29,25 +29,14 @@ Wenn Sie eine Sicherheitslücke in OmniRoute entdecken, melden Sie diese bitte v
 | 3.7.x   | ✅ Sicherheitsupdates                             |
 | < 3.7.0 | ❌ Nicht unterstützt                              |
 
-## LTS-Supportzeitraum (v3.9.x)
+## LTS Supportfenster (v3.9.x)
 
-Nach 3.8.59 ist die nächste Version **3.9.0**, mit der die Long-Term-Support-Linie auf dem
-Branch `stable/v3` eröffnet wird (siehe [`ROADMAP.md`](ROADMAP.md) → „Phase 3 — v3.9.0 LTS“).
+Nach 3.8.59 ist die nächste Version** 3.9.0** , wodurch die langfristige Support-Leitung im `stable/v3` Zweig geöffnet wird (siehe [`ROADMAP.md`](ROADMAP.md) → „Phase 3 — v3.9.0 LTS“).
 
-- **Was `stable/v3` erhält:** Fehlerbehebungen, Sicherheitspatches und Provider-Aktualisierungen. Neue
-  Funktionen werden im v4-Kanal veröffentlicht; bei der LTS-Linie steht Stabilität an erster Stelle. `npm install omniroute`
-  (der `latest`-Dist-Tag) bleibt während des gesamten v4-Zyklus auf v3.
-- **Dauer des Zeitraums:** `stable/v3` erhält **Sicherheitskorrekturen und Korrekturen kritischer Regressionen für
-  12 Monate nach der Freigabe von 3.9.0 oder bis 90 Tage, nachdem v4.0.0 als `latest` veröffentlicht wurde —
-  je nachdem, welcher Zeitpunkt später liegt**. Das daraus resultierende Enddatum wird zum Zeitpunkt der Freigabe in den Versionshinweisen zu 3.9.0 und in
-  [`ROADMAP.md`](ROADMAP.md) festgehalten.
-- **Melden einer Schwachstelle in der LTS-Linie:** über denselben Kanal wie bei jeder anderen Version —
-  eine private [GitHub-Sicherheitsempfehlung](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  niemals über ein öffentliches Issue. Geben Sie an, welche Version Sie getestet haben (zum Beispiel `3.9.2`); Korrekturen werden in
-  `stable/v3` übernommen und anschließend auf v4 vorwärtsportiert.
-- **Sicherheitsbasislinie bei der LTS-Freigabe:** Der gemessene Scannerstatus sowie Nachweise für den Routenschutz und
-  öffentliche Zugangsdaten werden in
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) festgehalten.
+- **Was `stable/v3` erhält:** Fehlerbehebungen, Sicherheitspatches und Anbieter-Updates. Neue Funktionen gehen an den v4-Kanal; Bei der LTS Linie geht es um Stabilität. `npm install omniroute` (das `latest` dist-tag) bleibt während des gesamten v4-Zyklus auf v3.
+- **Fensterdauer:** `stable/v3` erhält** Sicherheitskorrekturen und kritische Regressionen für 12 Monate nach der Kürzung von 3.9.0 oder bis 90 Tage nach der Veröffentlichung von v4.0.0 als `latest` — je nachdem, welcher Zeitpunkt später liegt** . Das resultierende Enddatum wird in den Versionshinweisen zu 3.9.0 und in [`ROADMAP.md`](ROADMAP.md) aufgezeichnet, wenn die Kürzung erfolgt.
+- **Meldung einer Schwachstelle in der LTS Zeile:** Gleicher Kanal wie jede andere Version — ein privater [GitHub Sicherheitshinweis](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), niemals ein öffentliches Problem. Sagen Sie, welche Version Sie getestet haben (zum Beispiel `3.9.2`); Korrekturen landen auf `stable/v3` und werden auf v4 weitergeleitet.
+- **Sicherheitsgrundlinie beim LTS -Schnitt:** Der gemessene Scannerstatus, Routenschutz und öffentliche Berechtigungsnachweise werden in [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) aufgezeichnet.
 
 ---
 
@@ -211,7 +200,7 @@ docker run -d \
   -e JWT_SECRET="$(openssl rand -base64 48)" \
   -e API_KEY_SECRET="$(openssl rand -hex 32)" \
   -e STORAGE_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ---

@@ -186,29 +186,92 @@ Pilns saraksts ar vairāk nekā 30 tabulām atrodas `src/lib/db/migrations/`.
 
 ## Migrācijas
 
-OmniRoute izmanto **versijotas, idempotentas migrācijas**, kas atrodas `src/lib/db/migrations/`. Katra migrācija ir atsevišķs SQL fails ar nosaukumu `NNN_description.sql`.
+OmniRoute izmanto** versijas, idempotentas migrācijas** `src/lib/db/migrations/`. Katra migrācija ir viens SQL fails. Līdzās pastāv divi nosaukšanas formāti; `_omniroute_migrations` ierakstītā versija ir ciparu prefikss.
 
-### Migrāciju nosaukumi
+### Migrācijas nosaukumu piešķiršana
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Formāts                                           | Piemērs                              | Lietots priekš                                                                                                                                                           |
+| ------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `NNN_description.sql` (tieši 3 cipari)            | `241_seen_models.sql`                | Vecā sērija `001`–`241`. Iesaldēts, kad tika izveidots laikspiedola formāts (`240` un `241` tika sapludināti tieši pirms tā): neviens jauns fails nesaņem kārtas numuru. |
+| `YYYYMMDDHHMMSS_description.sql` (14 cipari, UTC) | `20261113120000_add_usage_index.sql` | Katra migrācija, kas izveidota no 2026. gada 11. gada 13. gada 13. gada.                                                                                                 |
 
-### Migrāciju izpilde
+Kāpēc izmaiņas: izmantojot secīgus skaitļus, paralēlais PRs izvēlējās to pašu nākamo numuru, un visi, izņemot vienu, bija jāpārnumurē pirms apvienošanas. UTC laikspiedols katram PR piešķir savu versiju.
 
-Palaišanas laikā `migrationRunner.ts`:
+Noteikumi par laikspiedola formātu (nodrošina `npm run check:migration-numbering`, tiek kopīgoti ar ģeneratoru `scripts/check/lib/migrationNaming.mjs`):
 
-1. Izveido tabulu `_omniroute_migrations`, ja tā vēl nepastāv
-2. Vaicā jau lietotās migrācijas
-3. Secīgi lieto visas jaunās migrācijas, katru atsevišķā transakcijā
-4. Reģistrē katru lietoto migrāciju kopā ar laikspiedolu
+- Laika zīmogs ir īsts UTC datums un laiks, ne agrāk kā `20261113000000` un ne vairāk kā 10 minūtes nākotnē.
+- Aprakstā ir mazie burti `snake_case` kas sākas ar burtu (`a-z`, `0-9`, viens `_` starp vārdiem), ne vairāk kā 80 rakstzīmes.
+- Divi faili ar vienādu laikspiedolu ir dublikāti.
+- Noteikums bez atstarpes attiecas tikai uz vecajām sērijām: ir jābūt katram skaitlim no `001` līdz `241`, izņemot zināmās atstarpes `026`, `055` un `121`. Dzēšot `241` (vai jebkuru vecu failu), vārti neizdodas. `001` un `241` nekad nevar pievienot `KNOWN_GAPS` atļaušanas sarakstam. Faili ar laikspiedolu nekad nerada atstarpes.
+- Katram `src/lib/db/migrations/` ierakstam ir jābūt parastam failam ar derīgu mazo burtu `.sql` nosaukumu. Katalogs, simboliskā saite, `.SQL` vai `.sql.bak` fails, slēpts fails vai nosaukums ar atstarpi neiztur vārtus, jo skrējējs to izlaidīs klusi vai avarētu sāknēšanas laikā.
+
+**Piesakiet pasūtījumu.** Darbinātājs kārto pēc prefiksa skaitliskās vērtības, nevis pēc teksta: vispirms vecie `001`–`241` faili, pēc tam laikspiedoga faili laikspiedolu secībā, pēc tam visi ar `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` reģistrētie direktoriji ar nosaukumiem (piemēram, `ee-001`). Gaidāma migrācija ir jebkurš fails, kura versija nav `_omniroute_migrations`, tāpēc migrācija no vecākas filiāles, kas tiek apvienota pēc jaunākas, joprojām attiecas uz esošajām datu bāzēm.
+
+**Laikspiedols ir izveides secība, nevis sapludināšanas secība.** Ja jūsu migrācija ir atkarīga no tabulas vai kolonnas, kas izveidota, veicot migrāciju ar a** jaunāks** laikspiedols (piemēram, viens no cita PR, kas vispirms tika sapludināts), jauna datu bāze vispirms palaistu jūsu datu bāzi un neizdosies. Kamēr jūsu PR joprojām ir atvērts, atjaunojiet faila nosaukumu ar `npm run db:new-migration`, lai tas iegūtu jaunāku laikspiedolu, vai padariet to neatkarīgu. `npm run test:migrations:fresh` katru migrāciju piemēro tukšai datu bāzei un uztver to.
+
+### Apvienotā migrācija nekad netiek dzēsta vai pārdēvēta
+
+Kad migrācijas fails atrodas izlaiduma atzarā vai `main`, tas jau ir palaists homologu un izstrādātāju datu bāzēs, VPS instalācijās un uzņēmuma sinhronizācijā. No šī brīža:
+
+- **Nekad neizdzēsiet to.** Jaunās instalēšanas shēma zaudētu savu shēmu, savukārt jauninātās datu bāzes to saglabās.
+- **Nekad nepārdēvējiet to.** `_omniroute_migrations` versija vairs neatbilst failam, tāpēc katra datu bāze, kurā tā jau tika lietota, to palaistu vēlreiz. Pēc tam neidempotents SQL dublē datus vai aptur sāknēšanu.
+- **Nepieciešama cita shēma?** Izveidojiet jaunu migrāciju, izmantojot `npm run db:new-migration`.
+
+Pārdēvēšana ir droša tikai failam, kas vēl nav sapludināts, un tas ir gadījumā, ja vārti norāda uz to. Izlaiduma tags šeit neko nemaina: katrs `release/v*` filiāles nosūtījums publicē Docker `:next` attēlu un darbojas ar homologu, VPS instalēšanu un uzņēmuma sinhronizāciju, tāpēc sapludinātā migrācija ir palaista reālās datu bāzēs, pirms pastāv `vX.Y.Z` tags. Vārti neizdodas ikreiz, kad tiek noņemts bāzes fails neatkarīgi no tā, vai tas ir atzīmēts vai nav.
+
+- **Apvienotās migrācijas atgriešana.** `git revert`, kas izdzēš failu, neizdodas izmantot vārtus. Saglabājiet failu un atsauciet tā shēmu jaunā migrācijā: `npm run db:new-migration -- <description>`, ar `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` un tā tālāk. Jauninātās un svaigās datu bāzes beidzas ar to pašu shēmu.
+- **Viens pieņemtais pārdēvējums: saderības ieraksts un identisks saturs.** Ja sapludinātajam failam ir jāpārvietojas (piemēram, diviem sapludinātiem failiem ir kopīgs laikspiedols un palaidējs apstājas ar versijas sadursmi), pārdēvējiet vēlāko failu, nepieskaroties tā SQL, un pievienojiet `{ fromVersion, fromName, toVersion, toName }` `RENAMED_MIGRATION_COMPATIBILITY` `src/lib/db/migrationRunner/constants.ts`. Datu bāzēm, kurās tika lietota vecā versija, `_omniroute_migrations` rinda tiek pārvietota, nevis tiek palaists fails vēlreiz. Vārti brīdina par šādu pārdēvēšanu un vienmēr veic komutācijas pārbaudi neatkarīgi no jaunais laikspiedols: jaunas instalēšanas gadījumā fails tiek lietots tā jaunajā pozīcijā, jauninātajās datu bāzēs tas netiek lietots, tāpēc izvēlieties jaunu laikspiedolu tuvu vecajam. Vārtiem neizdodas pārdēvēt, ja saturs ir mainīts (shēmas izmaiņas joprojām tiek veiktas jaunā migrācijā) vai ja ieraksta mērķa fails nav diskā.
+- **Nekad nepārdēvējiet tajā pašā laikspiedogā.** Pārdēvēšana, kas saglabā laika zīmogu un maina tikai aprakstu, neiztur vārtus ar vai bez ieraksta. Izmantojot ierakstu, kura `toVersion` ir vienāds ar `fromVersion`, izpildītājs izdzēš veco `_omniroute_migrations` rindu un vēlreiz lieto failu katrā datu bāzē, kurā tas jau ir palaists. Bez ieraksta skrējējs izseko tikai versiju: tas izlaiž failu šajās datu bāzēs (jauns saturs tajās nekad nepalaiž) un katrā sāknēšanas reizē reģistrē pārnumerācijas kļūdu. Izmantojiet citu laikspiedolu un saderības ierakstu vai saglabājiet nosaukumu.
+- **Vārti pārbauda, vai pārdēvētais fails vairs netiek palaists.** Katram aptvertajam pārdēvējumam vārti nodod jauno faila nosaukumu komutācijas pārbaudei ar `--must-not-apply`. Pārbaude palaiž jaunināto datu bāzi ar īsto palaidēju, un, ja palaidējs vēlreiz lieto šo failu (piemēram, tāpēc, ka ierakstam ir nepareiza versija vai nosaukums, vai tāpēc, ka vārtu teksta parsētājs nolasa `constants.ts` atšķirīgi no TypeScript), vārti neizdodas ar `migration renomeada rodaria de novo` un lūdz pārbaudīt ieraksta vecās un jaunās versijas un nosaukumus.
+
+### Ko vārti pārbauda pret bāzi
+
+Izvilkšanas pieprasījuma un sapludināšanas rindas izpildes laikā `npm run check:migration-numbering` salīdzina diskā esošo `src/lib/db/migrations/` ar to pašu direktoriju pamata filiālē. Bāze ir šādā secībā: `--base-latest-tag`, `--base <ref>`, `MIGRATION_BASE_REF` mainīgais vai, ja `GITHUB_EVENT_NAME` ir `pull_request`, `pull_request_target` vai `merge_group`, sapludināšanas izpildes pirmais vecākais, notikuma lietderīgās slodzes `merge_group.base_sha` vai `git merge-base HEAD origin/$GITHUB_BASE_REF`. Izvilkšanas pieprasījuma vai sapludināšanas rindas izpildē bez atrisināmas bāzes vārti neizdodas. Ārpus CI bez `--base` tas drukā `comparação com a base: pulada (sem --base)` un izlaiž šos noteikumus.
+
+`--base-latest-tag` tiek salīdzināts ar jaunāko laidiena tagu (`vX.Y.Z` semver secībā; sufiksēti tagi, piemēram, naktskrekli, netiek skaitīti), kas ir `HEAD` vēsturē, ar tādiem pašiem noteikumiem kā `--base`. Release-Green (`scripts/quality/validate-release-green.mjs`) palaiž vārtus šādā veidā, jo push un ieplānotajām izpildēm nav pull pieprasījumu bāzes un sapludināšana var tikt veikta bez jaunas CI izpildes. Ja vēsturē nav izlaiduma atzīmes, vārti neizdodas; palaist `git fetch --tags` (in CI, `actions/checkout` ar `fetch-depth: 0` ienes tagus).
+
+| Izmaiņas vilkšanas pieprasījumā                                                                          | Rezultāts                                                                                                                                                                                                                                                                                                                                                 |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pamatnē esošais fails tiek pārdēvēts ar `RENAMED_MIGRATION_COMPATIBILITY` ierakstu                       | **Brīdinājums** ja saturs ir identisks un komutācijas pārbaude tiek veikta neatkarīgi no jaunā laikspiedola; tas neizdodas, ja jaunā pozīcija maina galīgo shēmu (atsauc pārdēvēšanu vai izvēlieties citu jaunu laika zīmogu, kur tas pārvietojas) vai ja skrējējs atkārtoti lietotu pārdēvēto failu jauninātā datu bāzē.** Neizdevās** ja mainās saturs. |
+| Pamatā esošais fails tiek pārdēvēts, saglabājot tā laikspiedolu (mainās tikai apraksts)                  | **Neizdevās** , ar vai bez ieraksta: skrējējs to lietotu vēlreiz (ar ierakstu) vai izlaistu to pēc versijas (bez viena). Izmantojiet citu laikspiedolu un saderības ierakstu vai saglabājiet nosaukumu.                                                                                                                                                   |
+| Pamatā esošais fails tiek izdzēsts vai pārdēvēts bez ieraksta                                            | **Neizdevās** , neatkarīgi no tā, vai fails ir vai nav laidiena tagā. Lai to atsauktu, atjaunojiet failu ar `git checkout <base> -- src/lib/db/migrations/<file>`; lai atgrieztu tās shēmu, pievienojiet jaunu migrāciju ar `DROP ... IF EXISTS`.                                                                                                         |
+| Pamatā esošajam failam ir atšķirīgs saturs                                                               | **Brīdinājums** ( `::warning` anotācija sadaļā GitHub Actions), un tiek veikta komutācijas pārbaude. Tas neizdodas, ja rediģēšana maina galīgo shēmu, jo jauninātās datu bāzes vairs nepiemēro rediģēto failu: ievietojiet izmaiņas jaunā migrācijā. Nekaitīgs labojums (komentārs, `IF NOT EXISTS`) tikai brīdina.                                       |
+| Fails ar laikspiedolu tiek pievienots ar laika zīmogu, kas nav jaunāks par bāzes jaunāko                 | Palaiž komutācijas pārbaudi, kas aprakstīta tālāk.                                                                                                                                                                                                                                                                                                        |
+| Vecā formāta `NNN_` fails tiek pievienots ar numuru zem bāzes jaunākā vecā formāta faila                 | **Neizdevās** , pat ja `KNOWN_GAPS` ir rediģēts tajā pašā izvilkšanas pieprasījumā: vecā sērija ir iesaldēta, izveidojiet migrāciju ar `npm run db:new-migration`. Vecā formāta faili, kas pārsniedz bāzes jaunāko (no `release/v*` uz `main` pull pieprasījumu), tiek pieņemti.                                                                          |
+| Nesakārtots, rediģēts vai pārdēvēts fails satur `INSERT`, `UPDATE`, `DELETE` vai `REPLACE` priekšrakstus | **Brīdinājums** : komutācijas pārbaude nesalīdzina datus, tāpēc pārbaudiet, vai secība, kādā jauninātās un jaunākās datubāzes to lieto, maina rezultātu.                                                                                                                                                                                                  |
+
+Vienā komutācijas pārbaudes gājienā kopā tiek iekļauti ārpus kārtas, rediģētie un pārdēvētie faili.
+
+Komutācijas pārbaude (`scripts/check/migration-commutation.ts`) izveido divas pagaidu datu bāzes ar reālo instalēšanas ceļu: an** jaunināts** viens (sāknēšana ar pamata migrāciju, pēc tam atkal sāknēšana tajā pašā failā ar vilkšanas pieprasījuma migrāciju) un** svaigs** viens (viena sāknēšana ar vilkšanas pieprasījuma migrāciju). Tas salīdzina iegūtās shēmas: tabulas un kolonnas (ignorējot kolonnu secību), UNIQUE / PRIMARY KEY un FOREIGN KEY ierobežojumus, katras tabulas normalizēto `CREATE TABLE` tekstu (kas aptver CHECK ierobežojumus, salīdzinājumus, ģenerētās kolonnas un tabulas opcijas), indeksus, trigerus un skatus. Rindas dati netiek salīdzināti. Ja tie sakrīt, vārti izdrukā, ka fails nav kārtībā, bet pārvietojas uz darbu un mājām, un iet garām. Ja tie atšķiras, vārti neizdodas ar atšķirību un mājienu gadījumam: failam, kas nav kārtībā, reģenerējiet tā nosaukumu ar `npm run db:new-migration`, kas ir droši, jo fails vēl nav sapludināts; rediģētam bāzes failam atjauno bāzes saturu un ievietojiet izmaiņas jaunā migrācijā; pārdēvētam failam atsauciet pārdēvēšanu vai izvēlieties citu jaunu laikspiedolu vietā, kur tas pārvietojas, nekad neizmantojiet to pašu laikspiedolu ar citu nosaukumu. Ja pati pārbaude nevar palaist, vārti neizdodas CI un brīdina tikai lokāli. Rediģētam bāzes failam jauninātā datu bāze tiek veidota ar šī faila bāzes saturu, un otrā sāknēšana to izlaiž, jo tā versija jau ir ierakstīta. Pārdēvētam failam jauninātā datu bāze tiek veidota ar failu ar tā veco nosaukumu, un otrā sāknēšana pārvieto savu `_omniroute_migrations` rindu caur saderības ierakstu, nevis palaiž to vēlreiz; vārti nodod jauno nosaukumu ar `--must-not-apply`, tāpēc pārbaude neizdodas, ja otrā sāknēšana to piemēro. Ja izvilkšanas pieprasījuma migrāciju neizdodas lietot jauninātajā ceļā, tas ir, pēc katras bāzes migrācijas (neatkarīgi no tā, vai tā neizdodas arī jaunas instalēšanas gadījumā), vārti ziņo `migration do PR não aplica` un lūdz labot SQL atbilstoši bāzes pašreizējai shēmai; ja fails ir atkarīgs no citas vilkšanas pieprasījuma migrācijas ar vēlāku laikspiedolu, atjaunojiet tā nosaukumu ar `npm run db:new-migration`.
+
+Lai veiktu to pašu salīdzinājumu lokāli, precīzi nododiet bāzi, piemēram, `npm run check:migration-numbering -- --base origin/<base-branch>` vai `npm run check:migration-numbering -- --base-latest-tag` lai salīdzinātu ar jaunāko laidienu.
+
+### Atvērtā PR `NNN` migrācijas konvertēšana
+
+Izvilkšanas pieprasījums, kas atvērts pirms slēdža, joprojām var saturēt secīgu failu, piemēram, `242_add_widgets.sql`. Vecie skaitļi virs `241` tiek noraidīti, tāpēc pirms apvienošanas konvertējiet tos:
+
+1. **Pārdēvējiet failu ar ģeneratoru, saglabājot aprakstu.** Palaidiet `npm run db:new-migration -- <same description>`, lai iegūtu jauno nosaukumu, pārvietojiet tajā SQL un izdzēsiet veco `NNN_` failu. Aprakstam ir jāpaliek identiskam: zemāk esošais saderības ieraksts atbilst tam.
+2. **Pievienojiet saderības ierakstu, ja pastāvīgā datu bāzē tika palaists vecais numurs.** Ja kāda saglabātā datu bāze (homologs, VPS, paša līdzstrādnieka instalācija) palaida PR būvējumu ar `NNN_` failu, pievienojiet `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` `RENAMED_MIGRATION_COMPATIBILITY` failā `src/lib/db/migrationRunner/constants.ts`. Tas ir** nepieciešams no `237` uz `241`** : tagad šajos slotos ir kanoniskais `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` un `241_seen_models.sql`, un bez ieraksta šāda datu bāze uz visiem laikiem izlaiž kanonisko migrāciju un atkal palaiž konvertēto. Tas darbojas arī slotā, kas paliek tukšs, piemēram, `242`, ja galamērķis ir laikspiedols. Ja rodas šaubas, pievienojiet ierakstu. Kur to pievienojat masīvā, nav nozīmes: ja ieraksta mērķa slotā joprojām ir rinda, no kuras cits ieraksts attālinās (piemēram, `237` tur PR rindu, bet vecāka `usage_history_calculated_cost` rinda gaida, lai pārvietotos uz `237`), skrējējs ļauj šim ierakstam gaidīt, līdz slots ir brīvs. Tikai reāls konflikts, piemēram, slots, kas atrodas rindā, kurā neviens ieraksts nepārvietojas, vai divi ieraksti, kas apmaina slotus, aptur sāknēšanu ar `Cannot reconcile ...`.
+3. **Saglabājiet SQL idempotentu** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), jo konvertētā migrācija var saskarties ar datu bāzi, kurā jau pastāv tās shēma.
+4. **Pārvietojiet īpašos gadījumus, kuriem ir noteikta versija.** Ja PR pievienoja burtu savam vecajam numuram `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) vai `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), nomainiet atslēgu uz jauno laikspiedolu.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` ir pārdēvētas migrācijas pārbaudes darba piemērs.
+
+### Atpakaļportēšana uz filiālēm pirms pārslēgšanas
+
+Nekad nepārvietojiet `YYYYMMDDHHMMSS_` failu uz filiāli, kas ir pirms slēdža (piemēram, vecāku `release/v*` zaru). Tur skrējējs failu nosaukumus kārto kā tekstu, tāpēc fails ar laikspiedolu darbotos starp `201_` un `202_` jaunā datu bāzē, un vecie vārti tur nesaprot 14 ciparu prefiksus. Šādā zarā ierakstiet izmaiņas kā šīs filiāles nākamo `NNN_` failu idempotent, tāpēc tas ir no-op, ja versija ar laikspiedolu tiek saņemta vēlāk.
+
+### Kā notiek migrācijas
+
+Startēšanas laikā `migrationRunner.ts`:
+
+1. Izveido `_omniroute_migrations` tabulu, ja tā neeksistē
+2. Vaicājumi par jau lietotajām migrācijām
+3. Lietojiet visas jaunās migrācijas secībā, katra darījumā
+4. Ieraksta katru piemēroto migrāciju ar laikspiedolu
 
 ```ts
-// src/lib/db/migrationRunner.ts (vienkāršots)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -225,7 +288,7 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 
 ### Idempotence
 
-Migrācijām jābūt **idempotentām** — to atkārtota izpilde nedrīkst veikt nekādas izmaiņas:
+Migrācijām jābūt** idempotents** — izpildot tos divreiz, ir bezdarbība:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,27 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Plaši izmantojiet klauzulas `IF NOT EXISTS`, `IF EXISTS` un `OR IGNORE` / `OR REPLACE`.
+Izmantojiet `IF NOT EXISTS`, `IF EXISTS` un `OR IGNORE` / `OR REPLACE` klauzulas brīvi.
 
 ### Jaunas migrācijas pievienošana
 
-1. **Nosakiet nākamo numuru**: `ls src/lib/db/migrations/ | tail -1`
-2. **Izveidojiet failu**: `NNN_my_change.sql`
-3. **Izmantojiet drošas DDL komandas**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Uzmanīgi aizpildiet esošos datus**: izmantojiet `UPDATE ... WHERE ...`, lai apstrādātu esošās rindas
-5. **Testējiet kopijā**: nekad neizpildiet nepārbaudītas migrācijas produkcijas vidē
+1. **Izveidojiet failu ar ģeneratoru** : `npm run db:new-migration -- <description>` (piemēram `npm run db:new-migration -- add combo priority`). Tas ieraksta `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` ar pašreizējo UTC laiku un komentāra galveni, pārvietojas vienu sekundi uz priekšu, ja tiek ņemts šis laikspiedols, un nekad nepārraksta failu. Neizvēlieties numuru ar roku.
+2. **Izmantojiet drošu DDL** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Rūpīgi aizpildiet datus** : izmantojiet `UPDATE ... WHERE ...`, lai apstrādātu esošās rindas
+4. **Pārbaudiet pasūtījumu un nosaukumu** : `npm run test:migrations:fresh` (visas migrācijas tukšā datu bāzē) un `npm run check:migration-numbering`
+5. **Tests uz kopijas** : nekad nepalaidiet nepārbaudītu migrāciju ražošanā
+6. **Tabulai, kas izveidota no koda, ir nepieciešama arī migrācija** : ja modulis arī laiski izveido tabulu (`CREATE TABLE IF NOT EXISTS`, tiek saglabāts kā pašārstniecības ceļš), migrācijai tā ir jāizveido ar to pašu DDL. Pretējā gadījumā tīrai instalēšanai un jauninātajai instalēšanai tiek izmantotas dažādas shēmas atkarībā no tā, vai šis koda ceļš tika palaists. `tests/unit/db/lazy-table-migration-guard.test.ts` skenē `src/` un `open-sse/` un neizdodas slinkā `CREATE` bez migrācijas (#20557). Piemērs: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Piemērs:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Ar iepriekšējām versijām nesaderīgas izmaiņas** (piemēram, kolonnu dzēšana) ir sarežģītas. OmniRoute NEATBALSTA versijas pazemināšanu — tiklīdz migrācija ir lietota, shēmas izmaiņas ir neatgriezeniskas. Plānojiet atbilstoši.
+> **Atpakaļ nesaderīgas izmaiņas** (piem., kolonnu nomešana) ir sarežģītas. OmniRoute vai NOT atbalsta — pazemināšanu, tiklīdz tiek lietota migrācija, shēmas izmaiņas ir neatgriezeniskas. Plānojiet atbilstoši.
 
 ---
 
@@ -407,22 +471,23 @@ Tiek izmantota SQLite tiešsaistes dublēšanas API — to var droši izpildīt,
 
 ### WAL režīms
 
-WAL pēc noklusējuma ir iespējots. Lielas rakstīšanas slodzes gadījumā apsveriet:
+WAL ir iespējots pēc noklusējuma. Ja ir liela rakstīšanas slodze, apsveriet:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Kontrolpunkts ik pēc 1000 lapām
-PRAGMA journal_size_limit = 67108864;  -- 64MB WAL ierobežojums
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute neiestata `journal_size_limit`. Kontrolpunkts pārvieto WAL kadrus galvenajā failā, bet WAL fails saglabā lielāko piešķirto izmēru. `OMNIROUTE_WAL_GUARD_MAX_MB` aizsargs tikai brīdina un palaiž `wal_checkpoint(RESTART)`; tas nav diska izmēra vāciņš.
 
 ### Indeksi
 
-Galvenie veiktspējas indeksi (migrācijas tos izveido automātiski):
+Galvenie veiktspējas indeksi (automātiski izveidoti, migrējot):
 
-- `idx_models_provider` — modeļu meklēšana pēc nodrošinātāja
-- `idx_combo_targets_combo_id` — kombināciju mērķu izvēršana
+- `idx_models_provider` — modeļu meklēšana pēc pakalpojumu sniedzēja
+- `idx_combo_targets_combo_id` — kombinētā mērķa paplašināšana
 - `idx_usage_history_api_key_timestamp` — lietojuma analītika
-- `idx_quota_snapshots_api_key_window` — kvotu uzskaite
-- `idx_call_logs_timestamp` — izsaukumu žurnāla vaicājumi
+- `idx_quota_snapshots_api_key_window` — kvotu izsekošana
+- `idx_call_logs_timestamp` — zvanu žurnāla vaicājumi
 
 Lai pievienotu jaunu indeksu, izveidojiet migrāciju:
 
@@ -431,24 +496,24 @@ Lai pievienotu jaunu indeksu, izveidojiet migrāciju:
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Atmiņā kartēta ievade/izvade
+### I/O ar atmiņas kartēšanu
 
-Ļoti lielām datubāzēm (>10GB) atmiņas kartēšanu var pielāgot, izmantojot SQLite pragma:
+Ļoti lielām datu bāzēm (> 10GB) atmiņas kartēšanu var pielāgot, izmantojot SQLite pragma:
 
 ```sql
--- Iestatiet, izmantojot SQLite pragma (pielāgojiet failā core.ts vai izpildlaikā)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Sablīvēšana
+### Blīvēšana
 
-Ilgstoši darbinātām OmniRoute instancēm ir lietderīgi periodiski izpildīt `VACUUM`:
+Ilgstoši OmniRoute gadījumi gūst labumu no neregulārām `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Izpildiet reizi mēnesī zemas noslodzes periodos. (WAL režīms samazina nepieciešamību, bet pilnībā to nenovērš.)
+Palaist katru mēnesi zemas satiksmes logos. (WAL režīms samazina nepieciešamību, bet nenovērš to.)
 
 ---
 

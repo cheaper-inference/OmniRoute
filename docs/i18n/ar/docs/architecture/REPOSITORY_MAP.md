@@ -4,593 +4,627 @@
 
 ---
 
-> **وصف من سطر واحد لكل دليل وملف في الجذر.**
-> آخر تحديث: 2026-06-28 — OmniRoute v3.8.40
+> **ما الذي يعيش فيه: كل دليل عالي المستوى وملف جذر يتم تعقبه، لغرض مكون من سطر واحد.** آخر تحديث: 13-11-2026 (OmniRoute v3.8.54)
 >
-> استخدم هذه الخريطة للتنقل بسرعة في قاعدة الشفرة. وللتعمق، اتبع الروابط المؤدية إلى الوثائق المخصصة.
+> استخدم هذه الخريطة للعثور على طريقك حول قاعدة التعليمات البرمجية، ثم اتبع الروابط إلى المستندات المخصصة. تم قياس عدد الملفات باستخدام `git ls-files` في التاريخ أعلاه. إنها تتغير مع كل إصدار تقريبًا، لذا تعامل معها على أنها أوامر من حيث الحجم.
 
 ## شجرة المستوى الأعلى
 
 ```
 OmniRoute/
-├── src/                  # تطبيق Next.js 16 (واجهة المستخدم + مسارات API + المكتبات + النطاق + الخادم)
-├── open-sse/             # مساحة عمل محرك البث (المعالجات، والمنفّذات، والمترجم، وخادم MCP)
-├── packages/            # مساحات عمل npm: ‏ui-kit (حزمة Keak CI UI Kit المضمّنة) وbrowser-pool
-├── electron/             # غلاف سطح المكتب (Electron 41 + electron-builder 26.10)
-├── bin/                  # نقطة دخول CLI ومعالجات الأوامر
-├── scripts/              # سكربتات البناء، والتحقق، والمزامنة، والمهام ذات الاستخدام الواحد
-├── docs/                 # الوثائق العامة (أنت هنا)
-├── tests/                # جميع مجموعات الاختبارات (الوحدة، والتكامل، وe2e، وعملاء البروتوكولات)
-├── public/               # أصول Next.js الثابتة، وبيان PWA، وعامل الخدمة، والأيقونات
-├── config/               # الإعدادات الثابتة + حالة بوابة الجودة (i18n، وpayloadRules، وquality/)
-├── images/               # أصول الصور للتسويق / README
-├── @omniroute/           # حزم مصاحبة قابلة للنشر (opencode-plugin، وopencode-provider)
-├── skills/               # حزم مهارات CLI/الوكلاء (cli-* + omni-* + config-codex-cli)
-├── examples/             # إضافات نموذجية + مشروع omniroute-cmd-hello الابتدائي
-├── contrib/              # مساهمات المجتمع (podman/)
-├── .source/              # إعدادات مصدر Fumadocs ‏(source.config.mjs + server/browser/dynamic)
-├── .github/              # تدفقات عمل GitHub Actions + قوالب المشكلات + قالب PR
-├── .husky/               # خطافات Git ‏(pre-commit، وpre-push)
-├── .claude/              # أوامر Claude Code ذات الشرطة المائلة (ضمن نطاق المشروع)
-├── .agents/              # تدفقات عمل ومهارات Codex / الوكلاء العامة (نسخة مطابقة من .claude/)
-├── .vscode/              # إعدادات مساحة عمل VS Code
-├── _ideia/               # ملاحظات التخطيط (غير رسمية؛ لا تُضمَّن في الإصدار)
-├── _mono_repo/           # مشروعات فرعية تاريخية (cloud، وsite، وvscode-extension)
-├── _references/          # نسخ مرجعية للقراءة فقط من مشروعات OSS ذات صلة
-├── _tasks/               # ملفات تتبع المهام لكل إصدار (غير رسمية)
-├── .build/ .worktrees/ dist/   # مساحة مؤقتة للبناء المحلي / أشجار عمل git / مخرجات البناء (يتجاهلها git)
-├── .issues/              # ذاكرة تخزين مؤقت محلية للمشكلات (يتجاهلها git)
-├── .playwright-mcp/      # نواتج اختبارات Playwright MCP
-├── coverage/             # مخرجات تغطية c8 (يتجاهلها git)
-├── logs/                 # سجلات وقت التشغيل (يتجاهلها git)
-├── node_modules/         # التبعيات (يتجاهلها git)
-├── package/              # منطقة تجهيز npm pack (ناتج بناء)
-├── .next/                # مخرجات بناء Next.js (يتجاهلها git)
-└── (ملفات الجذر — انظر أدناه)
+├── src/              # Next.js 16 app: dashboard, /api and /v1 routes, server libs, domain, i18n
+├── open-sse/         # Streaming engine workspace (@omniroute/open-sse): handlers, executors, translator, services, MCP server
+├── packages/         # npm workspaces: ui-kit (vendored Keak CI UI Kit) and browser-pool
+├── @omniroute/       # Separately published npm packages (OpenCode plugins and provider)
+├── bin/              # Published `omniroute` CLI, MCP/bridge entry points, self-host ops scripts (*.sh)
+├── electron/         # Desktop app (Electron main/preload + helpers + icons)
+├── public/           # Static assets served by Next.js (provider logos, PWA icons, sw.js, openapi.yaml copy)
+├── skills/           # Agent Skills (SKILL.md) served by /api/agent-skills, MCP and A2A
+├── tests/            # All test suites: unit, integration, e2e, homolog, fixtures, snapshots
+├── scripts/          # Build, quality gates, i18n, release, ops, perf and one-off scripts (allow-listed subfolders)
+├── config/           # Versioned config: i18n, payload rules, CLI manifest, quality-gate baselines, release inventories
+├── changelog.d/      # Per-PR changelog fragments, aggregated into CHANGELOG.md at release time
+├── docs/             # Public documentation (served at /docs via Fumadocs) + translated mirrors in docs/i18n/
+├── examples/         # Example plugins and quickstart clients
+├── deploy/           # Kubernetes deployment: Helm chart + Kustomize base/overlays
+├── docker/           # Auxiliary container images (not the main image, which is the root Dockerfile)
+├── contrib/          # Community recipes: Podman quadlets, VPS compose, Windows launchers, session-sync note
+├── .github/          # GitHub Actions workflows, composite actions, issue/PR templates, CODEOWNERS, labels
+├── .husky/           # Tracked git hooks: commit-msg, pre-commit, pre-push
+├── .vale/            # Vale prose-lint vocabulary (styles/Vocab/OmniRoute/accept.txt)
+├── .vscode/          # Shared VS Code workspace settings (settings.json)
+└── (root files — see below)
+```
+
+المسارات المحلية أو المُنشأة أو الخاصة (جميعها تم تجاهلها، ولم يتم الالتزام بها مطلقًا، ولم يتم وصفها بشكل أكبر):
+
+```
+node_modules/            # npm dependencies
+.build/                  # Next.js build output (default distDir .build/next, see next.config.mjs)
+dist/                    # npm staging directory assembled by scripts/build/prepublish.ts
+.source/                 # fumadocs-mdx output that feeds the /docs viewer
+.husky/_/                # Husky runtime generated on install (core.hooksPath target)
+coverage/ logs/ test-results/ playwright-report/   # coverage, runtime logs, Playwright output
+.env                     # local secrets generated from .env.example
+_*/                      # private local-only folders (anchored /_* ignore); never tracked
+.claude/ .agents/        # local AI-assistant state and skills; never tracked
 ```
 
 ---
 
 ## ملفات الجذر
 
-| الملف                                       | الغرض                                                                                            |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| **README.md**                               | صفحة هبوط تسويقية + بدء سريع + مصفوفة الميزات (راجع أيضًا `llm.txt`)                             |
-| **CHANGELOG.md**                            | سجل التغييرات لكل إصدار (يُنشأ تلقائيًا بواسطة مهارة `/version-bump-cc`)                         |
-| **LICENSE**                                 | نص ترخيص MIT                                                                                     |
-| **CLAUDE.md**                               | قواعد المشروع لوكلاء Claude Code (القواعد الصارمة، والاصطلاحات، والسيناريوهات)                   |
-| **AGENTS.md**                               | مماثل لـ CLAUDE.md ولكن لوكلاء الذكاء الاصطناعي من غير Claude (Codex وCursor وغيرهما)            |
-| **GEMINI.md**                               | قواعد موجزة للوكلاء المستندين إلى Gemini (مجموعة فرعية من CLAUDE.md)                             |
-| **CONTRIBUTING.md**                         | دليل المساهمين: الإعداد، والالتزامات التقليدية، والاختبار، ومسار طلبات السحب                     |
-| **SECURITY.md**                             | سياسة الإبلاغ عن الثغرات، والإصدارات المدعومة، ونموذج التهديدات                                  |
-| **CODE_OF_CONDUCT.md**                      | ميثاق المساهمين — توقعات سلوك المجتمع                                                            |
-| **llm.txt**                                 | صفحة هبوط بنص عادي مُحسّنة لزواحف نماذج اللغة الكبيرة (تحسين الظهور لدى مساعدي الذكاء الاصطناعي) |
-| **package.json**                            | بيان npm، والبرامج النصية، والتبعيات، والمحركات، وبوابة تغطية c8                                 |
-| **package-lock.json**                       | شجرة التبعيات المقفلة                                                                            |
-| **tsconfig.json**                           | إعداد TypeScript الجذري                                                                          |
-| **tsconfig.typecheck-core.json**            | إعداد التحقق من الأنواع لنواة `src/`                                                             |
-| **tsconfig.typecheck-noimplicit-core.json** | تحقق صارم من الأنواع (`noImplicitAny`)                                                           |
-| **tsconfig.tsbuildinfo**                    | ذاكرة تخزين مؤقت للبناء التزايدي في TS (يتجاهلها git)                                            |
-| **next.config.mjs**                         | إعداد بناء Next.js 16 (مخرجات مستقلة)                                                            |
-| **next-env.d.ts**                           | أنواع البيئة المُنشأة تلقائيًا بواسطة Next.js                                                    |
-| **eslint.config.mjs**                       | إعداد ESLint المسطح (قواعد لكل نطاق في المشروع)                                                  |
-| **prettier.config.mjs**                     | قواعد التنسيق في Prettier                                                                        |
-| **postcss.config.mjs**                      | إعداد PostCSS لمسار معالجة Tailwind/CSS                                                          |
-| **playwright.config.ts**                    | إعداد اختبارات Playwright الشاملة                                                                |
-| **vitest.config.ts**                        | إعداد Vitest (الحزمة الافتراضية)                                                                 |
-| **vitest.mcp.config.ts**                    | إعداد Vitest لخادم MCP / حزم autoCombo / ذاكرة التخزين المؤقت                                    |
-| **sonar-project.properties**                | إعداد SonarQube/SonarCloud (جودة الشفرة)                                                         |
-| **Dockerfile**                              | بناء Docker متعدد المراحل (builder → runner-base → runner-cli)                                   |
-| **docker-compose.yml**                      | إعداد Compose للتطوير بأربعة ملفات تعريف (base وcli وhost وcliproxyapi) + حاوية redis جانبية     |
-| **docker-compose.prod.yml**                 | إعداد Compose للإنتاج (المنفذ 20130، وredis، ووحدات تخزين مسماة)                                 |
-| **.dockerignore**                           | الملفات المستبعدة من سياق Docker                                                                 |
-| **fly.toml**                                | إعداد النشر على Fly.io (المنطقة `sin`، والمنفذ 20128، ووحدة التخزين /data)                       |
-| **.env.example**                            | قالب ملف البيئة (يُنسخ تلقائيًا إلى `.env` عند التثبيت الأول)                                    |
-| **.gitignore**                              | أنماط التجاهل في Git                                                                             |
-| **.npmignore**                              | قائمة الاستبعاد عند النشر إلى npm                                                                |
-| **.npmrc**                                  | إعداد npm (السجل، وسياسة ملف القفل)                                                              |
-| **.node-version**                           | تثبيت إصدار Node (تستخدمه الأدوات المتوافقة مع nvm)                                              |
-| **.nvmrc**                                  | تثبيت إصدار Node لـ nvm                                                                          |
-| **eslint.complexity.config.mjs**            | إعداد ESLint لآلية ضبط التعقيد (`scripts/check/check-complexity.mjs --config`)                   |
-| **eslint.sonarjs.config.mjs**               | إعداد ESLint لقواعد SonarJS (التعقيد المعرفي / التكرار)                                          |
-| **source.config.ts**                        | إعداد مصدر Fumadocs باستخدام `defineDocs` (يغذي `.source/`)                                      |
-| **knip.json**                               | إعداد Knip — الملفات/التصديرات/التبعيات غير المستخدمة (يغذي بوابة الشفرة الميتة)                 |
-| **stryker.conf.json**                       | إعداد اختبار الطفرات في Stryker                                                                  |
-| **.size-limit.json**                        | إعداد ميزانية حزمة size-limit                                                                    |
-| **promptfooconfig.yaml**                    | إعداد تقييم promptfoo                                                                            |
-| **.gitleaks.toml**                          | مجموعة قواعد فحص الأسرار في gitleaks                                                             |
-| **.zizmor.yml**                             | إعداد تدقيق الأمان لإجراءات GitHub باستخدام zizmor                                               |
-| **socket.yml**                              | إعداد سلسلة التوريد في Socket.dev                                                                |
-| **news.json**                               | موجز إعلانات v2 مترجم؛ يُطرح عنصر إطلاق Radar غير نشط                                            |
-| **flake.nix** / **flake.lock**              | تعريف صدفة تطوير Nix + ملف القفل                                                                 |
-| **.env**                                    | أسرار محلية (يتجاهلها git — مُنشأة من `.env.example`)                                            |
+جميع الملفات المتعقبة في جذر المستودع (`git ls-files | grep -v /`)، مجمعة حسب الوظيفة.
 
-> **نُقلت من الجذر في v3.8.26 (لتقليل الفوضى):**
->
-> - **→ `config/quality/`:** `quality-baseline.json`، و`complexity-baseline.json`، و`duplication-baseline.json`، و`file-size-baseline.json`، و`test-discovery-baseline.json`، و`dependency-allowlist.json`، و`.license-allowlist.json`، وملف `quality-metrics.json` المُنشأ (يتجاهله git). راجع [`## config/`](#config--static-configs--quality-gate-state).
+### وثائق المشروع
+
+| ملف                      | غاية                                                                      |
+| ------------------------ | ------------------------------------------------------------------------- |
+| `README.md`              | الصفحة المقصودة: نظرة عامة على الميزات والبدء السريع وطرق التثبيت         |
+| `CHANGELOG.md`           | سجل التغيير لكل إصدار (يتم طي الأجزاء من `changelog.d/` هنا)              |
+| `ROADMAP.md`             | خارطة الطريق العامة                                                       |
+| `LICENSE`                | ترخيص MIT                                                                 |
+| `THIRD_PARTY_NOTICES.md` | إشعارات بشأن تعليمات برمجية خارجية مجمعة (على سبيل المثال، روابط wreq-js) |
+| `CONTRIBUTING.md`        | دليل المساهم: الإعداد، الالتزامات التقليدية، مصفوفة الاختبار، تدفق PR     |
+| `SECURITY.md`            | سياسة الإبلاغ عن نقاط الضعف                                               |
+| `CODE_OF_CONDUCT.md`     | توقعات سلوك المجتمع                                                       |
+| `llm.txt`                | ملخص مشروع نص عادي لبرامج الزحف والمساعدين LLM                            |
+
+### تعليمات مساعد الذكاء الاصطناعي
+
+| ملف         | غاية                                                                          |
+| ----------- | ----------------------------------------------------------------------------- |
+| `AGENTS.md` | مصدر واحد للحقيقة لكل مساعد AI : الاتفاقيات، وبوابات الجودة، والقواعد الصارمة |
+| `CLAUDE.md` | دلتا خاصة بكلود كود؛ واردات `AGENTS.md`                                       |
+| `GEMINI.md` | دلتا الجوزاء محددة. يشير إلى `AGENTS.md`                                      |
+
+توجد أيضًا أدلة متداخلة بجانب الكود الذي تصفه: `open-sse/services/AGENTS.md` و `src/lib/db/AGENTS.md`.
+
+### بيانات الحزمة وسلسلة أدوات العقدة
+
+| ملف                        | غاية                                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| `package.json`             | بيان npm: البرامج النصية، التبعيات، `engines`، `workspaces`، `files` المنشورة        |
+| `package-lock.json`        | شجرة التبعية المقفلة                                                                 |
+| `pnpm-workspace.yaml`      | قائمة مساحة عمل pnpm (`packages/*` و `open-sse`) والقائمة المسموح بها للإنشاء الأصلي |
+| `.npmrc` / `.npmignore`    | تكوين npm ونشر الاستثناءات                                                           |
+| `.node-version` / `.nvmrc` | دبابيس إصدار العقدة لمديري الإصدارات                                                 |
+| `flake.nix` / `flake.lock` | Nix dev shell وقفله                                                                  |
+| `Makefile`                 | اختصارات `make` التي تفوض البرامج النصية npm                                         |
+
+### إنشاء TypeScript و Next.js وdocs
+
+| ملف                                       | غاية                                                                                     |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `tsconfig.json`                           | التكوين الأساسي TypeScript والأسماء المستعارة للمسار (`@/*`، `@omniroute/open-sse`)      |
+| `tsconfig.typecheck-core.json`            | شريحة `npm run typecheck:core`                                                           |
+| `tsconfig.typecheck-noimplicit-core.json` | شريحة `npm run typecheck:noimplicit:core` ( `noImplicitAny` الصارمة).                    |
+| `tsconfig.typecheck-api.json`             | شريحة التحقق من نوع مسار واجهة برمجة التطبيقات (`scripts/check/check-api-typecheck.mjs`) |
+| `tsconfig.typecheck-dashboard.json`       | شريحة فحص نوع لوحة القيادة (`npm run check:dashboard-typecheck`)                         |
+| `tsconfig.build.json`                     | فحص نوع الإنتاج (`npm run typecheck:build`، `check:build-typecheck`)                     |
+| `tsconfig.mitm.json`                      | تكوين بناء MITM المستخدم بواسطة `scripts/build/buildMitm.mjs`                            |
+| `next.config.mjs`                         | تكوين Next.js 16 (إخراج مستقل، أسماء مستعارة لملف التعريف)                               |
+| `source.config.ts`                        | Fumadocs `defineDocs` config: أي أقسام `docs/` يتم تجميعها في `/docs`                    |
+| `postcss.config.mjs`                      | خط أنابيب PostCSS / Tailwind                                                             |
+
+### الوبر والتنسيق
+
+| ملف                                       | غاية                                                                                              |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `eslint.config.mjs`                       | التكوين المسطح الرئيسي ESLint (`npm run lint`، مع `config/quality/eslint-suppressions.json`)      |
+| `eslint.complexity-ratchets.config.mjs`   | التكوين المستقل الذي يستخدمه التعقيد والتعقيد المعرفي يتصاعد في تمريرة ESLint واحدة               |
+| `eslint.complexity.config.mjs`            | التكوين المستقل مع `complexity` + `max-lines-per-function` الأساسي فقط (يستخدم بواسطة الاختبارات) |
+| `prettier.config.mjs` / `.prettierignore` | قواعد Prettier والاستثناءات                                                                       |
+| `.editorconfig`                           | الإعدادات الافتراضية للمحرر (مسافة بادئة ذات مسافتين)                                             |
+| `.markdownlint.json`                      | لينت تخفيض السعر الاستشاري (`npm run lint:md`)                                                    |
+| `.vale.ini`                               | الوبر النثري الاستشاري (`npm run lint:prose`)، المفردات في `.vale/`                               |
+
+### الاختبارات والتقييم والتغطية
+
+| ملف                           | غاية                                                                                                      |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `vitest.config.ts`            | مجموعة jsdom Vitest : `npm run test:vitest:ui` (لوحة المعلومات `.tsx` والخطافات واختبارات memory/skills ) |
+| `vitest.mcp.config.ts`        | مجموعة العقدة Vitest : `npm run test:vitest` (MCP ، autoCombo، combo، API `.spec.ts`)                     |
+| `vitest.quarantine.config.ts` | يقوم بتشغيل الملفات المعزولة المدرجة في `config/quality/vitest-exclusions.json`                           |
+| `vitest.e2e-live.config.ts`   | أجنحة Vitest للخادم المباشر (`tests/e2e/ecosystem.test.ts`، `tests/e2e/protocol-clients.test.ts`)         |
+| `playwright.config.ts`        | Playwright E2E (`tests/e2e/**/*.spec.ts`, `npm run test:e2e`)                                             |
+| `stryker.conf.mjs`            | اختبار طفرة سترايكر (`npm run test:mutation`؛ يحسب `tap.testFiles` من `mutate`)                           |
+| `stryker.disablebail.mjs`     | متغير سترايكر بدون كفالة، لقياس تكرار الاختبار                                                            |
+| `promptfooconfig.yaml`        | مجموعة Quickfoo LLM للأمن                                                                                 |
+| `codecov.yml`                 | إعدادات تغطية تصحيح Codecov                                                                               |
+
+### Docker والنشر
+
+| ملف                               | غاية                                                                                        |
+| --------------------------------- | ------------------------------------------------------------------------------------------- |
+| `Dockerfile`                      | صورة متعددة المراحل (`builder` → `runner-base` → `runner-web` / `runner-cli*`)              |
+| `Dockerfile.bun`                  | صورة بديلة في وقت تشغيل Bun (تم إنشاؤها بواسطة `docker-publish.yml`)                        |
+| `docker-compose.yml`              | الإنشاء الافتراضي باستخدام الملفات الشخصية (قاعدة، ويب، cli، مضيف، ذاكرة، cliproxyapi، ...) |
+| `docker-compose.prod.yml`         | مثيل لقطة إنتاج منفصل على المنفذ 20130                                                      |
+| `docker-compose.selfhost.yml`     | مضيف ذاتي لاسترجاع أمر واحد (أزواج مع `.env.selfhost.example`)                              |
+| `docker-compose.ollama-local.yml` | Docker OmniRoute يتحدث إلى Ollama الأصلي                                                    |
+| `.dockerignore`                   | Docker استثناءات سياق البناء                                                                |
+| `fly.toml`                        | تكوين تطبيق Fly.io (المنفذ 20128، وحدة تخزين `/data` )                                      |
+
+### الروبوتات الأمنية وسلسلة التوريد والمستودعات
+
+| ملف                                          | غاية                                                                        |
+| -------------------------------------------- | --------------------------------------------------------------------------- |
+| `.gitleaks.toml`                             | قواعد الفحص السري والقوائم المسموح بها لـ gitleaks                          |
+| `.trivyignore`                               | عمليات منع المخاطر المقبولة لفحص صورة الحاوية                               |
+| `.zizmor.yml`                                | zizmor GitHub Actions Security-audit config                                 |
+| `socket.yml`                                 | تكوين تطبيق المقبس.dev (يتم تجاهل المسار؛ وليس بوابة CI )                   |
+| `sonar-project.properties`                   | تكوين مشروع SonarQube/SonarCloud                                            |
+| `knip.json`                                  | Knip تكوين files/exports/deps غير المستخدم (يغذي `npm run check:dead-code`) |
+| `.size-limit.json`                           | ميزانيات بحجم الحزمة                                                        |
+| `.mergify.yml`                               | دمج تكوين قائمة انتظار الدمج                                                |
+| `.coderabbit.yaml`                           | تكوين مراجعة CodeRabbit                                                     |
+| `.cbmignore`                                 | قائمة التجاهل لفهرس كود codebase-memory-mcp                                 |
+| `.gitignore` / `.gitattributes` / `.mailmap` | تجاهل القواعد ونهايات أسطر LF للنصوص البرمجية وهويات المؤلف الأساسية        |
+
+### قوالب البيئة والحالة والأعلاف
+
+| ملف                         | غاية                                                                     |
+| --------------------------- | ------------------------------------------------------------------------ |
+| `.env.example`              | تم نسخ القالب إلى `.env` عند التثبيت الأول؛ القائمة المرجعية لـ env vars |
+| `.env.selfhost.example`     | قالب `docker-compose.selfhost.yml`                                       |
+| `.env.homolog.example`      | نموذج لعداء التجانس (`npm run homolog`)                                  |
+| `.env.devin-bridge.example` | مثال لملف env لإعداد جسر Devin                                           |
+| `.i18n-state.json`          | حالة الترجمة التزايدية (تجزئات المصدر لكل مستند ولغة)                    |
+| `news.json`                 | خلاصة الإعلانات المترجمة (المخطط v2) التي تقرأها لوحة المعلومات          |
 
 ---
 
 ## تطبيق `src/` — Next.js
 
+حوالي 4550 ملفًا متعقبًا. المسار الاسم المستعار `@/*` → `src/*`.
+
 ```
 src/
-├── app/                 # App Router (pages + API routes + status pages + landing)
-├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
-├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
-├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
-├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
-├── i18n/                # next-intl config + per-locale message JSON (67 locales)
-├── middleware/          # Next.js middleware (request enrichment, locale detection)
-├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
-│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Model adapter glue (legacy shim)
-├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
-├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Legacy in-memory store (being phased out for src/lib/db)
-├── types/               # Shared TS type files
-├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
-├── instrumentation-node.ts  # Node-only instrumentation
-└── proxy.ts             # HTTP-proxy entry shim
+├── app/                  # App Router: pages, layouts and route handlers (file-convention loaded)
+│   ├── (dashboard)/      # Route group for the dashboard: dashboard/<section>/ pages + home widgets
+│   ├── api/              # HTTP routes: v1/ (OpenAI-compatible), v1beta/ (Gemini-style), management routes
+│   ├── docs/             # Embedded docs viewer (lib/openapi.generated.ts is generated)
+│   ├── a2a/ .well-known/ # A2A JSON-RPC entry point and Agent Card discovery
+│   ├── healthz/ livez/ readyz/ status/   # Health probes and status page
+│   ├── landing/ login/ auth/ authorize/ callback/ connect/   # Public, auth and OAuth pages
+│   ├── miniapp/          # Telegram Mini App page
+│   └── 400/ … 503/       # Static HTTP error pages
+├── lib/                  # Server-side libraries and domain modules (largest folder)
+├── shared/               # Code shared by server and client: components, constants, validation, utils
+├── sse/                  # Next.js side of the SSE pipeline: handlers/ (chat*), services/ (auth, leases, quotas)
+├── mitm/                 # MITM / TPROXY capture: cert/, dns/, handlers/, targets/, inspector/, tproxy/ (C addon)
+├── server/               # Server-only: authz/ (route guard pipeline), auth/, cors/, origin/, ws/
+├── domain/               # Policy engine, fallback, cost rules, lockout, quota cache, assessment/
+├── i18n/                 # next-intl: messages/ (67 locales), global-error-messages/ (generated), routeNamespaces.generated.json
+├── store/                # Zustand client stores (theme, notifications, …)
+├── hooks/                # Client hooks (live dashboard, compression preview, breaker health)
+├── types/                # Ambient and shared type declarations
+├── models/               # Compatibility barrel re-exporting db functions
+├── middleware/           # promptInjectionGuard.ts (facade over the guardrail system)
+├── scripts/              # backfillAggregation.ts (`npm run backfill-aggregation`)
+├── proxy.ts              # Next.js 16 proxy: headless gate + authz pipeline for dashboard, /api and /v1-style paths
+├── instrumentation.ts    # Next.js instrumentation hook (delegates Node-only work)
+└── instrumentation-node.ts   # Node-only startup work
 ```
 
-### جهاز توجيه التطبيقات `src/app/` — (Next.js 16)
+### جهاز توجيه تطبيق `src/app/` —
 
-| طريق                                                                         | غاية                                                                                                                                                                                                                                                                                                                     |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `app/api/v1/`                                                                | OpenAI-compat API العامة (~ 25 المسارات الفرعية: الدردشة، والإكمالات، والتضمينات، والملفات، والدفعات، والصوت، والصور، ومقاطع الفيديو، والموسيقى، وإعادة الترتيب، والإشراف، والبحث، وWS، والوكلاء، والحسابات، ومقدمي الخدمات، وما إلى ذلك)                                                                                |
-| `app/api/v1beta/`                                                            | نقاط النهاية API على غرار الجوزاء                                                                                                                                                                                                                                                                                        |
-| `app/api/playground/`                                                        | مسارات استوديو Playground: `improve-prompt/` (POST — LLM موجه الكاتب)، `presets/` ( قائمة GET / إنشاء POST )، `presets/[id]/` (GET / PUT / DELETE) — انظر `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                         |
-| `app/api/` (non-v1)                                                          | طرق Management/admin (أدلة ~ 60: مقدمو الخدمات، والمجموعات، والإعدادات، وmcp، وa2a، والتقييمات، والذاكرة، والمهارات، وخطافات الويب، والامتثال، والمرونة، والمراقبة، والأنفاق، وأدوات cli، وما إلى ذلك)                                                                                                                   |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 مسارًا (التحكم في الخادم، وكيل state/DNS/mappings، تجاوز، cert، upstream-ca). LOCAL_ONLY + SPAWN_CAPABLE. انظر `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                            |
-| `app/api/tools/traffic-inspector/`                                           | مفتش المرور REST + WS API — 16 طرق + (الطلبات، الجلسات، المضيفين، أوضاع الالتقاط، التصدير، ws). LOCAL_ONLY + SPAWN_CAPABLE. انظر `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                              |
-| `app/a2a/`                                                                   | نقطة دخول A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                                 |
-| `app/.well-known/agent.json/`                                                | بطاقة وكيل A2A (الاكتشاف)                                                                                                                                                                                                                                                                                                |
-| `app/(dashboard)/dashboard/`                                                 | صفحات UI للوحة المعلومات (50 قسم + ، ملفات ~ 118 page.tsx : الموفرون، المجموعات، الإعدادات، الذاكرة، المهارات، خطافات الويب، التقييمات، التدقيق، الدفعة، ذاكرة التخزين المؤقت، التكاليف، الصحة، النظام، النشاط، إلخ.)                                                                                                    |
-| `app/(dashboard)/dashboard/search-tools/`                                    | أدوات البحث Studio UI (3 علامات تبويب: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — راجع `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                      |
-| `app/(dashboard)/dashboard/memory/`                                          | استوديو الذاكرة (الخطة 21): `page.tsx` (3 علامات تبويب)، `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard)، `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab)، `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | صفحة لوحة معلومات AgentBridge بطاقة خادم — ، 9 بطاقات وكيل، معالج الإعداد، تعيين النموذج، قائمة التجاوز. i18n PT-BR + EN. انظر `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                         |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | صفحة لوحة تحكم Traffic Inspector، تقسيم — DevTools ، 7 علامات تبويب تفاصيل، 4 تبديلات لوضع الالتقاط، مسجل الجلسة، تلوين السياق. i18n PT-BR + EN. انظر `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                            |
-| `app/(dashboard)/dashboard/activity/`                                        | صفحة موجز النشاط (المجموعة ب): `page.tsx` (الخادم) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — راجع `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                 |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | صفحة مشاركة الحصص (المجموعة ب): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                              |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | صفحة تكوين خطة الموفر (المجموعة ب): أبعاد حصة `page.tsx` + `ProviderPlanConfigClient.tsx` — لكل تجاوز اتصال                                                                                                                                                                                                              |
-| `app/docs/`                                                                  | عارض الوثائق المضمن (يعرض `docs/*.md`)                                                                                                                                                                                                                                                                                   |
-| `app/landing/`                                                               | الصفحة المقصودة للتسويق                                                                                                                                                                                                                                                                                                  |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | الصفحات ذات الصلة بالمصادقة                                                                                                                                                                                                                                                                                              |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | صفحات خطأ HTTP                                                                                                                                                                                                                                                                                                           |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | صفحات Static/status                                                                                                                                                                                                                                                                                                      |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | تخطيط الجذر، الصفحة الرئيسية، بيان PWA ، CSS العالمي                                                                                                                                                                                                                                                                     |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | حدود الخطأ                                                                                                                                                                                                                                                                                                               |
+| طريق                                                                | غاية                                                                                                                                                                                             |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `app/api/v1/`                                                       | API العامة المتوافقة مع OpenAI: الدردشة، الإكمالات، الردود، الرسائل، التضمينات، الصور، الصوت، مقاطع الفيديو، الموسيقى، إعادة الترتيب، الإشراف، البحث، الملفات، الدفعات، ws، النماذج، ...         |
+| `app/api/v1beta/`                                                   | نقاط النهاية على غرار الجوزاء                                                                                                                                                                    |
+| `app/api/` (مجلدات أخرى)                                            | طرق الإدارة والإدارة: الموفرون، المجموعات، الإعدادات، المفاتيح، الاستخدام، السجلات، mcp، a2a، acp، الذاكرة، المهارات، التقييمات، خطافات الويب، الأنفاق، المكونات الإضافية، الرادار، الأدوات، ... |
+| `app/api/tools/agent-bridge/`                                       | AgentBridge REST API — [AGENTBRIDGE.md](../frameworks/AGENTBRIDGE.md)                                                                                                                            |
+| `app/api/tools/traffic-inspector/`                                  | مفتش المرور REST API — انظر [TRAFFIC_INSPECTOR.md](../frameworks/TRAFFIC_INSPECTOR.md)                                                                                                           |
+| `app/(dashboard)/dashboard/`                                        | مجلد واحد لكل قسم من لوحة المعلومات (المقدمون، المجموعات، السجلات، الاستخدام، التكاليف، ذاكرة التخزين المؤقت، الضغط، الذاكرة، الملعب، أدوات البحث، الإعدادات، الأدوات، ...)                      |
+| `app/(dashboard)/home/`                                             | الشاشة الرئيسية والحاجيات الخاصة بها                                                                                                                                                             |
+| `app/docs/`                                                         | يعرض عارض المستندات أقسام Fumadocs المدرجة في `source.config.ts`                                                                                                                                 |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`          | تخطيط الجذر، إدخال الجذر (عمليات إعادة التوجيه)، بيان PWA ، CSS العالمي                                                                                                                          |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx` | حدود الخطأ والاحتياطيات                                                                                                                                                                          |
 
-### المكتبات الأساسية `src/lib/` — (وحدات ~ 50)
+تتبع طرق API `Route → CORS → Zod validation → optional auth → policy → handler`; انظر [ARCHITECTURE.md](ARCHITECTURE.md) و [API_REFERENCE.md](../reference/API_REFERENCE.md).
 
-| الوحدة النمطية                              | غاية                                                                                                                                                                                                                                                                                                                  |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                      | مدير مهام بروتوكول A2A ، المهارات (5)، البث                                                                                                                                                                                                                                                                           |
-| `acp/`                                      | سجل وكيل CLI (اكتشاف CLI المحلي — راجع `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                    |
-| `api/`                                      | مساعدات API المشتركة (`requireManagementAuth`، التحقق من الصحة)                                                                                                                                                                                                                                                       |
-| `auth/`                                     | الجلسة، تجزئة كلمة المرور، التحقق من صحة الرمز المميز                                                                                                                                                                                                                                                                 |
-| `batches/`                                  | دفعات OpenAI معالجات API                                                                                                                                                                                                                                                                                              |
-| `catalog/`                                  | كتالوج الموفر Zod التحقق من صحة دقة قدرة +                                                                                                                                                                                                                                                                            |
-| `cloudAgent/`                               | وكلاء السحابة (Codex Cloud، Devin، Jules) — راجع `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                     |
-| `combos/`                                   | دقة التحرير والسرد + إعادة ترتيب المساعدين                                                                                                                                                                                                                                                                            |
-| `audit/`                                    | مساعدو موجز النشاط: `highLevelActions.ts` (القائمة المسموح بها + `isHighLevelAction()`)، `activityIcons.ts` (خريطة الإجراء → icon/verb )، `timeline.ts` (groupByDay/relativeTime) — راجع `docs/architecture/MONITORING_SECTIONS.md`                                                                                   |
-| `compliance/`                               | سجل التدقيق، تدقيق موفر + — راجع `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                        |
-| `compression/`                              | غراء محرك الضغط (المحركات تعيش في `open-sse/services/compression/`)                                                                                                                                                                                                                                                   |
-| `config/`                                   | مساعدو تكوين وقت التشغيل                                                                                                                                                                                                                                                                                              |
-| `db/`                                       | 120 + domain وحدات DB + 168 عمليات الترحيل (انتقل دائمًا من هنا لـ SQLite)                                                                                                                                                                                                                                            |
-| `quota/`                                    | محرك مشاركة الحصص: `dimensions.ts` (types/Zod) و `types.ts` ( واجهة QuotaStore ) و `sqliteQuotaStore.ts` و `redisQuotaStore.ts` و `storeFactory.ts` و `fairShare.ts` و `burnRate.ts` `planResolver.ts` `planRegistry.ts` و `saturationSignals.ts` `enforce.ts` `spendRecorder.ts` — See `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                    | عميل كتالوج النموذج الحر للرادار: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — راجع `docs/frameworks/RADAR.md`                                                                                                                                        |
-| `display/`                                  | مساعدو تنسيق UI (التكلفة، زمن الوصول، وما إلى ذلك)                                                                                                                                                                                                                                                                    |
-| `embeddings/`                               | مساعدين خدمة التضمين                                                                                                                                                                                                                                                                                                  |
-| `env/`                                      | تحليل متغير Env للتحقق من صحة +                                                                                                                                                                                                                                                                                       |
-| `evals/`                                    | إطار التقييم (الأجنحة، العداء، وقت التشغيل) — راجع `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                         |
-| `guardrails/`                               | قناع PII ، الحقن الفوري، جسر الرؤية — انظر `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                              |
-| `jobs/`                                     | وظائف الخلفية (مثل cron)                                                                                                                                                                                                                                                                                              |
-| `memory/`                                   | ذاكرة المحادثة (SQLite FTS5 + ، sqlite-vec hybrid RRF ، + ، Qdrant الطبقة 2) — انظر `docs/frameworks/MEMORY.md`                                                                                                                                                                                                       |
-| `memory/embedding/`                         | طبقة التضمين متعددة المصادر: `index.ts` (المحلل)، `remote.ts`، `staticPotion.ts`، `transformersLocal.ts`، `cache.ts`، `types.ts` (الخطة 21)                                                                                                                                                                           |
-| `memory/vectorStore.ts`                     | مجمع sqlite-vec v0.1.9 — KNN القوة الغاشمة + الهجين RRF (FTS5 + Vector، k = 60). Lazy-init، يتدهور بشكل جيد عند عدم توفر sqlite-vec. (الخطة 21)                                                                                                                                                                       |
-| `memory/reindex.ts`                         | يعالج `runReindexBatch()` — الذكريات باستخدام `needs_reindex=1` في الخلفية؛ يتم استدعاؤه بواسطة `POST /api/memory/reindex` ومسار الردم البطيء. (الخطة 21)                                                                                                                                                             |
-| `monitoring/`                               | الشيكات الصحية، وانبعاثات المقاييس                                                                                                                                                                                                                                                                                    |
-| `oauth/`                                    | تدفقات OAuth/import لـ 22 وحدة موفر (agy، antigravity، claude، cline، codebuddy-cn، codex، cursor، devin-desktop، ghe-copilot، github، gitlab-duo، grok-cli-oauth، grok-cli، Kilocode، kimi-coding، kiro، openference، qoder، trae، xai-oauth، zed-hosted، zed)                                                       |
-| `plugins/`                                  | تسجيل البرنامج المساعد                                                                                                                                                                                                                                                                                                |
-| `promptCache/`                              | نقاط توقف ذاكرة التخزين المؤقت السريعة ذات النمط الأنثروبي                                                                                                                                                                                                                                                            |
-| `skills/`                                   | إطار المهارات (سوق + المدمج + SkillsSH) — راجع `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                            |
-| `playground/`                               | مساعدو Playground Studio المشتركون: `codeExport.ts` (مولد curl/Python/TS )، `promptImprover.ts` (منشئ meta-prompt)، `streamMetrics.ts` (pure TTFT/TPS)، `types.ts` (جدول التسعير) — راجع `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                       |
-| `webhookDispatcher.ts`                      | تسليم HMAC webhook — راجع `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                               |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts`    | مديري الأنفاق — انظر `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                      |
-| `cloudSync.ts`, `initCloudSync.ts`          | مزامنة سحابية اختيارية للحالة                                                                                                                                                                                                                                                                                         |
-| `localDb.ts`                                | إعادة تصدير البرميل لوحدات قاعدة البيانات (لا توجد عمليات إعادة تصدير منطقية — فقط)                                                                                                                                                                                                                                   |
-| `cacheLayer.ts`, `idempotencyLayer.ts`      | طلب التخزين المؤقت + Idempotency                                                                                                                                                                                                                                                                                      |
-| (~ 30 المزيد من الملفات ذات المستوى الأعلى) | المساعدون المتخصصون (logEnv، modelsDevSync، piiSanitizer، إلخ.)                                                                                                                                                                                                                                                       |
+### مكتبات خادم `src/lib/` —
 
-### قاعدة بيانات `src/lib/db/` — (147 وحدة + 208 هجرات)
+ما يقرب من 90 مجلدًا فرعيًا بالإضافة إلى حوالي 90 وحدة من المستوى الأعلى. المجموعات الرئيسية:
 
-| فرعي                      | غاية                                                                                                                                                                                                                |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | `getDbInstance()` Singleton مع يومية WAL                                                                                                                                                                            |
-| `db/migrations/`          | ملفات SQL ذات الإصدارات (غير فعالة، معاملات). يضيف `073_memory_vec.sql` عمود `memory_vec_meta` + `needs_reindex` (الخطة 21).                                                                                        |
-| `db/playgroundPresets.ts` | وحدة CRUD لإعدادات Playground Studio المسبقة (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                                         |
-| `db/memoryVec.ts`         | CRUD لـ `memory_vec_meta` (active_dim، embedding_signature، last_reset_at، vec_loaded) + `markMemoryNeedsReindex`، `getMemoryReindexQueue`، وما إلى ذلك (الخطة 21)                                                  |
-| `db/<domain>.ts`          | وحدة واحدة لكل مجال: الموفرون، والمجموعات، apiKeys، والمستخدمون، والجلسات، والاستخدام، وسجل التدقيق، وخطافات الويب، والمهارات، وإدخالات الذاكرة، ومهام_وكيل_السحابة، والتقييمات* \* ، Reasoning_cache، وما إلى ذلك. |
+| منطقة                     | المجلدات / الملفات                                                                                                  | الغوص العميق                                                                                                                                   |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| قاعدة البيانات            | وحدات المجال `db/` — ، `migrations/`، `adapters/`، `repositories/`، `migrationRunner/`                              | [`src/lib/db/AGENTS.md`](../../src/lib/db/AGENTS.md) ، [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md)                                           |
+| الاستخدام والحصة والإنفاق | `usage/`, `quota/`, `spend/`                                                                                        | [QUOTA_SHARE.md](../routing/QUOTA_SHARE.md) ، [COST_TRACKING.md](../guides/COST_TRACKING.md)                                                   |
+| مقدمي الخدمات والنماذج    | `providers/`, `providerModels/`, `modelValidation/`, `catalog/`, `radar/`, `freeProxyProviders/`                    | [RADAR.md](../frameworks/RADAR.md), [MODEL-VALIDATION.md](../guides/MODEL-VALIDATION.md)                                                       |
+| OAuth وأوراق الاعتماد     | `oauth/` (مقدمو الخدمات/، الخدمات/، الأدوات/)، `zed-oauth/`، `copilot/`، `cursor/`، `credentialHealth/`             | `resolvePublicCred()` (مستند المشغل، لم يتم تقديمه للعامة)                                                                                     |
+| السلامة والحوكمة          | `guardrails/`, `compliance/`, `pii/`, `security/`                                                                   | [GUARDRAILS.md](../security/GUARDRAILS.md), [COMPLIANCE.md](../security/COMPLIANCE.md)                                                         |
+| مميزات الوكيل             | `a2a/`, `acp/`, `cloudAgent/`, `memory/`, `skills/`, `agentSkills/`                                                 | [AGENT_PROTOCOLS_GUIDE.md](../frameworks/AGENT_PROTOCOLS_GUIDE.md), [MEMORY.md](../frameworks/MEMORY.md), [SKILLS.md](../frameworks/SKILLS.md) |
+| الإضافات والخدمات         | `plugins/` و `services/` (مثبتو الخدمة المضمنة والمشرفون)                                                           | [PLUGINS.md](../frameworks/PLUGINS.md), [EMBEDDED-SERVICES.md](../frameworks/EMBEDDED-SERVICES.md)                                             |
+| التوجيه والمرونة          | `combos/`, `routing/`, `resilience/`, `reasoningRouting/`, `promptCache/`                                           | [RESILIENCE_GUIDE.md](RESILIENCE_GUIDE.md)                                                                                                     |
+| الوكلاء والشبكات          | `proxyHealth/`، `proxySubscription/`، `proxyRelay/`، `proxyEvents/`، وحدات النفق                                    | [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) ، [TUNNELS_GUIDE.md](../ops/TUNNELS_GUIDE.md)                                                          |
+| الوظائف والجدولة          | `jobs/`, `jobRegistry/`, `warmupScheduler/`                                                                         |                                                                                                                                                |
+| إمكانية الملاحظة والتصدير | `monitoring/`, `logExport/`, `webhooks/`, `audit/`, `events/`                                                       | [LOG-EXPORT.md](../frameworks/LOG-EXPORT.md), [WEBHOOKS.md](../frameworks/WEBHOOKS.md)                                                         |
+| التكامل CLI و IDE         | `cliTools/`, `cli-helper/`, `vscode/`, `inspector/`, `versionManager/`                                              | [CLI-TOOLS.md](../reference/CLI-TOOLS.md), [VSCODE-COPILOT.md](../guides/VSCODE-COPILOT.md)                                                    |
+| مصادر السياق              | `localCorpus/`, `notion/`, `obsidian/`                                                                              | [LOCAL_CORPUS_CONTEXT.md](../frameworks/LOCAL_CORPUS_CONTEXT.md)                                                                               |
+| ميزات أخرى                | `evals/`, `playground/`, `gamification/`, `telegram/`, `conductor/`, `batches/`, `deploy/`, `transfer/`, `sync/`, … | [EVALS.md](../frameworks/EVALS.md) ، [PLAYGROUND_STUDIO.md](../frameworks/PLAYGROUND_STUDIO.md)                                                |
 
-### `src/domain/`
+وحدات المستوى الأعلى تستحق المعرفة:
 
-| الوحدة النمطية         | غاية                                              |
-| ---------------------- | ------------------------------------------------- |
-| `policy.ts`            | محرك السياسة                                      |
-| `fallbackPolicy.ts`    | شجرة القرار الاحتياطية                            |
-| `costRules.ts`         | قواعد حساب التكلفة                                |
-| `lockoutPolicy.ts`     | سياسة تأمين Model/connection                      |
-| `tagRouter.ts`         | التوجيه القائم على العلامات                       |
-| `comboResolver.ts`     | دقة التحرير والسرد (يستخدمها محرك التحرير والسرد) |
-| `modelAvailability.ts` | التحقق من توفر كل نموذج                           |
-| `assessment/`          | تقييم النموذج (المرحلة الأولى من تقييم RFC-AUTO)  |
+| ملف                                                            | غاية                                                                    |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `cacheLayer.ts`, `idempotencyLayer.ts`, `semanticCache.ts`     | التخزين المؤقت للاستجابة والعجز                                         |
+| `webhookDispatcher.ts`                                         | تسليم خطاف الويب الموقع من HMAC                                         |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts`, `tailscaleTunnel.ts` | مدراء الأنفاق                                                           |
+| `tokenHealthCheck*.ts`, `tokenRefreshCircuit.ts`               | فحوصات صحة بيانات الاعتماد الخلفية ودائرة التحديث                       |
+| `streamingPiiTransform.ts`, `streamingCredentialTransform.ts`  | تدفق المطهرات الاستجابة                                                 |
+| `gracefulShutdown.ts`, `serverLifecycle.ts`                    | دورة حياة العملية                                                       |
+| `*.stub.ts`                                                    | تم تبديل بذرة ملف التعريف بواسطة الأسماء المستعارة في `next.config.mjs` |
 
-### `src/server/`
+### قاعدة بيانات `src/lib/db/` —
 
-| الوحدة النمطية | غاية                                                                                        |
-| -------------- | ------------------------------------------------------------------------------------------- |
-| `authz/`       | خط أنابيب التفويض: `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`        | تكوين CORS                                                                                  |
-| `auth/`        | الوسيطة للجلسة                                                                              |
+| طريق                  | غاية                                                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`          | `getDbInstance()` مفردة (مجلة WAL )                                                                                 |
+| `db/migrations/`      | هجرات `.sql` المرقمة وغير الفعالة (236 ملفًا في وقت كتابة هذا التقرير؛ ترقيم حراس `check-migration-numbering.mjs` ) |
+| `db/migrationRunner/` | عداء الهجرة                                                                                                         |
+| `db/adapters/`        | محولات برنامج تشغيل SQLite (better-sqlite3، العقدة:sqlite، الكعكة:sqlite، sql.js)                                   |
+| `db/repositories/`    | تطبيقات مستودع SQLite (المجموعات، الإعدادات المسبقة للملعب، تكوين التوجيه)                                          |
+| `db/<domain>.ts`      | حوالي 175 وحدة نطاق (الموفرون، المجموعات، apiKeys، الإعدادات، الاستخدام، ...) يقوم — دائمًا باستيرادها مباشرة       |
 
-### `src/shared/`
+### `src/domain/`, `src/server/`, `src/shared/`
 
-| الوحدة النمطية                   | غاية                                                                                                |
-| -------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `components/`                    | مكون لوحة المعلومات API: المحولات عبر `packages/ui-kit` — راجع `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: أسماء الأيقونات المستخدمة من قبل مكونات الشاشات → Lucide (`<Icon>`)                     |
-| `constants/providers.ts`         | **381 مقدم** مع التحقق من صحة Zod (مصدر الحقيقة)                                                    |
-| `constants/cliTools.ts`          | تسجيل أداة CLI الخارجية                                                                             |
-| `constants/routingStrategies.ts` | **20 استراتيجية توجيه** مع الأولويات                                                                |
-| `constants/publicApiRoutes.ts`   | الطرق التي تتطلب مصادقة الحامل (مقابل الإدارة).                                                     |
-| `constants/upstreamHeaders.ts`   | قائمة رفض الرأس لطلبات المنبع                                                                       |
-| `validation/schemas.ts`          | مخططات ~ 80 Zod (مصدر واحد للحقيقة لعقود API )                                                      |
-| `validation/helpers.ts`          | مساعدو التحقق من صحة Zod (`validateBody`، وما إلى ذلك)                                              |
-| `types/`                         | أنواع TS المشتركة                                                                                   |
-| `contracts/`                     | عقود API العامة (يستهلكها `files:` في `package.json`)                                               |
-| `utils/circuitBreaker.ts`        | قاطع الدائرة المزود (انظر `docs/architecture/RESILIENCE_GUIDE.md`)                                  |
-| `utils/apiAuth.ts`               | التحقق من صحة مفتاح API ، وفحص النطاق                                                               |
-| `utils/fetchTimeout.ts`          | أغلفة Timeout/abort للجلب المنبع                                                                    |
-| `utils/releaseNotes.ts`          | مغلق محلل إعلان v2/legacy ، والتوطين، وفصل ID                                                       |
+| طريق                                                           | غاية                                                                                                                                                |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `domain/policyEngine.ts`                                       | محرك السياسة                                                                                                                                        |
+| `domain/fallbackPolicy.ts`, `lockoutPolicy.ts`, `costRules.ts` | القرارات الاحتياطية، سياسة الإغلاق، قواعد التكلفة                                                                                                   |
+| `domain/quotaCache*.ts`, `quotaSnapshot*.ts`                   | ذاكرة التخزين المؤقت للحصة واستمرارية اللقطة                                                                                                        |
+| `domain/assessment/`                                           | التقييم النموذجي (المقيم، المصنف، المعالج الذاتي)                                                                                                   |
+| `server/authz/`                                                | خط أنابيب التفويض وحارس الطريق (`routeGuard.ts`) — راجع [AUTHZ_GUIDE.md](AUTHZ_GUIDE.md) ، [ROUTE_GUARD_TIERS.md](../security/ROUTE_GUARD_TIERS.md) |
+| `server/origin/`, `server/cors/`                               | Public/MCP/WS قرار الأصل و CORS — انظر [CORS.md](../security/CORS.md)                                                                               |
+| `server/ws/`                                                   | لوحة القيادة الحية لخادم WebSocket                                                                                                                  |
+| `shared/components/`                                           | مكونات لوحة المعلومات والمحولات عبر `packages/ui-kit` — راجع [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)                                                   |
+| `shared/constants/`                                            | كتالوج الموفرين (`providers.ts`)، استراتيجيات التوجيه، أدوات CLI ، خريطة الأيقونات، قائمة رفض رأس المنبع، ...                                       |
+| `shared/validation/`                                           | مخططات Zod ومساعدي التحقق من الصحة                                                                                                                  |
+| `shared/utils/`                                                | قاطع الدائرة، مصادقة مفتاح API، مهلات الجلب، إشارات الميزات، ...                                                                                    |
+| `shared/middleware/`, `network/`, `services/`, `hooks/`        | البرامج الوسيطة للدخول إلى الدردشة، ومساعدي الشبكة، وخدمات العملاء، وخطافات React                                                                   |
 
 ---
 
-## `open-sse/` — مساحة عمل محرك البث
+## مساحة عمل محرك التدفق `open-sse/` —
 
-مساحة عمل npm منفصلة (`@omniroute/open-sse`). تتولى معالجة الطلبات وتنفيذ موفّري الخدمة.
+مساحة عمل npm `@omniroute/open-sse` (حوالي 2390 ملفًا متعقبًا). يقوم بمعالجة الطلب وتنفيذ الموفر. نظرة عامة: [OPEN_SSE_ARCHITECTURE.md](../frameworks/OPEN_SSE_ARCHITECTURE.md).
 
 ```
 open-sse/
-├── handlers/            # 16 ملفًا (12 معالجًا + 4 أدوات مساعدة): chatCore، responsesHandler، embeddings، audio، image، video، music، rerank، moderations، search، وغيرها.
-├── executors/           # 150 وحدة تنفيذ (فئات توسّع BaseExecutor + أدوات مساعدة خاصة بكل موفّر)
-├── translator/          # محوّلات التنسيق (9 للطلبات، و9 للاستجابات، و9 أدوات مساعدة)
-├── transformer/         # Responses API ↔ Chat Completions‏ (TransformStream)
-├── services/            # أكثر من ~80 وحدة خدمة (combo، accountFallback، autoCombo، reasoningCache، وضع التخفي في claude code/chatgpt، modelDeprecation، taskAwareRouter، workflowFSM، وغيرها)
-├── mcp-server/          # خادم MCP‏ (110 أدوات، و3 وسائل نقل، و33 نطاقًا)
-├── config/              # سجلات الموفّرين/النماذج، وتهيئة الترويسات، والأسماء البديلة للنماذج
-├── utils/               # عميل TLS، وجلب/موزّع الوكيل، وأدوات الشبكة المساعدة
-├── index.ts             # نقطة دخول مساحة العمل
-├── package.json         # بيان مساحة العمل
-├── tsconfig.json        # تهيئة TS لمساحة العمل
-└── types.d.ts           # تعريفات الأنواع لمساحة العمل
+├── handlers/       # Request handlers: chatCore.ts + chatCore/, responses, embeddings, audio, imageGeneration/,
+│                   #   videoGeneration/, search/, fal/, mediaGeneration/, sseParser/, responseSanitizer/, …
+├── executors/      # Provider-specific HTTP dispatch, registered in executors/registry.ts; base/ holds shared recovery helpers
+├── translator/     # Format conversion: request/, response/, helpers/, image/, registry.ts, bootstrap.ts
+├── transformer/    # responsesTransformer.ts (Responses API ↔ Chat Completions TransformStream)
+├── services/       # Combo routing, rate limits, fallback, caching, usage, token refresh, compression (see below)
+├── config/         # Provider registry (config/providers/registry/<id>/), constants, model/media registries
+├── mcp-server/     # MCP server: tools/, schemas/, toolSearch/, transports, audit, scopes, __tests__/
+├── utils/          # Stream, error, TLS, proxy-fetch and logging utilities
+├── vendor/         # codex-chatgpt-web/ — vendored adapter (provenance in vendor.json)
+├── lib/            # DeepSeek proof-of-work worker and hash
+├── shared/         # zedAuth.ts
+├── index.ts        # Workspace entry
+└── package.json · tsconfig.json · types.d.ts
 ```
+
+### `open-sse/services/`
+
+| طريق                                                                                           | غاية                                                                                                                                                   |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `combo.ts` + `combo/`                                                                          | استراتيجيات التوجيه التحرير والسرد — انظر [AUTO-COMBO.md](../routing/AUTO-COMBO.md)                                                                    |
+| `autoCombo/`                                                                                   | مجموعات التسجيل والسرد التلقائي وحزم الوضع                                                                                                             |
+| `accountFallback.ts` + `accountFallback/`                                                      | فترة تهدئة الاتصال وتأمين النموذج — راجع [RESILIENCE_GUIDE.md](RESILIENCE_GUIDE.md)                                                                    |
+| `rateLimitManager.ts` + `rateLimitManager/`                                                    | تتبع الحد الأقصى للسعر وتحليل الرأس                                                                                                                    |
+| `compression/`                                                                                 | محركات الضغط (`engines/`)، حزم القواعد (`rules/`)، `eval/`، `harness/`، `riskGate/` — راجع [COMPRESSION_GUIDE.md](../compression/COMPRESSION_GUIDE.md) |
+| `tokenRefresh/`, `usage/`, `cache/`, `admission/`, `sessionPool/`, `codexAccount/`, `routing/` | تحديث الرمز المميز، ومحاسبة الاستخدام، والتخزين المؤقت، وممرات القبول، ومجموعات الجلسات، وحسابات Codex ، ومساعدي التوجيه                               |
+| `__tests__/`                                                                                   | مجموعات Vitest ذات الموقع المشترك (تم جمعها بواسطة تكوينات Vitest )                                                                                    |
+| `AGENTS.md`                                                                                    | دليل الوكيل لهذا المجلد                                                                                                                                |
+
+النمط: وحدة كبيرة `X.ts` بجوار المجلد `X/` تعني أن الوحدة مقسمة إلى ملفات أصغر (`handlers/chatCore.ts` + `handlers/chatCore/`, `services/combo.ts` + `services/combo/`).
 
 ### `open-sse/mcp-server/`
 
-| المسار                      | الغرض                                                                           |
-| --------------------------- | ------------------------------------------------------------------------------- |
-| `server.ts`                 | دورة حياة خادم MCP‏ (وسائل نقل stdio وHTTP)                                     |
-| `httpTransport.ts`          | وسائل نقل HTTP القابلة للبث وSSE‏ (`/api/mcp/sse`، `/api/mcp/stream`)           |
-| `audit.ts`                  | تسجيل التدقيق في جدول `mcp_tool_audit`                                          |
-| `scopeEnforcement.ts`       | التحقق من النطاق لكل أداة                                                       |
-| `runtimeHeartbeat.ts`       | نبضة سلامة إلى `DATA_DIR/runtime/mcp-heartbeat.json`                            |
-| `descriptionCompressor.ts`  | ضغط البيانات الوصفية لأوصاف الأدوات لتوفير السياق                               |
-| `schemas/tools.ts`          | 36 تعريفًا أساسيًا للأدوات + النطاقات                                           |
-| `tools/advancedTools.ts`    | تنفيذات الأدوات المتقدمة                                                        |
-| `tools/memoryTools.ts`      | 3 أدوات للذاكرة (البحث/الإضافة/المسح)                                           |
-| `tools/skillTools.ts`       | 4 أدوات للمهارات (العرض/التمكين/التنفيذ/عمليات التنفيذ)                         |
-| `tools/compressionTools.ts` | 5 أدوات للضغط                                                                   |
-| `README.md`                 | ملف README داخلي لخادم MCP‏ (مرتبط تبادليًا من `docs/frameworks/MCP-SERVER.md`) |
+| طريق                  | غاية                                                                                                      |
+| --------------------- | --------------------------------------------------------------------------------------------------------- |
+| `server.ts`           | دورة حياة خادم MCP                                                                                        |
+| `httpTransport.ts`    | وسائل النقل HTTP و SSE القابلة للتدفق                                                                     |
+| `scopeEnforcement.ts` | عمليات فحص النطاق لكل أداة                                                                                |
+| `audit.ts`            | تسجيل تدقيق استدعاء الأداة                                                                                |
+| `schemas/`            | تعريفات الأداة ونطاقاتها                                                                                  |
+| `tools/`              | تطبيقات الأدوات (الذاكرة، المهارات، الضغط، ...)                                                           |
+| `toolSearch/`         | أداة البحث                                                                                                |
+| `README.md`           | ملاحظات الهندسة المعمارية الداخلية. الكتالوج الكامل موجود في [MCP-SERVER.md](../frameworks/MCP-SERVER.md) |
 
 ---
 
-## `packages/` — مساحات العمل
+## مساحات عمل `packages/` — npm
 
-| المسار                   | الغرض                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `packages/ui-kit/`       | `@omniroute/ui-kit` — لقطة مورّدة من Keak CI UI Kit‏ (`private`، `UNLICENSED`)، تُستهلك بصفتها شيفرة مصدرية (من دون بناء). يثبّت `UPSTREAM.md` الالتزام المنبعي ويسجّل تفويض الترخيص؛ ويسرد `PATCHES.md` التصحيحات المحلية (لا توجد تصحيحات)؛ ولا تتم مزامنة `src/` إلا بواسطة `scripts/dev/sync-ui-kit.sh`، وتخضع للحماية بواسطة `npm run check:ui-kit-snapshot`. راجع `docs/architecture/DESIGN_SYSTEM.md` |
-| `packages/browser-pool/` | `@omniroute/browser-pool` — خدمة اختيارية لمجموعة المتصفحات (دردشة مدعومة بواسطة CloakBrowser وPlaywright)                                                                                                                                                                                                                                                                                                   |
+| طريق                     | غاية                                                                                                                                                                                                                                                                                                        |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui-kit/`       | `@omniroute/ui-kit`: لقطة من Keak CI UI Kit، يتم استهلاكها كمصدر. يقوم `UPSTREAM.md` بتثبيت الالتزام الأولي، ويسرد `PATCHES.md` التصحيحات المحلية. تتم مزامنة `src/` فقط بواسطة `scripts/dev/sync-ui-kit.sh` ويتم حمايتها بواسطة `npm run check:ui-kit-snapshot`. انظر [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) |
+| `packages/browser-pool/` | `@omniroute/browser-pool`: واجهات تجمع المتصفحات والتنفيذ (`packages/browser-pool/src/index.ts`، `packages/browser-pool/src/interfaces.ts`). مدرج في `workspaces`; يوجد تجمع متصفح وقت التشغيل الذي تستخدمه البوابة في `open-sse/services/`                                                                 |
 
----
+## `@omniroute/` — الحزم المنشورة بشكل منفصل
 
-## `electron/` — غلاف سطح المكتب
+هذه ليست مساحات عمل npm. لكل منها `package.json` وملف القفل الخاص بها؛ يأتي المجلد في `omniroute` tarball (`files: ["@omniroute/"]`).
 
-| الملف            | الغرض                                                                                     |
-| ---------------- | ----------------------------------------------------------------------------------------- |
-| `main.js`        | عملية Electron الرئيسية (BrowserWindow، خادم Next.js مضمن، علبة النظام، التحديث التلقائي) |
-| `preload.js`     | جسر IPC ‏(contextBridge ← `window.omniroute`)                                             |
-| `package.json`   | إعداد electron-builder + تبعيات Electron 41 وelectron-builder 26.10                       |
-| `assets/`        | أيقونات التطبيق (Windows .ico، وmacOS .icns، وLinux .png)                                 |
-| `dist-electron/` | مخرجات البناء (متجاهلة بواسطة git)                                                        |
-| `types.d.ts`     | تعريفات الأنواع لجسر واجهة العرض                                                          |
-| `README.md`      | ملف README داخلي لـ Electron (راجع أيضًا `docs/guides/ELECTRON_GUIDE.md`)                 |
+| طريق                             | غاية                                                                                                                                                        |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@omniroute/opencode-plugin/`    | البرنامج المساعد OpenCode (اكتشاف النموذج، مصادقة `/connect` )؛ المستخدمة من قبل `omniroute setup-opencode` — انظر [OPENCODE.md](../frameworks/OPENCODE.md) |
+| `@omniroute/opencode-plugin-v2/` | البرنامج المساعد OpenCode لوعد v2 API — راجع [OPENCODE-V2-PLUGIN.md](../guides/OPENCODE-V2-PLUGIN.md)                                                       |
+| `@omniroute/opencode-provider/`  | مولد التكوين الثابت. تم وضع علامة مهملة في `package.json` الخاصة بها لصالح `opencode-plugin`                                                                |
 
 ---
 
-## `bin/` — واجهة سطر الأوامر
+## `bin/` — CLI ومخطوطات ops
 
-| الملف                                                                                                       | الغرض                                                                                                                                                     |
-| ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute.mjs`                                                                                             | نقطة الدخول الرئيسية لواجهة سطر الأوامر — `omniroute serve`، و`omniroute setup`، و`omniroute doctor`، و`omniroute providers`، و`omniroute combos`، وغيرها |
-| `reset-password.mjs`                                                                                        | واجهة مستقلة عبر سطر الأوامر لإعادة تعيين كلمة المرور                                                                                                     |
-| `cli/commands/setup.mjs`                                                                                    | معالج إعداد تفاعلي وغير تفاعلي                                                                                                                            |
-| `cli/commands/doctor.mjs`                                                                                   | تشخيصات سلامة النظام (أكثر من 8 فحوصات)                                                                                                                   |
-| `cli/commands/providers.mjs`                                                                                | سرد موفري الخدمة/اختبارهم/التحقق منهم                                                                                                                     |
-| `cli/{args,data-dir,encryption,io,provider-catalog,provider-store,provider-test,settings-store,sqlite}.mjs` | وحدات مساعدة لواجهة سطر الأوامر                                                                                                                           |
-| `cli/tray/tray.ts`                                                                                          | تكامل علبة النظام (عبر الأنظمة الأساسية: NotifyIcon على Windows، وsystray2 على macOS/Linux)                                                               |
-| `cli/tray/tray.ps1`                                                                                         | واجهة PowerShell الخلفية لـ NotifyIcon ‏(Windows، دون ملفات تنفيذية جديدة)                                                                                |
-| `cli/tray/autostart.ts`                                                                                     | تشغيل تلقائي عبر الأنظمة الأساسية (LaunchAgent / .desktop / السجل)                                                                                        |
-| `cli/runtime/sqliteRuntime.mjs`                                                                             | سلسلة من 5 خطوات لحل برنامج تشغيل SQLite ‏(مضمن ← وقت التشغيل ← تثبيت مؤجل ← node:sqlite ← sql.js)                                                        |
-| `cli/runtime/magicBytes.mjs`                                                                                | التحقق من البايتات السحرية للملفات الثنائية (ELF / Mach-O / Mach-O fat / PE)                                                                              |
-| `cli/runtime/index.mjs`                                                                                     | `warmUpRuntimes()` — يحل برامج التشغيل مسبقًا بعد التثبيت/عند أول بدء تشغيل                                                                               |
-| `nodeRuntimeSupport.mjs`                                                                                    | التحقق من دعم إصدار Node.js عند التثبيت                                                                                                                   |
+| طريق                                                                        | غاية                                                                                            |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `omniroute.mjs`                                                             | مدخل CLI الرئيسي (`omniroute serve`, `setup`, `doctor`, `providers`, `combo`, ...)              |
+| `reset-password.mjs`                                                        | `omniroute-reset-password` ثنائي                                                                |
+| `mcp-server.mjs`                                                            | نقطة دخول MCP stdio                                                                             |
+| `antigravity-bridge.mjs`, `chatgpt-web-codex-mcp.mjs`                       | الجسر المساعد / نقاط دخول MCP                                                                   |
+| `aliasResolver.mjs`, `aliasResolverHook.mjs`                                | خطاف حل ESM الذي يعين الأسماء المستعارة لمسار tsconfig لعمليات التثبيت العامة                   |
+| `nodeRuntimeSupport.mjs`                                                    | التحقق من إصدار Node.js المدعوم                                                                 |
+| `snapshot-data.sh`, `restore-data.sh`, `restore-policies.sh`, `rollback.sh` | البرامج النصية لاسترداد الحوادث ذات المضيف الذاتي (مشاركة `_ops-common.sh`)                     |
+| `cold-start-bench.sh`                                                       | معيار البداية الباردة — راجع [PERF_BASELINE.md](../ops/PERF_BASELINE.md)                        |
+| `cli/commands/`                                                             | وحدة واحدة لكل أمر CLI (حوالي 100، بما في ذلك عمليات التكامل `setup-*` )                        |
+| `cli/api-commands/`                                                         | تم إنشاؤها من `docs/openapi.yaml` بواسطة `npm run build:cli-api` — لا تقم بتحريرها              |
+| `cli/locales/`                                                              | كتالوجات رسائل CLI (67 لغة)                                                                     |
+| `cli/tui/`, `cli/tui-components/`                                           | محطة UI                                                                                         |
+| `cli/tray/`                                                                 | علبة النظام والتشغيل التلقائي (Windows PowerShell backend، systray on macOS/Linux)              |
+| `cli/runtime/`                                                              | دقة وقت التشغيل الأصلية (`sqliteRuntime.mjs`، `magicBytes.mjs`)، مشرف العملية                   |
+| `cli/*.mjs`                                                                 | المساعدون المشتركون (args، عميل API ، دليل البيانات، التشفير، متجر الموفر، متجر الإعدادات، ...) |
+| `cli/README.md`, `cli/CONVENTIONS.md`                                       | CLI الداخلية والاتفاقيات                                                                        |
 
----
+انظر [CLI-TOOLS.md](../reference/CLI-TOOLS.md) و [CLI-COMPANION.md](../guides/CLI-COMPANION.md).
 
-## `skills/` — مهارات الوكلاء العامة
+## تطبيق سطح المكتب `electron/` —
 
-| الملف                        | الغرض                                                                                                    |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `skills/omniroute*/SKILL.md` | 10 ملفات تعريف للمهارات مخصصة لوكلاء الذكاء الاصطناعي الخارجيين (Claude Desktop وChatGPT وCursor وCline) |
-
----
-
-## `scripts/` — سكربتات البناء والتحقق
-
-| السكربت                             | الغرض                                                                                  |
-| ----------------------------------- | -------------------------------------------------------------------------------------- |
-| `run-next.mjs`                      | مشغّل التطوير/البدء مع تحميل متغيرات البيئة                                            |
-| `build-next-isolated.mjs`           | بناء مستقل (الوضع المستقل في Next.js 16)                                               |
-| `prepublish.ts`                     | إعداد الحزمة قبل `npm pack`                                                            |
-| `postinstall.mjs`                   | إنشاء `.env` تلقائيًا من `.env.example` عند التثبيت الأول                              |
-| `sync-env.mjs`                      | إعادة مزامنة مفاتيح `.env` مع `.env.example`                                           |
-| `check-cycles.mjs`                  | اكتشاف التبعيات الدائرية                                                               |
-| `check-route-validation.mjs`        | التحقق من أن جميع مسارات API تستخدم التحقق عبر Zod                                     |
-| `check-t11-any-budget.mjs`          | فرض حد صريح لاستخدام `any` لكل ملف                                                     |
-| `check-docs-sync.mjs`               | التحقق من مزامنة إصدارات الوثائق (فحص pre-commit حالي)                                 |
-| **`check-env-doc-sync.mjs`**        | جديد: التحقق المتقاطع من متغيرات البيئة في الشيفرة و`.env.example` و`ENVIRONMENT.md`   |
-| **`check-docs-counts-sync.mjs`**    | جديد: التحقق من تطابق الأعداد (المنفّذات والاستراتيجيات وOAuth ومهارات A2A) مع الوثائق |
-| **`check-deprecated-versions.mjs`** | جديد: الإبلاغ عن الإصدارات/التواريخ القديمة في الوثائق                                 |
-| `check-supported-node-runtime.ts`   | التحقق من أن إصدار Node الحالي مدعوم                                                   |
-| `check-pr-test-policy.mjs`          | فرض قاعدة "الاختبارات مطلوبة" على تغييرات شيفرة الإنتاج                                |
-| **`gen-provider-reference.ts`**     | جديد: إنشاء `docs/reference/PROVIDER_REFERENCE.md` تلقائيًا من الكتالوج                |
-| `i18n/generate-multilang.mjs`       | ترجمة نصوص واجهة المستخدم والوثائق عبر Google Translate                                |
-| `i18n_autotranslate.py`             | مسار ترجمة الوثائق القائم على نماذج اللغة الكبيرة                                      |
-| `validate_translation.py`           | التحقق من الترجمة لكل إعداد محلي                                                       |
-| `check_translations.py`             | التحقق من مفاتيح i18n في الشيفرة                                                       |
-| `run-playwright-tests.mjs`          | مشغّل اختبارات Playwright الشاملة                                                      |
-| `run-protocol-clients-tests.mjs`    | مشغّل اختبارات MCP/A2A الشاملة                                                         |
-| `run-ecosystem-tests.mjs`           | اختبارات المنظومة (تكامل مزوّدي الخدمة)                                                |
-| `test-report-summary.mjs`           | إنشاء ملخص التغطية بصيغة markdown                                                      |
-| `smoke-electron-packaged.mjs`       | إجراء اختبار أولي لبناء Electron المحزّم                                               |
-| `native-binary-compat.mjs`          | التحقق من تطابق التبعيات الأصلية (`better-sqlite3`) مع Node الخاص بـElectron           |
-| `validate-pack-artifact.ts`         | التحقق من مخرجات حزمة npm                                                              |
-| `responses-ws-proxy.mjs`            | جسر WebSocket لواجهة Codex Responses API                                               |
-| `v1-ws-bridge.mjs`                  | جسر WebSocket لنقطة النهاية `/api/v1/ws`                                               |
-| `standalone-server-ws.mjs`          | مشغّل خادم WS مستقل                                                                    |
-| `system-info.mjs`                   | طباعة معلومات النظام/بيئة التشغيل لأغراض الدعم                                         |
-| `healthcheck.mjs`                   | فحص سلامة لمرة واحدة (يستخدمه Docker HEALTHCHECK)                                      |
-| `uninstall.mjs`                     | سكربت إلغاء تثبيت نظيف                                                                 |
-| `dev/sync-ui-kit.sh`                | نسخ `src/` الخاص بحزمة CI UI Kit عند تثبيت محدد إلى `packages/ui-kit/src`              |
-| `check/check-ui-kit-snapshot.mjs`   | بوابة pre-commit: التأكد من تطابق `packages/ui-kit/src` مع التثبيت المحدد في المصدر    |
-| `dev/gen-icon-map.mjs`              | `npm run gen:icon-map` — أسماء الأيقونات المستخدمة التي لا يعيّنها `ICON_MAP`          |
-| `dev/codemod-material-icons.mjs`    | إعادة كتابة امتدادات Material Symbols الحرفية إلى `<Icon>` (أدوات الترحيل)             |
-
----
-
-## `docs/` — الوثائق العامة (7 ملفات جذر + 17 مجلدات فرعية)
-
-### أدلة المستوى الأعلى
-
-| وثيقة                       | غاية                                                                                      |
-| --------------------------- | ----------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | بنية عالية المستوى، خريطة النظام الفرعي، سطح لوحة القيادة                                 |
-| `CODEBASE_DOCUMENTATION.md` | المرجع الهندسي: الدلائل والوحدات والاتفاقيات                                              |
-| `FEATURES.md`               | مصفوفة الميزات مع ميزات الإصدار 3.8                                                       |
-| `USER_GUIDE.md`             | دليل المستخدم النهائي (الإعداد، النماذج، المجموعات، CLIs، الصوت، إلخ.)                    |
-| `API_REFERENCE.md`          | مرجع نقطة النهاية API مع نموذج المصادقة                                                   |
-| `openapi.yaml`              | مواصفات OpenAPI 3.0 (121 مسارًا)                                                          |
-| `SETUP_GUIDE.md`            | طرق التثبيت (npm، npx، Docker، Electron، Termux، source)                                  |
-| `ENVIRONMENT.md`            | جميع صيغ env (~ 800 موثقة، ~ 3,050 سطر `.env.example`)                                    |
-| `TROUBLESHOOTING.md`        | الأخطاء الشائعة + v3.8.0 المشكلات المعروفة                                                |
-| `RELEASE_CHECKLIST.md`      | تدفق الإصدار الكامل (المهارات، الهاسكي، الالتزامات التقليدية، النشر)                      |
-| `COVERAGE_PLAN.md`          | أهداف التغطية والحالة الراهنة                                                             |
-| `FREE_TIERS.md`             | موفرو الطبقة المجانية المنسقون (48 + مجانًا + 11 OAuth)                                   |
-| `CLI-TOOLS.md`              | تكاملات CLI الخارجية + الداخلية OmniRoute CLI                                             |
-| `I18N.md`                   | بنية i18n، إضافة لغة، 67 لغة                                                              |
-| `UNINSTALL.md`              | خطوات إلغاء التثبيت النظيفة                                                               |
-| `PROVIDER_REFERENCE.md`     | **تم إنشاؤها تلقائيًا** كتالوج 381 مقدمي الخدمة (regen: `npm run gen:provider-reference`) |
-
-### الغوص العميق في النظام الفرعي
-
-| وثيقة                                      | غاية                                                                                  |
-| ------------------------------------------ | ------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                            | خادم MCP : 110 أدوات، 3 وسائل نقل، 33 نطاقًا، نقاط نهاية REST                         |
-| `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC، 6 مهارات، مساعدين REST ، بطاقة الوكيل                             |
-| `AGENT_PROTOCOLS_GUIDE.md`                 | الدليل الموحد: A2A vs ACP vs Cloud Agents                                             |
-| `CLOUD_AGENT.md`                           | تنسيق Codex Cloud / Devin / Jules                                                     |
-| `SKILLS.md`                                | إطار المهارات (سوق + المدمج + SkillsSH + رمل)                                         |
-| `RADAR.md`                                 | تراكب كتالوج النموذج الحر للرادار (`RADAR_ENABLED`، متوقف بشكل افتراضي)               |
-| `MEMORY.md`                                | نظام الذاكرة (SQLite FTS5 + Qdrant)                                                   |
-| `EVALS.md`                                 | إطار التقييم (الأجنحة، والتشغيل، وقواعد التقييم)                                      |
-| `GUARDRAILS.md`                            | قناع PII ، الحقن الفوري، جسر الرؤية                                                   |
-| `COMPLIANCE.md`                            | سجل التدقيق، والاحتفاظ، وإلغاء الاشتراك noLog                                         |
-| `WEBHOOKS.md`                              | تسليم خطاف الويب الموقع من HMAC                                                       |
-| `REASONING_REPLAY.md`                      | ذاكرة التخزين المؤقت memory/SQLite الهجينة لـ `reasoning_content`                     |
-| `AUTHZ_GUIDE.md`                           | خط أنابيب التفويض (`classify` → `policies` → `enforce`)                               |
-| `RESILIENCE_GUIDE.md`                      | قاطع الدائرة + Cooldown + Model Lockout                                               |
-| `docs/security/STEALTH_GUIDE.md` (جيت فقط) | بصمة TLS (JA3/JA4)، رمز Claude CCH، شهادة MITM                                        |
-| `AUTO-COMBO.md`                            | محرك التحرير والسرد التلقائي (تسجيل 16 عاملًا، وحزم الأوضاع الستة، والمصنع الافتراضي) |
-
-### ضغط
-
-| وثيقة                           | غاية                                     |
-| ------------------------------- | ---------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | نظرة عامة على أوضاع الضغط + خارطة الطريق |
-| `COMPRESSION_ENGINES.md`        | محركات رجل الكهف + RTK ، عقد التسجيل     |
-| `COMPRESSION_RULES_FORMAT.md`   | حزمة حكم رجل الكهف مخطط JSON             |
-| `COMPRESSION_LANGUAGE_PACKS.md` | مخزون حزمة القواعد لكل لغة               |
-| `RTK_COMPRESSION.md`            | خط الأنابيب التعريفي RTK (56 مرشحًا)     |
-
-### النشر
-
-| وثيقة                        | غاية                                                                     |
-| ---------------------------- | ------------------------------------------------------------------------ |
-| `DOCKER_GUIDE.md`            | بناء Docker ، الملفات الشخصية (base/cli/host/cliproxyapi)، Redis Sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | نشر VM/VPS العام (Ubuntu/Debian + nginx + systemd)                       |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | نشر Fly.io (حاليًا للصينيين فقط)                                         |
-| `TERMUX_GUIDE.md`            | Android مقطوعة الرأس عبر Termux                                          |
-| `PWA_GUIDE.md`               | تطبيق الويب التقدمي يقوم بتثبيت عامل خدمة +                              |
-| `ELECTRON_GUIDE.md`          | تطبيق سطح المكتب بناء + تسجيل + توزيع                                    |
-| `TUNNELS_GUIDE.md`           | مسار Cloudflared + ngrok + Tailscale                                     |
-| `PROXY_GUIDE.md`             | الوكيل الصادر ذو 4 مستويات + 1proxy Marketplace                          |
-
-### الدلائل الفرعية
-
-| فرعي                  | غاية                                                                                                                                                                                |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ترجمات المستندات المترجمة (41 لغة)                                                                                                                                                  |
-| `docs/screenshots/`   | أصول الصورة للأدلة                                                                                                                                                                  |
-| `_tasks/superpowers/` | Plans/specs من القوى العظمى (`writing-plans`/`brainstorming`) + Research — معزول، إصدار منفصل من الريبو، تم تجاهله بواسطة الشجرة الرئيسية. انظر CLAUDE.md → "عناصر التخطيط والبحث". |
-
----
-
-## `tests/` — مجموعات الاختبارات
-
-| المجلد الفرعي                        | النوع                                          | مشغّل الاختبارات                            |
-| ------------------------------------ | ---------------------------------------------- | ------------------------------------------- |
-| `tests/unit/`                        | اختبارات الوحدات (نحو 4,800 ملف، وهي الأسرع)   | مشغّل الاختبارات الأصلي في Node             |
-| `tests/integration/`                 | اختبارات تكامل متعددة الوحدات + قاعدة البيانات | مشغّل الاختبارات الأصلي في Node (التزامن 1) |
-| `tests/e2e/`                         | اختبارات E2E لواجهة المستخدم + سير العمل       | Playwright                                  |
-| `tests/e2e/protocol-clients.test.ts` | اختبارات E2E بعملاء حقيقيين لـ MCP + A2A       | عملاء بروتوكولات مخصصون                     |
-| `tests/e2e/ecosystem.test.ts`        | تكامل المزوّدين (يتصل بالشبكة)                 | مشغّل الاختبارات الأصلي في Node             |
-
----
+| طريق                                                       | غاية                                                                       |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `main.js`                                                  | عملية Electron الرئيسية (النافذة، الخادم المضمن، الدرج، التحديثات)         |
+| `preload.js`                                               | جسر IPC يتعرض للعارض                                                       |
+| `lib/`                                                     | دورة حياة النافذة، جاهزية الخادم، مراقبة الصحة، تفضيلات الخادم البعيد      |
+| `remoteServerPrompt*.js`, `assets/remoteServerPrompt.html` | نافذة موجه الخادم البعيد                                                   |
+| `processTree.js`, `sqlite-inspection.js`                   | تنظيف عملية الطفل ومساعدي فحص SQLite                                       |
+| `package.json` / `package-lock.json`                       | تكوين منشئ الإلكترون وتبعيات Electron                                      |
+| `assets/`                                                  | أيقونات التطبيقات والدرج (`.ico`، `.icns`، `.png`)                         |
+| `README.md`                                                | الملاحظات الداخلية — انظر [ELECTRON_GUIDE.md](../guides/ELECTRON_GUIDE.md) |
 
 ## `public/` — الأصول الثابتة
 
-| المسار              | الغرض                                                               |
-| ------------------- | ------------------------------------------------------------------- |
-| `public/` (الجذر)   | الأيقونات المفضلة، robots.txt، ملف البيان، عامل الخدمة، صور تسويقية |
-| `public/providers/` | شعارات المزوّدين بصيغتي PNG/SVG (تُستخدم في لوحة المعلومات)         |
+| طريق                                        | غاية                                                                                                                      |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `providers/`                                | تم تحميل شعارات الموفر بواسطة المعرف (`/providers/<id>.svg`)؛ مصدرها في `config/quality/provider-assets-provenance.jsonl` |
+| `favicon.*`, `apple-touch-icon.*`, `icon-*` | أيقونات المتصفح و PWA                                                                                                     |
+| `sw.js`                                     | عامل الخدمة — انظر [PWA_GUIDE.md](../guides/PWA_GUIDE.md)                                                                 |
+| `openapi.yaml`                              | نسخة من `docs/openapi.yaml` تم إنشاؤها بواسطة `npm run gen:public-openapi`                                                |
+| `images/`, `sponsors/`, `deyin.svg`         | مخططات تدفق الطبقة، لافتة الراعي، عمل فني README                                                                          |
+
+## مهارات وكيل `skills/` —
+
+46 مهارة، مجلد واحد يحتوي كل منها على `SKILL.md` (`cli-*`، `omni-*`، `config-codex-cli`، `ponytail`)، بالإضافة إلى `skills/README.md`. يقرأها `src/lib/agentSkills/catalog.ts` في وقت التشغيل ويكشفها من خلال `/api/agent-skills` و MCP و A2A. يتم إنشاء معظم البيانات بواسطة `src/lib/agentSkills/generator.ts` (`scripts/skills/generate-agent-skills.mjs`; `npm run check:agent-skills-sync` للتحقق من الانجراف). انظر [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md).
 
 ---
 
-## `config/` — الإعدادات الثابتة + حالة بوابة الجودة
+## `scripts/` — بناء والبوابات والأدوات
 
-قوالب الإعدادات الموزّعة، بالإضافة إلى خطوط الأساس المضمّنة لبوابة الجودة
-(نُقلت إلى هنا من جذر المستودع في v3.8.26 لإبقاء الجذر بسيطًا).
+حوالي 435 ملفًا متعقبًا. يتم وضع البرامج النصية الجديدة في أحد المجلدات الفرعية المسموح بها بواسطة `AGENTS.md`؛ رمز لمرة واحدة يذهب إلى `scripts/ad-hoc/`.
 
-| المسار                                        | الغرض                                                                                      |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `config/i18n.json`                            | قائمة الإعدادات المحلية + بياناتها الوصفية (المصدر المعتمد للعدد البالغ 42 إعدادًا محليًا) |
-| `config/i18n-schema.json`                     | مخطط JSON للتحقق من صحة `i18n.json`                                                        |
-| `config/payloadRules.json`                    | قواعد تنقية الحمولات الواردة من المصدر                                                     |
-| `config/quality/quality-baseline.json`        | خط أساس تصاعدي متعدد المقاييس (`scripts/quality/check-quality-ratchet.mjs`)                |
-| `config/quality/complexity-baseline.json`     | خط أساس ثابت لتعقيد ESLint (`check-complexity.mjs`)                                        |
-| `config/quality/duplication-baseline.json`    | خط أساس ثابت للتكرار في jscpd (`check-duplication.mjs`)                                    |
-| `config/quality/file-size-baseline.json`      | خط أساس ثابت لحجم كل ملف (`check-file-size.mjs`)                                           |
-| `config/quality/test-discovery-baseline.json` | خط أساس ثابت للاختبارات اليتيمة (`check-test-discovery.mjs`)                               |
-| `config/quality/dependency-allowlist.json`    | قائمة السماح للتبعيات المعتمدة (`check-deps.mjs`)                                          |
-| `config/quality/.license-allowlist.json`      | قائمة السماح لتراخيص SPDX (`check-licenses.mjs`)                                           |
-| `config/quality/quality-metrics.json`         | مقاييس مجمّعة مؤقتة (يُنشئها `collect-metrics.mjs`؛ **يتجاهلها Git**)                      |
+```
+scripts/
+├── check-permissions.sh   # Container ENTRYPOINT (copied to /app by the Dockerfile)
+├── postinstall.mjs        # Native-runtime warm-up run after scripts/build/postinstall.mjs
+├── start-ws-server.mjs    # Starts the live-dashboard WebSocket server as a separate process
+├── build/                 # Build, standalone assembly, npm pack/publish, postinstall, MITM, Electron prep
+├── check/                 # Quality gates behind most `npm run check:*` scripts; lib/ holds shared helpers
+├── quality/               # Ratchets, gate manifest, impact map, mutation tooling, release acceptance
+├── ci/                    # Steps invoked only by workflows (Docker publish, Release-Green, scanners)
+├── dev/                   # Dev runners (run-next, Playwright/protocol/ecosystem runners) and runtime helpers shipped in the package
+├── docs/                  # README SVG/diagram generators, OpenAPI module, provider reference, wiki sync
+├── i18n/                  # UI and docs translation pipeline, coverage checks, glossary/, lib/
+├── release/               # Changelog aggregation, contributors, merge train, LTS cut, publish verification
+├── ops/                   # Canary deploy, OpenCode free relay, runner janitor, allowlist sync
+├── perf/                  # Benchmarks and one-off performance A/B scripts
+├── cli/                   # CLI tooling (API-command generator, SSO, CLI smoke tests, media MCP)
+├── homolog/               # Homologation against a running instance + promptfoo config generation
+├── features/              # Feature-triage engine and its lib/
+├── router-eval/           # Offline router evaluation (`npm run eval:router*`)
+├── compression/           # Compression benchmark (`npm run bench:compression`, runs on Bun)
+├── compression-eval/      # Compression quality evaluation (`npm run eval:compression`)
+├── devin-bridge/          # Shell entry points for the Devin bridge (build, launch, tests)
+├── docker/                # Base-path patching for the standalone server inside containers
+├── integrations/          # MarkItDown MCP launchers — see docs/integrations/MARKITDOWN_MCP.md
+├── launchers/             # Double-click launchers and desktop-shortcut creators (Windows/macOS/Linux)
+├── packs/                 # Optional-pack manifest and installer (shipped in the npm package)
+├── test/                  # Live smoke scripts (combo-live, OpenCode/ChatGPT Web)
+├── sre/                   # On-call rotation, log redaction, TCP close analyzer
+├── vps/                   # Start/stop the release runner
+├── skills/                # Agent Skills generator CLI
+├── research/              # Free-tier budget card SVG generator
+└── ad-hoc/                # One-shot diagnostics and migrations
+```
 
----
+نقاط الدخول المستخدمة بشكل متكرر:
 
-## `.github/` — تكامل GitHub
+| البرنامج النصي                                                      | غاية                                                                                     |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `dev/run-next.mjs`                                                  | `npm run dev` / `npm start` عداء                                                         |
+| `build/build-next-isolated.mjs`                                     | `npm run build` (بناء مستقل Next.js )                                                    |
+| `build/prepublish.ts`                                               | `npm run build:cli`: تجميع npm `dist/`                                                   |
+| `build/postinstall.mjs`                                             | ربط npm `postinstall`                                                                    |
+| `build/publicOpenApi.mjs`                                           | `npm run gen:public-openapi`                                                             |
+| `docs/gen-provider-reference.ts`                                    | `npm run gen:provider-reference` (يجدد PROVIDER_REFERENCE.md)                            |
+| `docs/gen-openapi-module.mjs`                                       | `prebuild:docs` (يولد `src/app/docs/lib/openapi.generated.ts`)                           |
+| `i18n/run-translation.mjs`                                          | `npm run i18n:run` (مرايا المستندات)                                                     |
+| `i18n/generate-route-namespaces.mjs`                                | `npm run gen:i18n-routes`                                                                |
+| `release/aggregate-changelog.mjs`                                   | طيات شظايا `changelog.d/` إلى `CHANGELOG.md`                                             |
+| `check/check-fabricated-docs.mjs`                                   | `npm run check:fabricated-docs` (بوابة دقة الوثيقة)                                      |
+| `check/check-tracked-artifacts.mjs`                                 | `npm run check:tracked-artifacts` (كتل مسارات `_*` الجذرية المتعقبة)                     |
+| `quality/check-quality-ratchet.mjs`                                 | `npm run quality:ratchet` (السقاطة المترية ضد `config/quality/`)                         |
+| `dev/run-playwright-tests.mjs`                                      | `npm run test:e2e`                                                                       |
+| `dev/run-protocol-clients-tests.mjs`, `dev/run-ecosystem-tests.mjs` | `npm run test:protocols:e2e`, `npm run test:ecosystem`                                   |
+| `dev/new-worktree.sh`                                               | إنشاء شجرة عمل تطوير معزولة — راجع [WORKTREE_ISOLATION.md](../ops/WORKTREE_ISOLATION.md) |
+| `dev/sync-ui-kit.sh`                                                | يقوم بمزامنة `packages/ui-kit/src` مع التزام المنبع المثبت                               |
 
-| المسار                             | الغرض                                                                    |
-| ---------------------------------- | ------------------------------------------------------------------------ |
-| `.github/workflows/`               | مهام سير عمل CI/CD في GitHub Actions (الفحص، الاختبار، التغطية، الإصدار) |
-| `.github/ISSUE_TEMPLATE/`          | قوالب مشكلات الأخطاء/الميزات                                             |
-| `.github/pull_request_template.md` | قالب طلب السحب                                                           |
-| `.github/dependabot.yml`           | إعدادات تحديث التبعيات                                                   |
+جرد البوابة وسياساتها: [QUALITY_GATES.md](QUALITY_GATES.md).
 
----
+## تكوين إصدار `config/` — وحالة البوابة
 
-## `.husky/` — خطافات Git
+| طريق                                     | غاية                                                                                                                 |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `i18n.json` / `i18n-schema.json`         | اللغات المدعومة (مصدر عدد اللغات) ومخططها                                                                            |
+| `payloadRules.json`                      | قواعد الحمولة النافعة (`open-sse/services/payloadRules.ts`)                                                          |
+| `cli-tools-manifest.json`                | بيان أدوات CLI المتكاملة (`bin/cli/cli-manifest.mjs`)                                                                |
+| `alibaba-free-tier-allowlist.json`       | القائمة المسموح بها لنموذج الطبقة المجانية Alibaba                                                                   |
+| `ci/toolchain.json`                      | إصدارات سلسلة أدوات CI                                                                                               |
+| `quality/quality-baseline.json`          | خط الأساس السقاطة متعدد المقاييس (التغطية، التحذيرات، الازدواجية، ...)                                               |
+| `quality/*-baseline.json`                | خطوط الأساس المجمدة للبوابات الفردية (التعقيد، الازدواجية، حجم الملف، شرائح التحقق من الكتابة، اكتشاف الاختبار، ...) |
+| `quality/*-allowlist.json`               | قوائم البوابة المسموح بها (التبعيات، التراخيص، إسناد AI ، اختبارات الأخوة المنسية، ...)                              |
+| `quality/eslint-suppressions.json`       | عمليات قمع ESLint المجمدة التي يطبقها `npm run lint`                                                                 |
+| `quality/gate-manifest.json`             | تم فحص بيان البوابة بواسطة `scripts/quality/gate-manifest.mjs`                                                       |
+| `quality/vitest-exclusions.json`         | جرد الحجر الصحي ل `vitest.quarantine.config.ts`                                                                      |
+| `quality/skill-templates/`               | تم فحص قوالب SKILL.md الأساسية بواسطة `scripts/quality/check-skill-contract.mjs`                                     |
+| `quality/release-acceptance.schema.json` | مخطط دليل قبول الإصدار — راجع [QUALITY_EVIDENCE_CONTRACT.md](QUALITY_EVIDENCE_CONTRACT.md)                           |
+| `release/`                               | تسويات سجل التغيير والبيان الأصلي لـ wreq-js ومخزون التراخيص والإشعارات                                              |
 
-| الملف        | الغرض                                                        |
-| ------------ | ------------------------------------------------------------ |
-| `pre-commit` | يشغّل `lint-staged + check-docs-sync + check:any-budget:t11` |
-| `pre-push`   | معطّل حاليًا (مُعلّق). شغّل `npm run test:unit` يدويًا.      |
-| `_/`         | المكوّنات الداخلية لـ Husky                                  |
+## شظايا سجل التغيير `changelog.d/` —
 
----
-
-## `.claude/` — أوامر الشرطة المائلة في Claude Code
-
-| الملف                                               | الغرض                                                 |
-| --------------------------------------------------- | ----------------------------------------------------- |
-| `commands/version-bump-cc.md`                       | `/version-bump-cc` — رفع الإصدار + سجل تغييرات تلقائي |
-| `commands/generate-release-cc.md`                   | `/generate-release-cc` — سير عمل إصدار كامل           |
-| `commands/deploy-vps-{local,akamai,both}-cc.md`     | النشر إلى VPS                                         |
-| `commands/capture-release-evidences-cc.md`          | تسجيل الميزات الجديدة عبر المتصفح بصيغة WebP          |
-| `commands/review-{prs,discussions}-cc.md`           | فرز طلبات السحب/المناقشات في GitHub                   |
-| `commands/{review-issues,implement-features}-cc.md` | مهام سير عمل المشكلات                                 |
-| `settings.local.json`                               | إعدادات Claude Code الخاصة بكل مشروع                  |
-
----
-
-## `.agents/` — مهام سير عمل الوكلاء العامة (Codex / Cursor / إلخ)
-
-| المسار                   | الغرض                                                           |
-| ------------------------ | --------------------------------------------------------------- |
-| `workflows/*-ag.md`      | 11 تعريفًا لمهام سير العمل (نسخة مطابقة من `.claude/commands/`) |
-| `skills/<name>/SKILL.md` | 9 تعريفات للمهارات مع ملاحظات تنفيذ Codex                       |
-
-> **ملاحظة:** مهام سير العمل والأوامر متطابقة حاليًا على مستوى البايت. إذا كان المقصود من `.agents/` استهداف بيئة تشغيل وكيل مختلفة (Codex)، فيجب أن تختلف المتغيرات بصورة ذات معنى.
-
----
-
-## `_ideia/`، و`_mono_repo/`، و`_references/`، و`_tasks/` — خارج الشجرة
-
-تحتوي هذه الأدلة ذات البادئة السفلية على محتوى غير مضمّن في التوزيع:
-
-- **`_ideia/`** — ملاحظات التصميم (فئات defer / notfit / viable)
-- **`_mono_repo/`** — مشاريع فرعية تاريخية (omnirouteCloud، وomnirouteSite، وvscode-extension)
-- **`_references/`** — نسخ للقراءة فقط من مشاريع OSS ذات صلة (LiteLLM، و9router، وClawRouter، وCLIProxyAPI، وmodelrelay، وnew-api، وغيرها) للرجوع إليها أثناء التطوير
-- **`_tasks/`** — ملفات تتبّع المهام لكل إصدار (غير رسمية)
-
-غير مضمّنة في مخرجات `npm pack`. راجع `.npmignore`.
-
----
-
-## مُنشأ / مُتجاهَل بواسطة Git
-
-| المسار                 | الغرض                                 |
-| ---------------------- | ------------------------------------- |
-| `node_modules/`        | تبعيات npm                            |
-| `.next/`               | مخرجات بناء Next.js                   |
-| `coverage/`            | تقارير التغطية من c8                  |
-| `logs/`                | سجلات وقت التشغيل                     |
-| `package/`             | منطقة تجهيز حزمة npm                  |
-| `.playwright-mcp/`     | عناصر اختبار Playwright MCP           |
-| `.issues/`             | ذاكرة التخزين المؤقت المحلية للمشكلات |
-| `tsconfig.tsbuildinfo` | ذاكرة التخزين المؤقت التزايدية لـ TS  |
+يضيف PR جزءًا واحدًا بدلاً من تحرير `CHANGELOG.md`: `features/` أو `fixes/` أو `maintenance/`، المسمى `<PR-number>-<slug>.md`. في وقت الإصدار، يقوم `scripts/release/aggregate-changelog.mjs` بطيها في `CHANGELOG.md` وحذفها؛ `npm run check:changelog-integrity` يتحقق من صحتها. التفاصيل في `changelog.d/README.md`.
 
 ---
 
-## نصائح التنقل
+## `docs/` — الوثائق العامة
 
-- **مساهم جديد؟** اقرأ `CONTRIBUTING.md` ← `CLAUDE.md` ← `docs/architecture/ARCHITECTURE.md` ← `docs/architecture/CODEBASE_DOCUMENTATION.md`.
-- **هل تضيف موفّرًا؟** اتبع `docs/architecture/ARCHITECTURE.md § Adding a New Provider` وتحقق أيضًا من `docs/reference/PROVIDER_REFERENCE.md`.
-- **هل تضيف مسارًا؟** راجع `docs/architecture/ARCHITECTURE.md § Adding a New API Route` و`src/shared/validation/schemas.ts`.
-- **هل تضيف أداة MCP؟** راجع `docs/frameworks/MCP-SERVER.md § Adding a Tool`.
-- **هل تضيف مهارة A2A؟** راجع `docs/frameworks/A2A-SERVER.md § Adding a New Skill`.
-- **هل تشغّله محليًا؟** راجع `docs/guides/SETUP_GUIDE.md`.
-- **هل تنشره؟** راجع `docs/guides/DOCKER_GUIDE.md` / `docs/ops/VM_DEPLOYMENT_GUIDE.md` / `docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md`.
-- **هل تُصدر نسخة؟** راجع `docs/ops/RELEASE_CHECKLIST.md` (ومهارة Claude Code المسماة `/generate-release-cc`).
+يتم تجميع الأقسام المدرجة في `source.config.ts` في موقع `/docs` (مع استبعاد عدد قليل من صفحات الأمان الخاصة بالمشغل فقط)؛ يقوم `docs/meta.json` بتعيين ترتيب الشريط الجانبي. ابدأ بـ [README.md](../README.md).
+
+| طريق                  | محتويات                                                                                                                                              |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `getting-started/`    | البداية السريعة، والاستضافة الذاتية، ومقدمو الخدمات، والطبقات المجانية، والسرد التلقائي، وأدلة ملفات تعريف الارتباط على الويب                        |
+| `guides/`             | أدلة المشغلين والمطورين: setup Docker و Electron و PWA وTermux و CLIs وi18n واستكشاف الأخطاء وإصلاحها ودليل المستخدم                                 |
+| `architecture/`       | الهندسة المعمارية، مرجع قاعدة التعليمات البرمجية، وصفات التعديل، المصادقة، المرونة، بوابات الجودة، نظام التصميم، هذه الخريطة                         |
+| `reference/`          | مرجع API ، متغيرات البيئة، علامات الميزات، أدوات CLI ، الطبقات المجانية، مرجع الموفر الذي تم إنشاؤه، الموفرون الذين تمت إزالتهم                      |
+| `frameworks/`         | MCP، A2A، ACP، المهارات، الذاكرة، المكونات الإضافية، وكلاء السحابة، webhooks، التقييمات، تصدير السجل، الرادار، ساحة اللعب، ...                       |
+| `routing/`            | التحرير والسرد التلقائي، replay/routing المنطقي، ومشاركة الحصص، وسلم الاشتراك، والتكلفة الصفرية الصارمة، ...                                         |
+| `security/`           | حواجز الحماية، وتعقيم الأخطاء، CORS، SSO، سياسة الخروج، طبقات حماية الطريق، سلسلة التوريد، ...                                                       |
+| `compression/`        | دليل الضغط، المحركات، RTK، تنسيق القاعدة، حزم اللغات، تحرير السياق                                                                                   |
+| `ops/`                | تدفق الإصدار، والتفرع، ودمج القطار، والنشر (VM، Fly.io، Kubernetes)، قاعدة البيانات، الوكلاء، أشجار العمل، تفاصيل القواعد الصارمة                    |
+| `providers/`          | أدلة لكل مزود (Claude Code، ChatGPT Web، Cursor، GitHub Copilot، ...)                                                                                |
+| `comparison/`         | OmniRoute مقارنة مع البدائل                                                                                                                          |
+| `integrations/`       | ملاحظات التكامل (fal.ai الأصلي، MarkItDown MCP)؛ لم يتم تجميعها في `/docs`                                                                           |
+| `openapi.yaml`        | مصدر OpenAPI ؛ يغذي `src/app/docs/lib/openapi.generated.ts` و `public/openapi.yaml` و `bin/cli/api-commands/`                                        |
+| `diagrams/`           | مصادر حورية البحر (`.mmd`)، المقدمة SVGs (`exported/`) و README SVGs من `scripts/docs/gen-readme-*`                                                  |
+| `assets/`             | علامة اللغة SVGs وأصول README الأخرى                                                                                                                 |
+| `screenshots/`        | لقطات الشاشة المستخدمة بواسطة README والأدلة                                                                                                         |
+| `i18n/`               | المرايا المترجمة: مجلد واحد لكل لغة (66) مع مستندات الجذر ومجموعة فرعية من `docs/` ؛ من إنتاج `npm run i18n:run` — انظر [I18N.md](../guides/I18N.md) |
+| `*.md` المستوى الأعلى | `README.md` (فهرس الوثيقة)، `DEVELOPER-ENVIRONMENT.md` وبعض الملاحظات المستقلة                                                                       |
+
+نقاط الدخول الرئيسية: [ARCHITECTURE.md](ARCHITECTURE.md), [CODEBASE_DOCUMENTATION.md](CODEBASE_DOCUMENTATION.md), [MODIFICATION_SCENARIOS.md](MODIFICATION_SCENARIOS.md), [ENVIRONMENT.md](../reference/ENVIRONMENT.md), [PROVIDER_REFERENCE.md](../reference/PROVIDER_REFERENCE.md) (التي تم إنشاؤها بواسطة `npm run gen:provider-reference`).
+
+---
+
+## أجنحة اختبار `tests/` —
+
+حوالي 9,670 ملفًا متعقبًا. ملفات الاختبار تنتمي هنا، وليس في جذر المشروع. الاستثناءات: مجلدات `__tests__/` الموجودة في نفس الموقع في `src/` و `open-sse/` والتي تجمعها تكوينات Vitest.
+
+| طريق                                                   | محتويات                                                                                                                                                                                            | عداء                                                                                    |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `tests/unit/`                                          | اختبارات الوحدة (أكثر من 9000 ملف): العديد منها في المستوى الأعلى، بالإضافة إلى مجلدات المجال (`ui/`, `compression/`, `build/`, `guardrails/`, `db/`, `cli/`, `api/`, `dashboard/`, `combo/`, ...) | عداء اختبار العقدة (`npm run test:unit`); `*.tsx` عبر `test:vitest:ui`                  |
+| `tests/unit/serial/`                                   | يتم تشغيل الاختبارات الحساسة لوحدة المعالجة المركزية مع التزامن 1                                                                                                                                  | `npm run test:unit:serial`                                                              |
+| `tests/unit/autoCombo/`, `tests/unit/api/**/*.spec.ts` | أجنحة Vitest داخل شجرة الوحدة                                                                                                                                                                      | `npm run test:vitest`                                                                   |
+| `tests/integration/`                                   | اختبارات التكامل متعدد الوحدات و DB ؛ `combo-matrix/`، `combo-live/`، `services/`                                                                                                                  | `npm run test:integration`, `test:combo:matrix`, `test:combo:live`, `test:services:int` |
+| `tests/e2e/`                                           | Playwright `*.spec.ts` + لايف سويتس `ecosystem.test.ts`، `protocol-clients.test.ts`                                                                                                                | `npm run test:e2e`, `test:ecosystem`, `test:protocols:e2e`                              |
+| `tests/boundary/`                                      | `*.live.test.ts` مقابل مثيل قيد التشغيل                                                                                                                                                            | `npm run test:boundary:live`                                                            |
+| `tests/homolog/`                                       | مجموعات التجانس (`api/` و `ui/` مع تكوين Playwright الخاص بها)                                                                                                                                     | `npm run homolog` — انظر [HOMOLOGATION.md](../ops/HOMOLOGATION.md)                      |
+| `tests/load/`                                          | تحميل البرامج النصية ونقعها (k6)                                                                                                                                                                   | سير عمل المرونة الليلية                                                                 |
+| `tests/_setup/`                                        | ملفات `--import` / setup (دير البيانات المعزولة، حارس الخروج، Vitest UI polyfills)                                                                                                                 | محملة من قبل العدائين                                                                   |
+| `tests/_helpers/`, `tests/helpers/`                    | مساعدو الاختبار المشتركون (اللقطات الذهبية، جلسة الإدارة، ...)                                                                                                                                     | المستوردة عن طريق الاختبارات                                                            |
+| `tests/fixtures/`                                      | بيانات المباراة وتركيبات عملية الطفل                                                                                                                                                               | المستوردة عن طريق الاختبارات                                                            |
+| `tests/snapshots/`                                     | الملفات الذهبية ل `tests/helpers/goldenSnapshot.ts`                                                                                                                                                | المستوردة عن طريق الاختبارات                                                            |
+| `tests/manual/`                                        | ملفات `.http` للمكالمات REST اليدوية                                                                                                                                                               | يدوي                                                                                    |
+| `tests/security/`                                      | البرامج النصية لشل الأمان                                                                                                                                                                          | دليل / تركيبات اختبار الوحدة                                                            |
+| `tests/types/`                                         | تركيبات العقد على مستوى النوع                                                                                                                                                                      | —                                                                                       |
+
+مصفوفة كاملة: `CONTRIBUTING.md` → "اختبارات التشغيل" و [COVERAGE_PLAN.md](../ops/COVERAGE_PLAN.md).
+
+---
+
+## `deploy/` — Kubernetes
+
+| طريق                                               | غاية                                                                                           |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `deploy/helm/omniroute/`                           | مخطط الخوذة (`Chart.yaml`، `values.yaml`، قوالب النشر، الخدمة، الدخول، PVC، Secret، configmap) |
+| `deploy/kubernetes/base/`                          | تخصيص القاعدة (مساحة الاسم، النشر، الخدمة، PVC، configmap، `secret.example.yaml`)              |
+| `deploy/kubernetes/overlays/k3s/`, `overlays/k8s/` | التراكبات الخاصة بالمجموعة (الدخول، فئة التخزين، الموارد، المجسات)                             |
+
+انظر [KUBERNETES_DEPLOYMENT_GUIDE.md](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+## `docker/` — الصور المساعدة
+
+| طريق                                | غاية                                                                                                     |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `docker/chatgpt-web-codex-browser/` | صورة متصفح بدون رأس مع وكيل CDP لمنفذ الويب ChatGPT — راجع [CHATGPT_WEB.md](../providers/CHATGPT_WEB.md) |
+| `docker/devin-bridge/`              | صورة جسر Devin وإنشاء ملف ومحاكاة وحارس الشبكة                                                           |
+| `docker/vnc-browser/`               | Chromium مع VNC لجلسات المتصفح التفاعلية                                                                 |
+
+الصورة الرئيسية هي جذر `Dockerfile`; راجع [DOCKER_GUIDE.md](../guides/DOCKER_GUIDE.md).
+
+## وصفات مجتمع `contrib/` — (غير مدعومة رسميًا)
+
+| طريق                    | غاية                                                                                                                         |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `contrib/podman/`       | رباعيات بودمان (الحاوية، الحجم، الشبكة، Redis)                                                                               |
+| `contrib/vps/`          | VPS `compose.yaml` + `.env.example`                                                                                          |
+| `contrib/windows/`      | قاذفات `.bat` للتشغيل من الخروج Windows                                                                                      |
+| `contrib/session-sync/` | README لملحق مستعرض مزامنة الجلسة التابع لجهة خارجية — راجع [SESSION-SYNC-EXTENSION.md](../guides/SESSION-SYNC-EXTENSION.md) |
+
+## `examples/`
+
+| طريق                            | غاية                                                                                    |
+| ------------------------------- | --------------------------------------------------------------------------------------- |
+| `examples/omniroute-cmd-hello/` | الحد الأدنى من البرنامج المساعد للأوامر — انظر [PLUGINS.md](../frameworks/PLUGINS.md)   |
+| `examples/plugins/`             | أمثلة على المكونات الإضافية: langfuse، وrequest-logger، وtheme-manager، وwelcome-banner |
+| `examples/quickstart/`          | مقتطفات العميل: الضفيرة، Node.js (axios)، PHP، Python                                   |
+
+---
+
+## التكامل `.github/` — GitHub
+
+| طريق                                                         | غاية                                                                                                                                                                                                                                                           |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.github/workflows/`                                         | CI (`ci.yml` `quality.yml` `build.yml`) وفحص الأمان (`codeql.yml` و `semgrep.yml` و `scorecard.yml` و `dast-smoke.yml`) ومجموعات `nightly-*.yml` المجدولة والنشر (`npm-publish.yml` و `docker-publish.yml` و `electron-release.yml`) وسير عمل الإصدار والصيانة |
+| `.github/actions/npm-ci-retry/`                              | الإجراء المركب: `npm ci` مع ذاكرة التخزين المؤقت وإعادة المحاولة                                                                                                                                                                                               |
+| `.github/actions/prepare-unit-storage/`                      | الإجراء المركب: يحرر مساحة قرص التشغيل، ثم يقوم بتثبيت التبعيات                                                                                                                                                                                                |
+| `.github/ISSUE_TEMPLATE/`                                    | نماذج مشكلة الأخطاء والميزات وتغطية الاختبار                                                                                                                                                                                                                   |
+| `.github/pull_request_template.md`, `PULL_REQUEST_TEMPLATE/` | قالب PR الافتراضي بالإضافة إلى متغيرات bugfix/feature                                                                                                                                                                                                          |
+| `.github/CODEOWNERS`, `FUNDING.yml`, `dependabot.yml`        | أصحاب الكود، روابط الرعاية، تحديثات التبعية                                                                                                                                                                                                                    |
+| `.github/labels.yml`                                         | تعريفات التسمية المطبقة بواسطة `npm run labels:sync`                                                                                                                                                                                                           |
+| `.github/copilot-instructions.md`                            | تعليمات GitHub Copilot (سطح تعليمات الوكيل)                                                                                                                                                                                                                    |
+
+خريطة وظيفة CI : [QUALITY_GATES.md](QUALITY_GATES.md).
+
+## `.husky/` — git
+
+| ملف          | غاية                                                                                                                                                        |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pre-commit` | التحقق من هوية Git، والنظام المرحلي، وبيان البوابة، ومزامنة المستندات، وأي ميزانية، ومقياس النوع، والعناصر المتعقبة، وعمليات فحص لقطة مجموعة واجهة المستخدم |
+| `commit-msg` | `scripts/check/check-ai-attribution.mjs` على رسالة الالتزام                                                                                                 |
+| `pre-push`   | الضوء المتعمد: فحص سلامة PATH/npm الذي يخرج 0                                                                                                               |
+
+يتم إنشاء وقت تشغيل الخطاف في `.husky/_/` عند التثبيت ولا يتم تتبعه.
+
+---
+
+## نصائح الملاحة
+
+- **مساهم جديد؟** `CONTRIBUTING.md` → `AGENTS.md` → [ARCHITECTURE.md](ARCHITECTURE.md) → [CODEBASE_DOCUMENTATION.md](CODEBASE_DOCUMENTATION.md).
+- **تغيير شيء شائع** (المزود، الطريق، وحدة DB ، أداة MCP ، مهارة A2A )؟ اتبع [MODIFICATION_SCENARIOS.md](MODIFICATION_SCENARIOS.md).
+- **إضافة مزود؟** تحقق من [REMOVED_PROVIDERS.md](../reference/REMOVED_PROVIDERS.md) أولاً، ثم تحقق من [PROVIDER_REFERENCE.md](../reference/PROVIDER_REFERENCE.md).
+- **تشغيل محليا؟** [SETUP_GUIDE.md](../guides/SETUP_GUIDE.md).
+- **هل يتم النشر؟** [DOCKER_GUIDE.md](../guides/DOCKER_GUIDE.md) ، [SELF_HOST_GUIDE.md](../getting-started/SELF_HOST_GUIDE.md) ، [VM_DEPLOYMENT_GUIDE.md](../ops/VM_DEPLOYMENT_GUIDE.md) ، [FLY_IO_DEPLOYMENT_GUIDE.md](../ops/FLY_IO_DEPLOYMENT_GUIDE.md) ، [KUBERNETES_DEPLOYMENT_GUIDE.md](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+- **الافراج؟** [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md).
+- **بوابة الجودة فشلت؟** [QUALITY_GATES.md](QUALITY_GATES.md) و [QUALITY_GATE_PLAYBOOK.md](../ops/QUALITY_GATE_PLAYBOOK.md).

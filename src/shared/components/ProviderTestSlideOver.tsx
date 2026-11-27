@@ -16,6 +16,7 @@ import {
   type LlmChatControls,
 } from "@/app/(dashboard)/dashboard/media-providers/components/LlmChatCard";
 import ProviderIcon from "@/shared/components/ProviderIcon";
+import { flowColorAlpha } from "@/shared/components/flow/edgeStyles";
 import { cn } from "@/shared/utils/cn";
 import { useApiKey } from "@/app/(dashboard)/dashboard/providers/hooks/useApiKey";
 import { useProviderModels } from "@/app/(dashboard)/dashboard/providers/hooks/useProviderModels";
@@ -169,7 +170,7 @@ function SlideOverHeader({
     <div className="flex items-center gap-3 px-4 py-3 border-b border-border shrink-0">
       <div
         className="size-9 rounded-lg flex items-center justify-center shrink-0"
-        style={{ backgroundColor: `${color}15` }}
+        style={{ backgroundColor: flowColorAlpha(color, 8) }}
       >
         {staticIconPath ? (
           <Image src={staticIconPath} alt={provider.name} width={22} height={22} />
@@ -178,10 +179,10 @@ function SlideOverHeader({
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <h2 className="text-sm font-semibold text-text-main truncate" title={provider.name}>
+        <h2 className="text-sm text-text-main truncate" title={provider.name}>
           {provider.name}
         </h2>
-        <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+        <div className="flex items-center gap-1.5 text-2xs text-text-muted">
           {provider.apiType && <span className="font-mono">{provider.apiType}</span>}
           {provider.deprecated && (
             <>
@@ -269,7 +270,7 @@ function TestToolbar({
           size="sm"
           onClick={() => controls?.clear()}
           title={t("clearConversation")}
-          className="gap-1 text-[11px] text-text-muted hover:text-text-main"
+          className="gap-1 text-2xs text-text-muted hover:text-text-main"
         >
           <Icon name="delete_sweep" size={14} />
           {t("clear")}
@@ -320,7 +321,7 @@ function TabPlaceholder({ icon, title, body }: { icon: string; title: string; bo
       <div className="size-12 rounded-full bg-accent/10 flex items-center justify-center">
         <Icon name={icon} size={24} className="text-accent" />
       </div>
-      <h3 className="text-sm font-semibold text-text-main">{title}</h3>
+      <h3 className="text-sm text-text-main">{title}</h3>
       <div className="text-xs text-text-muted max-w-sm">{body}</div>
     </div>
   );
@@ -444,7 +445,7 @@ function LogsTab({ providerId }: { providerId: string }) {
   return (
     <div className="flex-1 min-h-0 flex flex-col">
       <div className="flex items-center justify-between px-4 py-2 border-b border-border shrink-0">
-        <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-wider text-text-muted font-medium">
+        <span className="inline-flex items-center gap-2 text-3xs uppercase tracking-wider text-text-muted font-medium">
           <span className="inline-flex items-center gap-1.5">
             <span className="relative inline-flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-75 animate-ping" />
@@ -460,7 +461,7 @@ function LogsTab({ providerId }: { providerId: string }) {
           size="sm"
           onClick={handleRefresh}
           title={t("refreshNow")}
-          className="gap-1 text-[10px] text-text-muted hover:text-text-main"
+          className="gap-1 text-3xs text-text-muted hover:text-text-main"
         >
           <Icon name="refresh" size={14} />
           {t("refresh")}
@@ -483,12 +484,12 @@ function LogsTab({ providerId }: { providerId: string }) {
                 variant="ghost"
                 aria-expanded={isExpanded}
                 onClick={() => setExpanded(isExpanded ? null : key)}
-                className="h-auto w-full justify-start gap-3 rounded-none px-4 py-2 text-left font-normal hover:bg-bg-subtle"
+                className="h-auto w-full justify-start gap-3 rounded-none px-4 py-2 text-left hover:bg-bg-subtle"
               >
-                <span className={`text-[11px] font-mono shrink-0 w-10 ${statusColor}`}>
+                <span className={`text-2xs font-mono shrink-0 w-10 ${statusColor}`}>
                   {log.status ?? "—"}
                 </span>
-                <span className="text-[11px] text-text-muted shrink-0 w-20 font-mono">
+                <span className="text-2xs text-text-muted shrink-0 w-20 font-mono">
                   {formatRelativeTs(log.timestamp)}
                 </span>
                 <div className="flex-1 min-w-0 flex flex-col">
@@ -499,13 +500,13 @@ function LogsTab({ providerId }: { providerId: string }) {
                     {log.model || log.requestedModel || "—"}
                   </span>
                   <span
-                    className="text-[10px] text-text-muted truncate font-mono"
+                    className="text-3xs text-text-muted truncate font-mono"
                     title={requester.title}
                   >
                     {requester.label}
                   </span>
                 </div>
-                <span className="text-[11px] text-text-muted shrink-0 font-mono w-14 text-right">
+                <span className="text-2xs text-text-muted shrink-0 font-mono w-14 text-right">
                   {formatDurationMs(log.duration)}
                 </span>
                 <Icon
@@ -519,7 +520,7 @@ function LogsTab({ providerId }: { providerId: string }) {
           );
         })}
       </ul>
-      <div className="px-4 py-2 border-t border-border text-[10px] text-text-muted text-center shrink-0">
+      <div className="px-4 py-2 border-t border-border text-3xs text-text-muted text-center shrink-0">
         <a
           href={`/dashboard/logs?connection=${encodeURIComponent(providerId)}`}
           className="inline-flex items-center gap-1 hover:text-text-main hover:underline"
@@ -554,10 +555,10 @@ function LogDetail({ log }: { log: LogEntry }) {
     },
   ];
   return (
-    <dl className="px-4 py-3 bg-bg-subtle/40 border-t border-border grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1.5 text-[11px]">
+    <dl className="px-4 py-3 bg-bg-subtle/40 border-t border-border grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1.5 text-2xs">
       {rows.map((row) => (
         <div key={row.label} className="contents">
-          <dt className="text-text-muted uppercase tracking-wider text-[10px] font-medium">
+          <dt className="text-text-muted uppercase tracking-wider text-3xs font-medium">
             {row.label}
           </dt>
           <dd className={`text-text-main min-w-0 break-words ${row.mono ? "font-mono" : ""}`}>

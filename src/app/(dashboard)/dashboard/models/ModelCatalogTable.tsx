@@ -77,7 +77,6 @@ function SortableHeading({
   return (
     <SortableTableHead
       scope="col"
-      className="px-4"
       direction={active ? direction : undefined}
       defaultDirection="asc"
       onDirectionChange={() => onSort(field)}
@@ -188,7 +187,7 @@ function ModelProviderCell({
 }) {
   const t = useTranslations("modelCatalog");
   return (
-    <TableCell className="h-auto px-4 py-3 align-top">
+    <TableCell className="align-top">
       <div className="flex items-center gap-1.5">
         <ModelIdentity
           name={model.provider}
@@ -208,7 +207,7 @@ function ModelProviderCell({
 
 function ModelTypeCell({ model }: { model: CatalogModelRow }) {
   return (
-    <TableCell className="h-auto px-4 py-3 align-top text-text-main">
+    <TableCell className="align-top text-text-main">
       {humanize(model.type)}
       {model.subtype && (
         <span className="mt-0.5 block text-xs text-text-muted">{humanize(model.subtype)}</span>
@@ -222,7 +221,7 @@ function ModelCapabilitiesCell({ capabilities }: { capabilities: string[] }) {
   const t = useTranslations("modelCatalog");
   const additionalCapabilities = capabilities.slice(3);
   return (
-    <TableCell className="h-auto max-w-xs whitespace-normal px-4 py-3 align-top">
+    <TableCell className="max-w-xs whitespace-normal align-top">
       {capabilities.length > 0 ? (
         <div className="flex flex-wrap gap-1.5">
           {capabilities.slice(0, 3).map((capability) => (
@@ -256,7 +255,7 @@ function ModelCapabilitiesCell({ capabilities }: { capabilities: string[] }) {
 function ModelFlagsCell({ model, labels }: { model: CatalogModelRow; labels: ModelCatalogLabels }) {
   const t = useTranslations("modelCatalog");
   return (
-    <TableCell className="h-auto px-4 py-3 align-top">
+    <TableCell className="align-top">
       <div className="flex flex-wrap gap-1.5">
         {model.custom === true && (
           <Badge size="sm" variant="info">
@@ -296,7 +295,7 @@ function ModelVisibilityCell({
   const t = useTranslations("modelCatalog");
   const hidden = model.hidden === true;
   return (
-    <TableCell className="h-auto px-4 py-3 align-top">
+    <TableCell className="align-top">
       <Button
         type="button"
         variant="ghost"
@@ -310,7 +309,7 @@ function ModelVisibilityCell({
         disabled={busy || !model.visibility}
         onClick={() => onToggle(model)}
         data-testid={`toggle-visibility-${model.id}`}
-        className="text-text-muted hover:text-text-main"
+        tone="muted"
       >
         <Icon
           name={hidden ? "visibility_off" : "visibility"}
@@ -374,27 +373,27 @@ function ModelCatalogTableRow({
         />
       )}
       <ModelProviderCell model={model} providerHealth={providerHealthMap[model.providerId]} />
-      <TableCell className="h-auto max-w-sm whitespace-normal px-4 py-3 align-top">
+      <TableCell className="max-w-sm whitespace-normal align-top">
         <span className="block break-words font-medium text-text-main">{model.name}</span>
         <span className="mt-0.5 block break-all font-mono text-xs text-text-muted">{model.id}</span>
       </TableCell>
       <ModelTypeCell model={model} />
       <ModelCapabilitiesCell capabilities={capabilities} />
-      <TableCell className="h-auto px-4 py-3 align-top tabular-nums text-text-main">
+      <TableCell className="align-top tabular-nums text-text-main">
         {formatOptionalCount(model.context_length)}
       </TableCell>
-      <TableCell className="h-auto px-4 py-3 align-top tabular-nums text-text-main">
+      <TableCell className="align-top tabular-nums text-text-main">
         {formatOptionalCount(model.max_output_tokens)}
       </TableCell>
       <ModelFlagsCell model={model} labels={labels} />
       {onToggleVisibility && (
         <ModelVisibilityCell model={model} busy={visibilityBusy} onToggle={onToggleVisibility} />
       )}
-      <TableCell className="h-auto px-4 py-3 align-top">
+      <TableCell className="align-top">
         <CatalogTestBadge result={result} loading={isTesting} />
       </TableCell>
       {onTestModel && (
-        <TableCell className="h-auto whitespace-nowrap px-4 py-3 text-right align-top">
+        <TableCell align="end" className="whitespace-nowrap align-top">
           {renderKeyAccess?.(model)}
           <Button
             variant="secondary"
@@ -478,7 +477,8 @@ export default function ModelCatalogTable({
       <div role="region" aria-label={t("tableRegion")}>
         <Table
           scrollbarLabel={t("tableRegion")}
-          containerClassName="rounded-none border-0"
+          variant="plain"
+          density="comfortable"
           className="min-w-[1100px]"
         >
           <TableCaption className="sr-only">{t("tableCaption")}</TableCaption>

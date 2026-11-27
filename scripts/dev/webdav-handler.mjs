@@ -24,6 +24,7 @@ import path from "node:path";
 import { createDecipheriv, scryptSync, createHash, timingSafeEqual } from "node:crypto";
 import { createRequire } from "node:module";
 import os from "node:os";
+import { resolveClientIp } from "./peer-stamp.mjs";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -244,6 +245,172 @@ export function verifyBasicAuth(authHeader, expectedUsername, expectedPassword) 
   return userOk && passOk;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Rate limiting & Lockout (issue #19834)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const WEBDAV_AUTH_MAX_FAILURES = 10;
+export const WEBDAV_AUTH_WINDOW_MS = 60 * 1000; // 60 seconds
+export const WEBDAV_AUTH_LOCKOUT_MS = 5 * 60 * 1000; // 5 minutes
+/** Expired failure entries are swept at most once per interval, never on every failure. */
+export const WEBDAV_AUTH_SWEEP_INTERVAL_MS = 1000;
+
+/** @type {Map<string, { count: number, resetAt: number, lockedUntil: number | null }>} */
+const authFailureMap = new Map();
+const WEBDAV_AUTH_SWEEP_THRESHOLD = 256;
+let lastAuthFailureSweepAt = 0;
+
+/**
+ * Drop expired failure entries once the map grows past the threshold. Rate-limited to one pass
+ * per WEBDAV_AUTH_SWEEP_INTERVAL_MS so a burst of distinct clients cannot turn every failed
+ * attempt into a full scan. Active lockouts are kept until they expire.
+ *
+ * @param {number} now
+ */
+function sweepExpiredWebdavAuthFailures(now) {
+  if (authFailureMap.size <= WEBDAV_AUTH_SWEEP_THRESHOLD) return;
+  if (now - lastAuthFailureSweepAt < WEBDAV_AUTH_SWEEP_INTERVAL_MS) return;
+  lastAuthFailureSweepAt = now;
+  for (const [k, v] of authFailureMap) {
+    if ((v.lockedUntil && v.lockedUntil <= now) || (!v.lockedUntil && now > v.resetAt)) {
+      authFailureMap.delete(k);
+    }
+  }
+}
+
+/**
+ * Normalise a client IP address for the WebDAV rate-limit key.
+ *
+ * @param {string | null | undefined} ip
+ * @returns {string}
+ */
+export function normalizeWebdavClientIp(ip) {
+  const trimmed = typeof ip === "string" ? ip.trim() : "";
+  if (!trimmed) return "unknown";
+  if (trimmed.startsWith("::ffff:")) return trimmed.slice("::ffff:".length);
+  return trimmed;
+}
+
+/**
+ * Client address used as the rate-limit key for a Node.js HTTP request.
+ *
+ * Forwarding headers are believed only when the TCP peer is a trusted proxy (loopback, a
+ * private-network proxy, a Cloudflare edge or OMNIROUTE_TRUSTED_PROXIES), via the same
+ * `resolveClientIp` the server uses everywhere else. A direct client can write X-Forwarded-For
+ * itself, so it is keyed by its connection address; otherwise rotating that header would reset
+ * the failure counter on every attempt.
+ *
+ * @param {import("node:http").IncomingMessage} req
+ * @returns {string}
+ */
+export function getWebdavClientIp(req) {
+  if (!req) return "unknown";
+  const peer = req.socket?.remoteAddress;
+  if (!peer) return "unknown";
+  return normalizeWebdavClientIp(resolveClientIp(req.headers || {}, peer) || peer);
+}
+
+/**
+ * Check if the given client IP is currently rate-limited/locked out.
+ *
+ * @param {string} rawIp
+ * @param {number} [now]
+ * @returns {{ allowed: boolean, retryAfter?: number }}
+ */
+export function checkWebdavRateLimit(rawIp, now = Date.now()) {
+  const ip = normalizeWebdavClientIp(rawIp);
+  const state = authFailureMap.get(ip);
+  if (!state) return { allowed: true };
+
+  if (state.lockedUntil && state.lockedUntil > now) {
+    const retryAfter = Math.max(1, Math.ceil((state.lockedUntil - now) / 1000));
+    return { allowed: false, retryAfter };
+  }
+
+  if ((state.lockedUntil && state.lockedUntil <= now) || now > state.resetAt) {
+    authFailureMap.delete(ip);
+    return { allowed: true };
+  }
+
+  return { allowed: true };
+}
+
+/**
+ * Record a failed WebDAV authentication attempt for an IP.
+ *
+ * @param {string} rawIp
+ * @param {number} [now]
+ * @returns {{ allowed: boolean, retryAfter?: number }}
+ */
+export function recordWebdavAuthFailure(rawIp, now = Date.now()) {
+  const ip = normalizeWebdavClientIp(rawIp);
+  sweepExpiredWebdavAuthFailures(now);
+
+  const existing = authFailureMap.get(ip);
+  let state;
+
+  if (!existing || now > existing.resetAt) {
+    state = { count: 1, resetAt: now + WEBDAV_AUTH_WINDOW_MS, lockedUntil: null };
+    authFailureMap.set(ip, state);
+  } else {
+    existing.count += 1;
+    if (existing.count >= WEBDAV_AUTH_MAX_FAILURES) {
+      existing.lockedUntil = now + WEBDAV_AUTH_LOCKOUT_MS;
+      const retryAfter = Math.ceil(WEBDAV_AUTH_LOCKOUT_MS / 1000);
+      console.warn(
+        `[WebDAV] Authentication lockout engaged for IP ${ip} after ${existing.count} failures (Retry-After: ${retryAfter}s)`
+      );
+      return { allowed: false, retryAfter };
+    }
+    state = existing;
+  }
+
+  console.warn(
+    `[WebDAV] Authentication failure from IP ${ip} (attempt ${state.count}/${WEBDAV_AUTH_MAX_FAILURES})`
+  );
+  return { allowed: true };
+}
+
+/**
+ * Reset failed authentication state for an IP on successful auth.
+ *
+ * @param {string} rawIp
+ */
+export function resetWebdavAuthFailures(rawIp) {
+  const ip = normalizeWebdavClientIp(rawIp);
+  authFailureMap.delete(ip);
+}
+
+/**
+ * Number of client addresses with tracked failures (for testing).
+ *
+ * @returns {number}
+ */
+export function getWebdavAuthFailureStateSize() {
+  return authFailureMap.size;
+}
+
+/**
+ * Clear all rate limiting state (for testing).
+ */
+export function clearWebdavRateLimits() {
+  authFailureMap.clear();
+  lastAuthFailureSweepAt = 0;
+}
+
+/**
+ * Count a rejected Basic-auth attempt. A request that carries no Authorization header is the
+ * client's challenge probe, not a password guess: it gets the 401 without spending an attempt.
+ *
+ * @param {string | undefined} authHeader
+ * @param {string} clientIp
+ * @returns {{ allowed: boolean, retryAfter?: number }}
+ */
+function recordRejectedWebdavAuth(authHeader, clientIp) {
+  if (!authHeader) return { allowed: true };
+  return recordWebdavAuthFailure(clientIp);
+}
+
 /**
  * Escape XML special characters.
  *
@@ -349,29 +516,39 @@ function getDefaultDataDir() {
   const homeDir = os.homedir();
   const legacyDir = path.join(homeDir, ".omniroute"); // getLegacyDotDataDir()
 
-  // 2) Preserve the legacy ~/.omniroute path if it already exists (avoid data loss).
-  try {
-    if (fs.existsSync(legacyDir) && fs.statSync(legacyDir).isDirectory()) {
-      return legacyDir;
+  const hasDatabase = (dir) => {
+    try {
+      return fs.statSync(path.join(dir, "storage.sqlite")).isFile();
+    } catch {
+      return false;
     }
+  };
+  let legacyIsDir = false;
+  try {
+    legacyIsDir = fs.statSync(legacyDir).isDirectory();
   } catch {
     // ignore stat errors
   }
 
-  // 3) Windows → %APPDATA%/omniroute.
+  // 3) Windows → %APPDATA%/omniroute; 4) XDG on Linux/macOS only when XDG_CONFIG_HOME is set.
+  let platformDir = null;
   if (process.platform === "win32") {
     const appData = process.env.APPDATA || path.join(homeDir, "AppData", "Roaming");
-    return path.join(appData, "omniroute");
+    platformDir = path.join(appData, "omniroute");
+  } else {
+    const xdgConfigHome = process.env.XDG_CONFIG_HOME;
+    if (typeof xdgConfigHome === "string" && xdgConfigHome.trim().length > 0) {
+      platformDir = path.join(path.resolve(xdgConfigHome.trim()), "omniroute");
+    }
   }
 
-  // 4) XDG on Linux/macOS only when XDG_CONFIG_HOME is explicitly configured.
-  const xdgConfigHome = process.env.XDG_CONFIG_HOME;
-  if (typeof xdgConfigHome === "string" && xdgConfigHome.trim().length > 0) {
-    return path.join(path.resolve(xdgConfigHome.trim()), "omniroute");
+  // 2) Preserve the legacy ~/.omniroute path if it already exists (avoid data loss), unless the
+  // platform dir holds the database and the legacy dir does not.
+  if (legacyIsDir && !(platformDir && !hasDatabase(legacyDir) && hasDatabase(platformDir))) {
+    return legacyDir;
   }
-
-  // 5) Default → legacy ~/.omniroute (even if it does not exist yet).
-  return legacyDir;
+  // 5) Default → platform dir, else legacy ~/.omniroute (even if it does not exist yet).
+  return platformDir ?? legacyDir;
 }
 
 /**
@@ -494,8 +671,7 @@ function buildEntryHref(baseHref, relativePath, isDir) {
 function handleOptions(req, res) {
   res.writeHead(200, {
     DAV: "1, 2",
-    Allow:
-      "OPTIONS, GET, HEAD, PUT, DELETE, MKCOL, MOVE, COPY, PROPFIND, LOCK, UNLOCK",
+    Allow: "OPTIONS, GET, HEAD, PUT, DELETE, MKCOL, MOVE, COPY, PROPFIND, LOCK, UNLOCK",
     "MS-Author-Via": "DAV",
     "Content-Length": "0",
   });
@@ -925,11 +1101,32 @@ export async function maybeHandleWebdav(req, res) {
     return true;
   }
 
-  // Authenticate
-  if (!verifyBasicAuth(req.headers["authorization"], config.username, config.password)) {
-    sendUnauthorized(res);
+  // Extract client IP and evaluate rate limits / lockout
+  const clientIp = getWebdavClientIp(req);
+  const rateLimitCheck = checkWebdavRateLimit(clientIp);
+  if (!rateLimitCheck.allowed) {
+    sendError(res, 429, "Too Many Requests", {
+      "Retry-After": String(rateLimitCheck.retryAfter || 60),
+    });
     return true;
   }
+
+  // Authenticate
+  const authHeader = req.headers["authorization"];
+  if (!verifyBasicAuth(authHeader, config.username, config.password)) {
+    const failureDecision = recordRejectedWebdavAuth(authHeader, clientIp);
+    if (!failureDecision.allowed) {
+      sendError(res, 429, "Too Many Requests", {
+        "Retry-After": String(failureDecision.retryAfter || 60),
+      });
+    } else {
+      sendUnauthorized(res);
+    }
+    return true;
+  }
+
+  // Successful auth clears previous failures for this client IP
+  resetWebdavAuthFailures(clientIp);
 
   // Resolve vault root
   let vaultRoot;

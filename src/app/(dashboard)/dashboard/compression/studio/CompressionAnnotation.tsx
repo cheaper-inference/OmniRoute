@@ -1,4 +1,5 @@
 import type { CompressionStats } from "@omniroute/open-sse/services/compression/types";
+import Badge from "@/shared/components/Badge";
 
 export interface CompressionAnnotationProps {
   stats: CompressionStats;
@@ -24,12 +25,9 @@ export function CompressionAnnotation({ stats }: CompressionAnnotationProps) {
         {stats.originalTokens}→{stats.compressedTokens}
       </span>
       {sorted.map(([name, n]) => (
-        <span
-          key={name}
-          className="px-1.5 py-0.5 rounded text-[10px] bg-chart-3/10 text-chart-3 border border-chart-3/20"
-        >
+        <Badge key={name} size="sm" tone="chart-3">
           {name}×{n}
-        </span>
+        </Badge>
       ))}
     </div>
   );

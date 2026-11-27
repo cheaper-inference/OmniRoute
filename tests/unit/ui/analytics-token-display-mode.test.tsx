@@ -2,6 +2,7 @@
 import React from "react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { within } from "@testing-library/react";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import UsageAnalytics from "@/shared/components/UsageAnalytics";
 import { ApiKeyTable, ProviderTable } from "@/shared/components/analytics/charts";
@@ -25,6 +26,8 @@ const mockTranslate = (key: string, values?: Record<string, any>) => {
   if (key === "tokenDisplayMode") return "Token Display Mode";
   if (key === "totalTokens") return "Total Tokens";
   if (key === "inputTokens") return "Input Tokens";
+  if (key === "totalInputTokens") return "Total Input Tokens";
+  if (key === "cachedInputTokens") return "Cached Input Tokens";
   if (key === "outputTokens") return "Output Tokens";
   if (key === "estCost") return "Est. Cost";
   if (values) return `${key}:${JSON.stringify(values)}`;
@@ -37,17 +40,19 @@ vi.mock("next-intl", () => ({
   useTranslations: () => mockTranslate,
 }));
 
-vi.mock("@/shared/components/analytics/rechartsCore", () => ({
-  loadRecharts: vi.fn(),
-  useRecharts: () => null,
-  ChartLoadingCard: () => <div data-testid="chart-loading" />,
-  DarkTooltip: () => null,
+// The kit charts that draw with recharts stay out of this test (they load through next/dynamic).
+vi.mock("@omniroute/ui-kit/reporting-charts", () => ({
+  StackedBarChart: () => <div data-testid="chart-loading" />,
+  StackedAreaChart: () => <div data-testid="chart-loading" />,
+  Sparkline: () => <div data-testid="chart-loading" />,
 }));
 
 const mockAnalyticsData = {
   summary: {
     totalTokens: 3712481200,
     promptTokens: 3700000000,
+    cachedInputTokens: 2000000000,
+    cachedInputTokensComplete: true,
     completionTokens: 12481200,
     totalCost: 1180.27,
     totalRequests: 19433,
@@ -153,15 +158,22 @@ describe("Analytics Token Display Mode (Compact vs Exact)", () => {
     await renderUsageAnalytics();
 
     // In default compact mode, values should be compact (e.g. 3.7B)
-    const kpiValues = container.querySelectorAll(".text-2xl.font-semibold");
+    const kpiValues = [
+      "Total Tokens",
+      "Total Input Tokens",
+      "Input Tokens",
+      "Cached Input Tokens",
+      "Output Tokens",
+    ].map((label) => within(container).getByRole("group", { name: label }).querySelector("dd"));
     expect(kpiValues[0]?.textContent).toBe("3.7B");
     expect(kpiValues[1]?.textContent).toBe("3.7B");
-    expect(kpiValues[2]?.textContent).toBe("12.5M");
+    expect(kpiValues[2]?.textContent).toBe("1.7B");
+    expect(kpiValues[3]?.textContent).toBe("2.0B");
+    expect(kpiValues[4]?.textContent).toBe("12.5M");
+    expect(within(container).getByText("$1180.27")).toBeTruthy();
 
     // Click "Exact" toggle
-    const exactBtn = container.querySelector(
-      'button[role="radio"][title="Exact"]'
-    ) as HTMLButtonElement;
+    const exactBtn = within(container).getByRole("radio", { name: "Exact" }) as HTMLButtonElement;
     expect(exactBtn).not.toBeNull();
 
     await act(async () => {
@@ -173,10 +185,26 @@ describe("Analytics Token Display Mode (Compact vs Exact)", () => {
     // Now values should be formatted with full precision
     expect(kpiValues[0]?.textContent).toBe(fmtFull(3712481200));
     expect(kpiValues[1]?.textContent).toBe(fmtFull(3700000000));
-    expect(kpiValues[2]?.textContent).toBe(fmtFull(12481200));
+    expect(kpiValues[2]?.textContent).toBe(fmtFull(1700000000));
+    expect(kpiValues[3]?.textContent).toBe(fmtFull(2000000000));
+    expect(kpiValues[4]?.textContent).toBe(fmtFull(12481200));
+    expect(within(container).getByText("$1180.27")).toBeTruthy();
 
     // Check localStorage was persisted
     expect(localStorage.getItem("omniroute:analytics-token-display-mode")).toBe("exact");
+    const compactBtn = within(container).getByRole("radio", {
+      name: "Compact",
+    }) as HTMLButtonElement;
+    await act(async () => {
+      compactBtn.click();
+      compactBtn.click();
+    });
+    expect(kpiValues[2]?.textContent).toBe("1.7B");
+    expect(kpiValues[3]?.textContent).toBe("2.0B");
+    await act(async () => {
+      exactBtn.click();
+    });
+    expect(kpiValues[2]?.textContent).toBe(fmtFull(1700000000));
   });
 
   it("hydrates saved 'exact' preference from localStorage on mount", async () => {
@@ -184,10 +212,16 @@ describe("Analytics Token Display Mode (Compact vs Exact)", () => {
 
     await renderUsageAnalytics();
 
-    const exactBtn = container.querySelector('button[role="radio"][title="Exact"]');
+    const exactBtn = within(container).getByRole("radio", { name: "Exact" });
     expect(exactBtn?.getAttribute("aria-checked")).toBe("true");
 
-    const kpiValues = container.querySelectorAll(".text-2xl.font-semibold");
+    const kpiValues = [
+      "Total Tokens",
+      "Total Input Tokens",
+      "Input Tokens",
+      "Cached Input Tokens",
+      "Output Tokens",
+    ].map((label) => within(container).getByRole("group", { name: label }).querySelector("dd"));
     expect(kpiValues[0]?.textContent).toBe(fmtFull(3712481200));
   });
 

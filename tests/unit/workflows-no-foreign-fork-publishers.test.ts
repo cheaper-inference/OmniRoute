@@ -39,12 +39,20 @@ const workflowDir = path.join(repoRoot, ".github/workflows");
  * `github.repository` guard and every GHCR namespace must name it.
  */
 const OWNER = "cheaper-inference";
-/** Docker Hub is a separate account that did not move with the repository. */
-const DOCKERHUB_OWNER = "diegosouzapw";
-const REGISTRY_OWNER: Record<string, string> = {
-  "ghcr.io": OWNER,
-  "docker.io": DOCKERHUB_OWNER,
-  "index.docker.io": DOCKERHUB_OWNER,
+/**
+ * Docker Hub cannot move a repository between namespaces: the legacy personal repository keeps
+ * its pull history and receives every release, and the organization repository is published in
+ * parallel (docker-org-mirror.yml).
+ */
+const DOCKERHUB_OWNERS = ["diegosouzapw", "cheaperinference"];
+/**
+ * GHCR: the organization package, plus the legacy personal package ghcr.io/diegosouzapw/omniroute
+ * that keeps receiving releases until 2027-06-30 (docker-org-mirror.yml, mirror-legacy-ghcr).
+ */
+const REGISTRY_OWNERS: Record<string, string[]> = {
+  "ghcr.io": [OWNER, "diegosouzapw"],
+  "docker.io": DOCKERHUB_OWNERS,
+  "index.docker.io": DOCKERHUB_OWNERS,
 };
 
 function workflowFiles(): string[] {
@@ -63,7 +71,7 @@ test("no workflow publishes to another owner's container registry", () => {
     // right after the registry host.
     for (const m of text.matchAll(/\b(ghcr\.io|(?:index\.)?docker\.io)\/([A-Za-z0-9_.-]+)/g)) {
       const [, host, owner] = m;
-      if (owner.toLowerCase() !== REGISTRY_OWNER[host]) {
+      if (!REGISTRY_OWNERS[host].includes(owner.toLowerCase())) {
         offenders.push(`${path.basename(file)} → ${m[0]}`);
       }
     }
@@ -72,7 +80,7 @@ test("no workflow publishes to another owner's container registry", () => {
   assert.deepEqual(
     offenders,
     [],
-    `workflow(s) target a registry namespace that is not ours (${JSON.stringify(REGISTRY_OWNER)}):\n  ${offenders.join("\n  ")}\n` +
+    `workflow(s) target a registry namespace that is not ours (${JSON.stringify(REGISTRY_OWNERS)}):\n  ${offenders.join("\n  ")}\n` +
       `A fork's publish workflow does not belong in the canonical repository — it cannot ` +
       `authenticate anyway, and it pollutes every release check board.`
   );

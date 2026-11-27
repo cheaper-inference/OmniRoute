@@ -13,9 +13,13 @@ import {
 } from "@omniroute/ui-kit/table";
 import Icon from "@/shared/components/Icon";
 import Button from "@/shared/components/Button";
+import { LocalOnlyNotice } from "@/shared/components/LocalOnlyNotice";
+import { useLocalOnlyBlocked } from "@/shared/hooks/useLocalOnlyAccess";
+import { detectLocalOnlyRejection } from "@/shared/utils/localOnlyAccess";
 import { cn } from "@/shared/utils/cn";
 import type { OmniSkill } from "./OmniSkillCard";
 import type { JSX } from "react";
+import Badge from "@/shared/components/Badge";
 
 interface SkillDetail extends OmniSkill {
   schema?: {
@@ -36,6 +40,8 @@ interface SkillExecution {
 
 type InspectorTab = "schema" | "handler" | "executions" | "sandbox";
 
+const EXECUTIONS_API_PATH = "/api/skills/executions";
+
 interface SkillInspectorPaneProps {
   selectedSkillId: string | null;
   skill: OmniSkill | null;
@@ -55,6 +61,7 @@ export function SkillInspectorPane({
   const [detail, setDetail] = useState<SkillDetail | null>(null);
   const [executions, setExecutions] = useState<SkillExecution[]>([]);
   const [loadingExecs, setLoadingExecs] = useState(false);
+  const executionsLocalOnly = useLocalOnlyBlocked(EXECUTIONS_API_PATH);
 
   useEffect(() => {
     let cancelled = false;
@@ -83,13 +90,17 @@ export function SkillInspectorPane({
   }, [selectedSkillId]);
 
   useEffect(() => {
-    if (!selectedSkillId || activeTab !== "executions") return;
+    if (!selectedSkillId || activeTab !== "executions" || executionsLocalOnly) return;
     let cancelled = false;
     Promise.resolve().then(() => {
       if (!cancelled) setLoadingExecs(true);
     });
-    fetch(`/api/skills/executions?skillId=${selectedSkillId}&limit=20`)
-      .then((r) => (r.ok ? r.json() : { data: [] }))
+    fetch(`${EXECUTIONS_API_PATH}?skillId=${selectedSkillId}&limit=20`)
+      .then(async (r) => {
+        // Local-only rejection: the notice below replaces the list.
+        if (await detectLocalOnlyRejection(r, EXECUTIONS_API_PATH)) return { data: [] };
+        return r.ok ? r.json() : { data: [] };
+      })
       .then((data: { data?: SkillExecution[] }) => {
         if (!cancelled) {
           setExecutions(data.data || []);
@@ -102,7 +113,7 @@ export function SkillInspectorPane({
     return () => {
       cancelled = true;
     };
-  }, [selectedSkillId, activeTab]);
+  }, [selectedSkillId, activeTab, executionsLocalOnly]);
 
   if (!selectedSkillId || !skill) {
     return (
@@ -128,24 +139,21 @@ export function SkillInspectorPane({
       <div className="px-4 pt-4 pb-2 border-b border-border">
         <div className="flex items-center gap-2 mb-1">
           <Icon name="auto_fix_high" size={18} className="text-primary" />
-          <h3 className="font-semibold text-text-main text-sm">{skill.name}</h3>
+          <h3 className="ci-heading text-text-main" data-size="sm">
+            {skill.name}
+          </h3>
         </div>
         <p className="text-xs text-text-muted line-clamp-2">{skill.description}</p>
         <div className="flex items-center gap-1.5 mt-1.5">
-          <span
-            className={`text-[10px] px-1.5 py-0.5 rounded ${
-              effectiveMode === "on"
-                ? "bg-success/10 text-success"
-                : effectiveMode === "auto"
-                  ? "bg-warning/10 text-warning"
-                  : "bg-surface-2 text-text-muted"
-            }`}
+          <Badge
+            variant={
+              effectiveMode === "on" ? "success" : effectiveMode === "auto" ? "warning" : "default"
+            }
+            size="sm"
           >
             {t("mode")}: {effectiveMode}
-          </span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-2 text-text-muted">
-            {(skill.sourceProvider || "local").toUpperCase()}
-          </span>
+          </Badge>
+          <Badge size="sm">{(skill.sourceProvider || "local").toUpperCase()}</Badge>
         </div>
       </div>
 
@@ -171,7 +179,7 @@ export function SkillInspectorPane({
         {activeTab === "schema" && (
           <div className="space-y-3">
             <div>
-              <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1.5">
+              <p className="ci-eyebrow mb-1.5" data-weight="medium">
                 {t("inputSchema")}
               </p>
               <pre className="text-xs bg-bg-subtle rounded-lg p-3 overflow-auto max-h-[200px] text-text-main font-mono whitespace-pre-wrap">
@@ -179,7 +187,7 @@ export function SkillInspectorPane({
               </pre>
             </div>
             <div>
-              <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1.5">
+              <p className="ci-eyebrow mb-1.5" data-weight="medium">
                 {t("outputSchema")}
               </p>
               <pre className="text-xs bg-bg-subtle rounded-lg p-3 overflow-auto max-h-[200px] text-text-main font-mono whitespace-pre-wrap">
@@ -191,7 +199,7 @@ export function SkillInspectorPane({
 
         {activeTab === "handler" && (
           <div>
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1.5">
+            <p className="ci-eyebrow mb-1.5" data-weight="medium">
               {t("handlerCode")}
             </p>
             <pre className="text-xs bg-bg-subtle rounded-lg p-3 overflow-auto max-h-[400px] text-text-main font-mono whitespace-pre-wrap">
@@ -202,13 +210,17 @@ export function SkillInspectorPane({
 
         {activeTab === "executions" && (
           <div>
-            {loadingExecs ? (
+            {executionsLocalOnly ? (
+              <LocalOnlyNotice />
+            ) : loadingExecs ? (
               <div className="text-xs text-text-muted">{t("loading")}...</div>
             ) : executions.length === 0 ? (
               <div className="text-xs text-text-muted text-center py-6">{t("noExecutions")}</div>
             ) : (
+              // The inspector pane's border is the frame around this table (#19620).
               <Table
-                className="text-xs"
+                variant="plain"
+                density="compact"
                 aria-label={t("executionsTab")}
                 scrollbarLabel={t("executionsTab")}
               >
@@ -223,17 +235,18 @@ export function SkillInspectorPane({
                   {executions.map((exec) => (
                     <TableRow key={exec.id}>
                       <TableCell>
-                        <span
-                          className={`px-1.5 py-0.5 rounded ${
+                        <Badge
+                          variant={
                             exec.status === "success"
-                              ? "bg-success/10 text-success"
+                              ? "success"
                               : exec.status === "error"
-                                ? "bg-error/10 text-error"
-                                : "bg-warning/10 text-warning"
-                          }`}
+                                ? "error"
+                                : "warning"
+                          }
+                          size="sm"
                         >
                           {exec.status}
-                        </span>
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-text-muted">{exec.duration}ms</TableCell>
                       <TableCell className="text-text-muted">
@@ -249,7 +262,7 @@ export function SkillInspectorPane({
 
         {activeTab === "sandbox" && (
           <div className="space-y-2">
-            <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1.5">
+            <p className="ci-eyebrow mb-1.5" data-weight="medium">
               {t("sandboxConfig")}
             </p>
             {[
@@ -264,12 +277,12 @@ export function SkillInspectorPane({
               >
                 <div>
                   <p className="text-xs font-medium">{item.label}</p>
-                  <p className="text-[10px] text-text-muted">{item.desc}</p>
+                  <p className="text-xs text-text-muted">{item.desc}</p>
                 </div>
                 <span className="text-xs font-mono text-text-muted">{item.value}</span>
               </div>
             ))}
-            <Button variant="outline" size="sm" fullWidth className="mt-3 text-xs text-text-muted">
+            <Button variant="outline" size="sm" tone="muted" fullWidth className="mt-3 text-xs">
               {t("runTestPlaceholder")}
             </Button>
           </div>
@@ -283,18 +296,18 @@ export function SkillInspectorPane({
             key={mode}
             variant="outline"
             size="sm"
+            tone={effectiveMode === mode ? undefined : "muted"}
             onClick={() => onSetMode(skill.id, mode)}
             aria-label={t("setModeAria", { mode })}
             aria-pressed={effectiveMode === mode}
             className={cn(
               "flex-1 text-xs",
-              effectiveMode === mode
-                ? mode === "on"
+              effectiveMode === mode &&
+                (mode === "on"
                   ? "border-success text-success bg-success/10"
                   : mode === "auto"
                     ? "border-warning text-warning bg-warning/10"
-                    : "border-error text-error bg-error/10"
-                : "text-text-muted"
+                    : "border-error text-error bg-error/10")
             )}
           >
             {mode === "on" ? t("onMode") : mode === "auto" ? t("autoMode") : t("offMode")}

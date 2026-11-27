@@ -201,7 +201,7 @@ Each route class has a policy in `src/server/authz/policies/`:
 - **`publicPolicy`** (`policies/public.ts`) — always returns `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — extracts Bearer, validates via `validateApiKey()`. Falls through to anonymous only when the effective `REQUIRE_API_KEY` feature flag is disabled. The effective flag is resolved through `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) so Dashboard Feature Flags and environment variables govern `/api/v1/*`, `/api/v1beta/*`, and aliases consistently; resolver failures fail closed. Allows dashboard-session requests on client API routes (including `/api/v1/models`, used by the dashboard model catalog).
   When Entra ID SSO is enabled, a Bearer that is structurally an Entra token (three base64url segments, `RS*` alg, `kid`) is handled by the SSO branch **before** `validateApiKey()` and its verdict is final — it never falls through to the API-key path or the degrade-to-anonymous branch, so an identity-provider outage cannot become open access. Static API keys are unaffected. See [Entra ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — accepts dashboard session, internal model-sync requests (matched against `/api/providers/[name]/(sync-models|models)`), or skips entirely if `isAuthRequired()` returns false. Returns 403 (`AUTH_001`) when a Bearer token is present but invalid, 401 otherwise. Also enforces the route-guard tiers (LOCAL_ONLY / ALWAYS_PROTECTED) before any auth branch — see [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY paths in `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (today: `/api/mcp/`) may be accessed from non-loopback when the Bearer key carries the `manage` scope; all other LOCAL_ONLY paths remain strict-loopback regardless of scope.
+- **`managementPolicy`** (`policies/management.ts`) — accepts dashboard session, internal model-sync requests (matched against `/api/providers/[name]/(sync-models|models)`), or skips entirely if `isAuthRequired()` returns false. Returns 403 (`AUTH_001`) when a Bearer token is present but invalid, 401 otherwise. Also enforces the route-guard tiers (LOCAL_ONLY / ALWAYS_PROTECTED) before any auth branch — see [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY paths in `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (today: `/api/mcp/`) may be accessed from non-loopback when the Bearer key carries the `manage`/`admin` scope or the narrow `mcp:connect` scope (`hasMcpConnectOrManageScope`), or with an authenticated dashboard session; all other LOCAL_ONLY paths remain strict-loopback regardless of scope.
 
 A successful policy returns `AuthSubject` with `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Downstream handlers can read it via `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` instead of re-running auth logic.
 
@@ -320,7 +320,9 @@ Catalog and matching rules (identical string, or a granted scope ending in `*`):
 subset, not that full catalog. Enforcement runs in
 `open-sse/mcp-server/scopeEnforcement.ts` after `resolveCallerScopeContext()`
 resolves scopes from MCP auth info, request metadata, or `OMNIROUTE_MCP_SCOPES`.
-It stays off unless `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+`OMNIROUTE_MCP_ENFORCE_SCOPES=true` turns it on globally (default `false`), but it is
+always enforced for an HTTP/SSE caller whose API key lacks `manage`/`admin` (see `shouldForceScopeEnforcement()` in `open-sse/mcp-server/scopeEnforcement.ts`),
+regardless of the flag.
 
 ### Access-token scopes
 

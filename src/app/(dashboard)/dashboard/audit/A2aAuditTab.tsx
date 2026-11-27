@@ -14,6 +14,7 @@ import {
 } from "@omniroute/ui-kit/table";
 import { TableLoadingState } from "@omniroute/ui-kit/table-loading";
 import { Badge, Button, EmptyState, Input, Select } from "@/shared/components";
+import Pager from "@/shared/components/Pager";
 import type { A2ATask, TaskState } from "@/lib/a2a/taskManager";
 
 type TaskListResponse = {
@@ -145,24 +146,13 @@ export default function A2aAuditTab() {
         pagination={
           <DataTableFooter
             pagination={
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setOffset((c) => Math.max(0, c - A2A_PAGE_SIZE))}
-                  disabled={offset === 0 || loading}
-                >
-                  {t("previous")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setOffset((c) => c + A2A_PAGE_SIZE)}
-                  disabled={offset + A2A_PAGE_SIZE >= data.total || loading}
-                >
-                  {t("next")}
-                </Button>
-              </div>
+              <Pager
+                variant="summary"
+                page={Math.floor(offset / A2A_PAGE_SIZE) + 1}
+                pageCount={Math.max(1, Math.ceil(data.total / A2A_PAGE_SIZE))}
+                onPageChange={(page) => setOffset((page - 1) * A2A_PAGE_SIZE)}
+                disabled={loading}
+              />
             }
           />
         }
@@ -172,7 +162,11 @@ export default function A2aAuditTab() {
         ) : data.tasks.length === 0 ? (
           <EmptyState icon="device_hub" title={t("a2aNoTasks")} />
         ) : (
-          <Table scrollbarLabel={t("a2aAudit")} className="min-w-[760px] text-left">
+          <Table
+            scrollbarLabel={t("a2aAudit")}
+            scrollLabel={t("a2aAudit")}
+            className="min-w-[760px]"
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("timestamp")}</TableHead>
@@ -187,13 +181,13 @@ export default function A2aAuditTab() {
             <TableBody>
               {data.tasks.map((task) => (
                 <TableRow key={task.id}>
-                  <TableCell className="font-mono text-xs text-text-muted">
+                  <TableCell className="font-mono text-text-muted">
                     {new Date(task.createdAt).toLocaleString()}
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-text-muted">
+                  <TableCell className="font-mono text-text-muted">
                     {task.id.slice(0, 8)}&hellip;
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-text-main">{task.skill}</TableCell>
+                  <TableCell className="font-mono text-text-main">{task.skill}</TableCell>
                   <TableCell>
                     <Badge size="sm" variant={STATE_TONES[task.state]}>
                       {t(`a2aState${task.state.charAt(0).toUpperCase()}${task.state.slice(1)}`)}

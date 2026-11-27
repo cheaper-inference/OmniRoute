@@ -23,6 +23,7 @@ import SegmentedControl, {
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import { cacheMetric, cacheRatio, cachePercent, cacheActivityComplete } from "./cacheUsageDisplay";
 import CacheEntriesTab from "./components/CacheEntriesTab";
@@ -161,11 +162,12 @@ function LinearMeter({ label, value, helper }: { label: string; value: number; h
         <span className="text-text-muted">{label}</span>
         <span className="font-semibold tabular-nums text-text-main">{value.toFixed(1)}%</span>
       </div>
-      {/* Kit Progress does not forward aria-label: the visible value above is the text. */}
-      <div aria-hidden="true">
-        <Progress value={Math.min(value, 100)} />
-      </div>
-      {helper && <div className="text-[11px] text-text-muted">{helper}</div>}
+      <Progress
+        aria-label={label}
+        aria-valuetext={`${value.toFixed(1)}%`}
+        value={Math.min(value, 100)}
+      />
+      {helper && <div className="text-xs text-text-muted">{helper}</div>}
     </div>
   );
 }
@@ -181,7 +183,9 @@ function DetailStat({
 }) {
   return (
     <div className="rounded-lg bg-bg-subtle px-3 py-2.5">
-      <div className="text-[11px] uppercase tracking-[0.12em] text-text-muted">{label}</div>
+      <div className="ci-eyebrow" data-size="2xs">
+        {label}
+      </div>
       <div className={`mt-1 text-sm font-semibold tabular-nums ${accent}`}>{value}</div>
     </div>
   );
@@ -236,12 +240,16 @@ function PromptTrendPanel({
   const tEvidence = useTranslations("common.usageEvidence");
   const unknown = tEvidence("unknown");
   const incomplete = tEvidence("historicalUnknown");
+  // Plain sections: the cache page's Card is the only frame around this panel and its table
+  // (#19620), the same as the "by provider" section beside it.
   if (trend.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-bg-subtle p-5">
+      <div>
         <div className="flex items-center gap-2">
           <Icon name="timeline" size={16} className="text-text-muted" />
-          <h3 className="text-sm font-medium text-text-main">{title}</h3>
+          <h3 className="ci-heading" data-size="sm">
+            {title}
+          </h3>
         </div>
         <p className="mt-2 text-sm text-text-muted">{noDataLabel}</p>
       </div>
@@ -269,12 +277,14 @@ function PromptTrendPanel({
   const maxRequests = Math.max(1, ...trend.map((point) => point.requests));
 
   return (
-    <div className="w-full self-start rounded-xl border border-border bg-bg-subtle p-5">
+    <div className="w-full self-start">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="flex items-center gap-2">
             <Icon name="timeline" size={16} className="text-text-muted" />
-            <h3 className="text-sm font-medium text-text-main">{title}</h3>
+            <h3 className="ci-heading" data-size="sm">
+              {title}
+            </h3>
           </div>
           <p className="mt-2 text-sm text-text-muted">{description}</p>
         </div>
@@ -304,7 +314,7 @@ function PromptTrendPanel({
       </div>
 
       <Table
-        className="text-sm"
+        variant="plain"
         containerClassName="mt-5"
         maxHeight="20rem"
         scrollLabel={title}
@@ -333,30 +343,30 @@ function PromptTrendPanel({
                   point.cacheCreationTokensComplete
                 )
               );
+              // The bar keeps a visible sliver for quiet hours; the spoken value is the request count.
               const volumeWidth = Math.max(8, (point.requests / maxRequests) * 100);
+              const volumeText = `${point.requests.toLocaleString()} ${requestsLabel.toLowerCase()}`;
 
               return (
                 <TableRow key={point.timestamp}>
-                  <TableCell className="font-medium tabular-nums text-text-main">
+                  <TableCell className="tabular-nums text-text-main">
                     {formatHour(point.timestamp)}
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1.5">
-                      <div className="h-2 overflow-hidden rounded-full bg-border/60">
-                        <div
-                          className="h-full rounded-full bg-chart-1"
-                          style={{ width: `${volumeWidth}%` }}
-                        />
-                      </div>
-                      <div className="text-xs text-text-muted">
-                        {point.requests.toLocaleString()} {requestsLabel.toLowerCase()}
-                      </div>
+                      <Progress
+                        aria-label={activityLabel}
+                        aria-valuetext={volumeText}
+                        value={volumeWidth}
+                        animate={false}
+                      />
+                      <div className="text-xs text-text-muted">{volumeText}</div>
                     </div>
                   </TableCell>
-                  <TableCell className="font-semibold tabular-nums text-text-main">
+                  <TableCell className="tabular-nums text-text-main">
                     {cachePercent(cacheRate, tEvidence("unknown"))}
                   </TableCell>
-                  <TableCell className="font-semibold tabular-nums text-chart-2">
+                  <TableCell className="tabular-nums text-chart-2-ink">
                     {cacheMetric(
                       point.cachedTokens,
                       point.cachedTokensComplete,
@@ -378,6 +388,8 @@ const REFRESH_INTERVAL_SECONDS = REFRESH_INTERVAL_MS / 1000;
 
 export default function CachePage() {
   const t = useTranslations("cache");
+  const tSidebar = useTranslations("sidebar");
+  const tHeader = useTranslations("header");
   const tEvidence = useTranslations("common.usageEvidence");
   const tSettings = useTranslations("settings");
   const tRoot = useTranslations();
@@ -484,6 +496,7 @@ export default function CachePage() {
       onChange={(next) => setActiveView(next as CacheView)}
       className="gap-6"
     >
+      <PageHeader compact title={tSidebar("cache")} description={tHeader("cacheDescription")} />
       <div className="flex justify-end">
         <Button
           variant="secondary"
@@ -533,7 +546,9 @@ export default function CachePage() {
                     {t("promptCache")}
                   </SectionBadge>
                   <div>
-                    <h2 className="text-lg font-semibold text-text-main">{t("promptCache")}</h2>
+                    <h2 className="ci-heading" data-size="lg">
+                      {t("promptCache")}
+                    </h2>
                     <p className="mt-1 max-w-3xl text-sm text-text-muted">
                       {t("promptCacheSectionDesc")}
                     </p>
@@ -582,7 +597,7 @@ export default function CachePage() {
                         tEvidence("historicalUnknown")
                       )}
                       sub={t("cachedTokensRead")}
-                      accent="text-chart-2"
+                      accent="text-chart-2-ink"
                       size="hero"
                     />
                     <StatCard
@@ -595,7 +610,7 @@ export default function CachePage() {
                         tEvidence("historicalUnknown")
                       )}
                       sub={t("cacheCreationWrite")}
-                      accent="text-chart-4"
+                      accent="text-chart-4-ink"
                       size="hero"
                     />
                     <StatCard
@@ -615,15 +630,18 @@ export default function CachePage() {
                   {/* A plain section: the Card is the only frame around the table (#19620). */}
                   <div className="w-full">
                     <div>
-                      <h3 className="text-sm font-medium text-text-main">{t("byProvider")}</h3>
+                      <h3 className="ci-heading" data-size="sm">
+                        {t("byProvider")}
+                      </h3>
                       <p className="mt-1 text-sm text-text-muted">{t("providerCacheRateDesc")}</p>
                     </div>
 
                     {providerEntries.length > 0 ? (
                       <Table
-                        className="text-sm"
-                        containerClassName="mt-3 rounded-none border-0"
+                        variant="plain"
+                        containerClassName="mt-3"
                         scrollbarLabel={t("byProvider")}
+                        scrollLabel={t("byProvider")}
                       >
                         <TableHeader>
                           <TableRow>
@@ -671,7 +689,7 @@ export default function CachePage() {
                                   {data.inputTokens.toLocaleString()}
                                   {data.estimated ? ` (${tEvidence("estimated")})` : ""}
                                 </TableCell>
-                                <TableCell className="tabular-nums text-chart-2">
+                                <TableCell className="tabular-nums text-chart-2-ink">
                                   {cacheMetric(
                                     data.cachedTokens,
                                     data.cachedTokensComplete,
@@ -679,7 +697,7 @@ export default function CachePage() {
                                     tEvidence("historicalUnknown")
                                   )}
                                 </TableCell>
-                                <TableCell className="tabular-nums text-chart-4">
+                                <TableCell className="tabular-nums text-chart-4-ink">
                                   {cacheMetric(
                                     data.cacheCreationTokens,
                                     data.cacheCreationTokensComplete,
@@ -687,13 +705,13 @@ export default function CachePage() {
                                     tEvidence("historicalUnknown")
                                   )}
                                 </TableCell>
-                                <TableCell className="font-semibold tabular-nums text-info">
+                                <TableCell className="tabular-nums text-info">
                                   {cachePercent(reuseRatio, tEvidence("unknown"))}
                                   {data.estimated && reuseRatio !== null
                                     ? ` (${tEvidence("estimated")})`
                                     : ""}
                                 </TableCell>
-                                <TableCell className="font-semibold tabular-nums text-success">
+                                <TableCell className="tabular-nums text-success">
                                   {cachePercent(cacheRate, tEvidence("unknown"))}
                                 </TableCell>
                                 <TableCell className="tabular-nums text-text-main">
@@ -713,9 +731,12 @@ export default function CachePage() {
                         </TableBody>
                       </Table>
                     ) : (
-                      <div className="mt-3 rounded-lg border border-dashed border-border px-4 py-6 text-sm text-text-muted">
-                        {t("noPromptCacheData")}
-                      </div>
+                      <EmptyState
+                        layout="inline"
+                        border="dashed"
+                        title={t("noPromptCacheData")}
+                        className="mt-3"
+                      />
                     )}
                   </div>
 
@@ -736,9 +757,7 @@ export default function CachePage() {
                   />
                 </>
               ) : (
-                <div className="rounded-lg border border-dashed border-border px-4 py-6 text-sm text-text-muted">
-                  {t("noPromptCacheData")}
-                </div>
+                <EmptyState layout="inline" border="dashed" title={t("noPromptCacheData")} />
               )}
             </div>
           </Card>
@@ -766,7 +785,9 @@ export default function CachePage() {
                     </SectionBadge>
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold text-text-main">{t("semanticCache")}</h2>
+                    <h2 className="ci-heading" data-size="lg">
+                      {t("semanticCache")}
+                    </h2>
                     <p className="mt-1 max-w-3xl text-sm text-text-muted">
                       {t("semanticCacheSectionDesc")}
                     </p>
@@ -825,7 +846,9 @@ export default function CachePage() {
                 <div className="rounded-xl border border-border bg-bg-subtle p-5">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <h3 className="text-sm font-medium text-text-main">{t("performance")}</h3>
+                      <h3 className="ci-heading" data-size="sm">
+                        {t("performance")}
+                      </h3>
                       <p className="mt-1 text-sm text-text-muted">
                         {t("autoRefresh", { seconds: REFRESH_INTERVAL_SECONDS })}
                       </p>
@@ -863,7 +886,9 @@ export default function CachePage() {
 
                 <div className="space-y-4">
                   <div className="rounded-xl border border-border bg-bg-subtle p-5">
-                    <h3 className="text-sm font-medium text-text-main">{t("behavior")}</h3>
+                    <h3 className="ci-heading" data-size="sm">
+                      {t("behavior")}
+                    </h3>
                     <div className="mt-4 grid gap-3">
                       <InfoRow icon="info">{t("behaviorDeterministic")}</InfoRow>
                       <InfoRow icon="info">
@@ -879,7 +904,9 @@ export default function CachePage() {
                   <div className="rounded-xl border border-border bg-bg-subtle p-5">
                     <div className="flex items-center gap-2">
                       <Icon name="fingerprint" size={16} className="text-text-muted" />
-                      <h3 className="text-sm font-medium text-text-main">{t("idempotency")}</h3>
+                      <h3 className="ci-heading" data-size="sm">
+                        {t("idempotency")}
+                      </h3>
                     </div>
                     <div className="mt-4 grid gap-3 md:grid-cols-2">
                       <DetailStat
@@ -899,7 +926,9 @@ export default function CachePage() {
               {/* A plain section: the Card is the only frame around the entries (#19620). */}
               <div>
                 <div className="mb-4 flex flex-col gap-1">
-                  <h3 className="text-sm font-medium text-text-main">{t("entries")}</h3>
+                  <h3 className="ci-heading" data-size="sm">
+                    {t("entries")}
+                  </h3>
                   <p className="text-sm text-text-muted">{t("semanticEntriesDesc")}</p>
                 </div>
                 <CacheEntriesTab />

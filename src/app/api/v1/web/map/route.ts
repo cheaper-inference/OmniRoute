@@ -2,7 +2,7 @@ import { z } from "zod";
 import { handleFirecrawlMap } from "@omniroute/open-sse/handlers/firecrawlMap.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { getProviderCredentialsWithQuotaPreflight } from "@/sse/services/auth";
-import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import {
   isKeyScopeBlockedCredentials,
@@ -10,7 +10,6 @@ import {
   resolveKeyConnectionScope,
   withoutKeyScopeBlocked,
 } from "@/sse/services/keyConnectionScope";
-import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import {
   validateBody,
   isValidationFailure,
@@ -21,10 +20,12 @@ import {
   rateLimitedProviderResponse,
 } from "@/app/api/v1/_shared/rateLimit";
 import { parseAndValidatePublicUrl } from "@/shared/network/outboundUrlGuard";
+import { WEB_FETCH_URL_MAX_LENGTH } from "@/shared/constants/formLimits";
 
 const mapSchema = z.object({
   url: z
     .string()
+    .max(WEB_FETCH_URL_MAX_LENGTH, `url must be at most ${WEB_FETCH_URL_MAX_LENGTH} characters`)
     .url()
     .refine((value) => {
       try {
@@ -63,11 +64,9 @@ export async function POST(request: Request) {
   if (isValidationFailure(validation))
     return errorResponse(400, formatValidationMessage(validation.error));
 
-  const { apiKey, valid: apiKeyValid } = await resolveClientApiKey(request);
-  if (isRequireApiKeyEnabled() && !apiKey) return errorResponse(401, "Authentication required");
-  if (isRequireApiKeyEnabled() && apiKey && !apiKeyValid) {
-    return errorResponse(401, "Invalid API key");
-  }
+  // A valid key or a signed-in dashboard session passes (KEA-9515).
+  const authError = await enforceClientApiRouteAuth(request);
+  if (authError) return authError;
 
   const policy = await enforceApiKeyPolicy(request, "web-fetch");
   if (policy.rejection) return policy.rejection;

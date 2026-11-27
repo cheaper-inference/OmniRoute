@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Alert } from "@omniroute/ui-kit/alert";
-import { CodePreview } from "@omniroute/ui-kit/code-preview";
+import CodePreview from "@/shared/components/CodePreview";
 import { ChoiceCard } from "@omniroute/ui-kit/onboarding-patterns";
 import { RadioGroup } from "@omniroute/ui-kit/radio-group";
 import Button from "@/shared/components/Button";
@@ -366,7 +366,7 @@ export default function OnboardingWizard() {
               )}
             />
             {/* The step title is the page heading (the wizard has no PageHeader). */}
-            <h1 className="text-2xl font-semibold text-text-main">{currentStep.title}</h1>
+            <h1 className="text-2xl text-text-main">{currentStep.title}</h1>
             {currentStep.id === "tiers" && (
               <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-text-muted text-balance">
                 {t("tier.subtitle")}
@@ -502,7 +502,7 @@ export default function OnboardingWizard() {
                 )}
                 {!skipSecurity && <FreeProviderOnboardingCard />}
                 {!skipSecurity && (
-                  <div className="flex items-center gap-3 text-[11px] text-text-muted">
+                  <div className="flex items-center gap-3 text-2xs text-text-muted">
                     <span className="h-px flex-1 bg-border" />
                     <span>{t("freeProviders.orUseApiKey")}</span>
                     <span className="h-px flex-1 bg-border" />

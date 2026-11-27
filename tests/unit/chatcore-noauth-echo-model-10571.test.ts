@@ -1,7 +1,7 @@
 /**
  * Regression test for PR #10571 — chatCore auto-echoes the listing-valid
  * `<alias>/<model>` form in the response `model` field for bare (unprefixed)
- * requests routed to a no-auth catalog provider (e.g. `uncloseai`), so clients
+ * requests routed to a no-auth catalog provider (e.g. `cloudflare-playground`), so clients
  * that validate `response.model` against the provider's entry in
  * `/v1/models` (which lists models under the provider's alias prefix) don't
  * warn/reject.
@@ -16,12 +16,15 @@ import { resolveNoAuthEchoModel } from "../../open-sse/handlers/chatCore/noAuthE
 import { REGISTRY } from "../../open-sse/config/providerRegistry.ts";
 
 test("aliases a bare model routed to a no-auth provider to <alias>/<model>", () => {
-  const alias = REGISTRY["uncloseai"]?.alias;
+  const alias = REGISTRY["cloudflare-playground"]?.alias;
   assert.ok(
     alias,
-    "uncloseai must declare an alias in the registry for this test to be meaningful"
+    "cloudflare-playground must declare an alias in the registry for this test to be meaningful"
   );
-  assert.equal(resolveNoAuthEchoModel("bare-model", "uncloseai"), `${alias}/bare-model`);
+  assert.equal(
+    resolveNoAuthEchoModel("bare-model", "cloudflare-playground"),
+    `${alias}/bare-model`
+  );
 });
 
 test("is a no-op (returns null) for an unregistered provider id", () => {
@@ -33,13 +36,16 @@ test("is a no-op (returns null) for a non-noAuth provider", () => {
 });
 
 test("is a no-op (returns null) when the requested model already has a provider prefix", () => {
-  assert.equal(resolveNoAuthEchoModel("uncloseai/bare-model", "uncloseai"), null);
+  assert.equal(
+    resolveNoAuthEchoModel("cloudflare-playground/bare-model", "cloudflare-playground"),
+    null
+  );
 });
 
 test("is a no-op (returns null) for empty/non-string requested model", () => {
-  assert.equal(resolveNoAuthEchoModel("", "uncloseai"), null);
-  assert.equal(resolveNoAuthEchoModel(null, "uncloseai"), null);
-  assert.equal(resolveNoAuthEchoModel(undefined, "uncloseai"), null);
+  assert.equal(resolveNoAuthEchoModel("", "cloudflare-playground"), null);
+  assert.equal(resolveNoAuthEchoModel(null, "cloudflare-playground"), null);
+  assert.equal(resolveNoAuthEchoModel(undefined, "cloudflare-playground"), null);
 });
 
 test("is a no-op (returns null) for a null/undefined provider", () => {

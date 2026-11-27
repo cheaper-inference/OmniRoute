@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import type { SearchProviderCatalogItem } from "@/shared/schemas/searchTools";
 import type { PlaygroundState } from "@/lib/playground/codeExport";
 
@@ -31,9 +33,13 @@ const DEFAULT_CONFIG: ConfigState = {
 };
 
 export default function SearchToolsClient() {
+  const tSidebar = useTranslations("sidebar");
+  const tHeader = useTranslations("header");
   const [activeTab, setActiveTab] = useState<ActiveTab>("search");
   const [configState, setConfigState] = useState<ConfigState>(DEFAULT_CONFIG);
   const [catalogProviders, setCatalogProviders] = useState<SearchProviderCatalogItem[]>([]);
+  // The Scrape tab gates Extract on the catalog only once it has actually loaded.
+  const [catalogLoaded, setCatalogLoaded] = useState(false);
   const [legacyProviders, setLegacyProviders] = useState<SearchProvider[]>([]);
   // Metrics shared across tabs (updated by active tab)
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
@@ -46,6 +52,7 @@ export default function SearchToolsClient() {
       .then((data: { providers?: SearchProviderCatalogItem[] }) => {
         const providers = data.providers ?? [];
         setCatalogProviders(providers);
+        setCatalogLoaded(true);
         // Build legacy-compatible list for SearchTab/SearchForm
         const legacy: SearchProvider[] = providers
           .filter((p) => p.kind === "search")
@@ -75,6 +82,13 @@ export default function SearchToolsClient() {
 
   return (
     <div className="flex flex-col lg:h-[calc(100vh-120px)]" data-testid="search-tools-studio">
+      {/* Inside the fixed-height column: the studio below keeps what the title leaves. */}
+      <PageHeader
+        compact
+        className="shrink-0 pb-4"
+        title={tSidebar("searchTools")}
+        description={tHeader("searchToolsDescription")}
+      />
       {/* Top bar: tabs + metrics + export */}
       <SearchToolsTopBar
         activeTab={activeTab}
@@ -112,6 +126,7 @@ export default function SearchToolsClient() {
           {activeTab === "scrape" && (
             <ScrapeTab
               configState={configState}
+              catalogProviders={catalogLoaded ? catalogProviders : null}
               onMetrics={(lMs, cUsd) => {
                 setLatencyMs(lMs);
                 setCostUsd(cUsd);

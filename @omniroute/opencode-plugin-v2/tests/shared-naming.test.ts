@@ -7,7 +7,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { formatFreeBudget, type FreeModelFreeType } from "../src/shared/naming.js";
+import {
+  disambiguateDisplayNames,
+  formatFreeBudget,
+  type FreeModelFreeType,
+} from "../src/shared/naming.js";
 
 test("formatFreeBudget: recurring-daily formats tokens/day", () => {
   assert.equal(
@@ -45,8 +49,15 @@ test("formatFreeBudget: discontinued has no token/credit args", () => {
   assert.equal(formatFreeBudget({ freeType: "discontinued" }), "(discontinued)");
 });
 
-test("formatFreeBudget: missing token/credit counts default to 0", () => {
-  assert.equal(formatFreeBudget({ freeType: "recurring-daily" }), "0 tokens/day");
+test("formatFreeBudget: a daily quota not stated in tokens is labelled explicitly", () => {
+  assert.equal(formatFreeBudget({ freeType: "recurring-daily" }), "(usage-based quota)");
+});
+
+test("formatFreeBudget: a monthly quota of zero is labelled explicitly too", () => {
+  assert.equal(
+    formatFreeBudget({ freeType: "recurring-monthly", monthlyTokens: 0 }),
+    "(usage-based quota)"
+  );
 });
 
 test("formatFreeBudget: unknown future value renders its own name, never empty", () => {
@@ -83,4 +94,23 @@ test("formatFreeBudget: uncapped budget has no counters, label only", () => {
     formatFreeBudget({ freeType: "recurring-uncapped" as FreeModelFreeType }),
     "(uncapped)"
   );
+});
+
+// CodeRabbit R3 (#19191): the publication-key fallback can itself be a name another
+// entry already keeps; fallback candidates are checked until one is unused.
+test("disambiguateDisplayNames: a fallback name that is already taken is not reused", () => {
+  const entries = [
+    { id: "p/d", name: "X (a) (p/c)" },
+    { id: "p/a/m", name: "X" },
+    { id: "p/b/m", name: "X" },
+    { id: "p/c", name: "X (a)" },
+  ];
+  const renamed = disambiguateDisplayNames(entries);
+  const finalNames = entries.map((entry) => renamed.get(entry.id) ?? entry.name);
+  assert.equal(
+    new Set(finalNames).size,
+    entries.length,
+    `published names must be unique: ${JSON.stringify(finalNames)}`
+  );
+  assert.equal(finalNames[0], "X (a) (p/c)", "an entry that is already unique keeps its name");
 });

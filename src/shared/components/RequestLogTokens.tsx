@@ -9,6 +9,7 @@ type TokenLog = {
     out?: number;
     cacheRead?: number | null;
     cacheWrite?: number | null;
+    cacheCreation?: number | null;
     compressed?: number;
   };
   usageEvidence?: UsageEvidence | null;
@@ -43,7 +44,7 @@ export default function RequestLogTokens({ log }: { log: TokenLog }) {
     {
       short: "CW",
       label: cache("cacheCreation"),
-      value: log.tokens?.cacheWrite,
+      value: log.tokens?.cacheWrite ?? log.tokens?.cacheCreation,
       evidence: log.usageEvidence?.cacheCreation,
       color: "text-warning",
     },
@@ -74,7 +75,7 @@ export default function RequestLogTokens({ log }: { log: TokenLog }) {
             |
           </span>
           <span
-            className="font-semibold text-chart-3"
+            className="font-semibold text-chart-3-ink"
             title={t("compressedTokens", { count: log.tokens.compressed.toLocaleString() })}
           >
             ↓{log.tokens.compressed.toLocaleString()}

@@ -7,6 +7,7 @@ import { Spinner } from "@/shared/components/Loading";
 import Button from "@/shared/components/Button";
 import Modal from "@/shared/components/Modal";
 import { FileDropZone } from "@/shared/components/FileInput";
+import Card from "@/shared/components/Card";
 
 const MAX_BYTES = 512 * 1024 * 1024; // 512 MB
 
@@ -131,7 +132,7 @@ export default function UploadFileModal({ onClose, onUploaded }: Props) {
           }}
         />
       ) : (
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-bg-alt border border-border">
+        <Card.Section className="flex items-center gap-3">
           <Icon name="description" size={24} className="text-accent" />
           <div className="flex flex-col gap-0.5 flex-1 min-w-0">
             <span className="text-sm font-medium text-text-main truncate" title={file.name}>
@@ -146,11 +147,12 @@ export default function UploadFileModal({ onClose, onUploaded }: Props) {
               setFile(null);
               setError(null);
             }}
-            className="shrink-0 text-xs text-text-muted hover:text-error hover:border-error/40"
+            tone="muted"
+            className="shrink-0 text-xs hover:text-error hover:border-error/40"
           >
             {t("uploadFileModalRemove")}
           </Button>
-        </div>
+        </Card.Section>
       )}
     </Modal>
   );

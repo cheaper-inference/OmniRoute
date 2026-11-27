@@ -10,26 +10,24 @@
  * gemini (no per-model limits published since 2025-12). Ollama Cloud ended its
  * free tier on 2026-11-09 (#19334).
  * One-time signup credits and discontinued tiers are excluded (do not recur).
+ *
+ * 2026-11-23 re-audit: each value is the pool-deduped recurring quota of the provider's
+ * ungated rows in the per-model catalog (`freeModelCatalog.data.ts`), so the two catalogs
+ * agree. Ended offers (mistral, nara, navy, llm7, bluesminds, arcee-ai, huggingchat,
+ * huggingface) and doubao (no recurring quota in the per-model catalog) left this map.
  */
 export type TosVerdict = "ok" | "caution" | "ambiguous" | "avoid" | "unknown";
 
 export const FREE_TIER_BUDGETS: Record<string, number> = {
-  mistral: 1_000_000_000,
-  nara: 210_000_000,
-  "cloudflare-ai": 122_000_000,
-  doubao: 60_000_000,
-  groq: 30_000_000,
   "api-airforce": 24_000_000,
-  bluesminds: 7_200_000,
-  sambanova: 6_000_000,
-  "arcee-ai": 4_800_000,
-  llm7: 4_300_000,
-  bazaarlink: 3_600_000,
+  groq: 24_000_000,
+  "cloudflare-ai": 22_700_000,
+  xkiro: 15_000_000,
+  bazaarlink: 1_440_000,
   openrouter: 1_200_000,
   cohere: 800_000,
-  huggingchat: 500_000,
-  morph: 400_000,
-  huggingface: 200_000,
+  sambanova: 480_000,
+  morph: 160_000,
   kiro: 25_000,
 };
 
@@ -84,8 +82,8 @@ function billions(n: number): string {
  *
  * @deprecated Superseded by the per-MODEL catalog. Use
  * `computeFreeModelTotals()` from `./freeModelCatalog.ts` — it is the canonical
- * source behind `/api/free-tier/summary` (~1.94B steady vs this per-provider
- * ~1.54B). This per-provider aggregator is retained only for reference; the
+ * source behind `/api/free-tier/summary`. This per-provider aggregator is retained
+ * only for reference; the
  * `FREE_TIER_TOS` map below is still used as the ToS source of truth.
  */
 export function computeFreeTierTotals(opts: { excludeTosAvoid?: boolean } = {}): FreeTierTotals {

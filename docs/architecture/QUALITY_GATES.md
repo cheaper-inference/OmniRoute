@@ -47,17 +47,44 @@ separate administrative change; adding these jobs does not itself protect a bran
 
 ### Merge queue
 
+> **2026-11-19: the Mergify merge queue is retired** (owner's decision). `.mergify.yml` no
+> longer defines a queue and refuses the Mergify commands that merge or rewrite a pull request.
+> Release PRs are merged by hand under the repository ruleset "Require green gates on the active
+> release" (`Gate / CI` + `Gate / Quality`) until omni-queue runs in live mode, and through
+> omni-queue after that ([OMNI_QUEUE.md](../ops/OMNI_QUEUE.md)). The workflow handling of Mergify drafts described below is still in `ci.yml` and `quality.yml`, but no Mergify draft is opened any more.
+
 The `queue` label sends a PR to the Mergify queue (`.mergify.yml`). Mergify opens a draft PR on
 a `mergify/merge-queue/` branch, CI runs the full selection there, and the original PR merges
 when `Gate / CI`, `Gate / Quality` and `Merge integrity (changelog + generated skills)` pass.
 
-Mergify writes its queue summary into the draft's description, and other apps can edit it too.
-A `pull_request` `edited` event on such a draft takes its own concurrency group
-(`-queue-edit-<run_id>`) so it cannot cancel the draft's real run, and it skips the gate and the
-matrix. Only `Merge integrity` still runs. The skipped gate job carries a different check name,
-because Mergify reads a skipped `Gate / CI` as a failed check and dequeues the PR.
-
 After a dequeue, a push does not always requeue the PR. Comment `@mergifyio queue` on it.
+
+### PR title/body edits and retargets
+
+`ci.yml`, `quality.yml` and `api-route-typecheck.yml` listen to the `pull_request` `edited`
+event, which GitHub sends for two different things:
+
+- **A base change** (a retarget, as at every release-freeze). The event carries
+  `changes.base`. The run validates the head on its new base exactly like a `synchronize`, in
+  the shared concurrency group, so it cancels the stale run on the old base.
+- **A title or body edit** (`changes.title` or `changes.body`, no `changes.base`). Bots make
+  several per pull request: Mergify writes its queue summary into its drafts, CodeRabbit its
+  summary, the Blacksmith app its footer. Such a run takes its own concurrency group
+  (`-metadata-edit-<run_id>`), so it cannot cancel the real run on the same head, and every
+  job is skipped, `Merge integrity` included. The run concludes `skipped`.
+
+An `edited` event that names neither change runs everything.
+
+A skipped job is named by its unevaluated `name:` expression, so each job whose check a
+consumer reads by name (`Gate / CI`, `Gate / Quality`, `Merge integrity (changelog + generated
+skills)`, `API Route Typecheck`) has an expression name. The skipped job of an edit run then
+never takes the required name, and the real run's check stays the newest of that name for the
+branch rules, Mergify and omni-queue. A skipped check with the required name would read as
+passed to the branch rules and as failed to Mergify, which dequeued #18961 on one (2026-11-04).
+omni-queue does not let a run that concluded `skipped` supersede the real runs
+on that head ([`docs/ops/OMNI_QUEUE.md`](../ops/OMNI_QUEUE.md#the-prs-own-gates-prchecksrequired)).
+The contract is pinned by `tests/unit/ci-mergify-candidate.test.mjs` and
+`tests/unit/merge-queue/workflows.test.mjs`.
 
 ### Retained evidence in the acceptance reducer
 
@@ -159,7 +186,7 @@ Runs on every PR to `main`. Blocks merge on failure.
 | `check:vitest-exclusions`         | Every Vitest exclusion names a tracking issue and appears in `config/quality/vitest-exclusions.json` (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Yes                                      |
 | `check:file-size`                 | Source files (`.ts`/`.tsx` in `src/`, `open-sse/`, `electron/`, `bin/`) stay within `cap` and test files (`*.test.ts(x)`) within `testCap`; files frozen in `file-size-baseline.json` (`frozen` / `testFrozen`) must not grow past their recorded size                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Yes                                      |
 | `check:error-helper`              | Error responses in executors/handlers use `buildErrorBody()` / `sanitizeErrorMessage()` (Hard Rule #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Yes                                      |
-| `check:migration-numbering`       | Migration SQL files are sequentially numbered, no gaps or duplicates                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Yes                                      |
+| `check:migration-numbering`       | Migration file names: the old `001`–`241` series is frozen and new files are `YYYYMMDDHHMMSS_<description>.sql`. Against the PR base it rejects a removed migration, a renamed one without a compatibility entry, and an out-of-order or edited one whose final schema does not commute. Also runs in the husky pre-commit hook when the commit stages a file under `src/lib/db/migrations/` (names, duplicates and the frozen series only; the comparison with the base stays in CI — #20578)                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `check:public-creds`              | No literal OAuth `client_id`/`client_secret` or Firebase Web keys outside `publicCreds.ts` (Hard Rule #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Yes                                      |
 | `check:db-rules`                  | No raw SQL outside `src/lib/db/` modules; no barrel-imports from `localDb.ts` (Hard Rules #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Yes                                      |
 | `check:known-symbols`             | Provider executors, routing strategies, and translators registered in their dispatch tables match the files on disk — no orphaned or undeclared symbols                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Yes                                      |
@@ -204,19 +231,23 @@ Runs after `test-coverage`. Blocks merge on failure.
 | `check:compression-budget`   | Compression benchmark budget — per-engine token-savings floors must not regress                                                                             | Yes                       |
 | `check:type-coverage`        | Percent-typed ratchet (`type-coverage`) does not regress; largely subsumes `typecheck:noimplicit:core`                                                      | Yes                       |
 | `check:codeql-ratchet`       | Open CodeQL alert count does not regress (reads via `gh api`; graceful-skip without token) — refresh cadence and manual trigger: see "CodeQL ratchet" below | Yes                       |
+| `check:type-scale-ratchet`   | Kit type scale: sizes under 12 px and `font-bold` in `src/` only go down (`typeScaleSubFloorSizes`, `typeScaleFontBold`); also in the pre-commit hook       | Yes                       |
 
 ### Job: `quality-extended`
 
-Entire job is advisory (`continue-on-error: true`). The npm-based ratchets run for
-real; the external scanners install via `gh release download` and self-skip (exit 0)
-when a binary is still absent.
+Mixed job, with no job-level `continue-on-error`: a step that passes `--ratchet` fails the job
+on a measured regression vs `quality-baseline.json`. Only `check:circular-deps` and the scanner
+install step are advisory (step-level `continue-on-error: true`). The external scanners install
+via `gh release download`; `check:secrets` self-skips (exit 0) when gitleaks is absent, while
+`check:vuln-ratchet`, `check:workflows` and `check:openapi-breaking` fail closed when their
+measurement is missing.
 
 | Script                   | Validates                                                                                                                                                                                       | Blocking                                          |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
 | `check:circular-deps`    | No circular dependencies (dpdm)                                                                                                                                                                 | **Advisory**                                      |
-| `check:bundle-size`      | Bundle size does not exceed the cap                                                                                                                                                             | **Advisory**                                      |
-| `check:secrets`          | Secret scanning (gitleaks) — skips if binary absent                                                                                                                                             | **Advisory**                                      |
-| `check:vuln-ratchet`     | Dependency vulnerabilities (osv-scanner) do not regress — `--ratchet` fails as INCOMPLETE (exit 2) if unmeasured                                                                                | **Advisory**                                      |
+| `check:bundle-size`      | Bundle size does not exceed the cap; an unmeasurable size fails too                                                                                                                             | **Blocking with --ratchet**                       |
+| `check:secrets`          | Secret scanning (gitleaks) — skips if binary absent                                                                                                                                             | **Blocking with --ratchet**                       |
+| `check:vuln-ratchet`     | Dependency vulnerabilities (osv-scanner) do not regress — `--ratchet` fails as INCOMPLETE (exit 2) if unmeasured                                                                                | **Blocking with --ratchet**                       |
 | `check:workflows`        | Workflow lint (actionlint + zizmor); missing/broken scanners, invalid reports or missing ratchet baseline fail as INCOMPLETE. Valid findings follow the selected strict/advisory/ratchet policy | Execution required; zizmor ratchet blocking in CI |
 | `check:openapi-breaking` | Public API contract against pinned event commits (PR merge-base, push before, merge-group base; scheduled/manual checkout first parent); required measurement fails closed                      | **Blocking with --ratchet**                       |
 
@@ -366,7 +397,12 @@ The commands behind it:
   `readme-diagrams`, `skills` (generated `SKILL.md`), `e2e-timings` (skipped until the tree
   ships `syncE2eTimings`), `ui-keys` (prunes keys `en.json` dropped and, with
   `--rewritten-since=<ref>` — default `origin/main` — re-queues English values rewritten since
-  the last release) and `llm-mirrors`. The
+  the last release; the values are translated in the same run by the backend configured in the
+  environment or in `.env` (`OMNIROUTE_TRANSLATION_*`, only those keys are read) or by the
+  Google engine. Without a backend it never writes `__MISSING__` markers: the release profile
+  fails, the nightly skips the keys, and `--allow-untranslated` writes them on purpose), `llm-mirrors` and `verify-generated` (after a write, `check:generated-artifacts`
+  and `check:agent-skills-sync` in release mode must pass; skipped in `--check` and when `--only`
+  leaves it out; a failure is exit 2). The
   `changelog` step is opt-in (`--with-changelog`, release profile only). `--profile=nightly`
   never touches a version claim. With `-- --check` it writes nothing and exits 1 when any file
   would change or a managed value needs a manual edit (listing both); exit 2 on an
@@ -642,7 +678,7 @@ passes; a regression fails in both modes. During the velocity phase it is adviso
 ### CodeQL ratchet: refresh cadence and manual trigger
 
 `check:codeql-ratchet` reads **repo state, refreshed on a schedule — not per PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` reports
+`gh api repos/cheaper-inference/OmniRoute/code-scanning/default-setup` reports
 `state: configured`, `schedule: weekly`: GitHub's default-setup scan, not a per-push
 analysis. Consequence: after a PR that FIXES alerts merges, the ratchet keeps reading
 the old, higher count until the next scheduled scan runs — so it reports a regression
@@ -709,16 +745,24 @@ PRs rewrote `PROVIDER_REFERENCE.md`, 26–28 rewrote the README diagrams).
 **The guard.** `check:pr-derived-paths` (job `pr-test-policy`) fails a feature PR that touches a
 file of a family in `config/quality/derived-paths/`:
 
-| Family      | Files                                                                                                                                              | Rewritten by                                                                          |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `generated` | `docs/reference/PROVIDER_REFERENCE.md`; the twelve generated README SVGs; `skills/*/references/**`; the `SKILL.md` files that have no custom block | `gen:provider-reference`, `docs:readme-diagrams`, `generate-agent-skills.mjs --apply` |
-| `baselines` | `config/quality/e2e-timings.json`                                                                                                                  | `balance-e2e-shards.mjs --sync` (`syncE2eTimings()`)                                  |
+| Family      | Files                                                                                                                                                                                   | Rewritten by                                                                                                             |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `generated` | `docs/reference/derived-facts.json`; `docs/reference/PROVIDER_REFERENCE.md`; the twelve generated README SVGs; `skills/*/references/**`; the `SKILL.md` files that have no custom block | `release:refresh-derived` (facts), `gen:provider-reference`, `docs:readme-diagrams`, `generate-agent-skills.mjs --apply` |
+| `baselines` | `config/quality/e2e-timings.json`                                                                                                                                                       | `balance-e2e-shards.mjs --sync` (`syncE2eTimings()`)                                                                     |
 
 Writers (`release/v*`, `chore/derived-*`, and `chore/bank-ratchet-*` for baselines) are exempt; so is
 a PR that changes only one family plus its companions (for `generated`: the generator scripts, their
-tests and `changelog.d/**`), e.g. a hero layout change with its regenerated SVG. A `SKILL.md` with a
+tests, the agent-skill inputs — `src/shared/constants/agentSkills.ts`, the hand-written `skills/**`
+docs, `docs/openapi.yaml` — and `changelog.d/**`), e.g. a hero layout change with its regenerated SVG,
+or a skills fix whose test reads the regenerated `SKILL.md` files. A `SKILL.md` with a
 hand-written `<!-- skill:custom-start -->` block is not in the family: its custom block stays
 editable next to a feature.
+
+Orphan cleanup is not judged by the families either: a PR may delete `docs/i18n/<locale>/<doc>`
+when the merge base had that mirror and `<doc>` no longer exists in the PR's head, and may edit
+`.i18n-state.json` only to drop such documents from `sources`. The guard lists those files under
+`orphan-cleanup`. Deleting the mirror of a document that still exists stays a violation: no other
+pipeline tracks that state, and the `llm.txt` and `CHANGELOG.md` mirrors have their own writers.
 
 **The checks, per gate mode** (`scripts/check/lib/gateMode.mjs`; helper
 `scripts/check/lib/derivedArtifactScope.mjs`):

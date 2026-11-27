@@ -1,6 +1,7 @@
 "use client";
 
 import Textarea from "@/shared/components/Textarea";
+import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import { cn } from "@/shared/utils/cn";
@@ -52,7 +53,7 @@ function Stepper({ currentStep }: StepperProps) {
           )}
           <div className="flex items-center gap-1.5">
             <span
-              className={`flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-semibold transition-colors ${
+              className={`flex items-center justify-center w-5 h-5 rounded-full text-2xs font-semibold transition-colors ${
                 currentStep === step.num
                   ? "bg-primary text-accent-foreground"
                   : currentStep > step.num
@@ -91,7 +92,7 @@ function ModeCard({ icon, title, description, selected, onClick }: ModeCardProps
       aria-pressed={selected}
       onClick={onClick}
       className={cn(
-        "h-auto flex-col items-start gap-2 whitespace-normal rounded-xl border-2 p-4 text-left font-normal",
+        "h-auto flex-col items-start gap-2 whitespace-normal rounded-xl border-2 p-4 text-left",
         selected ? "border-primary bg-primary/5" : "bg-surface"
       )}
     >
@@ -143,7 +144,9 @@ export default function BuildWizard({
       {step === 1 && (
         <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
           <div>
-            <h2 className="text-base font-semibold text-text-main mb-1">{tb("step1Title")}</h2>
+            <h2 className="ci-heading mb-1" data-size="md">
+              {tb("step1Title")}
+            </h2>
             <p className="text-xs text-text-muted">{tb("step1Subtitle")}</p>
           </div>
 
@@ -183,24 +186,22 @@ export default function BuildWizard({
       {step === 2 && (
         <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
           <div>
-            <h2 className="text-base font-semibold text-text-main mb-1">{tb("step2Title")}</h2>
+            <h2 className="ci-heading mb-1" data-size="md">
+              {tb("step2Title")}
+            </h2>
             <p className="text-xs text-text-muted">{tb("step2Subtitle")}</p>
           </div>
 
           {includesTools && (
             <div>
-              <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">
-                {t("toolsLabel")}
-              </h3>
+              <h3 className="ci-eyebrow mb-3">{t("toolsLabel")}</h3>
               <ToolsBuilder toolsBuilder={toolsBuilder} />
             </div>
           )}
 
           {includesJson && (
             <div>
-              <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">
-                {t("structuredOutputLabel")}
-              </h3>
+              <h3 className="ci-eyebrow mb-3">{t("structuredOutputLabel")}</h3>
               <StructuredOutputEditor structuredOutput={structuredOutput} />
             </div>
           )}
@@ -236,14 +237,16 @@ export default function BuildWizard({
               {running ? t("running") : tb("runButton")}
             </Button>
 
-            <div className="ml-auto flex items-center gap-2 text-[11px] text-text-muted">
+            <div className="ml-auto flex items-center gap-2 text-xs text-text-muted">
               {includesTools && toolsBuilder.tools.length > 0 && (
-                <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                <Badge size="sm" variant="primary">
                   {toolsBuilder.tools.length} tool{toolsBuilder.tools.length !== 1 ? "s" : ""}
-                </span>
+                </Badge>
               )}
               {includesJson && structuredOutput.enabled && (
-                <span className="px-1.5 py-0.5 rounded bg-success/10 text-success">JSON mode</span>
+                <Badge size="sm" variant="success">
+                  JSON mode
+                </Badge>
               )}
             </div>
           </div>

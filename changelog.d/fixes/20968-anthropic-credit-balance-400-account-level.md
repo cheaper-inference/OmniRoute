@@ -1,0 +1,1 @@
+- fix(resilience): park an Anthropic "credit balance is too low" 400 as account-level credits_exhausted, also on anthropic-compatible nodes (#20968)

@@ -6,7 +6,7 @@ import { cn } from "@/shared/utils/cn";
 interface CapabilityBadgeProps {
   /** ICON_MAP name shown before the label (rendered through <Icon>). */
   icon?: string;
-  /** Tone classes, e.g. "bg-chart-3/15 text-chart-3" (utilities win over the kit badge). */
+  /** Tone classes, e.g. "bg-chart-3/15 text-chart-3-ink" (utilities win over the kit badge). */
   className?: string;
   title?: string;
   children: ReactNode;
@@ -26,7 +26,7 @@ export default function CapabilityBadge({
       title={title}
       icon={icon ? <Icon name={icon} size={12} /> : undefined}
       className={cn(
-        "min-h-0 gap-0.5 whitespace-nowrap px-1.5 py-0.5 text-[10px] font-medium leading-none",
+        "min-h-0 gap-0.5 whitespace-nowrap px-1.5 py-0.5 text-3xs font-medium leading-none",
         className
       )}
     >
