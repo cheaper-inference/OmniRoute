@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vəd — Bir endpoint və 394 provayder. Başqa bir sağlam hədəf mövcud olduğu müddətdə avtomatik geri dönüş yönləndirməni davam etdirir. Altı sütun: 394 provayder arasında dayanıqlı geri dönüş · uyğun iş yüklərində tokenlərə görə 95%-dək qənaət · 150-dən çox pulsuz paket və təkrarlanan/açarsız, həmişəlik pulsuz 51 provayderlə başlamaq üçün $0 · bir konfiqurasiya vasitəsilə 39 CLI/agent inteqrasiyası · /v1 ünvanında OpenAI, Claude, Gemini və Responses API uyğunluğu · circuit breaker-lər, TLS stealth, MCP 110 aləti, A2A, yaddaş, guardrails, evals və 7 800-dən çox izlənən test faylında 56 000-dən çox statik test deklarasiyası daxil olmaqla istehsal nəzarətləri."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vəd — Bir endpoint və 394 provayder. Başqa bir sağlam hədəf mövcud olduğu müddətdə avtomatik geri dönüş yönləndirməni davam etdirir. Altı sütun: 394 provayder arasında dayanıqlı geri dönüş · uyğun iş yüklərində tokenlərə görə 95%-dək qənaət · 150-dən çox pulsuz paket və təkrarlanan/açarsız, həmişəlik pulsuz 40 provayderlə başlamaq üçün $0 · bir konfiqurasiya vasitəsilə 39 CLI/agent inteqrasiyası · /v1 ünvanında OpenAI, Claude, Gemini və Responses API uyğunluğu · circuit breaker-lər, TLS stealth, MCP 110 aləti, A2A, yaddaş, guardrails, evals və 7 800-dən çox izlənən test faylında 56 000-dən çox statik test deklarasiyası daxil olmaqla istehsal nəzarətləri."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ shell tarixçənizdən kənarda saxlayır. → [CLI İnteqrasiyaları](docs/guid
 
 </div>
 
-> **394 qeydiyyatdan keçmiş provayder** əsas çat, media, axtarış, lokal, bulud-agent və sistem kolleksiyalarında yer alır; bunlara kəşf metadatasında **`hasFree: true` daşıyan 153 provayder** daxildir. Çat model reyestrində **239 provayder / 3 059 fərqli provayder-model cütü / 1 475 xam model ID-si** var; ayrıca pulsuz büdcə kataloqunda **model başına 465 sətir**, **34 təkrarlanan hovuz** və **51 təkrarlanan/açarsız əbədi pulsuz provayder** mövcuddur. Bunlar qəsdən fərqli məxrəclərdir; təriflər və hovuzların təkrarsızlaşdırılması əsasında hesablamalar [Provayder arayışı](docs/reference/PROVIDER_REFERENCE.md) və [Pulsuz tariflər](docs/reference/FREE_TIERS.md) bölmələrində təqdim olunur.
+> **394 qeydiyyatdan keçmiş provayder** əsas çat, media, axtarış, lokal, bulud-agent və sistem kolleksiyalarında yer alır; bunlara kəşf metadatasında **`hasFree: true` daşıyan 153 provayder** daxildir. Çat model reyestrində **239 provayder / 3 059 fərqli provayder-model cütü / 1 475 xam model ID-si** var; ayrıca pulsuz büdcə kataloqunda **model başına 465 sətir**, **34 təkrarlanan hovuz** və **40 təkrarlanan/açarsız əbədi pulsuz provayder** mövcuddur. Bunlar qəsdən fərqli məxrəclərdir; təriflər və hovuzların təkrarsızlaşdırılması əsasında hesablamalar [Provayder arayışı](docs/reference/PROVIDER_REFERENCE.md) və [Pulsuz tariflər](docs/reference/FREE_TIERS.md) bölmələrində təqdim olunur.
 
 <div align="center">
 

@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="প্রতিশ্রুতি — একটি এন্ডপয়েন্ট এবং 394টি প্রোভাইডার। অন্য একটি সুস্থ target উপলভ্য থাকলে স্বয়ংক্রিয় fallback রাউটিং চালু রাখে। ছয়টি স্তম্ভ: 394টি প্রোভাইডার জুড়ে নির্ভরযোগ্য fallback · যোগ্য workload-এ সর্বোচ্চ 95% token সাশ্রয় · 150টিরও বেশি free tier এবং বারবার ব্যবহারযোগ্য বা keyless অবস্থায় চিরস্থায়ীভাবে বিনামূল্যের 51টি প্রোভাইডারসহ $0 দিয়ে শুরু · একটি কনফিগারেশনের মাধ্যমে 39টি CLI/agent integration · /v1-এ OpenAI, Claude, Gemini এবং Responses API সামঞ্জস্য · circuit breaker, TLS stealth, MCP-এর 110টি tool, A2A, memory, guardrail, eval এবং 7,800টিরও বেশি ট্র্যাক করা test file জুড়ে 56,000টিরও বেশি static test declaration-সহ production control।"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="প্রতিশ্রুতি — একটি এন্ডপয়েন্ট এবং 394টি প্রোভাইডার। অন্য একটি সুস্থ target উপলভ্য থাকলে স্বয়ংক্রিয় fallback রাউটিং চালু রাখে। ছয়টি স্তম্ভ: 394টি প্রোভাইডার জুড়ে নির্ভরযোগ্য fallback · যোগ্য workload-এ সর্বোচ্চ 95% token সাশ্রয় · 150টিরও বেশি free tier এবং বারবার ব্যবহারযোগ্য বা keyless অবস্থায় চিরস্থায়ীভাবে বিনামূল্যের 40টি প্রোভাইডারসহ $0 দিয়ে শুরু · একটি কনফিগারেশনের মাধ্যমে 39টি CLI/agent integration · /v1-এ OpenAI, Claude, Gemini এবং Responses API সামঞ্জস্য · circuit breaker, TLS stealth, MCP-এর 110টি tool, A2A, memory, guardrail, eval এবং 7,800টিরও বেশি ট্র্যাক করা test file জুড়ে 56,000টিরও বেশি static test declaration-সহ production control।"/>
 
 <br/>
 <br/>
@@ -702,7 +702,7 @@ omniroute configure codex          # এছাড়াও: claude opencode qwen
 
 </div>
 
-> **394টি নিবন্ধিত প্রদানকারী** canonical chat, media, search, local, cloud-agent এবং system collection জুড়ে রয়েছে, যার মধ্যে **153টির ক্ষেত্রে `hasFree: true` discovery metadata রয়েছে**। Chat model registry-তে রয়েছে **239টি প্রদানকারী / 3,059টি স্বতন্ত্র provider-model জোড়া / 1,475টি raw model ID**; পৃথক free-budget catalog-এ রয়েছে **প্রতি-মডেল 465টি সারি**, **34টি recurring pool** এবং **51টি recurring/keyless free-forever প্রদানকারী**। নকশাগতভাবেই এগুলো ভিন্ন denominator; সংজ্ঞা এবং pool-deduped হিসাব [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) ও [Free Tiers](docs/reference/FREE_TIERS.md)-এ রয়েছে।
+> **394টি নিবন্ধিত প্রদানকারী** canonical chat, media, search, local, cloud-agent এবং system collection জুড়ে রয়েছে, যার মধ্যে **153টির ক্ষেত্রে `hasFree: true` discovery metadata রয়েছে**। Chat model registry-তে রয়েছে **239টি প্রদানকারী / 3,059টি স্বতন্ত্র provider-model জোড়া / 1,475টি raw model ID**; পৃথক free-budget catalog-এ রয়েছে **প্রতি-মডেল 465টি সারি**, **34টি recurring pool** এবং **40টি recurring/keyless free-forever প্রদানকারী**। নকশাগতভাবেই এগুলো ভিন্ন denominator; সংজ্ঞা এবং pool-deduped হিসাব [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) ও [Free Tiers](docs/reference/FREE_TIERS.md)-এ রয়েছে।
 
 <div align="center">
 

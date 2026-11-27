@@ -32,6 +32,7 @@ type TokenClaim = {
   via?: "label" | "short" | "method";
 };
 type Verdict = { ok: boolean; detail: string };
+type Edit = { start: number; end: number; to: string };
 type Totals = { s?: number; m?: number; g?: number; l?: number; t?: number; r?: number };
 type Check = {
   label: string;
@@ -43,12 +44,14 @@ type Check = {
   requiredKeys?: string[];
   validate?: (content: string) => Verdict;
   extract?: (content: string) => { key?: string; value: unknown }[];
+  plan?: (content: string) => { edits: Edit[]; manual: string[] };
 };
 type Facts = Record<string, unknown> & { code?: Record<string, unknown> | null };
 
 const claimsLib = (await import("../../scripts/check/lib/derivedClaims.mjs")) as unknown as {
   locateFreeTokenClaims: (content: string) => TokenClaim[];
   locateHeadlineClaims: (content: string) => TokenClaim[];
+  applyEdits: (content: string, edits: Edit[]) => string;
 };
 const gate = (await import("../../scripts/check/check-docs-counts-sync.mjs")) as unknown as {
   formatTokenHeadline: (tokens: number) => string;
@@ -421,6 +424,83 @@ const D47_BLOCK =
   "~11.4B free tokens / month\n  counted the way other catalogs count: every row added up, ended offers included\n\n~93M real today\n  each shared quota counted once: what you can actually use";
 const SHORT_PAIR = "~11.4B as others count · ~93M real";
 
+const UPDATED_TOTALS = { headlineSteady: 89_780_000, rowSumTotal: 11_349_500_000 };
+
+function headlineCheck(file: string, code: Record<string, unknown> = UPDATED_TOTALS) {
+  const check = freeTierChecks({ ...gate.PR_MODE_FACTS, code }).find((c) => c.files.includes(file));
+  assert.ok(check?.plan && check.validate);
+  return { plan: check.plan, validate: check.validate };
+}
+
+test("the README plan refreshes the Markdown pair and alt figures in place", () => {
+  const { plan, validate } = headlineCheck("README.md");
+  for (const content of [D47_BLOCK, `<img alt="… ${SHORT_PAIR} …">`]) {
+    assert.equal(validate(content).ok, false);
+    const { edits, manual } = plan(content);
+    assert.deepEqual(manual, []);
+    assert.deepEqual(
+      edits.map(({ start, end, to }) => [content.slice(start, end), to]),
+      [
+        ["~11.4B", "~11.3B"],
+        ["~93M", "~90M"],
+      ]
+    );
+    const after = claimsLib.applyEdits(content, edits);
+    assert.equal(after, content.replace("~11.4B", "~11.3B").replace("~93M", "~90M"));
+    assert.equal(validate(after).ok, true);
+    assert.deepEqual(plan(after), { edits: [], manual: [] });
+  }
+  assert.deepEqual(plan("~11.4B as others count · ~90M real"), { edits: [], manual: [] });
+  const separate = '<img alt="~11.4B as others count · ~90M real">\n\n~93M real today';
+  assert.equal(
+    claimsLib.applyEdits(separate, plan(separate).edits),
+    separate.replace("~93M", "~90M")
+  );
+});
+
+test("the headline plan skips claims without a finite catalog value", () => {
+  const { plan } = headlineCheck("README.md", {
+    headlineSteady: 89_780_000,
+    rowSumTotal: Infinity,
+  });
+  assert.equal(
+    claimsLib.applyEdits(SHORT_PAIR, plan(SHORT_PAIR).edits),
+    "~11.4B as others count · ~90M real"
+  );
+});
+
+test("the method page refreshes the other token kinds and retired share at their anchors", () => {
+  const { plan, validate } = headlineCheck("docs/reference/FREE_TIERS.md", {
+    headlineFirst: 153_280_000,
+    rowSumLive: 1_250_000_000,
+    rowSumRetiredShare: 0.9761,
+  });
+  const content =
+    "up to **~156M** in your first month. **~162 M** summed per live row. " +
+    "98.6% from retired rows. Historical: ~156M.";
+  const { edits, manual } = plan(content);
+  assert.deepEqual(manual, []);
+  const after = claimsLib.applyEdits(content, edits);
+  assert.equal(
+    after,
+    "up to **~153M** in your first month. **~1.3B** summed per live row. " +
+      "97.6% from retired rows. Historical: ~156M."
+  );
+  assert.equal(validate(after).ok, true);
+});
+
+test("the headline plan keeps missing steady and unresolved gated claims manual", () => {
+  const { plan } = headlineCheck("README.md", { ...UPDATED_TOTALS, freeGated: 6_000_000 });
+  const missing = plan("~12.0B as others count");
+  assert.equal(missing.edits.length, 1);
+  assert.match(missing.manual.join(" "), /missing gated figure.*no headline:steady/);
+  assert.doesNotMatch(missing.manual.join(" "), /stale free-token figure/);
+
+  const stale = plan(`${SHORT_PAIR} +~7M behind regional identity verification`);
+  assert.equal(stale.edits.length, 2);
+  assert.match(stale.manual.join(" "), /stale gated figure/);
+});
+
 test("the big figure never travels without its label and the real one", () => {
   assert.equal(place(D47_BLOCK).ok, true, place(D47_BLOCK).detail);
   assert.equal(place(SHORT_PAIR).ok, true);
@@ -478,7 +558,7 @@ const invariants = () =>
     .filter((c) => c.scope === "invariant");
 
 test("row-sum file lists follow the owner's decision of 2026-11-21", () => {
-  assert.deepEqual(gate.ROW_SUM_REQUIRED_FILES, []);
+  assert.deepEqual(gate.ROW_SUM_REQUIRED_FILES, ["README.md", "docs/reference/FREE_TIERS.md"]);
   assert.deepEqual(gate.TOKEN_FIGURE_FREE_FILES, ["package.json", "llm.txt"]);
   assert.equal(gate.ROW_SUM_TOTAL_PUBLIC, true);
   for (const file of ["package.json", "llm.txt"]) {
@@ -524,7 +604,7 @@ test("the row-sum invariants pass on today's tree", () => {
     }
   }
   const required = rowSum.find((c) => /^Row-sum figure required/.test(c.label));
-  assert.deepEqual(required?.files, []);
+  assert.deepEqual(required?.files, ["README.md", "docs/reference/FREE_TIERS.md"]);
   assert.equal(required?.validate?.("~93M real today").ok, false);
   assert.equal(required?.validate?.(SHORT_PAIR).ok, true);
 });
@@ -538,4 +618,29 @@ test("the big figure leaves every surface when the owner retires it", () => {
   assert.equal(place(SHORT_PAIR, shown).ok, true);
   assert.equal(place("98.6% from offers that no longer exist", shown).ok, true);
   assert.equal(place("~93M real today", shown).ok, true);
+});
+
+test("the README and FREE_TIERS must keep the row-sum figure", () => {
+  assert.ok(gate.ROW_SUM_REQUIRED_FILES.includes("README.md"));
+  assert.ok(gate.ROW_SUM_REQUIRED_FILES.includes("docs/reference/FREE_TIERS.md"));
+  const required = invariants().find((c) => /^Row-sum figure required/.test(c.label));
+  assert.ok(required?.validate);
+  const readme = readFileSync(path.join(ROOT, "README.md"), "utf8");
+  const freeTiers = readFileSync(path.join(ROOT, "docs/reference/FREE_TIERS.md"), "utf8");
+  assert.equal(required.validate(readme).ok, true);
+  assert.equal(required.validate(freeTiers).ok, true);
+  // The README with every big figure removed (block, title, alt texts keep only the real one).
+  const withoutBig = readme
+    .replace(/~\d+(?:\.\d+)?B free tokens \/ month/g, "free tokens / month")
+    .replace(/~\d+(?:\.\d+)?B as [Oo]thers [Cc]ount · /g, "");
+  assert.equal(required.validate(withoutBig).ok, false);
+  assert.equal(place(readme, { methodPage: false }).ok, true);
+  assert.equal(place(freeTiers, { methodPage: true }).ok, true);
+  // The hero alt that lost its real figure breaks the pair (D48).
+  const heroAt = readme.indexOf("readme-hero.svg");
+  const lineEnd = readme.indexOf("\n", heroAt);
+  const heroLine = readme.slice(readme.lastIndexOf("\n", heroAt) + 1, lineEnd);
+  const broken = readme.replace(heroLine, heroLine.replace(/ · ~\d+(?:\.\d+)?M real/, ""));
+  assert.notEqual(broken, readme);
+  assert.equal(place(broken, { methodPage: false }).ok, false);
 });

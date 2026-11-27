@@ -14,7 +14,7 @@ import {
 import { hasSpecializedExecutor } from "../../open-sse/executors/index.ts";
 
 // Bug 1: all noAuth providers should allow optional API key
-for (const provider of ["cloudflare-playground", "uncloseai", "duckduckgo-web", "veoaifree-web"]) {
+for (const provider of ["cloudflare-playground", "duckduckgo-web", "veoaifree-web"]) {
   test(`${provider} allows optional API key (noAuth provider)`, () => {
     assert.equal(providerAllowsOptionalApiKey(provider), true);
   });

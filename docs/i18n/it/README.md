@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="La promessa — Un endpoint e 394 provider. Il fallback automatico mantiene l'instradamento attivo finché è disponibile un'altra destinazione funzionante. Sei pilastri: fallback resiliente tra 394 provider · fino al 95% di risparmio sui token per i carichi di lavoro idonei · $0 per iniziare con oltre 150 piani gratuiti e 51 provider gratuiti ricorrenti o senza chiave per sempre · 39 integrazioni CLI/agent tramite un'unica configurazione · compatibilità con le API OpenAI, Claude, Gemini e Responses a /v1 · controlli per la produzione, inclusi circuit breaker, TLS stealth, 110 strumenti MCP, A2A, memoria, guardrail, valutazioni e oltre 56.000 dichiarazioni di test statiche in oltre 7.800 file di test monitorati."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="La promessa — Un endpoint e 394 provider. Il fallback automatico mantiene l'instradamento attivo finché è disponibile un'altra destinazione funzionante. Sei pilastri: fallback resiliente tra 394 provider · fino al 95% di risparmio sui token per i carichi di lavoro idonei · $0 per iniziare con oltre 150 piani gratuiti e 40 provider gratuiti ricorrenti o senza chiave per sempre · 39 integrazioni CLI/agent tramite un'unica configurazione · compatibilità con le API OpenAI, Claude, Gemini e Responses a /v1 · controlli per la produzione, inclusi circuit breaker, TLS stealth, 110 strumenti MCP, A2A, memoria, guardrail, valutazioni e oltre 56.000 dichiarazioni di test statiche in oltre 7.800 file di test monitorati."/>
 
 <br/>
 <br/>
@@ -712,7 +712,7 @@ dalla cronologia della tua shell. → [Integrazioni CLI](docs/guides/CLI-INTEGRA
 
 </div>
 
-> **394 provider registrati** nelle raccolte canoniche di chat, media, ricerca, locali, agenti cloud e sistema, inclusi **153 con metadati di rilevamento `hasFree: true`**. Il registro dei modelli di chat comprende **239 provider / 3.059 coppie provider-modello distinte / 1.475 ID modello grezzi**; il catalogo separato dei budget gratuiti contiene **465 righe per modello**, **34 pool ricorrenti** e **51 provider gratuiti per sempre, ricorrenti e senza chiave**. Si tratta di denominatori diversi per progettazione; le definizioni e i calcoli deduplicati per pool sono disponibili in [Riferimento provider](docs/reference/PROVIDER_REFERENCE.md) e [Livelli gratuiti](docs/reference/FREE_TIERS.md).
+> **394 provider registrati** nelle raccolte canoniche di chat, media, ricerca, locali, agenti cloud e sistema, inclusi **153 con metadati di rilevamento `hasFree: true`**. Il registro dei modelli di chat comprende **239 provider / 3.059 coppie provider-modello distinte / 1.475 ID modello grezzi**; il catalogo separato dei budget gratuiti contiene **465 righe per modello**, **34 pool ricorrenti** e **40 provider gratuiti per sempre, ricorrenti e senza chiave**. Si tratta di denominatori diversi per progettazione; le definizioni e i calcoli deduplicati per pool sono disponibili in [Riferimento provider](docs/reference/PROVIDER_REFERENCE.md) e [Livelli gratuiti](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

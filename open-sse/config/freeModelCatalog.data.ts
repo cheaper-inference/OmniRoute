@@ -507,10 +507,9 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "t3-web", modelId: "qwen3-32b", displayName: "Qwen3 32B (via t3.chat)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "t3-web", tos: "avoid" },
   { provider: "t3-web", modelId: "kimi-k2", displayName: "Kimi K2 (via t3.chat)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "t3-web", tos: "avoid" },
   // Tencent hunyuan-pro retired 2026-06-22: cloud.tencent.com/document/product/1729/131925.
-  // 2026-10-16 refresh: upstream /v1/models serves a single live model; the
-  // previously catalogued id 404s on /v1/chat/completions (see the matching
-  // comment in providers/registry/uncloseai/index.ts).
-  { provider: "uncloseai", modelId: "turboderp/Qwen3.8-27B-exl3", displayName: "Qwen3.8 27B exl3 (🆓 Free)", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "uncloseai", tos: "caution" },
+  // 2026-11-25 (#19385): uncloseai closed its public beta; upstream HTTP 401 "The public beta is
+  // closed for now. This endpoint needs an API key, and key registration is closed".
+  { provider: "uncloseai", modelId: "turboderp/Qwen3.8-27B-exl3", displayName: "Qwen3.8 27B exl3 (UncloseAI)", monthlyTokens: 0, creditTokens: 0, freeType: "discontinued", poolKey: null, tos: "caution" },
   // evidence: public-page https://cloud.google.com/free/docs/free-cloud-features (2026-11-23) — "The Free Trial gets
   // you a $300 Welcome credit to spend over 90 days" · "During the sign up, you must provide a credit card or other
   // payment method that is valid for the period of the Free Trial." ⇒ gates: ["card"]: the credit stays listed but

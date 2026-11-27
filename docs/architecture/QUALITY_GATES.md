@@ -57,13 +57,34 @@ The `queue` label sends a PR to the Mergify queue (`.mergify.yml`). Mergify open
 a `mergify/merge-queue/` branch, CI runs the full selection there, and the original PR merges
 when `Gate / CI`, `Gate / Quality` and `Merge integrity (changelog + generated skills)` pass.
 
-Mergify writes its queue summary into the draft's description, and other apps can edit it too.
-A `pull_request` `edited` event on such a draft takes its own concurrency group
-(`-queue-edit-<run_id>`) so it cannot cancel the draft's real run, and it skips the gate and the
-matrix. Only `Merge integrity` still runs. The skipped gate job carries a different check name,
-because Mergify reads a skipped `Gate / CI` as a failed check and dequeues the PR.
-
 After a dequeue, a push does not always requeue the PR. Comment `@mergifyio queue` on it.
+
+### PR title/body edits and retargets
+
+`ci.yml`, `quality.yml` and `api-route-typecheck.yml` listen to the `pull_request` `edited`
+event, which GitHub sends for two different things:
+
+- **A base change** (a retarget, as at every release-freeze). The event carries
+  `changes.base`. The run validates the head on its new base exactly like a `synchronize`, in
+  the shared concurrency group, so it cancels the stale run on the old base.
+- **A title or body edit** (`changes.title` or `changes.body`, no `changes.base`). Bots make
+  several per pull request: Mergify writes its queue summary into its drafts, CodeRabbit its
+  summary, the Blacksmith app its footer. Such a run takes its own concurrency group
+  (`-metadata-edit-<run_id>`), so it cannot cancel the real run on the same head, and every
+  job is skipped, `Merge integrity` included. The run concludes `skipped`.
+
+An `edited` event that names neither change runs everything.
+
+A skipped job is named by its unevaluated `name:` expression, so each job whose check a
+consumer reads by name (`Gate / CI`, `Gate / Quality`, `Merge integrity (changelog + generated
+skills)`, `API Route Typecheck`) has an expression name. The skipped job of an edit run then
+never takes the required name, and the real run's check stays the newest of that name for the
+branch rules, Mergify and omni-queue. A skipped check with the required name would read as
+passed to the branch rules and as failed to Mergify, which dequeued #18961 on one (2026-11-04).
+omni-queue does not let a run that concluded `skipped` supersede the real runs
+on that head ([`docs/ops/OMNI_QUEUE.md`](../ops/OMNI_QUEUE.md#the-prs-own-gates-prchecksrequired)).
+The contract is pinned by `tests/unit/ci-mergify-candidate.test.mjs` and
+`tests/unit/merge-queue/workflows.test.mjs`.
 
 ### Retained evidence in the acceptance reducer
 

@@ -137,10 +137,10 @@ describe("argument parsing", () => {
 describe("mirror propagation (conservative)", () => {
   it("finds whole numbers only", () => {
     assert.deepEqual(
-      findNumberOccurrences("393 a3930 1,393 v393 3.393 393.5 (393) ~1.62B", "393"),
+      findNumberOccurrences("393 a3930 1,393 v393 3.393 393.5 (393) ~4.56B", "393"),
       [0, 34]
     );
-    assert.deepEqual(findNumberOccurrences("~1.62B free", "1.62"), [1]);
+    assert.deepEqual(findNumberOccurrences("~4.56B free", "4.56"), [1]);
   });
 
   it("carries a number when source and mirror hold the same occurrences", () => {
@@ -444,6 +444,47 @@ describe("provider reference comparison", () => {
 // README.md. The refresh must still carry everything once, refresh .i18n-state.json and leave no
 // manual item — and must never certify a mirror that kept an old value, nor a stale locale.
 describe("refreshDerived with the real gate plan (README + mirrors + state)", () => {
+  it("refreshes free-token figures in the source docs and their translated mirrors", async () => {
+    const files = {
+      "README.md":
+        '<img alt="~11.4B as others count · ~93M real"> +~6M behind regional identity verification',
+      "docs/i18n/pt-BR/README.md":
+        '<img alt="~11.4B como outros contam · ~93M reais"> Arquivo de ~93MB.',
+      "docs/reference/FREE_TIERS.md":
+        "~93M real today. ~11.4B summed row by row, 98.6% from retired rows. +~6M behind regional identity verification",
+      "docs/i18n/pt-BR/docs/reference/FREE_TIERS.md":
+        "~93M reais hoje. ~11.4B somados linha por linha, 98.6% de ofertas que já acabaram.",
+      "docs/getting-started/FREE-TIERS-GUIDE.md": "~93M real today.",
+      "docs/i18n/pt-BR/docs/getting-started/FREE-TIERS-GUIDE.md": "~93M reais hoje.",
+    };
+    const root = tree(files);
+    const snapshot = loadFactsSnapshot();
+    assert.ok(snapshot);
+    const facts = {
+      ...snapshot,
+      code: {
+        ...snapshot.code,
+        headlineSteady: 89_780_000,
+        rowSumTotal: 11_349_500_000,
+        rowSumRetiredShare: 0.9761,
+      },
+    };
+    const result = await refreshDerived({ root, only: ["numbers"], facts });
+    assert.equal(result.infraError, null);
+    assert.deepEqual(result.changedFiles, Object.keys(files).sort());
+    assert.deepEqual(
+      result.manual.filter((m) => /Live catalog|free-tier headline/i.test(m.label)),
+      []
+    );
+    for (const [file, before] of Object.entries(files)) {
+      const after = before
+        .replace("~11.4B", "~11.3B")
+        .replace("~93M", "~90M")
+        .replace("98.6%", "97.6%");
+      assert.equal(read(root, file), after, file);
+    }
+  });
+
   const REPO = path.resolve(import.meta.dirname, "../..");
   const realFile = (rel: string) => fs.readFileSync(path.join(REPO, rel), "utf8");
   const LOCALES = ["pt-BR", "fa"];

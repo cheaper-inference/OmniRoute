@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vaat — Tek bir uç nokta ve 394 sağlayıcı. Başka bir sağlıklı hedef kullanılabilir durumda olduğu sürece otomatik geri dönüş yönlendirmeyi sürdürür. Altı temel: 394 sağlayıcı arasında dayanıklı geri dönüş · uygun iş yüklerinde %95'e varan token tasarrufu · 150'den fazla ücretsiz katman ve sürekli/anahtarsız olarak sonsuza kadar ücretsiz 51 sağlayıcıyla başlangıç maliyeti 0 $ · tek bir yapılandırma üzerinden 39 CLI/agent entegrasyonu · /v1 adresinde OpenAI, Claude, Gemini ve Responses API uyumluluğu · devre kesiciler, TLS gizliliği, 110 MCP aracı, A2A, bellek, güvenlik korkulukları, değerlendirmeler ve 7.800'den fazla izlenen test dosyasına yayılmış 56.000'den fazla statik test bildirimi dahil üretim kontrolleri."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vaat — Tek bir uç nokta ve 394 sağlayıcı. Başka bir sağlıklı hedef kullanılabilir durumda olduğu sürece otomatik geri dönüş yönlendirmeyi sürdürür. Altı temel: 394 sağlayıcı arasında dayanıklı geri dönüş · uygun iş yüklerinde %95'e varan token tasarrufu · 150'den fazla ücretsiz katman ve sürekli/anahtarsız olarak sonsuza kadar ücretsiz 40 sağlayıcıyla başlangıç maliyeti 0 $ · tek bir yapılandırma üzerinden 39 CLI/agent entegrasyonu · /v1 adresinde OpenAI, Claude, Gemini ve Responses API uyumluluğu · devre kesiciler, TLS gizliliği, 110 MCP aracı, A2A, bellek, güvenlik korkulukları, değerlendirmeler ve 7.800'den fazla izlenen test dosyasına yayılmış 56.000'den fazla statik test bildirimi dahil üretim kontrolleri."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ kabuk geçmişinizden uzak tutar. → [CLI Entegrasyonları](docs/guides/CLI-INT
 
 </div>
 
-> Kanonik sohbet, medya, arama, yerel, bulut aracısı ve sistem koleksiyonlarında **394 kayıtlı sağlayıcı** bulunur; bunların **153’ü `hasFree: true` keşif meta verisini taşır**. Sohbet modeli kayıt defteri **239 sağlayıcı / 3.059 farklı sağlayıcı-model çifti / 1.475 ham model kimliği** içerir; ayrı ücretsiz bütçe kataloğunda ise **model başına 465 satır**, **34 yinelenen havuz** ve **51 yinelenen/anahtarsız sonsuza kadar ücretsiz sağlayıcı** bulunur. Bunlar tasarım gereği farklı paydalardır; tanımlar ve havuz tekilleştirilmiş hesaplamalar [Sağlayıcı Referansı](docs/reference/PROVIDER_REFERENCE.md) ile [Ücretsiz Katmanlar](docs/reference/FREE_TIERS.md) belgelerinde yer alır.
+> Kanonik sohbet, medya, arama, yerel, bulut aracısı ve sistem koleksiyonlarında **394 kayıtlı sağlayıcı** bulunur; bunların **153’ü `hasFree: true` keşif meta verisini taşır**. Sohbet modeli kayıt defteri **239 sağlayıcı / 3.059 farklı sağlayıcı-model çifti / 1.475 ham model kimliği** içerir; ayrı ücretsiz bütçe kataloğunda ise **model başına 465 satır**, **34 yinelenen havuz** ve **40 yinelenen/anahtarsız sonsuza kadar ücretsiz sağlayıcı** bulunur. Bunlar tasarım gereği farklı paydalardır; tanımlar ve havuz tekilleştirilmiş hesaplamalar [Sağlayıcı Referansı](docs/reference/PROVIDER_REFERENCE.md) ile [Ücretsiz Katmanlar](docs/reference/FREE_TIERS.md) belgelerinde yer alır.
 
 <div align="center">
 
