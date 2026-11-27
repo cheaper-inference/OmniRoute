@@ -5,6 +5,7 @@ import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
+import NumberInput from "@/shared/components/NumberInput";
 import Select from "@/shared/components/Select";
 import Textarea from "@/shared/components/Textarea";
 import {
@@ -100,8 +101,6 @@ function TestResult({ t, result }: { t: any; result: DecisionPreviewTest }) {
 }
 type UpdateDraft = (patch: Partial<DecisionDraft>) => void;
 
-const numberOrUndefined = (value: string) => (value === "" ? undefined : Number(value));
-
 /** `baseUrl` and wire format: only for the `http` decider. */
 function DecisionHttpFields({
   t,
@@ -148,25 +147,23 @@ function DecisionLimitFields({
 }) {
   return (
     <>
-      <Input
+      <NumberInput
         label={getI18nOrFallback(t, "decisionTimeoutLabel", "Timeout (ms)")}
-        type="number"
-        min="100"
-        max="5000"
-        step="100"
-        value={draft.timeoutMs ?? ""}
+        min={100}
+        max={5000}
+        step={100}
+        value={draft.timeoutMs ?? null}
         placeholder="2000"
-        onChange={(event) => update({ timeoutMs: numberOrUndefined(event.target.value) })}
+        onValueChange={(value) => update({ timeoutMs: value ?? undefined })}
       />
-      <Input
+      <NumberInput
         label={getI18nOrFallback(t, "decisionMinConfidenceLabel", "Minimum confidence")}
-        type="number"
-        min="0"
-        max="1"
-        step="0.05"
-        value={draft.minConfidence ?? ""}
+        min={0}
+        max={1}
+        step={0.05}
+        value={draft.minConfidence ?? null}
         placeholder="0"
-        onChange={(event) => update({ minConfidence: numberOrUndefined(event.target.value) })}
+        onValueChange={(value) => update({ minConfidence: value ?? undefined })}
       />
     </>
   );
@@ -321,7 +318,7 @@ function AddDescriptionKey({
           }
         }}
         className="flex-1"
-        inputClassName="font-mono"
+        mono
       />
       <Button size="sm" variant="outline" onClick={onAdd} disabled={!value.trim()}>
         {getI18nOrFallback(t, "decisionAddKey", "Add")}

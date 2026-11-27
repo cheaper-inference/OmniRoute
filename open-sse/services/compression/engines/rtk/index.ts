@@ -435,6 +435,8 @@ function processToolResultBlocks(
   let compressed = false;
   const nextContent = content.map((part) => {
     if (!isAnthropicToolResultBlock(part)) return part;
+    // A failed tool call keeps its full error trace: a trimmed trace makes the model retry blind.
+    if (part.is_error === true) return part;
     // The block itself is a cache breakpoint — preserve it byte-for-byte.
     if (hasCacheControlMarker(part)) return part;
     const toolUseId = typeof part.tool_use_id === "string" ? part.tool_use_id : null;

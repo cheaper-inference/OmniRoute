@@ -25,13 +25,18 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../
 const dockerfile = fs.readFileSync(path.join(repoRoot, "Dockerfile"), "utf-8");
 const lines = dockerfile.split("\n");
 
-/** Non-comment instruction lines of the `runner-base` stage (FROM to next FROM). */
+/** Non-comment instructions of the `runner-base` stage (FROM to next FROM). */
 function runnerBaseStage(): string[] {
   const start = lines.findIndex((l) => /^FROM\s+\S+\s+AS\s+runner-base\b/i.test(l.trim()));
   assert.ok(start >= 0, "Dockerfile must declare a `runner-base` stage");
   const after = lines.slice(start + 1).findIndex((l) => /^FROM\s+/i.test(l.trim()));
   const end = after === -1 ? lines.length : start + 1 + after;
-  return lines.slice(start, end).filter((l) => !l.trim().startsWith("#"));
+  return lines
+    .slice(start, end)
+    .filter((l) => !l.trim().startsWith("#"))
+    .join("\n")
+    .replace(/\\\r?\n[ \t]*/g, " ")
+    .split("\n");
 }
 
 test("#13990 runner-base copies the app with --chown=node:node instead of a second chown layer", () => {
@@ -55,9 +60,15 @@ test("#13990 runner-base copies the app with --chown=node:node instead of a seco
 test("#13990 runner-base still hands /app and /app/data to the node user", () => {
   const stage = runnerBaseStage();
   assert.ok(
-    stage.some((l) =>
-      /^RUN\b.*mkdir -p \/app\/data\s*&&\s*chown node:node \/app \/app\/data\b/.test(l)
-    ),
+    stage.some((instruction) => {
+      const prepare = /^RUN\s+mkdir -p ([^;&|]+)&&\s*chown node:node ([^;&|]+)$/.exec(instruction);
+      if (!prepare) return false;
+
+      const [, directories, ownershipTargets] = prepare;
+      const created = directories.trim().split(/\s+/);
+      const owned = ownershipTargets.trim().split(/\s+/);
+      return created.includes("/app/data") && owned.includes("/app") && owned.includes("/app/data");
+    }),
     "runner-base must create /app/data and chown /app and /app/data (non-recursively) to node"
   );
 });

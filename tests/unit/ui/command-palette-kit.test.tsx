@@ -277,6 +277,45 @@ describe("CommandPalette on the kit Dialog", () => {
     }
   );
 
+  // Kit #276: the hint row is the kit CommandFooter, a part of the Command (not a hand-made
+  // strip under it): outside the listbox, with the kit's own size and separator, and a press on
+  // a hint keeps focus in the search field.
+  it(
+    "shows its key hints in the kit CommandFooter, inside the Command",
+    { timeout: 20_000 },
+    async () => {
+      render(<CommandPalette isOpen onClose={vi.fn()} />);
+      const dialog = await screen.findByRole("dialog", {
+        name: /Quick navigation|Command palette/i,
+      });
+      const command = dialog.querySelector<HTMLElement>("[data-slot=command]")!;
+      const footer = dialog.querySelector<HTMLElement>("[data-slot=command-footer]")!;
+      expect(footer).not.toBeNull();
+      expect(footer.className).toBe("ci-command__footer");
+      expect(command.contains(footer)).toBe(true);
+      expect(footer.closest("[role=listbox]")).toBeNull();
+      // After the list and the empty state, as the kit asks.
+      expect(command.lastElementChild).toBe(footer);
+      // Three hints: move, open, close. Every key cap outside the search field is in the footer.
+      expect(Array.from(footer.children).map((hint) => hint.textContent)).toEqual([
+        "↑↓navigate",
+        "↵open",
+        "Escclose",
+      ]);
+      expect(footer.querySelectorAll("[data-slot=kbd]")).toHaveLength(4);
+      expect(dialog.querySelectorAll("[data-slot=kbd]")).toHaveLength(5);
+      // No hand-set size or border: the footer's type and separator are the kit's.
+      expect(dialog.innerHTML).not.toContain("text-[11px]");
+      expect(dialog.innerHTML).not.toContain("border-t");
+
+      const input = screen.getByRole("combobox");
+      input.focus();
+      const notCancelled = fireEvent.mouseDown(footer.firstElementChild!);
+      expect(notCancelled).toBe(false);
+      expect(document.activeElement).toBe(input);
+    }
+  );
+
   it("renders nothing while closed", () => {
     render(<CommandPalette isOpen={false} onClose={vi.fn()} />);
     expect(screen.queryByRole("dialog")).toBeNull();

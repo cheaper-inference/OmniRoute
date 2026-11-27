@@ -1,0 +1,57 @@
+{
+  "argv": [
+    "--auth-type",
+    "openai",
+    "--model",
+    "anthropic/claude-sonnet-4-6"
+  ],
+  "cleanup": {
+    "removeTempDir": true,
+    "revokeSession": true
+  },
+  "env": {
+    "set": {
+      "OMNIROUTE_API_KEY": "${TOKEN}",
+      "QWEN_CODE_MODELS_DEV_REFRESH": "off",
+      "QWEN_CODE_SYSTEM_SETTINGS_PATH": "${TMP}/qwen-system-settings.json",
+      "QWEN_USAGE_STATISTICS_ENABLED": "false"
+    },
+    "unset": [
+      "OPENAI_API_KEY",
+      "OPENAI_BASE_URL",
+      "OPENAI_MODEL",
+      "QWEN_MODEL"
+    ]
+  },
+  "modelList": {
+    "injected": 5,
+    "strategy": "inject",
+    "viewHash": "7f4f4066aebfbb84189d2f7f8adeb0a75a997acf4cbeb61c10b01800b593bba3"
+  },
+  "needsTempDir": true,
+  "notes": [
+    "Qwen Code still writes its own state under ~/.qwen (settings migration, projects, memories); the launcher does not."
+  ],
+  "planVersion": 1,
+  "postExitChecks": [],
+  "preflight": [],
+  "secretSites": [
+    {
+      "key": "OMNIROUTE_API_KEY",
+      "kind": "env"
+    }
+  ],
+  "teardown": [],
+  "tempFiles": [
+    {
+      "contents": "{\n  \"general\": {\n    \"enableAutoUpdate\": false\n  },\n  \"memory\": {\n    \"enableManagedAutoMemory\": false\n  },\n  \"model\": {\n    \"name\": \"anthropic/claude-sonnet-4-6\"\n  },\n  \"modelProviders\": {\n    \"openai\": [\n      {\n        \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n        \"envKey\": \"OMNIROUTE_API_KEY\",\n        \"generationConfig\": {\n          \"contextWindowSize\": 200000\n        },\n        \"id\": \"anthropic/claude-sonnet-4-6\",\n        \"name\": \"Claude Sonnet 4.6 (OmniRoute)\"\n      },\n      {\n        \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n        \"envKey\": \"OMNIROUTE_API_KEY\",\n        \"generationConfig\": {\n          \"contextWindowSize\": 400000\n        },\n        \"id\": \"openai/gpt-5.2\",\n        \"name\": \"GPT-5.2 (OmniRoute)\"\n      },\n      {\n        \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n        \"envKey\": \"OMNIROUTE_API_KEY\",\n        \"id\": \"mystery/unknown-context\",\n        \"name\": \"Unknown Context (OmniRoute)\"\n      },\n      {\n        \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n        \"envKey\": \"OMNIROUTE_API_KEY\",\n        \"generationConfig\": {\n          \"contextWindowSize\": 32768\n        },\n        \"id\": \"small/ctx-32k\",\n        \"name\": \"Small 32k (OmniRoute)\"\n      },\n      {\n        \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n        \"envKey\": \"OMNIROUTE_API_KEY\",\n        \"generationConfig\": {\n          \"contextWindowSize\": 128000\n        },\n        \"id\": \"fastest\",\n        \"name\": \"Combo fastest (OmniRoute)\"\n      }\n    ]\n  },\n  \"privacy\": {\n    \"usageStatisticsEnabled\": false\n  },\n  \"security\": {\n    \"auth\": {\n      \"selectedType\": \"openai\"\n    }\n  }\n}",
+      "format": "json",
+      "mode": 384,
+      "path": "qwen-system-settings.json"
+    }
+  ],
+  "tool": "qwen",
+  "warnings": [
+    "Qwen Code 0.26.0 is older than the recommended 0.27.0; upgrade with: npm install -g @qwen-code/qwen-code@latest"
+  ]
+}

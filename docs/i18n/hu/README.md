@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Az ígéret — Egy végpont és 394 szolgáltató. Az automatikus tartalék útválasztás folytatja az útválasztást, amíg elérhető egy másik működőképes célpont. Hat pillér: megbízható tartalék útválasztás 394 szolgáltatón keresztül · akár 95%-os tokenmegtakarítás a jogosult munkaterheléseknél · 0 dollárról indulhat 150+ ingyenes csomaggal és 51 rendszeresen elérhető/kulcs nélküli, örökre ingyenes szolgáltatóval · 39 CLI-/ügynökintegráció egyetlen konfiguráción keresztül · OpenAI, Claude, Gemini és Responses API-kompatibilitás a /v1 címen · éles környezethez szükséges vezérlők, többek között áramkörmegszakítók, TLS-rejtés, MCP 110 eszközzel, A2A, memória, korlátozások, kiértékelések, valamint több mint 56 000 statikus tesztdeklaráció több mint 7 800 nyomon követett tesztfájlban."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Az ígéret — Egy végpont és 394 szolgáltató. Az automatikus tartalék útválasztás folytatja az útválasztást, amíg elérhető egy másik működőképes célpont. Hat pillér: megbízható tartalék útválasztás 394 szolgáltatón keresztül · akár 95%-os tokenmegtakarítás a jogosult munkaterheléseknél · 0 dollárról indulhat 150+ ingyenes csomaggal és 40 rendszeresen elérhető/kulcs nélküli, örökre ingyenes szolgáltatóval · 39 CLI-/ügynökintegráció egyetlen konfiguráción keresztül · OpenAI, Claude, Gemini és Responses API-kompatibilitás a /v1 címen · éles környezethez szükséges vezérlők, többek között áramkörmegszakítók, TLS-rejtés, MCP 110 eszközzel, A2A, memória, korlátozások, kiértékelések, valamint több mint 56 000 statikus tesztdeklaráció több mint 7 800 nyomon követett tesztfájlban."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ megóvja a titkos adatokat a shell előzményétől. → [CLI Integrációk](doc
 
 </div>
 
-> **394 regisztrált szolgáltató** a kanonikus chat-, média-, keresési, helyi, felhőalapú ügynök- és rendszerkollekciókban, köztük **153, amely `hasFree: true` felfedezési metaadatot tartalmaz**. A chatmodell-regiszter **239 szolgáltatót / 3 059 különálló szolgáltató-modell párt / 1 475 nyers modellazonosítót** tartalmaz; a különálló ingyenes keretkatalógusban **465 modellenkénti sor**, **34 ismétlődő keret** és **51 ismétlődő/kulcs nélküli, örökké ingyenes szolgáltató** található. Ezek szándékosan eltérő nevezők; a definíciók és a keretduplikációt kiszűrő számítások a [Szolgáltató-referenciában](docs/reference/PROVIDER_REFERENCE.md) és az [Ingyenes csomagok](docs/reference/FREE_TIERS.md) oldalon találhatók.
+> **394 regisztrált szolgáltató** a kanonikus chat-, média-, keresési, helyi, felhőalapú ügynök- és rendszerkollekciókban, köztük **153, amely `hasFree: true` felfedezési metaadatot tartalmaz**. A chatmodell-regiszter **239 szolgáltatót / 3 059 különálló szolgáltató-modell párt / 1 475 nyers modellazonosítót** tartalmaz; a különálló ingyenes keretkatalógusban **465 modellenkénti sor**, **34 ismétlődő keret** és **40 ismétlődő/kulcs nélküli, örökké ingyenes szolgáltató** található. Ezek szándékosan eltérő nevezők; a definíciók és a keretduplikációt kiszűrő számítások a [Szolgáltató-referenciában](docs/reference/PROVIDER_REFERENCE.md) és az [Ingyenes csomagok](docs/reference/FREE_TIERS.md) oldalon találhatók.
 
 <div align="center">
 
@@ -1318,7 +1318,7 @@ Kanonikus mérőszámok 2026-10-18-án: **1.976 egyedi videó** · **20.220.289 
   <tr><td nowrap><b>Futtatókörnyezet</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Nyelv</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> a <code>src/</code> és <code>open-sse/</code> könyvtárakban (a v2.0 óta nincs <code>any</code> a magban)</td></tr>
   <tr><td nowrap><b>Keretrendszer</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Adatbázis</b></td><td>better-sqlite3 (SQLite, WAL-naplózás) + LowDB (örökölt JSON) — 147 tartományi modul, 244 migráció</td></tr>
+  <tr><td nowrap><b>Adatbázis</b></td><td>better-sqlite3 (SQLite, WAL-naplózás) + LowDB (örökölt JSON) — 147 tartományi modul, 252 migráció</td></tr>
   <tr><td nowrap><b>Memória</b></td><td>SQLite FTS5 teljes szöveges keresés + int8-kvantált vektorbeágyazások, típusos lecsengés</td></tr>
   <tr><td nowrap><b>Sémák</b></td><td>Zod 4 — MCP-eszközök I/O-ellenőrzése + API-szerződések</td></tr>
   <tr><td nowrap><b>Protokollok</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

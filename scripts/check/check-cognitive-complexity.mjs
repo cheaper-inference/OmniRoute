@@ -4,11 +4,9 @@
 // Shares ESLint walk with check-complexity via complexityEslintReport.mjs.
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
-import {
-  countCognitiveViolations,
-  getComplexityEslintReport,
-} from "./complexityEslintReport.mjs";
+
+import { isMainModule } from "../lib/is-main-module.mjs";
+import { countCognitiveViolations, getComplexityEslintReport } from "./complexityEslintReport.mjs";
 
 // Re-export for existing unit tests.
 export { countCognitiveViolations };
@@ -89,4 +87,4 @@ function main() {
   process.exit(0);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (isMainModule(import.meta.url)) main();

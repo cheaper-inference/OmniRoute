@@ -375,13 +375,18 @@ export function prChecksNeedWorkflowRuns(runs, names) {
  * `workflow_dispatch` run of the same workflow on the same head never cancel each other. In each
  * group only the run with the highest id is current, and so is its check suite; the suite of an
  * older run of the group is not. A run whose event is missing or empty is a group of its own: it
- * supersedes nothing and nothing supersedes it. A suite that maps to no listed run with a
- * workflow id (another app's suite, or one the listing did not show) is current: what is unknown
- * never turns a gate green.
+ * supersedes nothing and nothing supersedes it. So is a run that completed `skipped`: every job
+ * of it was skipped, so it validated nothing and reports no gate. That is a PR title/body edit
+ * run of ci.yml, quality.yml or api-route-typecheck.yml (an `edited` event without a base
+ * change: a concurrency group of its own, every job skipped): newer than the real run on the
+ * same head, it must not drop that run's suite, or a gate the real runs disagree on reads
+ * missing until the next push. A run still in progress (not `skipped` yet) supersedes as before:
+ * the stricter reading. A suite that maps to no listed run with a workflow id (another app's
+ * suite, or one the listing did not show) is current: what is unknown never turns a gate green.
  * Known limit, not handled: two PRs that share one head SHA share their `pull_request` runs'
  * group, so the newest `pull_request` run of either supersedes the other's.
  * @param {{id: number, workflowId: number|null, checkSuiteId: number|null,
- *          event?: string|null}[]} workflowRuns
+ *          event?: string|null, status?: string|null, conclusion?: string|null}[]} workflowRuns
  * @returns {(suiteId: number) => boolean}
  */
 export function currentSuitePredicate(workflowRuns) {
@@ -391,7 +396,8 @@ export function currentSuitePredicate(workflowRuns) {
   for (const run of workflowRuns ?? []) {
     if (run?.workflowId == null || run.checkSuiteId == null) continue;
     known.add(run.checkSuiteId);
-    if (typeof run.event !== "string" || !run.event) {
+    const ranNothing = run.status === "completed" && run.conclusion === "skipped";
+    if (typeof run.event !== "string" || !run.event || ranNothing) {
       current.add(run.checkSuiteId); // a group of its own
       continue;
     }

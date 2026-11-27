@@ -46,7 +46,7 @@ export default function SearchHistory({ onReplay }: SearchHistoryProps) {
 
   return (
     <div className="p-4 flex-1">
-      <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
+      <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
         {t("searchHistory")}
       </span>
       <div className="mt-2 space-y-1.5">
@@ -58,7 +58,7 @@ export default function SearchHistory({ onReplay }: SearchHistoryProps) {
             className="p-2"
             title={<span className="block truncate text-xs font-normal">{entry.query}</span>}
             description={
-              <span className="flex justify-between gap-2 text-[10px]">
+              <span className="flex justify-between gap-2 text-3xs">
                 <span>{entry.provider}</span> <span>{timeAgo(entry.timestamp, locale)}</span>
               </span>
             }

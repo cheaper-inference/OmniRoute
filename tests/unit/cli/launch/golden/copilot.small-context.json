@@ -1,0 +1,60 @@
+{
+  "argv": [
+    "--model",
+    "small/ctx-32k"
+  ],
+  "cleanup": {
+    "removeTempDir": true,
+    "revokeSession": true
+  },
+  "env": {
+    "set": {
+      "COPILOT_AUTO_UPDATE": "false",
+      "COPILOT_MODEL": "small/ctx-32k",
+      "COPILOT_OFFLINE": "true",
+      "COPILOT_PROVIDER_API_KEY": "${TOKEN}",
+      "COPILOT_PROVIDER_BASE_URL": "http://127.0.0.1:20128/v1",
+      "COPILOT_PROVIDER_MAX_OUTPUT_TOKENS": "8192",
+      "COPILOT_PROVIDER_MAX_PROMPT_TOKENS": "32768",
+      "COPILOT_PROVIDER_TYPE": "openai",
+      "COPILOT_PROVIDER_WIRE_API": "completions"
+    },
+    "unset": [
+      "COPILOT_PROVIDERS_CONFIG",
+      "COPILOT_PROVIDER_API_KEY_COMMAND",
+      "COPILOT_PROVIDER_BEARER_TOKEN",
+      "COPILOT_PROVIDER_MODEL_ID",
+      "COPILOT_PROVIDER_TRANSPORT",
+      "COPILOT_PROVIDER_WIRE_MODEL"
+    ]
+  },
+  "modelList": {
+    "injected": 1,
+    "strategy": "inject",
+    "viewHash": "7f4f4066aebfbb84189d2f7f8adeb0a75a997acf4cbeb61c10b01800b593bba3"
+  },
+  "needsTempDir": false,
+  "notes": [],
+  "planVersion": 1,
+  "postExitChecks": [],
+  "preflight": [
+    {
+      "key": "COPILOT_PROVIDERS_CONFIG",
+      "kind": "env-absent",
+      "severity": "error",
+      "why": "a providers.json named by COPILOT_PROVIDERS_CONFIG overrides the launch env (unset by the plan)"
+    }
+  ],
+  "secretSites": [
+    {
+      "key": "COPILOT_PROVIDER_API_KEY",
+      "kind": "env"
+    }
+  ],
+  "teardown": [],
+  "tempFiles": [],
+  "tool": "copilot",
+  "warnings": [
+    "Copilot recommends 128k context; small/ctx-32k has 32768"
+  ]
+}
