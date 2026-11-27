@@ -179,15 +179,25 @@ test("legacy helpers query the handle they are given", () => {
 });
 
 test("listCacheTrend, sumTokensThisMonth and speed samples match the facades", async () => {
-  const now = Date.now();
-  insertUsage({ provider: "a", tokensInput: 100, tokensOutput: 7, cacheRead: 10 });
+  // Every row sits in the current UTC hour (and so the current month), a few
+  // seconds after the hour starts, so the expected bucket count and monthly
+  // total hold whenever the test runs.
+  const hourStart = Math.floor(Date.now() / 3_600_000) * 3_600_000;
+  const at = (seconds: number) => new Date(hourStart + seconds * 1000).toISOString();
+  insertUsage({
+    provider: "a",
+    tokensInput: 100,
+    tokensOutput: 7,
+    cacheRead: 10,
+    timestamp: at(4),
+  });
   insertUsage({
     connectionId: "c1",
     model: "x",
     tokensOutput: 300,
     latencyMs: 2000,
     ttftMs: 500,
-    timestamp: new Date(now - 60_000).toISOString(),
+    timestamp: at(3),
   });
   insertUsage({
     connectionId: "c1",
@@ -196,9 +206,9 @@ test("listCacheTrend, sumTokensThisMonth and speed samples match the facades", a
     tokensReasoning: 200,
     latencyMs: 1200,
     ttftMs: 200,
-    timestamp: new Date(now - 120_000).toISOString(),
+    timestamp: at(2),
   });
-  insertUsage({ connectionId: "c1", success: 0, tokensOutput: 9, latencyMs: 9 });
+  insertUsage({ connectionId: "c1", success: 0, tokensOutput: 9, latencyMs: 9, timestamp: at(1) });
 
   const trend = await reads.listCacheTrend(4);
   assert.equal(trend.length, 1);
