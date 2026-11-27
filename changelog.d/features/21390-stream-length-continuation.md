@@ -1,0 +1,1 @@
+- **feat(sse):** Opt-in `STREAM_LENGTH_CONTINUATION_ENABLED` continues a Chat Completions stream once (up to 2,048 tokens) after a genuine `length` finish, only when the client's own output limit still has room, and delivers one terminal and one `[DONE]` (#21390).
