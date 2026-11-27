@@ -18,7 +18,7 @@ test("an unofficial service can use its own subscription risk notice", () => {
     subscriptionRisk: true,
     riskNoticeVariant: "unofficial-service",
   });
-  assert.equal(result.success, true, result.error?.message);
+  assert.equal(result.success, true, result.error?.message ?? "");
 });
 
 test("the English risk notices include the new warning and preserve the prior messages", () => {

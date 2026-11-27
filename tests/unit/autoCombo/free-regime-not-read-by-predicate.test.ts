@@ -105,7 +105,8 @@ test("no provider loses its free status without a recorded decision", () => {
       "nara",
       "navy",
       "predibase",
-      "routeway",
+      // routeway left this list in the plan 05 E1a wave: https://api.routeway.ai/v1/models lists seven
+      // current :free ids again and the rate-limit docs publish 200 requests/day (reopened 2026-11-27).
       "stepfun",
       // #19385: UncloseAI ended its public beta and now requires an API key.
       "uncloseai",
