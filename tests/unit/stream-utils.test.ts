@@ -17,6 +17,7 @@ const {
 } = await import("../../open-sse/utils/streamPayloadCollector.ts");
 const { FORMATS } = await import("../../open-sse/translator/formats.ts");
 const { createRequestLogger } = await import("../../open-sse/utils/requestLogger.ts");
+const { synthesizeOpenAiSseFromJson } = await import("../../open-sse/utils/jsonToSse.ts");
 
 // Retained stream chunks are prefixed with a fixed-width per-chunk arrival timestamp
 // ("[HH:MM:SS.mmm] ", 15 chars) by the request logger for streaming-latency
@@ -85,10 +86,96 @@ for (const mode of ["passthrough", "translate"]) {
         }
       );
       assert.equal(completed?.status, 200);
-      assert.equal(completed?.responseBody.usage.total_tokens, reportedTotal ?? 107);
+      assert.equal(completed?.providerPayload.summary.usage.total_tokens, reportedTotal ?? 107);
     }
   });
 }
+
+async function runChatTotalStream(
+  usage: {
+    prompt_tokens: number;
+    completion_tokens?: number;
+    total_tokens: number;
+    estimated?: boolean;
+  },
+  sourceFormat: string = FORMATS.OPENAI
+) {
+  let completed;
+  const chunk = { id: "chatcmpl-model", object: "chat.completion.chunk", model: "gpt-4.1" };
+  const wire = await readTransformed(
+    [
+      `data: ${JSON.stringify({ ...chunk, choices: [{ index: 0, delta: { role: "assistant", content: "Hello" }, finish_reason: null }] })}\n\n`,
+      `data: ${JSON.stringify({ ...chunk, choices: [{ index: 0, delta: {}, finish_reason: "stop" }] })}\n\n`,
+      `data: ${JSON.stringify({ ...chunk, choices: [], usage })}\n\n`,
+      "data: [DONE]\n\n",
+    ],
+    {
+      mode: sourceFormat === FORMATS.CLAUDE ? "translate" : "passthrough",
+      sourceFormat,
+      targetFormat: FORMATS.OPENAI,
+      provider: "openai",
+      model: chunk.model,
+      onComplete(payload) {
+        completed = payload;
+      },
+    }
+  );
+  assert.equal(completed?.status, 200);
+  return { completed, wire };
+}
+
+test("Chat total reaches the provider summary after real translation to Claude", async () => {
+  const { completed, wire } = await runChatTotalStream(
+    { prompt_tokens: 100, completion_tokens: 7, total_tokens: 113 },
+    FORMATS.CLAUDE
+  );
+  assert.match(wire, /event: content_block_delta/);
+  assert.match(wire, /"text":"Hello"/);
+  assert.equal(completed.providerPayload.summary.usage.total_tokens, 113);
+  assert.equal(completed.clientPayload.summary.usage.total_tokens, 107);
+  assert.equal(completed.usage.total_tokens, 107);
+});
+
+test("Chat total stays reported when the completion count is estimated", async () => {
+  const { completed } = await runChatTotalStream({ prompt_tokens: 100, total_tokens: 113 });
+  assert.equal(completed.usage.estimated, true);
+  assert.equal(completed.usage.total_tokens, 113);
+  assert.equal(completed.providerPayload.summary.usage.total_tokens, 113);
+});
+
+for (const total of [113.5, Number.MAX_SAFE_INTEGER + 1, 0, -1]) {
+  test(`Chat total ignores an invalid reported value (${total}) in the provider summary`, async () => {
+    const { completed } = await runChatTotalStream({
+      prompt_tokens: 100,
+      completion_tokens: 7,
+      total_tokens: total,
+    });
+    assert.equal(completed.providerPayload.summary.usage.total_tokens, 107);
+  });
+}
+
+test("Chat total ignores a total marked as estimated on the upstream event", async () => {
+  const { completed } = await runChatTotalStream({
+    prompt_tokens: 100,
+    completion_tokens: 7,
+    total_tokens: 113,
+    estimated: true,
+  });
+  assert.equal(completed.providerPayload.summary.usage.total_tokens, 107);
+});
+
+test("Chat total in the provider summary does not change semantic-cache SSE replay", async () => {
+  const { completed } = await runChatTotalStream({
+    prompt_tokens: 100,
+    completion_tokens: 7,
+    total_tokens: 113,
+  });
+  const replay = synthesizeOpenAiSseFromJson(JSON.stringify(completed.responseBody));
+  assert.match(replay, /"content":"Hello"/);
+  const replayedUsage = parseJsonDataPayloads(replay).find((payload) => payload.usage)?.usage;
+  assert.equal(replayedUsage?.total_tokens, 107);
+  assert.equal(completed.providerPayload.summary.usage.total_tokens, 113);
+});
 
 function parseJsonDataPayloads(text) {
   return text
@@ -831,7 +918,7 @@ test("createSSEStream translate mode converts Claude SSE into OpenAI chunks and 
       `data: ${JSON.stringify({
         type: "message_delta",
         delta: { stop_reason: "end_turn" },
-        usage: { output_tokens: 4 },
+        usage: { output_tokens: 4, total_tokens: 113 },
       })}\n\n`,
       `data: ${JSON.stringify({
         type: "message_stop",
@@ -857,6 +944,7 @@ test("createSSEStream translate mode converts Claude SSE into OpenAI chunks and 
   assert.equal(onCompletePayload.status, 200);
   assert.equal(onCompletePayload.responseBody.choices[0].message.content, "Hello Claude");
   assert.equal(onCompletePayload.responseBody.usage.prompt_tokens, 3);
+  assert.equal(onCompletePayload.providerPayload.summary.usage.total_tokens, 7);
   assert.equal(onCompletePayload.responseBody.usage.completion_tokens, 4);
   assert.equal(onCompletePayload.responseBody.usage.total_tokens, 7);
 });

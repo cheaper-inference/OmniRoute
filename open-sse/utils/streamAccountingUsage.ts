@@ -1,6 +1,6 @@
 import { FORMATS } from "../translator/formats.ts";
 import { finalizeStreamingUsage } from "./finalizeStreamingUsage.ts";
-import type { UsageLike } from "./usageTracking.ts";
+import { isEstimatedUsage, type UsageLike } from "./usageTracking.ts";
 
 /** Normalize receipt aliases once so completion, partial usage and quota consumers agree. */
 export function canonicalStreamingUsage(usage: UsageLike | null | undefined): UsageLike | null {
@@ -37,22 +37,30 @@ export function resolveStreamAccountingUsage(input: StreamAccountingInput): Usag
   );
 }
 
-/** Keep a provider's independent Chat total in the synthesized call-log summary. */
-export function preserveReportedChatTotal(
-  summary: { total_tokens: number },
-  receipt: UsageLike | null | undefined,
+/** Capture the total before translation or estimation rewrites the provider receipt. */
+export function readReportedChatTotal(
+  payload: unknown,
   upstreamFormat: string
-): void {
-  const total = receipt?.total_tokens;
+): number | undefined {
+  if (upstreamFormat !== FORMATS.OPENAI) return undefined;
+  const usage = (payload as { usage?: UsageLike } | null)?.usage;
+  const total = usage?.total_tokens;
   if (
-    upstreamFormat === FORMATS.OPENAI &&
-    !receipt?.estimated &&
     typeof total === "number" &&
-    Number.isFinite(total) &&
-    total > 0
-  ) {
-    summary.total_tokens = total;
-  }
+    Number.isSafeInteger(total) &&
+    total > 0 &&
+    !isEstimatedUsage(usage)
+  )
+    return total;
+  return undefined;
+}
+
+export function withReportedChatTotal<T extends { usage: { total_tokens: number } }>(
+  body: T,
+  total: number | undefined
+): T {
+  if (total === undefined) return body;
+  return { ...body, usage: { ...body.usage, total_tokens: total } };
 }
 
 /** Claude's legacy OpenAI projection excludes cache creation from prompt, unlike accounting. */

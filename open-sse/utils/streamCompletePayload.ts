@@ -2,8 +2,10 @@ export type StreamCompletePayload = {
   buyerCostMicro?: number | null;
   status: number;
   usage: unknown;
-  /** Minimal response body for call log (streaming: usage + note; non-streaming not used) */
+  /** Assembled response body used for replay and downstream consumers. */
   responseBody?: unknown;
+  /** Assembled response with the upstream Chat total for call-log persistence. */
+  callLogResponseBody?: unknown;
   providerPayload?: unknown;
   clientPayload?: unknown;
   error?: string | null;

@@ -80,7 +80,12 @@ const textChunk = (content: string, finish: string | null = null) => ({
   choices: [{ index: 0, delta: { content }, finish_reason: finish }],
 });
 
-async function runChat(apiKeyId: string, stream: boolean, response: () => Response) {
+async function runChat(
+  apiKeyId: string,
+  stream: boolean,
+  response: () => Response,
+  endpoint = "/v1/chat/completions"
+) {
   globalThis.fetch = (async () => response()) as typeof fetch;
   const body = { model: MODEL, stream, messages: [{ role: "user", content: "hello there" }] };
   const result = (await handleChatCore({
@@ -88,7 +93,7 @@ async function runChat(apiKeyId: string, stream: boolean, response: () => Respon
     modelInfo: { provider: "openai", model: MODEL, extendedContext: false },
     credentials: { apiKey: "sk-test-estimated" },
     clientRawRequest: {
-      endpoint: "/v1/chat/completions",
+      endpoint,
       body,
       headers: new Headers({ accept: stream ? "text/event-stream" : "application/json" }),
     },
@@ -268,4 +273,28 @@ test("a stream with provider-reported usage carries no estimated marker", async 
   const entry = await persistedLog("key-sse-reported");
   assert.equal(entry?.tokens?.in, USAGE.prompt_tokens);
   assert.equal(usageEstimatedMeta(entry), undefined);
+});
+
+test("a translated stream persists the upstream Chat total in the call-log response", async () => {
+  const wire = await runChat(
+    "key-sse-translated-total",
+    true,
+    () =>
+      sseCompletion([
+        textChunk("hello from the model"),
+        textChunk("", "stop"),
+        {
+          ...textChunk(""),
+          choices: [],
+          usage: { prompt_tokens: 100, completion_tokens: 7, total_tokens: 113 },
+        },
+      ]),
+    "/v1/messages"
+  );
+  assert.match(wire, /event: content_block_delta/);
+  const entry = await persistedLog("key-sse-translated-total");
+  assert.equal(entry?.tokens?.in, 100);
+  assert.equal(entry?.tokens?.out, 7);
+  const responseBody = entry?.responseBody as { usage?: { total_tokens?: number } } | undefined;
+  assert.equal(responseBody?.usage?.total_tokens, 113);
 });
