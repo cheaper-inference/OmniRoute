@@ -200,12 +200,16 @@ function* leaves(value: unknown, budget: ScanBudget, depth = 0): Generator<strin
     for (let i = 0; i < width && budget.nodes > 0; i += 1)
       yield* leaves(value[i], budget, depth + 1);
   } else if (depth < 4 && isRecord(value)) {
-    let width = 0;
-    for (const key in value) {
-      if (!Object.hasOwn(value, key)) continue;
-      if (width++ >= 32 || budget.nodes <= 0) break;
-      yield* leaves(value[key], budget, depth + 1);
-    }
+    yield* recordLeaves(value, budget, depth);
+  }
+}
+
+function* recordLeaves(value: Json, budget: ScanBudget, depth: number): Generator<string> {
+  let width = 0;
+  for (const key in value) {
+    if (!Object.hasOwn(value, key)) continue;
+    if (width++ >= 32 || budget.nodes <= 0) break;
+    yield* leaves(value[key], budget, depth + 1);
   }
 }
 
