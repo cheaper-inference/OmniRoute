@@ -123,7 +123,9 @@ for (const [label, overrides] of [
   ["no endpoint (no OpenAI default)", { baseUrl: undefined }],
   ["endpoint with credentials", { baseUrl: "https://u:p@api.example.com/run" }],
   ["endpoint with fragment", { baseUrl: "https://api.example.com/run#x" }],
-  ["cloud metadata endpoint", { baseUrl: "http://169.254.169.254/latest" }],
+  ["cloud metadata endpoint", { baseUrl: "https://169.254.169.254/latest" }],
+  ["keyed node on plain http:// (CWE-319)", { baseUrl: "http://api.example.com/generate" }],
+  ["keyed node on a private LAN http:// host", { baseUrl: "http://192.168.1.20/generate" }],
   ["anthropic node type", { type: "anthropic-compatible" }],
   ["preset", { preset: "vibeproxy-openai" }],
 ] as const) {
@@ -244,6 +246,38 @@ test("connection validation checks the config only and never calls the endpoint"
   assert.equal(bad.valid, false);
   assert.equal(bad.unsupported, false);
   assert.equal(called, 0);
+});
+
+test("plain http:// is refused with a clear message for a keyed node, kept for authType none", async () => {
+  const refused = await createNode({ baseUrl: "http://10.0.0.5/generate" });
+  assert.equal(refused.response.status, 400);
+  const message = String(refused.body.error?.message);
+  assert.match(message, /https:\/\//);
+  assert.match(message, /private LAN/);
+  assert.match(message, /authType "none"/);
+
+  const open = await createNode({
+    baseUrl: "http://10.0.0.5/generate",
+    customJson: { ...customJson, authType: "none" },
+  });
+  assert.equal(open.response.status, 201);
+
+  const local = await createNode({ prefix: "loc", baseUrl: "http://localhost:8080/generate" });
+  assert.equal(local.response.status, 201);
+
+  // A connection stored before the rule reports the problem instead of "unverifiable".
+  const stale = (await validateProviderApiKey({
+    provider: "openai-compatible-custom-json-x",
+    apiKey: "k",
+    providerSpecificData: {
+      apiType: "custom-json",
+      baseUrl: "http://api.example.com/run",
+      customJson,
+    },
+  })) as Json;
+  assert.equal(stale.valid, false);
+  assert.equal(stale.unsupported, false);
+  assert.match(String(stale.error), /https:\/\//);
 });
 
 test("the explicit node test sends exactly one real request with the template", async () => {

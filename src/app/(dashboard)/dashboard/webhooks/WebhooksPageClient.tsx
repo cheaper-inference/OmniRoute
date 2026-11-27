@@ -194,7 +194,7 @@ export function WebhooksPageClient() {
               <Card key={stat.label} className="p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-wider text-text-muted">
+                    <p className="ci-eyebrow" data-weight="medium">
                       {stat.label}
                     </p>
                     <p className="mt-1 text-2xl font-semibold text-text-main">{stat.value}</p>

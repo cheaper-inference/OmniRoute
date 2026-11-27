@@ -49,7 +49,11 @@ export class GitHubError extends Error {
  * @property {string} headSha
  * @property {string|null} headBranch    branch (or tag) whose event started the run
  * @property {string} event              "push" | "pull_request" | "workflow_dispatch" | ...
+ * @property {number|null} workflowId    the workflow (file) this is a run of: a new run of it on
+ *                                       the same head has a higher id and its own check suite
  * @property {number|null} checkSuiteId  the check suite holding this run's check runs
+ * @property {number|null} runAttempt    1 for the first attempt, 2 after a re-run, ... (null when
+ *                                       the payload has none)
  */
 
 /**
@@ -77,18 +81,24 @@ export class GitHubError extends Error {
  * @property {(n: number) => Promise<{id: number, body: string, author: string,
  *            createdAt: string}[]>} listIssueComments
  * @property {(n: number, body: string) => Promise<{id: number}>} createIssueComment
- * @property {(n: number, key: string, body: string) => Promise<{posted: boolean}>} commentOnce
+ * @property {(n: number, key: string, body: string, opts?: {reader?: GitHubClient|null,
+ *            alsoLogins?: string[]}) => Promise<{posted: boolean}>} commentOnce
  *            posts `body + "\n\n" + contracts.commentMarker(key)` unless a comment on issue/PR n
  *            already contains that marker (then {posted:false}). The ONLY way queue code comments.
  *            After posting it re-reads the comments: when two writers raced (approval job + tick,
  *            or a POST replayed after a 5xx), the lowest comment id wins and the newer duplicate
- *            this call created is deleted ({posted:false}).
+ *            this call created is deleted ({posted:false}). opts (owner voice, voice.mjs):
+ *            `reader` = the client that lists the comments (the App's: every read stays the
+ *            App's), the POST and DELETE stay this client's; `alsoLogins` = more logins whose
+ *            markers count next to botLogin (the owner's login, read from the owner's token)
  * @property {(commentId: number) => Promise<void>} deleteIssueComment   404 = already gone
  * @property {(opts: {labels?: string[], state?: "open"|"closed"|"all"}) => Promise<{number: number,
  *            title: string, body: string, labels: string[], state: string,
  *            updatedAt: string}[]>} listIssues   issues only (PRs filtered out)
  * @property {(input: {title: string, body: string, labels?: string[]}) => Promise<{number: number}>} createIssue
  * @property {(n: number, patch: {title?: string, body?: string, state?: string}) => Promise<void>} updateIssue
+ * @property {() => Promise<string>} getAuthenticatedLogin   GET /user: the login of the token's
+ *            own account ("" when the answer names none); voice.mjs reads the owner's with it
  *
  * — commits / checks / statuses —
  * @property {(branch: string) => Promise<string|null>} getBranchSha   null when absent
@@ -129,10 +139,19 @@ export class GitHubError extends Error {
  * @property {(q: {branch?: string, headSha?: string, event?: string})
  *            => Promise<WorkflowRun[]>} listWorkflowRuns   GET /actions/runs filtered by branch /
  *            head_sha / event (at most 10 pages)
+ * @property {(runId: number) => Promise<WorkflowJob[]>} listWorkflowRunJobs   GET
+ *            /actions/runs/{runId}/jobs?filter=all (every page): the jobs of every attempt of the
+ *            run, each with the id of its check run (checkRunId, read from check_run_url), its
+ *            htmlUrl and runnerId. GitHub also lists here a check run created through the Checks
+ *            API in the run's suite: contracts.isRealWorkflowJob tells the real jobs apart
  * @property {(workflowFile: string, q: {branch?: string, event?: string})
  *            => Promise<WorkflowRun[]>} listWorkflowFileRuns   runs of ONE workflow file, newest
  *            first (first page only: callers look for runs they just triggered)
  * @property {(workflowFile: string, ref: string, inputs: object) => Promise<void>} dispatchWorkflow
+ * @property {(runId: number) => Promise<void>} rerunFailedJobs   POST
+ *            /actions/runs/{runId}/rerun-failed-jobs: GitHub re-runs the run's failed jobs (and
+ *            the jobs that need them) as its next attempt; needs the Actions write permission.
+ *            Refusals (403 running already or no permission, 404, 422) throw GitHubError
  * @property {(branch: string) => Promise<{type: string, rulesetId: number|null}[]>} getBranchRules
  *            the ACTIVE rules that apply to a branch name (GET /rules/branches/<branch>, every
  *            page, every ruleset that matches the name, organization ones included); GitHub
@@ -167,6 +186,17 @@ export function parseLinkHeader(header) {
     if (m) for (const rel of m[2].split(/\s+/)) out[rel] = m[1];
   }
   return out;
+}
+
+/**
+ * `error` with `rateLimited: true` when the client classified its answer as a rate limit
+ * (isRateLimited: a 429, or a 403 with a Retry-After header, `x-ratelimit-remaining: 0` or the
+ * words "rate limit"), whether it gave up at once (a wait over the cap) or after its retries;
+ * unchanged otherwise. Callers that stop at a rate limit read it.
+ */
+function markRateLimited(error, rateLimited) {
+  if (rateLimited) error.rateLimited = true;
+  return error;
 }
 
 /**
@@ -340,7 +370,44 @@ export function normalizeWorkflowRun(raw) {
     headSha: raw.head_sha ?? "",
     headBranch: typeof raw.head_branch === "string" && raw.head_branch ? raw.head_branch : null,
     event: String(raw.event ?? ""),
+    workflowId: raw.workflow_id ?? null,
     checkSuiteId: raw.check_suite_id ?? null,
+    runAttempt: Number.isSafeInteger(raw.run_attempt) ? raw.run_attempt : null,
+  };
+}
+
+/**
+ * @typedef {object} WorkflowJob  normalized by github.listWorkflowRunJobs
+ * @property {number} id
+ * @property {number|null} runId
+ * @property {number|null} runAttempt
+ * @property {string} name
+ * @property {string} status
+ * @property {string|null} conclusion
+ * @property {number|null} checkRunId  the id of the job's check run: the last path segment of its
+ *                                     `check_run_url`; null when the payload has none
+ * @property {string|null} htmlUrl  `html_url`: …/actions/runs/<run id>/job/<job id> for a real job,
+ *                                  …/runs/<check run id> for a check run created through the
+ *                                  Checks API that GitHub lists among the run's jobs
+ *                                  (contracts.isRealWorkflowJob); null when absent
+ * @property {number|null} runnerId  `runner_id`: null for a job that never ran and for such a
+ *                                   check run
+ */
+
+/** @returns {WorkflowJob} */
+export function normalizeWorkflowJob(raw) {
+  const match = /\/check-runs\/(\d+)\/?$/.exec(String(raw.check_run_url ?? ""));
+  const checkRunId = match ? Number(match[1]) : null;
+  return {
+    id: raw.id,
+    runId: raw.run_id ?? null,
+    runAttempt: Number.isSafeInteger(raw.run_attempt) ? raw.run_attempt : null,
+    name: String(raw.name ?? ""),
+    status: String(raw.status ?? ""),
+    conclusion: raw.conclusion ?? null,
+    checkRunId: Number.isSafeInteger(checkRunId) ? checkRunId : null,
+    htmlUrl: typeof raw.html_url === "string" && raw.html_url ? raw.html_url : null,
+    runnerId: Number.isSafeInteger(raw.runner_id) ? raw.runner_id : null,
   };
 }
 
@@ -378,7 +445,9 @@ function errorMessage(data, fallback) {
  *   baseDelayMs/maxDelayMs/nowMs tune the backoff (tests); maxDelayMs (default 120 s) is also
  *   the longest Retry-After / rate-limit reset wait honored: a longer one throws at once;
  *   botLogin, when set, makes commentOnce
- *   count only markers in comments authored by that login (a third party cannot pre-post one);
+ *   count only markers in comments authored by that login, or by a login its caller adds
+ *   (`alsoLogins`: the owner's, read from the owner's own token): a third party cannot pre-post
+ *   one;
  *   requestTimeoutMs (default 30 s) aborts a hung request, which then counts as a network error.
  * @returns {GitHubClient}
  */
@@ -476,8 +545,8 @@ export function createGitHubClient(options) {
         return { status, data, headers: res.headers };
       }
       // A rate-limited request was not processed, so it is always safe to replay.
-      const retryable =
-        (status >= 500 && retryServerErrors) || isRateLimited(status, res.headers, data);
+      const rateLimited = isRateLimited(status, res.headers, data);
+      const retryable = (status >= 500 && retryServerErrors) || rateLimited;
       if (retryable && attempt < maxRetries) {
         const delay = retryDelayMs(attempt, res.headers, {
           baseDelayMs,
@@ -489,18 +558,24 @@ export function createGitHubClient(options) {
           // adds rate-limit pressure. Fail now; the next tick tries again.
           const wait = Math.ceil(delay / 1000);
           const why = redact(errorMessage(data, res.statusText));
-          throw new GitHubError(
-            status,
-            method,
-            shown,
-            `retry after ${wait} s (over the ${maxDelayMs} ms retry cap): ${why}`
+          throw markRateLimited(
+            new GitHubError(
+              status,
+              method,
+              shown,
+              `retry after ${wait} s (over the ${maxDelayMs} ms retry cap): ${why}`
+            ),
+            rateLimited
           );
         }
         log(`${method} ${shown} → ${status}; retry ${attempt + 1}/${maxRetries} in ${delay} ms`);
         await sleep(delay);
         continue;
       }
-      throw new GitHubError(status, method, shown, redact(errorMessage(data, res.statusText)));
+      throw markRateLimited(
+        new GitHubError(status, method, shown, redact(errorMessage(data, res.statusText))),
+        rateLimited
+      );
     }
   }
 
@@ -615,19 +690,25 @@ export function createGitHubClient(options) {
 
     deleteIssueComment,
 
-    async commentOnce(n, key, body) {
+    async commentOnce(n, key, body, { reader = null, alsoLogins = [] } = {}) {
       const marker = commentMarker(key);
-      const ours = (c) => c.body.includes(marker) && (!botLogin || c.author === botLogin);
-      if ((await listIssueComments(n)).some(ours)) return { posted: false };
+      // Logins whose markers are the queue's own: the App's, and the owner's under the owner
+      // voice. Exact logins only, as GitHub returns them; nobody else's marker ever counts.
+      const trusted = botLogin ? new Set([botLogin, ...alsoLogins.filter(Boolean)]) : null;
+      const ours = (c) => c.body.includes(marker) && (!trusted || trusted.has(c.author));
+      // Under the owner voice the App's client reads, this (the owner's) client writes.
+      const list = reader ? (m) => reader.listIssueComments(m) : listIssueComments;
+      if ((await list(n)).some(ours)) return { posted: false };
       const { id } = await createIssueComment(n, `${body}\n\n${marker}`);
       // Read-then-write is not atomic: another writer may have posted the same marker meanwhile,
       // and each POST replayed after a 5xx may have left one more copy. The lowest id wins; drop
-      // every newer copy written by our login (never a comment of someone else).
-      const found = (await listIssueComments(n)).filter(ours).sort((a, b) => a.id - b.id);
+      // every newer copy written by a trusted login (never a comment of someone else).
+      const found = (await list(n)).filter(ours).sort((a, b) => a.id - b.id);
       const winner = found[0]?.id;
       if (winner === undefined || id === undefined) return { posted: true };
-      const self = botLogin ?? found.find((c) => c.id === id)?.author;
-      const extra = found.filter((c) => c.id !== winner && (c.id === id || c.author === self));
+      const self = found.find((c) => c.id === id)?.author;
+      const mine = (c) => (trusted ? trusted.has(c.author) : c.author === self);
+      const extra = found.filter((c) => c.id !== winner && (c.id === id || mine(c)));
       for (const c of extra) await deleteIssueComment(c.id);
       if (extra.length) {
         const ids = extra.map((c) => c.id).join(", ");
@@ -653,6 +734,11 @@ export function createGitHubClient(options) {
     async updateIssue(n, patch) {
       assertNumber(n);
       await request("PATCH", r(`/issues/${n}`), { body: patch });
+    },
+
+    async getAuthenticatedLogin() {
+      const { data } = await request("GET", "/user");
+      return typeof data?.login === "string" ? data.login : "";
     },
 
     async getBranchSha(branch) {
@@ -867,6 +953,15 @@ export function createGitHubClient(options) {
       return runs.map(normalizeWorkflowRun);
     },
 
+    async listWorkflowRunJobs(runId) {
+      if (!Number.isSafeInteger(runId) || runId <= 0) {
+        throw new Error(`listWorkflowRunJobs: invalid workflow run id: ${runId}`);
+      }
+      // filter=all: the jobs of every attempt, so a re-run's attempt keeps the jobs before it.
+      const jobs = await paginate(r(`/actions/runs/${runId}/jobs`), { filter: "all" });
+      return jobs.map(normalizeWorkflowJob);
+    },
+
     async listWorkflowFileRuns(workflowFile, { branch, event } = {}) {
       const query = { ...(branch ? { branch } : {}), ...(event ? { event } : {}) };
       const path = r(`/actions/workflows/${encodeURIComponent(workflowFile)}/runs`);
@@ -882,6 +977,13 @@ export function createGitHubClient(options) {
           body: { ref, inputs },
         }
       );
+    },
+
+    async rerunFailedJobs(runId) {
+      if (!Number.isSafeInteger(runId) || runId <= 0) {
+        throw new Error(`rerunFailedJobs: invalid workflow run id: ${runId}`);
+      }
+      await request("POST", r(`/actions/runs/${runId}/rerun-failed-jobs`));
     },
 
     async getBranchRules(branch) {

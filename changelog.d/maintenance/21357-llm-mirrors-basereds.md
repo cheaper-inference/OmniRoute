@@ -1,0 +1,1 @@
+- **chore(docs):** The 66 translated `llm.txt` mirrors match the root again (free-tier catalog line reworded by #21237), which clears the release-branch docs-sync failure (#21357)

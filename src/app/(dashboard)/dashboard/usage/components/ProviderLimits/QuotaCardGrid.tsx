@@ -189,7 +189,7 @@ function ProviderQuotaHeader({
       {dragHandle}
       <Icon name={open ? "expand_less" : "expand_more"} size={16} className="text-text-muted" />
       <div className="min-w-0 flex-1">
-        <h3 className="text-sm text-text-main truncate">
+        <h3 className="ci-heading truncate" data-size="sm">
           {group && (
             <span
               className="me-2 inline-block h-2 w-2 rounded-full"
@@ -199,7 +199,7 @@ function ProviderQuotaHeader({
           )}
           {providerLabel}
         </h3>
-        <p className="text-[11px] text-text-muted tabular-nums">
+        <p className="text-2xs text-text-muted tabular-nums">
           {t("activeCount", { count: activeCount })} / {t("accountsCount", { count })}
         </p>
       </div>

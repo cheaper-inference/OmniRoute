@@ -132,10 +132,14 @@ for (const profile of ["ci", "quality"]) {
     assert.equal(run(needs, queueContext, profile).verdict, "PASS");
     for (const [id, rule] of Object.entries(policy.profiles[profile].jobs)) {
       if (rule.disposition !== "required") continue;
+      // The merge queue's base-check shards never apply to a pull request (a Mergify draft
+      // included): there a skip passes, and a failure, a cancel or a missing result still fail.
+      const applicable = rule.when !== "omni-queue-base-check";
       for (const status of ["failure", "cancelled", "skipped", "pending"]) {
         const changed = structuredClone(needs);
         changed[id].result = status;
-        assert.equal(run(changed, queueContext, profile).verdict, "FAIL", `${id}: ${status}`);
+        const expected = !applicable && status === "skipped" ? "PASS" : "FAIL";
+        assert.equal(run(changed, queueContext, profile).verdict, expected, `${id}: ${status}`);
       }
       const missing = structuredClone(needs);
       delete missing[id];
@@ -323,10 +327,10 @@ for (const profile of ["ci", "quality"]) {
     const checkName = policy.profiles[profile].checkName;
     const unrequestedName = `Admission not requested / ${profile === "ci" ? "CI" : "Quality"}`;
     assert.ok(verdict.name.endsWith(`&& '${checkName}' || '${unrequestedName}' }}`), verdict.name);
-    // Classification failure still reaches always(); queue description edits remain excluded.
+    // Classification failure still reaches always(); PR title/body edits remain excluded.
     assert.match(
       verdict.if,
-      /^\$\{\{ always\(\) && !\(github\.event_name == 'pull_request' && github\.event\.action == 'edited' && github\.event\.pull_request\.user\.login == 'mergify\[bot\]' && /
+      /^\$\{\{ always\(\) && !\(github\.event_name == 'pull_request' && github\.event\.action == 'edited' && !github\.event\.changes\.base && \(github\.event\.changes\.body \|\| github\.event\.changes\.title\)\) && /
     );
     assert.deepEqual(workflow.on.pull_request.branches, ["main", "release/**"]);
     // Push runs only for main since 2026-10-18: each change already ran the matrix on its

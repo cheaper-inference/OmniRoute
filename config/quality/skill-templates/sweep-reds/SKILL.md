@@ -1,6 +1,6 @@
 ---
 name: sweep-reds
-description: Repair confirmed CI failures base-first, then prepare affected PRs one at a time with exact-candidate evidence. Use when asked to sweep reds or restore the queue. Never merges, closes PRs, weakens tests, or changes CI under ordinary sweep authority.
+description: "Use when CI is red across the queue or the 'Release branch not green' issue is open: 'varre os reds', 'a base está vermelha', 'destrava a fila'. Repairs the base first, in its own PR, then takes the red PRs one at a time, separating inherited failures from PR defects. A chosen PR list on a healthy base: /green-prs. One PR: /babysit. Never merges, closes PRs or edits CI."
 ---
 
 # Sweep reds: base first, then affected PRs

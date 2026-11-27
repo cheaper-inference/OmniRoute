@@ -167,12 +167,13 @@ export function formatFreeBudget(params: {
   creditTokens?: number;
 }): string {
   const { freeType, monthlyTokens = 0, creditTokens = 0 } = params;
+  const quota = "(usage-based quota)";
 
   switch (freeType) {
     case "recurring-daily":
-      return `${fmtTokens(monthlyTokens)} tokens/day`;
+      return monthlyTokens > 0 ? `${fmtTokens(monthlyTokens)} tokens/day` : quota;
     case "recurring-monthly":
-      return `${fmtTokens(monthlyTokens)} tokens/month`;
+      return monthlyTokens > 0 ? `${fmtTokens(monthlyTokens)} tokens/month` : quota;
     case "recurring-credit":
       return `${fmtTokens(creditTokens)} credits`;
     case "recurring-uncapped":
@@ -253,6 +254,14 @@ export interface ModelDisplayNameParams {
 function stripFreeMarkers(text: string): { text: string; wasFree: boolean } {
   let cleaned = text.trim();
   let wasFree = false;
+  // An upstream free glyph may sit anywhere in the model name — parenthesised
+  // at the end (`QwQ 32B (🆓)`) or inside a variant tag (`FP8 Fast 🆓 ~150`).
+  // Remove it wherever it appears so the plugin prefix stays the only one.
+  const withoutGlyph = cleaned.replace(/\s{0,8}\(🆓\)\s{0,8}|\s{0,8}🆓\s{0,8}/g, " ");
+  if (withoutGlyph.length !== cleaned.length) {
+    wasFree = true;
+    cleaned = withoutGlyph.trim();
+  }
   const withoutPrefix = cleaned.replace(/^\[free\]\s{0,8}/i, "");
   if (withoutPrefix.length !== cleaned.length) {
     wasFree = true;
@@ -270,6 +279,21 @@ function stripFreeMarkers(text: string): { text: string; wasFree: boolean } {
     }
   }
   return { text: cleaned.length > 0 ? cleaned : text.trim(), wasFree };
+}
+
+/**
+ * Apply the inferred-free marker as a single leading label. An upstream `Free`
+ * in the name can leave a full `🆓 ` prefix on the built name, and older rows
+ * carried a trailing ` (free, inferred)` suffix; both are removed so exactly
+ * one marker remains, at the head. `label` is passed in by the caller (never
+ * imported here) to keep the free-signals -> naming dependency acyclic.
+ */
+export function withInferredFreeLabel(name: string, label: string): string {
+  let cleaned = name.trim();
+  cleaned = cleaned.replace(/^🆓\??\s{0,8}/, "");
+  cleaned = cleaned.replace(/\s{0,8}\(free,\s*inferred\)\s{0,8}$/i, "").trim();
+  if (cleaned.startsWith(label)) return cleaned;
+  return `${label}${cleaned}`;
 }
 
 /**
@@ -318,8 +342,12 @@ export function buildModelDisplayName(params: ModelDisplayNameParams): string {
 
   // Split off a leading provider prefix (`Provider - rest`) when present.
   let work = rawBase.trim();
+  let prefixWasFree = false;
   const dashMatch = work.match(/^(.+?)\s+-\s+(.+)$/);
   if (dashMatch) {
+    // A free marker on the name's provider prefix (`[Free] Cloudflare - ...`)
+    // still marks the entry free, even when the label comes from elsewhere.
+    prefixWasFree = stripFreeMarkers(dashMatch[1]!).wasFree;
     if (!provider) provider = dashMatch[1]!.trim();
     // Remove a leading [Free] from provider if present.
     const pm = stripFreeMarkers(provider);
@@ -348,7 +376,7 @@ export function buildModelDisplayName(params: ModelDisplayNameParams): string {
   // Free markers.
   const { text: cleanedModel, wasFree } = stripFreeMarkers(work);
   const model = cleanedModel.length > 0 ? cleanedModel : work;
-  const isFree = !!params.isFree || wasFree;
+  const isFree = !!params.isFree || wasFree || prefixWasFree;
 
   if (
     editor &&
@@ -454,7 +482,10 @@ export function disambiguateDisplayNames(
   for (const entry of entries) {
     let name = renamed.get(entry.id) ?? entry.name;
     if (globalSeen.has(name)) {
-      name = `${entry.name} (${entry.id})`;
+      // The key suffix can itself be a name already kept: count up until free.
+      const base = `${entry.name} (${entry.id})`;
+      name = base;
+      for (let n = 2; globalSeen.has(name); n++) name = `${base} (${n})`;
       renamed.set(entry.id, name);
     }
     globalSeen.add(name);

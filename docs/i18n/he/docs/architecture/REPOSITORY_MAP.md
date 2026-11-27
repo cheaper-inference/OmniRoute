@@ -4,593 +4,627 @@
 
 ---
 
-> **תיאור בשורה אחת לכל ספרייה וקובץ שורש.**
-> עודכן לאחרונה: 2026-06-28 — OmniRoute v3.8.40
+> **מה גר איפה: כל ספרייה ברמה העליונה וקובץ שורש במעקב, עם מטרה בשורה אחת.** עדכון אחרון: 2026-11-13 (OmniRoute v3.8.54)
 >
-> השתמשו במפה זו כדי לנווט במהירות בבסיס הקוד. לצלילה מעמיקה, עקבו אחר הקישורים לתיעוד הייעודי.
+> השתמש במפה זו כדי להתמצא בבסיס הקוד, ולאחר מכן עקוב אחר הקישורים למסמכים הייעודיים. ספירת הקבצים נמדדה עם `git ls-files` בתאריך לעיל. הם משתנים כמעט בכל שחרור, אז התייחסו אליהם כסדרי גודל.
 
 ## עץ ברמה העליונה
 
 ```
 OmniRoute/
-├── src/                  # יישום Next.js 16 (ממשק משתמש + נתיבי API + ספריות + תחום + שרת)
-├── open-sse/             # סביבת עבודה למנוע הזרמה (מטפלים, מבצעים, מתרגם, שרת MCP)
-├── packages/            # סביבות עבודה של npm:‏ ui-kit (ערכת ממשק המשתמש Keak CI המשולבת) ו-browser-pool
-├── electron/             # מעטפת שולחן עבודה (Electron 41 + electron-builder 26.10)
-├── bin/                  # נקודת כניסה ל-CLI ומטפלי פקודות
-├── scripts/              # סקריפטים לבנייה, בדיקה, סנכרון ומשימות חד-פעמיות
-├── docs/                 # תיעוד ציבורי (אתם כאן)
-├── tests/                # כל חבילות הבדיקות (יחידה, אינטגרציה, e2e, לקוחות פרוטוקול)
-├── public/               # נכסים סטטיים של Next.js, מניפסט PWA,‏ service worker וסמלים
-├── config/               # תצורה סטטית + מצב שערי איכות (i18n,‏ payloadRules,‏ quality/)
-├── images/               # נכסי תמונות לשיווק / README
-├── @omniroute/           # חבילות נלוות הניתנות לפרסום (opencode-plugin,‏ opencode-provider)
-├── skills/               # חבילות מיומנויות ל-CLI/סוכנים (cli-* + omni-* + config-codex-cli)
-├── examples/             # תוספים לדוגמה + תבנית התחלה omniroute-cmd-hello
-├── contrib/              # תרומות קהילתיות (podman/)
-├── .source/              # תצורת מקור של Fumadocs‏ (source.config.mjs + server/browser/dynamic)
-├── .github/              # תהליכי עבודה של GitHub Actions + תבניות דיווח על בעיות + תבנית PR
-├── .husky/               # Git hooks‏ (pre-commit,‏ pre-push)
-├── .claude/              # פקודות לוכסן של Claude Code (בהיקף הפרויקט)
-├── .agents/              # תהליכי עבודה + מיומנויות עבור Codex / סוכנים כלליים (עותק של .claude/)
-├── .vscode/              # הגדרות סביבת העבודה של VS Code
-├── _ideia/               # הערות תכנון (לא רשמיות; אינן מופצות)
-├── _mono_repo/           # תתי-פרויקטים היסטוריים (cloud,‏ site,‏ vscode-extension)
-├── _references/          # שיבוטי עזר לקריאה בלבד מפרויקטי OSS קשורים
-├── _tasks/               # קובצי מעקב אחר משימות לכל גרסה (לא רשמיים)
-├── .build/ .worktrees/ dist/   # אזורי עבודה מקומיים לבנייה / git-worktree / פלט בנייה (gitignored)
-├── .issues/              # מטמון מקומי של בעיות (gitignored)
-├── .playwright-mcp/      # תוצרי בדיקות של Playwright MCP
-├── coverage/             # פלט כיסוי של c8‏ (gitignored)
-├── logs/                 # יומני ריצה (gitignored)
-├── node_modules/         # תלויות (gitignored)
-├── package/              # אזור הכנה עבור npm pack‏ (תוצר בנייה)
-├── .next/                # פלט הבנייה של Next.js‏ (gitignored)
-└── (קובצי שורש — ראו להלן)
+├── src/              # Next.js 16 app: dashboard, /api and /v1 routes, server libs, domain, i18n
+├── open-sse/         # Streaming engine workspace (@omniroute/open-sse): handlers, executors, translator, services, MCP server
+├── packages/         # npm workspaces: ui-kit (vendored Keak CI UI Kit) and browser-pool
+├── @omniroute/       # Separately published npm packages (OpenCode plugins and provider)
+├── bin/              # Published `omniroute` CLI, MCP/bridge entry points, self-host ops scripts (*.sh)
+├── electron/         # Desktop app (Electron main/preload + helpers + icons)
+├── public/           # Static assets served by Next.js (provider logos, PWA icons, sw.js, openapi.yaml copy)
+├── skills/           # Agent Skills (SKILL.md) served by /api/agent-skills, MCP and A2A
+├── tests/            # All test suites: unit, integration, e2e, homolog, fixtures, snapshots
+├── scripts/          # Build, quality gates, i18n, release, ops, perf and one-off scripts (allow-listed subfolders)
+├── config/           # Versioned config: i18n, payload rules, CLI manifest, quality-gate baselines, release inventories
+├── changelog.d/      # Per-PR changelog fragments, aggregated into CHANGELOG.md at release time
+├── docs/             # Public documentation (served at /docs via Fumadocs) + translated mirrors in docs/i18n/
+├── examples/         # Example plugins and quickstart clients
+├── deploy/           # Kubernetes deployment: Helm chart + Kustomize base/overlays
+├── docker/           # Auxiliary container images (not the main image, which is the root Dockerfile)
+├── contrib/          # Community recipes: Podman quadlets, VPS compose, Windows launchers, session-sync note
+├── .github/          # GitHub Actions workflows, composite actions, issue/PR templates, CODEOWNERS, labels
+├── .husky/           # Tracked git hooks: commit-msg, pre-commit, pre-push
+├── .vale/            # Vale prose-lint vocabulary (styles/Vocab/OmniRoute/accept.txt)
+├── .vscode/          # Shared VS Code workspace settings (settings.json)
+└── (root files — see below)
+```
+
+נתיבים מקומיים, שנוצרו או פרטיים (כולם נרשמו ב-gitignored, מעולם לא מחויבים, לא מתוארים יותר):
+
+```
+node_modules/            # npm dependencies
+.build/                  # Next.js build output (default distDir .build/next, see next.config.mjs)
+dist/                    # npm staging directory assembled by scripts/build/prepublish.ts
+.source/                 # fumadocs-mdx output that feeds the /docs viewer
+.husky/_/                # Husky runtime generated on install (core.hooksPath target)
+coverage/ logs/ test-results/ playwright-report/   # coverage, runtime logs, Playwright output
+.env                     # local secrets generated from .env.example
+_*/                      # private local-only folders (anchored /_* ignore); never tracked
+.claude/ .agents/        # local AI-assistant state and skills; never tracked
 ```
 
 ---
 
-## קובצי שורש
+## קבצי שורש
 
-| File                                        | Purpose                                                                                    |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| **README.md**                               | דף נחיתה שיווקי + התחלה מהירה + מטריצת תכונות (ראו גם `llm.txt`)                           |
-| **CHANGELOG.md**                            | יומן שינויים לכל גרסה (נוצר אוטומטית באמצעות המיומנות `/version-bump-cc`)                  |
-| **LICENSE**                                 | נוסח רישיון MIT                                                                            |
-| **CLAUDE.md**                               | כללי הפרויקט לסוכני Claude Code (כללים מחייבים, מוסכמות, תרחישים)                          |
-| **AGENTS.md**                               | זהה ל-CLAUDE.md אך מיועד לסוכני AI שאינם Claude ‏(Codex, Cursor וכו׳)                      |
-| **GEMINI.md**                               | כללים תמציתיים לסוכנים מבוססי Gemini (תת-קבוצה של CLAUDE.md)                               |
-| **CONTRIBUTING.md**                         | מדריך לתורמים: הגדרה, commits מוסכמים, בדיקות, תהליך PR                                    |
-| **SECURITY.md**                             | מדיניות דיווח על פגיעויות, גרסאות נתמכות, מודל איומים                                      |
-| **CODE_OF_CONDUCT.md**                      | אמנת התורמים — ציפיות להתנהגות בקהילה                                                      |
-| **llm.txt**                                 | דף נחיתה בטקסט פשוט המותאם לסורקי LLM ‏(SEO לעוזרי AI)                                     |
-| **package.json**                            | מניפסט npm, סקריפטים, תלויות, מנועים, סף כיסוי c8                                          |
-| **package-lock.json**                       | עץ תלויות נעול                                                                             |
-| **tsconfig.json**                           | תצורת TypeScript ראשית                                                                     |
-| **tsconfig.typecheck-core.json**            | תצורת בדיקת טיפוסים לליבת `src/`                                                           |
-| **tsconfig.typecheck-noimplicit-core.json** | בדיקת טיפוסים מחמירה (`noImplicitAny`)                                                     |
-| **tsconfig.tsbuildinfo**                    | מטמון build מצטבר של TS (מוחרג מ-Git)                                                      |
-| **next.config.mjs**                         | תצורת build של Next.js 16 (פלט עצמאי)                                                      |
-| **next-env.d.ts**                           | טיפוסי סביבה שנוצרים אוטומטית על ידי Next.js                                               |
-| **eslint.config.mjs**                       | תצורה שטוחה של ESLint (כללים לפי אזור בפרויקט)                                             |
-| **prettier.config.mjs**                     | כללי עיצוב של Prettier                                                                     |
-| **postcss.config.mjs**                      | תצורת PostCSS עבור צינור העיבוד של Tailwind/CSS                                            |
-| **playwright.config.ts**                    | תצורת בדיקות E2E של Playwright                                                             |
-| **vitest.config.ts**                        | תצורת Vitest (חבילת בדיקות ברירת המחדל)                                                    |
-| **vitest.mcp.config.ts**                    | תצורת Vitest עבור שרת MCP / חבילות autoCombo / מטמון                                       |
-| **sonar-project.properties**                | תצורת SonarQube/SonarCloud (איכות קוד)                                                     |
-| **Dockerfile**                              | build רב-שלבי של Docker ‏(builder → runner-base → runner-cli)                              |
-| **docker-compose.yml**                      | תצורת compose לפיתוח עם 4 פרופילים (base, cli, host, cliproxyapi) + שירות צדדי של redis    |
-| **docker-compose.prod.yml**                 | תצורת compose לייצור (פורט 20130, redis, אמצעי אחסון בעלי שם)                              |
-| **.dockerignore**                           | קבצים שמוחרגים מהקשר Docker                                                                |
-| **fly.toml**                                | תצורת פריסה של Fly.io (אזור `sin`, פורט 20128, אמצעי אחסון /data)                          |
-| **.env.example**                            | תבנית קובץ סביבה (מועתקת אוטומטית אל `.env` בהתקנה הראשונה)                                |
-| **.gitignore**                              | תבניות התעלמות של Git                                                                      |
-| **.npmignore**                              | רשימת החרגות לפרסום ב-npm                                                                  |
-| **.npmrc**                                  | תצורת npm (מאגר, מדיניות קובץ נעילה)                                                       |
-| **.node-version**                           | גרסת Node מקובעת (בשימוש כלים התואמים ל-nvm)                                               |
-| **.nvmrc**                                  | גרסת Node מקובעת עבור nvm                                                                  |
-| **eslint.complexity.config.mjs**            | תצורת ESLint עבור מנגנון העלאת סף המורכבות (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | תצורת ESLint עבור כללי SonarJS (מורכבות קוגניטיבית / שכפול)                                |
-| **source.config.ts**                        | תצורת מקור `defineDocs` של Fumadocs (מזינה את `.source/`)                                  |
-| **knip.json**                               | תצורת Knip — קבצים/ייצואים/תלויות שאינם בשימוש (מזינה את שער הקוד המת)                     |
-| **stryker.conf.json**                       | תצורת בדיקות מוטציה של Stryker                                                             |
-| **.size-limit.json**                        | תצורת תקציב לחבילת size-limit                                                              |
-| **promptfooconfig.yaml**                    | תצורת הערכה של promptfoo                                                                   |
-| **.gitleaks.toml**                          | מערכת כללים לסריקת סודות של gitleaks                                                       |
-| **.zizmor.yml**                             | תצורת בדיקת אבטחה של GitHub Actions באמצעות zizmor                                         |
-| **socket.yml**                              | תצורת שרשרת אספקה של Socket.dev                                                            |
-| **news.json**                               | פיד הכרזות מקומי של v2; פריט ההשקה של Radar מסופק כלא פעיל                                 |
-| **flake.nix** / **flake.lock**              | הגדרת מעטפת פיתוח של Nix וקובץ נעילה                                                       |
-| **.env**                                    | סודות מקומיים (נכללים ב-gitignore — נוצרים מתוך `.env.example`)                            |
+כל הקבצים במעקב בשורש המאגר (`git ls-files | grep -v /`), מקובצים לפי פונקציה.
 
-> **הועברו מתיקיית השורש ב-v3.8.26 (לצמצום העומס):**
->
-> - **← `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, וכן `quality-metrics.json` שנוצר אוטומטית (נכלל ב-gitignore). ראו [`## config/`](#config--static-configs--quality-gate-state).
+### תיעוד הפרויקט
+
+| קוֹבֶץ                   | מַטָרָה                                                            |
+| ------------------------ | ------------------------------------------------------------------ |
+| `README.md`              | דף נחיתה: סקירת תכונות, התחלה מהירה, שיטות התקנה                   |
+| `CHANGELOG.md`           | יומן שינויים לכל מהדורה (קטעים מ- `changelog.d/` מקופלים כאן)      |
+| `ROADMAP.md`             | מפת דרכים ציבורית                                                  |
+| `LICENSE`                | רישיון MIT                                                         |
+| `THIRD_PARTY_NOTICES.md` | הודעות על קוד צד שלישי מצורף (לדוגמה ה-wreq-js bindings)           |
+| `CONTRIBUTING.md`        | מדריך לתורמים: הגדרה, מחויבות קונבנציונלית, מטריצת בדיקה, זרימת PR |
+| `SECURITY.md`            | מדיניות דיווח על פגיעות                                            |
+| `CODE_OF_CONDUCT.md`     | ציפיות להתנהגות בקהילה                                             |
+| `llm.txt`                | תקציר פרויקט בטקסט רגיל לסורקים ועוזרים של LLM                     |
+
+### הוראות עוזר AI
+
+| קוֹבֶץ      | מַטָרָה                                                            |
+| ----------- | ------------------------------------------------------------------ |
+| `AGENTS.md` | מקור יחיד של אמת לכל עוזר AI : כנסים, שערים איכותיים, חוקים קשיחים |
+| `CLAUDE.md` | דלתות ספציפיות לקוד קלוד; מייבא `AGENTS.md`                        |
+| `GEMINI.md` | דלתות ספציפיות למזל תאומים; מצביע בחזרה ל- `AGENTS.md`             |
+
+מדריכים מקוננים קיימים גם לצד הקוד שהם מתארים: `open-sse/services/AGENTS.md` ו- `src/lib/db/AGENTS.md`.
+
+### מניפסטים של חבילות ושרשרת כלים של צומת
+
+| קוֹבֶץ                     | מַטָרָה                                                                               |
+| -------------------------- | ------------------------------------------------------------------------------------- |
+| `package.json`             | מניפסט npm: scripts, dependencies, `engines`, `workspaces`, publiced `files`          |
+| `package-lock.json`        | עץ תלות נעול                                                                          |
+| `pnpm-workspace.yaml`      | רשימת סביבות העבודה של pnpm (`packages/*`, `open-sse`) ורשימת ההיתרים של בנייה מקורית |
+| `.npmrc` / `.npmignore`    | תצורת npm ופרסם אי הכללות                                                             |
+| `.node-version` / `.nvmrc` | סיכות גרסת צומת למנהלי גרסאות                                                         |
+| `flake.nix` / `flake.lock` | Nix dev shell והנעילה שלו                                                             |
+| `Makefile`                 | קיצורי `make` שמאצילים לסקריפטים של npm                                               |
+
+### TypeScript, Next.js ו-docs build
+
+| קוֹבֶץ                                    | מַטָרָה                                                                |
+| ----------------------------------------- | ---------------------------------------------------------------------- |
+| `tsconfig.json`                           | בסיס תצורת TypeScript וכינויי נתיב (`@/*`, `@omniroute/open-sse`)      |
+| `tsconfig.typecheck-core.json`            | פרוסת `npm run typecheck:core`                                         |
+| `tsconfig.typecheck-noimplicit-core.json` | פרוסת `npm run typecheck:noimplicit:core` (קפדנית `noImplicitAny`).    |
+| `tsconfig.typecheck-api.json`             | פרוסת בדיקת סוג של מסלול API (`scripts/check/check-api-typecheck.mjs`) |
+| `tsconfig.typecheck-dashboard.json`       | פרוסת בדיקת סוג לוח מחוונים (`npm run check:dashboard-typecheck`)      |
+| `tsconfig.build.json`                     | בדיקת סוג ייצור (`npm run typecheck:build`, `check:build-typecheck`)   |
+| `tsconfig.mitm.json`                      | תצורת MITM build בשימוש על ידי `scripts/build/buildMitm.mjs`           |
+| `next.config.mjs`                         | Next.js 16 config (פלט עצמאי, כינויים של פרופיל build)                 |
+| `source.config.ts`                        | Fumadocs `defineDocs` config: אילו קטעי `docs/` קומפלס ל- `/docs`      |
+| `postcss.config.mjs`                      | צינור PostCSS / Tailwind                                               |
+
+### מוך ועיצוב
+
+| קוֹבֶץ                                    | מַטָרָה                                                                                  |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `eslint.config.mjs`                       | תצורת ESLint שטוחה הראשית (`npm run lint`, עם `config/quality/eslint-suppressions.json`) |
+| `eslint.complexity-ratchets.config.mjs`   | תצורה עצמאית המשמשת את מחגרות המורכבות והמורכבות הקוגניטיבית במעבר ESLint אחד            |
+| `eslint.complexity.config.mjs`            | תצורה עצמאית עם הליבה `complexity` + `max-lines-per-function` בלבד (בשימוש בבדיקות)      |
+| `prettier.config.mjs` / `.prettierignore` | חוקי Prettier והחרגות                                                                    |
+| `.editorconfig`                           | ברירת מחדל של עורך (הזחה של 2 רווחים)                                                    |
+| `.markdownlint.json`                      | מוך סימון מייעץ (`npm run lint:md`)                                                      |
+| `.vale.ini`                               | מוך פרוזה מייעצת (`npm run lint:prose`), אוצר מילים `.vale/`                             |
+
+### בדיקות, הערכה וסיקור
+
+| קוֹבֶץ                        | מַטָרָה                                                                                         |
+| ----------------------------- | ----------------------------------------------------------------------------------------------- |
+| `vitest.config.ts`            | jsdom Vitest suite: `npm run test:vitest:ui` (לוח המחוונים `.tsx`, hoooks, memory/skills tests) |
+| `vitest.mcp.config.ts`        | חבילת Node Vitest : `npm run test:vitest` (MCP, autoCombo, combo, API `.spec.ts`)               |
+| `vitest.quarantine.config.ts` | מפעיל את הקבצים בהסגר הרשומים ב- `config/quality/vitest-exclusions.json`                        |
+| `vitest.e2e-live.config.ts`   | שרתים חיים Vitest suites (`tests/e2e/ecosystem.test.ts`, `tests/e2e/protocol-clients.test.ts`)  |
+| `playwright.config.ts`        | Playwright E2E (`tests/e2e/**/*.spec.ts`, `npm run test:e2e`)                                   |
+| `stryker.conf.mjs`            | בדיקת מוטציות של סטרייקר (`npm run test:mutation`; מחשבת `tap.testFiles` מ- `mutate`)           |
+| `stryker.disablebail.mjs`     | גרסת סטרייקר ללא ערבות, למדידת יתירות בדיקה                                                     |
+| `promptfooconfig.yaml`        | promptfoo LLM-Security Suite                                                                    |
+| `codecov.yml`                 | הגדרות כיסוי תיקון Codecov                                                                      |
+
+### Docker ופריסה
+
+| קוֹבֶץ                            | מַטָרָה                                                                           |
+| --------------------------------- | --------------------------------------------------------------------------------- |
+| `Dockerfile`                      | תמונה רב-שלבית (`builder` → `runner-base` → `runner-web` / `runner-cli*`)         |
+| `Dockerfile.bun`                  | תמונה חלופית בזמן ריצה של Bun (נבנה על ידי `docker-publish.yml`)                  |
+| `docker-compose.yml`              | חיבור ברירת מחדל עם פרופילים (בסיס, אינטרנט, cli, מארח, זיכרון, cliproxyapi, ...) |
+| `docker-compose.prod.yml`         | מופע נפרד של תמונת מצב של ייצור ביציאה 20130                                      |
+| `docker-compose.selfhost.yml`     | מארח עצמי של לולאה בפקודה אחת (מזוג עם `.env.selfhost.example`)                   |
+| `docker-compose.ollama-local.yml` | Docker OmniRoute מדבר עם Ollama יליד מארח                                         |
+| `.dockerignore`                   | אי הכללות Docker build-context                                                    |
+| `fly.toml`                        | תצורת אפליקציית Fly.io (יציאה 20128, נפח `/data` )                                |
+
+### בוטים של אבטחה, שרשרת אספקה ומאגר
+
+| קוֹבֶץ                                       | מַטָרָה                                                                        |
+| -------------------------------------------- | ------------------------------------------------------------------------------ |
+| `.gitleaks.toml`                             | חוקי הסריקה הסודית ורשימות ההיתרים של gitleaks                                 |
+| `.trivyignore`                               | דיכוי סיכונים מקובלים עבור סריקת תמונת המכולה                                  |
+| `.zizmor.yml`                                | zizmor GitHub תצורת פעולות אבטחה-ביקורת                                        |
+| `socket.yml`                                 | תצורת האפליקציה Socket.dev (הנתיב מתעלם; לא שער CI )                           |
+| `sonar-project.properties`                   | תצורת פרויקט SonarQube/SonarCloud                                              |
+| `knip.json`                                  | סחיטה בתצורת files/exports/deps שאינה בשימוש (מזינה `npm run check:dead-code`) |
+| `.size-limit.json`                           | תקציבים בגודל חבילה                                                            |
+| `.mergify.yml`                               | מיזוג תצורת מיזוג-תור                                                          |
+| `.coderabbit.yaml`                           | תצורת סקירת CodeRabbit                                                         |
+| `.cbmignore`                                 | התעלם מרשימת אינדקס הקוד של codebase-memory-mcp                                |
+| `.gitignore` / `.gitattributes` / `.mailmap` | התעלם מכללים, סיומת שורה של LF לתסריטים, זהויות מחבר קנוניות                   |
+
+### תבניות סביבה, מצב והזנות
+
+| קוֹבֶץ                      | מַטָרָה                                                          |
+| --------------------------- | ---------------------------------------------------------------- |
+| `.env.example`              | התבנית הועתקה ל- `.env` בהתקנה הראשונה; רשימת הפניות של env vars |
+| `.env.selfhost.example`     | תבנית עבור `docker-compose.selfhost.yml`                         |
+| `.env.homolog.example`      | תבנית עבור רץ ההומולוגיות (`npm run homolog`)                    |
+| `.env.devin-bridge.example` | קובץ env לדוגמה עבור הגדרת גשר Devin                             |
+| `.i18n-state.json`          | מצב תרגום מצטבר (hashs מקור לכל מסמך ומקום)                      |
+| `news.json`                 | עדכון הודעות מקומי (סכימה v2) נקרא על ידי לוח המחוונים           |
 
 ---
 
 ## `src/` — Next.js
 
+כ-4,550 קבצים במעקב. נתיב כינוי `@/*` → `src/*`.
+
 ```
 src/
-├── app/                 # App Router (pages + API routes + status pages + landing)
-├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
-├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
-├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
-├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
-├── i18n/                # next-intl config + per-locale message JSON (67 locales)
-├── middleware/          # Next.js middleware (request enrichment, locale detection)
-├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
-│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Model adapter glue (legacy shim)
-├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
-├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Legacy in-memory store (being phased out for src/lib/db)
-├── types/               # Shared TS type files
-├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
-├── instrumentation-node.ts  # Node-only instrumentation
-└── proxy.ts             # HTTP-proxy entry shim
+├── app/                  # App Router: pages, layouts and route handlers (file-convention loaded)
+│   ├── (dashboard)/      # Route group for the dashboard: dashboard/<section>/ pages + home widgets
+│   ├── api/              # HTTP routes: v1/ (OpenAI-compatible), v1beta/ (Gemini-style), management routes
+│   ├── docs/             # Embedded docs viewer (lib/openapi.generated.ts is generated)
+│   ├── a2a/ .well-known/ # A2A JSON-RPC entry point and Agent Card discovery
+│   ├── healthz/ livez/ readyz/ status/   # Health probes and status page
+│   ├── landing/ login/ auth/ authorize/ callback/ connect/   # Public, auth and OAuth pages
+│   ├── miniapp/          # Telegram Mini App page
+│   └── 400/ … 503/       # Static HTTP error pages
+├── lib/                  # Server-side libraries and domain modules (largest folder)
+├── shared/               # Code shared by server and client: components, constants, validation, utils
+├── sse/                  # Next.js side of the SSE pipeline: handlers/ (chat*), services/ (auth, leases, quotas)
+├── mitm/                 # MITM / TPROXY capture: cert/, dns/, handlers/, targets/, inspector/, tproxy/ (C addon)
+├── server/               # Server-only: authz/ (route guard pipeline), auth/, cors/, origin/, ws/
+├── domain/               # Policy engine, fallback, cost rules, lockout, quota cache, assessment/
+├── i18n/                 # next-intl: messages/ (67 locales), global-error-messages/ (generated), routeNamespaces.generated.json
+├── store/                # Zustand client stores (theme, notifications, …)
+├── hooks/                # Client hooks (live dashboard, compression preview, breaker health)
+├── types/                # Ambient and shared type declarations
+├── models/               # Compatibility barrel re-exporting db functions
+├── middleware/           # promptInjectionGuard.ts (facade over the guardrail system)
+├── scripts/              # backfillAggregation.ts (`npm run backfill-aggregation`)
+├── proxy.ts              # Next.js 16 proxy: headless gate + authz pipeline for dashboard, /api and /v1-style paths
+├── instrumentation.ts    # Next.js instrumentation hook (delegates Node-only work)
+└── instrumentation-node.ts   # Node-only startup work
 ```
 
-### נתב אפליקציות `src/app/` — (Next.js 16)
+### נתב אפליקציות `src/app/` —
 
-| נָתִיב                                                                       | מַטָרָה                                                                                                                                                                                                                                                                                                                   |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | Public OpenAI-compat API (~ 25 תת-מסלולים: צ'אט, השלמות, הטמעות, קבצים, אצוות, אודיו, תמונות, סרטונים, מוזיקה, דירוג מחדש, מנחות, חיפוש, ws, סוכנים, חשבונות, ספקים וכו')                                                                                                                                                 |
-| `app/api/v1beta/`                                                            | נקודות קצה API בסגנון מזל תאומים                                                                                                                                                                                                                                                                                          |
-| `app/api/playground/`                                                        | מסלולי סטודיו למשחקים: `improve-prompt/` (POST — LLM prompt rewriter), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — see `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                             |
-| `app/api/` (non-v1)                                                          | מסלולי Management/admin (ספריות ~ 60: ספקים, שילובים, הגדרות, mcp, a2a, evals, זיכרון, מיומנויות, webhooks, תאימות, חוסן, ניטור, מנהרות, כלי cli וכו')                                                                                                                                                                    |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 מסלולים (בקרת שרת, סוכן state/DNS/mappings, עוקף, cert, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. ראה `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                                      |
-| `app/api/tools/traffic-inspector/`                                           | מפקח התנועה REST + WS API — 16 מסלולי + (בקשות, הפעלות, מארחים, מצבי לכידה, ייצוא, ws). LOCAL_ONLY + SPAWN_CAPABLE. ראה `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                                        |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 נקודת כניסה (`POST /a2a`)                                                                                                                                                                                                                                                                                |
-| `app/.well-known/agent.json/`                                                | כרטיס סוכן A2A (גילוי)                                                                                                                                                                                                                                                                                                    |
-| `app/(dashboard)/dashboard/`                                                 | דפי UI של לוח המחוונים (50 קטעי +, קבצי ~ 118 page.tsx : ספקים, שילובים, הגדרות, זיכרון, מיומנויות, webhooks, evals, ביקורת, אצווה, מטמון, עלויות, בריאות, מערכת, פעילות וכו')                                                                                                                                            |
-| `app/(dashboard)/dashboard/search-tools/`                                    | כלי חיפוש Studio UI (3 כרטיסיות: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — see `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                              |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (תוכנית 21): `page.tsx` (מעטפת 3 כרטיסיות), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | עמוד לוח המחוונים AgentBridge כרטיס שרת —, 9 כרטיסי סוכן, אשף התקנה, מיפוי דגמים, רשימת עוקפים. i18n PT-BR + EN. ראה `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                                    |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | דף לוח המחוונים של מפקח התנועה — DevTools פיצול, 7 כרטיסיות פירוט, 4 מצבי לכידה, מקליט הפעלות, צביעת הקשר. i18n PT-BR + EN. ראה `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                                                   |
-| `app/(dashboard)/dashboard/activity/`                                        | דף הזנת פעילות (קבוצה B): `page.tsx` (שרת) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — see `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                           |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | דף שיתוף מכסות (קבוצה ב): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                     |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | דף תצורת תוכנית הספק (קבוצה B): `page.tsx` + `ProviderPlanConfigClient.tsx` — ממדי מכסה לכל עקיפה של חיבור                                                                                                                                                                                                                |
-| `app/docs/`                                                                  | מציג תיעוד מוטבע (מציג `docs/*.md`)                                                                                                                                                                                                                                                                                       |
-| `app/landing/`                                                               | דף נחיתה שיווקי                                                                                                                                                                                                                                                                                                           |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | דפים הקשורים לאימות                                                                                                                                                                                                                                                                                                       |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | דפי שגיאה של HTTP                                                                                                                                                                                                                                                                                                         |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | דפי Static/status                                                                                                                                                                                                                                                                                                         |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | פריסת שורש, בית, מניפסט PWA, CSS גלובלי                                                                                                                                                                                                                                                                                   |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | גבולות שגיאה                                                                                                                                                                                                                                                                                                              |
+| נָתִיב                                                              | מַטָרָה                                                                                                                                                |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `app/api/v1/`                                                       | API ציבורי תואם OpenAI: צ'אט, השלמות, תגובות, הודעות, הטמעות, תמונות, אודיו, סרטונים, מוזיקה, דירוג מחדש, מנחות, חיפוש, קבצים, אצוות, ws, דגמים, ...   |
+| `app/api/v1beta/`                                                   | נקודות קצה בסגנון מזל תאומים                                                                                                                           |
+| `app/api/` (תיקיות אחרות)                                           | מסלולי ניהול וניהול: ספקים, שילובים, הגדרות, מפתחות, שימוש, יומנים, mcp, a2a, acp, זיכרון, מיומנויות, evals, webhooks, מנהרות, תוספים, מכ"ם, כלים, ... |
+| `app/api/tools/agent-bridge/`                                       | AgentBridge REST API — ראה [AGENTBRIDGE.md](../frameworks/AGENTBRIDGE.md)                                                                              |
+| `app/api/tools/traffic-inspector/`                                  | מפקח תעבורה REST API — ראה [TRAFFIC_INSPECTOR.מד](../frameworks/TRAFFIC_INSPECTOR.md)                                                                  |
+| `app/(dashboard)/dashboard/`                                        | תיקיה אחת לכל מקטע לוח המחוונים (ספקים, שילובים, יומנים, שימוש, עלויות, מטמון, דחיסה, זיכרון, מגרש משחקים, כלי חיפוש, הגדרות, כלים, ...)               |
+| `app/(dashboard)/home/`                                             | מסך הבית והווידג'טים שלו                                                                                                                               |
+| `app/docs/`                                                         | מציג Docs המציג את קטעי Fumadocs הרשומים ב- `source.config.ts`                                                                                         |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`          | פריסת שורש, כניסת שורש (הפניות מחדש), מניפסט PWA, CSS גלובלי                                                                                           |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx` | גבולות שגיאה ונפילות                                                                                                                                   |
 
-### `src/lib/` — Core ספריות (~ 50 מודולים)
+מסלולי API עוקבים אחר `Route → CORS → Zod validation → optional auth → policy → handler`; ראה [ARCHITECTURE.md](ARCHITECTURE.md) ו- [API_REFERENCE.md](../reference/API_REFERENCE.md).
 
-| מודול                                    | מַטָרָה                                                                                                                                                                                                                                                                                                             |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | מנהל משימות פרוטוקול A2A, מיומנויות (5), סטרימינג                                                                                                                                                                                                                                                                   |
-| `acp/`                                   | CLI Agent Registry (גילוי CLI מקומי — see `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                               |
-| `api/`                                   | עוזרי API משותפים (`requireManagementAuth`, אימות)                                                                                                                                                                                                                                                                  |
-| `auth/`                                  | הפעלה, גיבוב סיסמא, אימות אסימון                                                                                                                                                                                                                                                                                    |
-| `batches/`                               | OpenAI Batches API                                                                                                                                                                                                                                                                                                  |
-| `catalog/`                               | ספק קטלוג Zod אימות יכולת + פתרון                                                                                                                                                                                                                                                                                   |
-| `cloudAgent/`                            | סוכני ענן (Codex Cloud, Devin, Jules) — see `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                        |
-| `combos/`                                | עוזרים לסדר מחדש + ברזולוציה משולבת                                                                                                                                                                                                                                                                                 |
-| `audit/`                                 | עוזרי הזנת פעילות: `highLevelActions.ts` (רשימת ההיתרים + `isHighLevelAction()`), `activityIcons.ts` (פעולה → icon/verb map), `timeline.ts` (groupByDay/relativeTime) — see `docs/architecture/MONITORING_SECTIONS.md`                                                                                              |
-| `compliance/`                            | יומן ביקורת + ספק ביקורת — ראה `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                        |
-| `compression/`                           | דבק מנוע דחיסה (מנועים חיים ב- `open-sse/services/compression/`)                                                                                                                                                                                                                                                    |
-| `config/`                                | עוזרי תצורת זמן ריצה                                                                                                                                                                                                                                                                                                |
-| `db/`                                    | 120 מודולי + domain DB + 168 העברות (תמיד עברו כאן עבור SQLite)                                                                                                                                                                                                                                                     |
-| `quota/`                                 | מנוע שיתוף מכסות: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore interface), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — see `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | לקוח קטלוג דגם חופשי של מכ"ם: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — see `docs/frameworks/RADAR.md`                                                                                                                                           |
-| `display/`                               | עוזרי עיצוב UI (עלות, חביון וכו')                                                                                                                                                                                                                                                                                   |
-| `embeddings/`                            | עוזרי שירות ההטבעות                                                                                                                                                                                                                                                                                                 |
-| `env/`                                   | ניתוח משתנה Env אימות +                                                                                                                                                                                                                                                                                             |
-| `evals/`                                 | Eval framework (סוויטות, ראנר, ריצה) — see `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                               |
-| `guardrails/`                            | PII masker, הזרקה מהירה, גשר ראייה — ראה `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                              |
-| `jobs/`                                  | עבודות רקע (כמו קרון)                                                                                                                                                                                                                                                                                               |
-| `memory/`                                | זיכרון שיחה (SQLite FTS5 + sqlite-vec היברידי RRF + Qdrant tier 2) — see `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                |
-| `memory/embedding/`                      | שכבת הטבעה מרובת מקורות: `index.ts` (פותר), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (תוכנית 21)                                                                                                                                                                              |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + hybrid RRF (FTS5 + vector, k = 60). Lazy-init, משפיל בחן כאשר sqlite-vec אינו זמין. (תוכנית 21)                                                                                                                                                                       |
-| `memory/reindex.ts`                      | `runReindexBatch()` — מעבד זיכרונות עם `needs_reindex=1` ברקע; נקרא על ידי `POST /api/memory/reindex` ונתיב מילוי עצלן. (תוכנית 21)                                                                                                                                                                                 |
-| `monitoring/`                            | בדיקות בריאות, פליטת מדדים                                                                                                                                                                                                                                                                                          |
-| `oauth/`                                 | OAuth/import זורם עבור 22 מודולי ספקים (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, zero, openference, זד)                                                                    |
-| `plugins/`                               | רישום תוספים                                                                                                                                                                                                                                                                                                        |
-| `promptCache/`                           | נקודות עצירה של קבצים למטמון בסגנון אנתרופי                                                                                                                                                                                                                                                                         |
-| `skills/`                                | מסגרת מיומנויות (מובנה + marketplace + SkillsSH) — see `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                  |
-| `playground/`                            | עוזרים משותפים ל-Playground Studio: `codeExport.ts` (מחולל curl/Python/TS ), `promptImprover.ts` (בונה מטה-prompt), `streamMetrics.ts` (pure TTFT/TPS), `types.ts` (טבלת תמחור) — see `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                        |
-| `webhookDispatcher.ts`                   | HMAC webhook משלוח — ראה `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                              |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | מנהלי מנהרות — רואים `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                    |
-| `cloudSync.ts`, `initCloudSync.ts`       | סנכרון ענן אופציונלי של מצב                                                                                                                                                                                                                                                                                         |
-| `localDb.ts`                             | ייצוא מחדש של חבית עבור מודולי db (ללא ייצוא מחדש של logic — בלבד)                                                                                                                                                                                                                                                  |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | בקש מאמצת + idempotency                                                                                                                                                                                                                                                                                             |
-| (~ 30 קבצים נוספים ברמה העליונה)         | עוזרים מיוחדים (logEnv, modelsDevSync, piiSanitizer וכו')                                                                                                                                                                                                                                                           |
+### ספריות שרת `src/lib/` —
 
-### מסד נתונים `src/lib/db/` — (147 מודולים + 208 העברות)
+בערך 90 תיקיות משנה ועוד כ-90 מודולים ברמה העליונה. קבוצות עיקריות:
 
-| Subdir                    | מַטָרָה                                                                                                                                                                |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | `getDbInstance()` singleton עם WAL journaling                                                                                                                          |
-| `db/migrations/`          | קבצי SQL בגרסה (אימפוטנטית, טרנזקציונית). `073_memory_vec.sql` מוסיף `memory_vec_meta` + `needs_reindex` (תוכנית 21).                                                  |
-| `db/playgroundPresets.ts` | מודול CRUD עבור Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)       |
-| `db/memoryVec.ts`         | CRUD עבור `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` וכו' (תוכנית 21)          |
-| `db/<domain>.ts`          | מודול אחד לדומיין: ספקים, שילובים, apiKeys, משתמשים, הפעלות, שימוש, יומן ביקורת, webhooks, מיומנויות, זיכרון_ערכים, משימות_סוכן_ענן, evals* \* , reasoning_cache וכו'. |
+| אֵזוֹר             | תיקיות / קבצים                                                                                                      | צלילה עמוקה                                                                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| מסד נתונים         | מודולי תחום `db/` —, `migrations/`, `adapters/`, `repositories/`, `migrationRunner/`                                | [`src/lib/db/AGENTS.md`](../../src/lib/db/AGENTS.md), [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md)                                            |
+| שימוש, מכסה והוצאה | `usage/`, `quota/`, `spend/`                                                                                        | [QUOTA_SHARE.מד](../routing/QUOTA_SHARE.md), [COST_TRACKING.md](../guides/COST_TRACKING.md)                                                    |
+| ספקים ודגמים       | `providers/`, `providerModels/`, `modelValidation/`, `catalog/`, `radar/`, `freeProxyProviders/`                    | [RADAR.md](../frameworks/RADAR.md), [MODEL-VALIDATION.md](../guides/MODEL-VALIDATION.md)                                                       |
+| OAuth ואישורים     | `oauth/` (ספקים/, שירותים/, utils/), `zed-oauth/`, `copilot/`, `cursor/`, `credentialHealth/`                       | `resolvePublicCred()` (מסמך מפעיל, לא מוגש בפומבי)                                                                                             |
+| בטיחות וממשל       | `guardrails/`, `compliance/`, `pii/`, `security/`                                                                   | [GUARDRAILS.md](../security/GUARDRAILS.md), [COMPLIANCE.md](../security/COMPLIANCE.md)                                                         |
+| תכונות סוכן        | `a2a/`, `acp/`, `cloudAgent/`, `memory/`, `skills/`, `agentSkills/`                                                 | [AGENT_PROTOCOLS_GUIDE.md](../frameworks/AGENT_PROTOCOLS_GUIDE.md), [MEMORY.md](../frameworks/MEMORY.md), [SKILLS.md](../frameworks/SKILLS.md) |
+| תוספים ושירותים    | `plugins/`, `services/` (מתקיני שירות משובץ ומפקח)                                                                  | [PLUGINS.md](../frameworks/PLUGINS.md), [EMBEDDED-SERVICES.md](../frameworks/EMBEDDED-SERVICES.md)                                             |
+| ניתוב וחוסן        | `combos/`, `routing/`, `resilience/`, `reasoningRouting/`, `promptCache/`                                           | [RESILIENCE_GUIDE.md](RESILIENCE_GUIDE.md)                                                                                                     |
+| פרוקסי ונטוורקינג  | `proxyHealth/`, `proxySubscription/`, `proxyRelay/`, `proxyEvents/`, מודולי מנהרה                                   | [PROXY_GUIDE.מד](../ops/PROXY_GUIDE.md), [TUNNELS_GUIDE.md](../ops/TUNNELS_GUIDE.md)                                                           |
+| משרות ולוח זמנים   | `jobs/`, `jobRegistry/`, `warmupScheduler/`                                                                         |                                                                                                                                                |
+| צפייה ויצוא        | `monitoring/`, `logExport/`, `webhooks/`, `audit/`, `events/`                                                       | [LOG-EXPORT.md](../frameworks/LOG-EXPORT.md), [WEBHOOKS.md](../frameworks/WEBHOOKS.md)                                                         |
+| שילוב CLI ו- IDE   | `cliTools/`, `cli-helper/`, `vscode/`, `inspector/`, `versionManager/`                                              | [CLI-TOOLS.md](../reference/CLI-TOOLS.md), [VSCODE-COPILOT.md](../guides/VSCODE-COPILOT.md)                                                    |
+| מקורות הקשר        | `localCorpus/`, `notion/`, `obsidian/`                                                                              | [LOCAL_CORPUS_CONTEXT.md](../frameworks/LOCAL_CORPUS_CONTEXT.md)                                                                               |
+| תכונות אחרות       | `evals/`, `playground/`, `gamification/`, `telegram/`, `conductor/`, `batches/`, `deploy/`, `transfer/`, `sync/`, … | [EVALS.md](../frameworks/EVALS.md), [PLAYGROUND_STUDIO.md](../frameworks/PLAYGROUND_STUDIO.md)                                                 |
 
-### `src/domain/`
+מודולים ברמה העליונה שכדאי להכיר:
 
-| מודול                  | מַטָרָה                                     |
-| ---------------------- | ------------------------------------------- |
-| `policy.ts`            | מנוע מדיניות                                |
-| `fallbackPolicy.ts`    | עץ החלטות נפילה                             |
-| `costRules.ts`         | כללי חישוב עלות                             |
-| `lockoutPolicy.ts`     | מדיניות נעילה Model/connection              |
-| `tagRouter.ts`         | ניתוב מבוסס תגים                            |
-| `comboResolver.ts`     | רזולוציית משולבת (בשימוש על ידי מנוע משולב) |
-| `modelAvailability.ts` | בדיקת זמינות לכל דגם                        |
-| `assessment/`          | הערכת מודל (שלב 1 של RFC-AUTO-ASSESSMENT )  |
+| קוֹבֶץ                                                         | מַטָרָה                                                      |
+| -------------------------------------------------------------- | ------------------------------------------------------------ |
+| `cacheLayer.ts`, `idempotencyLayer.ts`, `semanticCache.ts`     | מטמון תגובה ואימפוטנציה                                      |
+| `webhookDispatcher.ts`                                         | משלוח אינטרנטי חתום על ידי HMAC                              |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts`, `tailscaleTunnel.ts` | מנהלי מנהרות                                                 |
+| `tokenHealthCheck*.ts`, `tokenRefreshCircuit.ts`               | בדיקות תקינות של אישורי רקע ומעגל רענון                      |
+| `streamingPiiTransform.ts`, `streamingCredentialTransform.ts`  | הזרמת חומרי חיטוי בתגובה                                     |
+| `gracefulShutdown.ts`, `serverLifecycle.ts`                    | מחזור חיים של תהליך                                          |
+| `*.stub.ts`                                                    | בדלי פרופיל מבנה שהוחלפו על ידי כינויים ב- `next.config.mjs` |
 
-### `src/server/`
+### מסד נתונים `src/lib/db/` —
 
-| מודול    | מַטָרָה                                                                               |
-| -------- | ------------------------------------------------------------------------------------- |
-| `authz/` | צנרת ההרשאה: `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | תצורת CORS                                                                            |
-| `auth/`  | תוכנת ביניים להפעלה                                                                   |
+| נָתִיב                | מַטָרָה                                                                                                            |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `db/core.ts`          | `getDbInstance()` singleton (WAL journaling)                                                                       |
+| `db/migrations/`      | העברות `.sql` ממוספרות ואידימונטיות (236 קבצים בזמן כתיבת שורות אלה; מספור שומרי `check-migration-numbering.mjs` ) |
+| `db/migrationRunner/` | רץ הגירה                                                                                                           |
+| `db/adapters/`        | מתאמי מנהל התקן SQLite (better-sqlite3, node:sqlite, bun:sqlite, sql.js)                                           |
+| `db/repositories/`    | יישומי מאגר SQLite (שילובים, הגדרות קבועות מראש של מגרש משחקים, תצורת ניתוב)                                       |
+| `db/<domain>.ts`      | כ-175 מודולי דומיינים (ספקים, שילובים, apiKeys, הגדרות, שימוש, ...) — תמיד מייבאים אותם ישירות                     |
 
-### `src/shared/`
+### `src/domain/`, `src/server/`, `src/shared/`
 
-| מודול                            | מַטָרָה                                                                                        |
-| -------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `components/`                    | רכיב לוח המחוונים API: מתאמים מעל `packages/ui-kit` — ראה `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: שמות סמלים המשמשים את המסכים רכיבי → Lucide (`<Icon>`)                             |
-| `constants/providers.ts`         | **381 ספקים** עם אימות Zod (מקור האמת)                                                         |
-| `constants/cliTools.ts`          | רישום כלי CLI חיצוני                                                                           |
-| `constants/routingStrategies.ts` | **20 אסטרטגיות ניתוב** עם סדרי עדיפויות                                                        |
-| `constants/publicApiRoutes.ts`   | מסלולים הדורשים אישור נושאת (לעומת ניהול).                                                     |
-| `constants/upstreamHeaders.ts`   | רשימת דחיית כותרות לבקשות במעלה הזרם                                                           |
-| `validation/schemas.ts`          | סכימות ~ 80 Zod (מקור יחיד של אמת עבור חוזי API )                                              |
-| `validation/helpers.ts`          | עוזרי אימות Zod (`validateBody` וכו')                                                          |
-| `types/`                         | סוגי TS משותפים                                                                                |
-| `contracts/`                     | חוזי API ציבוריים (נצרך על ידי `files:` ב- `package.json`)                                     |
-| `utils/circuitBreaker.ts`        | מפסק חשמל של ספק (ראה `docs/architecture/RESILIENCE_GUIDE.md`)                                 |
-| `utils/apiAuth.ts`               | אימות מפתח API, בדיקת היקף                                                                     |
-| `utils/fetchTimeout.ts`          | עטיפות Timeout/abort להבאה במעלה הזרם                                                          |
-| `utils/releaseNotes.ts`          | מנתח הודעת v2/legacy סגור, לוקליזציה וביטול ID                                                 |
+| נָתִיב                                                         | מַטָרָה                                                                                                                              |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `domain/policyEngine.ts`                                       | מנוע מדיניות                                                                                                                         |
+| `domain/fallbackPolicy.ts`, `lockoutPolicy.ts`, `costRules.ts` | החלטות נפילה, מדיניות נעילה, כללי עלות                                                                                               |
+| `domain/quotaCache*.ts`, `quotaSnapshot*.ts`                   | מטמון מכסה והתמדה של תמונת מצב                                                                                                       |
+| `domain/assessment/`                                           | הערכת מודל (מעריך, מקטלג, מרפא עצמי)                                                                                                 |
+| `server/authz/`                                                | צינור ההרשאה ושומר נתיב (`routeGuard.ts`) — ראה [AUTHZ_GUIDE](AUTHZ_GUIDE.md), [ROUTE_GUARD_TIERS](../security/ROUTE_GUARD_TIERS.md) |
+| `server/origin/`, `server/cors/`                               | רזולוציית מקור Public/MCP/WS ו- CORS — ראה [CORS.md](../security/CORS.md)                                                            |
+| `server/ws/`                                                   | WebSocket לוח מחוונים חי                                                                                                             |
+| `shared/components/`                                           | רכיבי לוח מחוונים ומתאמים מעל `packages/ui-kit` — ראה [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)                                           |
+| `shared/constants/`                                            | קטלוג ספקים (`providers.ts`), אסטרטגיות ניתוב, כלי CLI, מפת אייקונים, רשימת כותרות במעלה הזרם, ...                                   |
+| `shared/validation/`                                           | סכימות Zod ועוזרי אימות                                                                                                              |
+| `shared/utils/`                                                | מפסק מעגלים, אישור מפתח API, פסקי זמן לאחזור, דגלי תכונה, …                                                                          |
+| `shared/middleware/`, `network/`, `services/`, `hooks/`        | תוכנת קבלה לצ'אט, עוזרי רשת, שירותי לקוחות, ווים React                                                                               |
 
 ---
 
-## `open-sse/` — סביבת עבודה של מנוע הזרמה
+## מנוע סטרימינג `open-sse/` — סביבת עבודה
 
-סביבת עבודה נפרדת של npm‏ (`@omniroute/open-sse`). מטפלת בעיבוד בקשות ובהפעלת ספקים.
+npm workspace `@omniroute/open-sse` (כ-2,390 קבצים במעקב). הוא מבצע את עיבוד הבקשות וביצוע הספק. סקירה כללית: [OPEN_SSE_ARCHITECTURE.md](../frameworks/OPEN_SSE_ARCHITECTURE.md).
 
 ```
 open-sse/
-├── handlers/            # 16 קבצים (12 מטפלים + 4 כלי עזר): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search וכו'
-├── executors/           # 150 מודולי ביצוע (מחלקות המרחיבות את BaseExecutor + כלי עזר ייעודיים לכל ספק)
-├── translator/          # ממירי פורמטים (9 לבקשות, 9 לתגובות, 9 כלי עזר)
-├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # כ־80+ מודולי שירות (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM וכו')
-├── mcp-server/          # שרת MCP‏ (110 כלים, 3 תעבורות, 33 תחומי הרשאה)
-├── config/              # מאגרי ספקים/מודלים, תצורת כותרות, כינויים למודלים
-├── utils/               # לקוח TLS, אחזור/מנתב פרוקסי, כלי עזר לרשת
-├── index.ts             # נקודת הכניסה של סביבת העבודה
-├── package.json         # מניפסט סביבת העבודה
-├── tsconfig.json        # תצורת TS של סביבת העבודה
-└── types.d.ts           # הצהרות הטיפוסים של סביבת העבודה
+├── handlers/       # Request handlers: chatCore.ts + chatCore/, responses, embeddings, audio, imageGeneration/,
+│                   #   videoGeneration/, search/, fal/, mediaGeneration/, sseParser/, responseSanitizer/, …
+├── executors/      # Provider-specific HTTP dispatch, registered in executors/registry.ts; base/ holds shared recovery helpers
+├── translator/     # Format conversion: request/, response/, helpers/, image/, registry.ts, bootstrap.ts
+├── transformer/    # responsesTransformer.ts (Responses API ↔ Chat Completions TransformStream)
+├── services/       # Combo routing, rate limits, fallback, caching, usage, token refresh, compression (see below)
+├── config/         # Provider registry (config/providers/registry/<id>/), constants, model/media registries
+├── mcp-server/     # MCP server: tools/, schemas/, toolSearch/, transports, audit, scopes, __tests__/
+├── utils/          # Stream, error, TLS, proxy-fetch and logging utilities
+├── vendor/         # codex-chatgpt-web/ — vendored adapter (provenance in vendor.json)
+├── lib/            # DeepSeek proof-of-work worker and hash
+├── shared/         # zedAuth.ts
+├── index.ts        # Workspace entry
+└── package.json · tsconfig.json · types.d.ts
 ```
+
+### `open-sse/services/`
+
+| נָתִיב                                                                                         | מַטָרָה                                                                                                                                               |
+| ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `combo.ts` + `combo/`                                                                          | אסטרטגיות ניתוב משולבות — see [AUTO-COMBO.md](../routing/AUTO-COMBO.md)                                                                               |
+| `autoCombo/`                                                                                   | חבילות ניקוד ומצב משולב אוטומטי                                                                                                                       |
+| `accountFallback.ts` + `accountFallback/`                                                      | קירור חיבור ונעילת דגם — ראה [RESILIENCE_GUIDE.md](RESILIENCE_GUIDE.md)                                                                               |
+| `rateLimitManager.ts` + `rateLimitManager/`                                                    | מעקב אחר מגבלת קצב וניתוח כותרות                                                                                                                      |
+| `compression/`                                                                                 | מנועי דחיסה (`engines/`), חבילות כללים (`rules/`), `eval/`, `harness/`, `riskGate/` — see [COMPRESSION_GUIDE.md](../compression/COMPRESSION_GUIDE.md) |
+| `tokenRefresh/`, `usage/`, `cache/`, `admission/`, `sessionPool/`, `codexAccount/`, `routing/` | רענון אסימון, חשבונאות שימוש, מטמון, נתיבי כניסה, בריכות הפעלה, חשבונות Codex, עוזרי ניתוב                                                            |
+| `__tests__/`                                                                                   | סוויטות Vitest במיקום משותף (נאספים על ידי תצורות Vitest )                                                                                            |
+| `AGENTS.md`                                                                                    | מדריך סוכן לתיקיה זו                                                                                                                                  |
+
+דפוס: מודול גדול `X.ts` ליד תיקייה `X/` פירושו שהמודול פוצל לקבצים קטנים יותר (`handlers/chatCore.ts` + `handlers/chatCore/`, `services/combo.ts` + `services/combo/`).
 
 ### `open-sse/mcp-server/`
 
-| נתיב                        | מטרה                                                                                    |
-| --------------------------- | --------------------------------------------------------------------------------------- |
-| `server.ts`                 | מחזור החיים של שרת MCP‏ (תעבורות stdio + HTTP)                                          |
-| `httpTransport.ts`          | תעבורות HTTP ניתנות להזרמה + SSE‏ (`/api/mcp/sse`, `/api/mcp/stream`)                   |
-| `audit.ts`                  | רישום ביקורת בטבלה `mcp_tool_audit`                                                     |
-| `scopeEnforcement.ts`       | אימות תחום הרשאה לכל כלי                                                                |
-| `runtimeHeartbeat.ts`       | פעימת תקינות אל `DATA_DIR/runtime/mcp-heartbeat.json`                                   |
-| `descriptionCompressor.ts`  | דחיסת מטא־נתונים של תיאורי כלים כדי לחסוך הקשר                                          |
-| `schemas/tools.ts`          | 36 הגדרות בסיסיות של כלים + תחומי הרשאה                                                 |
-| `tools/advancedTools.ts`    | מימושים של כלים מתקדמים                                                                 |
-| `tools/memoryTools.ts`      | 3 כלי זיכרון (חיפוש/הוספה/ניקוי)                                                        |
-| `tools/skillTools.ts`       | 4 כלי מיומנות (רשימה/הפעלה/ביצוע/ביצועים)                                               |
-| `tools/compressionTools.ts` | 5 כלי דחיסה                                                                             |
-| `README.md`                 | קובץ README פנימי של שרת MCP‏ (מקושר בהפניה צולבת מתוך `docs/frameworks/MCP-SERVER.md`) |
+| נָתִיב                | מַטָרָה                                                                                 |
+| --------------------- | --------------------------------------------------------------------------------------- |
+| `server.ts`           | מחזור החיים של שרת MCP                                                                  |
+| `httpTransport.ts`    | הובלות HTTP ו- SSE ניתנות להזרמה                                                        |
+| `scopeEnforcement.ts` | בדיקות היקף לכל כלי                                                                     |
+| `audit.ts`            | רישום ביקורת של כלים-שיחות                                                              |
+| `schemas/`            | הגדרות והיקפים של הכלים                                                                 |
+| `tools/`              | יישומי כלים (זיכרון, מיומנויות, דחיסה,...)                                              |
+| `toolSearch/`         | חיפוש כלי                                                                               |
+| `README.md`           | הערות אדריכלות פנימית; הקטלוג המלא נמצא ב- [MCP-SERVER.md](../frameworks/MCP-SERVER.md) |
 
 ---
 
-## `packages/` — סביבות עבודה
+## `packages/` — npm סביבות עבודה
 
-| נתיב                     | מטרה                                                                                                                                                                                                                                                                                                                                                                      |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/ui-kit/`       | `@omniroute/ui-kit` — תמונת מצב משולבת של Keak CI UI Kit‏ (`private`, `UNLICENSED`), הנצרכת כקוד מקור (ללא בנייה). `UPSTREAM.md` מקבע את ה־commit במקור ומתעד את הרשאת הרישיון; `PATCHES.md` מפרט תיקונים מקומיים (אין); `src/` מסונכרנת רק באמצעות `scripts/dev/sync-ui-kit.sh` ומוגנת באמצעות `npm run check:ui-kit-snapshot`. ראו `docs/architecture/DESIGN_SYSTEM.md` |
-| `packages/browser-pool/` | `@omniroute/browser-pool` — שירות אופציונלי למאגר דפדפנים (צ'אט המבוסס על CloakBrowser ועל Playwright)                                                                                                                                                                                                                                                                    |
+| נָתִיב                   | מַטָרָה                                                                                                                                                                                                                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui-kit/`       | `@omniroute/ui-kit`: תמונת מצב של ה-Keak CI UI Kit, שנצרכה כמקור. `UPSTREAM.md` מצמיד את ה-upstream commit, `PATCHES.md` מפרט תיקונים מקומיים. `src/` מסונכרן רק על ידי `scripts/dev/sync-ui-kit.sh` ומוגן על ידי `npm run check:ui-kit-snapshot`. ראה [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) |
+| `packages/browser-pool/` | `@omniroute/browser-pool`: ממשקים ויישום של מאגר דפדפן (`packages/browser-pool/src/index.ts`, `packages/browser-pool/src/interfaces.ts`). רשום ב- `workspaces`; מאגר הדפדפנים בזמן הריצה המשמש את השער חי ב- `open-sse/services/`                                                           |
 
----
+## `@omniroute/` — שפורסמו בנפרד חבילות
 
-## `electron/` — מעטפת שולחן עבודה
+אלו לא סביבות עבודה של npm. לכל אחד יש `package.json` ו-lockfile משלו; התיקייה נשלחת ב- `omniroute` tarball (`files: ["@omniroute/"]`).
 
-| קובץ             | מטרה                                                                                   |
-| ---------------- | -------------------------------------------------------------------------------------- |
-| `main.js`        | התהליך הראשי של Electron‏ (BrowserWindow, שרת Next.js מוטמע, מגש מערכת, עדכון אוטומטי) |
-| `preload.js`     | גשר IPC‏ (contextBridge → `window.omniroute`)                                          |
-| `package.json`   | תצורת electron-builder + תלויות Electron 41 + electron-builder 26.10                   |
-| `assets/`        | סמלי היישום (Windows .ico, macOS .icns, Linux .png)                                    |
-| `dist-electron/` | פלט הבנייה (gitignored)                                                                |
-| `types.d.ts`     | הצהרות טיפוסים עבור גשר ה-renderer                                                     |
-| `README.md`      | README פנימי של Electron (ראו גם `docs/guides/ELECTRON_GUIDE.md`)                      |
+| נָתִיב                           | מַטָרָה                                                                                                                              |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `@omniroute/opencode-plugin/`    | תוסף OpenCode (גילוי מודל, `/connect` auth); בשימוש על ידי `omniroute setup-opencode` — ראה [OPENCODE.md](../frameworks/OPENCODE.md) |
+| `@omniroute/opencode-plugin-v2/` | תוסף OpenCode עבור v2 Promise API — ראה [OPENCODE-V2-PLUGIN.md](../guides/OPENCODE-V2-PLUGIN.md)                                     |
+| `@omniroute/opencode-provider/`  | מחולל תצורה סטטי; מסומן מבוטל `package.json` משלו לטובת `opencode-plugin`                                                            |
 
 ---
 
-## `bin/` — ממשק שורת פקודה
+## `bin/` — CLI ו-ops scripts
 
-| קובץ                                                                                                        | מטרה                                                                                                                                 |
-| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `omniroute.mjs`                                                                                             | נקודת הכניסה הראשית ל-CLI — `omniroute serve`, `omniroute setup`, `omniroute doctor`, `omniroute providers`, `omniroute combos` וכו׳ |
-| `reset-password.mjs`                                                                                        | כלי CLI עצמאי לאיפוס סיסמה                                                                                                           |
-| `cli/commands/setup.mjs`                                                                                    | אשף הגדרה אינטראקטיבי ולא-אינטראקטיבי                                                                                                |
-| `cli/commands/doctor.mjs`                                                                                   | אבחון תקינות המערכת (8+ בדיקות)                                                                                                      |
-| `cli/commands/providers.mjs`                                                                                | הצגה/בדיקה/אימות של ספקים                                                                                                            |
-| `cli/{args,data-dir,encryption,io,provider-catalog,provider-store,provider-test,settings-store,sqlite}.mjs` | מודולי עזר ל-CLI                                                                                                                     |
-| `cli/tray/tray.ts`                                                                                          | שילוב במגש המערכת (חוצה פלטפורמות: NotifyIcon ב-Windows,‏ systray2 ב-macOS/Linux)                                                    |
-| `cli/tray/tray.ps1`                                                                                         | מנגנון NotifyIcon ב-PowerShell‏ (Windows, ללא קבצים בינאריים חדשים)                                                                  |
-| `cli/tray/autostart.ts`                                                                                     | הפעלה אוטומטית חוצת פלטפורמות (LaunchAgent / .desktop / registry)                                                                    |
-| `cli/runtime/sqliteRuntime.mjs`                                                                             | שרשרת בת 5 שלבים לפתרון מנהל התקן SQLite‏ (bundled → runtime → lazy-install → node:sqlite → sql.js)                                  |
-| `cli/runtime/magicBytes.mjs`                                                                                | אימות magic bytes בינאריים (ELF / Mach-O / Mach-O fat / PE)                                                                          |
-| `cli/runtime/index.mjs`                                                                                     | `warmUpRuntimes()` — פותר מראש מנהלי התקנים במהלך postinstall / ההפעלה הראשונה                                                       |
-| `nodeRuntimeSupport.mjs`                                                                                    | אימות גרסת Node.js נתמכת במהלך ההתקנה                                                                                                |
+| נָתִיב                                                                      | מַטָרָה                                                                          |
+| --------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `omniroute.mjs`                                                             | ערך CLI ראשי (`omniroute serve`, `setup`, `doctor`, `providers`, `combo`, …)     |
+| `reset-password.mjs`                                                        | `omniroute-reset-password` בינארי                                                |
+| `mcp-server.mjs`                                                            | נקודת כניסה MCP stdio                                                            |
+| `antigravity-bridge.mjs`, `chatgpt-web-codex-mcp.mjs`                       | גשר עזר / נקודות כניסה ל- MCP                                                    |
+| `aliasResolver.mjs`, `aliasResolverHook.mjs`                                | ESM resolve hook שממפה כינויים של נתיב tsconfig עבור התקנות גלובליות             |
+| `nodeRuntimeSupport.mjs`                                                    | בדיקת גרסת Node.js נתמכת                                                         |
+| `snapshot-data.sh`, `restore-data.sh`, `restore-policies.sh`, `rollback.sh` | סקריפטים לשחזור תקריות מארח עצמי (שתף `_ops-common.sh`)                          |
+| `cold-start-bench.sh`                                                       | מדד התחלה קרה — ראה [PERF_BASELINE.md](../ops/PERF_BASELINE.md)                  |
+| `cli/commands/`                                                             | מודול אחד לכל פקודת CLI (כ-100, כולל שילובי `setup-*` )                          |
+| `cli/api-commands/`                                                         | נוצר מ- `docs/openapi.yaml` על-ידי `npm run build:cli-api` — אין לערוך           |
+| `cli/locales/`                                                              | קטלוגי הודעות CLI (67 מקומות)                                                    |
+| `cli/tui/`, `cli/tui-components/`                                           | טרמינל UI                                                                        |
+| `cli/tray/`                                                                 | מגש מערכת והפעלה אוטומטית (קצה אחורי Windows PowerShell, systray ב- macOS/Linux) |
+| `cli/runtime/`                                                              | רזולוציית זמן ריצה מקורית (`sqliteRuntime.mjs`, `magicBytes.mjs`), מפקח תהליכים  |
+| `cli/*.mjs`                                                                 | עוזרים משותפים (args, API client, data dir, הצפנה, חנות ספקים, חנות הגדרות, ...) |
+| `cli/README.md`, `cli/CONVENTIONS.md`                                       | פנימיות ומוסכמות CLI                                                             |
 
----
+ראה [CLI-TOOLS.md](../reference/CLI-TOOLS.md) [CLI-COMPANION.md](../guides/CLI-COMPANION.md).
 
-## `skills/` — מיומנויות סוכן ציבוריות
+## אפליקציית `electron/` — לשולחן העבודה
 
-| קובץ                         | מטרה                                                                                     |
-| ---------------------------- | ---------------------------------------------------------------------------------------- |
-| `skills/omniroute*/SKILL.md` | 10 מניפסטים של מיומנויות עבור סוכני AI חיצוניים (Claude Desktop, ChatGPT, Cursor, Cline) |
-
----
-
-## `scripts/` — סקריפטים לבנייה ולבדיקה
-
-| סקריפט                              | מטרה                                                                        |
-| ----------------------------------- | --------------------------------------------------------------------------- |
-| `run-next.mjs`                      | מפעיל לפיתוח/הפעלה עם טעינת משתני סביבה                                     |
-| `build-next-isolated.mjs`           | בנייה עצמאית (Next.js 16 standalone)                                        |
-| `prepublish.ts`                     | הכנת החבילה לפני `npm pack`                                                 |
-| `postinstall.mjs`                   | יצירה אוטומטית של `.env` מתוך `.env.example` בהתקנה הראשונה                 |
-| `sync-env.mjs`                      | סנכרון מחדש של מפתחות `.env` עם `.env.example`                              |
-| `check-cycles.mjs`                  | זיהוי תלויות מעגליות                                                        |
-| `check-route-validation.mjs`        | אימות שלכל נתיבי ה-API יש אימות Zod                                         |
-| `check-t11-any-budget.mjs`          | אכיפת מכסה מפורשת של `any` לכל קובץ                                         |
-| `check-docs-sync.mjs`               | אימות סנכרון גרסת התיעוד (בדיקת pre-commit קיימת)                           |
-| **`check-env-doc-sync.mjs`**        | חדש: הצלבת משתני סביבה בקוד מול `.env.example` ומול `ENVIRONMENT.md`        |
-| **`check-docs-counts-sync.mjs`**    | חדש: אימות שהספירות (מבצעים, אסטרטגיות, OAuth, מיומנויות A2A) תואמות לתיעוד |
-| **`check-deprecated-versions.mjs`** | חדש: סימון גרסאות/תאריכים מיושנים בתיעוד                                    |
-| `check-supported-node-runtime.ts`   | אימות שגרסת Node הנוכחית נתמכת                                              |
-| `check-pr-test-policy.mjs`          | אכיפת הכלל "נדרשות בדיקות" בשינויים בקוד ייצור                              |
-| **`gen-provider-reference.ts`**     | חדש: יצירה אוטומטית של `docs/reference/PROVIDER_REFERENCE.md` מהקטלוג       |
-| `i18n/generate-multilang.mjs`       | תרגום מחרוזות ממשק משתמש ותיעוד באמצעות Google Translate                    |
-| `i18n_autotranslate.py`             | צינור תרגום תיעוד מבוסס LLM                                                 |
-| `validate_translation.py`           | אימות תרגום לכל אזור                                                        |
-| `check_translations.py`             | בדיקת מפתחות i18n בצד הקוד                                                  |
-| `run-playwright-tests.mjs`          | מפעיל בדיקות E2E של Playwright                                              |
-| `run-protocol-clients-tests.mjs`    | מפעיל בדיקות E2E של MCP/A2A                                                 |
-| `run-ecosystem-tests.mjs`           | בדיקות מערכת אקולוגית (שילוב ספקים)                                         |
-| `test-report-summary.mjs`           | יצירת סיכום כיסוי בפורמט markdown                                           |
-| `smoke-electron-packaged.mjs`       | בדיקת עשן לבניית Electron ארוזה                                             |
-| `native-binary-compat.mjs`          | אימות שתלויות מקוריות (`better-sqlite3`) תואמות ל-Node של Electron          |
-| `validate-pack-artifact.ts`         | אימות פלט חבילת npm                                                         |
-| `responses-ws-proxy.mjs`            | גשר WebSocket עבור Codex Responses API                                      |
-| `v1-ws-bridge.mjs`                  | גשר WebSocket עבור נקודת הקצה `/api/v1/ws`                                  |
-| `standalone-server-ws.mjs`          | מפעיל שרת WS עצמאי                                                          |
-| `system-info.mjs`                   | הדפסת מידע על המערכת/סביבת הריצה לצורכי תמיכה                               |
-| `healthcheck.mjs`                   | בדיקת תקינות חד-פעמית (בשימוש Docker HEALTHCHECK)                           |
-| `uninstall.mjs`                     | סקריפט הסרה נקייה                                                           |
-| `dev/sync-ui-kit.sh`                | העתקת `src/` של CI UI Kit ב-commit מקובע אל `packages/ui-kit/src`           |
-| `check/check-ui-kit-snapshot.mjs`   | שער pre-commit: ‏`packages/ui-kit/src` תואם ל-commit המקובע במאגר המקור     |
-| `dev/gen-icon-map.mjs`              | `npm run gen:icon-map` — שמות סמלים שבשימוש וש-`ICON_MAP` אינו ממפה         |
-| `dev/codemod-material-icons.mjs`    | שכתוב תגי span מילוליים של Material Symbols ל-`<Icon>` (כלי מיגרציה)        |
-
----
-
-## `docs/` — תיעוד ציבורי (7 קבצי שורש + 17 subdirs)
-
-### מדריכים ברמה העליונה
-
-| דוק                         | מַטָרָה                                                                        |
-| --------------------------- | ------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | ארכיטקטורה ברמה גבוהה, מפת תת-מערכת, משטח לוח המחוונים                         |
-| `CODEBASE_DOCUMENTATION.md` | התייחסות הנדסית: ספריות, מודולים, מוסכמות                                      |
-| `FEATURES.md`               | מטריצת תכונות עם הדגשות v3.8                                                   |
-| `USER_GUIDE.md`             | מדריך למשתמש קצה (הגדרה, דגמים, שילובים, CLIs, אודיו וכו')                     |
-| `API_REFERENCE.md`          | הפניה לנקודת קצה API עם מודל אישור                                             |
-| `openapi.yaml`              | מפרט OpenAPI 3.0 (121 נתיבים)                                                  |
-| `SETUP_GUIDE.md`            | שיטות התקנה (npm, npx, Docker, Electron, Termux, source)                       |
-| `ENVIRONMENT.md`            | כל ה-env vars (~ 800 מתועד, ~ 3,050 שורות `.env.example`)                      |
-| `TROUBLESHOOTING.md`        | שגיאות נפוצות + v3.8.0 בעיות ידועות                                            |
-| `RELEASE_CHECKLIST.md`      | זרימת שחרור מלאה (מיומנויות, צרוד, התחייבויות קונבנציונליות, פריסה)            |
-| `COVERAGE_PLAN.md`          | יעדי כיסוי ומצב נוכחי                                                          |
-| `FREE_TIERS.md`             | ספקי שכבה חופשית אוצרות (48 + free + 11 OAuth)                                 |
-| `CLI-TOOLS.md`              | שילובי CLI חיצוניים + פנימי OmniRoute CLI                                      |
-| `I18N.md`                   | ארכיטקטורת i18n, הוספת שפה, 67 מקומות                                          |
-| `UNINSTALL.md`              | נקה את שלבי הסרת ההתקנה                                                        |
-| `PROVIDER_REFERENCE.md`     | **נוצר אוטומטית** קטלוג של 381 ספקים (Regen: `npm run gen:provider-reference`) |
-
-### צלילות עמוקות של תת-מערכת
-
-| דוק                                         | מַטָרָה                                                                   |
-| ------------------------------------------- | ------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | שרת MCP : 110 כלים, 3 העברות, 33 היקפים, נקודות קצה REST                  |
-| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 כישורים, עוזרי REST, כרטיס סוכן                     |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | מדריך מאוחד: A2A vs ACP vs Cloud Agents                                   |
-| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules                                               |
-| `SKILLS.md`                                 | מסגרת מיומנויות (ארגז חול מובנה + marketplace + SkillsSH + )              |
-| `RADAR.md`                                  | שכבת-על של קטלוג דגם רדאר (`RADAR_ENABLED`, כבוי כברירת מחדל)             |
-| `MEMORY.md`                                 | מערכת זיכרון (SQLite FTS5 + Qdrant)                                       |
-| `EVALS.md`                                  | Eval framework (סוויטות, ריצות, רובריקות)                                 |
-| `GUARDRAILS.md`                             | מסכת PII, הזרקה מהירה, גשר ראייה                                          |
-| `COMPLIANCE.md`                             | יומן ביקורת, שימור, ביטול הסכמה noLog                                     |
-| `WEBHOOKS.md`                               | משלוח אינטרנטי חתום על ידי HMAC                                           |
-| `REASONING_REPLAY.md`                       | מטמון memory/SQLite היברידי עבור `reasoning_content`                      |
-| `AUTHZ_GUIDE.md`                            | צינור הרשאות (`classify` → `policies` → `enforce`)                        |
-| `RESILIENCE_GUIDE.md`                       | נעילה של מפסק מעגל + cooldown דגם +                                       |
-| `docs/security/STEALTH_GUIDE.md` (גיט בלבד) | טביעת אצבע TLS (JA3/JA4), Claude Code CCH, MITM cert                      |
-| `AUTO-COMBO.md`                             | מנוע משולב אוטומטי (ניקוד של 16 גורמים, חבילות של 6 מצבים, מפעל וירטואלי) |
-
-### דְחִיסָה
-
-| דוק                             | מַטָרָה                                |
-| ------------------------------- | -------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | סקירה כללית של מצבי דחיסה מפת הדרכים + |
-| `COMPRESSION_ENGINES.md`        | מנועי Caveman + RTK, חוזה רישום        |
-| `COMPRESSION_RULES_FORMAT.md`   | ערכת כלל חבילת JSON schema             |
-| `COMPRESSION_LANGUAGE_PACKS.md` | מלאי של חבילת כללים לכל שפה            |
-| `RTK_COMPRESSION.md`            | צינור הצהרתי של RTK (56 מסננים)        |
-
-### פְּרִיסָה
-
-| דוק                          | מַטָרָה                                                           |
-| ---------------------------- | ----------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker build, פרופילים (base/cli/host/cliproxyapi), Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | פריסת VM/VPS גנרית (Ubuntu/Debian + nginx + systemd)              |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | פריסת Fly.io (כרגע בסינית בלבד)                                   |
-| `TERMUX_GUIDE.md`            | אנדרואיד ללא ראש דרך Termux                                       |
-| `PWA_GUIDE.md`               | Progressive Web App התקנת + service worker                        |
-| `ELECTRON_GUIDE.md`          | אפליקציית שולחן העבודה לבנות + sign + להפיץ                       |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale                                   |
-| `PROXY_GUIDE.md`             | שוק פרוקסי יוצא 4 רמות + 1proxy                                   |
-
-### ספריות משנה
-
-| Subdir                | מַטָרָה                                                                                                                                                           |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | תרגומי מסמכים מקומיים (41 מקומות)                                                                                                                                 |
-| `docs/screenshots/`   | נכסי תמונה למדריכים                                                                                                                                               |
-| `_tasks/superpowers/` | Plans/specs ממעצמות-על (`writing-plans`/`brainstorming`) + research — repo מבודד, בעל גרסאות נפרדות, מנוכר על ידי העץ הראשי. ראה CLAUDE.md → "תכנון ומחקר חפצים". |
-
----
-
-## `tests/` — חבילות בדיקות
-
-| תת-ספרייה                            | סוג                                          | מריץ                                     |
-| ------------------------------------ | -------------------------------------------- | ---------------------------------------- |
-| `tests/unit/`                        | בדיקות יחידה (כ-4,800 קבצים, המהירות ביותר)  | מריץ הבדיקות המובנה של Node              |
-| `tests/integration/`                 | בדיקות אינטגרציה מרובות מודולים + מסד נתונים | מריץ הבדיקות המובנה של Node (מקביליות 1) |
-| `tests/e2e/`                         | E2E של ממשק המשתמש + תהליכי עבודה            | Playwright                               |
-| `tests/e2e/protocol-clients.test.ts` | E2E עם לקוחות אמיתיים של MCP + A2A           | לקוחות פרוטוקול מותאמים אישית            |
-| `tests/e2e/ecosystem.test.ts`        | אינטגרציית ספקים (עם גישה לרשת)              | מריץ הבדיקות המובנה של Node              |
-
----
+| נָתִיב                                                     | מַטָרָה                                                               |
+| ---------------------------------------------------------- | --------------------------------------------------------------------- |
+| `main.js`                                                  | תהליך ראשי Electron (חלון, שרת מוטבע, מגש, עדכונים)                   |
+| `preload.js`                                               | גשר IPC נחשף למעבד                                                    |
+| `lib/`                                                     | מחזור חיים של חלון, מוכנות שרת, כלב שמירה על בריאות, העדפות שרת מרחוק |
+| `remoteServerPrompt*.js`, `assets/remoteServerPrompt.html` | חלון הנחיה לשרת מרוחק                                                 |
+| `processTree.js`, `sqlite-inspection.js`                   | עוזרי ניקיון תהליכי ילדים ובדיקת SQLite                               |
+| `package.json` / `package-lock.json`                       | תצורה של בונה אלקטרונים ותלות ב- Electron                             |
+| `assets/`                                                  | סמלי אפליקציות ומגש (`.ico`, `.icns`, `.png`)                         |
+| `README.md`                                                | הערות פנימיות — ראה [ELECTRON_GUIDE.md](../guides/ELECTRON_GUIDE.md)  |
 
 ## `public/` — נכסים סטטיים
 
-| נתיב                | מטרה                                                              |
-| ------------------- | ----------------------------------------------------------------- |
-| `public/` (שורש)    | סמלי מועדפים, robots.txt, מניפסט, service worker, תמונות שיווקיות |
-| `public/providers/` | סמלי ספקים בפורמט PNG/SVG (בשימוש בלוח המחוונים)                  |
+| נָתִיב                                      | מַטָרָה                                                                                                    |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `providers/`                                | לוגו ספק נטען על ידי id (`/providers/<id>.svg`); מקור ב- `config/quality/provider-assets-provenance.jsonl` |
+| `favicon.*`, `apple-touch-icon.*`, `icon-*` | סמלי דפדפן ו- PWA                                                                                          |
+| `sw.js`                                     | עובד שירות — ראה [PWA_GUIDE.md](../guides/PWA_GUIDE.md)                                                    |
+| `openapi.yaml`                              | עותק של `docs/openapi.yaml` שנוצר על ידי `npm run gen:public-openapi`                                      |
+| `images/`, `sponsors/`, `deyin.svg`         | דיאגרמות זרימת שכבות, באנר נותני חסות, יצירות אמנות README                                                 |
+
+## `skills/` — מיומנויות סוכן
+
+46 כישורים, תיקייה אחת כל אחת עם `SKILL.md` (`cli-*`, `omni-*`, `config-codex-cli`, `ponytail`), פלוס `skills/README.md`. `src/lib/agentSkills/catalog.ts` קורא אותם בזמן ריצה וחושף אותם דרך `/api/agent-skills`, MCP ו- A2A. רוב המניפסטים נוצרים על ידי `src/lib/agentSkills/generator.ts` (`scripts/skills/generate-agent-skills.mjs`; `npm run check:agent-skills-sync` בודק סחיפה). ראה [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md).
 
 ---
 
-## `config/` — תצורות סטטיות + מצב שער האיכות
+## `scripts/` — לבנות, שערים וכלי עבודה
 
-תבניות תצורה המופצות יחד עם המוצר, לצד קווי הבסיס המחויבים של שער האיכות
-(הועברו לכאן משורש המאגר ב-v3.8.26 כדי לשמור על שורש מצומצם).
+כ-435 קבצים במעקב. סקריפטים חדשים נכנסים לאחת מתיקיות המשנה המותרות על ידי `AGENTS.md`; קוד חד פעמי נכנס ל- `scripts/ad-hoc/`.
 
-| נתיב                                          | מטרה                                                                        |
-| --------------------------------------------- | --------------------------------------------------------------------------- |
-| `config/i18n.json`                            | רשימת אזורים + מטא-נתונים (המקור הקנוני לספירה של 42 אזורים)                |
-| `config/i18n-schema.json`                     | סכמת JSON המאמתת את `i18n.json`                                             |
-| `config/payloadRules.json`                    | כללים לניקוי מטענים ממקור חיצוני                                            |
-| `config/quality/quality-baseline.json`        | קו בסיס מחמיר מרובה מדדים (`scripts/quality/check-quality-ratchet.mjs`)     |
-| `config/quality/complexity-baseline.json`     | קו בסיס מוקפא למורכבות ESLint (`check-complexity.mjs`)                      |
-| `config/quality/duplication-baseline.json`    | קו בסיס מוקפא לכפילויות jscpd (`check-duplication.mjs`)                     |
-| `config/quality/file-size-baseline.json`      | קו בסיס מוקפא לגודל כל קובץ (`check-file-size.mjs`)                         |
-| `config/quality/test-discovery-baseline.json` | קו בסיס מוקפא לבדיקות יתומות (`check-test-discovery.mjs`)                   |
-| `config/quality/dependency-allowlist.json`    | רשימת היתרים של תלויות מאושרות (`check-deps.mjs`)                           |
-| `config/quality/.license-allowlist.json`      | רשימת היתרים של רישיונות SPDX (`check-licenses.mjs`)                        |
-| `config/quality/quality-metrics.json`         | מדדים זמניים שנאספו (נוצרו על ידי `collect-metrics.mjs`; **מוחרגים מ-git**) |
+```
+scripts/
+├── check-permissions.sh   # Container ENTRYPOINT (copied to /app by the Dockerfile)
+├── postinstall.mjs        # Native-runtime warm-up run after scripts/build/postinstall.mjs
+├── start-ws-server.mjs    # Starts the live-dashboard WebSocket server as a separate process
+├── build/                 # Build, standalone assembly, npm pack/publish, postinstall, MITM, Electron prep
+├── check/                 # Quality gates behind most `npm run check:*` scripts; lib/ holds shared helpers
+├── quality/               # Ratchets, gate manifest, impact map, mutation tooling, release acceptance
+├── ci/                    # Steps invoked only by workflows (Docker publish, Release-Green, scanners)
+├── dev/                   # Dev runners (run-next, Playwright/protocol/ecosystem runners) and runtime helpers shipped in the package
+├── docs/                  # README SVG/diagram generators, OpenAPI module, provider reference, wiki sync
+├── i18n/                  # UI and docs translation pipeline, coverage checks, glossary/, lib/
+├── release/               # Changelog aggregation, contributors, merge train, LTS cut, publish verification
+├── ops/                   # Canary deploy, OpenCode free relay, runner janitor, allowlist sync
+├── perf/                  # Benchmarks and one-off performance A/B scripts
+├── cli/                   # CLI tooling (API-command generator, SSO, CLI smoke tests, media MCP)
+├── homolog/               # Homologation against a running instance + promptfoo config generation
+├── features/              # Feature-triage engine and its lib/
+├── router-eval/           # Offline router evaluation (`npm run eval:router*`)
+├── compression/           # Compression benchmark (`npm run bench:compression`, runs on Bun)
+├── compression-eval/      # Compression quality evaluation (`npm run eval:compression`)
+├── devin-bridge/          # Shell entry points for the Devin bridge (build, launch, tests)
+├── docker/                # Base-path patching for the standalone server inside containers
+├── integrations/          # MarkItDown MCP launchers — see docs/integrations/MARKITDOWN_MCP.md
+├── launchers/             # Double-click launchers and desktop-shortcut creators (Windows/macOS/Linux)
+├── packs/                 # Optional-pack manifest and installer (shipped in the npm package)
+├── test/                  # Live smoke scripts (combo-live, OpenCode/ChatGPT Web)
+├── sre/                   # On-call rotation, log redaction, TCP close analyzer
+├── vps/                   # Start/stop the release runner
+├── skills/                # Agent Skills generator CLI
+├── research/              # Free-tier budget card SVG generator
+└── ad-hoc/                # One-shot diagnostics and migrations
+```
+
+נקודות כניסה בשימוש תכוף:
+
+| תַסרִיט                                                             | מַטָרָה                                                                                |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `dev/run-next.mjs`                                                  | `npm run dev` / `npm start`                                                            |
+| `build/build-next-isolated.mjs`                                     | `npm run build` (בנייה עצמאית Next.js )                                                |
+| `build/prepublish.ts`                                               | `npm run build:cli`: מרכיב את ה-npm `dist/`                                            |
+| `build/postinstall.mjs`                                             | npm `postinstall` וו                                                                   |
+| `build/publicOpenApi.mjs`                                           | `npm run gen:public-openapi`                                                           |
+| `docs/gen-provider-reference.ts`                                    | `npm run gen:provider-reference` (מחדש את PROVIDER_REFERENCE.md)                       |
+| `docs/gen-openapi-module.mjs`                                       | `prebuild:docs` (יוצר `src/app/docs/lib/openapi.generated.ts`)                         |
+| `i18n/run-translation.mjs`                                          | `npm run i18n:run` (מראות מסמכים)                                                      |
+| `i18n/generate-route-namespaces.mjs`                                | `npm run gen:i18n-routes`                                                              |
+| `release/aggregate-changelog.mjs`                                   | מקפל שברי `changelog.d/` לתוך `CHANGELOG.md`                                           |
+| `check/check-fabricated-docs.mjs`                                   | `npm run check:fabricated-docs` (שער דיוק דוק)                                         |
+| `check/check-tracked-artifacts.mjs`                                 | `npm run check:tracked-artifacts` (חוסם נתיבי שורש `_*` במעקב)                         |
+| `quality/check-quality-ratchet.mjs`                                 | `npm run quality:ratchet` (מחגר מטרי נגד `config/quality/`)                            |
+| `dev/run-playwright-tests.mjs`                                      | `npm run test:e2e`                                                                     |
+| `dev/run-protocol-clients-tests.mjs`, `dev/run-ecosystem-tests.mjs` | `npm run test:protocols:e2e`, `npm run test:ecosystem`                                 |
+| `dev/new-worktree.sh`                                               | יוצר עץ עבודה מבודד לפיתוח — see [WORKTREE_ISOLATION.md](../ops/WORKTREE_ISOLATION.md) |
+| `dev/sync-ui-kit.sh`                                                | מסנכרן `packages/ui-kit/src` ל-commit מוצמד במעלה הזרם                                 |
+
+מלאי שער ומדיניות: [QUALITY_GATES.md](QUALITY_GATES.md).
+
+## תצורה בגרסה `config/` — ומצב שער
+
+| נָתִיב                                   | מַטָרָה                                                                                            |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `i18n.json` / `i18n-schema.json`         | מקומות נתמכים (מקור ספירת המקומות) והסכימה שלהם                                                    |
+| `payloadRules.json`                      | כללי מטען במעלה הזרם (`open-sse/services/payloadRules.ts`)                                         |
+| `cli-tools-manifest.json`                | מניפסט של כלי CLI אינטגרליים (`bin/cli/cli-manifest.mjs`)                                          |
+| `alibaba-free-tier-allowlist.json`       | רשימת ההיתרים של דגמי Alibaba בשכבה חופשית                                                         |
+| `ci/toolchain.json`                      | גרסאות CI toolchain                                                                                |
+| `quality/quality-baseline.json`          | קו בסיס של מחגר רב-מטרי (כיסוי, אזהרות, כפילות,...)                                                |
+| `quality/*-baseline.json`                | קווי בסיס קפואים עבור שערים בודדים (מורכבות, שכפול, גודל קובץ, פרוסות בדיקת סוג, גילוי בדיקה, ...) |
+| `quality/*-allowlist.json`               | רשימות היתרים של שערים (תלות, רישיונות, ייחוס AI, מבחני אחים נשכחים, ...)                          |
+| `quality/eslint-suppressions.json`       | דיכוי ESLint קפואים שהופעלו על ידי `npm run lint`                                                  |
+| `quality/gate-manifest.json`             | מניפסט שער נבדק על ידי `scripts/quality/gate-manifest.mjs`                                         |
+| `quality/vitest-exclusions.json`         | מלאי הסגר עבור `vitest.quarantine.config.ts`                                                       |
+| `quality/skill-templates/`               | תבניות SKILL.md קנוניות נבדקו על ידי `scripts/quality/check-skill-contract.mjs`                    |
+| `quality/release-acceptance.schema.json` | סכימת ראיות שחרור-קבלה — ראה [QUALITY_EVIDENCE_CONTRACT.md](QUALITY_EVIDENCE_CONTRACT.md)          |
+| `release/`                               | התאמות יומן שינויים והמניפסט המקורי של wreq-js, מלאי רישיון והודעות                                |
+
+## קטעי יומן שינויים `changelog.d/` —
+
+PR מוסיף קטע אחד במקום לערוך `CHANGELOG.md`: `features/`, `fixes/` או `maintenance/`, בשם `<PR-number>-<slug>.md`. בזמן השחרור `scripts/release/aggregate-changelog.mjs` מקפל אותם ל- `CHANGELOG.md` ומוחק אותם; `npm run check:changelog-integrity` מאמת אותם. פרטים ב- `changelog.d/README.md`.
 
 ---
 
-## `.github/` — אינטגרציה עם GitHub
+## תיעוד ציבורי `docs/` —
 
-| נתיב                               | מטרה                                                        |
-| ---------------------------------- | ----------------------------------------------------------- |
-| `.github/workflows/`               | תהליכי CI/CD של GitHub Actions ‏(lint, בדיקות, כיסוי, הפצה) |
-| `.github/ISSUE_TEMPLATE/`          | תבניות דיווח על באגים/בקשות לתכונות                         |
-| `.github/pull_request_template.md` | תבנית PR                                                    |
-| `.github/dependabot.yml`           | תצורת עדכוני תלויות                                         |
+קטעים הרשומים ב- `source.config.ts` קומפילו לאתר `/docs` (עם מספר דפי אבטחה למפעיל בלבד לא נכללו); `docs/meta.json` מגדיר את סדר סרגל הצד. התחל ב- [README.md](../README.md).
 
----
+| נָתִיב              | תוֹכֶן                                                                                                                                         |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `getting-started/`  | התחלה מהירה, אירוח עצמי, ספקים, שכבות חינם, קומבו אוטומטי ומדריכי קובצי קובצי אינטרנט                                                          |
+| `guides/`           | מדריכים למפעילים ולמפתחים: התקנה, Docker, Electron, PWA, Termux, CLIs, i18n, פתרון בעיות, מדריך למשתמש                                         |
+| `architecture/`     | ארכיטקטורה, התייחסות לבסיס קוד, מתכוני שינוי, אישור, חוסן, שערים איכותיים, מערכת עיצוב, מפה זו                                                 |
+| `reference/`        | התייחסות API, משתני סביבה, דגלי תכונה, כלי CLI, שכבות חינמיות, הפניה לספק שנוצר, ספקים שהוסרו                                                  |
+| `frameworks/`       | MCP, A2A, ACP, מיומנויות, זיכרון, תוספים, סוכני ענן, webhooks, evals, ייצוא יומנים, מכ"ם, מגרש משחקים, ...                                     |
+| `routing/`          | קומבו אוטומטי, חשיבה replay/routing, נתח מכסה, סולם מנויים, עלות אפס קפדנית, …                                                                 |
+| `security/`         | מעקות בטיחות, חיטוי שגיאות, CORS, SSO, מדיניות יציאה, שכבות שמירה על נתיבים, שרשרת אספקה, ...                                                  |
+| `compression/`      | מדריך דחיסה, מנועים, RTK, פורמט כללים, ערכות שפה, עריכת הקשר                                                                                   |
+| `ops/`              | זרימת שחרור, הסתעפות, רכבת מיזוג, פריסה (VM, Fly.io, Kubernetes), מסד נתונים, פרוקסי, עצי עבודה, פירוט כללים קשיחים                            |
+| `providers/`        | מדריכים לכל ספק (Claude Code, ChatGPT Web, Cursor, GitHub Copilot, …)                                                                          |
+| `comparison/`       | OmniRoute בהשוואה לחלופות                                                                                                                      |
+| `integrations/`     | הערות אינטגרציה (יליד fal.ai, MarkItDown MCP); לא הידור לתוך `/docs`                                                                           |
+| `openapi.yaml`      | מקור OpenAPI ; מזין `src/app/docs/lib/openapi.generated.ts`, `public/openapi.yaml` ו- `bin/cli/api-commands/`                                  |
+| `diagrams/`         | מקורות בת ים (`.mmd`), שניתנו SVGs (`exported/`) ו- README SVGs מ- `scripts/docs/gen-readme-*`                                                 |
+| `assets/`           | דגל שפה SVGs ונכסי README אחרים                                                                                                                |
+| `screenshots/`      | צילומי מסך המשמשים את README והמדריכים                                                                                                         |
+| `i18n/`             | מראות מתורגמים: תיקיה אחת לכל מקום (66) עם מסמכי בסיס וקבוצת משנה `docs/` ; מיוצר על ידי `npm run i18n:run` — ראה [I18N.md](../guides/I18N.md) |
+| `*.md` ברמה העליונה | `README.md` (אינדקס doc), `DEVELOPER-ENVIRONMENT.md` וכמה הערות עצמאיות                                                                        |
 
-## `.husky/` — Git Hooks
-
-| קובץ         | מטרה                                                              |
-| ------------ | ----------------------------------------------------------------- |
-| `pre-commit` | מפעיל את `lint-staged + check-docs-sync + check:any-budget:t11`   |
-| `pre-push`   | מושבת כרגע (מסומן כהערה). יש להפעיל את `npm run test:unit` ידנית. |
-| `_/`         | רכיבים פנימיים של Husky                                           |
-
----
-
-## `.claude/` — פקודות Slash של Claude Code
-
-| קובץ                                                | מטרה                                                   |
-| --------------------------------------------------- | ------------------------------------------------------ |
-| `commands/version-bump-cc.md`                       | `/version-bump-cc` — עדכון גרסה + יומן שינויים אוטומטי |
-| `commands/generate-release-cc.md`                   | `/generate-release-cc` — תהליך הפצה מלא                |
-| `commands/deploy-vps-{local,akamai,both}-cc.md`     | פריסה ל-VPS                                            |
-| `commands/capture-release-evidences-cc.md`          | הקלטת תכונות חדשות בדפדפן כ-WebP                       |
-| `commands/review-{prs,discussions}-cc.md`           | מיון PR-ים ודיונים ב-GitHub                            |
-| `commands/{review-issues,implement-features}-cc.md` | תהליכי עבודה עבור Issues                               |
-| `settings.local.json`                               | הגדרות Claude Code עבור כל פרויקט                      |
+נקודות כניסה מרכזיות: [ARCHITECTURE.md](ARCHITECTURE.md), [CODEBASE_DOCUMENTATION.md](CODEBASE_DOCUMENTATION.md), [MODIFICATION_SCENARIOS.md](MODIFICATION_SCENARIOS.md), [ENVIRONMENT.md](../reference/ENVIRONMENT.md), [PROVIDER_REFERENCE.md](../reference/PROVIDER_REFERENCE.md) (נוצר על ידי `npm run gen:provider-reference`).
 
 ---
 
-## `.agents/` — תהליכי עבודה כלליים לסוכנים (Codex / Cursor / וכו׳)
+## חבילות בדיקה של `tests/` —
 
-| נתיב                     | מטרה                                                 |
-| ------------------------ | ---------------------------------------------------- |
-| `workflows/*-ag.md`      | 11 הגדרות תהליכי עבודה (עותק של `.claude/commands/`) |
-| `skills/<name>/SKILL.md` | 9 הגדרות מיומנויות עם הערות ביצוע עבור Codex         |
+כ-9,670 קבצים במעקב. קבצי בדיקה שייכים לכאן, לא לשורש הפרויקט. יוצאים מן הכלל: תיקיות `__tests__/` הממוקמות יחד ב- `src/` ו- `open-sse/` שתצורות Vitest.
 
-> **הערה:** תהליכי העבודה והפקודות זהים כרגע ברמת הבתים. אם `.agents/` נועדה לסביבת הרצה אחרת של סוכן (Codex), הגרסאות צריכות להיות שונות באופן מהותי.
+| נָתִיב                                                 | תוֹכֶן                                                                                                                                                                     | רָץ                                                                                     |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `tests/unit/`                                          | בדיקות יחידה (מעל 9,000 קבצים): רבים ברמה העליונה, בתוספת תיקיות דומיין (`ui/`, `compression/`, `build/`, `guardrails/`, `db/`, `cli/`, `api/`, `dashboard/`, `combo/`, …) | רץ מבחן צומת (`npm run test:unit`); `*.tsx` דרך `test:vitest:ui`                        |
+| `tests/unit/serial/`                                   | בדיקות רגישות למעבד פועלות במקביל 1                                                                                                                                        | `npm run test:unit:serial`                                                              |
+| `tests/unit/autoCombo/`, `tests/unit/api/**/*.spec.ts` | סוויטות Vitest בתוך עץ היחידה                                                                                                                                              | `npm run test:vitest`                                                                   |
+| `tests/integration/`                                   | מבחני שילוב רב-מודולים ו- DB ; `combo-matrix/`, `combo-live/`, `services/`                                                                                                 | `npm run test:integration`, `test:combo:matrix`, `test:combo:live`, `test:services:int` |
+| `tests/e2e/`                                           | Playwright `*.spec.ts` + live suites `ecosystem.test.ts`, `protocol-clients.test.ts`                                                                                       | `npm run test:e2e`, `test:ecosystem`, `test:protocols:e2e`                              |
+| `tests/boundary/`                                      | `*.live.test.ts` נגד מופע פועל                                                                                                                                             | `npm run test:boundary:live`                                                            |
+| `tests/homolog/`                                       | סוויטות הומולוגיות (`api/`, `ui/` עם תצורת Playwright משלה)                                                                                                                | `npm run homolog` — ראה [HOMOLOGATION.md](../ops/HOMOLOGATION.md)                       |
+| `tests/load/`                                          | טען וספוג סקריפטים (k6)                                                                                                                                                    | זרימת עבודה של חוסן לילי                                                                |
+| `tests/_setup/`                                        | `--import` / קבצי התקנה (DATA מבודדים, egress guard, Vitest UI polyfills)                                                                                                  | נטען על ידי הרצים                                                                       |
+| `tests/_helpers/`, `tests/helpers/`                    | עוזרי מבחן משותפים (תמונות זהב, פגישת ניהול, ...)                                                                                                                          | מיובא על ידי בדיקות                                                                     |
+| `tests/fixtures/`                                      | נתוני מתקן ותקני תהליכי ילדים                                                                                                                                              | מיובא על ידי בדיקות                                                                     |
+| `tests/snapshots/`                                     | קבצי זהב עבור `tests/helpers/goldenSnapshot.ts`                                                                                                                            | מיובא על ידי בדיקות                                                                     |
+| `tests/manual/`                                        | קבצי `.http` לשיחות REST ידניות                                                                                                                                            | יָדָנִי                                                                                 |
+| `tests/security/`                                      | סקריפטים של מעטפת אבטחה                                                                                                                                                    | גופי בדיקה ידניים / יחידות                                                              |
+| `tests/types/`                                         | אביזרי חוזה ברמת סוג                                                                                                                                                       | —                                                                                       |
+
+מטריצה מלאה: `CONTRIBUTING.md` → "Running Tests" ו- [COVERAGE_PLAN.md](../ops/COVERAGE_PLAN.md).
 
 ---
 
-## `_ideia/`, `_mono_repo/`, `_references/`, `_tasks/` — מחוץ לעץ
+## `deploy/` — Kubernetes
 
-תיקיות אלה, ששמותיהן מתחילים בקו תחתון, מכילות תוכן שאינו מיועד להפצה:
+| נָתִיב                                             | מַטָרָה                                                                                   |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `deploy/helm/omniroute/`                           | תרשים הגה (`Chart.yaml`, `values.yaml`, תבניות לפריסה, שירות, כניסה, PVC, סוד, configmap) |
+| `deploy/kubernetes/base/`                          | התאמה אישית של בסיס (מרחב שמות, פריסה, שירות, PVC, configmap, `secret.example.yaml`)      |
+| `deploy/kubernetes/overlays/k3s/`, `overlays/k8s/` | שכבות-על ספציפיות לאשכול (כניסה, מחלקת אחסון, משאבים, בדיקות)                             |
 
-- **`_ideia/`** — הערות תכנון (קטגוריות defer / notfit / viable)
-- **`_mono_repo/`** — תתי-פרויקטים היסטוריים (omnirouteCloud, omnirouteSite, vscode-extension)
-- **`_references/`** — עותקים לקריאה בלבד של פרויקטי OSS קשורים (LiteLLM, 9router, ClawRouter, CLIProxyAPI, modelrelay, new-api וכו׳), לצורך הצלבה במהלך הפיתוח
-- **`_tasks/`** — קובצי מעקב אחר משימות לכל הפצה (לא רשמיים)
+ראה [KUBERNETES_DEPLOYMENT_GUIDE.md](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
-אינן נכללות בפלט של `npm pack`. ראו `.npmignore`.
+## תמונות עזר `docker/` —
+
+| נָתִיב                              | מַטָרָה                                                                                                         |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `docker/chatgpt-web-codex-browser/` | תמונת דפדפן ללא ראש עם פרוקסי CDP עבור ChatGPT Web executor — ראה [CHATGPT_WEB.md](../providers/CHATGPT_WEB.md) |
+| `docker/devin-bridge/`              | תמונת גשר Devin, קובץ חיבור, לעג ושומר רשת                                                                      |
+| `docker/vnc-browser/`               | Chromium עם VNC להפעלות דפדפן אינטראקטיביות                                                                     |
+
+התמונה הראשית היא השורש `Dockerfile`; ראה [DOCKER_GUIDE.md](../guides/DOCKER_GUIDE.md).
+
+## מתכוני קהילת `contrib/` — (לא נתמכים רשמית)
+
+| נָתִיב                  | מַטָרָה                                                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `contrib/podman/`       | רביעיות של פודמן (מיכל, נפח, רשת, Redis)                                                                                 |
+| `contrib/vps/`          | VPS `compose.yaml` + `.env.example`                                                                                      |
+| `contrib/windows/`      | משגרי `.bat` לריצה מקופת Windows                                                                                         |
+| `contrib/session-sync/` | README עבור סיומת דפדפן לסנכרון הפעלה של צד שלישי — ראה [SESSION-SYNC-EXTENSION.md](../guides/SESSION-SYNC-EXTENSION.md) |
+
+## `examples/`
+
+| נָתִיב                          | מַטָרָה                                                                |
+| ------------------------------- | ---------------------------------------------------------------------- |
+| `examples/omniroute-cmd-hello/` | תוסף פקודה מינימלי — ראה [PLUGINS.md](../frameworks/PLUGINS.md)        |
+| `examples/plugins/`             | תוספים לדוגמה: langfuse, request-logger, theme-manager, welcome-banner |
+| `examples/quickstart/`          | קטעי לקוח: curl, Node.js (axios), PHP, Python                          |
 
 ---
 
-## קבצים שנוצרו / שקבצי Git מתעלם מהם
+## `.github/` — GitHub
 
-| נתיב                   | מטרה                        |
-| ---------------------- | --------------------------- |
-| `node_modules/`        | תלויות npm                  |
-| `.next/`               | פלט הבנייה של Next.js       |
-| `coverage/`            | דוחות כיסוי של c8           |
-| `logs/`                | יומני ריצה                  |
-| `package/`             | אזור הכנה עבור npm pack     |
-| `.playwright-mcp/`     | תוצרי בדיקות Playwright MCP |
-| `.issues/`             | מטמון מקומי של בעיות        |
-| `tsconfig.tsbuildinfo` | מטמון אינקרמנטלי של TS      |
+| נָתִיב                                                       | מַטָרָה                                                                                                                                                                                                                                                           |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.github/workflows/`                                         | CI (`ci.yml`, `quality.yml`, `build.yml`), סריקות אבטחה (`codeql.yml`, `semgrep.yml`, `scorecard.yml`, `dast-smoke.yml`), חבילות `nightly-*.yml` מתוזמנות, פרסום (`npm-publish.yml`, `docker-publish.yml`, `electron-release.yml`), זרימות עבודה של שחרור ותחזוקה |
+| `.github/actions/npm-ci-retry/`                              | פעולה מורכבת: `npm ci` עם מטמון ונסה שוב                                                                                                                                                                                                                          |
+| `.github/actions/prepare-unit-storage/`                      | פעולה מורכבת: מפנה שטח דיסק של הרץ ולאחר מכן מתקינה תלות                                                                                                                                                                                                          |
+| `.github/ISSUE_TEMPLATE/`                                    | טפסים לבעיות באג, תכונה וכיסוי בדיקה                                                                                                                                                                                                                              |
+| `.github/pull_request_template.md`, `PULL_REQUEST_TEMPLATE/` | ברירת המחדל של תבנית PR בתוספת גרסאות bugfix/feature                                                                                                                                                                                                              |
+| `.github/CODEOWNERS`, `FUNDING.yml`, `dependabot.yml`        | בעלי קוד, קישורי חסות, עדכוני תלות                                                                                                                                                                                                                                |
+| `.github/labels.yml`                                         | הגדרות תווית מיושמות על ידי `npm run labels:sync`                                                                                                                                                                                                                 |
+| `.github/copilot-instructions.md`                            | הוראות GitHub Copilot (משטח הוראות סוכן)                                                                                                                                                                                                                          |
+
+מפת עבודות CI : [QUALITY_GATES.md](QUALITY_GATES.md).
+
+## `.husky/` — git hooks
+
+| קוֹבֶץ       | מַטָרָה                                                                                                                   |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `pre-commit` | בדיקת זהות של Git, שלב מוך, מניפסט שער, סנכרון מסמכים, כל תקציב, מחגר בקנה מידה סוג, חפצים במעקב ובדיקות תמונת ממשק משתמש |
+| `commit-msg` | `scripts/check/check-ai-attribution.mjs` על הודעת ה-commit                                                                |
+| `pre-push`   | אור בכוונה: בדיקת שפיות PATH/npm שיוצאת מ-0                                                                               |
+
+זמן הריצה של ה-hook ב- `.husky/_/` נוצר בהתקנה ואינו נמצא במעקב.
 
 ---
 
 ## טיפים לניווט
 
-- **תורמים חדשים?** קראו את `CONTRIBUTING.md` ← `CLAUDE.md` ← `docs/architecture/ARCHITECTURE.md` ← `docs/architecture/CODEBASE_DOCUMENTATION.md`.
-- **מוסיפים ספק?** פעלו לפי `docs/architecture/ARCHITECTURE.md § Adding a New Provider` ובצעו הצלבה מול `docs/reference/PROVIDER_REFERENCE.md`.
-- **מוסיפים נתיב?** `docs/architecture/ARCHITECTURE.md § Adding a New API Route` וגם `src/shared/validation/schemas.ts`.
-- **מוסיפים כלי MCP?** `docs/frameworks/MCP-SERVER.md § Adding a Tool`.
-- **מוסיפים מיומנות A2A?** `docs/frameworks/A2A-SERVER.md § Adding a New Skill`.
-- **מריצים באופן מקומי?** `docs/guides/SETUP_GUIDE.md`.
-- **פורסים?** `docs/guides/DOCKER_GUIDE.md` / `docs/ops/VM_DEPLOYMENT_GUIDE.md` / `docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md`.
-- **מוציאים גרסה?** `docs/ops/RELEASE_CHECKLIST.md` (וכן מיומנות Claude Code בשם `/generate-release-cc`).
+- **תורם חדש?** `CONTRIBUTING.md` → `AGENTS.md` → [ARCHITECTURE.md](ARCHITECTURE.md) → [CODEBASE_DOCUMENTATION.md](CODEBASE_DOCUMENTATION.md).
+- **לשנות משהו נפוץ** (ספק, מסלול, מודול DB, כלי MCP, מיומנות A2A )? עקוב אחר [MODIFICATION_SCENARIOS.md](MODIFICATION_SCENARIOS.md).
+- **האם להוסיף ספק?** בדוק תחילה [REMOVED_PROVIDERS.md](../reference/REMOVED_PROVIDERS.md), ואז הצלב [PROVIDER_REFERENCE.md](../reference/PROVIDER_REFERENCE.md).
+- **רצים מקומיים?** [SETUP_GUIDE.md](../guides/SETUP_GUIDE.md).
+- **פריסה?** [DOCKER_GUIDE.מד](../guides/DOCKER_GUIDE.md), [SELF_HOST_GUIDE.מד](../getting-started/SELF_HOST_GUIDE.md), [VM_DEPLOYMENT_GUIDE.מד](../ops/VM_DEPLOYMENT_GUIDE.md), [FLY_IO_DEPLOYMENT_GUIDE.מד](../ops/FLY_IO_DEPLOYMENT_GUIDE.md), [KUBERNETES_DEPLOYMENT_GUIDE.מד](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+- **משחררים?** [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md).
+- **שער איכותי נכשל?** [QUALITY_GATES.מד](QUALITY_GATES.md) [QUALITY_GATE_PLAYBOOK.מד](../ops/QUALITY_GATE_PLAYBOOK.md).

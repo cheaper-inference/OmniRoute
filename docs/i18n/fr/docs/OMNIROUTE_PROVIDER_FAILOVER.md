@@ -6,8 +6,18 @@
 
 Les échecs sont classés avant que les décisions de nouvelle tentative ne soient prises.
 
-Les échecs transitoires tels que les délais d’attente dépassés, les erreurs réseau, les limitations de débit et les réponses 5xx des fournisseurs peuvent déclencher un basculement. Les erreurs d’authentification, les erreurs d’autorisation, les requêtes non valides, les modèles indisponibles et les échecs inconnus ne font pas l’objet de nouvelles tentatives à l’aveugle.
+Les pannes transitoires telles que les délais d'attente, les erreurs réseau, les limites de débit et les réponses 5xx du fournisseur peuvent échouer. Le quota ou le crédit épuisé (un quota 429 ou 402 Paiement requis) n'est jamais réessayé sur le même fournisseur mais bascule vers un autre, dont le quota est distinct. Les erreurs d'authentification, les erreurs d'autorisation, les demandes non valides, les modèles indisponibles et les échecs inconnus ne sont pas réessayés aveuglément.
 
-La stratégie inter-fournisseurs par défaut autorise jusqu’à trois tentatives auprès des fournisseurs, réessaie en cas de limitation de débit ou de délai d’attente dépassé, et distingue la désactivation administrative de l’état temporaire du circuit.
+La stratégie inter-fournisseurs par défaut autorise jusqu'à trois tentatives de fournisseur, retente les limites de débit et les délais d'attente, bascule sur le quota épuisé et sépare la désactivation administrative de l'état temporaire du circuit.
 
-Les états du circuit sont `closed`, `open` et `half_open`. Une période de temporisation planifie une sonde limitée ; une sonde réussie ferme le circuit, tandis qu’une sonde échouée le rouvre.
+## Où cela s'applique
+
+- **Combinaisons** basculez entre leurs cibles selon la stratégie et les paramètres du combo.
+- **Un identifiant de modèle nu** (pas de préfixe `provider/` ) que plusieurs fournisseurs actifs servent, sans combinaison de ce nom exact, est d'abord envoyé aux sélections d'inférence du fournisseur. Si cette tentative échoue d'une manière qui entraîne le basculement de la stratégie, la même demande est envoyée au prochain fournisseur actif qui sert l'identifiant. La réponse porte `x-omniroute-fallback-attempts` avec le nombre de prestataires essayés avant celui qui a répondu.
+  - Chaque alternative est autorisée exactement comme si l'inférence l'avait choisi. Une cible que la clé API bloque ou n'admet pas est ignorée sans appel en amont, et le client obtient la véritable erreur en amont, et non un rejet de politique pour une cible qu'il n'a jamais nommée.
+  - Seule une réponse échouée continue : rien ne bascule après le premier octet diffusé.
+  - L’échange de modèle de secours d’urgence s’applique uniquement après la défaillance de chaque fournisseur du modèle demandé.
+  - Une requête épinglée sur une connexion (`x-omniroute-connection`) y reste.
+  - Un identifiant préfixé (`provider/model`) n'est jamais redirigé vers un autre fournisseur.
+
+Les états du circuit sont `closed`, `open` et `half_open`. Un temps de recharge programme une sonde limitée ; une sonde réussie ferme le circuit et une sonde échouée le rouvre.

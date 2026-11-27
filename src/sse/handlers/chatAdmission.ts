@@ -15,6 +15,7 @@ import {
 import type { PerTargetAdmissionHook } from "@omniroute/open-sse/services/admission/types.ts";
 import type { KeyQuotaReservation } from "@/domain/keyQuota";
 import { releaseChatAdmissionAfterHandler } from "@/shared/middleware/chatAdmissionRelease";
+import { capClientRetryAfter } from "@/shared/middleware/clientRetryAfterCap";
 
 /** Single fairness bucket for unauthenticated / keyless traffic. Opaque; never a raw key. */
 export const ANONYMOUS_ADMISSION_TENANT_KEY = "anonymous";
@@ -340,13 +341,15 @@ export function withChatAdmission(
     );
     const effectiveSignal = lifecycleSignal ?? request?.signal ?? undefined;
     try {
-      let response = await implementation(
-        request,
-        clientRawRequest,
-        preParsedBody,
-        correlationId,
-        admissionContext,
-        effectiveSignal
+      let response = capClientRetryAfter(
+        await implementation(
+          request,
+          clientRawRequest,
+          preParsedBody,
+          correlationId,
+          admissionContext,
+          effectiveSignal
+        )
       );
       // Only a call that holds a key-quota slot gets the extra stream wrapper.
       const keyQuotaLease = admissionContext.getKeyQuotaLease();

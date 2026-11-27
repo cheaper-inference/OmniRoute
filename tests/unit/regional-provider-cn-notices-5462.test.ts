@@ -8,9 +8,8 @@ import assert from "node:assert/strict";
 // (api.stepfun.com) is the China platform, but a genuine Singapore-operated global
 // platform (platform.stepfun.ai) exists — so StepFun's notice must POINT users to
 // the global alternative rather than claim a hard CN-only block.
-const { APIKEY_PROVIDERS_REGIONAL } = await import(
-  "../../src/shared/constants/providers/apikey/regional.ts"
-);
+const { APIKEY_PROVIDERS_REGIONAL } =
+  await import("../../src/shared/constants/providers/apikey/regional.ts");
 
 function notice(id: string): { text?: string; signupUrl?: string } | undefined {
   const entry = (APIKEY_PROVIDERS_REGIONAL as Record<string, any>)[id];
@@ -37,7 +36,15 @@ test("#5462 StepFun notice points international users to the global .ai platform
 test("#5462 the notices do not disable the providers (display-only hint)", () => {
   for (const id of ["sensenova", "stepfun"]) {
     const entry = (APIKEY_PROVIDERS_REGIONAL as Record<string, any>)[id];
-    assert.equal(entry.hasFree, true, `${id} must stay usable — notice is informational only`);
     assert.equal(entry.id, id);
+    assert.notEqual(
+      entry.deprecated,
+      true,
+      `${id} must stay usable — notice is informational only`
+    );
   }
+  // The free flag follows the provider's pricing page, not the notice:
+  // SenseNova keeps its free offer; StepFun is pay-per-use only (checked 2026-11-23).
+  assert.equal(APIKEY_PROVIDERS_REGIONAL.sensenova.hasFree, true);
+  assert.equal(APIKEY_PROVIDERS_REGIONAL.stepfun.hasFree, false);
 });

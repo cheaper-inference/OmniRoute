@@ -8,7 +8,11 @@ import { validateBinaryMagic, platformBinaryLabel } from "./magicBytes.mjs";
 const RUNTIME_DIR = join(homedir(), ".omniroute", "runtime");
 // Exported so the packaging coherence guard (tests/unit/pack-boot-runtime-paths.test.ts)
 // can assert this stays on the same major as optionalDependencies.better-sqlite3 (#11242).
-export const BETTER_SQLITE3_VERSION = "better-sqlite3@^13.0.2";
+// #20998 / #21001: EXACT pin, equal to the version locked in package-lock.json.
+// A caret range here made the lazy fallback resolve whatever the registry served
+// that day, outside the lockfile's integrity guarantees. The drift guard in
+// tests/unit/security-remediation-20998.test.mjs compares it to the lockfile.
+export const BETTER_SQLITE3_VERSION = "better-sqlite3@13.0.3";
 
 let resolvedCached = null;
 
@@ -16,14 +20,19 @@ let resolvedCached = null;
  * Resolves a SQLite driver through a 5-step fallback chain:
  *   1. Bundled better-sqlite3 (optionalDependency)
  *   2. Runtime-installed better-sqlite3 in ~/.omniroute/runtime/
- *   3. Lazy npm install into runtime dir
+ *   3. Lazy npm install into runtime dir — OPT-IN (allowInstall, default true)
  *   4. node:sqlite (Node ≥22.5 stdlib)
  *   5. sql.js (bundled WASM, always available)
+ *
+ * #21001: the postinstall warm-up calls this with { allowInstall: false } so an
+ * `npm install` of OmniRoute can never reach the network through step 3. Only
+ * an interactive CLI/startup resolution may install, and then only the exact
+ * locked version above.
  *
  * Returns { driver, source } where source is one of:
  *   "bundled" | "runtime" | "runtime-installed-now" | "node-sqlite" | "sql-js"
  */
-export async function loadSqliteRuntime() {
+export async function loadSqliteRuntime({ allowInstall = true } = {}) {
   if (resolvedCached) return resolvedCached;
 
   if (process.versions.bun) {
@@ -49,15 +58,17 @@ export async function loadSqliteRuntime() {
     return resolvedCached;
   }
 
-  try {
-    await installRuntime();
-    const after = await tryLoadRuntimeInstalled();
-    if (after) {
-      resolvedCached = { driver: after, source: "runtime-installed-now" };
-      return resolvedCached;
+  if (allowInstall) {
+    try {
+      await installRuntime();
+      const after = await tryLoadRuntimeInstalled();
+      if (after) {
+        resolvedCached = { driver: after, source: "runtime-installed-now" };
+        return resolvedCached;
+      }
+    } catch (err) {
+      console.warn(`[omniroute] runtime install failed: ${err.message}`);
     }
-  } catch (err) {
-    console.warn(`[omniroute] runtime install failed: ${err.message}`);
   }
 
   try {

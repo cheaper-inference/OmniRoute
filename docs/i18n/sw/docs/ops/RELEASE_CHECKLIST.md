@@ -35,57 +35,32 @@ npm run test:e2e           # si lazima lakini inapendekezwa
 /capture-release-evidences-cc
 ```
 
-## Uchapishaji Unaoaminika wa npm (chaguo-msingi tangu v3.8.51) — huwekwa kwenye hatua kwa ombi, wa moja kwa moja kama mbadala
+## npm Uchapishaji Unaoaminika (chaguo-msingi tangu v3.8.51) — umewekwa kwa ombi, moja kwa moja kama njia mbadala
 
-`npm-publish.yml` huchapisha kupitia **Uchapishaji Unaoaminika wa npm (OIDC)** kwa chaguo-msingi: kazi ya
-`stage-npm` (inayoendeshwa na GitHub) hubadilisha id-token ya GitHub kuwa kitambulisho cha muda mfupi cha npm
-kwa utekelezaji huo — hakuna tokeni ya muda mrefu ya npm katika siri za hazina, hakuna ombi la 2FA, na uthibitisho wa asili umeambatishwa.
-Huo ndio ukiukaji unaoruhusiwa na npm sasa kwa kuwa tokeni zinazokwepa 2FA zinaondolewa;
-unarejesha mtiririko wa kiotomatiki kikamilifu ambao mradi ulikuwa nao hadi v3.8.48 huku ukidumisha
-hakikisho la WS1.3 (tokeni iliyovuja haiwezi kuchapisha peke yake — hakuna tokeni).
+`npm-publish.yml` inachapisha kupitia** npm Uchapishaji Unaoaminika (OIDC)** kwa chaguo-msingi: kazi ya `stage-npm` (iliyopangishwa na github) hubadilisha ishara ya kitambulisho cha GitHub kwa kitambulisho cha npm cha muda mfupi kwa ajili hiyo — no tokeni ya npm ya muda mrefu katika hifadhi ya siri, hakuna haraka ya 2FA, asili iliyoambatishwa. Hiyo ni vikwazo vya bypass npm sasa kwamba tokeni zinazoruka 2FA zinarejeshwa; inarejesha mtiririko wa kiotomatiki kabisa ambao mradi ulikuwa nao hadi v3.8.48 huku ukiweka dhamana ya WS1.3 (ishara iliyovuja haiwezi kuchapisha peke yake — hakuna tokeni).
 
-**Usanidi wa mara moja (mmiliki):** npmjs.com → kifurushi `omniroute` → Settings → _Trusted
-Publisher_ → GitHub: mmiliki `diegosouzapw`, hazina `OmniRoute`, mtiririko wa kazi `npm-publish.yml`
-(mazingira: hakuna). Hadi hapo pawepo, hatua ya kiotomatiki hushindwa kwa `ENEEDAUTH`:
-ianzishwe tena kwa `publish_mode=staged` (hapa chini) au `direct`.
+**Usanidi wa mara moja (mmiliki):** npmjs.com → kifurushi `omniroute` → Mipangilio → _Mchapishaji Anayeaminika_ → GitHub: mmiliki `diegosouzapw`, repo `OmniRoute`, mtiririko wa kazi `npm-publish.yml` (mazingira: hakuna). Hadi hiyo ipo, hatua ya kiotomatiki itashindwa na `ENEEDAUTH`: tuma tena na `publish_mode=staged` (chini) au `direct`.
 
 ### Uchapishaji kwa hatua (kwa ombi — `publish_mode=staged`)
 
-Mtiririko wa kazi wa npm-publish hauchapishi tena moja kwa moja: huanzisha tarball iliyofungashwa
-(`check:pack-boot`) kisha huendesha `npm stage publish` — baiti hizo halisi huhifadhiwa kwenye
-rejista, **haziwezi kusakinishwa** hadi mmiliki aidhinishe. Lango la kibinadamu la 2FA limehamishwa
-kuwa BAADA ya uthibitisho, si kabla yake.
+Mtiririko wa kazi wa npm-publish hauchapishi tena moja kwa moja: hupakia tarball (`check:pack-boot`) na kisha kukimbia `npm stage publish` — byte haswa zimeegeshwa kwenye sajili,** haiwezi kusakinishwa** mpaka mmiliki aidhinishe. Lango la 2FA la kibinadamu lilihamia AFTER uthibitisho, sio kabla yake.
 
-**Mtiririko wa mmiliki baada ya mtiririko wa kazi kufaulu:**
+**Mtiririko wa mmiliki baada ya mtiririko wa kazi kuwa kijani:**
 
-1. `npm stage list omniroute` — tafuta kitambulisho cha hatua (pia huchapishwa katika muhtasari wa mtiririko wa kazi).
-2. Thibitisha baiti zilizowekwa kwenye hatua (inapendekezwa): `npm stage download <id>`, kisha sakinisha
-   tarball iliyopakuliwa katika prefix ya muda na uiwashe (`npm run check:pack-boot` huendesha kiotomatiki
-   uamuzi huohuo wa kufungasha→kusakinisha→kuwasha katika CI).
-3. `npm stage approve <id>` — ombi la 2FA NDILO tendo la kuchapisha. `npm stage reject <id>` hutupilia mbali.
-4. Kinga baada ya uchapishaji: kithibitishaji cha baada ya uchapishaji (WS1.4 ya mpango wa v3.8.49) husakinisha
-   toleo lililochapishwa kutoka kwenye rejista ya umma katika kontena safi na kuliwasha.
+1. `npm stage list omniroute` — pata kitambulisho cha hatua (pia kimechapishwa katika muhtasari wa mtiririko wa kazi).
+2. Thibitisha baiti zilizowekwa kwa hatua (inapendekezwa): `npm stage download <id>`, kisha usakinishe tarball iliyopakuliwa kwenye kiambishi awali cha temp na uiwashe (`npm run check:pack-boot` hubadilisha kifurushi kiotomatiki → install → boot verdict in CI).
+3. `npm stage approve <id>` — 2FA haraka IS kuchapisha. `npm stage reject <id>` inatupa.
+4. Wavu baada ya kuchapisha: kithibitishaji baada ya uchapishaji (WS1.4 ya mpango wa v3.8.49) husakinisha toleo lililochapishwa kutoka kwa sajili ya umma katika chombo safi na kuliwasha.
 
-**Mbadala wa dharura:** `workflow_dispatch` yenye `publish_mode=direct` hurejesha
-`npm publish` ya zamani ya papo hapo (itumiwe tu ikiwa uwekaji kwenye hatua wenyewe haufanyi kazi vizuri; rekodi sababu).
+**Urejesho wa dharura:** `workflow_dispatch` pamoja na `publish_mode=direct` hurejesha urithi `npm publish` mara moja (tumia tu ikiwa uandaaji unafanya vibaya; rekodi kwa nini).
 
-**Uimarishaji wa mara moja (mmiliki, npmjs.com):** sanidi Trusted Publisher kwa
-`omniroute` katika hali ya hatua pekee ili tokeni ya muda mrefu iliyovuja isiweze kutekeleza `npm publish`
-moja kwa moja kutoka popote — CI inaweza tu kuweka kwenye hatua; ni 2FA ya mmiliki pekee inayotoa toleo.
+**Ugumu wa mara moja (mmiliki, npmjs.com):** sanidi Mchapishaji Anayeaminika kwa `omniroute` katika hali ya hatua tu ili ishara iliyovuja ya muda mrefu haiwezi `npm publish` moja kwa moja kutoka popote — CI inaweza tu kupiga hatua; matoleo ya 2FA pekee ya mmiliki.
 
-**Mwongozo wa kushughulikia artefakti iliyoharibika (haujabadilika):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"`
-ndilo tendo la kawaida la kwanza (dakika chache, linaweza kutenduliwa); tumia `npm unpublish` tu ndani ya dirisha la saa 72/bila-vitegemezi
-na kamwe si kama hatua ya kwanza. Docker: usiwahi kuandika upya tagi ya toleo — kurejesha nyuma ni
-kuelekeza upya `latest` kwenye digest nzuri ya mwisho.
+**Kitabu cha kucheza cha vizalia vilivyovunjwa (hakijabadilika):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` kama reflex chaguo-msingi (dakika, inayoweza kutenduliwa); `npm unpublish` tu ndani ya dirisha 72h/no-dependents na kamwe kama hoja ya kwanza. Docker: usiwahi kuandika upya lebo ya toleo — urudishaji nyuma unaelekeza `latest` kwenye muhtasari mzuri wa mwisho.
 
-**`latest` ya Docker Hub (inahitajika kwa kila uchapishaji thabiti wa SemVer):** mtiririko wa kazi wa
-`docker-publish` lazima uweke tagi **zote mbili** `X.Y.Z` na, wakati
-`should-promote-latest.sh` inakubali kuwa hili ndilo toleo thabiti la juu zaidi la SemVer, `:latest`
-kwa **digest ileile**. Baada ya kazi: digest ya `latest` ya Hub inalingana na digest mpya ya
-SemVer na `last_updated` imesogea. Usiache `:latest` kwenye build ya zamani
-wakati madokezo ya toleo yanazungumzia marekebisho yaliyopo kwenye git pekee. Miongozo ya kuanza haraka ya Compose
-hutumia `:latest`; GitOps inapaswa kuendelea kubandika `X.Y.Z`. Tazama
-[Vituo vya matoleo ya Docker](../guides/DOCKER_GUIDE.md#release-channels) na #10317.
+**Docker Hub `latest` (inahitajika kwa kila uchapishaji SemVer thabiti):** mtiririko wa kazi `docker-publish` lazima uweke alama** zote mbili** `X.Y.Z` na, `should-promote-latest.sh` inapokubali hii ndiyo SemVer imara zaidi, `:latest` pamoja na** digest sawa** . Baada ya kazi: Muhtasari wa Hub `latest` unalingana na muhtasari mpya SemVer na `last_updated` kusogezwa. Usiache `:latest` kwenye muundo wa zamani wakati maelezo ya kutolewa yanazungumza juu ya marekebisho ambayo yanapatikana tu kwenye git. Tunga vianzio vya haraka tumia `:latest`; GitOps inapaswa kuendelea kubana `X.Y.Z`. Tazama [njia za kutolewa za Docker](../guides/DOCKER_GUIDE.md#release-channels) na #10317.
+
+**Docker Hub hazina ya shirika (`cheaperinference/omniroute`):** Docker Hub haiwezi kuhamisha hazina kati ya nafasi za majina, kwa hivyo `diegosouzapw/omniroute` huhifadhi historia yake ya kuvuta na kila toleo, na kazi ya `mirror-org-dockerhub` ya nakala za `docker-publish` kila toleo lililotolewa (na `:latest` linapokuzwa) kutoka `ghcr.io/cheaper-inference/omniroute` hadi hazina ya shirika. Inahitaji siri za `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ; bila wao kazi inabaki kuwa ya kijani na onyo la "Docker Hub org mirror" na sajili zingine huchapisha kawaida. Ili kuchapisha toleo lililotolewa hapo baadaye, endesha** Vitendo → Vioo Docker picha kwa Docker Hub org → Endesha mtiririko wa kazi** na `version=X.Y.Z` (na `promote_latest` kwa toleo thabiti zaidi): inakili picha zilizopo, hakuna uundaji upya.
 
 ## Njia ya Haraka ya Hotfix (lebo `hotfix`)
 
@@ -109,138 +84,136 @@ tawi la toleo (release-green endelevu) — njia hii huruka KUSUBIRI, kamwe si ut
 Diff za majaribio pekee (faili zote chini ya `tests/`, hakuna chini ya `tests/e2e/`) huruka matriki ya E2E
 kiotomatiki, bila lebo yoyote.
 
-## Orodha Hakiki ya Kina
+## Orodha ya Hakiki ya Kina
 
-### Kabla ya Toleo
+### Kutolewa mapema
 
-- [ ] PR zote zinazolenga toleo hili zimeunganishwa kwenye `release/vX.Y.0`
-- [ ] Vipengee vyote vya Linear/masuala vilivyo wazi kwa toleo hili vimefungwa au kuhamishwa hadi hatua muhimu inayofuata
-- [ ] CI imefaulu kwenye tawi la `release/vX.Y.0`
-- [ ] Hakuna viashirio vya `TODO(release)` kwenye msimbo: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Taswira msingi ya Docker imesasishwa (kwa sasa `node:24.15.0-trixie-slim`)
+- [ ] PRs zote zinazolengwa kwa toleo hili zimeunganishwa kuwa `release/vX.Y.0`
+- [ ] Vipengee vyote Linear/issue vilivyofunguliwa kwa toleo hili vimefungwa au kusukumwa hadi hatua inayofuata
+- [ ] CI kijani kwenye tawi la `release/vX.Y.0`
+- [ ] Hakuna alama `TODO(release)` katika msimbo: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] picha ya msingi Docker imesasishwa (kwa sasa `node:24.15.0-trixie-slim`)
 
-### Toleo na Kumbukumbu ya Mabadiliko
+### Toleo & Changelog
 
-- [ ] Endesha `/version-bump-cc <patch|minor|major>` (ujuzi wa Claude Code)
-  - Husasisha matoleo katika `package.json`, `electron/package.json`
-  - Huzalisha upya `CHANGELOG.md` kutoka kwenye commit za git tangu lebo ya mwisho
-  - Husasisha beji za README.md
-- [ ] Kagua CHANGELOG.md mwenyewe na usafishe ujumbe wa commit ikihitajika
-- [ ] Hakikisha sehemu ya hivi karibuni ya semver katika `CHANGELOG.md` inalingana na toleo la `package.json`
-- [ ] Weka `## [Unreleased]` kama sehemu ya kwanza ya kumbukumbu ya mabadiliko kwa kazi ijayo
-- [ ] Sasisha `docs/openapi.yaml` → `info.version` lazima ilingane na toleo la `package.json`
+- [ ] Endesha `/version-bump-cc <patch|minor|major>` ( ustadi wa Msimbo wa Claude )
+  - Matuta `package.json`, `electron/package.json`
+  - Huzalisha tena `CHANGELOG.md` kutoka kwa ahadi za git tangu lebo ya mwisho
+  - Inasasisha beji README.md
+- [ ] Kagua CHANGELOG.md wewe mwenyewe na safisha jumbe za ahadi ikiwa inahitajika
+- [ ] Hakikisha sehemu ya hivi punde ya semver katika `CHANGELOG.md` inalingana na toleo la `package.json`
+- [ ] Weka `## [Unreleased]` kama sehemu ya kwanza ya mabadiliko kwa kazi inayokuja
+- [ ] Sasisha `docs/openapi.yaml` → `info.version` lazima iwe sawa na toleo la `package.json`
 
-### Ubora wa Msimbo
+### Ubora wa Kanuni
 
-- [ ] `npm run lint` — hitilafu 0 (maonyo yalikuwepo awali)
+- [ ] `npm run lint` — makosa 0 (maonyo yapo awali)
 - [ ] `npm run typecheck:core` — safi
-- [ ] `npm run typecheck:noimplicit:core` — safi (kali)
-- [ ] `npm run check:cycles:ratchet` — ndani ya kikomo kisichobadilika cha `metrics.cycles` (`check:cycles` pekee hutoka kwa msimbo 1 ikipata mzunguko wowote, #15281)
+- [ ] `npm run typecheck:noimplicit:core` — safi (madhubuti)
+- [ ] `npm run check:cycles:ratchet` — ndani ya dari `metrics.cycles` iliyoganda ( `check:cycles` tupu inatoka 1 kwa mzunguko wowote, #15281)
 - [ ] `npm run check:any-budget:t11` — ndani ya bajeti
 - [ ] `npm run check:route-validation:t06` — safi
-- [ ] `npm run check:node-runtime` — kiwango cha chini cha mazingira-endeshi kinachotumika kimetimizwa (`>=22.22.2 <23`, `>=24.0.0 <27`, kulingana na `SUPPORTED_NODE_RANGE` katika `src/shared/utils/nodeRuntimeSupport.ts`; kimeoanishwa na `engines` ya `package.json`)
+- [ ] `npm run check:node-runtime` — inayotumika wakati wa kukimbia ilikutana (`>=22.22.2 <23`, `>=24.0.0 <27`, kwa `SUPPORTED_NODE_RANGE` katika `src/shared/utils/nodeRuntimeSupport.ts`; iliyokaa na `package.json` `engines`)
 
-### Majaribio
+### Kupima
 
-- [ ] `npm run test:unit` — yanafaulu
-- [ ] `npm run test:vitest` — yanafaulu (seva ya MCP, autoCombo, akiba)
-- [ ] `npm run test:coverage` — sharti la 60/60/60/60 limetimizwa (kauli/mistari/vitendakazi/matawi)
-- [ ] `npm run test:integration` — yanafaulu (ikiwa mabadiliko yanahusisha DB / vishughulikiaji)
-- [ ] `npm run test:combo:matrix` — yanafaulu (matriki ya mikakati ya combo: huthibitisha kwa njia bainifu maamuzi ya uteuzi ya mikakati yote 19 ya umma ya uelekezaji; endesha unapobadilisha uelekezaji wa combo, utatuzi wa mkakati, au mantiki mbadala)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **si lazima/mwongozo** (jaribio la msingi lililodhibitiwa dhidi ya huduma halisi ya juu; huchukua nakala tuli ya DB ya kusoma pekee kutoka VPS `root@192.168.0.15`; hutumia watoa huduma halisi, hugharimu salio; haliendeshwi kamwe katika CI; hurukwa bila hitilafu ikiwa sharti halipo)
-- [ ] `npm run test:combo:live:vps` — **si lazima/mwongozo** (jaribio la msingi la moja kwa moja la VPS la Awamu ya 3: matukio 7 ya HTTP dhidi ya seva hai ya `.15` kupitia Node ESM ya kawaida; linahitaji `ssh root@192.168.0.15`; huunda/hufuta combo za `__live_test__*` pekee; hutumia watoa huduma halisi; haliendeshwi kamwe katika CI)
-- [ ] `npm run test:e2e` — yanafaulu (mabadiliko ya UI)
-- [ ] `npm run test:protocols:e2e` — yanafaulu (mabadiliko ya MCP/A2A)
-- [ ] `npm run test:ecosystem` — yanafaulu
+- [ ] `npm run test:unit` — kupita
+- [ ] `npm run test:vitest` — kupita ( seva ya MCP, autoCombo, kache)
+- [ ] `npm run test:coverage` — lango 60/60/60/60 limeridhika (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — kupita (ikiwa mabadiliko gusa DB / vidhibiti)
+- [ ] `npm run test:combo:matrix` — pass (matriki ya mkakati wa mchanganyiko: huthibitisha maamuzi yote 22 ya mikakati ya uelekezaji wa umma kwa kubainisha; endesha unapogusa uelekezaji wa mseto, utatuzi wa mkakati, au mantiki mbadala)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (moshi halisi wa juu wa mkondo; vyanzo vya muhtasari wa DB wa kusoma pekee kutoka VPS `root@192.168.0.15`; hugusa watoa huduma halisi, hugharimu mikopo; kamwe haifanyi kazi katika CI; kuruka kwa usafi bila lango)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS moshi wa moja kwa moja: matukio ya HTTP 7 dhidi ya seva `.15` ya moja kwa moja kupitia Node ESM; inahitaji `ssh root@192.168.0.15`; creates/deletes michanganyiko `__live_test__*` pekee; hugonga watoa huduma halisi; haitumiki kamwe katika CI)
+- [ ] kupita `npm run test:e2e` — ( mabadiliko UI )
+- [ ] kupita `npm run test:protocols:e2e` — ( mabadiliko MCP/A2A )
+- [ ] `npm run test:ecosystem` — kupita
 
-### Hook (Zimethibitishwa na Husky)
+### Hooks (Husky imethibitishwa)
 
-Hook za Husky zipo katika `.husky/` na huendeshwa kiotomatiki wakati wa shughuli za git.
+ndoano za Husky huishi katika `.husky/` na huendesha kiotomatiki kwenye shughuli za git.
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** masharti ya haraka na bainifu — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (yalianzishwa 2026-06-13). Kwa makusudi hayajumuishi `test:unit` (ni ya polepole; inashughulikiwa na kazi ya CI ya `test-unit`).
-  - Endesha `npm run test:unit` mwenyewe kabla ya kusukuma matawi ya toleo.
+- **jitolea mapema:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **sukuma kabla:** milango ya haraka ya kuamua — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (iliyoamilishwa 2026-06-13). Kwa makusudi haijumuishi `test:unit` (polepole; iliyofunikwa na kazi ya CI `test-unit` ).
+  - Endesha `npm run test:unit` mwenyewe kabla ya kusukuma matawi ya kutolewa.
 
-Ikiwa hook itashindwa: rekebisha tatizo la msingi, usiipite kwa kutumia `--no-verify`.
+Ikiwa ndoano itashindwa: rekebisha suala la msingi, usipite `--no-verify`.
 
-### Commit za Kawaida
+### Maadili ya Kawaida
 
-Commit zote zinazokusudiwa kwa toleo lazima zifuate muundo wa `type(scope): subject`.
+Ahadi zote zinazofungamana na toleo lazima zifuate umbizo `type(scope): subject`.
 
 **Aina halali:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**Mawanda halali:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**Upeo halali:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker` `authz` `ci`, `mcp`, `a2a`, `memory`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator` `skills` `domain`
 
-Mabadiliko yanayovunja uoanifu: ongeza kijachini cha `BREAKING CHANGE:` au `!` baada ya mawanda (mfano `feat(api)!: drop /v0`).
+Mabadiliko yanayovunja: ongeza `BREAKING CHANGE:` footer au `!` baada ya upeo (km `feat(api)!: drop /v0`).
 
 ### Nyaraka
 
-- [ ] `npm run check:docs-sync` inafaulu (huendeshwa kiotomatiki na pre-commit)
-- [ ] `npm run check:docs-all` inafaulu (jumla: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` hutoka kwa msimbo 0 — mkataba wa mazingira kati ya msimbo ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` haujavunjika
-- [ ] `npm run check:doc-links` hutoka kwa msimbo 0 — hakuna marejeleo ya ndani ya markdown yaliyovunjika baada ya kupanga upya
-- [ ] `docs/architecture/ARCHITECTURE.md` imekaguliwa kwa tofauti za hifadhi/mazingira-endeshi
-- [ ] `docs/guides/TROUBLESHOOTING.md` imekaguliwa kwa tofauti za vigezo vya mazingira na uendeshaji
-- [ ] Ikiwa `.env.example` imebadilika: `docs/reference/ENVIRONMENT.md` imesasishwa
-- [ ] Ikiwa kipengele kipya kina UI: `docs/guides/USER_GUIDE.md` kinakitaja
-- [ ] Ikiwa kipengele kipya kina API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` zimesasishwa
-- [ ] Ikiwa kipengele kipya ni moduli: kuna `docs/<MODULE>.md` maalumu
-- [ ] Ikiwa kuna mabadiliko yanayovunja uoanifu: `docs/guides/TROUBLESHOOTING.md` ina dokezo la uhamishaji
+- [ ] `npm run check:docs-sync` hupita (inaendeshwa otomatiki na ahadi ya awali)
+- [ ] `npm run check:docs-all` hupita (mwavuli: hati-sawazisha + -hesabu za hati + env-doc-sync + matoleo yaliyoacha kutumika + viungo vya hati)
+- [ ] `npm run check:env-doc-sync` inatoka 0 msimbo wa — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env mkataba haujakamilika
+- [ ] `npm run check:doc-links` inatoka kwa — 0 hakuna marejeleo ya alama ya ndani yaliyovunjika baada ya urekebishaji
+- [ ] `docs/architecture/ARCHITECTURE.md` ilipitiwa upya kwa storage/runtime drift
+- [ ] `docs/guides/TROUBLESHOOTING.md` ilipitiwa upya kwa env var na uendeshaji wa uendeshaji
+- [ ] Ikiwa `.env.example` ilibadilika: `docs/reference/ENVIRONMENT.md` imesasishwa
+- [ ] Ikiwa kipengele kipya kina UI: `docs/guides/USER_GUIDE.md` inakitaja
+- [ ] Ikiwa kipengele kipya kina API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` imesasishwa
+- [ ] Ikiwa kipengele kipya ni moduli: `docs/<MODULE>.md` maalum ipo
+- [ ] Ikiwa mabadiliko yanavunja: `docs/guides/TROUBLESHOOTING.md` ina noti ya uhamiaji
 
 ### i18n
 
-- [ ] `npm run i18n:check` hutoka kwa msimbo 0 — hali ya tafsiri (`.i18n-state.json`) imeoanishwa na nyaraka chanzo (hakuna vyanzo vilivyopotoka katika hali kali; ushauri wa hali ya maonyo unakubalika kwa marekebisho ya dakika za mwisho ya nyaraka, lakini inapaswa kuwa 0 kabla ya kuweka lebo)
-- [ ] `npm run i18n:check-ui-coverage` hutoka kwa msimbo 0 — kila lugha ya UI iko kwenye au juu ya kiwango cha chini cha ufunikaji cha 80%
-- [ ] `npm run i18n:sync-ui:dry` huripoti funguo 0 zinazokosekana katika lugha zote 66 lengwa (kila lugha isipokuwa chanzo cha `en`)
-- [ ] Ikiwa nyaraka chanzo za Kiingereza zimebadilika, endesha `npm run i18n:run` (inahitaji `OMNIROUTE_TRANSLATION_API_KEY` katika `.env`) kabla ya kuweka lebo
-- [ ] Michango ya tafsiri inaweza kuahirishwa hadi toleo linalofuata ikiwa ni midogo (ifuatilie katika CHANGELOG)
+- [ ] `npm run i18n:check` inatoka katika hali 0 ya tafsiri ya — (`.i18n-state.json`) kwa kusawazisha na hati chanzo (hakuna vyanzo vilivyopeperushwa katika hali kali; ushauri wa hali ya onyo unakubalika kwa miguso ya hati ya dakika ya mwisho, lakini inapaswa kuwa 0 kabla ya kuweka lebo)
+- [ ] `npm run i18n:check-ui-coverage` inatoka 0 — kila eneo la UI au juu ya sakafu ya 80%
+- [ ] `npm run i18n:sync-ui:dry` inaripoti 0 funguo ambazo hazipo katika lugha zote 66 zinazolengwa (kila lugha isipokuwa chanzo cha `en` )
+- [ ] Kama chanzo cha hati za Kiingereza kilibadilika, endesha `npm run i18n:run` (inahitaji `OMNIROUTE_TRANSLATION_API_KEY` katika `.env`) kabla ya kuweka lebo.
+- [ ] Michango ya tafsiri inaweza kuahirishwa hadi toleo lijalo ikiwa ni ndogo (wimbo katika CHANGELOG)
 
-### Uhamishaji wa Hifadhidata
+### Uhamiaji wa Hifadhidata
 
 - [ ] Ikiwa `src/lib/db/migrations/` ina faili mpya:
-  - [ ] Kila uhamishaji ni idempotent (`CREATE TABLE IF NOT EXISTS`, n.k.)
-  - [ ] Uhamishaji umefungwa ndani ya miamala
-  - [ ] Umepewa namba kwa usahihi (hakuna pengo katika mfuatano)
-- [ ] Jaribu kwenye usakinishaji mpya: futa `~/.omniroute/omniroute.db` na uendeshe `npm run dev`
-- [ ] Jaribu kwenye usakinishaji uliopo: hifadhi nakala ya DB, endesha uhamishaji, thibitisha skema
-- [ ] Faili za WAL (`-wal`, `-shm`) zinashughulikiwa kwa usahihi ikiwa uhamishaji unaandika upya majedwali
+  - [ ] Kila uhamaji hauna uwezo (`CREATE TABLE IF NOT EXISTS`, nk.)
+  - [ ] Uhamiaji umefungwa katika shughuli
+  - [ ] Imehesabiwa kwa usahihi (hakuna mapengo katika mlolongo)
+- [ ] Jaribu kusakinisha upya: futa `~/.omniroute/omniroute.db` na uendeshe `npm run dev`
+- [ ] Jaribu kwenye usakinishaji uliopo: chelezo DB, endesha uhamiaji, thibitisha schema
+- [ ] WAL faili (`-wal`, `-shm`) zinashughulikiwa kwa usahihi ikiwa uhamiaji huandika upya jedwali
 
-### Katalogi ya Watoa Huduma (iliyothibitishwa na Zod)
+### Katalogi ya Mtoa Huduma (Imeidhinishwa na Zod)
 
-- [ ] Skima ya Zod ya `src/shared/constants/providers.ts` ni halali wakati wa upakiaji
+- [ ] `src/shared/constants/providers.ts` Zod schema halali wakati wa kupakia
   - [ ] Watoa huduma wote wana sehemu zinazohitajika (`id`, `label`, `kind`, n.k.)
-  - [ ] `freeNote` imetolewa kwa watoa huduma wapya wasiolipishwa
-  - [ ] Watoa huduma wa OAuth wana `oauthConfig` iliyosajiliwa katika `src/lib/oauth/constants/oauth.ts`
-- [ ] Ikiwa mtoa huduma mpya ameongezwa: kitekelezaji kinacholingana katika `open-sse/executors/`
-- [ ] Ikiwa umbizo si la OpenAI: kitafsiri katika `open-sse/translator/`
-- [ ] Miundo imesajiliwa katika `open-sse/config/providerRegistry.ts`
-- [ ] Majaribio ya kitengo katika `tests/unit/` yanashughulikia uainishaji na uelekezaji wa watoa huduma
+  - [ ] `freeNote` imetolewa kwa watoa huduma wapya bila malipo
+  - [ ] watoa huduma OAuth wamesajiliwa `oauthConfig` katika `src/lib/oauth/constants/oauth.ts`
+- [ ] Mtoa huduma mpya akiongezwa: mtekelezaji sambamba katika `open-sse/executors/`
+- [ ] Ikiwa umbizo lisilo la OpenAI: mtafsiri katika `open-sse/translator/`
+- [ ] Wanamitindo waliosajiliwa katika `open-sse/config/providerRegistry.ts`
+- [ ] Majaribio ya kitengo katika uainishaji na uelekezaji wa mtoaji wa `tests/unit/`
 
-### Kompyuta ya Mezani (Electron)
+### Eneo-kazi (Electron)
 
-Ikiwa `electron/` imebadilika:
+Ikiwa `electron/` ilibadilika:
 
-- [ ] `npm run electron:smoke:packaged` inafaulu
-- [ ] Miundo imejaribiwa kwa angalau mojawapo ya `:win`, `:mac`, `:linux`
-- [ ] Vyeti vya kusaini msimbo havijaisha muda wake (ikiwa unasaini)
-- [ ] Toleo la `electron/package.json` linalingana na `package.json` ya mzizi
-- [ ] Kielekezi cha kituo cha kusasisha kiotomatiki kimesasishwa ikiwa toleo linaachiliwa kwenda `stable`
+- [ ] `npm run electron:smoke:packaged` hupita
+- [ ] Majengo yaliyojaribiwa kwa angalau moja ya `:win`, `:mac`, `:linux`
+- [ ] Hati za kusaini msimbo hazijaisha muda wake (ikiwa unasaini)
+- [ ] toleo `electron/package.json` linalingana na mzizi `package.json`
+- [ ] Sasisha kielekezi kiotomatiki cha kituo ikiwa kinatolewa kwa `stable`
 
-### Mpangilio wa Ujenzi
+### Muundo wa Kujenga
 
-Hazina hutumia saraka tatu tofauti za matokeo — usizichanganye kamwe:
+Hifadhi hutumia saraka tatu tofauti za pato — kamwe hazichanganyiki:
 
-| Saraka    | Madhumuni                                                                          | Inafuatiliwa?             |
-| --------- | ---------------------------------------------------------------------------------- | ------------------------- |
-| `src/`    | Chanzo cha programu (TypeScript / TSX)                                             | Ndiyo                     |
-| `.build/` | Vitu vya kati vya ujenzi — matokeo ya `next build` (`distDir`)                     | Hapana (imepuuzwa na git) |
-| `dist/`   | Kifurushi cha npm kinachoweza kusambazwa — kilichokusanywa na `assembleStandalone` | Hapana (imepuuzwa na git) |
+| Orodha    | Kusudi                                                                             | Je, umefuatiliwa?  |
+| --------- | ---------------------------------------------------------------------------------- | ------------------ |
+| `src/`    | Chanzo cha maombi (TypeScript / TSX)                                               | Ndiyo              |
+| `.build/` | Jenga pato la kati — `next build` (`distDir`)                                      | Hapana (imepuuzwa) |
+| `dist/`   | Kifungu cha npm — kinachoweza kusafirishwa kilichokusanywa na `assembleStandalone` | Hapana (imepuuzwa) |
 
-> **Dokezo kwa mwendeshaji:** saraka ya picha ya VPS ya mbali inabaki kuwa `/usr/lib/node_modules/omniroute/app/`.
-> Ni matokeo ya ujenzi **ndani ya hazina** pekee yaliyohamishwa (`app/` → `dist/`). Ujuzi wa upelekaji husawazisha
-> yaliyomo kwenye `dist/` kwenda kwenye saraka ya mbali ya `app/` kwa rsync — hakuna mabadiliko ya njia za VPS yanayohitajika.
+> **Ujumbe wa Opereta:** saraka ya picha VPS ya mbali inabaki `/usr/lib/node_modules/omniroute/app/`. Ya pekee** katika-repo** kujenga pato kuhamishwa (`app/` → `dist/`). Ujuzi wa kupeleka rsync `dist/` yaliyomo kwenye `app/` dir — hakuna mabadiliko ya njia VPS yanahitajika.
 
-**Mtiririko wa ujenzi mmoja:**
+**Mtiririko wa muundo mmoja:**
 
 ```
 npm run build:release
@@ -250,23 +223,22 @@ npm run build:release
   └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-USIENDESHE `npm run build` ikifuatiwa na `npm run build:cli` tofauti kwa ajili ya upelekaji — tumia
-`npm run build:release`, ambayo hufanya ujenzi mpya safi pamoja na sentinel kwa amri moja.
+Fanya NOT endesha `npm run build` ikifuatiwa na `npm run build:cli` tofauti ya kupeleka — tumia `npm run build:release` ambayo hufanya mlinzi safi + katika amri moja.
 
 ### Uthibitishaji wa Vizalia
 
 - [ ] `npm run build:release` inafaulu na `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` ni safi — hakuna `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, au masalio mengine ya ndani
-- [ ] `dist/server.js` ipo baada ya ujenzi
-- [ ] Jaribio la hiari la ndani la mazingira ya utekelezaji yaliyofungashwa: `npm run dev:candidate -- validate` baada ya `npm run dev:candidate -- build` huwasha tarball iliyofungashwa kwenye `DATA_DIR` iliyotengwa na hukagua `/api/health` + `/v1/models` (angalia [Njia Bora ya Uchangiaji](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] `npm run check:pack-artifact` safi — hakuna `app.__qa_backup`, `scripts/scratch`, `package-lock.json`, au mabaki mengine ya ndani
+- [ ] `dist/server.js` ipo baada ya kujenga
+- [ ] Moshi wa hiari wa wakati wa uendeshaji uliowekwa kwenye vifurushi: `npm run dev:candidate -- validate` baada ya `npm run dev:candidate -- build` huwasha tarball iliyopakiwa kwenye `DATA_DIR` iliyotengwa na kuangalia `/api/health` + `/v1/models` (angalia [Njia ya Dhahabu ya Mchango](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
-### Uwekaji Lebo na Utoaji
+### Kuweka tagi na Kutolewa
 
-- [ ] Endesha `/generate-release-cc` (ujuzi wa Claude Code):
-  - Huunda lebo `vX.Y.Z`
-  - Husukuma lebo na tawi
-  - Hufungua Toleo la GitHub lenye maelezo ya mabadiliko
-  - Huambatisha visakinishaji vya Electron (ikiwa vimejengwa)
+- [ ] Endesha `/generate-release-cc` ( ustadi wa Msimbo wa Claude ):
+  - Hutengeneza tagi `vX.Y.Z`
+  - Inasukuma tagi na tawi
+  - Hufungua Toleo GitHub kwa kubadilisha logi
+  - Huambatisha visakinishi vya Electron (ikiwa vimejengwa)
 - [ ] Au kwa mikono:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
@@ -274,46 +246,45 @@ USIENDESHE `npm run build` ikifuatiwa na `npm run build:cli` tofauti kwa ajili y
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Upelekaji
+### Weka
 
-Ujuzi wa upelekaji hutumia mtiririko mwepesi wa rsync — hakuna `npm pack`, wala `npm i -g`:
+Ujuzi wa kupeleka tumia mtiririko mwepesi wa rsync — no `npm pack`, hakuna `npm i -g`:
 
-- [ ] Tumia ujuzi wa upelekaji unaolingana na lengwa:
+- [ ] Tumia ujuzi wa kutumia unaolingana na lengo:
   - `/deploy-vps-local-cc` — VPS ya ndani (192.168.0.15)
-  - `/deploy-vps-akamai-cc` — VPS ya Akamai (69.164.221.35)
+  - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — zote mbili
 - [ ] Kabla ya kupeleka, thibitisha `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] Ujenzi lazima uendeshwe mahali ambapo `node_modules` ni halisi (checkout kuu au worktree iliyotekelezewa `npm ci` — SI worktree yenye symlink)
-- [ ] Fanya jaribio la awali la mazingira yaliyohamishwa:
-  - Fungua `/dashboard/health` → hakikisha mfuatano wa toleo unalingana na toleo lililotolewa
-  - Endesha ombi la `/v1/chat/completions` dhidi ya mtoa huduma anayejulikana
-  - Thibitisha `/api/monitoring/health` inarejesha vivunja mzunguko vya `CLOSED`
-  - Thibitisha usafirishaji wa MCP unajibu (`/mcp` HTTP, `/mcp-sse` SSE)
+- [ ] Muundo lazima uendeshwe ambapo `node_modules` ni halisi (malipo kuu au `npm ci`'d worktree — NOT mti wa kazi uliolinganishwa)
+- [ ] Mfano wa majaribio ya moshi:
+  - Fungua mfuatano `/dashboard/health` → wa toleo la kuangalia unalingana na kutolewa
+  - Tekeleza ombi la `/v1/chat/completions` dhidi ya mtoa huduma anayejulikana
+  - Thibitisha `/api/monitoring/health` inarudisha vivunja mzunguko `CLOSED`
+  - Thibitisha jibu la usafirishaji MCP (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### Baada ya Utoaji
+### Baada ya kutolewa
 
-- [ ] Endesha `/capture-release-evidences-cc` (ujuzi wa Claude Code)
-  - Hunasa picha za skrini/rekodi za WebP za vipengele vipya
-  - Huziambatisha kwenye maelezo ya toleo / chapisho la blogu
-- [ ] Sasisha GitHub Discussions / Discord kwa tangazo la toleo
+- [ ] Endesha `/capture-release-evidences-cc` ( ustadi wa Msimbo wa Claude )
+  - Inanasa WebP screenshots/recordings ya vipengele vipya
+  - Inaambatisha ili kutoa madokezo / chapisho la blogi
+- [ ] Sasisha Majadiliano GitHub / Discord na tangazo la kutolewa
 - [ ] Fungua hatua muhimu kwa toleo linalofuata
-- [ ] Ikiwa ni muhimu sana: bandika mjadala au chapisha katika `news.json` kwa ajili ya bango la ndani ya programu
+- [ ] Ikiwa ni muhimu: bandika majadiliano au uchapishe katika `news.json` kwa bango la ndani ya programu
 
-### Kizuizi cha uzinduzi wa umma wa Radar
+### Lango la uzinduzi wa rada kwa umma
 
-Tangazo la Radar limehifadhiwa kimakusudi likiwa na `active: false`. Uwezeshaji ni badiliko tofauti
-baada ya ushahidi kutolewa kwa kila kipengee hapa chini:
+Tangazo la Rada limetolewa kwa makusudi na `active: false`. Uamilisho ni badiliko tofauti baada ya kila kitu hapa chini kuthibitishwa:
 
-- [ ] PR zote za Radar zilizopangwa kwa safu zimeunganishwa na CI ya ncha ya toleo ni kijani
-- [ ] Peleka na ufanyie majaribio ya awali njia za OSS Radar huku `RADAR_ENABLED` ikiwa bado imezimwa kwa chaguomsingi
-- [ ] Fanyia majaribio ya awali `GET /planos`, `/termos`, `/privacidade`, na `/reembolso` kwenye seva pangishi ya Radar iliyotajwa
-- [ ] Rekodi utambulisho/mawasiliano/anwani ya mwendeshaji na ukaguzi wa kisheria ulioidhinishwa na mmiliki katika huduma ya faragha
-- [ ] Jaribu Stripe Checkout na webhook iliyosainiwa katika hali ya majaribio pekee
-- [ ] Jaribu uwasilishaji mmoja wa barua pepe ya muamala iliyosimbwa kwa njia fiche ukitumia mtumaji/kikoa kilichoidhinishwa
-- [ ] Thibitisha urejeshaji wa nakala rudufu na utekelezaji mmoja wa utafiti unaosimamiwa na wenye kikomo cha bajeti
+- [ ] PRs zote za Rada zilizopangwa zimeunganishwa na ncha CI ya kutolewa ni ya kijani
+- [ ] Sambaza na ufute njia za OSS Rada na `RADAR_ENABLED` bado imezimwa kwa chaguo-msingi
+- [ ] Moshi `GET /planos`, `/termos`, `/privacidade`, na `/reembolso` juu ya mwenyeji aitwaye Rada
+- [ ] Rekodi opereta identity/contact/address na ukaguzi wa kisheria ulioidhinishwa na mmiliki katika huduma ya kibinafsi
+- [ ] Zoezi la Malipo ya Mistari na kifaa cha wavuti kilichotiwa saini katika hali ya majaribio pekee
+- [ ] Zoezi la uwasilishaji wa barua pepe ya malipo iliyosimbwa kwa njia fiche na sender/domain iliyoidhinishwa
+- [ ] Thibitisha urejeshaji wa nakala rudufu na utafiti mmoja unaosimamiwa, unaozingatia bajeti
 - [ ] Idhinisha sera ya ukaguzi wa BRL/PIX kabla ya kukubali ushahidi wa mchango
-- [ ] Wezesha Checkout ya umma baada tu ya vizuizi vilivyotangulia, kisha uamilishe ID mpya ya `news.json`
-- [ ] Thibitisha bango la Home linatumia maandishi yaliyowekewa lugha ya eneo na ID mpya inaonekana tena baada ya ID ya zamani kuondolewa
+- [ ] Washa Malipo ya umma tu baada ya milango iliyotangulia, kisha uwashe ID `news.json`
+- [ ] Thibitisha bango la Nyumbani linatumia nakala iliyojanibishwa na ID mpya itatokea tena baada ya ID ya zamani kuondolewa.
 
 ## Jaribio la msingi la Huduma Zilizopachikwa (v3.8.4+)
 
@@ -384,111 +355,70 @@ Kabla ya kutoa toleo lolote la v3.8.x, thibitisha vipengele hivi vya ziada:
 
 ---
 
-## Ukataji wa 3.9.0 LTS (uliofanyiwa mazoezi katika 3.8.58)
+## 3.9.0 LTS kata (imekaririwa katika 3.8.58)
 
-Baada ya v3.8.59 toleo linalofuata ni 3.9.0, na kilele chake kinakuwa matawi mawili ya muda mrefu:
-`stable/v3` (mkondo wa v3 LTS, npm `latest`) na `develop` (v4, lililopandishwa hadi 4.0.0, npm
-`nightly`). Muundo wa matawi/vituo, usogezaji mbele na lebo ziko katika
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); mpango uko katika [ROADMAP](../../ROADMAP.md) (Awamu ya 3). Ukataji unafanyika mara moja;
-3.8.58 unaufanyia mazoezi kutoka mwanzo hadi mwisho kwenye fork, na 3.8.59 unahitimishwa kwa
-[orodha hakiki ya GO/NO-GO](./LTS_GO_NO_GO.md).
+Baada ya v3.8.59 toleo linalofuata ni 3.9.0, na ncha yake inakuwa matawi mawili ya muda mrefu: `stable/v3` (mstari wa v3 LTS, npm `latest`) na `develop` (v4, bumped hadi 4.0.0, npm `nightly`). Muundo wa branch/channel, bandari ya mbele na lebo ziko katika [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ; mpango upo katika [ROADMAP](../../ROADMAP.md) (Awamu ya 3). Kata inaendesha mara moja; 3.8.58 huifanyia mazoezi mwisho hadi mwisho kwenye uma, na 3.8.59 hufunga kwa [orodha hakiki GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Jaribio kavu (kusoma pekee, salama wakati wowote)
+### Dry-run (kusoma-tu, salama wakati wowote)
 
 ```bash
-npm run release:dry-run-lts-cut                       # ukataji halisi: 3.9.0 kutoka HEAD, tag iliyotangulia v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # bainisha commit chanzo
+npm run release:dry-run-lts-cut                       # the real cut: 3.9.0 from HEAD, previous tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pin the source commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` haitekelezi chochote: inasoma git na `gh` na kuchapisha
-mfuatano mzima — masharti ya awali (chanzo kinatambulika, hazina chanzo ina historia kamili —
-shallow clone haiwezi kusukuma `stable/v3`, upande unaopokea unakataa kifurushi kwenye mzazi wa kwanza
-aliyeunganishwa, kwa hiyo kata kutoka full clone au tekeleza `git fetch --unshallow origin` kwanza —
-tag iliyotangulia ipo, `package.json` ina toleo lengwa, issue ya `release-freeze` iko wazi, hakuna
-issue iliyo wazi ya `Release branch not green`
-kwenye tawi la toleo lililopo — tawi ambalo halipo huripoti `?` isiyojulikana, kamwe
-si kijani — foleni ya Mergify `release` imesanidiwa (G11: `queue_rules`, `checks_timeout`,
-lebo `queue`), ruleset ya `release/*` bado inazuia ufutaji na force-push, na
-`stable/v3` na `develop` bado hazipo), hatua mbili za matawi, vichochezi gani vya workflow
-zilizositishwa na masharti ya `if:` yanakuwa kweli (na yapi yanaendelea kuzuiwa na variable ya hazina au
-yamebainishwa kwenye hazina rasmi), dist-tags zinazotarajiwa (`latest` → 3.9.0, `next` na
-`nightly` tupu) na urejeshaji nyuma. Exit `0` = `RESULT: READY`, `1` = sharti la awali linalozuia
-halikutimizwa (`✗`), `2` = hitilafu ya matumizi. `--advisory <id,...>` hushusha ukaguzi kuwa onyo (`!`)
-bila kuuficha.
+`scripts/release/dry-run-lts-cut.mjs` haitekelezi chochote: inasoma git na `gh` na kuchapisha mlolongo mzima wa masharti ya — (chanzo hutatuliwa, hazina ya chanzo ina historia kamili — clone isiyo na kina haiwezi kushinikiza `stable/v3`, upande wa kupokea unakataa pakiti kwa mzazi wa kwanza aliyepandikizwa, kwa hivyo kata kutoka kwa clone kamili au `git fetch --unshallow origin` — la awali lipo, `package.json` tag ya kwanza iko, tag ya kwanza iko. Suala la `release-freeze` limefunguliwa, hakuna toleo `Release branch not green` lililo wazi kwenye tawi la toleo lililopo — tawi ambalo halipo linaripoti `?` haijulikani, kamwe foleni ya — ya kijani isiyoweza kuachilia PRs (G11: `config/merge-queue/config.json` halali, `bases` yake inasimamia tawi la kutolewa, `mode` `live`, lebo yake ipo), sheria za `release/*` bado na kulazimisha `stable/v3` `develop` bado haipo), hatua mbili za tawi, ambazo husababisha mtiririko wa kazi tulivu na hali ya `if:` kugeuka kuwa kweli (na ambayo hukaa kwenye lango la kibadilishaji cha hazina au kubandikwa kwenye hazina ya kisheria), tagi za dist zinazotarajiwa (`latest` → 3.9.0, `next` na `nightly` tupu) na urejeshaji. Ondoka `0` = `RESULT: READY`, `1` = sharti la kuzuia halikufaulu (`✗`), `2` = hitilafu ya matumizi. `--advisory <id,...>` inapunguza hundi hadi onyo (`!`) bila kuificha.
 
-Endesha jaribio kavu la ukataji halisi wakati release freeze ya 3.9.0 bado iko wazi — matawi
-huundwa baada ya tag na kabla ya Awamu ya 12c kuondoa freeze.
+Endesha ukataji halisi wakati kigandishi cha 3.9.0 bado kiko wazi — matawi huundwa baada ya lebo na kabla ya Awamu ya 12c kuinua kugandisha.
 
-### Mazoezi ya 3.8.58 (fork pekee)
+### 3.8.58 mazoezi (uma pekee)
 
 ```bash
-# 1. Jaribio kavu kwenye kilele cha sasa kwa kutumia vigezo vya mazoezi
+# 1. Dry-run on the current tip with rehearsal parameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Tekeleza dhidi ya remote ya FORK (origin, au remote yoyote ambayo URL yake ni ya hazina
-#    rasmi, inakataliwa; kila hatua huomba uthibitisho kwenye terminal)
+# 2. Execute against a FORK remote (origin, or any remote whose URL is the canonical
+#    repository, is refused; every step asks for confirmation on the terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Jaribu workflow zilizosimamishwa kwenye fork (workflow_dispatch pale ambapo jaribio kavu
-#    huripoti ubainishaji kwenye hazina rasmi), kisha rejesha nyuma
+# 3. Exercise the dormant workflows in the fork (workflow_dispatch where the dry-run
+#    reports a canonical-repository pin), then roll back
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Commit ya kupandisha toleo la develop hujengwa kwa git plumbing (working tree haiguswi) na hupandisha matoleo ya
-faili zilezile tano kama commit ya kufungua mzunguko: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` na `docs/openapi.yaml`. Sehemu ya `[4.0.0]`
-ya CHANGELOG na nakala zake za i18n hufunguliwa kwenye `develop` baadaye, kabla ya PR yake ya kwanza.
-Script haibadilishi kamwe npm dist-tags — zifanyie mazoezi kwenye kifurushi cha majaribio.
+Ahadi ya kuendeleza bump imejengwa na git plumbing (hakuna mti unaofanya kazi unaoguswa) na hugonga faili tano sawa na ahadi ya kufunguliwa kwa mzunguko: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` na `docs/openapi.yaml`. Sehemu ya `[4.0.0]` CHANGELOG na vioo vyake vya i18n hufunguliwa kwenye `develop` baadaye, kabla ya PR yake ya kwanza. Hati haibadilishi npm dist-tags — jizoeze zile zilizo kwenye kifurushi cha mwanzo.
 
-### Artifact ya uhakiki wa PR (jenga mara moja, kuza bytes zilezile)
+### PR onyesho la kukagua vizalia vya programu (jenga mara moja, tangaza baiti sawa)
 
-`.github/workflows/preview-artifact.yml` hujenga tarball moja ya uzalishaji kutoka kichwa cha PR na
-kuthibitisha build hiyo kamili (sehemu ya (a) ya #8084). PR za hazina hiyo hiyo pekee; hakuna kinachochapishwa.
+`.github/workflows/preview-artifact.yml` huunda tarball moja ya uzalishaji kutoka kwa kichwa cha PR na inadhibitisha muundo huo (#8084 kipande (a)). PRs ya hazina moja pekee; hakuna kinachochapishwa.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # au ongeza lebo ya `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # usakinishaji wa uhakiki
+npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Utekelezaji hufanya `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, hufungasha
-tarball, huendesha `npm run check:pack-boot` (siri bandia, saraka ya data ya muda), hufungasha upya na
-hushindwa isipokuwa digest iwe sawa, kisha hurekodi `artifact-identity.json` (SHA ya kichwa, SHA ya msingi,
-hash ya lockfile, jukwaa, arch, node ABI, bundler, sera ya build —
-`scripts/release/artifact-identity.mjs`) na kuthibitisha tarball katika job tofauti. Kukuza
-uhakiki kunamaanisha kusakinisha tarball hiyo: usijenge upya kamwe kutoka kwenye chanzo.
+Uendeshaji hufanya `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, hupakia tarball, huendesha `npm run check:pack-boot` (siri bandia, ephemeral data dir), hupakia tena na kutofaulu isipokuwa muhtasari unafanana, kisha hurekodi `artifact-identity.json` (head SHA, base SHA, lockfile ABI, jukwaa, arch, — `scripts/release/artifact-identity.mjs`, node ) na inathibitisha tarball katika kazi tofauti. Kukuza onyesho la kukagua kunamaanisha kusakinisha tarball hiyo: usijenge tena kutoka kwa chanzo.
 
-### Ukataji (3.9.0, baada ya GO)
+### Kata (3.9.0, baada ya GO)
 
-1. GO imerekodiwa katika [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` huchapisha `RESULT: READY`.
-3. Unda matawi kwenye `origin` kwa mkono ukitumia amri zinazochapishwa na jaribio kavu —
-   script inakataa kusukuma kwenye `origin`. Ili kutumia tena commit ya develop iliyokaguliwa, endesha
-   mazoezi ya `--execute` kwenye kilele cha 3.9.0 dhidi ya fork yako kwanza; inachapisha SHA zote mbili, na
-   commit zilezile zinaweza kusukumwa:
+1. GO iliyorekodiwa katika [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` huchapa `RESULT: READY`.
+3. Unda matawi kwenye `origin` kwa mkono na maagizo dry-run chapa — hati inakataa kushinikiza `origin`. Ili kutumia tena ahadi ya usanidi iliyohakikiwa, endesha mazoezi `--execute` kwenye kidokezo cha 3.9.0 dhidi ya uma yako kwanza; inachapisha zote mbili SHAs, na ahadi zile zile zinaweza kusukumwa:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Linda `stable/v3` na `develop` (mikusanyo ya kanuni + foleni ya kuunganisha) kabla ya PR ya kwanza kuwasilishwa.
-5. Mitiririko ya kazi iliyositishwa huwashwa kulingana na kuwepo kwa tawi: `forward-port.yml` (push kwenda
-   `stable/v3`), `validate-stable-pr.yml` (PR zinazoenda `stable/v3`) na `nightly-v4-build.yml`
-   (hujenga `develop`). Kabla ya kuanza kutumika, weka siri ya hazina `secrets.FORWARD_PORT_TOKEN` (ili CI iendeshwe kwenye
-   PR za forward-port); uchapishaji wa kila usiku hubaki umezimwa hadi mmiliki aweke kigezo cha hazina
-   `vars.NIGHTLY_PUBLISH` kuwa `true` na npm Trusted Publishing ikubali
-   `nightly-v4-build.yml`. Utatuzi wa chaneli unafanywa na `scripts/release/dist-tag.mjs`, kitatuzi kilekile
-   kinachotumiwa na `npm-publish.yml`.
-6. Thibitisha chaneli: `npm view omniroute dist-tags --json` huonyesha `latest` = 3.9.0 na hakuna
-   `next` / `nightly` hadi v4 ichapishwe.
-7. Rejesha hali ya awali, ikihitajika: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   na `npm dist-tag add omniroute@3.8.59 latest`.
+4. Linda `stable/v3` na `develop` (rulesets + unganisha foleni) kabla ya PR ya kwanza kutua.
+5. Mitiririko ya kazi tulivu huwashwa kwa kuwepo kwa tawi: `forward-port.yml` (shinikiza hadi `stable/v3`), `validate-stable-pr.yml` (PRs hadi `stable/v3`) na `nightly-v4-build.yml` (hujenga `develop`). Kabla ya kwenda moja kwa moja, weka siri ya hazina `secrets.FORWARD_PORT_TOKEN` (ili CI iendeshe bandari ya mbele PRs); uchapishaji wa kila usiku husalia hadi mmiliki aweke kigezo cha hazina `vars.NIGHTLY_PUBLISH` hadi `true` na npm Uchapishaji Unaoaminika ukubali `nightly-v4-build.yml`. Azimio la kituo ni `scripts/release/dist-tag.mjs`, kisuluhishi sawa na `npm-publish.yml` hutumia.
+6. Thibitisha vituo: `npm view omniroute dist-tags --json` inaonyesha `latest` = 3.9.0 na hakuna `next` / `nightly` hadi v4 itakapochapisha.
+7. Kurudisha nyuma, ikiwa inahitajika: `git push origin --delete refs/heads/stable/v3 refs/heads/develop` na `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---
 

@@ -7,99 +7,20 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
 import fs from "node:fs";
-import http from "node:http";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
-const BIN = path.join(ROOT, "bin", "omniroute.mjs");
-
-type Hit = { url: string; authorization: string | null; cliToken: string | null };
-
-async function startRecorder(host = "127.0.0.1") {
-  const hits: Hit[] = [];
-  const server = http.createServer((req, res) => {
-    hits.push({
-      url: req.url ?? "",
-      authorization: (req.headers.authorization as string) ?? null,
-      cliToken: (req.headers["x-omniroute-cli-token"] as string) ?? null,
-    });
-    res.writeHead(200, { "content-type": "application/json" });
-    res.end(JSON.stringify({ status: "ok" }));
-  });
-  await new Promise<void>((resolve) => server.listen(0, host, resolve));
-  const { port } = server.address() as net.AddressInfo;
-  return { hits, port, close: () => new Promise<void>((r) => server.close(() => r())) };
-}
-
-async function freePort() {
-  const srv = net.createServer();
-  await new Promise<void>((resolve) => srv.listen(0, "127.0.0.1", resolve));
-  const { port } = srv.address() as net.AddressInfo;
-  await new Promise<void>((r) => srv.close(() => r()));
-  return port;
-}
-
-function layout() {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-r6b1-"));
-  const home = path.join(tmp, "home");
-  const dataDir = path.join(home, ".omniroute");
-  const cwd = path.join(tmp, "untrusted");
-  fs.mkdirSync(dataDir, { recursive: true });
-  fs.mkdirSync(cwd, { recursive: true });
-  return { tmp, home, dataDir, cwd };
-}
-
-function cleanEnv(home: string, extra: Record<string, string> = {}) {
-  const env: Record<string, string> = {};
-  for (const [key, value] of Object.entries(process.env)) {
-    if (value === undefined) continue;
-    if (/^(OMNIROUTE_|NODE_|NPM_CONFIG_|DATA_DIR$|PORT$|API_PORT$|DASHBOARD_PORT$)/i.test(key)) {
-      continue;
-    }
-    if (/_PROXY$|^XDG_|^LD_|^DYLD_|^SSL_CERT_|^USERPROFILE$|^APPDATA$/i.test(key)) continue;
-    env[key] = value;
-  }
-  return {
-    ...env,
-    HOME: home,
-    CI: "1",
-    NO_UPDATE_NOTIFIER: "1",
-    OMNIROUTE_NO_UPDATE_NOTIFIER: "1",
-    OMNIROUTE_CLI_SKIP_REPO_ENV: "1",
-    OMNIROUTE_CONTEXT_KEYCHAIN_DISABLED: "1",
-    OMNIROUTE_DISABLE_CLI_TOKEN: "1",
-    STORAGE_ENCRYPTION_KEY: "0".repeat(64),
-    ...extra,
-  };
-}
-
-function runCli(bin: string, args: string[], cwd: string, env: Record<string, string>) {
-  return new Promise<{ code: number | null; stdout: string; stderr: string }>((resolve) => {
-    const child = spawn(process.execPath, [bin, ...args], { cwd, env, detached: true });
-    let stdout = "";
-    let stderr = "";
-    child.stdout.on("data", (d) => (stdout += d));
-    child.stderr.on("data", (d) => (stderr += d));
-    const timer = setTimeout(() => {
-      try {
-        process.kill(-child.pid!, "SIGKILL");
-      } catch {}
-    }, 60_000);
-    child.on("close", (code) => {
-      clearTimeout(timer);
-      resolve({ code, stdout, stderr });
-    });
-  });
-}
-
-function rm(dir: string) {
-  fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
-}
+import {
+  ROOT,
+  BIN,
+  startRecorder,
+  freePort,
+  layout,
+  cleanEnv,
+  runCli,
+  rm,
+} from "../_helpers/cliCwdEnvHarness.ts";
 
 // ── (a) Bearer exfiltration through OMNIROUTE_BASE_URL ───────────────────────
 
@@ -249,15 +170,39 @@ test("a shell variable still wins over the cwd .env", async () => {
   }
 });
 
-// ── (d) ordinary keys in the cwd .env keep working ──────────────────────────
+// ── (d) the cwd .env cannot pick the local port the CLI talks to ────────────
+//
+// CodeRabbit I6 (CWE-522): with no higher-precedence base URL the CLI derives
+// its destination from PORT, and buildHeaders attaches the machine token to any
+// loopback destination, so a cwd PORT sent x-omniroute-cli-token (and the API
+// key) to whatever listened on the chosen local port.
 
-test("cwd .env PORT still applies", async () => {
+test("cwd .env PORT, API_PORT and DASHBOARD_PORT cannot pick the CLI destination", async () => {
+  const dirs = layout();
+  const sink = await startRecorder();
+  try {
+    fs.writeFileSync(path.join(dirs.dataDir, ".env"), "OMNIROUTE_API_KEY=sk-r6b1-datadir-key\n");
+    fs.writeFileSync(
+      path.join(dirs.cwd, ".env"),
+      `PORT=${sink.port}\nAPI_PORT=${sink.port}\nDASHBOARD_PORT=${sink.port}\n`
+    );
+    const { stderr } = await runCli(BIN, ["health"], dirs.cwd, cleanEnv(dirs.home));
+    assert.deepEqual(sink.hits, [], "the port chosen by the cwd .env must not be contacted");
+    assert.match(stderr, /cannot set PORT, API_PORT, DASHBOARD_PORT; ignored/);
+    assert.ok(!stderr.includes(String(sink.port)), "the ignored value is never printed");
+  } finally {
+    await sink.close();
+    rm(dirs.tmp);
+  }
+});
+
+test("a data-dir .env PORT still picks the CLI destination", async () => {
   const dirs = layout();
   const legit = await startRecorder();
   try {
-    fs.writeFileSync(path.join(dirs.cwd, ".env"), `PORT=${legit.port}\n`);
+    fs.writeFileSync(path.join(dirs.dataDir, ".env"), `PORT=${legit.port}\n`);
     const { stderr } = await runCli(BIN, ["health"], dirs.cwd, cleanEnv(dirs.home));
-    assert.ok(legit.hits.length > 0, `PORT from the cwd .env is honoured: ${stderr}`);
+    assert.ok(legit.hits.length > 0, `PORT from the data-dir .env is honoured: ${stderr}`);
     assert.doesNotMatch(stderr, /cannot set/);
   } finally {
     await legit.close();
@@ -494,13 +439,16 @@ const EXPECTED_SKIPPED = [
   "APP_LOG_LEVEL",
   "OMNIROUTE_API_KEY_COOLDOWN_MS",
   "OMNIROUTE_R6B1_ORDINARY",
+  // The local ports: they pick which listener gets the CLI's credentials (I6).
+  "PORT",
+  "API_PORT",
+  "DASHBOARD_PORT",
+  // The opt-in for sending a key over plain HTTP (fcc-claude).
+  "OMNIROUTE_ALLOW_INSECURE_REMOTE",
 ];
 
 // The whole allowlist, with a value each key accepts.
 const EXPECTED_ALLOWED: Record<string, string> = {
-  PORT: "20129",
-  API_PORT: "20130",
-  DASHBOARD_PORT: "20131",
   REQUIRE_API_KEY: "true",
   LANG: "C.UTF-8",
   LANGUAGE: "en_US:en",
@@ -571,9 +519,17 @@ test("allowlist: values that are not plain ports, locales or flags are skipped",
   for (const [key, value] of rejected) {
     assert.equal(isAllowedFromCwdEnv(key, value), false, `${key}=${JSON.stringify(value)}`);
   }
+  // Ports are not allowed at all any more, whatever the value.
   for (const [key, value] of [
     ["PORT", "1"],
     ["PORT", "65535"],
+    ["PORT", "20128"],
+    ["API_PORT", "20129"],
+    ["DASHBOARD_PORT", "20130"],
+  ]) {
+    assert.equal(isAllowedFromCwdEnv(key, value), false, `${key}=${JSON.stringify(value)}`);
+  }
+  for (const [key, value] of [
     ["REQUIRE_API_KEY", "true"],
     ["REQUIRE_API_KEY", "1"],
     ["REQUIRE_API_KEY", "yes"],
@@ -616,15 +572,19 @@ test("allowlist: REQUIRE_API_KEY accepts exactly the values the server treats as
 
 test("cwdEnvRejection: unknown name, wrong case and bad value are told apart", async () => {
   const { cwdEnvRejection } = await import("../../bin/cli/utils/untrustedCwdEnv.mjs");
-  assert.equal(cwdEnvRejection("PORT", "20129"), null);
+  assert.equal(cwdEnvRejection("TZ", "UTC"), null);
   assert.deepEqual(cwdEnvRejection("NODE_OPTIONS", "x"), { kind: "name" });
   assert.deepEqual(cwdEnvRejection("NODE_OPTIONS\u0000", "x"), { kind: "name" });
-  assert.deepEqual(cwdEnvRejection("port", "20129"), { kind: "case", name: "PORT" });
+  assert.deepEqual(cwdEnvRejection("lang", "C"), { kind: "case", name: "LANG" });
   assert.deepEqual(cwdEnvRejection("Tz", "UTC"), { kind: "case", name: "TZ" });
-  assert.deepEqual(cwdEnvRejection("PORT", "abc"), {
+  assert.deepEqual(cwdEnvRejection("LANG", "/tmp/x"), {
     kind: "value",
-    expected: "a port number from 1 to 65535",
+    expected: "a locale name",
   });
+  // The ports are not allowed keys: a plain name rejection, in any case.
+  for (const key of ["PORT", "API_PORT", "DASHBOARD_PORT", "port"]) {
+    assert.deepEqual(cwdEnvRejection(key, "20129"), { kind: "name" }, key);
+  }
   assert.deepEqual(cwdEnvRejection("REQUIRE_API_KEY", "false"), {
     kind: "value",
     expected: "true, 1 or yes",
@@ -767,7 +727,8 @@ test("one warning names every skipped key", async () => {
     const warnings = stderr.split("\n").filter((l) => l.includes("cannot set"));
     assert.equal(warnings.length, 1, stderr);
     assert.match(warnings[0], /cannot set OMNIROUTE_BASE_URL, HEADROOM_PYTHON, NODE_ENV; ignored/);
-    assert.match(warnings[0], /may set only PORT, API_PORT, DASHBOARD_PORT, REQUIRE_API_KEY/);
+    assert.match(warnings[0], /may set only REQUIRE_API_KEY, LANG, LANGUAGE/);
+    assert.doesNotMatch(warnings[0], /may set only .*PORT/);
     assert.ok(!stderr.includes("/tmp/x") && !stderr.includes("development"));
   } finally {
     await legit.close();
@@ -795,20 +756,17 @@ test("a key the shell already sets is reported as shadowed, not as skipped", asy
   }
 });
 
-test("cwd .env PORT with a value that is not a port is skipped", async () => {
+test("cwd .env TZ with a value that is not a zone name is skipped", async () => {
   const dirs = layout();
   const legit = await startRecorder();
   try {
     fs.writeFileSync(path.join(dirs.dataDir, ".env"), "");
-    fs.writeFileSync(path.join(dirs.cwd, ".env"), `PORT=${legit.port}x\n`);
-    const { stderr } = await runCli(
-      BIN,
-      ["health"],
-      dirs.cwd,
-      cleanEnv(dirs.home, { OMNIROUTE_BASE_URL: `http://127.0.0.1:${legit.port}` })
-    );
-    assert.match(stderr, /: ignored PORT \(expected a port number from 1 to 65535\)\./);
-    // PORT is an allowed key, so the warning must not say it cannot be set.
+    fs.writeFileSync(path.join(dirs.cwd, ".env"), `TZ=/tmp/zone-${legit.port}x\n`);
+    const env = cleanEnv(dirs.home, { OMNIROUTE_BASE_URL: `http://127.0.0.1:${legit.port}` });
+    delete env.TZ;
+    const { stderr } = await runCli(BIN, ["health"], dirs.cwd, env);
+    assert.match(stderr, /: ignored TZ \(expected a zone name such as Europe\/Berlin\)\./);
+    // TZ is an allowed key, so the warning must not say it cannot be set.
     assert.doesNotMatch(stderr, /cannot set/);
     assert.ok(!stderr.includes(`${legit.port}x`), "the rejected value is not printed");
   } finally {
@@ -817,12 +775,12 @@ test("cwd .env PORT with a value that is not a port is skipped", async () => {
   }
 });
 
-test("cwd .env `port=` (wrong case) is skipped with a hint, not silently", async () => {
+test("cwd .env `lang=` (wrong case) is skipped with a hint, not silently", async () => {
   const dirs = layout();
   const legit = await startRecorder();
   const sink = await startRecorder();
   try {
-    fs.writeFileSync(path.join(dirs.cwd, ".env"), `port=${sink.port}\nTz=UTC\n`);
+    fs.writeFileSync(path.join(dirs.cwd, ".env"), `port=${sink.port}\nlang=C\nTz=UTC\n`);
     const { stderr } = await runCli(
       BIN,
       ["health"],
@@ -833,9 +791,10 @@ test("cwd .env `port=` (wrong case) is skipped with a hint, not silently", async
     assert.ok(legit.hits.length > 0, stderr);
     assert.match(
       stderr,
-      /: ignored port \(write the name as PORT\), Tz \(write the name as TZ\)\./
+      /: ignored lang \(write the name as LANG\), Tz \(write the name as TZ\)\./
     );
-    assert.doesNotMatch(stderr, /cannot set/);
+    // PORT is not an allowed key, so `port=` is skipped as an unknown name.
+    assert.match(stderr, /cannot set port; ignored/);
   } finally {
     await legit.close();
     await sink.close();
@@ -877,10 +836,11 @@ test("a working directory name with escape sequences is escaped in every env mes
     fs.mkdirSync(cwd);
     fs.writeFileSync(
       path.join(cwd, ".env"),
-      "NODE_OPTIONS=x\nPORT=abc\nOMNIROUTE_BASE_URL=x\nLC_MESSAGES=C\nLC_MESSAGES=C\n"
+      "NODE_OPTIONS=x\nLC_ALL=/x\nOMNIROUTE_BASE_URL=x\nLC_MESSAGES=C\nLC_MESSAGES=C\n"
     );
     const env = cleanEnv(dirs.home, { OMNIROUTE_BASE_URL: "http://127.0.0.1:9" });
     delete env.LC_MESSAGES;
+    delete env.LC_ALL;
     const { stdout, stderr } = await runCli(BIN, ["health"], cwd, env);
     const out = stdout + stderr;
     for (const raw of ["\u001b[2K", "\u001b]0;", "\u0007", "\u202e"]) {
@@ -889,7 +849,7 @@ test("a working directory name with escape sequences is escaped in every env mes
     assert.ok(!/^\s*\u2714 all keys loaded/m.test(out), "no forged line");
     const shown = "\\u001b[2K\\u001b]0;PWNED\\u0007\\n  \u2714 all keys loaded\\u202e";
     assert.ok(stderr.includes(`${shown}/.env" cannot set NODE_OPTIONS; ignored.`), stderr);
-    assert.ok(stderr.includes(`${shown}/.env": ignored PORT (`), stderr);
+    assert.ok(stderr.includes(`${shown}/.env": ignored LC_ALL (`), stderr);
     assert.ok(stderr.includes(`${shown}/.env" is ignored, the environment set it first`), stderr);
     // The second LC_MESSAGES line: the cwd file itself set it first.
     assert.ok(

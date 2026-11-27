@@ -7,6 +7,7 @@ import { join } from "node:path";
 const dataDir = mkdtempSync(join(tmpdir(), "omni-context-18582-"));
 process.env.DATA_DIR = dataDir;
 const core = await import("../../src/lib/db/core.ts");
+const { closeCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 const sync = await import("../../src/lib/modelsDevSync.ts");
 const contexts = await import("../../src/lib/db/modelContextOverrides.ts");
 const overrides = await import("../../src/lib/db/modelCapabilityOverrides.ts");
@@ -20,7 +21,8 @@ const provider = "openai-compatible-chat-18582";
 const model = "gemma-4-E2B-it-GGUF";
 const input = { provider, model };
 
-test.after(() => {
+test.after(async () => {
+  await closeCallLogSaves();
   core.resetDbInstance();
   rmSync(dataDir, { recursive: true, force: true });
 });

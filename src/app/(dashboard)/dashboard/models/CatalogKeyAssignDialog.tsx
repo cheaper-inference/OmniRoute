@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
@@ -174,7 +175,7 @@ function AssignKeyRow({
   const usable = !UNUSABLE_STATES.has(state);
   const isTarget = usable && selected.has(key.id);
   return (
-    <div key={key.id} className="rounded border border-border p-3">
+    <Card.Section key={key.id}>
       <Checkbox
         className="flex items-center gap-2"
         aria-label={t("selectApiKey", { name: key.name })}
@@ -194,7 +195,7 @@ function AssignKeyRow({
         · {stateLabels[state]}
       </p>
       <AssignKeyHints accessKey={key} context={context} />
-    </div>
+    </Card.Section>
   );
 }
 function AssignKeyHints({

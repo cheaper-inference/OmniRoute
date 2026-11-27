@@ -22,6 +22,7 @@ import {
   saveImageErrorResult,
   saveImageSuccessResult,
 } from "../../imageGeneration.ts";
+import { checkCodexOutputFormat } from "./codexOutputFormat.ts";
 
 type ImageLog = {
   info: (tag: string, message: string) => void;
@@ -149,6 +150,17 @@ export async function handleCodexImagesApi({
       path: logPath,
     });
   }
+  const formatCheck = checkCodexOutputFormat(body);
+  if (!formatCheck.ok) {
+    return saveImageErrorResult({
+      provider,
+      model,
+      status: 400,
+      startTime,
+      error: formatCheck.error,
+      path: logPath,
+    });
+  }
   const isEdit = referenceImages.length > 0;
   const url = codexImagesUrl(baseUrl, isEdit ? "edits" : "generations");
   const prompt = String(body.prompt);
@@ -162,6 +174,7 @@ export async function handleCodexImagesApi({
   if (typeof body.background === "string" && body.background.trim()) {
     upstreamBody.background = body.background.trim();
   }
+  if (formatCheck.forward) upstreamBody.output_format = formatCheck.forward;
   if (isEdit) {
     upstreamBody.images = referenceImages.map((image) => ({
       image_url: `data:${image.mime || "image/png"};base64,${image.bytes.toString("base64")}`,

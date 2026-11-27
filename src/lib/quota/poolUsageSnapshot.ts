@@ -1,6 +1,7 @@
 import { WINDOW_MS, type DimensionKey } from "./dimensions";
-import type { PoolUsageSnapshot, QuotaStore } from "./types";
+import type { PoolUsageAccount, PoolUsagePerKey, PoolUsageSnapshot, QuotaStore } from "./types";
 import { computeBurnRateFromWindow } from "./burnRate";
+import { attributePercentDimension, type PercentAttributionStore } from "./percentAttribution";
 
 /** Shared snapshot arithmetic; counter reads remain with each storage backend. */
 export async function buildPoolUsageSnapshot(
@@ -78,4 +79,91 @@ export async function buildPoolUsageSnapshot(
     dimensions: dimensionSnapshots,
     burnRate,
   };
+}
+
+type SnapshotDimension = PoolUsageSnapshot["dimensions"][number];
+
+interface PercentSnapshotPool {
+  id: string;
+  connectionId: string;
+  connectionIds?: string[];
+  allocations: Array<{ apiKeyId: string; weight: number }>;
+}
+
+/** One account's attribution of a percent dimension, reusing the snapshot's fair shares. */
+async function attributeAccount(
+  dim: SnapshotDimension,
+  connectionId: string,
+  pool: PercentSnapshotPool,
+  provider: string,
+  store: PercentAttributionStore
+): Promise<PoolUsageAccount> {
+  const attribution = await attributePercentDimension({
+    store,
+    pool,
+    connectionId,
+    provider,
+    dimension: { window: dim.window, limit: dim.limit },
+  });
+  const perKey: PoolUsagePerKey[] = dim.perKey.map((entry) => {
+    const consumed = attribution.consumedByKey[entry.apiKeyId] ?? 0;
+    return {
+      apiKeyId: entry.apiKeyId,
+      consumed,
+      fairShare: entry.fairShare,
+      deficit: consumed - entry.fairShare,
+      borrowing: consumed > entry.fairShare,
+    };
+  });
+  return {
+    connectionId,
+    globalUsedPercent: attribution.globalUsedPercent,
+    consumedTotal: attribution.accountConsumed,
+    internal: attribution.internal,
+    external: attribution.external,
+    externalCharged: attribution.externalCharged,
+    perKey,
+  };
+}
+
+/**
+ * Fill the percent dimensions of a usage snapshot with the per-key numbers the
+ * quota-share gate uses. Each account keeps its own attribution book, so the
+ * attributed number depends on the account serving the request: each percent
+ * dimension gets one `accounts` entry per pool connection; its top-level
+ * `consumedTotal` and `perKey` mirror the primary account (`accounts[0]`).
+ * Other dimensions pass through untouched.
+ *
+ * Returns a new snapshot and never throws: the attribution itself fails open.
+ * `snapshot` limits must already be the effective (summed) limits.
+ */
+export async function withPercentAttribution(
+  snapshot: PoolUsageSnapshot,
+  pool: PercentSnapshotPool,
+  provider: string,
+  store: PercentAttributionStore
+): Promise<PoolUsageSnapshot> {
+  const connectionIds =
+    Array.isArray(pool.connectionIds) && pool.connectionIds.length > 0
+      ? pool.connectionIds
+      : [pool.connectionId];
+
+  const dimensions = await Promise.all(
+    snapshot.dimensions.map(async (dim): Promise<SnapshotDimension> => {
+      if (dim.unit !== "percent") return dim;
+      const accounts = await Promise.all(
+        connectionIds.map((connectionId) =>
+          attributeAccount(dim, connectionId, pool, provider, store)
+        )
+      );
+      return {
+        ...dim,
+        consumedTotal: accounts[0].consumedTotal,
+        perKey: accounts[0].perKey,
+        accounts,
+      };
+    })
+  );
+
+  return { ...snapshot, dimensions };
 }

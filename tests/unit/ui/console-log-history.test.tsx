@@ -72,9 +72,10 @@ describe("retained console history and pause", () => {
     expect(vi.mocked(fetch).mock.calls[0][0]).toContain("range=all");
     await click('button[aria-label="logs.consoleViewer.pauseLogs"]');
     expect(container.querySelector('[role="log"]')?.getAttribute("aria-live")).toBe("off");
+    // Refresh carries a title, so it is aria-disabled while paused (it stays hoverable).
     expect(
-      container.querySelector('button[aria-label="common.refresh"]')?.hasAttribute("disabled")
-    ).toBe(true);
+      container.querySelector('button[aria-label="common.refresh"]')?.getAttribute("aria-disabled")
+    ).toBe("true");
     await act(async () => vi.advanceTimersByTimeAsync(15000));
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(container.textContent).toContain("first");

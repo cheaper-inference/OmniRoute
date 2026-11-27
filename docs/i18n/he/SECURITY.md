@@ -6,11 +6,11 @@
 
 ## דיווח על פגיעויות
 
-אם גיליתם פגיעות אבטחה ב-OmniRoute, אנא דווחו עליה באופן אחראי:
+אם אתה מגלה פגיעות אבטחה ב- OmniRoute, אנא דווח על כך באחריות:
 
-1. **אל תפתחו** דיווח ציבורי ב-GitHub
-2. השתמשו ב-[GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. כללו: תיאור, שלבים לשחזור והשפעה אפשרית
+1. **DO NOT** לפתוח בעיית GitHub ציבורית
+2. השתמש [בעצות אבטחה GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. כלול: תיאור, שלבי רפרודוקציה והשפעה אפשרית
 
 ## לוח זמנים לתגובה
 
@@ -29,25 +29,14 @@
 | 3.7.x   | ✅ אבטחה                                    |
 | < 3.7.0 | ❌ אינה נתמכת                               |
 
-## חלון התמיכה של LTS ‏(v3.9.x)
+## חלון תמיכה של LTS (v3.9.x)
 
-לאחר 3.8.59, הגרסה הבאה היא **3.9.0**, שפותחת את קו התמיכה ארוכת הטווח בענף
-`stable/v3` (ראו [`ROADMAP.md`](ROADMAP.md) ← "שלב 3 — v3.9.0 LTS").
+אחרי 3.8.59 הגרסה הבאה היא** 3.9.0** , הפותח את קו התמיכה לטווח ארוך בסניף `stable/v3` (ראה [`ROADMAP.md`](ROADMAP.md) → "שלב 3 — v3.9.0 LTS").
 
-- **מה מקבל `stable/v3`:** תיקוני באגים, תיקוני אבטחה ועדכוני ספקים. תכונות
-  חדשות מגיעות לערוץ v4; קו ה-LTS נותן עדיפות ליציבות. `npm install omniroute`
-  (ה-dist-tag בשם `latest`) נשאר ב-v3 לאורך כל מחזור v4.
-- **משך החלון:** `stable/v3` מקבל **תיקוני אבטחה ותיקונים לרגרסיות קריטיות במשך
-  12 חודשים לאחר השקת 3.9.0, או עד 90 יום לאחר פרסום v4.0.0 בתור `latest` —
-  לפי המאוחר מביניהם**. תאריך הסיום שיתקבל מתועד בהערות המהדורה של 3.9.0 ובקובץ
-  [`ROADMAP.md`](ROADMAP.md) בעת ההשקה.
-- **דיווח על פגיעות בקו ה-LTS:** דרך אותו ערוץ כמו בכל גרסה אחרת —
-  [דיווח אבטחה פרטי ב-GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  ולעולם לא דיווח פומבי. ציינו איזו גרסה בדקתם (לדוגמה `3.9.2`); התיקונים נכנסים אל
-  `stable/v3` ומועברים קדימה אל v4.
-- **בסיס האבטחה בעת השקת ה-LTS:** מצב הסורק שנמדד, הגנת הנתיבים
-  והוכחות פרטי הגישה הציבוריים מתועדים בקובץ
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **מה ש- `stable/v3` מקבל:** תיקוני באגים, תיקוני אבטחה ועדכוני ספקים. תכונות חדשות עוברות לערוץ v4; קו LTS הוא יציבות ראשון. `npm install omniroute` (ה- `latest` dist-tag) נשאר על v3 במהלך כל מחזור v4.
+- **משך החלון:** `stable/v3` מקבל** תיקוני אבטחה ורגרסיות קריטיות למשך 12 חודשים לאחר חיתוך 3.9.0, או עד 90 יום לאחר פרסום v4.0.0 כ- `latest` — לפי המאוחר מביניהם** . תאריך הסיום המתקבל מתועד בהערות הגרסה 3.9.0 וב- [`ROADMAP.md`](ROADMAP.md) כאשר החיתוך מתרחש.
+- **דיווח על פגיעות בקו LTS :** אותו ערוץ כמו כל גרסה אחרת — a private [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), אף פעם לא בעיה ציבורית. אמור איזו גרסה בדקת (לדוגמה `3.9.2`); תיקונים נוחתים על `stable/v3` ומועברים קדימה ל-v4.
+- **קו בסיס אבטחה בחתך LTS :** מצב סורק מדוד, שמירה על נתיב והוכחות ציבוריות נרשמות ב- [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 
@@ -211,7 +200,7 @@ docker run -d \
   -e JWT_SECRET="$(openssl rand -base64 48)" \
   -e API_KEY_SECRET="$(openssl rand -hex 32)" \
   -e STORAGE_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ---

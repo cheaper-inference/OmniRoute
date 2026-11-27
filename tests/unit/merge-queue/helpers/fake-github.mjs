@@ -27,6 +27,7 @@
 //
 // Programmable state (plain Maps/arrays of RAW GitHub payloads; mutate freely):
 //   fake.repoInfo                        GET /repos/o/r payload ({default_branch: "main", ...})
+//   GET /user                            {login, type} of the login the request's token acts as
 //   fake.addPull({number?, title, user?, base?, head?, labels?, draft?, ...}) → raw pull
 //   fake.pulls       Map<number, rawPull>      (labels: [{name}] — shared with the issue endpoints)
 //   fake.files       Map<number, [{filename, previous_filename?, status}]>
@@ -48,10 +49,22 @@
 //   fake.workflowRuns rawRun[]                 (filters: branch, head_sha, event; the
 //                       per-workflow listing also matches `path` .github/workflows/<file>)
 //   fake.addWorkflowRun({headSha, headBranch, event = "push", checkSuiteId?, name = "CI",
-//                    status = "completed", conclusion = null, path?}) → raw workflow run appended
-//                       to fake.workflowRuns; `checkSuiteId` = the suite of its check runs (the
-//                       `check_run.check_suite.id` fake.addCheckRun returns / takes as `suiteId`)
+//                    status = "completed", conclusion = null, runAttempt = 1, path?,
+//                    workflowId?}) → raw workflow run appended to fake.workflowRuns (ids grow
+//                       with every call, as GitHub's); `checkSuiteId` = the suite of its check
+//                       runs (the `check_run.check_suite.id` fake.addCheckRun returns / takes as
+//                       `suiteId`); `workflowId` = its `workflow_id` (absent when not given)
 //   fake.dispatches  [{workflow, ref, inputs}] recorded workflow_dispatch calls
+//   fake.reruns      [runId] recorded POST /actions/runs/:id/rerun-failed-jobs calls: 404 for an
+//                       unknown run, 403 while it is not completed; otherwise the run starts its
+//                       next attempt (run_attempt + 1, status "queued", conclusion null) and 201
+//   fake.jobListings [{runId, filter}]       recorded GET /actions/runs/:id/jobs calls; the jobs are
+//                       the check runs of the run's suite (every attempt), each with its
+//                       check_run_url, its html_url …/actions/runs/<run>/job/<id> and a runner
+//                       (none when skipped or queued). A check run added with addCheckRun
+//                       `job: false` (created through POST /check-runs) is listed too, as GitHub
+//                       lists it (measured 2026-11-19): html_url …/runs/<id>, no runner, no
+//                       labels, no steps; with `listedInJobs: false` the listing leaves it out
 //   fake.merges      [{number, body}]          recorded PUT /pulls/:n/merge calls
 //   fake.mergeResponses Map<number, {status, body}>  override the default merge behavior
 //   fake.rulesets    Map<id, ruleset>
@@ -83,6 +96,8 @@
 //   - PUT /pulls/:n/merge: closed/merged → 405, `sha` ≠ head → 409, else merges (200) and sets
 //     merged/merged_at/merge_commit_sha on the pull;
 //   - DELETE /issues/comments/:id removes a comment (404 when absent);
+//   - PATCH /issues/:n with state "closed" stamps closed_at (fake.now), with "open" clears it;
+//   - GET /issues honors `since` (updated_at at or after it), as GitHub does;
 //   - GET /contents/<dir> lists the direct children [{type: "file"|"dir", name, path, sha}].
 
 import { createHash } from "node:crypto";
@@ -140,6 +155,9 @@ export async function startFakeGitHub(options = {}) {
     annotations: new Map(),
     workflowRuns: [],
     dispatches: [],
+    reruns: [],
+    /** GET /actions/runs/:id/jobs calls, in order: {runId, filter} */
+    jobListings: [],
     merges: [],
     mergeResponses: new Map(),
     rulesets: new Map(),
@@ -226,6 +244,8 @@ export async function startFakeGitHub(options = {}) {
       completedAt = status === "completed" ? fake.now() : null,
       output = { title: null, summary: null, text: null },
       htmlUrl,
+      job = true,
+      listedInJobs = true,
     } = input;
     if (!fake.checkSuites.has(sha)) fake.checkSuites.set(sha, []);
     const suites = fake.checkSuites.get(sha);
@@ -253,6 +273,11 @@ export async function startFakeGitHub(options = {}) {
       app: { slug: appSlug },
       check_suite: { id: suite.id },
       output,
+      // false: created through POST /check-runs, no job of any workflow run (GET .../jobs lists
+      // it in the shape GitHub gives such a check run, or not at all with listedInJobs false);
+      // not fields GitHub sends, the client ignores them
+      ...(job ? {} : { not_a_job: true }),
+      ...(job || listedInJobs ? {} : { not_listed_in_jobs: true }),
     };
     if (!fake.checkRuns.has(sha)) fake.checkRuns.set(sha, []);
     fake.checkRuns.get(sha).push(run);
@@ -268,7 +293,9 @@ export async function startFakeGitHub(options = {}) {
       name = "CI",
       status = "completed",
       conclusion = null,
+      runAttempt = 1,
       path,
+      workflowId = null,
     } = input;
     const id = nextId++;
     const run = {
@@ -279,8 +306,10 @@ export async function startFakeGitHub(options = {}) {
       event,
       status,
       conclusion,
+      run_attempt: runAttempt,
       html_url: `https://github.com/${owner}/${repo}/actions/runs/${id}`,
       check_suite_id: checkSuiteId,
+      ...(workflowId === null ? {} : { workflow_id: workflowId }),
       ...(path ? { path } : {}),
     };
     fake.workflowRuns.push(run);
@@ -386,6 +415,8 @@ export async function startFakeGitHub(options = {}) {
   // ─────────────── routes: [method, RegExp on the repo-relative path, handler] ───────────────
   const routes = [
     ["GET", /^$/, () => json(200, fake.repoInfo)],
+    // GET /user (outside the repository prefix): the login the bearer token acts as.
+    ["GET", /^!\/user$/, () => json(200, user())],
 
     [
       "GET",
@@ -459,6 +490,10 @@ export async function startFakeGitHub(options = {}) {
         ]
           .filter((i) => state === "all" || i.state === state)
           .filter((i) => wanted.every((w) => i.labels.some((l) => l.name === w)))
+          // GitHub's `since`: updated at or after that instant.
+          .filter(
+            (i) => !req.query.since || Date.parse(i.updated_at) >= Date.parse(req.query.since)
+          )
           .sort((a, b) => b.number - a.number);
         return paginated(req, list);
       },
@@ -491,6 +526,9 @@ export async function startFakeGitHub(options = {}) {
         for (const key of ["title", "body", "state"]) {
           if (req.body?.[key] !== undefined) target[key] = req.body[key];
         }
+        // GitHub stamps closed_at when an issue closes and clears it when it reopens.
+        if (req.body?.state === "closed") target.closed_at = fake.now();
+        if (req.body?.state === "open") target.closed_at = null;
         target.updated_at = fake.now();
         return json(200, target);
       },
@@ -813,6 +851,71 @@ export async function startFakeGitHub(options = {}) {
           .filter((r) => !req.query.branch || r.head_branch === req.query.branch)
           .filter((r) => !req.query.event || r.event === req.query.event);
         return paginated(req, list, "workflow_runs");
+      },
+    ],
+    [
+      "GET",
+      /^\/actions\/runs\/(\d+)\/jobs$/,
+      (req, [id]) => {
+        const run = fake.workflowRuns.find((r) => r.id === Number(id));
+        if (!run) return notFound();
+        fake.jobListings.push({ runId: run.id, filter: req.query.filter ?? null });
+        // Every check run of the run's suite is listed (every attempt), in the shape GitHub
+        // gives it: a job of the run (its id is its check run's id), or one created through
+        // POST /check-runs (addCheckRun `job: false`), listed by GitHub all the same.
+        const jobs = [];
+        for (const runs of fake.checkRuns.values()) {
+          for (const cr of runs) {
+            if (cr.check_suite?.id !== run.check_suite_id || cr.not_listed_in_jobs) continue;
+            const forged = Boolean(cr.not_a_job);
+            const ran = !forged && cr.status !== "queued" && cr.conclusion !== "skipped";
+            const runnerId = ran ? 1_000_000_000 + cr.id : null;
+            jobs.push({
+              id: cr.id,
+              run_id: run.id,
+              workflow_name: run.name,
+              head_branch: run.head_branch,
+              run_attempt: run.run_attempt ?? 1,
+              head_sha: run.head_sha,
+              html_url: forged
+                ? `https://github.com/${owner}/${repo}/runs/${cr.id}`
+                : `https://github.com/${owner}/${repo}/actions/runs/${run.id}/job/${cr.id}`,
+              status: cr.status,
+              conclusion: cr.conclusion,
+              started_at: cr.started_at,
+              completed_at: cr.completed_at,
+              name: cr.name,
+              steps: ran
+                ? [{ name: "Set up job", status: "completed", conclusion: "success" }]
+                : [],
+              check_run_url: `https://api.github.com/repos/${owner}/${repo}/check-runs/${cr.id}`,
+              labels: forged ? [] : ["ubuntu-latest"],
+              runner_id: runnerId,
+              runner_name: ran ? `GitHub Actions ${runnerId}` : null,
+              runner_group_id: ran ? 0 : null,
+              runner_group_name: ran ? "GitHub Actions" : null,
+            });
+          }
+        }
+        return paginated(req, jobs, "jobs");
+      },
+    ],
+    [
+      "POST",
+      /^\/actions\/runs\/(\d+)\/rerun-failed-jobs$/,
+      (_req, [id]) => {
+        const run = fake.workflowRuns.find((r) => r.id === Number(id));
+        if (!run) return notFound();
+        if (run.status !== "completed") {
+          return json(403, { message: "This workflow is already running" });
+        }
+        fake.reruns.push(run.id);
+        Object.assign(run, {
+          run_attempt: (run.run_attempt ?? 1) + 1,
+          status: "queued",
+          conclusion: null,
+        });
+        return json(201, {});
       },
     ],
     [

@@ -4,10 +4,20 @@
 
 ---
 
-A na-ekewa ọdịda n’ụdị tupu e kpebie ma a ga-anwa ọzọ.
+A na-ekewa ọdịda ọdịda tupu emee mkpebi ọzọ.
 
-Ọdịda nwa oge dịka ngafe oge nchere, njehie netwọkụ, oke ọnụego arịrịọ, na nzaghachi 5xx sitere n’aka onye na-eweta ọrụ nwere ike ibute ịgbanwe gaa n’onye na-eweta ọrụ ọzọ. Anaghị anwaghachi njehie nkwenye njirimara, njehie ikike, arịrịọ na-adịghị irè, ụdịdị na-adịghị, na ọdịda ndị a na-amaghị n’enweghị ntụle.
+Ọdịda na-adịte aka dị ka nkwụsị oge, mperi netwọkụ, oke ọnụego, na nzaghachi 5xx onye na-eweta nwere ike ịda. A naghị anwale oke ma ọ bụ kredit ike gwụrụ (oke 429, ma ọ bụ 402 ịkwụ ụgwọ achọrọ) n'otu onye na-eweta ya mana ọ dabara na nke ọzọ, onye oke ya dị iche. A naghị anwale njehie nyocha, mperi ikike, arịrịọ na-ezighi ezi, ụdị adịghị adị na ọdịda amaghi ama na kpuru ìsì.
 
-Iwu ndabara maka ịgafe n’etiti ndị na-eweta ọrụ na-enye ohere ruo nnwale atọ n’aka ndị na-eweta ọrụ, na-anwagharị mgbe e nwere oke ọnụego arịrịọ na ngafe oge nchere, ma na-edobe nkwụsị nchịkwa iche na ọnọdụ sekit nwa oge.
+Amụma ndị na-eweta obe na-adịghị mma na-enye ohere ruo mbọ atọ nke ndị na-eweta ya, na-emegharị oke ọnụego yana nkwụsị oge, na-adaba na oke ike gwụrụ, ma na-edebe nkwarụ nhazi iche na steeti sekit nwa oge.
 
-Ọnọdụ sekit bụ `closed`, `open`, na `half_open`. Oge izu ike na-ahazi nyocha nwere oke; nyocha gara nke ọma na-emechi sekit, ebe nyocha dara ada na-emepeghachi ya.
+## Ebe ọ na-emetụta
+
+- **Ngwakọta** daa n'etiti ebumnuche ha dịka atụmatụ na ntọala nke combo siri dị.
+- **Id nlereanya efu** (enweghị `provider/` prefix) na ọtụtụ ndị na-enye ọrụ na-eje ozi, na-enweghị ngwakọta nke aha ahụ kpọmkwem, na-ebu ụzọ zigara ndị na-eweta ntinye aka. Ọ bụrụ na mbọ ahụ daa n'ụzọ amụma ahụ daa, a na-ezigara otu arịrịọ ahụ na onye na-eweta ọrụ na-esote nke na-eje ozi id. Nzaghachi na-ebu `x-omniroute-fallback-attempts` yana ọnụọgụ ndị na-enye ndị a nwara tupu nke zara.
+  - Enyere ikike nke ọ bụla ọzọ dị ka a ga-asị na echere ya. Ihe mgbaru ọsọ nke igodo API ma ọ bụ na-anabataghị ka awụsara ya na-enweghị oku na-aga elu, onye ahịa ahụ na-enwetakwa njehie n'ezie, ọ bụghị njụjụ amụma maka ebumnuche ọ na-akpọbeghị.
+  - Naanị nzaghachi dara ada na-aga n'ihu: ọ nweghị ihe na-aga n'ihu ka ọbịte mbụ agbasachara.
+  - Mgbanwe ihe nlere ọdịda mberede na-emetụta naanị mgbe onye ọ bụla na-eweta ụdị a rịọrọ daa.
+  - Arịrịọ etinyere na njikọ (`x-omniroute-connection`) na-anọ na ya.
+  - Agaghị ebugharị id (`provider/model`) prefixed na onye na-eweta ọzọ.
+
+Steeti sekit bụ `closed`, `open`, na `half_open`. A cooldown na-ahazi ihe nyocha nwere oke; nyocha nke na-aga nke ọma na-emechi sekit ma nyocha dara ada meghee ya.
