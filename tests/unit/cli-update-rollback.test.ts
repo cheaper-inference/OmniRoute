@@ -716,6 +716,22 @@ test("service detection: a CLI daemon is proven, a systemd unit, pm2 or a superv
     assert.equal(daemon.serverPid, 4100);
     assert.equal(daemon.environment.PORT, "1");
 
+    // The per-user systemd manager is not a service of the app: a daemon started from a
+    // terminal sits below it.
+    const userSession = tx.detectManagedService(dataDir, pkg, {
+      isPidAlive: alive,
+      readFileSync: procfs(
+        "0::/user.slice/user-1000.slice/user@1000.service/app.slice/app-gnome-terminal-1.scope\n"
+      ),
+    });
+    assert.equal(userSession.shape, "daemon");
+
+    const nestedUnit = tx.detectManagedService(dataDir, pkg, {
+      isPidAlive: alive,
+      readFileSync: procfs("0::/system.slice/hosted-compute-agent.service/job-1\n"),
+    });
+    assert.equal(nestedUnit.shape, "other");
+
     const systemd = tx.detectManagedService(dataDir, pkg, {
       isPidAlive: alive,
       readFileSync: procfs("0::/system.slice/omniroute.service\n"),

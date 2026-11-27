@@ -125,6 +125,28 @@ exit 1
   };
 }
 
+// The detector reads the service's own environment and cgroup. Both are pinned here so a host
+// (a CI runner under a systemd unit, a shell with INVOCATION_ID, PM2_*, CI=true) cannot change
+// the verdict: the fake service gets an explicit minimal environment and never inherits
+// process.env, and the cgroup is answered by a fixed session scope.
+function hermeticServiceEnv(env: Env): Record<string, string> {
+  return {
+    PATH: "/usr/local/bin:/usr/bin:/bin",
+    HOME: env.root,
+    DATA_DIR: env.dataDir,
+    PORT: String(env.port),
+  };
+}
+
+const SESSION_CGROUP = "0::/user.slice/user-1000.slice/session-1.scope\n";
+
+function hermeticProcDeps() {
+  return {
+    readFileSync: (file: string) =>
+      file.endsWith("/cgroup") ? SESSION_CGROUP : fs.readFileSync(file, "utf8"),
+  };
+}
+
 function startOldServer(env: Env) {
   const child = spawn(
     process.execPath,
@@ -132,7 +154,7 @@ function startOldServer(env: Env) {
     {
       detached: true,
       stdio: "ignore",
-      env: { ...process.env, DATA_DIR: env.dataDir, PORT: String(env.port), OMNIROUTE_FAKE: "1" },
+      env: hermeticServiceEnv(env),
     }
   );
   child.unref();
@@ -186,7 +208,8 @@ async function runUpdate(env: Env, targetVersion: string, readinessTimeoutMs: nu
   const ctx = tx.createDefaultPreflightContext({
     dataDir: env.dataDir,
     packageRoot: env.packageRoot,
-    env: process.env,
+    env: {},
+    procDeps: hermeticProcDeps(),
   });
   ctx.isContainer = () => false; // the dev box itself may be a container
   ctx.globalRoot = async () => path.dirname(env.packageRoot);

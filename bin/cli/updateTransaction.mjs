@@ -631,11 +631,28 @@ function readServicePid(dataDir, service) {
   }
 }
 
+// systemd's per-user manager is itself `user@<uid>.service`: every process a person starts
+// from a terminal in a graphical or ssh session sits below it, and none of them is "a service".
+const USER_MANAGER_UNIT = /^user@\d+\.service$/;
+
+// True when a cgroup path has a systemd service unit of its own in it (`/system.slice/x.service`,
+// `.../app.slice/x.service/sub`), not just the per-user manager or a session/app scope.
+function cgroupNamesServiceUnit(cgroup) {
+  return String(cgroup)
+    .split("\n")
+    .some((line) =>
+      line
+        .slice(line.lastIndexOf(":") + 1)
+        .split("/")
+        .some((segment) => segment.endsWith(".service") && !USER_MANAGER_UNIT.test(segment))
+    );
+}
+
 function runsUnderServiceManager(pid, environment, read = (file) => readFileSync(file, "utf8")) {
   if (environment && (environment.PM2_HOME || environment.pm_id !== undefined)) return true;
   try {
     // A systemd service unit owns the process: it would restart the old version behind us.
-    return /\.service(?:\/|$|\n)/m.test(String(read(`/proc/${pid}/cgroup`)));
+    return cgroupNamesServiceUnit(read(`/proc/${pid}/cgroup`));
   } catch {
     return false;
   }
@@ -784,7 +801,12 @@ export async function resolveGlobalNpmRoot() {
  * Real context for `preflightManagedUpdate`. `dataDir` and `packageRoot` come from the caller
  * (the CLI resolves them from its own files, the server from its configuration).
  */
-export function createDefaultPreflightContext({ dataDir, packageRoot, env = process.env }) {
+export function createDefaultPreflightContext({
+  dataDir,
+  packageRoot,
+  env = process.env,
+  procDeps = {},
+}) {
   return {
     platform: process.platform,
     isContainer: () => runningInContainer(env),
@@ -800,7 +822,7 @@ export function createDefaultPreflightContext({ dataDir, packageRoot, env = proc
     },
     installedVersion: () => readPackageVersion(packageRoot),
     dataDir,
-    service: async () => detectManagedService(dataDir, packageRoot),
+    service: async () => detectManagedService(dataDir, packageRoot, procDeps),
     lockHeld: () => isLockHeld(dataDir),
     diskHeadroom: (args) => checkDiskHeadroom(args),
     nodePath: process.execPath,
@@ -926,12 +948,9 @@ export function createDefaultDependencies({ plan, runtime, environment }) {
       if (readPackageVersion(runtime.packageRoot) !== p.previousVersion) {
         return { kind: "refused", reason: "version-changed" };
       }
+      // The supervisor shape was proven at launch; only the identity of the process can change.
       const service = detectManagedService(runtime.dataDir, runtime.packageRoot);
-      if (
-        !service ||
-        service.shape !== "daemon" ||
-        [service.serverPid].join(",") !== runtime.oldPids.join(",")
-      ) {
+      if (!service || [service.serverPid].join(",") !== runtime.oldPids.join(",")) {
         return { kind: "refused", reason: "service-changed" };
       }
       const disk = await checkDiskHeadroom({
