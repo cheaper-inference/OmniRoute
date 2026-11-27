@@ -1,14 +1,19 @@
 import {
   computeFreeModelTotals,
+  computePublicFreeHeadline,
+  computeRowSumMirror,
   type FreeModelBudget,
 } from "@omniroute/open-sse/config/freeModelCatalog.ts";
 import {
   FREE_CATALOG_CURATED_AT,
   FREE_MODEL_BUDGETS,
 } from "@omniroute/open-sse/config/freeModelCatalog.data.ts";
+import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry.ts";
 import type { MergedEntry } from "@/lib/radar/applyFeed";
+import type { RadarFeedRowSum } from "@/lib/radar/feedSchema";
 import { getRadarCatalog } from "@/lib/radar";
 import { sumUsageTokensThisMonth } from "@/lib/db/usageSummary";
+import type { FreeTierSummary } from "@/shared/types/freeTierSummary";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
 import { listNoCredentialProviders } from "@/shared/utils/providerCredentialRequirement";
 
@@ -18,24 +23,14 @@ const CORS = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
-/**
- * `hardStopGuaranteed` is a hand-curated fact about the upstream provider that
- * the Radar feed does not carry, so it is read back from the baseline entry
- * rather than dropped when the overlay is served.
- */
-const HARD_STOP_BY_KEY = new Map(
-  FREE_MODEL_BUDGETS.filter((m) => m.hardStopGuaranteed !== undefined).map((m) => [
-    `${m.provider}:${m.modelId}`,
-    m.hardStopGuaranteed,
-  ])
+const RELEASE_BY_KEY = new Map(
+  FREE_MODEL_BUDGETS.map((entry) => [`${entry.provider}:${entry.modelId}`, entry])
 );
 
-/**
- * Project a merged catalog entry back onto the response's `FreeModelBudget`
- * shape: the overlay's extra fields (origin, provenance, capabilities…) stay
- * internal, so the published contract is identical whichever source answered.
- */
-function toBudgetEntry(entry: MergedEntry): FreeModelBudget & { enabled?: boolean } {
+type BudgetEntry = FreeModelBudget & { enabled?: boolean };
+
+/** Project the overlay onto the existing budget fields. */
+function toBudgetEntry(entry: MergedEntry): BudgetEntry {
   return {
     provider: entry.provider,
     modelId: entry.modelId,
@@ -47,8 +42,43 @@ function toBudgetEntry(entry: MergedEntry): FreeModelBudget & { enabled?: boolea
     tos: entry.tos,
     trainsOnPrompts: entry.trainsOnPrompts,
     eligibilityGate: entry.eligibilityGate,
-    hardStopGuaranteed: HARD_STOP_BY_KEY.get(`${entry.provider}:${entry.modelId}`),
+    // The release catalog curates this fact about the upstream provider.
+    hardStopGuaranteed: RELEASE_BY_KEY.get(`${entry.provider}:${entry.modelId}`)
+      ?.hardStopGuaranteed,
     enabled: entry.enabled,
+  };
+}
+
+function resolveRowSum(
+  feedRowSum: RadarFeedRowSum | null | undefined,
+  releaseEntries: BudgetEntry[] | undefined,
+  asOf: Date
+): Pick<FreeTierSummary, "rowSum" | "rowSumSource"> {
+  if (feedRowSum?.method === "row-sum-v1") {
+    const {
+      liveTokensPerMonth: liveTokens,
+      retiredTokensPerMonth: retiredTokens,
+      totalTokensPerMonth: totalTokens,
+    } = feedRowSum;
+    return {
+      rowSumSource: "radar",
+      rowSum: {
+        method: "row-sum-v1",
+        liveTokens,
+        retiredTokens,
+        totalTokens,
+        retiredShare: totalTokens > 0 ? retiredTokens / totalTokens : 0,
+      },
+    };
+  }
+
+  const { method, liveTokens, retiredTokens, totalTokens, retiredShare } = computeRowSumMirror({
+    entries: releaseEntries,
+    asOf,
+  });
+  return {
+    rowSumSource: "release",
+    rowSum: { method, liveTokens, retiredTokens, totalTokens, retiredShare },
   };
 }
 
@@ -77,33 +107,55 @@ export async function GET(req: Request): Promise<Response> {
   // relying on Origin checks the browser CORS model doesn't actually enforce
   // for a same-origin-looking (DNS-rebinding) caller.
   const authed = await isAuthenticated(req);
-  const serveOverlay = overlayIsFresh && (meta.tier !== "live" || authed);
+  const overlay = overlayIsFresh && (meta.tier !== "live" || authed) ? meta : null;
 
   // The accessor has already applied local model state to the shipped catalog
   // when the feed is stale.
-  const totals =
-    serveOverlay || meta?.olderThanRelease
-      ? computeFreeModelTotals({ excludeTosAvoid, entries: entries.map(toBudgetEntry) })
-      : computeFreeModelTotals({ excludeTosAvoid });
+  const servedEntries = overlay || meta?.olderThanRelease ? entries.map(toBudgetEntry) : undefined;
+  const totals = computeFreeModelTotals({ excludeTosAvoid, entries: servedEntries });
+
+  // Apply release-curated counting gates to the new figures and keep the legacy
+  // totals based on the existing overlay projection.
+  const { steadyRecurringTokens: realTokens, socialGatedRecurringTokens: socialGatedTokens } =
+    computePublicFreeHeadline({
+      entries: servedEntries?.map((entry) => ({
+        ...entry,
+        gates: RELEASE_BY_KEY.get(`${entry.provider}:${entry.modelId}`)?.gates,
+      })),
+    });
+  const servedAt = new Date();
+  const catalogUpdatedAt = overlay ? overlay.generatedAt : FREE_CATALOG_CURATED_AT;
 
   // #13679: usedThisMonth/remaining reveal the operator's own local usage —
   // unlike the catalog totals, that is not meant to be public. Withhold both
   // from unauthenticated callers instead of gating the whole route, so the
   // intentionally-public catalog fields stay served to everyone.
   const usedThisMonth = authed ? sumUsageTokensThisMonth() : null;
-  const body = {
+  const body: FreeTierSummary = {
     ...totals,
+    perModel: totals.perModel.map((row) => ({
+      ...row,
+      inRelease: RELEASE_BY_KEY.has(`${row.provider}:${row.modelId}`),
+      routable: Object.hasOwn(REGISTRY, row.provider),
+    })),
     usedThisMonth,
     remaining: authed ? Math.max(0, totals.steadyRecurringTokens - usedThisMonth!) : null,
-    // Which source answered, and the date of what was actually served — the
-    // feed's own build date when the overlay answers (null when a cache row
-    // predates build-date tracking; never the download time standing in),
-    // the release curation date when the baseline does.
-    catalogUpdatedAt: serveOverlay ? meta.generatedAt : FREE_CATALOG_CURATED_AT,
-    catalogSource: serveOverlay ? ("radar-overlay" as const) : ("baseline" as const),
+    catalogUpdatedAt,
+    catalogSource: overlay ? "radar-overlay" : "baseline",
     // Computed here, not in the component: deriving it client-side would pull
     // the whole provider REGISTRY into the browser bundle.
     noCredentialProviders: listNoCredentialProviders(),
+    source: {
+      kind: overlay ? "radar" : "release",
+      version: overlay?.version ?? null,
+      generatedAt: catalogUpdatedAt,
+      servedAt: servedAt.toISOString(),
+    },
+    ...resolveRowSum(overlay?.rowSum, overlay ? undefined : servedEntries, servedAt),
+    realTokens,
+    socialGatedTokens,
+    activePromotions: null,
+    priceReference: overlay?.priceReference ?? null,
   };
   return new Response(JSON.stringify(body), {
     status: 200,

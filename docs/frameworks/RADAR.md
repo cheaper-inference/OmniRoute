@@ -559,6 +559,31 @@ once the flag is on, an unauthenticated request gets `401` before any DB read or
 write. `GET /api/radar/settings` never returns the raw supporter key regardless of
 auth state — only the masked form and a `hasSupporterKey` boolean.
 
+`GET /api/free-tier/summary` serves the free-tier catalog used by the dashboard.
+Community overlays are public, and live overlays require an authenticated caller.
+The existing totals and `perModel` honor `?excludeTosAvoid=1`. The instance's usage
+and remaining tokens are available only with authentication.
+
+- `source` gives the catalog's `kind` (`release` or `radar`), `version`,
+  `generatedAt`, and `servedAt` in UTC. For a release, `version` is `null` and
+  `generatedAt` is the release catalog's curation date.
+- `realTokens` counts eligible recurring tokens with each shared quota counted once,
+  excluding ToS-`avoid` entries. `socialGatedTokens` reports the separate total
+  behind social gates. Both use the served catalog and apply the public headline
+  rules regardless of the query filter.
+- `rowSum` contains the `row-sum-v1` method, `liveTokens`, `retiredTokens`,
+  `totalTokens`, and `retiredShare`. It adds recurring quotas row by row, including
+  eligible ended offers. `rowSumSource` identifies the feed or release calculation.
+  A missing or unsupported feed method uses the release calculation. Clients
+  should display the row sum alongside `realTokens` only when `rowSumSource`
+  matches `source.kind`.
+- `priceReference` is `{ yearlyUsd, lifetimeUsd, checkedAt }` when the served Radar
+  feed includes a valid reference. It is `null` otherwise. `checkedAt` uses
+  `YYYY-MM-DD`.
+- Each `perModel` row includes `inRelease` for membership in the shipped free-model
+  catalog and `routable` for provider membership in the local registry.
+- `activePromotions` is reserved for the promotions summary and currently returns `null`.
+
 ---
 
 ## Supporter offers
