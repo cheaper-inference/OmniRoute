@@ -1,15 +1,16 @@
 ---
 title: "Plugin Marketplace"
 version: 3.8.40
-lastUpdated: 2026-06-28
+lastUpdated: 2026-11-26
 ---
 
 # Plugin Marketplace
 
-> **Source of truth:** `src/lib/plugins/` (`marketplace.ts`, `manager.ts`, `manifest.ts`,
-> `scanner.ts`, `loader.ts`), `src/app/api/plugins/`, and
+> **Source of truth:** `src/lib/plugins/` (`marketplace.ts`, `marketplaceIntegrity.ts`,
+> `marketplaceArchive.ts`, `manager.ts`, `manifest.ts`, `scanner.ts`, `loader.ts`),
+> `src/app/api/plugins/`, and
 > `src/app/(dashboard)/dashboard/plugins/`
-> **Last updated:** 2026-06-28 — v3.8.40
+> **Last updated:** 2026-11-26
 
 OmniRoute ships a WordPress-style plugin system. Plugins are self-contained
 directories — each with a `plugin.json` manifest and an entry file — that hook
@@ -98,7 +99,7 @@ loopback-only — `/api/plugins` and `/api/plugins/` are listed in
 | `/api/plugins`                     | POST   | Install a plugin from the plugin sources directory  |
 | `/api/plugins/scan`                | POST   | Scan the plugin directory and register new plugins  |
 | `/api/plugins/marketplace`         | GET    | List marketplace catalog entries                    |
-| `/api/plugins/marketplace/install` | POST   | Install a marketplace plugin by name                |
+| `/api/plugins/marketplace/install` | POST   | Install a marketplace plugin by name (+ version)    |
 | `/api/plugins/[name]`              | GET    | Get installed plugin details                        |
 | `/api/plugins/[name]`              | DELETE | Uninstall a plugin                                  |
 | `/api/plugins/[name]/activate`     | POST   | Activate (load + register hooks)                    |
@@ -147,6 +148,73 @@ applies to `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
+
+### Signed install (opt-in)
+
+Behind the `PLUGIN_MARKETPLACE_INTEGRITY_ENABLED` feature flag (off by default),
+`POST /api/plugins/marketplace/install` installs only from the **official signed
+index**. With the flag off nothing below applies and the original contract
+(including a custom registry URL) is unchanged.
+
+```bash
+curl -X POST http://localhost:20128/api/plugins/marketplace/install \
+  -H "Cookie: auth_token=..." \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "my-plugin", "version": "1.2.0" }'
+```
+
+The `version` is required in this mode. Steps, all in `src/lib/plugins/`:
+
+1. Fetch the index and its detached signature (`marketplace.ts`, through
+   `safeOutboundFetch` with the `public-only` guard, timeouts and size caps).
+2. `verifyMarketplaceIndex()` (`marketplaceIntegrity.ts`) checks the Ed25519
+   signature over the **exact bytes** received, with any currently trusted key,
+   and only then parses them with a closed Zod schema: HTTPS download URL,
+   mandatory SHA-256 per package, unique name+version, and an `issuedAt` /
+   `expiresAt` window that must contain the current time.
+3. Look up the exact `name` + `version` in the verified index.
+4. Download the package and `verifyMarketplaceArchive()` compares its SHA-256 with
+   the digest the signed index lists.
+5. `extractMarketplaceArchive()` (`marketplaceArchive.ts`) unpacks the same bytes
+   into a private staging directory. It writes regular files and directories
+   only, and refuses links, absolute or `..` paths, backslashes, NUL bytes,
+   duplicate paths, more than 2000 entries and more than 50 MiB unpacked. The
+   archive must hold exactly one `plugin.json`, at the root or one directory
+   down, whose `name` and `version` equal the signed entry.
+6. Only then is `pluginManager.install()` called, with the extracted directory.
+   This includes the upgrade path of an already installed plugin.
+
+Any failure raises a `MarketplaceIntegrityError` before the manager is reached, so
+an installed plugin and its registered version stay as they were. The response is
+a fixed message (`400` verification failure, `404` unknown name+version, `502`
+index or package unreachable, `503` not configured) with the failing step in
+`error.reason`; upstream hosts, paths and stack traces are never returned. **A
+failure of the signed mode never enables an unsigned install**: this mode does
+not read the `pluginMarketplaceUrl` setting at all.
+
+#### What the owner provides before turning the flag on
+
+The trust anchor is `OFFICIAL_MARKETPLACE_TRUST` in
+`src/lib/plugins/marketplaceIntegrity.ts`. It ships **empty**:
+
+- `keys`: the official Ed25519 public key(s), base64 SPKI-DER or PEM. For a
+  rotation, add the new key and give the old one a `notAfter` for the overlap
+  window; retired and malformed keys are skipped. Only public keys belong in the
+  repository.
+- `indexUrl` and `signatureUrl`: HTTPS URLs of the index JSON and of its detached
+  signature (base64 Ed25519 over the exact index bytes).
+
+While any of these is empty, enabling the flag makes every install fail with
+`503` ("not configured"): the flag cannot be used to bypass anything.
+
+#### Custom registries (future step)
+
+Signed verification covers the official index only. A custom registry that is
+signed with an operator-chosen key is a separate, later step: it would add a
+second `MarketplaceTrustSource` (index URL, signature URL, keys) selected by an
+explicit field of the install request. The extension point is documented in
+`marketplaceIntegrity.ts`; it is not implemented, and the `pluginMarketplaceUrl`
+setting is never treated as a trust source.
 
 ### Update plugin config
 
