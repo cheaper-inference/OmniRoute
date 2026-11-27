@@ -34,6 +34,20 @@ interface AddWebhookWizardProps {
 
 const STEPS = [1, 2, 3] as const;
 
+type WizardOperation = "next" | "finish" | "delete" | null;
+
+interface WizardSession {
+  draftId: string | null;
+  operation: WizardOperation;
+}
+
+async function deleteDraft(id: string): Promise<boolean> {
+  const res = await fetch(`/api/webhooks/${id}`, { method: "DELETE", keepalive: true }).catch(
+    () => null
+  );
+  return res?.ok ?? false;
+}
+
 interface WizardState {
   kind: WebhookKind;
   slack: SlackConfig;
@@ -100,10 +114,12 @@ export function AddWebhookWizard({
   const isEditing = Boolean(editingWebhook);
   const [step, setStep] = useState(1);
   const [state, setState] = useState<WizardState>(INITIAL);
-  const [saving, setSaving] = useState(false);
+  const [operation, setOperation] = useState<WizardOperation>(null);
+  const saving = operation !== null;
   const tc = useTranslations("common");
   const [error, setError] = useState<string | null>(null);
   const [createdId, setCreatedId] = useState<string | null>(null);
+  const sessionRef = useRef<WizardSession | null>(null);
   // Next stays enabled on step 2: a refused click is what flags the fields that need fixing
   // (inline, by the forms) and moves focus to the first of them.
   const [showStep2Errors, setShowStep2Errors] = useState(false);
@@ -116,24 +132,53 @@ export function AddWebhookWizard({
 
   useEffect(() => {
     if (!isOpen) return;
+    const session: WizardSession = { draftId: null, operation: null };
+    sessionRef.current = session;
     void (async () => {
       await Promise.resolve();
+      if (sessionRef.current !== session) return;
       setStep(1);
       setState(stateFromWebhook(editingWebhook));
       setShowStep2Errors(false);
       setError(null);
+      setOperation(null);
       setCreatedId(editingWebhook?.id ?? null);
     })();
+    return () => {
+      sessionRef.current = null;
+      // Finish handles its own outcome, and an in-flight DELETE already uses keepalive.
+      if (session.draftId && session.operation !== "finish" && session.operation !== "delete") {
+        void deleteDraft(session.draftId);
+      }
+    };
   }, [editingWebhook, isOpen]);
 
-  const handleClose = () => {
-    if (saving) return;
-    setStep(1);
-    setState(INITIAL);
-    setShowStep2Errors(false);
+  const updateOperation = (session: WizardSession, next: WizardOperation) => {
+    session.operation = next;
+    if (sessionRef.current === session) setOperation(next);
+  };
+
+  const handleClose = async () => {
+    const session = sessionRef.current;
+    if (!session || session.operation) return;
+    const id = session.draftId;
+    if (!id) {
+      onClose();
+      return;
+    }
+
+    updateOperation(session, "delete");
     setError(null);
-    setCreatedId(null);
-    onClose();
+    const deleted = await deleteDraft(id);
+    if (deleted) session.draftId = null;
+    updateOperation(session, null);
+    if (sessionRef.current !== session) return;
+
+    if (deleted) {
+      onClose();
+    } else {
+      setError(t("deleteFailed"));
+    }
   };
 
   // Builds the config payload (URL + kind + metadata) — sent when entering step 3.
@@ -156,12 +201,14 @@ export function AddWebhookWizard({
   // Called when Next is clicked on step 2: create (or update) the webhook so the
   // test button is available at step 3 before the user clicks Finish.
   const handleNextFromStep2 = async () => {
+    const session = sessionRef.current;
+    if (!session || session.operation) return;
     if (!step2Valid(state, isEditing)) {
       setShowStep2Errors(true);
       setRefusedNext((count) => count + 1);
       return;
     }
-    setSaving(true);
+    updateOperation(session, "next");
     setError(null);
     try {
       if (createdId) {
@@ -176,24 +223,34 @@ export function AddWebhookWizard({
         const res = await fetch("/api/webhooks", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(buildConfigPayload()),
+          body: JSON.stringify({ ...buildConfigPayload(), enabled: false }),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(webhookErrorText(data.error, t("saveFailed")));
-        setCreatedId(data.webhook?.id ?? null);
+        const id = data.webhook?.id;
+        if (!id) throw new Error(t("saveFailed"));
+        if (sessionRef.current !== session) {
+          void deleteDraft(id);
+          return;
+        }
+        session.draftId = id;
+        setCreatedId(id);
       }
-      setStep(3);
+      if (sessionRef.current === session) setStep(3);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("saveFailed"));
+      if (sessionRef.current === session) {
+        setError(err instanceof Error ? err.message : t("saveFailed"));
+      }
     } finally {
-      setSaving(false);
+      updateOperation(session, null);
     }
   };
 
   // Finish: update events/enabled/description on the already-created webhook.
   const finish = async () => {
-    if (!createdId) return;
-    setSaving(true);
+    const session = sessionRef.current;
+    if (!createdId || !session || session.operation) return;
+    updateOperation(session, "finish");
     setError(null);
     try {
       const res = await fetch(`/api/webhooks/${createdId}`, {
@@ -206,14 +263,22 @@ export function AddWebhookWizard({
           description: state.description,
         }),
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(webhookErrorText(data.error, t("saveFailed")));
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(webhookErrorText(data.error, t("saveFailed")));
+      }
+      session.draftId = null;
+      if (sessionRef.current !== session) return;
       onCreated();
-      handleClose();
+      onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("saveFailed"));
+      if (sessionRef.current === session) {
+        setError(err instanceof Error ? err.message : t("saveFailed"));
+      } else if (session.draftId) {
+        void deleteDraft(session.draftId);
+      }
     } finally {
-      setSaving(false);
+      updateOperation(session, null);
     }
   };
 
@@ -256,7 +321,7 @@ export function AddWebhookWizard({
                 variant="primary"
                 onClick={() => (step === 2 ? void handleNextFromStep2() : setStep((s) => s + 1))}
                 disabled={saving}
-                loading={saving && step === 2}
+                loading={operation === "next" && step === 2}
               >
                 {t("wizard.next")}
               </Button>
@@ -265,7 +330,7 @@ export function AddWebhookWizard({
                 variant="primary"
                 onClick={() => void finish()}
                 disabled={saving}
-                loading={saving}
+                loading={operation === "finish"}
               >
                 {t("wizard.finish")}
               </Button>

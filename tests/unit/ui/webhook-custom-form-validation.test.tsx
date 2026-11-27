@@ -101,6 +101,7 @@ describe("Custom webhook URL guidance (KEA-9517)", () => {
     expect(JSON.parse(String(creates()[0][1]?.body))).toEqual({
       kind: "custom",
       url: "http://example.com",
+      enabled: false,
     });
   });
 
@@ -196,6 +197,7 @@ describe("Custom webhook step validation (KEA-9386)", () => {
       kind: "custom",
       url: "https://example.com/hook",
       secret,
+      enabled: false,
     });
   });
 

@@ -1,0 +1,1 @@
+- **fix(dashboard):** Keep new webhook drafts disabled until Finish and delete them when the wizard is dismissed or left (KEA-9785).

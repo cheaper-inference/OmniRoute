@@ -85,6 +85,7 @@ export function createWebhook(data: {
   url: string;
   events?: string[];
   secret?: string;
+  enabled?: boolean;
   description?: string;
   kind?: WebhookKind;
   metadataEncrypted?: string | null;
@@ -95,13 +96,14 @@ export function createWebhook(data: {
   const kind = data.kind || "custom";
 
   db.prepare(
-    `INSERT INTO webhooks (id, url, events, secret, description, kind, metadata_encrypted)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO webhooks (id, url, events, secret, enabled, description, kind, metadata_encrypted)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(
     id,
     data.url,
     JSON.stringify(data.events || ["*"]),
     secret,
+    data.enabled === false ? 0 : 1,
     data.description || "",
     kind,
     data.metadataEncrypted ?? null
