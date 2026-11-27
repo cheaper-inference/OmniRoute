@@ -70,6 +70,7 @@ const MODEL_ENDPOINT_OPTIONS: ModelSupportedEndpoint[] = [
   "audio-speech",
   "audio-transcriptions",
   "music",
+  "decisions",
 ];
 
 // Layout shared by the add form and the inline edit form: two columns on phones (fields
@@ -89,6 +90,7 @@ function endpointLabel(endpoint: ModelSupportedEndpoint, t: (key: string) => str
     "audio-speech": t("audioSpeech"),
     "audio-transcriptions": t("audioTranscriptions"),
     music: "Music",
+    decisions: t("supportedEndpointDecisions"),
   };
   return labels[endpoint] || endpoint;
 }

@@ -32,6 +32,7 @@ import {
 } from "@/app/api/v1/_shared/rateLimit";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
 import { buildOllamaSystemOneUrl } from "@/app/api/v1/_shared/systemOneOllamaUrl";
+import { buildAlibabaSystemOneUrl } from "@/app/api/v1/_shared/systemOneAlibabaUrl";
 import {
   isSystemOneCloudflareBackendEnabled,
   isSystemOneOllamaLocalBackendEnabled,
@@ -76,6 +77,7 @@ function resolveEnabledTarget(
           `a bare jev-* alias, "openrouter/<vendor>/<model>" for OpenRouter-hosted decisions models, ` +
           `"cloudflare-ai/<jev|clef|clef-flash>" for Cloudflare Workers AI ` +
           `(needs the SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED feature flag), ` +
+          `"alibaba/decision-model" for Alibaba DashScope decision models, ` +
           `or "ollama-local/<model>" for a local Ollama ` +
           `(needs the SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED feature flag).`
       ),
@@ -104,12 +106,28 @@ function resolveEnabledTarget(
 
 /**
  * Backends whose URL depends on the selected connection: `ollama-local` (#14667) posts
- * to that connection's base URL, never to a request field.
+ * to that connection's base URL, never to a request field; `alibaba` posts to the
+ * connection's DashScope host (general or a dedicated business space) rewritten to
+ * `…/compatible-mode/v1/systemone`.
  */
 function bindConnectionUrl(
   target: SystemOneTarget,
   credentials: SystemOneCredentials
 ): { target: SystemOneTarget } | { rejection: Response } {
+  if (target.backend === "alibaba") {
+    try {
+      const upstreamUrl = buildAlibabaSystemOneUrl(credentials.providerSpecificData?.baseUrl);
+      return { target: { ...target, upstreamUrl } };
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : String(err);
+      return {
+        rejection: errorResponse(
+          HTTP_STATUS.BAD_REQUEST,
+          `Invalid alibaba base URL: ${sanitizeErrorMessage(raw)}`
+        ),
+      };
+    }
+  }
   if (target.backend !== "ollama-local") return { target };
   try {
     const upstreamUrl = buildOllamaSystemOneUrl(credentials.providerSpecificData?.baseUrl);
