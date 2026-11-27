@@ -46,11 +46,35 @@ import { getNoAuthHydrationProviderIds } from "@/sse/services/noAuthProviderSibl
 
 export type { GeminiThinkingLevel } from "@/shared/constants/modelSpecs";
 
-/** Native Gemini thinking levels from the static catalog, without a new SSE-to-src import. */
+const GEMINI_4_THINKING_LEVELS = ["low", "medium", "high"] as const;
+const GEMINI_4_XHIGH_THINKING_LEVELS = [...GEMINI_4_THINKING_LEVELS, "xhigh"] as const;
+
+// Keep native protocol capabilities separate from provider catalog/availability data.
+const GEMINI_4_NATIVE_THINKING = {
+  // Preserve Argon's existing bare default's output-cap-aware legacy fallback.
+  argon: { levels: GEMINI_4_THINKING_LEVELS, defaultLevel: undefined },
+  carbon: { levels: GEMINI_4_THINKING_LEVELS, defaultLevel: "medium" },
+  hydrogen: { levels: GEMINI_4_XHIGH_THINKING_LEVELS, defaultLevel: "high" },
+  neon: { levels: GEMINI_4_XHIGH_THINKING_LEVELS, defaultLevel: "high" },
+} as const;
+
+/** Native Gemini thinking levels and fixed-tier defaults, independent of admission. */
 export function getNativeGeminiThinkingSpec(model: string): {
   levels: readonly GeminiThinkingLevel[];
   defaultLevel: GeminiThinkingLevel | undefined;
+  fixedTier?: GeminiThinkingLevel;
 } {
+  const id = model.slice(model.lastIndexOf("/") + 1).toLowerCase();
+  const match = /^gemini-4-(argon|carbon|hydrogen|neon)(?:-(low|medium|high|xhigh))?$/.exec(
+    id === "gemini-4" ? "gemini-4-argon" : id
+  );
+  if (match) {
+    const family = GEMINI_4_NATIVE_THINKING[match[1] as keyof typeof GEMINI_4_NATIVE_THINKING];
+    const levels: readonly GeminiThinkingLevel[] = family.levels;
+    const requestedTier = match[2] as GeminiThinkingLevel | undefined;
+    const fixedTier = requestedTier && levels.includes(requestedTier) ? requestedTier : undefined;
+    return { levels, fixedTier, defaultLevel: fixedTier ?? family.defaultLevel };
+  }
   const spec = getModelSpec(model);
   return {
     levels: spec?.geminiThinkingLevels ?? [],
