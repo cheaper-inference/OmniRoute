@@ -167,22 +167,36 @@ const STATUS_COMMAND_RE = /^git\s+status\b/i;
  *  - `integral`  a machine format this renderer does not summarise (`-z`, porcelain v2), kept whole;
  *  - `null`      anything else, including the human-readable layout: the legacy path handles it.
  */
+type TokenEffect = "stop" | "integral" | "v1" | null;
+
+function longFlagEffect(token: string): TokenEffect {
+  const equals = token.indexOf("=");
+  const name = equals === -1 ? token.slice(2) : token.slice(2, equals);
+  const value = equals === -1 ? "" : token.slice(equals + 1);
+  if (name === "porcelain" && (value === "v2" || value === "2")) return "integral";
+  return name === "porcelain" || name === "short" ? "v1" : null;
+}
+
+function shortFlagEffect(flags: string): TokenEffect {
+  if (flags.includes("z")) return "integral";
+  return flags.includes("s") ? "v1" : null;
+}
+
+/** What one command-line token says about the output format. */
+function tokenEffect(token: string): TokenEffect {
+  if (token === "--" || token === "|") return "stop";
+  if (token.startsWith("--")) return longFlagEffect(token);
+  return token.startsWith("-") && token.length > 1 ? shortFlagEffect(token.slice(1)) : null;
+}
+
 export function gitStatusCommandKind(command: string): "v1" | "integral" | null {
   if (!STATUS_COMMAND_RE.test(command)) return null;
   let kind: "v1" | null = null;
   for (const token of command.split(/\s+/).slice(2)) {
-    if (token === "--" || token === "|") break;
-    if (token.startsWith("--")) {
-      const equals = token.indexOf("=");
-      const name = equals === -1 ? token.slice(2) : token.slice(2, equals);
-      const value = equals === -1 ? "" : token.slice(equals + 1);
-      if (name === "porcelain" && (value === "v2" || value === "2")) return "integral";
-      if (name === "porcelain" || name === "short") kind = "v1";
-    } else if (token.startsWith("-") && token.length > 1) {
-      const flags = token.slice(1);
-      if (flags.includes("z")) return "integral";
-      if (flags.includes("s")) kind = "v1";
-    }
+    const effect = tokenEffect(token);
+    if (effect === "stop") break;
+    if (effect === "integral") return "integral";
+    if (effect === "v1") kind = "v1";
   }
   return kind;
 }
