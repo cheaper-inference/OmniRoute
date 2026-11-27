@@ -157,7 +157,7 @@ Step-by-step recipes for a new provider, dual-auth provider, API route, DB modul
 
 Deep-dives not already linked from the sections above — read the matching one before a non-trivial change:
 
-- Repo navigation — `docs/architecture/REPOSITORY_MAP.md` · Reasoning replay — `docs/routing/REASONING_REPLAY.md` · Radar (free-model catalog overlay) — `docs/frameworks/RADAR.md` · Memory system (FTS5 + Qdrant) — `docs/frameworks/MEMORY.md` · Cloud agents — `docs/frameworks/CLOUD_AGENT.md`
+- Auto-Combo (scoring factors, strategy table) — `docs/routing/AUTO-COMBO.md` · Repo navigation — `docs/architecture/REPOSITORY_MAP.md` · Reasoning replay — `docs/routing/REASONING_REPLAY.md` · Radar (free-model catalog overlay) — `docs/frameworks/RADAR.md` · Memory system (FTS5 + Qdrant) — `docs/frameworks/MEMORY.md` · Cloud agents — `docs/frameworks/CLOUD_AGENT.md`
 - Compliance / audit — `docs/security/COMPLIANCE.md` · Stealth (TLS / fingerprint) — `docs/security/STEALTH_GUIDE.md`
 - Evals — `docs/frameworks/EVALS.md` · Webhooks — `docs/frameworks/WEBHOOKS.md` · Log export (call logs → BigQuery/…) — `docs/frameworks/LOG-EXPORT.md` · Embedded services — `docs/frameworks/EMBEDDED-SERVICES.md`
 - API reference + OpenAPI — `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` · Provider catalog (auto-generated) — `docs/reference/PROVIDER_REFERENCE.md`
