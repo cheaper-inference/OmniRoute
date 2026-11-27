@@ -254,7 +254,8 @@ export const PROVIDER_EXPECTATIONS: Record<string, ProviderExpectation> = {
       gated: 0,
       socialGated: 15_000_000,
       boost: 0,
-      rowSumLive: 570_000_000,
+      // The 17 revived IDs carry their historical quotas in the retired reading.
+      rowSumLive: 315_000_000,
       publishedPools: 1,
     },
     discontinued: [

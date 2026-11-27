@@ -98,7 +98,15 @@ test("nara restores Agnes 2.5 Flash and keeps the other seven free rows retired"
     assert.deepEqual(m.gates ?? [], active ? ["telegram"] : []);
   }
   const ledger = RETIRED_FREE_ROWS.filter((r) => r.provider === "nara");
-  assert.deepEqual(ledger.map((r) => r.modelId).sort(), retiredIds);
+  assert.deepEqual(ledger.map((r) => r.modelId).sort(), registered);
+  assert.deepEqual(
+    ledger
+      .filter((r) => r.revivedAt === undefined)
+      .map((r) => r.modelId)
+      .sort(),
+    retiredIds
+  );
+  assert.equal(ledger.find((r) => r.modelId === activeId)?.revivedAt, "2026-11-27");
   assert.ok(ledger.every((r) => r.lastListedMonthlyTokens === 210_000_000));
   assert.ok(ledger.every((r) => r.reason === "no-models"));
   // Routing is untouched: the paid models stay reachable with a paid key.

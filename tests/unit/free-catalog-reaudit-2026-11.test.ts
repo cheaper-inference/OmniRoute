@@ -18,6 +18,7 @@ import {
   resolveFreeQuotaUnit,
   computePublicFreeHeadline,
   computeRowSumMirror,
+  formatTokenHeadline,
   freeTypesInBucket,
   isCountingGated,
   isSocialGated,
@@ -310,14 +311,16 @@ test("row-sum reading and retired ledger after the re-audit", () => {
   const m = computeRowSumMirror();
   // E1a adds 10 Zylo token rows × 6M; the other six providers are metered by requests.
   // E1b adds six Aion token rows × 0.6M (https://www.aionlabs.ai/docs/rate-limits/, 2026-11-27).
-  // E1c adds 210M from Nara and (38 - 9) × 15M from xKiro to the live reading.
-  // Returning offers leave the retired reading: Nara -210M and xKiro -17 × 150M.
-  // Eight xKiro IDs leave the free list and enter the ledger at 15M each.
-  assert.equal(m.liveTokens, 867_600_000);
-  assert.equal(m.retiredTokens, 8_550_500_000);
-  assert.equal(m.totalTokens, 9_418_100_000);
-  assert.equal(Math.round(m.retiredShare * 1000) / 10, 90.8);
-  assert.equal(RETIRED_FREE_ROWS.length, 125);
+  // Nara's revival wins its 210M tie. The 17 xKiro revivals keep their 150M historical
+  // quotas in the retired reading, alongside the eight new 15M retirements.
+  assert.equal(m.liveTokens, 612_600_000);
+  assert.equal(m.retiredTokens, 11_100_500_000);
+  assert.equal(m.totalTokens, 11_713_100_000);
+  assert.equal(m.realSteadyTokens, 120_436_000);
+  assert.equal(formatTokenHeadline(m.totalTokens), "~11.7B");
+  assert.equal(m.retiredShare, 11_100_500_000 / 11_713_100_000);
+  assert.equal(Math.round(m.retiredShare * 1000) / 10, 94.8);
+  assert.equal(RETIRED_FREE_ROWS.length, 143);
 });
 
 test("catalog counts after the re-audit", () => {
@@ -379,7 +382,18 @@ const LEDGER_BLOCKS: Array<[string, number, string]> = [
 test("the ledger keeps the last quota of every retired pool row, with its reason", () => {
   for (const [provider, tokens, reason] of LEDGER_BLOCKS) {
     const ledger = RETIRED_FREE_ROWS.filter((r) => r.provider === provider);
-    assert.deepEqual(ids(ledger), ids(retired(provider)), `${provider} ledger ids`);
+    assert.deepEqual(
+      ids(ledger.filter((r) => r.revivedAt === undefined)),
+      ids(retired(provider)),
+      `${provider} retired ledger ids`
+    );
+    const revived = ledger.filter((r) => r.revivedAt !== undefined);
+    assert.deepEqual(
+      ids(revived),
+      provider === "nara" ? ["agnes-2.5-flash"] : [],
+      `${provider} revived ledger ids`
+    );
+    for (const r of revived) assert.equal(r.revivedAt, "2026-11-27");
     for (const r of ledger) {
       assert.equal(r.lastListedMonthlyTokens, tokens, `${provider}/${r.modelId}`);
       assert.equal(r.reason, reason, `${provider}/${r.modelId}`);
@@ -396,9 +410,9 @@ test("the ledger keeps the last quota of every retired pool row, with its reason
 
 // --- Ledger rows of the corrected pools and dated evidence ----------------------------------
 
-test("dead ids of corrected pools keep their last listed quota in the ledger", () => {
+test("retired ids of corrected pools keep their last listed quota in the ledger", () => {
   const expect: Array<[string, number, string, number]> = [
-    ["xkiro", 150_000_000, "id-retired", 12],
+    ["xkiro", 150_000_000, "id-retired", 29],
     ["xkiro", 150_000_000, "paid-only", 1],
     ["groq", 6_000_000, "id-retired", 1],
     ["bazaarlink", 3_600_000, "id-retired", 31],
@@ -411,10 +425,17 @@ test("dead ids of corrected pools keep their last listed quota in the ledger", (
       (r) => r.provider === provider && r.reason === reason && r.retiredAt === "2026-11-23"
     );
     assert.equal(ledger.length, n, `${provider} ${reason}`);
+    const revived = ledger.filter((r) => r.revivedAt !== undefined);
+    assert.equal(revived.length, provider === "xkiro" && reason === "id-retired" ? 17 : 0);
     for (const r of ledger) {
       assert.equal(r.lastListedMonthlyTokens, tokens, `${provider}/${r.modelId}`);
       const row = rows(provider).find((m) => m.modelId === r.modelId);
-      assert.equal(row?.freeType, "discontinued", `${provider}/${r.modelId} is retired`);
+      if (r.revivedAt === undefined) {
+        assert.equal(row?.freeType, "discontinued", `${provider}/${r.modelId} is retired`);
+      } else {
+        assert.equal(r.revivedAt, "2026-11-27", `${provider}/${r.modelId} revival date`);
+        assert.equal(row?.freeType, "recurring-daily", `${provider}/${r.modelId} is live`);
+      }
       assert.equal(r.poolKey, row?.poolKey);
     }
   }

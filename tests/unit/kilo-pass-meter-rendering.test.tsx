@@ -101,9 +101,9 @@ function parse(html: string): Document {
   return new DOMParser().parseFromString(html, "text/html");
 }
 
-/** The kit band progressbar named `label`, as its ARIA values. */
+/** The kit band meter named `label`, as its ARIA values. */
 function band(doc: Document, label: string) {
-  const bar = doc.querySelector<HTMLElement>(`[role="progressbar"][aria-label="${label}"]`);
+  const bar = doc.querySelector<HTMLElement>(`[role="meter"][aria-label="${label}"]`);
   if (!bar) return null;
   return {
     min: bar.getAttribute("aria-valuemin"),
@@ -230,7 +230,7 @@ describe("KiloPassMeter segmented presentation", () => {
     const group = doc.querySelector('[role="group"]');
     expect(group?.getAttribute("aria-label")).toBe("Kilo Pass usage meter");
     expect(group?.closest(".ci-progress")?.getAttribute("data-layout")).toBe("bands");
-    expect(doc.querySelectorAll('[role="progressbar"]')).toHaveLength(2);
+    expect(doc.querySelectorAll('[role="meter"]')).toHaveLength(2);
     expect(band(doc, "Paid")).toEqual({
       min: "0",
       max: "49",
@@ -267,7 +267,7 @@ describe("KiloPassMeter segmented presentation", () => {
 
     expect(band(doc, "Paid")).toMatchObject({ max: "49", now: "10" });
     expect(band(doc, "Available bonus")).toBeNull();
-    expect(doc.querySelectorAll('[role="progressbar"]')).toHaveLength(1);
+    expect(doc.querySelectorAll('[role="meter"]')).toHaveLength(1);
   });
 
   it("omits the paid band when only the free bonus pool exists", () => {
@@ -292,7 +292,7 @@ describe("KiloPassMeter segmented presentation", () => {
     const html = renderMeter({ base: 0, bonus: 0, used: 0, total: 0, remaining: 0, balance: null });
     const doc = parse(html);
 
-    const bar = doc.querySelector('[role="progressbar"]');
+    const bar = doc.querySelector('[role="meter"]');
     expect(bar?.getAttribute("aria-label")).toBe("Kilo Pass usage meter");
     expect(bar?.getAttribute("aria-valuenow")).toBe("0");
     expect(html).not.toContain('data-state="indeterminate"');
@@ -319,7 +319,7 @@ describe("KiloPassMeter band text is translated", () => {
         <Meter base={49} bonus={24.5} used={47.95} total={73.5} remaining={25.55} />
       )
     );
-    const texts = Array.from(doc.querySelectorAll('[role="progressbar"]')).map((bar) =>
+    const texts = Array.from(doc.querySelectorAll('[role="meter"]')).map((bar) =>
       bar.getAttribute("aria-valuetext")
     );
     expect(texts).toEqual(["$47.95 von $49.00", "$0.00 von $24.50"]);

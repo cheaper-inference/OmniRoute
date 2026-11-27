@@ -85,7 +85,13 @@ test("nara has one shared 7M/day pool for Agnes 2.5 Flash", () => {
   const retired = rows.filter((m) => m.modelId !== live[0].modelId);
   assert.ok(retired.every((m) => m.monthlyTokens === 0 && m.freeType === "discontinued"));
   const ledger = RETIRED_FREE_ROWS.filter((r) => r.provider === "nara");
-  assert.equal(ledger.length, retired.length);
+  assert.equal(ledger.filter((r) => r.revivedAt === undefined).length, retired.length);
+  assert.deepEqual(
+    ledger
+      .filter((r) => r.revivedAt !== undefined)
+      .map(({ modelId, revivedAt }) => ({ modelId, revivedAt })),
+    [{ modelId: live[0].modelId, revivedAt: "2026-11-27" }]
+  );
   assert.ok(ledger.every((r) => r.lastListedMonthlyTokens === 210_000_000));
 });
 
