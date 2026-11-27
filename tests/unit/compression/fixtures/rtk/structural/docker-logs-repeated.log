@@ -1,0 +1,55 @@
+Attaching to api
+INFO  [boot] server booting on port 8080
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+ERROR [db] connection refused: db:5432
+ERROR [db] connection refused: db:5432
+WARN  [pool] pool exhausted, queue=7
+ERROR [worker] job 42 crashed: TypeError: handler is undefined
+    at run (/app/worker.js:10:5)
+    at run (/app/worker.js:10:5)
+    at next (/app/queue.js:88:13)
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [http] GET /healthz 200 1ms
+INFO  [jobs] job 43 finished ok
+INFO  [jobs] job 43 finished ok
+INFO  [jobs] job 43 finished ok
+INFO  [net] retrying upstream after timeout
+INFO  [net] retrying upstream after timeout
+INFO  [net] retrying upstream after timeout
+INFO  [net] retrying upstream after timeout
+INFO  [net] retrying upstream after timeout
+DEBUG [cache] hit user:1
+DEBUG [cache] hit user:1
+DEBUG [cache] hit user:1
+DEBUG [cache] hit user:1
+DEBUG [cache] hit user:1
+INFO  [boot] ready

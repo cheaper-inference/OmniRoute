@@ -75,9 +75,14 @@ interface StructuralRoute {
 type NativeToolRouteSelector = (text: string, toolName: string) => StructuralRoute | null;
 const NATIVE_TOOL_ROUTES: Record<string, NativeToolRouteSelector> = {};
 
+const LOGS_COMMAND_RE = /^docker\s+(?:compose\s+)?logs\b/i;
 const DIFF_COMMAND_RE = /^git\s+(?:diff|show)\b/i;
 const DIFF_FILE_HEADER_RE = /^diff --(?:git|cc|combined) /m;
 const DIFF_STRONG_START_RE = /^diff --(?:git|cc|combined) /;
+
+function logsRoute(command: string): StructuralRoute {
+  return { type: "docker-logs", render: STRUCTURAL_REGISTRY["docker-logs"], command };
+}
 
 function diffRoute(command: string | null): StructuralRoute {
   return { type: "git-diff", render: STRUCTURAL_REGISTRY["git-diff"], command };
@@ -90,6 +95,7 @@ function diffRoute(command: string | null): StructuralRoute {
  */
 function selectShellRoute(text: string, rawCommand: string | null | undefined, full: boolean) {
   const command = lastCommandSegment(rawCommand?.trim() ?? "") || null;
+  if (command && LOGS_COMMAND_RE.test(command)) return logsRoute(command);
   if (command) {
     if (!DIFF_COMMAND_RE.test(command)) return null;
     return !full || DIFF_FILE_HEADER_RE.test(text) ? diffRoute(command) : null;

@@ -2,6 +2,15 @@ export interface DeduplicateOptions {
   threshold?: number;
 }
 
+/** Length of the run of identical lines that starts at `start` (1 when the next line differs). */
+export function identicalRunLength(lines: readonly string[], start: number): number {
+  let runLength = 1;
+  while (start + runLength < lines.length && lines[start + runLength] === lines[start]) {
+    runLength++;
+  }
+  return runLength;
+}
+
 export function deduplicateRepeatedLines(
   text: string,
   options: DeduplicateOptions = {}
@@ -16,10 +25,7 @@ export function deduplicateRepeatedLines(
 
   for (let index = 0; index < lines.length; index++) {
     const line = lines[index];
-    let runLength = 1;
-    while (index + runLength < lines.length && lines[index + runLength] === line) {
-      runLength++;
-    }
+    const runLength = identicalRunLength(lines, index);
 
     if (line.trim() && runLength >= threshold) {
       output.push(line);

@@ -196,6 +196,19 @@ computed from the whole input, and drops blob ids and unchanged context. Dispatc
   filter being explicitly disabled keeps the legacy path. The `rtkConfig.renderers` allowlist is
   matched against the format name (`git-diff`).
 
+**Repeated logs** (`docker logs`, `docker compose logs`; `engines/rtk/renderers/repeatedLogs.ts`,
+format name `docker-logs`). The format comes from the correlated command only. The renderer collapses
+a run of `>= 3` lines that are byte-identical, consecutive and routine (levels `TRACE`, `DEBUG`,
+`INFO`, `NOTICE`, with an optional compose prefix and timestamp) into the first line plus
+`[N repetições omitidas]`, where `N` is the number of lines dropped. It counts runs with the same
+helper the legacy deduplicator uses (`identicalRunLength`), whose output is unchanged. Everything
+else is copied verbatim and in order: diagnostic levels (`WARN`, `ERROR`, `FATAL`, ...) even when
+repeated, routine lines that mention a failure word from the shared severity vocabulary or carry a
+result (`started`, `finished`, `listening`, ...), continuation lines (stack frames, payloads, blank
+lines) and a routine record that owns continuation lines. Two bursts separated by any other line are
+counted separately. An input that already contains a line shaped like the omission marker is
+ambiguous and is returned unchanged, as is any text with no run to collapse.
+
 ## Code Comment Stripping (`stripCodeComments` / `preserveDocstrings`)
 
 When `rtkConfig.applyToCodeBlocks` is enabled, RTK can also strip comments from fenced code blocks:
