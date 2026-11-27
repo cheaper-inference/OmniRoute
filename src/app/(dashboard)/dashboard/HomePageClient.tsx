@@ -28,7 +28,7 @@ import { HomeProviderTopologySection } from "./HomeProviderTopologySection";
 import { shouldShowProviderTopologyOnHome } from "./homeAppearance";
 import ManualUpdateCommand from "./ManualUpdateCommand";
 import UpdateProgressDialog, { type UpdatePhase, type UpdateStep } from "./UpdateProgressDialog";
-import { followManagedUpdate } from "./managedUpdateTracker";
+import { runManagedUpdateFlow } from "./managedUpdateTracker";
 import HomeRecentRequests from "../home/HomeRecentRequests";
 import { isEnabledNoAuthProvider } from "../home/topologyUtils";
 
@@ -700,6 +700,19 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
     [fetchData, t]
   );
 
+  // Managed update: the server stops during the swap, so follow the durable verdict.
+  const followManaged = (data: { operationId: string; to: string; from: string }) =>
+    runManagedUpdateFlow({
+      operationId: data.operationId,
+      targetVersion: data.to,
+      currentVersion: data.from,
+      t,
+      setSteps: setUpdateSteps,
+      setPhase: setUpdatePhase,
+      setUpdating,
+      notify: useNotificationStore.getState(),
+    });
+
   const handleUpdate = async () => {
     const notify = useNotificationStore.getState();
     setUpdating(true);
@@ -724,19 +737,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
           return;
         }
         if (data.operationId) {
-          // Managed update: the server stops during the swap, so follow the durable verdict.
-          const followed = await followManagedUpdate({
-            operationId: data.operationId,
-            targetVersion: data.to,
-            currentVersion: data.from,
-            t,
-            setSteps: setUpdateSteps,
-            setPhase: setUpdatePhase,
-          });
-          setUpdating(false);
-          const updated = followed.kind === "terminal" && followed.state.status === "updated";
-          if (updated) notify.success(t("updateCompleted", { version: data.to }));
-          else notify.error(t("updateFailed"));
+          await followManaged(data);
           return;
         }
         notify.success(data.message || t("updateStarted"));

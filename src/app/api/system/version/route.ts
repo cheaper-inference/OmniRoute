@@ -65,6 +65,32 @@ async function sendRestartStep(send: (data: Record<string, unknown>) => void): P
   send({ step: "restart", status: outcome.status, message: outcome.message });
 }
 
+async function managedUpdateResponse(mode: string, current: string, latest: string) {
+  const managed = await maybeLaunchManagedUpdate({ mode, latest });
+  if (managed.kind === "accepted") {
+    clearLatestVersionCache();
+    return NextResponse.json(
+      {
+        success: true,
+        operationId: managed.operationId,
+        status: "accepted",
+        message: `Update to v${latest} started. The service stops briefly while it is swapped and checked.`,
+        from: current,
+        to: latest,
+        channel: "npm-managed",
+      },
+      { status: 202 }
+    );
+  }
+  if (managed.kind === "refused") {
+    return NextResponse.json(
+      { success: false, error: managed.message, code: managed.code, channel: "npm-managed" },
+      { status: 409 }
+    );
+  }
+  return null;
+}
+
 function managedUpdateStateResponse(operationId: string) {
   const noStore = { "Cache-Control": "no-store" };
   if (!managedUpdateOperationIdSchema.safeParse(operationId).success) {
@@ -193,29 +219,9 @@ export async function POST(req: NextRequest) {
   }
 
   // Managed update with automatic recovery (flag off, or any environment outside its cut:
-  // `not-applicable`, and everything below runs exactly as before).
-  const managed = await maybeLaunchManagedUpdate({ mode: config.mode, latest });
-  if (managed.kind === "accepted") {
-    clearLatestVersionCache();
-    return NextResponse.json(
-      {
-        success: true,
-        operationId: managed.operationId,
-        status: "accepted",
-        message: `Update to v${latest} started. The service stops briefly while it is swapped and checked.`,
-        from: current,
-        to: latest,
-        channel: "npm-managed",
-      },
-      { status: 202 }
-    );
-  }
-  if (managed.kind === "refused") {
-    return NextResponse.json(
-      { success: false, error: managed.message, code: managed.code, channel: "npm-managed" },
-      { status: 409 }
-    );
-  }
+  // no response here, and everything below runs exactly as before).
+  const managedResponse = await managedUpdateResponse(config.mode, current, latest);
+  if (managedResponse) return managedResponse;
 
   // Socket-free Docker image update: drop a request file in DATA_DIR for the host watcher,
   // which pulls the image and recreates the container. The dashboard then polls GET.

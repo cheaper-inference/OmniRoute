@@ -88,56 +88,67 @@ const STEP_ID: Record<ManagedStepKey, string> = {
   verify: "managed-verify",
 };
 
+type StepContext = {
+  state: ManagedUpdateState;
+  restoring: boolean;
+  activeIndex: number;
+};
+
+function baseStepStatus(index: number, { state, restoring, activeIndex }: StepContext): string {
+  if (state.status === "updated") return "done";
+  if (state.status === "unsupported") return index === 0 ? "failed" : "pending";
+  if (restoring) return index < PHASE_ORDER.length - 1 ? "done" : "failed";
+  if (index < activeIndex) return "done";
+  return index === activeIndex ? "running" : "pending";
+}
+
+// A failure before the verify step means the later rows never ran.
+function stepStatus(index: number, context: StepContext): string {
+  const status = baseStepStatus(index, context);
+  if (!context.restoring) return status;
+  const failedAt = FAILED_STEP_BY_REASON[context.state.reason ?? ""];
+  if (failedAt === undefined || index < failedAt) return status;
+  return index === failedAt ? "failed" : "pending";
+}
+
+const FAILED_STEP_BY_REASON: Record<string, number> = { "snapshot-failed": 1, "install-failed": 2 };
+
+function restoreRow(state: ManagedUpdateState, t: Translate): UpdateStep {
+  const outcome =
+    state.status === "rolled-back"
+      ? "done"
+      : state.status === "manual-recovery"
+        ? "failed"
+        : "running";
+  return {
+    step: "managed-restore",
+    status: outcome,
+    message: t(`managedUpdateMessage.restore.${outcome}`, { version: state.previousVersion }),
+  };
+}
+
 /** Dialog rows for a state. Pure: `t` supplies the (English-only) strings. */
 export function managedStateToSteps(
   state: ManagedUpdateState,
   t: Translate,
   { disconnected = false }: { disconnected?: boolean } = {}
 ): UpdateStep[] {
-  const steps: UpdateStep[] = [];
   const restoring =
     state.phase === "restoring" ||
     state.status === "rolled-back" ||
     state.status === "manual-recovery";
-  const activeStep: ManagedStepKey = PHASE_TO_STEP[state.phase] ?? "verify";
-  const activeIndex = PHASE_ORDER.indexOf(activeStep);
-  const succeeded = state.status === "updated";
-  const failedUnsupported = state.status === "unsupported";
+  const activeIndex = PHASE_ORDER.indexOf(PHASE_TO_STEP[state.phase] ?? "verify");
+  const context: StepContext = { state, restoring, activeIndex };
 
-  PHASE_ORDER.forEach((key, index) => {
-    let status = "pending";
-    if (succeeded) status = "done";
-    else if (failedUnsupported) status = index === 0 ? "failed" : "pending";
-    else if (restoring) status = index < PHASE_ORDER.length - 1 ? "done" : "failed";
-    else if (index < activeIndex) status = "done";
-    else if (index === activeIndex) status = "running";
-    // A failure before the install means the later rows never ran.
-    if (restoring && state.reason === "snapshot-failed" && index >= 1)
-      status = index === 1 ? "failed" : "pending";
-    if (restoring && state.reason === "install-failed" && index >= 2)
-      status = index === 2 ? "failed" : "pending";
-    let message = t(`managedUpdateMessage.${key}.${status === "running" ? "running" : status}`, {
-      version: state.targetVersion,
-    });
-    if (status === "running" && disconnected) message = t("managedUpdateReconnecting");
-    steps.push({ step: STEP_ID[key], status, message });
+  const steps = PHASE_ORDER.map((key, index): UpdateStep => {
+    const status = stepStatus(index, context);
+    const message =
+      status === "running" && disconnected
+        ? t("managedUpdateReconnecting")
+        : t(`managedUpdateMessage.${key}.${status}`, { version: state.targetVersion });
+    return { step: STEP_ID[key], status, message };
   });
-
-  if (restoring) {
-    const restoredOk = state.status === "rolled-back";
-    steps.push({
-      step: "managed-restore",
-      status: restoredOk ? "done" : state.status === "manual-recovery" ? "failed" : "running",
-      message: t(
-        restoredOk
-          ? "managedUpdateMessage.restore.done"
-          : state.status === "manual-recovery"
-            ? "managedUpdateMessage.restore.failed"
-            : "managedUpdateMessage.restore.running",
-        { version: state.previousVersion }
-      ),
-    });
-  }
+  if (restoring) steps.push(restoreRow(state, t));
   return steps;
 }
 
@@ -260,4 +271,21 @@ export async function followManagedUpdate(options: FollowOptions): Promise<Manag
     setPhase("failed");
   }
   return result;
+}
+
+type FlowOptions = FollowOptions & {
+  setUpdating: (updating: boolean) => void;
+  notify: { success: (message: string) => void; error: (message: string) => void };
+};
+
+/** `followManagedUpdate` plus the end-of-update notice, so the page only makes one call. */
+export async function runManagedUpdateFlow(options: FlowOptions): Promise<void> {
+  const followed = await followManagedUpdate(options);
+  options.setUpdating(false);
+  const updated = followed.kind === "terminal" && followed.state.status === "updated";
+  if (updated) {
+    options.notify.success(options.t("updateCompleted", { version: options.targetVersion }));
+  } else {
+    options.notify.error(options.t("updateFailed"));
+  }
 }
