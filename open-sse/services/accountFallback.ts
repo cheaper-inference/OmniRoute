@@ -2347,10 +2347,20 @@ export function checkFallbackError(
       shouldUseQuotaSignal &&
       isCreditsExhaustedForStatus(status, provider, errorStr, structuredError?.code)
     ) {
+      const parsedReset = parseDetailedRetryFromErrorText(errorStr, provider);
+      const resetHintMs =
+        parsedReset?.provenance === "body_iso_reset" ? parsedReset.retryAfterMs : null;
       return {
         shouldFallback: true,
-        cooldownMs: COOLDOWN_MS.paymentRequired ?? 3600 * 1000, // 1h cooldown
+        cooldownMs: resetHintMs ?? COOLDOWN_MS.paymentRequired ?? 3600 * 1000, // 1h cooldown unless reset date supplied
         reason: RateLimitReason.QUOTA_EXHAUSTED,
+        ...(resetHintMs
+          ? {
+              usedUpstreamRetryHint: true,
+              retryHintSource: parsedReset!.provenance,
+              quotaResetHintMs: resetHintMs,
+            }
+          : {}),
         // Only passthrough/aggregator + *-compatible-* keys stay model-scoped; per-model-lock
         // providers (codex, gemini, github, antigravity) keep account-level credits_exhausted.
         ...(!isPassthroughCreditScope(provider) ||
