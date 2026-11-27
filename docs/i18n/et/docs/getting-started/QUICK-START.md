@@ -21,10 +21,10 @@ npm install -g omniroute
 ### Variant B: Docker
 
 ```bash
-docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
+docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ```
 
-`:latest` viitab uusimale **avaldatud** stabiilsele SemVer-versioonile. See **ei** järgi giti haru `main`. GitOpsi jaoks fikseeri versioon kujul `diegosouzapw/omniroute:X.Y.Z`. Vaata jaotist [Tõmmise sildid / väljalaskekanalid](../guides/DOCKER_GUIDE.md#release-channels).
+`:latest` viitab uusimale **avaldatud** stabiilsele SemVer-versioonile. See **ei** järgi giti haru `main`. GitOpsi jaoks fikseeri versioon kujul `cheaperinference/omniroute:X.Y.Z`. Vaata jaotist [Tõmmise sildid / väljalaskekanalid](../guides/DOCKER_GUIDE.md#release-channels).
 
 ### Variant C: lähtekoodist
 

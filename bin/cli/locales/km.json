@@ -12,7 +12,8 @@
     "dryRun": "[dry-run] នឹង {action}",
     "cancelled": "បានបោះបង់។",
     "jsonOpt": "បញ្ចេញលទ្ធផលជា JSON",
-    "yesOpt": "រំលងសារស្នើឱ្យបញ្ជាក់"
+    "yesOpt": "រំលងសារស្នើឱ្យបញ្ជាក់",
+    "positiveIntegerRequired": "ដែនកំណត់ត្រូវតែជាចំនួនគត់វិជ្ជមាន។"
   },
   "setup": {
     "title": "ការដំឡើង OmniRoute",

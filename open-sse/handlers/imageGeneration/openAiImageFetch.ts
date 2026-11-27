@@ -1,3 +1,4 @@
+import { normalizeImageOutput } from "./outputFormat.ts";
 import { HTTP_STATUS } from "../../config/constants.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { isJsonObject } from "../../utils/kieTask.ts";
@@ -14,6 +15,11 @@ type ImageFetchFailure = Extract<ImageEndpointResult, { success: false }>;
 export type ImageFetchOptions = {
   /** Deadline for the whole exchange — response headers AND body read. Always set by the caller. */
   timeoutMs: number;
+  /**
+   * Container the caller asked for explicitly via `output_format`. Only then is the response
+   * labelled with the detected `mime_type`/`output_format`; otherwise it passes through as-is.
+   */
+  requestedOutputFormat?: string;
   /**
    * Caller cancellation. Only passed with IMAGE_GENERATION_LONG_JOBS on (#16260): an abort
    * then ends the request with 499 instead of waiting for the upstream job.
@@ -47,7 +53,8 @@ function hasUsableImage(items: unknown[]): boolean {
 async function readImageResponse(
   response: Response,
   provider: string,
-  log: ImageFetchLog
+  log: ImageFetchLog,
+  requestedOutputFormat?: string
 ): Promise<ImageEndpointResult> {
   if (!response.ok) {
     const errorText = await response.text();
@@ -74,7 +81,9 @@ async function readImageResponse(
       ),
     };
   }
-  return buildImageEndpointSuccess(data, items);
+  if (typeof requestedOutputFormat !== "string") return buildImageEndpointSuccess(data, items);
+  const normalized = normalizeImageOutput(data, items, requestedOutputFormat, log?.warn?.bind(log));
+  return buildImageEndpointSuccess(data, normalized.items, normalized.outputFormat);
 }
 
 /** Map a failed image fetch (network error, header/body deadline) to a 502/504 result. */
@@ -136,7 +145,7 @@ export async function fetchImageEndpoint(
       body,
       ...(fetchSignal ? { signal: fetchSignal } : {}),
     });
-    const result = await readImageResponse(response, provider, log);
+    const result = await readImageResponse(response, provider, log, options.requestedOutputFormat);
     return signal?.aborted ? cancelledImageResult(provider, log) : result;
   } catch (error: unknown) {
     if (signal?.aborted) return cancelledImageResult(provider, log);

@@ -18,6 +18,7 @@ import { createRoot } from "react-dom/client";
 import { describe, it, expect, vi, afterEach } from "vitest";
 
 vi.mock("next-intl", () => ({
+  useLocale: () => "en",
   useTranslations: () => (key: string) => key,
 }));
 
@@ -64,13 +65,16 @@ describe("AddApiKeyModal — cookie modal sizing (#6265)", () => {
     expect(dialog!.className).toMatch(/max-h-\[90vh\]/);
     expect(dialog!.className).toMatch(/overflow-y-auto/);
 
-    // The body container (`data-slot="modal-body"`, last child of the dialog — no
-    // footer prop is used by AddApiKeyModal) must NOT carry its own independent max-h/
+    // The body container (`data-slot="modal-body"`, the last section of the dialog — no
+    // footer prop is used by AddApiKeyModal; only the kit close button, which the kit renders
+    // after the content, follows it) must NOT carry its own independent max-h/
     // overflow cap — otherwise the outer cap and the inner cap fight (double cap),
     // clipping content before the outer 90vh bound ever kicks in.
-    const bodyDiv = dialog!.children[dialog!.children.length - 1] as HTMLElement;
+    const sections = Array.from(dialog!.children) as HTMLElement[];
+    const bodyDiv = sections[sections.length - 2];
     expect(bodyDiv).toBeTruthy();
     expect(bodyDiv.getAttribute("data-slot")).toBe("modal-body");
+    expect(sections[sections.length - 1].className).toBe("ci-dialog__close");
     expect(bodyDiv.className).not.toMatch(/max-h-/);
     expect(bodyDiv.className).not.toMatch(/overflow-y-auto/);
 

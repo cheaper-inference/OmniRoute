@@ -347,6 +347,7 @@ test("listStrategies — exposes every registered strategy + aliases", () => {
     "sla",
     "lkgp",
     "nadir",
+    "decision",
   ]) {
     assert.ok(names.includes(n), `listStrategies missing '${n}'`);
   }

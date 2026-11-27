@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { Tabs, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
@@ -10,13 +10,17 @@ import Button from "@/shared/components/Button";
 import { FileInput } from "@/shared/components/FileInput";
 import Modal from "@/shared/components/Modal";
 import Textarea from "@/shared/components/Textarea";
+import { LocalOnlyNotice } from "@/shared/components/LocalOnlyNotice";
+import { useLocalOnlyBlocked } from "@/shared/hooks/useLocalOnlyAccess";
+import { detectLocalOnlyRejection } from "@/shared/utils/localOnlyAccess";
 import type { SkillsProvider } from "@/lib/skills/providerSettings";
 import { OmniSkillsList } from "./components/OmniSkillsList";
 import { OmniExecutionsTab } from "./components/OmniExecutionsTab";
 import { OmniSandboxTab } from "./components/OmniSandboxTab";
 import { OmniMarketplaceTab } from "./components/OmniMarketplaceTab";
 import type { OmniSkill } from "./components/OmniSkillCard";
-import type { JSX } from "react";
+import type { ComponentProps, JSX } from "react";
+import Notice from "@/shared/components/Notice";
 
 interface Execution {
   id: string;
@@ -25,6 +29,28 @@ interface Execution {
   status: string;
   duration: number;
   createdAt: string;
+}
+
+const EXECUTIONS_API_PATH = "/api/skills/executions";
+
+/** One page of executions, or null when the route is local-only for this session. */
+async function loadExecutions(page: number): Promise<unknown | null> {
+  const res = await fetch(`${EXECUTIONS_API_PATH}?page=${page}&limit=20`);
+  if (await detectLocalOnlyRejection(res, EXECUTIONS_API_PATH)) return null;
+  return res.json();
+}
+
+/** An execution stat, or a dash when the executions route is local-only for this session. */
+function executionStat(localOnly: boolean, value: string | number): string | number {
+  return localOnly ? "—" : value;
+}
+
+/** The Executions tab: the list, or the notice when the route is local-only for this session. */
+function ExecutionsPanel({
+  localOnly,
+  ...listProps
+}: ComponentProps<typeof OmniExecutionsTab> & { localOnly: boolean }): JSX.Element {
+  return localOnly ? <LocalOnlyNotice /> : <OmniExecutionsTab {...listProps} />;
 }
 
 export function OmniSkillsPageClient(): JSX.Element {
@@ -54,6 +80,9 @@ export function OmniSkillsPageClient(): JSX.Element {
   } | null>(null);
   const [installing, setInstalling] = useState(false);
   const [skillsProvider, setSkillsProvider] = useState<SkillsProvider>("skillsmp");
+  // The executions API is a local-only route: a remote session gets the notice, not "0".
+  const executionsLocalOnly = useLocalOnlyBlocked(EXECUTIONS_API_PATH);
+  const executionsLocalOnlyAtMount = useRef(executionsLocalOnly);
 
   const t = useTranslations("skills");
   const tSidebar = useTranslations("sidebar");
@@ -77,7 +106,8 @@ export function OmniSkillsPageClient(): JSX.Element {
   };
 
   const fetchExecutions = async (page: number) => {
-    const res = await fetch(`/api/skills/executions?page=${page}&limit=20`).then((r) => r.json());
+    const res = await loadExecutions(page);
+    if (!res) return;
     setExecutions((res as { data?: Execution[] }).data || []);
     setExecTotal((res as { total?: number }).total || 0);
     setExecTotalPages((res as { totalPages?: number }).totalPages || 1);
@@ -86,7 +116,7 @@ export function OmniSkillsPageClient(): JSX.Element {
   useEffect(() => {
     Promise.all([
       fetch("/api/skills?page=1&limit=20").then((r) => r.json()),
-      fetch("/api/skills/executions?page=1&limit=20").then((r) => r.json()),
+      executionsLocalOnlyAtMount.current ? null : loadExecutions(1),
       fetch("/api/settings").then((r) => (r.ok ? r.json() : null)),
     ])
       .then(([skillsData, executionsData, settingsData]) => {
@@ -99,9 +129,11 @@ export function OmniSkillsPageClient(): JSX.Element {
             : []
         );
 
-        setExecutions((executionsData as { data?: Execution[] }).data || []);
-        setExecTotal((executionsData as { total?: number }).total || 0);
-        setExecTotalPages((executionsData as { totalPages?: number }).totalPages || 1);
+        if (executionsData) {
+          setExecutions((executionsData as { data?: Execution[] }).data || []);
+          setExecTotal((executionsData as { total?: number }).total || 0);
+          setExecTotalPages((executionsData as { totalPages?: number }).totalPages || 1);
+        }
 
         const sd = settingsData as { skillsProvider?: SkillsProvider } | null;
         if (sd?.skillsProvider === "skillsmp" || sd?.skillsProvider === "skillssh") {
@@ -221,20 +253,24 @@ export function OmniSkillsPageClient(): JSX.Element {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card padding="sm">
-          <p className="text-xs text-text-muted uppercase tracking-wide">{t("totalSkills")}</p>
+          <p className="ci-eyebrow">{t("totalSkills")}</p>
           <p className="text-2xl font-semibold text-text-main mt-1">{skillsTotal}</p>
         </Card>
         <Card padding="sm">
-          <p className="text-xs text-text-muted uppercase tracking-wide">{t("enabledSkills")}</p>
+          <p className="ci-eyebrow">{t("enabledSkills")}</p>
           <p className="text-2xl font-semibold text-success mt-1">{enabledCount}</p>
         </Card>
         <Card padding="sm">
-          <p className="text-xs text-text-muted uppercase tracking-wide">{t("totalExecutions")}</p>
-          <p className="text-2xl font-semibold text-primary mt-1">{execTotal}</p>
+          <p className="ci-eyebrow">{t("totalExecutions")}</p>
+          <p className="text-2xl font-semibold text-primary mt-1">
+            {executionStat(executionsLocalOnly, execTotal)}
+          </p>
         </Card>
         <Card padding="sm">
-          <p className="text-xs text-text-muted uppercase tracking-wide">{t("successRate")}</p>
-          <p className="text-2xl font-semibold text-warning mt-1">{successRate}%</p>
+          <p className="ci-eyebrow">{t("successRate")}</p>
+          <p className="text-2xl font-semibold text-warning mt-1">
+            {executionStat(executionsLocalOnly, `${successRate}%`)}
+          </p>
         </Card>
       </div>
 
@@ -291,7 +327,8 @@ export function OmniSkillsPageClient(): JSX.Element {
       )}
 
       {activeTab === "executions" && (
-        <OmniExecutionsTab
+        <ExecutionsPanel
+          localOnly={executionsLocalOnly}
           executions={executions}
           execPage={execPage}
           execTotalPages={execTotalPages}
@@ -328,7 +365,8 @@ export function OmniSkillsPageClient(): JSX.Element {
           onChange={(e) => setInstallJson(e.target.value)}
           placeholder={t("installJsonPlaceholder")}
           aria-label={t("installSkillModalTitle")}
-          className="h-48 resize-none font-mono text-sm"
+          mono
+          className="h-48 resize-none text-sm"
         />
         <div className="flex flex-wrap items-center gap-3 mt-3">
           <FileInput
@@ -347,15 +385,12 @@ export function OmniSkillsPageClient(): JSX.Element {
           </Button>
         </div>
         {installStatus && (
-          <div
-            className={`mt-3 p-3 rounded-lg text-sm ${
-              installStatus.type === "success"
-                ? "bg-success/10 text-success"
-                : "bg-error/10 text-error"
-            }`}
+          <Notice
+            variant={installStatus.type === "success" ? "success" : "critical"}
+            className="mt-3"
           >
             {installStatus.message}
-          </div>
+          </Notice>
         )}
       </Modal>
     </div>

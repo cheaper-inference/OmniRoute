@@ -115,36 +115,22 @@ Privzeti `KillMode=process` izvajalnika pusti procese `Runner.Worker → npm →
   potreboval 27–32 minut, za nalaganje z diska pa 2 minuti.
 - VPS `.15` je namenjen samo homologaciji — nikoli ne izvaja izvajalnikov CI.
 
-## Gostovana steza (izvajalniki, ki jih gosti GitHub)
+## Gostujoča steza (tekači, ki jih gosti GitHub)
 
-Repozitorij pripada organizaciji `cheaper-inference`, ki uporablja paket **Team**: **60
-sočasnih gostovanih opravil**, ki si jih delijo vsi repozitoriji v organizaciji, vsa preverjanja PR-jev,
-vsi delovni tokovi, sproženi ob potisku, in privzeta nastavitev CodeQL. Spodnje številke so bile izmerjene na
-paketu **Pro** (40 sočasnih gostovanih opravil). Meritve 2026-10-18 med
-akcijo združevanja (~10 združitev/uro v `release/v3.8.52`): v 24 urah je bilo ustvarjenih **2.500 izvajanj delovnih tokov**,
-v 6 urah je bilo v vejo izvedenih 44 potiskov, v čakalni vrsti pa je čakalo **106 gostovanih opravil**, medtem ko so preverjanja PR-jev
-čakala več ur, PR-ji pa so bili združeni brez njih. Ob vsakem potisku v vejo se je sprožilo devet delovnih tokov:
+Repozitorij pripada organizaciji `cheaper-inference`, na** Ekipa** načrt:** 60 sočasno gostujočih opravil** , ki ga delijo vsi repozitorij v organizaciji, vsako preverjanje PR, vsak delovni tok, ki ga sproži pritisk, in privzeta nastavitev CodeQL. Spodnje številke so bile izmerjene na** Pro** načrt (40 sočasno gostujočih opravil). Izmerjeno dne 2026-10-18 med združitveno kampanjo (~ 10 merges/hour na `release/v3.8.52`):** 2.500 potekov delovnega toka, ustvarjenih v 24 urah** , 44 poti do poslovalnice v 6 urah,** 106 gostujočih opravil je v čakalni vrsti** medtem ko so pregledi PR čakali ure in PRs so bili združeni brez njih. Devet delovnih tokov, sproženih ob vsakem pritisku v vejo:
 
-| ob vsakem potisku v `release/v*`            | gostovana opravila | rezultat med navalom                                             | od 2026-10-18                                                                          |
-| ------------------------------------------- | -----------------: | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `ci.yml` (celotna matrika)                  |              do 30 | preklicano ob naslednjem potisku, 24 od 24 v enem dnevu          | se ne zažene ob potiskih v `release/**` (izvajanje PR-ja + Release-Green)              |
-| `quality.yml`                               |                 ~6 | preklicano, 23 od 23                                             | se ne zažene ob potiskih v `release/**`                                                |
-| `Release-Green` `--quick`                   |                  0 | izvajanje na `omni-build`, preklicanih 97 od 100                 | reža `omni-release`, nikoli preklicano, čakajoča izvajanja se združijo                 |
-| `Lock released branch`, `OpenSSF Scorecard` |                  2 | eno izvajanje v čakalni vrsti na potisk                          | eno izvajanje na ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)              |
-| `Release acceptance` (vzporedno poročilo)   |                  1 | en gostovani `npm ci` na potisk, nikoli preklican                | nespremenjeno — kandidat za filter `paths:`                                            |
-| `Publish to Docker Hub` → `Deploy to VPS`   |                  2 | preklicano ob vsakem potisku; veja amd64 tekmuje na `omni-build` | nespremenjeno — lastnikov kanal za uvajanje                                            |
-| Privzeta nastavitev CodeQL (`dynamic`)      |                  4 | `javascript-typescript`, `actions`, `c-cpp`, `python` na potisk  | nespremenjeno — Settings → Code security; `c-cpp`/`python` tukaj ne pregledata ničesar |
+| na pritisk na `release/v*`                  | gostujoča delovna mesta | izid pod nevihto                                                 | od 2026-10-18                                                                 |
+| ------------------------------------------- | ----------------------: | ---------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `ci.yml` (polna matrika)                    |                   do 30 | preklican z naslednjim pritiskom, 24 od 24 v dnevu               | ni zagnano pri potiskih `release/**` (PR run + Release-Green)                 |
+| `quality.yml`                               |                      ~6 | preklicano, 23 od 23                                             | ni zagnano na potiske `release/**`                                            |
+| `Release-Green` `--quick`                   |                       0 | potekalo na `omni-build`, preklicanih 97 od 100                  | reža `omni-release`, nikoli preklicana, zagon v teku se zruši                 |
+| `Lock released branch`, `OpenSSF Scorecard` |                       2 | en zagon v čakalni vrsti na pritisk                              | ena vožnja na sodnika (`tests/unit/build/hosted-lane-concurrency.test.ts`)    |
+| `Release acceptance` (senčno poročilo)      |                       1 | ena gostovana `npm ci` na pritisk, nikoli preklicana             | nespremenjen kandidat — za filter `paths:`                                    |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                       2 | preklicano na pritisk; amd64 noga tekmuje na `omni-build`        | nespremenjen kanal za uvedbo lastnika —                                       |
+| privzeta nastavitev CodeQL (`dynamic`)      |                       4 | `javascript-typescript`, `actions`, `c-cpp`, `python` na pritisk | nespremenjena — nastavitve → varnost kode; `c-cpp`/`python` skenira nič tukaj |
 
-`tests/unit/build/push-storm-diet.test.ts` fiksira sprožilec ob potisku, omejen samo na `main`, za `ci.yml` in
-`quality.yml`. Stranski učinek: Codecov ob vsakem potisku v izdajo ne prejme več osnovnega nalaganja (korak
-je informativen in uporablja `continue-on-error`); preverjanje pokritosti v repozitoriju in komentar PR-ja
-ostaneta nespremenjena.
+`tests/unit/build/push-storm-diet.test.ts` pripne `main` -only potisni sprožilec `ci.yml` in `quality.yml`. Stranski učinek: Codecov ne prejme več osnovnega nalaganja na sprostitev (korak je informativen in `continue-on-error`); vrata pokritosti v skladišču in komentarji PR niso prizadeti.
 
-**Več samostojno gostovane zmogljivosti ne odpravi čakalne vrste gostovanih opravil.** Razvojni strežnik
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) bi lahko gostil izvajalnik, vendar seje agentov njegovo obremenitev že
-vzdržujejo med 20 in 26, vsebnik agenta nima demona Docker, zasičena pa je gostovana steza.
-Strežnik `.113` je imel v istem trenutku 71 GB prostega prostora in obremenitev 5–8; njegova omejitev
-je zgoraj navedena količina pomnilnika na poslušalca (največ 6 poslušalcev), ne CPE. Preostali vzvodi
-so procesni: PR-je iz akcije združevanja vključujte prek čakalne vrste Mergify (`label=queue`, paketi si
-delijo eno izvajanje CI za `merge_group` namesto enega izvajanja na PR in še enega na potisk), zmanjšajte
-nabor jezikov v privzeti nastavitvi CodeQL in filtrirajte `release-acceptance.yml` glede na datoteke, ki jih bere.
+**Večja zmogljivost samostojnega gostovanja ne popravi gostujoče čakalne vrste.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) bi lahko gostil tekača, vendar agentske seje že ohranjajo njegovo obremenitev pri 20–26, vsebnik agenta nima demona Docker in nasičen pas je gostujoči. Škatla `.113` je imela 71 GB prostih in naloženih 5–8 v istem trenutku; njegova omejitev je zgornji proračun pomnilnika na poslušalca (največ 6 poslušalcev), ne CPU. Preostali vzvodi so procesni: prizemljite kampanjo PRs prek čakalne vrste Mergify (`label=queue`, paketi si delijo en zagon `merge_group` CI namesto enega zagona na PR plus enega na pritisk), obrežite jezike privzete nastavitve CodeQL in filtrirajte `release-acceptance.yml` po datotekah, ki jih bere.
+
+> **2026-11-19: čakalna vrsta za spajanje Mergify je umaknjena** (odločitev lastnika). `.mergify.yml` ne definira več čakalne vrste in zavrača ukaze Mergify, ki združijo ali prepišejo zahtevo za vleko. Izdaje PRs so združene ročno pod naborom pravil repozitorija »Zahtevaj zelena vrata pri aktivni izdaji« (`Gate / CI` + `Gate / Quality`), dokler se omni-queue ne zažene v načinu v živo, nato pa prek omni-queue ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Zgornji vzvod Mergify ne obstaja več.

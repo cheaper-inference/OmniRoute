@@ -25,7 +25,7 @@ export default definePlugin({
 });
 ```
 
-## API-Referenz
+## API Referenz
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
@@ -33,28 +33,28 @@ Factory-Funktion, die ein Plugin-Objekt mit Standardwerten erstellt.
 
 **Parameter:**
 
-- `name` (string, erforderlich) — Plugin-Name in Kebab-Case
-- `priority` (number, optional, Standardwert: 100) — Niedrigere Werte werden zuerst ausgeführt
-- `enabled` (boolean, optional, Standardwert: true) — Soll das Plugin aktiviert starten?
-- `onRequest` (function, optional) — Wird vor dem Chat-Handler ausgeführt
-- `onResponse` (function, optional) — Wird nach dem Chat-Handler ausgeführt
-- `onError` (function, optional) — Wird bei einem Handler-Fehler ausgeführt
+- `name` (Zeichenfolge, erforderlich) — Plugin-Name im Kebab-Fall
+- `priority` (Zahl, optional, Standard: 100) — Lower wird zuerst ausgeführt
+- `enabled` (boolean, optional, Standard: true) — Start aktiviert?
+- `onRequest` (Funktion, optional) — Wird vor dem Chat-Handler ausgeführt
+- `onResponse` (Funktion, optional) — Wird nach dem Chat-Handler ausgeführt
+- `onError` (Funktion, optional) — Wird bei Handlerfehler ausgeführt
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Blockiert die Anfrage und gibt optional eine benutzerdefinierte Antwort zurück.
+Blockieren Sie die Anfrage und geben Sie optional eine benutzerdefinierte Antwort zurück.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Ändert den Anfrage-Body, bevor er den Provider erreicht.
+Ändern Sie den Anforderungstext, bevor er den Anbieter erreicht.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Fügt dem Anfragekontext Metadaten hinzu.
+Hängen Sie Metadaten an den Anforderungskontext an.
 
 ```ts
 onRequest: (ctx) => {
@@ -74,15 +74,18 @@ onRequest: (ctx) => {
 
 ## Plugin-Kontext (`PluginContext`)
 
-| Feld        | Typ                       | Beschreibung                   |
-| ----------- | ------------------------- | ------------------------------ |
-| `requestId` | `string`                  | Eindeutige Anfragekennung      |
-| `model`     | `string`                  | Name des angeforderten Modells |
-| `provider`  | `string`                  | ID des Ziel-Providers          |
-| `body`      | `Record<string, unknown>` | Anfrage-Body                   |
-| `headers`   | `Record<string, string>`  | Anfrage-Header                 |
-| `metadata`  | `Record<string, unknown>` | Veränderbare Metadaten         |
-| `timestamp` | `number`                  | Zeitstempel der Anfrage        |
+| Feld         | Typ                       | Beschreibung                            |
+| ------------ | ------------------------- | --------------------------------------- |
+| `requestId`  | `string`                  | Eindeutiger Anforderungsbezeichner      |
+| `model`      | `string`                  | Angeforderter Modellname                |
+| `provider`   | `string`                  | Zielanbieter ID                         |
+| `body`       | `Record<string, unknown>` | Anforderungstext                        |
+| `headers`    | `Record<string, string>`  | Anforderungsheader (siehe Hinweis)      |
+| `metadata`   | `Record<string, unknown>` | Veränderbare Metadaten                  |
+| `timestamp`  | `number`                  | Zeitstempel anfordern                   |
+| `apiKeyInfo` | `object` (optional)       | API -Schlüsselmetadaten (siehe Hinweis) |
+
+Der Kontext enthält niemals die Anmeldeinformationen des Clients: Die Header `authorization`, `x-api-key`, `proxy-authorization` und `cookie` werden entfernt (jede Groß-/Kleinschreibung), und `apiKeyInfo` behält die Metadaten des Schlüssels (z. B. `id`, `name` und `scopes`), jedoch nicht den Schlüsselwert oder seinen Fingerabdruck (`redactPluginContext()` in `src/lib/plugins/hooks.ts`). Dies gilt für `onRequest`, `onResponse` und `onError`.
 
 ## Manifest (`plugin.json`)
 
@@ -140,17 +143,16 @@ Oder als einfache boolesche Werte (Standardpriorität 100):
 
 ## Berechtigungssystem
 
-Plugins werden in einem isolierten VM-Kontext ausgeführt. Der Zugriff auf externe Ressourcen erfordert ausdrückliche Berechtigungen:
+Plugins sind** nicht sandboxed** . Jedes aktive Plugin wird als separater, gewöhnlicher untergeordneter Node.js Prozess (`loadPlugin()` in `src/lib/plugins/loader.ts`) unter demselben Betriebssystembenutzer wie OmniRoute ausgeführt, ohne VM Kontext und ohne Node.js -Berechtigungsflags. Der Plugin-Code kann `node:fs`, `node:child_process`, `fetch` und jedes andere Node.js API verwenden: Er kann jede Datei lesen und schreiben, die der OmniRoute Benutzer lesen und schreiben kann (einschließlich des Datenverzeichnisses), Programme ausführen und das Netzwerk erreichen.
 
-| Berechtigung | Gewährt                                                      |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Schreibgeschützter `process.env`-Proxy                       |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+Das `requires.permissions` des Manifests akzeptiert `network`, `file-read`, `file-write`, `env` und `exec`, aber heute hat nur `env` einen Effekt zur Laufzeit:
 
-Ohne eine Berechtigung sind die entsprechenden globalen Objekte in der Sandbox schlicht nicht verfügbar.
+| Erlaubnis                                    | Wirkung heute                                                                                                                                                                                                                         |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Der Plugin-Prozess empfängt auch `PORT`, `HOSTNAME`, `TZ` und `TMPDIR`. Ohne sie empfängt es nur `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` und `PLUGIN_NAME` (plus `SystemRoot` und `windir` auf Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Keiner. Es handelt sich lediglich um Deklarationen: Wenn sie fehlen, wird nichts blockiert.                                                                                                                                           |
+
+Die Installation eines Plugins ist wie die Installation jedes anderen Programms auf dem Host. Installieren Sie nur Plugins, deren Quelle Sie vertrauen.
 
 ## Konfigurationsschema
 
@@ -194,7 +196,7 @@ Konfigurationswerte werden in der Datenbank gespeichert und sind über die Konfi
 
 ## Beispiele
 
-### Anfrageprotokollierung
+### Logger anfordern
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 Minute
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -228,10 +230,7 @@ export default definePlugin({
     requests.set(key, timestamps);
 
     if (timestamps.length > maxRequests) {
-      return blockRequest({
-        error: "Ratenbegrenzung überschritten",
-        status: 429,
-      });
+      return blockRequest({ error: "Rate limit exceeded", status: 429 });
     }
   },
 });

@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { ROUTING_STRATEGY_VALUES } from "../../../src/shared/constants/routingStrategies.ts";
 import {
   renderStrategiesGrid,
   STRATEGIES_GRID_COPY,
@@ -53,7 +54,7 @@ test("the only embedded font is the mono subset for the strategy identifiers, an
   assert.doesNotMatch(style, /Switzer|CI Serif|CI Sans/, "the mono subset is the only face");
   assert.match(svg, /<use href="#g[0-9a-z]+"/, "the Switzer text is drawn as outlines");
   assert.doesNotMatch(svg, /https?:\/\/(?!www\.w3\.org\/2000\/svg)|@import|<script|<foreignObject/);
-  assert.match(svg, /^<svg viewBox="0 0 1200 644" [^>]*role="img"/);
+  assert.match(svg, /^<svg viewBox="0 0 1200 808" [^>]*role="img"/);
   assert.ok(Buffer.byteLength(svg) < 200 * 1024, "must stay under the 200 KB studio target");
 });
 
@@ -62,8 +63,15 @@ test("every copy string stays in the file as text", async () => {
   for (const s of Object.values(STRATEGIES_GRID_COPY).flat()) {
     assert.ok(svg.includes(esc(s)), `string not drawn: ${s}`);
   }
-  // 18 of the 22 strategies by design — the README table carries the other four.
-  assert.equal(STRATEGIES_GRID_COPY.names.length, 18);
+});
+
+test("the grid draws exactly one tile per public combo routing strategy", async () => {
+  const svg = await renderStrategiesGrid();
+  assert.deepEqual([...STRATEGIES_GRID_COPY.names].sort(), [...ROUTING_STRATEGY_VALUES].sort());
+  assert.equal(
+    svg.match(/<rect width="173" height="158"/g)?.length,
+    ROUTING_STRATEGY_VALUES.length
+  );
 });
 
 test("the counts gate's own readers of this file accept the generated content (snapshot facts)", async () => {

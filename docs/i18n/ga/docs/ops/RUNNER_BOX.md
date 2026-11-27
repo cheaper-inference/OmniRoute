@@ -138,35 +138,22 @@ an am, agus é díomhaoin amháin**, agus an tseiceáil díomhaointis agus an t-
   `next-build` 1.3 GB teacht i dtír ar an tmpfs agus 2 nóiméad é a uaslódáil ón diosca.
 - Is le haghaidh homalógaithe amháin atá an VPS `.15` — ní ritheann sé runner CI riamh.
 
-## Lána óstáilte (riteoirí arna n-óstáil ag GitHub)
+## Lána arna óstáil (rochtainí arna óstáil ag GitHub)
 
-Baineann an stórlann leis an eagraíocht `cheaper-inference`, ar an bplean **Team**: **60
-jab óstáilte chomhthráthacha**, comhroinnte idir gach stórlann san eagraíocht, gach seiceáil PR,
-gach sreabhadh oibre a thionscnaítear le brú agus cumraíocht réamhshocraithe CodeQL. Tomhaiseadh na figiúirí thíos ar an bplean
-**Pro** (40 jab óstáilte chomhthráthacha). Tomhaiseadh an méid seo ar 2026-10-18 le linn
-feachtais chumaisc (~10 gcumasc/uair ar `release/v3.8.52`): cruthaíodh **2,500 rith sreafa oibre laistigh de
-24 h**, rinneadh 44 bhrú chuig an mbrainse laistigh de 6 h, agus bhí **106 jab óstáilte sa scuaine** fad a bhí seiceálacha PR ag fanacht ar feadh
-uaireanta agus cumascadh PRanna gan iad. Tionscnaíodh naoi sreabhadh oibre le gach brú chuig an mbrainse:
+Baineann an stór leis an eagraíocht `cheaper-inference`, ar an** Foireann** plean:** 60 post óstaithe comhthráthach** , arna roinnt ag gach stór san eagraíocht, gach seiceáil PR, gach sreabhadh oibre brú-spreagtha agus socrú réamhshocraithe CodeQL. Tomhaiseadh na figiúirí thíos ar an** Pro** plean (40 post óstaithe comhthráthach). Arna thomhas ar 2026-10-18 le linn feachtais chumaisc (~ 10 merges/hour ar `release/v3.8.52`):** 2,500 sruth oibre cruthaithe i 24 h** , 44 brú go dtí an brainse i 6 h,** 106 post óstaithe scuaine** fad is a d'fhan seiceálacha PR uaireanta agus rinneadh PRs a chumasc gan iad. Scaoileadh naoi sreabhadh oibre ar gach brú chuig an mbrainse:
 
-| in aghaidh an bhrú chuig `release/v*`         | jabanna óstáilte | toradh le linn na géarchéime                                                      | ó 2026-10-18                                                                                 |
-| --------------------------------------------- | ---------------: | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `ci.yml` (maitrís iomlán)                     |       suas le 30 | curtha ar ceal ag an gcéad bhrú eile, 24 as 24 in aon lá amháin                   | ní chuirtear tús leis ar bhrúnna `release/**` (rith PR + Release-Green)                      |
-| `quality.yml`                                 |               ~6 | curtha ar ceal, 23 as 23                                                          | ní chuirtear tús leis ar bhrúnna `release/**`                                                |
-| `Release-Green` `--quick`                     |                0 | ritheadh ar `omni-build`, cuireadh 97 as 100 ar ceal                              | sliotán `omni-release`, ní chuirtear ar ceal riamh é, comhdhlúthaítear rith atá ar feitheamh |
-| `Lock released branch`, `OpenSSF Scorecard`   |                2 | rith amháin sa scuaine in aghaidh an bhrú                                         | rith amháin in aghaidh na tagartha (`tests/unit/build/hosted-lane-concurrency.test.ts`)      |
-| `Release acceptance` (tuairisc scátha)        |                1 | `npm ci` óstáilte amháin in aghaidh an bhrú, nár cuireadh ar ceal riamh           | gan athrú — iarrthóir ar scagaire `paths:`                                                   |
-| `Publish to Docker Hub` → `Deploy to VPS`     |                2 | curtha ar ceal in aghaidh an bhrú; téann céim amd64 san iomaíocht ar `omni-build` | gan athrú — cainéal imlonnaithe an úinéara                                                   |
-| Cumraíocht réamhshocraithe CodeQL (`dynamic`) |                4 | `javascript-typescript`, `actions`, `c-cpp`, `python` in aghaidh an bhrú          | gan athrú — Settings → Code security; ní scanann `c-cpp`/`python` aon rud anseo              |
+| in aghaidh an bhrú chun `release/v*`        | poist óstáilte | toradh faoin stoirm                                                              | ó 2026-10-18                                                                          |
+| ------------------------------------------- | -------------: | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `ci.yml` (maitrís iomlán)                   |     suas le 30 | curtha ar ceal faoin gcéad bhrú eile, 24 as 24 in aghaidh an lae                 | níor thosaigh ar bhrú `release/**` (PR run + Release-Green)                           |
+| `quality.yml`                               |             ~6 | curtha ar ceal, 23 de 23                                                         | nár thosaigh ar bhrú `release/**`                                                     |
+| `Release-Green` `--quick`                   |              0 | ar siúl ar `omni-build`, ceal 97 de 100                                          | sliotán `omni-release`, níor cuireadh ar ceal riamh é, ar feitheamh titim as a chéile |
+| `Lock released branch`, `OpenSSF Scorecard` |              2 | rith scuaine amháin in aghaidh an bhrú                                           | rith amháin in aghaidh an tag (`tests/unit/build/hosted-lane-concurrency.test.ts`)    |
+| `Release acceptance` (scáththuairisc)       |              1 | d'óstáil ceann amháin `npm ci` in aghaidh an bhrú, níor cuireadh ar ceal é riamh | iarrthóir — gan athrú le haghaidh scagaire `paths:`                                   |
+| `Publish to Docker Hub` → `Deploy to VPS`   |              2 | ar ceal in aghaidh an bhrú; amd64 cos san iomaíocht ar `omni-build`              | cainéal imscaradh an úinéara — gan athrú                                              |
+| socrú réamhshocraithe CodeQL (`dynamic`)    |              4 | `javascript-typescript`, `actions`, `c-cpp`, `python` in aghaidh an bhrú         | gan athrú — Socruithe → Cód slándála; `c-cpp`/`python` scanadh faic anseo             |
 
-Socraíonn `tests/unit/build/push-storm-diet.test.ts` truicear brú `ci.yml` agus
-`quality.yml` chuig `main` amháin. Fo-éifeacht: ní fhaigheann Codecov uaslódáil bhunúsach a thuilleadh in aghaidh gach brú eisiúna (tá an
-chéim faisnéiseach agus `continue-on-error`); níl aon tionchar ar an ngeata cumhdaigh laistigh den stór ná ar an nóta tráchta PR.
+bioráin `tests/unit/build/push-storm-diet.test.ts` an truicear brú `main` -only de `ci.yml` agus `quality.yml`. Taobh-éifeacht: ní fhaigheann Codecov bunuaslódáil in aghaidh an bhrú scaoilte a thuilleadh (tá an chéim faisnéiseach agus `continue-on-error`); níl aon tionchar ar an ngeata clúdaigh in-repo agus ar thuairimí PR.
 
-**Ní réitíonn acmhainn fhéinóstáilte bhreise an scuaine óstáilte.** D’fhéadfadh an bosca forbartha
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) riteoir a óstáil, ach coinníonn seisiúin na ngníomhairí
-a ualach ag 20–26 cheana féin, níl deamhan Docker i gcoimeádán an ghníomhaire, agus is í an lána
-óstáilte atá sáithithe. Bhí 71 GB saor ar an mbosca `.113` agus ualach 5–8 air ag an am céanna; is é
-an buiséad cuimhne in aghaidh an éisteora thuas an srian atá air (uasteorainn 6 éisteoir), ní an LAP. Is
-luamháin phróisis iad na roghanna atá fágtha: cumaisc PRanna feachtais trí scuaine Mergify (`label=queue`, roinneann
-baisceanna rith CI amháin `merge_group` seachas rith amháin in aghaidh an PR móide ceann amháin in aghaidh an bhrú), laghdaigh teangacha
-na cumraíochta réamhshocraithe CodeQL, agus scag `release-acceptance.yml` de réir na gcomhad a léann sé.
+**Ní shocraíonn acmhainn féin-óstach an scuaine óstaigh.** D'fhéadfadh an devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) rádala a óstáil, ach coinníonn na seisiúin ghníomhaire a ualach cheana féin ag 20-26, níl aon deamhan Docker ag an gcoimeádán gníomhaire, agus is é an lána sáithithe an ceann óstaithe. Bhí 71 GB saor in aisce sa bhosca `.113` agus ualach 5–8 ag an nóiméad céanna; is é an srian atá air ná an buiséad cuimhne in aghaidh an éisteora thuas (uasteorainn 6 éisteoir), ní CPU. Is iad na luamháin atá fágtha ná cinn phróiseála: feachtais talún PRs tríd an scuaine Mergify (`label=queue`, roinneann na baisceanna rith amháin `merge_group` CI in ionad rith amháin in aghaidh PR móide ceann amháin in aghaidh an bhrú), trim na teangacha réamhshocraithe CodeQL, agus scag `release-acceptance.yml` de réir na gcomhad a léann sé.
+
+> **2026-11-19: tá scuaine an chumaisc Mergify ar scor** (cinneadh an úinéara). Ní shainíonn `.mergify.yml` scuaine a thuilleadh agus diúltaíonn sé do na horduithe Mergify a chumasc nó a athscríobhann iarratas tarraingthe. Déantar scaoileadh PRs a chumasc de láimh faoin tacar rialacha stórtha "Éiligh geataí glasa ar an scaoileadh gníomhach" (`Gate / CI` + `Gate / Quality`) go dtí go ritheann omni-scuaine i mód beo, agus trí scuaine omni ina dhiaidh sin ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Níl an luamhán Mergify thuas ann a thuilleadh.

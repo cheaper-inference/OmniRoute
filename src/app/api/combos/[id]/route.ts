@@ -4,12 +4,17 @@ import { isCloudEnabled } from "@/lib/db/settings";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { syncToCloud } from "@/lib/cloudSync";
 import { validateCompositeTiersConfig } from "@/lib/combos/compositeTiers";
+import { isReservedComboName } from "@/lib/combos/autoNames";
 import { normalizeComboModels } from "@/lib/combos/steps";
 import { buildComboConnectionLabels } from "@/lib/combos/controlCenterAccountLabels";
 import { validateComboDAG, clampComboDepth } from "@omniroute/open-sse/services/combo.ts";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { resolveCanonicalProviderModel } from "@omniroute/open-sse/services/model.ts";
 import { updateComboSchema } from "@/shared/validation/schemas";
-import { requiresQuotaOnlyComboRefExecute } from "@/shared/validation/schemas/combo";
+import {
+  RESERVED_COMBO_NAME_MESSAGE,
+  requiresQuotaOnlyComboRefExecute,
+} from "@/shared/validation/schemas/combo";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { QUOTA_MODEL_PREFIX } from "@/lib/quota/quotaModelNaming";
@@ -120,9 +125,16 @@ export async function PUT(request, { params }) {
         request
       );
     }
+    const comboName = validation.data.name ?? currentCombo.name;
+    if (isReservedComboName(comboName.trim())) {
+      return comboErrorResponse(
+        "COMBO_002",
+        400,
+        { firstField: "name", firstMessage: sanitizeErrorMessage(RESERVED_COMBO_NAME_MESSAGE) },
+        request
+      );
+    }
     const allCombos = await getCombos();
-
-    const comboName = validation.data.name || currentCombo.name;
     const normalizedUpdate = { ...validation.data };
     if (normalizedUpdate.compressionOverride !== undefined) {
       const legacyCompressionOverride = normalizedUpdate.compressionOverride;

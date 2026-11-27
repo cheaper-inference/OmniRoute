@@ -70,6 +70,41 @@ const DEFAULT_DEPS: StreamingPipelineDeps = {
   createModelEchoTransform: defaultModelEcho,
 };
 
+type MaskingGateArgs = {
+  createPiiTransform: unknown;
+  credentialRedactionEnabled?: boolean;
+  credentialDisabledGuardrails?: string[];
+  piiDisabledGuardrails?: string[];
+};
+
+function credentialMaskingOn(args: MaskingGateArgs): boolean {
+  return isCredentialTransformEnabled({
+    credentialRedactionEnabled: args.credentialRedactionEnabled ?? false,
+    credentialDisabledGuardrails: args.credentialDisabledGuardrails ?? [],
+  });
+}
+
+function piiMaskingGateOpen(args: MaskingGateArgs): boolean {
+  return isPiiTransformEnabled({ piiDisabledGuardrails: args.piiDisabledGuardrails ?? [] });
+}
+
+/**
+ * True when assembleStreamingPipeline will add a masking transform (credential redaction or
+ * PII sanitization) for this request. Masking rewrites only the client's copy of the stream,
+ * so the assembled body seen by the semantic-cache writer is still unmasked.
+ */
+export function isStreamMaskingActive(
+  args: MaskingGateArgs,
+  isFeatureFlagEnabled: typeof defaultFeatureFlag = defaultFeatureFlag
+): boolean {
+  if (credentialMaskingOn(args)) return true;
+  if (!piiMaskingGateOpen(args)) return false;
+  return (
+    typeof args.createPiiTransform === "function" ||
+    isFeatureFlagEnabled("PII_RESPONSE_SANITIZATION")
+  );
+}
+
 export function assembleStreamingPipeline(
   args: {
     providerResponse: Parameters<typeof defaultPipeWithDisconnect>[0];
@@ -119,16 +154,11 @@ export function assembleStreamingPipeline(
   // rule would otherwise rewrite the digit middle of a token. Opt-in, gated per request by
   // the same flag and opt-out name as the non-streaming post-call guardrail. Off or opted
   // out enqueues no transform, so bytes pass through untouched.
-  if (
-    isCredentialTransformEnabled({
-      credentialRedactionEnabled: args.credentialRedactionEnabled ?? false,
-      credentialDisabledGuardrails: args.credentialDisabledGuardrails ?? [],
-    })
-  ) {
+  if (credentialMaskingOn(args)) {
     piiStream = piiStream.pipeThrough(deps.createCredentialSseTransform());
   }
 
-  if (isPiiTransformEnabled({ piiDisabledGuardrails: args.piiDisabledGuardrails ?? [] })) {
+  if (piiMaskingGateOpen(args)) {
     if (typeof args.createPiiTransform === "function") {
       piiStream = piiStream.pipeThrough((args.createPiiTransform as () => TransformStream)());
     } else if (deps.isFeatureFlagEnabled("PII_RESPONSE_SANITIZATION")) {

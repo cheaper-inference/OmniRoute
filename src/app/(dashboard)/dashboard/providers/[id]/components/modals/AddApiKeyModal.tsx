@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
@@ -9,11 +10,13 @@ import {
   Checkbox,
   Input,
   Modal,
+  NumberInput,
   SegmentedControl,
   Select,
   Textarea,
   Toggle,
   TALL_MODAL_PROPS,
+  Notice,
 } from "@/shared/components";
 import { CHATGPT_WEB_CODEX_CONNECTOR_NAME } from "@/shared/constants/chatgptWebCodex";
 import {
@@ -583,7 +586,8 @@ export default function AddApiKeyModal({
             {openRouterPreset.input}
             {freeModelsToggle}
             <Textarea
-              className="min-h-[140px] resize-y font-mono text-sm"
+              mono
+              className="min-h-[140px] resize-y text-sm"
               placeholder={
                 isCloudflare
                   ? "name1|account-id-1|cf-token-1\nname2|account-id-2|cf-token-2"
@@ -593,18 +597,12 @@ export default function AddApiKeyModal({
               onChange={(e) => setBulkText(e.target.value)}
             />
             <div className="flex items-end gap-4 flex-wrap">
-              <Input
-                type="number"
+              <NumberInput
                 label={t("priorityLabel")}
                 min={1}
                 max={100}
                 value={formData.priority}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    priority: Number.parseInt(e.target.value) || 1,
-                  })
-                }
+                onValueChange={(value) => setFormData({ ...formData, priority: value || 1 })}
                 className="w-auto min-w-0"
                 inputClassName="w-20"
               />
@@ -660,12 +658,9 @@ export default function AddApiKeyModal({
         {(!bulkSupported || mode === "single") && (
           <>
             {isCcCompatible && (
-              <div className="rounded-lg border border-warning/25 bg-warning/10 px-3 py-2 text-sm text-text-muted">
-                <div className="flex items-start gap-2">
-                  <Icon name="warning" size={18} className="mt-0.5 text-warning" />
-                  <p>{t("ccCompatibleValidationHint")}</p>
-                </div>
-              </div>
+              <Notice variant="warning" icon="warning">
+                {t("ccCompatibleValidationHint")}
+              </Notice>
             )}
             {isCommandCode && onStartCommandCodeAuth && (
               <div className="rounded-lg border border-info/20 bg-info/10 px-3 py-3 text-sm">
@@ -825,7 +820,7 @@ export default function AddApiKeyModal({
                 );
               })()}
             {isChatGptWebCodex && (
-              <div className="space-y-3 rounded-lg border border-border bg-bg-subtle p-3">
+              <Card.Section className="space-y-3">
                 <div>
                   <p className="text-sm font-medium text-text-main">{t("codexTunnelTitle")}</p>
                   <p className="mt-1 text-xs text-text-muted">{t("codexTunnelDescription")}</p>
@@ -891,7 +886,7 @@ export default function AddApiKeyModal({
                         : t("check")}
                   </Button>
                 </div>
-              </div>
+              </Card.Section>
             )}
             {isModal && (
               <Input
@@ -974,13 +969,9 @@ export default function AddApiKeyModal({
                 {providerText(t, validationBadge.labelKey, validationBadge.fallback)}
               </Badge>
             )}
-            {saveError && (
-              <div className="text-sm text-error bg-error/10 border border-error/20 rounded-lg px-3 py-2">
-                {saveError}
-              </div>
-            )}
+            {saveError && <Notice variant="critical">{saveError}</Notice>}
             {(isCcCompatible || openRouterPreset.input) && (
-              <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
+              <Card.Section className="flex flex-col gap-4">
                 {isCcCompatible && (
                   <CcCompatibleRequestDefaultsFields
                     values={formData}
@@ -988,7 +979,7 @@ export default function AddApiKeyModal({
                   />
                 )}
                 {openRouterPreset.input}
-              </div>
+              </Card.Section>
             )}
             {freeModelsToggle}
             <QuotaScrapingFields
@@ -1112,13 +1103,11 @@ export default function AddApiKeyModal({
               onChange={(e) => setFormData({ ...formData, validationModelId: e.target.value })}
               hint={t("validationModelIdHint")}
             />
-            <Input
+            <NumberInput
               label={t("priorityLabel")}
-              type="number"
+              min={1}
               value={formData.priority}
-              onChange={(e) =>
-                setFormData({ ...formData, priority: Number.parseInt(e.target.value) || 1 })
-              }
+              onValueChange={(value) => setFormData({ ...formData, priority: value || 1 })}
             />
             {usesBaseUrl && (
               <Input

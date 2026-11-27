@@ -156,10 +156,11 @@ function SortableSection({
       <div className="flex items-center gap-1 pl-2 pr-4">
         <Button
           variant="ghost"
+          tone="muted"
           size="icon-sm"
           {...listeners}
           {...attributes}
-          className="shrink-0 cursor-grab touch-none text-text-muted active:cursor-grabbing"
+          className="shrink-0 cursor-grab touch-none active:cursor-grabbing"
           title={tSidebar("dragReorderSection")}
           aria-label={tSidebar("dragReorderSection")}
         >
@@ -247,10 +248,11 @@ function SortableChildRow({ id, children }: { id: string; children: React.ReactN
     >
       <Button
         variant="ghost"
+        tone="muted"
         size="icon-sm"
         {...listeners}
         {...attributes}
-        className="mt-2 shrink-0 cursor-grab touch-none text-text-muted active:cursor-grabbing"
+        className="mt-2 shrink-0 cursor-grab touch-none active:cursor-grabbing"
         title={tSidebar("dragReorderItem")}
         aria-label={tSidebar("dragReorderItem")}
       >
@@ -372,7 +374,7 @@ function GroupRow({
             size={14}
             className={cn("text-text-muted transition-transform", open && "rotate-90")}
           />
-          <span className="truncate text-[10px] font-semibold uppercase tracking-widest text-text-muted">
+          <span className="ci-eyebrow truncate" data-size="3xs" data-weight="medium">
             {groupTitle}
           </span>
         </Button>
@@ -382,7 +384,7 @@ function GroupRow({
         </span>
         {canToggleSeparator && (
           <div className="flex items-center gap-2 border-l border-border pl-3">
-            <span className="text-[10px] font-medium text-text-muted">{separatorLabel}</span>
+            <span className="text-3xs font-medium text-text-muted">{separatorLabel}</span>
             <Toggle
               size="sm"
               ariaLabel={`${separatorLabel} · ${groupTitle}`}

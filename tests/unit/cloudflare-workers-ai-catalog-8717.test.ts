@@ -7,8 +7,11 @@
  * builders still pick them and burn quota on guaranteed failures.
  *
  * Regression: dead IDs absent from FREE_MODEL_BUDGETS + cloudflare-ai registry;
- * live replacements present; 30M monthlyTokens budget stays on the live
- * Llama 3.3 70B FP8 Fast entry (poolKey cloudflare-ai dedupes by max).
+ * live replacements present; the Neurons/day budget sits on exactly one live
+ * entry (poolKey cloudflare-ai dedupes by max). Re-audit 2026-11-23
+ * (developers.cloudflare.com/workers-ai/platform/pricing/): 10,000 Neurons/day priced on
+ * @cf/zai-org/glm-4.7-flash ⇒ 22.7M tokens/month; kimi-k2.6 needs a paid billing method and is
+ * kept as discontinued.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -79,23 +82,26 @@ test("#8717: cloudflare-ai registry must list live replacements", () => {
   }
 });
 
-test("#8717: 30M monthlyTokens budget moves to live Llama 3.3 70B FP8 Fast", () => {
-  const fp8 = FREE_MODEL_BUDGETS.find(
-    (m) =>
-      m.provider === "cloudflare-ai" && m.modelId === "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+test("#8717: the Neurons/day budget sits on one live entry, GLM 4.7 Flash (re-audit 2026-11-23)", () => {
+  const glm = FREE_MODEL_BUDGETS.find(
+    (m) => m.provider === "cloudflare-ai" && m.modelId === "@cf/zai-org/glm-4.7-flash"
   );
-  assert.ok(fp8, "fp8-fast entry must exist");
+  assert.ok(glm, "glm-4.7-flash entry must exist");
   assert.equal(
-    fp8.monthlyTokens,
-    30_000_000,
-    "Neurons/day free budget (~30M tok/mo) must stay on the live Llama 3.3 entry"
+    glm.monthlyTokens,
+    22_700_000,
+    "10,000 Neurons/day at glm-4.7-flash prices (~22.7M tok/mo) must sit on this entry"
   );
 
-  // No other cloudflare-ai catalog row should still claim the 30M (poolKey dedupes by max,
-  // but advertising it on a dead id was the original bug surface).
+  // No other cloudflare-ai catalog row may claim a budget (poolKey dedupes by max, but
+  // advertising it on a second id was the original bug surface).
   const withBudget = FREE_MODEL_BUDGETS.filter(
-    (m) => m.provider === "cloudflare-ai" && m.monthlyTokens === 30_000_000
+    (m) => m.provider === "cloudflare-ai" && m.monthlyTokens > 0
   );
   assert.equal(withBudget.length, 1);
-  assert.equal(withBudget[0].modelId, "@cf/meta/llama-3.3-70b-instruct-fp8-fast");
+  assert.equal(withBudget[0].modelId, "@cf/zai-org/glm-4.7-flash");
+  const kimi = FREE_MODEL_BUDGETS.find(
+    (m) => m.provider === "cloudflare-ai" && m.modelId === "@cf/moonshotai/kimi-k2.6"
+  );
+  assert.equal(kimi?.freeType, "discontinued", "kimi-k2.6 requires a paid billing method");
 });

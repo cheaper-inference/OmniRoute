@@ -148,7 +148,7 @@ test("curated-only providers still accept operator-defined custom models", () =>
   // "Curated" describes the upstream discovery surface (there is none), not a ban on
   // hand-added ids: without this a curated provider can never route a model the
   // registry does not ship, and the row saved in the dashboard is silently dropped.
-  for (const providerId of ["kimi-web", "zai-web", "chatgpt-web", "codebuddy-intl"]) {
+  for (const providerId of ["kimi-web", "zai-web", "chatgpt-web"]) {
     const models = mergeProviderModelListing({
       ...input,
       providerId,
@@ -170,7 +170,7 @@ test("curated-only providers still accept operator-defined custom models", () =>
 test("curated-only providers drop custom rows a discovery sync imported", () => {
   // #18018 keeps operator rows; a curated provider has no upstream catalog, so a row
   // with an import source is a stale leftover of a retired discovery path (#8451).
-  for (const providerId of ["kimi-web", "zai-web", "chatgpt-web", "codebuddy-intl"]) {
+  for (const providerId of ["kimi-web", "zai-web", "chatgpt-web"]) {
     const models = mergeProviderModelListing({
       ...input,
       providerId,

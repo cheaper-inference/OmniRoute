@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 import { getDbInstance, resetDbInstance } from "../../src/lib/db/core.ts";
 import { startCleanupScheduler, stopCleanupScheduler } from "../../src/lib/db/cleanup.ts";
@@ -164,7 +165,7 @@ function runCredentialHealthInit(flag: string | undefined): string {
   try {
     const child = spawnSync(
       process.execPath,
-      ["--import", "tsx/esm", "--input-type=module", "-e", code],
+      [...nativeCoverageArgs(), "--import", "tsx/esm", "--input-type=module", "-e", code],
       { cwd: process.cwd(), env, encoding: "utf8", timeout: 180_000 }
     );
     assert.equal(child.status, 0, child.stderr);

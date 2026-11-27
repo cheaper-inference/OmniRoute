@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { isDeepStrictEqual } from "node:util";
 import { wildcardMatch } from "./wildcardRouter.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -9,14 +10,23 @@ export type PayloadRuleModelSpec = {
   protocol?: string;
 };
 
+/** Optional guard on a rule: all conditions must hold (AND) on the payload at that point. */
+export type PayloadRuleCondition = {
+  path: string;
+  op: "eq" | "neq" | "in" | "exists" | "missing";
+  value?: unknown;
+};
+
 export type PayloadMutationRule = {
   models: PayloadRuleModelSpec[];
   params: Record<string, unknown>;
+  when?: PayloadRuleCondition[];
 };
 
 export type PayloadFilterRule = {
   models: PayloadRuleModelSpec[];
   params: string[];
+  when?: PayloadRuleCondition[];
 };
 
 export type PayloadRulesConfig = {
@@ -62,25 +72,81 @@ function cloneValue<T>(value: T): T {
   return structuredClone(value);
 }
 
+function cloneWhen(rule: { when?: PayloadRuleCondition[] }) {
+  return rule.when ? { when: cloneValue(rule.when) } : {};
+}
+
 function clonePayloadRulesConfig(config: PayloadRulesConfig): PayloadRulesConfig {
   return {
     default: config.default.map((rule) => ({
       models: rule.models.map((model) => ({ ...model })),
       params: cloneValue(rule.params),
+      ...cloneWhen(rule),
     })),
     override: config.override.map((rule) => ({
       models: rule.models.map((model) => ({ ...model })),
       params: cloneValue(rule.params),
+      ...cloneWhen(rule),
     })),
     filter: config.filter.map((rule) => ({
       models: rule.models.map((model) => ({ ...model })),
       params: [...rule.params],
+      ...cloneWhen(rule),
     })),
     defaultRaw: config.defaultRaw.map((rule) => ({
       models: rule.models.map((model) => ({ ...model })),
       params: cloneValue(rule.params),
+      ...cloneWhen(rule),
     })),
   };
+}
+
+const CONDITION_OPS = new Set(["eq", "neq", "in", "exists", "missing"]);
+
+function normalizeCondition(raw: unknown): PayloadRuleCondition | null {
+  const item = toRecord(raw);
+  const path = typeof item.path === "string" ? item.path.trim() : "";
+  const op = typeof item.op === "string" ? item.op : "";
+  if (getPathSegments(path).length === 0 || !CONDITION_OPS.has(op)) return null;
+  const needsValue = op === "eq" || op === "neq" || op === "in";
+  if (needsValue !== (item.value !== undefined)) return null;
+  if (op === "in" && !Array.isArray(item.value)) return null;
+  return needsValue
+    ? { path, op: op as PayloadRuleCondition["op"], value: item.value }
+    : { path, op: op as PayloadRuleCondition["op"] };
+}
+
+/**
+ * Read a rule's optional `when`. Returns `undefined` for a rule with none, `null` when it is
+ * malformed: the caller drops the whole rule, because a conditional rule that lost its condition
+ * would apply to every request.
+ */
+function normalizeWhen(raw: unknown): PayloadRuleCondition[] | undefined | null {
+  if (raw === undefined) return undefined;
+  if (!Array.isArray(raw) || raw.length === 0) return null;
+  const conditions = raw.map(normalizeCondition);
+  return conditions.every((condition) => condition !== null)
+    ? (conditions as PayloadRuleCondition[])
+    : null;
+}
+
+function conditionHolds(payload: unknown, condition: PayloadRuleCondition): boolean {
+  const actual = getValueAtPath(payload, condition.path);
+  switch (condition.op) {
+    case "exists":
+      return actual !== undefined;
+    case "missing":
+      return actual === undefined;
+    case "eq":
+      return actual !== undefined && isDeepStrictEqual(actual, condition.value);
+    case "neq":
+      return actual === undefined || !isDeepStrictEqual(actual, condition.value);
+    case "in":
+      return (
+        actual !== undefined &&
+        (condition.value as unknown[]).some((candidate) => isDeepStrictEqual(actual, candidate))
+      );
+  }
 }
 
 function normalizeModelSpecs(value: unknown): PayloadRuleModelSpec[] {
@@ -96,24 +162,26 @@ function normalizeModelSpecs(value: unknown): PayloadRuleModelSpec[] {
 
 function normalizeMutationRules(value: unknown): PayloadMutationRule[] {
   return toArray<JsonRecord>(value)
-    .map((item) => {
+    .map((item): PayloadMutationRule | null => {
       const models = normalizeModelSpecs(item?.models);
       const params = toRecord(item?.params);
-      if (models.length === 0 || Object.keys(params).length === 0) return null;
-      return { models, params };
+      const when = normalizeWhen(item?.when);
+      if (models.length === 0 || Object.keys(params).length === 0 || when === null) return null;
+      return when ? { models, params, when } : { models, params };
     })
     .filter((item): item is PayloadMutationRule => !!item);
 }
 
 function normalizeFilterRules(value: unknown): PayloadFilterRule[] {
   return toArray<JsonRecord>(value)
-    .map((item) => {
+    .map((item): PayloadFilterRule | null => {
       const models = normalizeModelSpecs(item?.models);
       const params = toArray<unknown>(item?.params)
         .map((pathValue) => (typeof pathValue === "string" ? pathValue.trim() : ""))
         .filter(Boolean);
-      if (models.length === 0 || params.length === 0) return null;
-      return { models, params };
+      const when = normalizeWhen(item?.when);
+      if (models.length === 0 || params.length === 0 || when === null) return null;
+      return when ? { models, params, when } : { models, params };
     })
     .filter((item): item is PayloadFilterRule => !!item);
 }
@@ -421,6 +489,19 @@ function matchesRule(model: string, protocols: string[], specs: PayloadRuleModel
   return specs.some((spec) => matchesModelSpec(model, protocols, spec));
 }
 
+/** Model match plus the optional `when` conditions, evaluated on the payload as it is now. */
+function ruleApplies(
+  rule: { models: PayloadRuleModelSpec[]; when?: PayloadRuleCondition[] },
+  model: string,
+  protocols: string[],
+  payload: JsonRecord
+) {
+  return (
+    matchesRule(model, protocols, rule.models) &&
+    (rule.when ?? []).every((condition) => conditionHolds(payload, condition))
+  );
+}
+
 function toPayloadRuleProtocols(value: string | string[]) {
   const protocols = Array.isArray(value) ? value : [value];
   return [...new Set(protocols.map((protocol) => protocol.trim()).filter(Boolean))];
@@ -458,7 +539,7 @@ export function applyPayloadRules(
   const applied: AppliedPayloadRule[] = [];
 
   for (const rule of rules.default) {
-    if (!matchesRule(model, protocols, rule.models)) continue;
+    if (!ruleApplies(rule, model, protocols, normalizedPayload)) continue;
     for (const [pathValue, rawValue] of Object.entries(rule.params)) {
       if (getValueAtPath(normalizedPayload, pathValue) !== undefined) continue;
       setValueAtPath(normalizedPayload, pathValue, rawValue);
@@ -472,7 +553,7 @@ export function applyPayloadRules(
   }
 
   for (const rule of rules.defaultRaw) {
-    if (!matchesRule(model, protocols, rule.models)) continue;
+    if (!ruleApplies(rule, model, protocols, normalizedPayload)) continue;
     for (const [pathValue, rawValue] of Object.entries(rule.params)) {
       if (getValueAtPath(normalizedPayload, pathValue) !== undefined) continue;
       const parsedValue = parseDefaultRawValue(rawValue);
@@ -485,7 +566,7 @@ export function applyPayloadRules(
   }
 
   for (const rule of rules.override) {
-    if (!matchesRule(model, protocols, rule.models)) continue;
+    if (!ruleApplies(rule, model, protocols, normalizedPayload)) continue;
     for (const [pathValue, rawValue] of Object.entries(rule.params)) {
       setValueAtPath(normalizedPayload, pathValue, rawValue);
       applied.push({ type: "override", path: pathValue, value: cloneValue(rawValue) });
@@ -496,7 +577,7 @@ export function applyPayloadRules(
   }
 
   for (const rule of rules.filter) {
-    if (!matchesRule(model, protocols, rule.models)) continue;
+    if (!ruleApplies(rule, model, protocols, normalizedPayload)) continue;
     for (const pathValue of rule.params) {
       if (!unsetValueAtPath(normalizedPayload, pathValue)) continue;
       applied.push({ type: "filter", path: pathValue });

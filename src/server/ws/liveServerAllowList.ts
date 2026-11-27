@@ -10,6 +10,8 @@
  * `LIVE_WS_ALLOWED_HOSTS` opt-in for LAN/Tailscale deployments.
  */
 
+import { getTrustProxyMode } from "@/server/origin/trustProxyMode";
+
 const DEFAULT_HOST = "127.0.0.1";
 
 /**
@@ -118,4 +120,106 @@ export function isOriginAllowed(
   if (allowedOrigins.has(origin)) return true;
   if (originHostMatches(origin, allowedHosts)) return true;
   return false;
+}
+
+// ── Same-origin upgrades through the main HTTP port (KEA-9514) ───────────────
+
+/** Upgrade request headers, as Node's `IncomingMessage.headers` gives them. */
+export type LiveWsUpgradeHeaders = Record<string, string | string[] | undefined>;
+
+/**
+ * Where an upgrade's Origin stands:
+ *   - `allowed`: the static allow-list (`isOriginAllowed`) admits it, as before;
+ *   - `same-origin`: not allow-listed, but it is the origin the browser dialled. The
+ *     connection must then present a real credential (`isLiveWsAuthAcceptedForOrigin`);
+ *   - `forbidden`: refused.
+ */
+export type LiveWsOriginVerdict = "allowed" | "same-origin" | "forbidden";
+
+function firstHeaderValue(headers: LiveWsUpgradeHeaders, name: string): string | null {
+  const raw = headers[name];
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return value?.split(",")[0]?.trim() || null;
+}
+
+/** `host[:port]` of a Host-style header value for `protocol`, or null when malformed. */
+function normalizeHostHeader(protocol: string, raw: string | null): string | null {
+  if (!raw || /[/\\\s@\x00-\x1f\x7f]/.test(raw)) return null;
+  try {
+    const url = new URL(`${protocol}//${raw}`);
+    if (url.username || url.password || url.pathname !== "/" || url.search || url.hash) {
+      return null;
+    }
+    return url.host;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * True when `origin` is the origin the browser dialled, i.e. the page and the socket share
+ * an origin. The dashboard opens `/live-ws` on its own origin off loopback, and the
+ * production server relays that upgrade with the browser's headers unchanged
+ * (scripts/dev/standalone-server-ws.mjs::proxyLiveWs), so the `Host` that arrives here is
+ * the one the browser sent.
+ *
+ * Why this cannot be used for cross-site WebSocket hijacking: a browser always sends the
+ * Origin of the page that opened the socket and the Host of the URL it dialled, and page
+ * code can set neither (nor any other header on a WebSocket). A page on another site
+ * therefore never produces a matching pair. A DNS-rebinding page does (its own host in
+ * both), but the browser sends it no cookie of this instance, which is why a same-origin
+ * socket must still present a real credential (`isLiveWsAuthAcceptedForOrigin`).
+ *
+ * `X-Forwarded-Host` / `X-Forwarded-Proto` are read only when the operator declared a
+ * reverse proxy with `OMNIROUTE_TRUST_PROXY` (for proxies that rewrite Host); with them, the
+ * Origin's scheme must also match the forwarded one.
+ */
+export function isSameOriginLiveWsUpgrade(
+  origin: string,
+  headers: LiveWsUpgradeHeaders,
+  env: NodeJS.ProcessEnv = process.env
+): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(origin);
+  } catch {
+    return false;
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return false;
+  // A browser's Origin is scheme://host[:port] and nothing else.
+  if (parsed.origin !== origin.trim().toLowerCase()) return false;
+
+  const candidates = [firstHeaderValue(headers, "host")];
+  if (getTrustProxyMode(env) !== "none") {
+    const proto = firstHeaderValue(headers, "x-forwarded-proto")?.toLowerCase();
+    if ((proto === "http" || proto === "https") && parsed.protocol !== `${proto}:`) return false;
+    candidates.push(firstHeaderValue(headers, "x-forwarded-host"));
+  }
+  return candidates.some((raw) => normalizeHostHeader(parsed.protocol, raw) === parsed.host);
+}
+
+/** The Origin verdict for a live dashboard upgrade (see `LiveWsOriginVerdict`). */
+export function resolveLiveWsOriginVerdict(
+  origin: string | undefined,
+  headers: LiveWsUpgradeHeaders,
+  env: NodeJS.ProcessEnv = process.env,
+  options: { allowedOrigins?: Set<string>; allowedHosts?: Set<string> } = {}
+): LiveWsOriginVerdict {
+  if (isOriginAllowed(origin, env, options)) return "allowed";
+  if (origin && isSameOriginLiveWsUpgrade(origin, headers, env)) return "same-origin";
+  return "forbidden";
+}
+
+/**
+ * Whether an authorization result is enough for a connection with this Origin verdict. An
+ * allow-listed origin keeps today's rules, open/anonymous mode included. A same-origin one
+ * needs a real credential (dashboard session cookie or a `manage` API key): the anonymous
+ * modes (requireLogin=false, fresh install) would otherwise let a DNS-rebinding page in.
+ */
+export function isLiveWsAuthAcceptedForOrigin(
+  verdict: LiveWsOriginVerdict,
+  auth: { authorized: boolean; anonymous?: boolean }
+): boolean {
+  if (verdict === "forbidden" || !auth.authorized) return false;
+  return verdict === "allowed" || auth.anonymous !== true;
 }

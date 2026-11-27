@@ -13,20 +13,40 @@ import {
 } from "@omniroute/ui-kit/table";
 import Badge from "@/shared/components/Badge";
 import { getSeriesColor } from "@/shared/components/analytics/chartColors";
+import LendingBadge from "./LendingBadge";
+
+/** An allocation as the admin routes return it, with the key holder's lending consent. */
+export type LendingAllocation = PoolAllocation & {
+  lendingPercent?: number;
+  lendingUntil?: number | null;
+};
 
 interface AllocationTableProps {
-  allocations: PoolAllocation[];
+  allocations: LendingAllocation[];
   usage: PoolUsageSnapshot | null;
   /** Map from apiKeyId to display name */
   keyLabels: Record<string, string>;
+  /** Whether the pool lends by consent: only then is a lending badge shown. */
+  consentMode: boolean;
 }
 
-export default function AllocationTable({ allocations, usage, keyLabels }: AllocationTableProps) {
+/** The usage snapshot time, the "now" a lending deadline is judged at. */
+function snapshotTimeMs(usage: PoolUsageSnapshot | null): number | null {
+  const ms = usage ? Date.parse(usage.generatedAt) : Number.NaN;
+  return Number.isFinite(ms) ? ms : null;
+}
+
+export default function AllocationTable({
+  allocations,
+  usage,
+  keyLabels,
+  consentMode,
+}: AllocationTableProps) {
   const t = useTranslations("quotaShare");
 
   if (allocations.length === 0) {
     return (
-      <div className="rounded-md bg-bg-subtle py-3 text-center text-[11px] italic text-text-muted">
+      <div className="rounded-md bg-bg-subtle py-3 text-center text-xs italic text-text-muted">
         {t("noAllocations")}
       </div>
     );
@@ -34,22 +54,24 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
 
   // Build per-key consumption lookup from first dimension (primary)
   const primaryDim = usage?.dimensions?.[0];
+  const nowMs = snapshotTimeMs(usage);
 
   return (
     // PoolCard's Card is the frame around this table (#19620).
     <Table
       scrollbarLabel={t("apiKeyColumn")}
       scrollLabel={t("apiKeyColumn")}
-      className="min-w-0 text-[11px]"
-      containerClassName="rounded-none border-0"
+      density="compact"
+      className="min-w-0"
+      variant="plain"
     >
       <TableHeader>
         <TableRow>
-          <TableHead className="h-8 px-2">{t("apiKeyColumn")}</TableHead>
-          <TableHead className="h-8 px-2 text-right">{t("weightColumn")}</TableHead>
-          <TableHead className="h-8 px-2 text-right">{t("realConsumedColumn")}</TableHead>
-          <TableHead className="h-8 px-2 text-right">{t("deficitColumn")}</TableHead>
-          <TableHead className="h-8 px-2 text-right">{t("policy")}</TableHead>
+          <TableHead>{t("apiKeyColumn")}</TableHead>
+          <TableHead numeric>{t("weightColumn")}</TableHead>
+          <TableHead numeric>{t("realConsumedColumn")}</TableHead>
+          <TableHead numeric>{t("deficitColumn")}</TableHead>
+          <TableHead align="end">{t("policy")}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -66,7 +88,7 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
 
           return (
             <TableRow key={alloc.apiKeyId}>
-              <TableCell className="h-auto px-2 py-1.5">
+              <TableCell>
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span
                     className="inline-block w-2.5 h-2.5 rounded-sm shrink-0"
@@ -77,21 +99,28 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
                     <Badge
                       size="sm"
                       variant="warning"
-                      className="shrink-0 text-[9px] font-semibold"
+                      className="shrink-0"
                       title={t("borrowingIndicator")}
                     >
                       {t("borrowingIndicator")}
                     </Badge>
                   )}
+                  {consentMode && (
+                    <LendingBadge
+                      percent={alloc.lendingPercent}
+                      until={alloc.lendingUntil}
+                      nowMs={nowMs}
+                    />
+                  )}
                 </div>
               </TableCell>
-              <TableCell className="h-auto px-2 py-1.5 text-right tabular-nums" style={{ color }}>
+              <TableCell numeric style={{ color }}>
                 {alloc.weight}%
               </TableCell>
-              <TableCell className="h-auto px-2 py-1.5 text-right tabular-nums text-text-muted">
+              <TableCell numeric className="text-text-muted">
                 {consumed !== null ? consumed.toLocaleString() : "—"}
               </TableCell>
-              <TableCell className="h-auto px-2 py-1.5 text-right tabular-nums">
+              <TableCell numeric>
                 {deficit !== null ? (
                   <span
                     className={
@@ -105,12 +134,12 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
                   <span className="text-text-muted">—</span>
                 )}
                 {fairShare !== null && (
-                  <span className="text-[9px] text-text-muted ml-1">
+                  <span className="text-3xs text-text-muted ml-1">
                     ({t("fairShareShort")}: {fairShare.toLocaleString()})
                   </span>
                 )}
               </TableCell>
-              <TableCell className="h-auto px-2 py-1.5 text-right">
+              <TableCell align="end">
                 <Badge
                   size="sm"
                   variant={
@@ -120,7 +149,6 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
                         ? "warning"
                         : "success"
                   }
-                  className="text-[9px] font-semibold"
                 >
                   {t(`policy${alloc.policy[0].toUpperCase()}${alloc.policy.slice(1)}`)}
                 </Badge>

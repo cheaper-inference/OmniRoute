@@ -92,6 +92,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### ସୁରକ୍ଷା ଏବଂ ପରିବହନ
+
+WebDAV ପ୍ରାମାଣିକିକରଣ ପ୍ରତି IP ବିଫଳତା ଟ୍ରାକିଂ ଏବଂ ଲକଆଉଟ୍ (60 ସେକେଣ୍ଡ ୱିଣ୍ଡୋ ମଧ୍ୟରେ 10 ଟି ବିଫଳ ପ୍ରୟାସ `429 Too Many Requests` ଏବଂ `Retry-After` ସହିତ 5 ମିନିଟର ଲକଆଉଟ୍ ଟ୍ରିଗର କରିଥାଏ)। କାରଣ WebDAV Basic ଳିକ ପ୍ରାମାଣିକିକରଣ ପ୍ରମାଣପତ୍ର ପଠାଇଥାଏ, ଲୁକବ୍ୟାକ୍ ବାହାରେ WebDAV ଏଣ୍ଡପଏଣ୍ଟକୁ ପ୍ରବେଶ କରିବା ସମୟରେ TLS ବନ୍ଦ କରିବା (କିମ୍ବା Tailscale କିମ୍ବା Cloudflare Tunnel ପରି ଏକ ସୁରକ୍ଷିତ ଟନେଲ ଉପରେ ରାଉଟିଙ୍ଗ୍) ଦୃ strongly ଭାବରେ ସୁପାରିଶ କରାଯାଏ।
+
 ### ପ୍ରତି-API-key context source (ଇଚ୍ଛାଧୀନ)
 
 `api_key_context_sources` ଟେବୁଲ୍ ମାଧ୍ୟମରେ Obsidian ବିନ୍ୟାସକୁ **ପ୍ରତ୍ୟେକ API key ପାଇଁ**

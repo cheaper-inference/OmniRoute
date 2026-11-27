@@ -487,6 +487,42 @@ test("execute (non-stream): a generic turn failure keeps the 200 Responses error
   assert.equal(body.error?.code, "codex_app_server_turn_failed");
 });
 
+test("execute (non-stream): an event backlog overflow ends the turn with an error instead of hanging", async () => {
+  const ctrl = makeFakeSocket();
+  const { fn } = fakeTransport(ctrl);
+  const executor = new CodexAppServerExecutor({ websocketFn: fn });
+  ctrl.socket.send = ((originalSend) => (data: string) => {
+    originalSend(data);
+    const frame = JSON.parse(data) as Record<string, unknown>;
+    if (frame.id == null || !frame.method) return;
+    queueMicrotask(() => {
+      if (frame.method === "thread/start") {
+        ctrl.emit({ jsonrpc: "2.0", id: frame.id, result: { threadId: "thr_1" } });
+      } else if (frame.method === "turn/start") {
+        ctrl.emit({ jsonrpc: "2.0", id: frame.id, result: {} });
+        // More events than the queue holds, in one synchronous burst, alternating kinds so
+        // they cannot coalesce. No terminal notification follows.
+        for (let i = 0; i < 10_050; i += 1) {
+          ctrl.emit({
+            jsonrpc: "2.0",
+            method: i % 2 ? "item/reasoning/textDelta" : "item/agentMessage/delta",
+            params: { delta: "x" },
+          });
+        }
+      } else {
+        ctrl.emit({ jsonrpc: "2.0", id: frame.id, result: {} });
+      }
+    });
+  })(ctrl.socket.send);
+
+  const result = await executor.execute(makeExecuteInput({ stream: false }));
+  const response = "response" in result ? result.response : (result as Response);
+  const body = (await response.json()) as { status?: string; error?: { code?: string } };
+  assert.equal(body.status, "failed");
+  assert.equal(body.error?.code, "codex_app_server_turn_failed");
+  assert.equal(ctrl.closed, true, "the client socket is torn down once the turn fails");
+});
+
 // ── Tool path: INBOUND advertise + OUTBOUND passthrough ──────────────────────
 
 test("dynamicToolWireName: flattens namespaced tools, passes plain ones through", () => {

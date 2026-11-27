@@ -15,6 +15,7 @@ import {
   SegmentedTabs,
   Select,
   Textarea,
+  Notice,
 } from "@/shared/components";
 interface ImportCodexAuthModalProps {
   onClose: () => void;
@@ -402,12 +403,13 @@ export function ImportCodexAuthModal({ onClose, onSuccess }: ImportCodexAuthModa
                   label={t("codexImportPasteLabel") || "Paste the JSON content"}
                 >
                   <Textarea
+                    mono
                     id="codex-import-single-paste"
                     value={singlePasteText}
                     onChange={(e) => handleSinglePasteChange(e.target.value)}
                     rows={7}
                     placeholder='{ "auth_mode": "chatgpt", ... }'
-                    className="resize-none font-mono text-xs"
+                    className="resize-none"
                   />
                 </Field>
               </SegmentedPanel>
@@ -453,11 +455,7 @@ export function ImportCodexAuthModal({ onClose, onSuccess }: ImportCodexAuthModa
               />
             </div>
 
-            {singleError && (
-              <div className="rounded-lg bg-error/10 border border-error/20 px-4 py-3 text-sm text-error">
-                {singleError}
-              </div>
-            )}
+            {singleError && <Notice variant="critical">{singleError}</Notice>}
 
             <div className="flex gap-2 pt-1">
               <Button
@@ -512,12 +510,13 @@ export function ImportCodexAuthModal({ onClose, onSuccess }: ImportCodexAuthModa
               {/* Paste mode */}
               <SegmentedPanel value="paste" className="flex flex-col gap-2">
                 <Textarea
+                  mono
                   value={bulkPasteText}
                   onChange={(e) => handleBulkPasteChange(e.target.value)}
                   rows={7}
                   aria-label={t("codexImportBulkModePaste") || "Paste list"}
                   placeholder={'[{ "auth_mode": "chatgpt", ... }, ...]'}
-                  className="resize-none font-mono text-xs"
+                  className="resize-none"
                 />
                 <p className="text-xs text-text-muted">
                   {t("codexImportBulkPasteHint") || "JSON array or multiple JSONs separated by ---"}
@@ -676,14 +675,14 @@ export function ApplyCodexAuthModal({
     <Modal isOpen={isOpen} title={title} onClose={onClose}>
       <div className="flex flex-col gap-4">
         <div>
-          <div className="text-xs uppercase text-text-muted mb-1">{targetLabel}</div>
+          <div className="ci-eyebrow mb-1">{targetLabel}</div>
           <code className="block rounded bg-bg-subtle px-2 py-1.5 text-xs font-mono text-text-main">
             ~/.codex/auth.json
           </code>
           <p className="mt-1 text-xs text-text-muted">{t("providerDetailPathAutoDetectedAllOs")}</p>
         </div>
         <div>
-          <div className="text-xs uppercase text-text-muted mb-1">{backupLabel}</div>
+          <div className="ci-eyebrow mb-1">{backupLabel}</div>
           <ul className="text-xs text-text-muted space-y-0.5 list-disc pl-4">
             <li>
               <code className="text-text-main">~/.codex/auth-&lt;timestamp&gt;.bak</code> — quick
@@ -692,12 +691,9 @@ export function ApplyCodexAuthModal({
             <li>Centralized backup history (audit trail)</li>
           </ul>
         </div>
-        <div className="rounded-lg border border-warning/25 bg-warning/10 px-3 py-2 text-sm text-warning">
-          <div className="flex items-start gap-2">
-            <Icon name="warning" size={18} className="mt-0.5 text-warning" />
-            <span>{warning}</span>
-          </div>
-        </div>
+        <Notice variant="warning" icon="warning">
+          {warning}
+        </Notice>
         <Checkbox
           label={confirmText}
           checked={confirmed}

@@ -64,11 +64,13 @@ test("a credits_exhausted OpenRouter connection keeps serving a catalogued free-
     testStatus: "credits_exhausted",
   });
 
+  // The catalogued free-access model must be a live row: an ended `:free` offer
+  // (freeType "discontinued") is no longer free access.
   const selected = await auth.getProviderCredentials(
     "openrouter",
     null,
     null,
-    "liquid/lfm-2.5-2.6b:free"
+    "google/gemma-4-31b-it:free"
   );
 
   assert.ok(selected, "a catalogued free-access model must still be served");

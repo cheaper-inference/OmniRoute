@@ -7,6 +7,7 @@ import { getProviderDisplayName } from "@/lib/display/names";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import Input from "@/shared/components/Input";
+import Badge from "@/shared/components/Badge";
 import { cn } from "@/shared/utils/cn";
 import { compareTr, matchesSearch } from "@/shared/utils/turkishText";
 
@@ -222,7 +223,8 @@ export const ProviderConnectionPermissionList = memo(function ProviderConnection
             variant="ghost"
             size="icon-sm"
             onClick={() => handleSearchChange("")}
-            className="absolute inset-y-0 right-1 my-auto text-text-muted"
+            className="absolute inset-y-0 right-1 my-auto"
+            tone="muted"
             aria-label={tc("clear")}
             icon="close"
           />
@@ -256,7 +258,8 @@ export const ProviderConnectionPermissionList = memo(function ProviderConnection
                     variant="ghost"
                     size="icon-sm"
                     onClick={() => handleToggleExpand(provider)}
-                    className="shrink-0 text-text-muted"
+                    className="shrink-0"
+                    tone="muted"
                     aria-label={providerDisplayName}
                     aria-expanded={isExpanded}
                   >
@@ -275,20 +278,20 @@ export const ProviderConnectionPermissionList = memo(function ProviderConnection
                     />
                     <Button
                       variant="ghost"
-                      size="sm"
+                      size="2xs"
                       onClick={() => handleToggleExpand(provider)}
-                      className="h-auto min-h-0 px-1 text-xs text-text-main truncate text-left"
+                      className="text-text-main truncate text-left"
                     >
                       {providerDisplayName}
                     </Button>
-                    <span className="text-[10px] text-text-muted bg-surface px-1 py-0.5 rounded shrink-0">
+                    <Badge size="sm" className="shrink-0">
                       {totalCount}
-                    </span>
+                    </Badge>
                   </div>
                   {selectedInProvider > 0 && (
-                    <span className="text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded-full shrink-0">
+                    <Badge size="sm" variant="primary" className="shrink-0">
                       {selectedInProvider}
-                    </span>
+                    </Badge>
                   )}
                 </div>
 
@@ -303,9 +306,10 @@ export const ProviderConnectionPermissionList = memo(function ProviderConnection
                           size="sm"
                           aria-pressed={isSelected}
                           onClick={() => handleToggleSingleConnection(conn.id)}
+                          tone={isSelected ? undefined : "muted"}
                           className={cn(
                             "w-full justify-start gap-2 text-left text-xs",
-                            isSelected ? "bg-primary/10 text-text-main" : "text-text-muted"
+                            isSelected && "bg-primary/10 text-text-main"
                           )}
                         >
                           <span
@@ -319,12 +323,12 @@ export const ProviderConnectionPermissionList = memo(function ProviderConnection
                           >
                             {isSelected && <Icon name="check" size={10} />}
                           </span>
-                          <span className="truncate flex-1 font-mono text-[11px]" title={conn.id}>
+                          <span className="truncate flex-1 font-mono text-2xs" title={conn.id}>
                             {conn.name ||
                               (typeof conn.id === "string" ? conn.id.slice(0, 8) : "connection")}
                           </span>
                           {!conn.isActive && (
-                            <span className="text-[9px] text-error shrink-0">{tc("inactive")}</span>
+                            <span className="text-3xs text-error shrink-0">{tc("inactive")}</span>
                           )}
                         </Button>
                       );

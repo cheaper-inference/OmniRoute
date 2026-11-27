@@ -1,0 +1,29 @@
+/* Placeholder decoration lives behind native text so selection, IME and caret remain native. */
+.ci-variable-textarea { position: relative; min-width: 0; background: var(--ci-field-bg); border-radius: var(--ci-radius-control); }
+.ci-variable-textarea__layer {
+  position: absolute; inset: 0; box-sizing: border-box; overflow: hidden; pointer-events: none;
+  border: var(--ci-border-default) solid transparent; border-radius: var(--ci-radius-control);
+  padding: var(--ci-space-3) var(--ci-space-4);
+  font: var(--ci-font-weight-regular) var(--ci-font-size-sm) / var(--ci-line-height-ui) var(--ci-font-ui);
+  line-height: var(--ci-type-data-leading); letter-spacing: var(--ci-type-data-tracking);
+  white-space: pre-wrap; overflow-wrap: break-word; word-break: normal; color: transparent;
+}
+/* `mono` sets the textarea in the code font. The layer repeats the same declarations as
+   .ci-textarea--mono in ci-ui.css, so each highlight stays under its text. */
+.ci-variable-textarea__layer--mono {
+  font-family: var(--ci-font-code);
+  font-size: var(--ci-font-size-xs);
+  line-height: var(--ci-type-reading-leading);
+  font-variant-numeric: tabular-nums;
+  font-variant-ligatures: none;
+  tab-size: 2;
+}
+.ci-variable-textarea__layer[dir="auto"] { unicode-bidi: plaintext; }
+.ci-variable-textarea__layer mark { background: var(--ci-chart-6-subtle); color: transparent; border-radius: 3px; padding: 0; font: inherit; letter-spacing: inherit; }
+.ci-variable-textarea__input { position: relative; background: transparent; caret-color: var(--ci-field-fg); }
+.ci-variable-textarea__input::selection { background: var(--ci-color-accent); color: var(--ci-color-accent-foreground); }
+.ci-variable-textarea[data-disabled] .ci-variable-textarea__layer { opacity: .56; }
+@media (forced-colors: active) {
+  .ci-variable-textarea__layer { display: none; }
+  .ci-variable-textarea__input { background: Field; color: FieldText; }
+}
