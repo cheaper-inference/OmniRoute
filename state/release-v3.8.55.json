@@ -3,12 +3,12 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b64",
+    "batchId": "b65",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b64-0ac5e8efa0be",
-    "candidateSha": "0ac5e8efa0bedabe2c230bacbdc3db3c77b1de56",
+    "candidateRef": "omni-queue/release-v3.8.55/b65-3a815de23db1",
+    "candidateSha": "3a815de23db1efaeb3fd34ccf196efc616132490",
     "baseSha": "c71f0065a7efe9230ec23b96a12253b050c4d7ad",
-    "treeSha": "97b06ec8559429009c8194231f23bd6df534fb3a",
+    "treeSha": "7872bbfd1a71e4d79e4f769e719653b41e7bbf5d",
     "prs": [
       {
         "n": 21264,
@@ -30,40 +30,58 @@
         "title": "docs(checks): flag only OmniRoute version claims and drop manual Last updated stamps",
         "author": "diegosouzapw",
         "labeledAt": "2026-11-27T01:10:15Z"
-      },
-      {
-        "n": 21352,
-        "head": "2e71918927684659060561614ccab39660f4b1be",
-        "title": "fix(api): refuse a selected Playground key that is gone instead of running without its policy (KEA-9523)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-27T04:28:36Z"
-      },
-      {
-        "n": 21345,
-        "head": "8fbe4785be1d6be723bf7e2e0a58bfa04ff27cde",
-        "title": "fix(translator): list recent translations newest first (KEA-9583)",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-27T04:28:45Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-27T08:52:48.207Z",
+    "startedAt": "2026-11-27T11:57:03.210Z",
     "attempts": 0,
-    "bisect": null,
-    "rerun": {
-      "ref": "omni-queue/release-v3.8.55/b64-0ac5e8efa0be",
-      "requestedAt": "2026-11-27T10:17:16.356Z",
-      "afterMs": 1795774608000,
-      "runIds": [
-        45969116351,
-        45969116311
+    "bisect": {
+      "rootBatchId": "b64",
+      "segments": [
+        [
+          {
+            "n": 21264,
+            "head": "29532e772ecce08b898701212419ac9ea728ed87",
+            "title": "docs(readme): dark-theme polish to match the site's use of the kit palette",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-27T00:59:23Z"
+          },
+          {
+            "n": 21360,
+            "head": "ae06a1eb1acaf0ec661a2049b86eefc0944ba139",
+            "title": "chore(quality): resync catalog drift probes with the audited catalog",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-27T01:02:32Z"
+          },
+          {
+            "n": 21331,
+            "head": "8bdfdfb91a24a151cec700fd4c471127a2229e7e",
+            "title": "docs(checks): flag only OmniRoute version claims and drop manual Last updated stamps",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-27T01:10:15Z"
+          }
+        ],
+        [
+          {
+            "n": 21352,
+            "head": "2e71918927684659060561614ccab39660f4b1be",
+            "title": "fix(api): refuse a selected Playground key that is gone instead of running without its policy (KEA-9523)",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-27T04:28:36Z"
+          },
+          {
+            "n": 21345,
+            "head": "8fbe4785be1d6be723bf7e2e0a58bfa04ff27cde",
+            "title": "fix(translator): list recent translations newest first (KEA-9583)",
+            "author": "diegosouzapw",
+            "labeledAt": "2026-11-27T04:28:45Z"
+          }
+        ]
       ],
-      "jobs": [
-        "Gate / Quality",
-        "Gate / CI",
-        "Lint",
-        "Fast Quality Gates"
-      ]
+      "culprits": [],
+      "landed": [],
+      "steps": 0,
+      "hang": false
     }
   },
   "baseChecks": [
@@ -160,66 +178,15 @@
     }
   },
   "counters": {
-    "batchSeq": 64,
-    "ciRuns": 69,
+    "batchSeq": 65,
+    "ciRuns": 70,
     "landedPrs": 62,
     "landedBatches": 19,
     "redBatches": 14,
-    "bisections": 4,
+    "bisections": 5,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-20T23:57:12.373Z",
-      "type": "batch-started",
-      "batchId": "b17",
-      "prs": [
-        19167,
-        19305,
-        19306,
-        20770,
-        20775
-      ],
-      "sha": "102a0a6818ff64fa85bf2fab49ce33377efd0ca3",
-      "detail": "5 PR(s) on 186db2e375c7; window 5",
-      "labeledAt": {
-        "19167": "2026-11-20T17:09:35Z",
-        "19305": "2026-11-20T17:10:31Z",
-        "19306": "2026-11-20T17:10:52Z",
-        "20770": "2026-11-20T23:33:34Z",
-        "20775": "2026-11-20T23:33:36Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44840264562"
-    },
-    {
-      "at": "2026-11-21T01:10:55.614Z",
-      "type": "checks-green",
-      "batchId": "b17",
-      "prs": [
-        19167,
-        19305,
-        19306,
-        20770,
-        20775
-      ],
-      "sha": "102a0a6818ff64fa85bf2fab49ce33377efd0ca3",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44848555822"
-    },
-    {
-      "at": "2026-11-21T01:11:11.734Z",
-      "type": "would-land",
-      "batchId": "b17",
-      "prs": [
-        19167,
-        19305,
-        19306,
-        20770,
-        20775
-      ],
-      "sha": "102a0a6818ff64fa85bf2fab49ce33377efd0ca3",
-      "detail": "shadow mode: would merge-ff onto 186db2e375c7",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44848555822"
-    },
     {
       "at": "2026-11-21T01:12:06.738Z",
       "type": "batch-started",
@@ -2909,8 +2876,56 @@
       "sha": "0ac5e8efa0bedabe2c230bacbdc3db3c77b1de56",
       "detail": "re-running the failed jobs of b64 once (Gate / Quality, Gate / CI, Lint, Fast Quality Gates) before bisecting",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45980752872"
+    },
+    {
+      "at": "2026-11-27T11:56:51.566Z",
+      "type": "checks-red",
+      "batchId": "b64",
+      "prs": [
+        21264,
+        21360,
+        21331,
+        21352,
+        21345
+      ],
+      "sha": "0ac5e8efa0bedabe2c230bacbdc3db3c77b1de56",
+      "detail": "Gate / Quality, Gate / CI, Fast Quality Gates, Lint",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45994526013"
+    },
+    {
+      "at": "2026-11-27T11:56:51.567Z",
+      "type": "bisect-split",
+      "batchId": "b64",
+      "prs": [
+        21264,
+        21360,
+        21331,
+        21352,
+        21345
+      ],
+      "sha": "0ac5e8efa0bedabe2c230bacbdc3db3c77b1de56",
+      "detail": "batch of 5 red: testing #21264, #21360, #21331 first",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45994526013"
+    },
+    {
+      "at": "2026-11-27T11:57:07.046Z",
+      "type": "batch-started",
+      "batchId": "b65",
+      "prs": [
+        21264,
+        21360,
+        21331
+      ],
+      "sha": "3a815de23db1efaeb3fd34ccf196efc616132490",
+      "detail": "bisect of b64: 3 PR(s) on c71f0065a7ef",
+      "labeledAt": {
+        "21264": "2026-11-27T00:59:23Z",
+        "21331": "2026-11-27T01:10:15Z",
+        "21360": "2026-11-27T01:02:32Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45994526013"
     }
   ],
-  "updatedAt": "2026-11-27T11:26:34.670Z",
-  "batchWindow": 5
+  "updatedAt": "2026-11-27T11:57:48.903Z",
+  "batchWindow": 2
 }
