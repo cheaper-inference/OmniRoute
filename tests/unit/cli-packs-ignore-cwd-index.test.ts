@@ -14,6 +14,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { cliCoverageNodeArgs } from "../_helpers/cliCwdEnvHarness.ts";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const BIN = path.join(ROOT, "bin", "omniroute.mjs");
@@ -68,7 +69,11 @@ function cleanEnv(home: string) {
 
 function runCli(args: string[], cwd: string, env: Record<string, string>) {
   return new Promise<{ code: number | null; stdout: string; stderr: string }>((resolve) => {
-    const child = spawn(process.execPath, [BIN, ...args], { cwd, env, detached: true });
+    const child = spawn(process.execPath, [...cliCoverageNodeArgs(BIN), BIN, ...args], {
+      cwd,
+      env,
+      detached: true,
+    });
     let stdout = "";
     let stderr = "";
     child.stdout.on("data", (d) => (stdout += d));

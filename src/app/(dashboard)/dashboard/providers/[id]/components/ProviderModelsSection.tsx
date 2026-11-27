@@ -213,7 +213,7 @@ export default function ProviderModelsSection({
       onClick={handleToggleAutoFetchModels}
       disabled={togglingAutoFetchModels}
       aria-pressed={isAutoFetchModelsEnabled}
-      className="text-[12px]"
+      className="text-xs"
       title={providerText(
         t,
         "autoFetchModelsTooltip",
@@ -237,7 +237,7 @@ export default function ProviderModelsSection({
       onClick={handleToggleAutoSync}
       disabled={togglingAutoSync}
       aria-pressed={isAutoSyncEnabled}
-      className="text-[12px]"
+      className="text-xs"
       title={t("autoSyncTooltip")}
     >
       <Icon
@@ -266,7 +266,7 @@ export default function ProviderModelsSection({
       onClick={handleClearAllModels}
       disabled={clearingModels}
       title={t("clearAllModels")}
-      className="text-[12px]"
+      className="text-xs"
     >
       <span>{t("clearAllModels")}</span>
     </Button>

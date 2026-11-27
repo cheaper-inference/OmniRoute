@@ -114,6 +114,7 @@ import {
   persistNonEmptyDiscoveredModels,
 } from "@/lib/providerModels/modelDiscovery";
 import { buildProviderModelsUrl, getDiscoveryClientVersionOptions } from "./discoveryClientVersion";
+import { shouldKeepStoredCodexCatalog } from "./codexDegradedGuard";
 import { getAdobeModels } from "./adobeFireflyDiscovery";
 import { getSyncedAvailableModels, getCustomModels, getModelIsHidden } from "@/lib/db/models";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
@@ -173,6 +174,7 @@ import { maybeHandleTwinmindModelDiscovery } from "./twinmindDiscovery";
 import { maybeHandleDevinDesktopModelDiscovery } from "./devinDesktopDiscovery";
 import { maybeHandleMuseCodeModelDiscovery } from "./museCodeDiscovery";
 import { maybeHandleVertexModelDiscovery } from "./vertexDiscovery";
+import { maybeHandleCodeBuddyIntlModelDiscovery } from "./codebuddyIntlDiscovery";
 import { buildChatGptModelsResponse } from "./chatgptModels";
 import {
   buildNoAuthModelsResponse,
@@ -727,6 +729,21 @@ export async function GET(
         });
       }
     }
+
+    const codebuddyIntlResponse = await maybeHandleCodeBuddyIntlModelDiscovery({
+      provider,
+      connectionId,
+      apiKey,
+      accessToken,
+      proxy,
+      refresh,
+      maybeReturnCachedDiscovery,
+      maybeReturnAutoFetchDisabled,
+      buildDiscoveryFallbackResponse,
+      buildResponse,
+      buildApiDiscoveryResponse,
+    });
+    if (codebuddyIntlResponse) return codebuddyIntlResponse;
 
     const webDiscoveryArgs = {
       provider,
@@ -2300,11 +2317,20 @@ export async function GET(
           githubCatalogModels && githubCatalogModels.length > 0
             ? enrichCodexModelsFromGithubCatalog(liveModels, githubCatalogModels)
             : liveModels;
-        const catalog = reconcileCodexCatalog(enrichedLiveModels);
-        await runWithCodexConnectionFence(codexFence, () =>
-          persistDiscoveredModels(provider, connectionId, catalog.activeModels)
-        );
+        const liveCatalog = reconcileCodexCatalog(enrichedLiveModels);
         const clientVersionSource = getCodexClientVersionSource();
+        // #16714: a degraded (refresh-failed) discovery must not shrink the stored catalog.
+        const keepStored = shouldKeepStoredCodexCatalog(
+          clientVersionSource,
+          liveCatalog.activeModels,
+          cachedDiscoveryModels
+        );
+        const catalog = keepStored ? reconcileCodexCatalog(cachedDiscoveryModels) : liveCatalog;
+        if (!keepStored) {
+          await runWithCodexConnectionFence(codexFence, () =>
+            persistDiscoveredModels(provider, connectionId, catalog.activeModels)
+          );
+        }
         return buildResponse({
           provider,
           connectionId,

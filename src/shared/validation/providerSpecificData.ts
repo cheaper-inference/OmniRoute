@@ -43,6 +43,16 @@ function validatePositiveNumberField(value: unknown, key: string, ctx: z.Refinem
   }
 }
 
+/** Optional boolean providerSpecificData flag; any other type is refused at save. */
+function validateBooleanField(value: unknown, key: string, ctx: z.RefinementCtx): void {
+  if (value === undefined || typeof value === "boolean") return;
+  ctx.addIssue({
+    code: z.ZodIssueCode.custom,
+    message: `providerSpecificData.${key} must be a boolean`,
+    path: [key],
+  });
+}
+
 // #6880 — per-connection prompt-cache capability override, extracted so
 // validateProviderSpecificData() stays under the complexity gate.
 // Per-connection model mapping: exact ids or trailing-star patterns -> a safe upstream model id.
@@ -344,6 +354,8 @@ export function validateProviderSpecificData(
     });
   }
 
+  validateBooleanField(data.blockClientTierFields, "blockClientTierFields", ctx);
+
   const openaiStoreEnabled = data.openaiStoreEnabled;
   if (openaiStoreEnabled !== undefined && typeof openaiStoreEnabled !== "boolean") {
     ctx.addIssue({
@@ -471,6 +483,15 @@ export function validateProviderSpecificData(
       code: z.ZodIssueCode.custom,
       message: "providerSpecificData.disableStreamOptions must be a boolean",
       path: ["disableStreamOptions"],
+    });
+  }
+
+  const strictChatHistory = data.strictChatHistory;
+  if (strictChatHistory !== undefined && typeof strictChatHistory !== "boolean") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.strictChatHistory must be a boolean",
+      path: ["strictChatHistory"],
     });
   }
 

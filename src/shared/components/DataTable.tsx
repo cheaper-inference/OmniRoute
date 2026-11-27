@@ -11,15 +11,14 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
-import { cn } from "@/shared/utils/cn";
 import EmptyState from "./EmptyState";
-import InteractiveTableRow from "./InteractiveTableRow";
 
 /**
  * DataTable — adapter over the kit `DataTableShell` + `Table` (KEA-7886).
  *
- * Sticky header, row click (mouse + Enter/Space), selected row, loading overlay and
- * empty state. Shared by RequestLoggerV2, ProxyLogger and similar tables.
+ * Sticky header, row activation (the kit `TableRow onActivate`: click, Enter and Space, with the
+ * controls inside the row keeping their own events), selected row, loading overlay and empty
+ * state.
  *
  * Usage:
  *   <DataTable
@@ -66,7 +65,8 @@ interface DataTableProps {
   /**
    * Draw the table's own frame (the kit `DataTableShell`). Pass `false` when a `Card`
    * already frames the table, so the two borders do not stack (issue 19620): the card is the
-   * frame, and the adapter keeps the kit loading region and a borderless table.
+   * frame and the surface, and the adapter renders the kit loading region around the kit's
+   * frameless table (`variant="plain"`).
    */
   framed?: boolean;
 }
@@ -107,7 +107,7 @@ export default function DataTable({
           maxHeight={maxHeight}
           scrollLabel={label}
           persistentScrollbars={false}
-          containerClassName={cn(!framed && "rounded-none border-0")}
+          variant={framed ? undefined : "plain"}
         >
           <TableHeader>
             <TableRow>
@@ -120,13 +120,14 @@ export default function DataTable({
           </TableHeader>
           <TableBody>
             {data.map((row, idx) => {
-              const selected = selectedId !== undefined && row.id === selectedId;
+              // Without a `selectedId` selection does not apply and no row states it; with one,
+              // every row says whether it is the selected one (`aria-selected` true / false).
+              const selected = selectedId === undefined ? undefined : row.id === selectedId;
               return (
-                <InteractiveTableRow
+                <TableRow
                   key={row.id || idx}
                   onActivate={onRowClick && (() => onRowClick(row))}
                   selected={selected}
-                  className={cn(onRowClick && "cursor-pointer")}
                 >
                   {columns.map((col) => (
                     <TableCell
@@ -137,7 +138,7 @@ export default function DataTable({
                       {renderCell(row, col)}
                     </TableCell>
                   ))}
-                </InteractiveTableRow>
+                </TableRow>
               );
             })}
           </TableBody>

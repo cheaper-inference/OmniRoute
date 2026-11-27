@@ -21,7 +21,7 @@
  * What it CANNOT prove (residual risk, deliberately not faked): that
  * `npm install -g @qoder-ai/qodercli@1.1.63` succeeds inside the image (registry
  * auth, network, postinstall), that the tarball still exposes a `qodercli` bin,
- * and that the binary starts on node:26-trixie-slim. Only a real
+ * and that the binary starts on the Wolfi-based runtime. Only a real
  * `docker build --target runner-cli` + `qodercli --version` can disprove those.
  */
 import test from "node:test";
@@ -178,15 +178,21 @@ test("#9292: the qodercli install runs as root and the stage hands back to the n
   }
 });
 
-test("#9292: PATH is not overridden in runner stages (npm -g bins land in /usr/local/bin, already on PATH)", () => {
-  for (const name of ["runner-base", CLI_CORE, ...CLI_FLAVORS]) {
-    const overrides = stage(name).instructions.filter(
-      (i) => /^ENV\s+(PATH|NPM_CONFIG_PREFIX)\b/.test(i) || /^ENV\s+PATH=/.test(i)
+test("#9292: runner stages preserve the system npm prefix and its bin directory on PATH", () => {
+  // Wolfi's npm installs global bins under /usr/bin, which is already on PATH.
+  for (const name of ["runtime-os", "runner-base", "runner-web", CLI_CORE, ...CLI_FLAVORS]) {
+    const overrides = stage(name).instructions.filter((i) =>
+      /^ENV\s+(?:(?:PATH|NPM_CONFIG_PREFIX)\b|.*\s(?:PATH|NPM_CONFIG_PREFIX)=)/.test(i)
     );
     assert.deepEqual(overrides, [], `${name} must not reroute PATH / npm prefix`);
   }
-  assert.match(stage("runner-base").base, /^base$/);
-  assert.match(stage("base").base, /^node:/, "official node image: npm prefix is /usr/local");
+  assert.equal(stage("runner-base").base, "runtime-os");
+  const runtime = stage("runtime-os");
+  assert.match(runtime.base, /^cgr\.dev\/chainguard\/wolfi-base(?::[^@\s]+)?@sha256:[a-f0-9]{64}$/);
+  assert.ok(
+    runtime.instructions.some((i) => /\bapk add\b[^&|;]*\snpm-12(?=\s|$)/.test(i)),
+    "runtime-os must install npm-12 via apk"
+  );
 });
 
 test("#9292: qodercli stays out of runner-base and runner-web (those stages must remain CLI-free)", () => {
@@ -270,7 +276,7 @@ test("#9292: image WITHOUT qodercli — the PAT path reports 502 cli_not_found (
   });
 });
 
-test("#9292: image WITH a `qodercli` on PATH (what npm -g puts in /usr/local/bin) — PAT chat is served", async (t) => {
+test("#9292: image WITH a `qodercli` on PATH (the global npm bin) — PAT chat is served", async (t) => {
   if (getKnownToolPaths("qoder").some((p) => fs.existsSync(p))) {
     // A real qodercli on this host would win over the PATH stub (known paths are
     // probed first) and make the assertion depend on the vendor binary.

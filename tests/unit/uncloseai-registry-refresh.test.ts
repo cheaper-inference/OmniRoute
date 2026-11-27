@@ -46,15 +46,16 @@ test("uncloseai registry seed contains the live upstream model, not the retired 
 
 test("uncloseai registry keeps the live discovery contract", () => {
   const entry = getRegistryEntry("uncloseai");
+  assert.equal(entry?.authType, "apikey");
   assert.equal(entry?.modelsUrl, "https://hermes.ai.unturf.com/v1/models");
   assert.equal(entry?.passthroughModels, undefined, "uncloseai is not a passthrough provider");
 });
 
-test("free-model catalog carries exactly the live uncloseai row", () => {
+test("free-model catalog records only the discontinued UncloseAI offer", () => {
   const rows = FREE_MODEL_BUDGETS.filter((row) => row.provider === "uncloseai");
   assert.equal(rows.length, 1, "catalog must have a single uncloseai row");
   assert.equal(rows[0].modelId, LIVE_MODEL);
-  assert.equal(rows[0].freeType, "keyless");
+  assert.equal(rows[0].freeType, "discontinued");
   assert.equal(rows[0].monthlyTokens, 0);
 
   for (const dead of DEAD_MODELS) {

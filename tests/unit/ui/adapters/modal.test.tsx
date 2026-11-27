@@ -79,10 +79,88 @@ describe("Modal adapter → kit Dialog (Radix)", () => {
         x
       </Modal>
     );
-    fireEvent.click(await screen.findByRole("button", { name: "Close" }));
-    expect(onClose).toHaveBeenCalledTimes(1);
-    // The kit's hardcoded "Close dialog" button is replaced by the translated one
+    const close = await screen.findByRole("button", { name: "Close" });
+    // It is the kit Dialog's own close button, named through `closeLabel`: one button, not a
+    // second one next to the kit's English "Close dialog".
+    expect(close.className).toBe("ci-dialog__close");
+    expect(screen.getAllByRole("button")).toEqual([close]);
     expect(screen.queryByRole("button", { name: "Close dialog" })).toBeNull();
+    fireEvent.click(close);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("the kit close button comes after the content, and the header keeps clear of it", async () => {
+    render(
+      <Modal isOpen onClose={() => {}} title="Order" footer={<button type="button">Save</button>}>
+        <button type="button">Inside</button>
+      </Modal>
+    );
+    const dialog = await screen.findByRole("dialog");
+    expect(
+      screen.getAllByRole("button").map((b) => b.getAttribute("aria-label") ?? b.textContent)
+    ).toEqual(["Inside", "Save", "Close"]);
+    // Focus starts on the first control of the content, not on Close.
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Inside" }));
+    const header = dialog.querySelector<HTMLElement>("[data-slot=dialog-header]")!;
+    expect(header.className).toContain("pe-14");
+    expect(header.querySelector("button")).toBeNull();
+  });
+
+  it("showCloseButton={false} renders no close button and reserves no room for one", async () => {
+    render(
+      <Modal isOpen onClose={() => {}} title="Busy" showCloseButton={false}>
+        body
+      </Modal>
+    );
+    const dialog = await screen.findByRole("dialog");
+    expect(screen.queryByRole("button", { name: "Close" })).toBeNull();
+    expect(dialog.querySelector(".ci-dialog__close")).toBeNull();
+    const header = dialog.querySelector<HTMLElement>("[data-slot=dialog-header]")!;
+    expect(header.className).not.toMatch(/\bpe-\d/);
+  });
+
+  it("compactHeader pulls the kit close button into the short header", async () => {
+    render(
+      <Modal isOpen onClose={() => {}} title="Compact" compactHeader>
+        body
+      </Modal>
+    );
+    const dialog = await screen.findByRole("dialog");
+    // The kit close button is the dialog's only direct <button> child.
+    expect(dialog.className).toContain("[&>button]:top-0.5");
+    expect(dialog.className).toContain("[&>button]:end-2");
+    expect([...dialog.children].filter((el) => el.tagName === "BUTTON")).toEqual([
+      screen.getByRole("button", { name: "Close" }),
+    ]);
+    const header = dialog.querySelector<HTMLElement>("[data-slot=dialog-header]")!;
+    expect(header.className).toContain("py-2.5");
+    expect(header.className).toContain("pe-12");
+  });
+
+  it("size=full fills the kit's fixed-height dialog: column layout, the body takes the rest", async () => {
+    const { rerender } = render(
+      <Modal isOpen onClose={() => {}} title="Full" size="full" footer={<span>footer</span>}>
+        body
+      </Modal>
+    );
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog.getAttribute("data-size")).toBe("full");
+    expect(dialog.className).toContain("flex");
+    expect(dialog.className).toContain("flex-col");
+    // The kit sets the height and its cap for this size: no host cap on top.
+    expect(dialog.className).not.toContain("max-h-");
+    const body = dialog.querySelector<HTMLElement>("[data-slot=modal-body]")!;
+    expect(body.className).toBe("p-6 flex-1 min-h-0 overflow-y-auto");
+
+    // A caller body keeps its own classes and still grows into the fixed height.
+    rerender(
+      <Modal isOpen onClose={() => {}} title="Full" size="full" bodyClassName="p-0">
+        body
+      </Modal>
+    );
+    expect(dialog.querySelector<HTMLElement>("[data-slot=modal-body]")!.className).toBe(
+      "flex-1 p-0"
+    );
   });
 
   it("closeOnOverlay=false keeps the dialog open on an outside click", async () => {
@@ -162,6 +240,7 @@ describe("Modal adapter → kit Dialog (Radix)", () => {
     expect(dialog.className).not.toMatch(/\bw-full\b/);
     expect(dialog.className).toContain("p-0");
     expect(dialog.className).toContain("max-h-[calc(100vh-3rem)]");
+    expect(dialog.className).not.toContain("flex-col");
     const header = dialog.querySelector<HTMLElement>("[data-slot=dialog-header]")!;
     expect(header.className).toContain("px-6");
     expect(header.className).toContain("pt-6");

@@ -84,7 +84,7 @@ describe("ConnectionQuotaPanel", () => {
 
   it("expands to per-window details with reset countdowns", () => {
     const el = mount(<ConnectionQuotaPanel {...panelProps()} />);
-    const toggle = el.querySelector<HTMLButtonElement>("button[title='Usage details']")!;
+    const toggle = el.querySelector<HTMLButtonElement>("button[aria-label='Usage details']")!;
     expect(toggle).not.toBeNull();
     act(() => toggle.click());
     expect(el.textContent).toContain("resets in ");
@@ -150,7 +150,7 @@ describe("ConnectionQuotaPanel", () => {
     expect(el.textContent).toContain("7d 0%");
     expect(el.textContent).not.toContain("5h");
     expect(el.textContent).not.toContain("sonnet");
-    act(() => el.querySelector<HTMLButtonElement>("button[title='Usage details']")!.click());
+    act(() => el.querySelector<HTMLButtonElement>("button[aria-label='Usage details']")!.click());
     expect(el.textContent).not.toContain("session (5h)");
   });
 
@@ -294,7 +294,7 @@ describe("ConnectionQuotaPanel", () => {
     const onRefresh = vi.fn();
     const el = mount(<ConnectionQuotaPanel {...panelProps({ cache: null, onRefresh })} />);
     expect(el.textContent).toContain("No usage data yet");
-    const refresh = el.querySelector<HTMLButtonElement>("button[title='Refresh usage']")!;
+    const refresh = el.querySelector<HTMLButtonElement>("button[aria-label='Refresh usage']")!;
     act(() => refresh.click());
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });

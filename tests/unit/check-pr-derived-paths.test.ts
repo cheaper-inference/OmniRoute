@@ -7,6 +7,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import {
+  orphanCleanupFiles,
   categoryOf,
   evaluateDerivedPaths,
   globToRegExp,
@@ -326,5 +327,139 @@ test("main: --warn in GitHub Actions also emits one ::warning annotation per vio
       console.log = log;
       console.error = error;
     }
+  });
+});
+
+// --- Orphan cleanup (2026-11-18, #20144) ------------------------------------------------------
+
+function withDocsRepo(fn: (dir: string, baseSha: string) => void) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "derived-orphans-"));
+  try {
+    gitIn(dir, "init", "-q", "-b", "base");
+    gitIn(dir, "config", "user.email", "test@example.invalid");
+    gitIn(dir, "config", "user.name", "test");
+    gitIn(dir, "config", "commit.gpgsign", "false");
+    fs.mkdirSync(path.join(dir, "config/quality/derived-paths"), { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, "config/quality/derived-paths/translation.json"),
+      JSON.stringify({
+        family: "translation",
+        writers: ["docs/i18n-*"],
+        categories: [{ id: "docs-i18n-mirrors", paths: ["docs/i18n/**", ".i18n-state.json"] }],
+      })
+    );
+    for (const f of ["docs/plan.md", "docs/keep.md"]) {
+      fs.mkdirSync(path.dirname(path.join(dir, f)), { recursive: true });
+      fs.writeFileSync(path.join(dir, f), `${f}\n`);
+      for (const loc of ["ko", "fr"]) {
+        const m = path.join(dir, "docs/i18n", loc, f);
+        fs.mkdirSync(path.dirname(m), { recursive: true });
+        fs.writeFileSync(m, `${loc} ${f}\n`);
+      }
+    }
+    // A mirror whose source is already gone on the base (an orphan the base carries).
+    fs.mkdirSync(path.join(dir, "docs/i18n/ko/docs/old"), { recursive: true });
+    fs.writeFileSync(path.join(dir, "docs/i18n/ko/docs/old/gone.md"), "ko gone\n");
+    const state = {
+      sources: {
+        "docs/plan.md": { source_hash: "p", locales: {} },
+        "docs/keep.md": { source_hash: "k", locales: {} },
+      },
+    };
+    fs.writeFileSync(path.join(dir, ".i18n-state.json"), JSON.stringify(state, null, 2) + "\n");
+    fs.writeFileSync(path.join(dir, "app.ts"), "1\n");
+    gitIn(dir, "add", "-A");
+    gitIn(dir, "commit", "-q", "-m", "base");
+    const baseSha = gitIn(dir, "rev-parse", "HEAD");
+    gitIn(dir, "checkout", "-q", "-b", "chore/repo-cleanup");
+    fn(dir, baseSha);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+const dropPlanFromState = (dir: string, extra: Record<string, unknown> = {}) => {
+  const p = path.join(dir, ".i18n-state.json");
+  const state = JSON.parse(fs.readFileSync(p, "utf8"));
+  delete state.sources["docs/plan.md"];
+  Object.assign(state, extra);
+  fs.writeFileSync(p, JSON.stringify(state, null, 2) + "\n");
+};
+
+test("orphan cleanup: deleting a doc, its mirrors and its state entry next to code is allowed", () => {
+  withDocsRepo((dir, baseSha) => {
+    fs.writeFileSync(path.join(dir, "app.ts"), "2\n");
+    for (const f of ["docs/plan.md", "docs/i18n/ko/docs/plan.md", "docs/i18n/fr/docs/plan.md"])
+      fs.rmSync(path.join(dir, f));
+    fs.rmSync(path.join(dir, "docs/i18n/ko/docs/old/gone.md")); // already an orphan on the base
+    dropPlanFromState(dir);
+    gitIn(dir, "add", "-A");
+    gitIn(dir, "commit", "-q", "-m", "cleanup");
+    assert.equal(
+      quiet(() => main(["--mode=pr"], { CI: "1", BASE_SHA: baseSha }, dir)),
+      0
+    );
+  });
+});
+
+test("orphan cleanup: deleting a mirror whose source the PR keeps still fails", () => {
+  withDocsRepo((dir, baseSha) => {
+    fs.writeFileSync(path.join(dir, "app.ts"), "2\n");
+    fs.rmSync(path.join(dir, "docs/i18n/ko/docs/keep.md"));
+    gitIn(dir, "add", "-A");
+    gitIn(dir, "commit", "-q", "-m", "drop a live mirror");
+    assert.equal(
+      quiet(() => main(["--mode=pr"], { CI: "1", BASE_SHA: baseSha }, dir)),
+      1
+    );
+  });
+});
+
+test("orphan cleanup: a state edit beyond dropping entries of removed docs still fails", () => {
+  withDocsRepo((dir, baseSha) => {
+    fs.writeFileSync(path.join(dir, "app.ts"), "2\n");
+    for (const f of ["docs/plan.md", "docs/i18n/ko/docs/plan.md", "docs/i18n/fr/docs/plan.md"])
+      fs.rmSync(path.join(dir, f));
+    dropPlanFromState(dir, { version: 2 });
+    gitIn(dir, "add", "-A");
+    gitIn(dir, "commit", "-q", "-m", "cleanup plus a state change");
+    assert.equal(
+      quiet(() => main(["--mode=pr"], { CI: "1", BASE_SHA: baseSha }, dir)),
+      1
+    );
+  });
+});
+
+test("orphanCleanupFiles: pure rule", () => {
+  const head = new Set(["docs/keep.md", "docs/i18n/ko/docs/keep.md"]);
+  const base = JSON.stringify({ sources: { "docs/plan.md": {}, "docs/keep.md": { a: 1 } } });
+  const out = orphanCleanupFiles({
+    files: ["docs/i18n/ko/docs/plan.md", "docs/i18n/ko/docs/keep.md", ".i18n-state.json"],
+    existsAtHead: (p) => head.has(p),
+    readBase: (p) => (p === ".i18n-state.json" ? base : "mirror at base"),
+    readHead: () => JSON.stringify({ sources: { "docs/keep.md": { a: 1 } } }),
+  });
+  assert.deepEqual([...out].sort(), [".i18n-state.json", "docs/i18n/ko/docs/plan.md"]);
+  // a live mirror that is merely modified is never cleanup
+  assert.equal(out.has("docs/i18n/ko/docs/keep.md"), false);
+});
+
+test("orphan cleanup: deleting a mirror whose source still exists stays a violation", () => {
+  withDocsRepo((dir) => {
+    // docs/notes.md is not in .i18n-state.json, but it exists: its mirror is not an orphan.
+    fs.writeFileSync(path.join(dir, "docs/notes.md"), "notes\n");
+    fs.mkdirSync(path.join(dir, "docs/i18n/ko/docs"), { recursive: true });
+    fs.writeFileSync(path.join(dir, "docs/i18n/ko/docs/notes.md"), "ko notes\n");
+    gitIn(dir, "add", "-A");
+    gitIn(dir, "commit", "-q", "-m", "untracked doc with one mirror on the base");
+    const base2 = gitIn(dir, "rev-parse", "HEAD");
+    fs.writeFileSync(path.join(dir, "app.ts"), "2\n");
+    fs.rmSync(path.join(dir, "docs/i18n/ko/docs/notes.md"));
+    gitIn(dir, "add", "-A");
+    gitIn(dir, "commit", "-q", "-m", "drop the mirror");
+    assert.equal(
+      quiet(() => main(["--mode=pr"], { CI: "1", BASE_SHA: base2 }, dir)),
+      1
+    );
   });
 });

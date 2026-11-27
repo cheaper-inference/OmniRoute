@@ -4,10 +4,9 @@
 
 ---
 
-Siden v3.8.49 (WS3.2/WS3.4 i kvalitets-/hastighedsplanen) er standardflettevejen for
-gennemgåede PR'er til `release/vX.Y.Z` **Mergify-flettekøen** (`.mergify.yml`);
-det **manuelle flettetog**, der er dokumenteret nedenfor, er RESERVELØSNINGEN — den bruges under hændelser,
-release-frysninger, eller hvis Mergifys Open Source-plan nogensinde ændres.
+> **2026-11-19: Mergify-fletningskøen er trukket tilbage** (ejers beslutning). `.mergify.yml` definerer ikke længere en kø og afviser de Mergify-kommandoer, der fusionerer eller omskriver en pull-anmodning. Release PRs flettes i hånden under repository-regelsættet "Kræv grønne porte på den aktive udgivelse" (`Gate / CI` + `Gate / Quality`) indtil omni-queue kører i live mode, og gennem omni-queue derefter ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Mergify-sektionerne nedenfor beskriver køen, som den var.
+
+Siden v3.8.49 (WS3.2/WS3.4 af quality/velocity planen) er standardfletningsstien for gennemgået PRs til `release/vX.Y.Z`** Flet sammenfletningskø** (`.mergify.yml`); de** manuelt sammenfletningstog** dokumenteret nedenfor er FALLBACK — der bruges under hændelser, udgivelsesfrysninger, eller hvis Mergify Open Source-planen nogensinde ændres.
 
 ## Standardforløb: Mergify-køen
 

@@ -41,24 +41,23 @@ flowchart LR
 `main` 不是日常集成分支。以 `main` 为目标创建的 PR
 通常需要在合并前重新指定目标分支。
 
-## 发布冻结（并行周期）
+## 释放冻结（并行循环）
 
-协调发布时，会创建一个带有 `release-freeze` 标签的标记 issue。
-这**不会停止开发**：
+当协调某个版本时，会打开一个标记为`release-freeze`标记问题。那**并没有停止发展**:
 
-- 冻结的 `release/vX.Y.Z` 由该次发布的发布负责人管理。
-- 下一周期的 `release/vX+1` 从冻结的顶端创建，以便贡献者继续合入工作。
-- 仍以冻结分支为目标的开放 PR 应**重新指定目标**为活跃的（版本号最高的）
-  `release/v*` 分支。
+- 冻结的`release/vX.Y.Z`属于该船的释放船长。
+- 下一个周期的`release/vX+1`将从冻结的尖端中删除，以便贡献者继续开展工作。
+- 打开仍以冻结分支为目标的PRs应该是**重新定位**到活动（最高） `release/v*`分支。
 
-在认定所需分支可合并之前，请先检查是否存在开放的冻结：
+在假设您想要的分支可合并之前，检查打开的冻结：
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-合并机制（所有者添加 `queue` 标签 → Mergify）记录在
-[MERGE_TRAIN.md](./MERGE_TRAIN.md) 中。
+合并机制（所有者`queue`标签→ Mergify）记录在[MERGE_TRAIN.md](./MERGE_TRAIN.md)中。
+
+> **2026-11-19：Mergify 合并队列退役**（所有者的决定）。 `.mergify.yml`不再定义队列并拒绝合并或重写拉取请求的 Mergify 命令。版本PRs在存储库规则集“活动版本上需要绿色门”(`Gate / CI` + `Gate / Quality`) 下手动合并，直到全队列在实时模式下运行，然后通过全队列 ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ) 进行合并。 `queue`标签不再合并任何内容。
 
 ## 为什么同时需要分支和标签？
 

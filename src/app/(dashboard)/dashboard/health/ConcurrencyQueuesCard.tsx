@@ -3,6 +3,8 @@
 import { useLocale, useTranslations } from "next-intl";
 import Button from "@/shared/components/Button";
 import { Card } from "@/shared/components";
+import EmptyState from "@/shared/components/EmptyState";
+
 import { useConcurrencySnapshot } from "./useConcurrencySnapshot";
 
 interface GateRow {
@@ -55,7 +57,9 @@ function QueueSection({ title, rows }: { title: string; rows: GateRow[] }) {
   const t = useTranslations("health");
   return (
     <section aria-label={title}>
-      <h3 className="mb-2 text-sm text-text-main">{title}</h3>
+      <h3 className="ci-heading mb-2" data-size="sm">
+        {title}
+      </h3>
       {rows.length ? (
         <ul className="space-y-2">
           {rows
@@ -65,9 +69,7 @@ function QueueSection({ title, rows }: { title: string; rows: GateRow[] }) {
             ))}
         </ul>
       ) : (
-        <p className="rounded-lg border border-dashed border-border p-3 text-sm text-text-muted">
-          {t("queuesEmpty")}
-        </p>
+        <EmptyState layout="inline" border="dashed" title={t("queuesEmpty")} />
       )}
     </section>
   );
@@ -158,7 +160,9 @@ export default function ConcurrencyQueuesCard() {
     <Card className="p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-lg text-text-main">{t("queuesTitle")}</h2>
+          <h2 className="ci-heading" data-size="lg">
+            {t("queuesTitle")}
+          </h2>
           <p className="mt-1 max-w-3xl text-xs text-text-muted">{t("queuesScope")}</p>
         </div>
         <Button

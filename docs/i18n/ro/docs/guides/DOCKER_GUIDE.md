@@ -27,13 +27,9 @@
 
 ---
 
-## Rulare rapidă
+## Run rapid
 
-> **Doriți să găzduiți local cu o singură comandă?** Consultați
-> [Ghidul de găzduire locală](../getting-started/SELF_HOST_GUIDE.md) —
-> `docker compose -f docker-compose.selfhost.yml up -d` (imagine publicată +
-> Redis, accesibil doar prin interfața loopback, fără alegerea unui profil). Rularea rapidă de mai jos este
-> varianta cu un singur container pentru utilizatorii care rulează deja Redis în altă parte.
+> **Auto-gazdă într-o singură comandă?** Consultați [Ghidul de auto-găzduire](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (imagine publicată + Redis, doar loopback, fără alegere de profil). Quick Run de mai jos este calea cu un singur container pentru utilizatorii care rulează deja Redis în altă parte.
 
 ```bash
 docker run -d \
@@ -42,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
-## Cu fișier de mediu
+## Cu fișierul de mediu
 
 ```bash
-# Copiați și editați mai întâi .env
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -239,16 +235,16 @@ Stiva de producție rulează în paralel cu configurația compose de dezvoltare 
 
 ## Etapele Dockerfile
 
-Depozitul include un Dockerfile cu mai multe etape (`Dockerfile`). Sunt expuse patru etape; alegeți valoarea `target` potrivită pentru cazul dvs. de utilizare.
+Depozitul furnizează un fișier Dockerfile în mai multe etape (`Dockerfile`). Sunt expuse patru etape; alege `target` potrivit pentru cazul tău de utilizare.
 
-| Etapă         | Imagine de bază       | Scop                                                                                                                                                                                                                                                                                                                            |
-| ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | Instalează dependențele (`npm ci --legacy-peer-deps`) și rulează `npm run build` (Turbopack în mod implicit — consultați mai jos Resurse pentru compilare)                                                                                                                                                                      |
-| `runner-base` | `node:26-trixie-slim` | Mediu de execuție pentru producție, cu rezultatul standalone Next.js. **Nu include CLI-uri ale furnizorilor.**                                                                                                                                                                                                                  |
-| `runner-cli`  | `runner-base`         | Adaugă `git`, `docker.io`, `docker-compose` și CLI-urile globale: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Alegeți această etapă pentru fluxuri de lucru agentice.**                                                                                                                                |
-| `runner-web`  | `runner-base`         | Adaugă Playwright și un browser Chromium (`--with-deps`) pentru furnizorii de sesiuni web: `gemini-web`, `claude-web`, `claude-turnstile`. **Alegeți această etapă când utilizați furnizorii respectivi** — imaginea simplă eșuează la momentul solicitării fără aceasta (consultați nota despre `-web` din Canale de lansare). |
+| Etapă         | Imagine de bază       | Scop                                                                                                                                                                                                                                                                                                          |
+| ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | Instalează deps (`npm ci --legacy-peer-deps`) și rulează `npm run build` (Turbopack în mod implicit — vezi mai jos Resursele din timpul construirii)                                                                                                                                                          |
+| `runner-base` | `node:26-trixie-slim` | Timp de funcționare a producției cu ieșire autonomă Next.js.** Niciun furnizor CLIs inclus.**                                                                                                                                                                                                                 |
+| `runner-cli`  | `runner-base`         | Adaugă `git`, `docker.io`, `docker-compose` și CLIs global : `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Alegeți acest lucru pentru fluxurile de lucru agentice.**                                                                                                                   |
+| `runner-web`  | `runner-base`         | Adaugă Playwright + un browser Chromium (`--with-deps`) pentru furnizorii de sesiuni web: `gemini-web`, `claude-web`, `claude-turnstile`.** Alegeți acest lucru atunci când utilizați acei furnizori** — imaginea simplă eșuează la momentul solicitării fără ea (vezi nota `-web` de sub Canale de lansare). |
 
-Compilați manual o anumită țintă:
+Creați manual o țintă specifică:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -256,42 +252,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### Resurse pentru compilare
+### Resurse în timpul construirii
 
-Trei argumente de compilare controlează resursele consumate de etapa `builder`. Acestea se aplică numai în timpul compilării —
-`OMNIROUTE_MEMORY_MB` (mai jos) este un parametru separat, pentru timpul de execuție.
+Trei argumente de construcție controlează cât costă etapa `builder`. Ele sunt doar în timpul construirii. — `OMNIROUTE_MEMORY_MB` (mai jos) este un buton separat, de rulare.
 
-| Argument de compilare       | Valoare implicită | Efect                                                                                                              |
-| --------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`               | `0` compilează cu webpack: consum maxim de memorie mai redus, dar mai lent. `1` activează Turbopack.               |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`            | Limita heap-ului V8 (`--max-old-space-size`) pentru procesul `next build` lansat.                                  |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`               | Furnizează valoarea pentru `CIRCLE_NODE_TOTAL`; Next derivă `workers = N - 1` pentru colectarea datelor paginilor. |
+| Construiți arg              | Implicit | Efect                                                                                                   |
+| --------------------------- | -------- | ------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`      | `0` se construiește cu webpack: memorie de vârf mai mică, mai lentă. `1` optează pentru Turbopack.      |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`   | plafon V8 heap (`--max-old-space-size`) pentru `next build` generat .                                   |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`      | Feeds `CIRCLE_NODE_TOTAL`; În continuare, derivă `workers = N - 1` pentru colectarea datelor de pagină. |
 
-`OMNIROUTE_BUILD_WORKERS` este parametrul care trebuie mărit pe un sistem de compilare puternic și cel care trebuie
-suspectat atunci când o compilare cu resurse limitate eșuează **după** `✓ Compiled successfully`. Fiecare
-proces worker pentru datele paginilor este un proces separat, la fel ca procesul părinte `next build`;
-o reproducere pe un VPS real (problema #7518) a măsurat pentru fiecare proces un vârf RSS de
-~4.5 GB, independent de opțiunea pentru heap din `NODE_OPTIONS` (Turbopack compilează folosind
-memorie nativă/Rust din afara heap-ului V8). Valoarea implicită `2` (→ 1 worker, 2
-procese în total) este dimensionată pentru runner-ele găzduite de GitHub cu 16 GB / 4 vCPU pe care le
-utilizează fluxul de publicare. La `8` (→ 7 workeri), runner-ul respectiv a rămas fără memorie, iar
-buildkit a oprit etapa cu eroarea `ResourceExhausted: ... cannot allocate memory`;
-nici `3` (→ 2 workeri) nu a încăput după ce valoarea RSS per proces a fost măsurată
-direct, în loc să fie estimată. `tests/unit/docker-build-memory-budget.test.ts`
-efectuează calculele pe baza valorii măsurate și eșuează dacă oricare dintre parametri
-depășește capacitatea runner-ului.
+`OMNIROUTE_BUILD_WORKERS` este cel care trebuie să ridice pe un constructor mare și cel care să suspecteze când o construcție constrânsă moare** după** `✓ Compiled successfully`. Fiecare lucrător de date de pagină este propriul său proces, la fel și `next build` ul părinte însuși; o reproducere VPS live (problema #7518) a măsurat RSS de vârf al fiecărui proces la ~ 4,5 GB independent de indicatorul `NODE_OPTIONS` heap (Turbopack se compilează în memoria native/Rust în afara heap-ului V8). Valoarea implicită a `2` (→ 1 worker, 2 procese în total) este dimensionată pentru cei 16 GB / 4 vCPU găzduiți de rulare GitHub pe care le utilizează pipeline de publicare. La `8` (→ 7 lucrători) acel alergător a rămas fără memorie și kit-ul de construcție a eșuat pasul cu `ResourceExhausted: ... cannot allocate memory`; `3` (→ 2 lucrători) încă nu se potriveau odată ce RSS per proces a fost măsurat direct în loc de dedus. `tests/unit/docker-build-memory-budget.test.ts` face aritmetica față de cifra măsurată și nu reușește dacă oricare dintre butoanele depășește alergătorul.
 
-Turbopack compilează folosind memorie Rust nativă care se află **în afara** heap-ului V8, astfel încât
-`OMNIROUTE_BUILD_MEMORY_MB` nu o limitează. Pe o gazdă cu o limită de memorie,
-compilarea este apoi oprită prin SIGKILL de mecanismul OOM, fără niciun mesaj de eroare — pur și simplu
-se oprește în timpul etapei `Creating an optimized production build`, ceea ce pare mai degrabă un blocaj
-decât o epuizare a memoriei. Acesta este motivul pentru care `Dockerfile` utilizează implicit webpack
-(`OMNIROUTE_USE_TURBOPACK=0`), spre deosebire de `npm run dev` / `npm run build`, unde
-Turbopack este opțiunea implicită din cod: o comandă simplă `docker build .`, fără argumente de compilare (așa cum
-rulează Railway și alte platforme cu implementare printr-un singur clic), nu trebuie să eșueze silențios pe un
-sistem de compilare cu memorie limitată. Imaginile publicate transmit deja explicit
-`OMNIROUTE_USE_TURBOPACK=0` în `docker-publish.yml`. Pe un sistem de compilare cu suficientă memorie RAM, activați
-Turbopack pentru o compilare mai rapidă:
+Turbopack se compilează în memoria nativă Rust care trăiește** exterior** heap-ul V8, deci `OMNIROUTE_BUILD_MEMORY_MB` nu îl leagă. Pe o gazdă cu un plafon de memorie, construcția este apoi SIGKILLed de către ucigașul OOM fără niciun text de eroare — pur și simplu se oprește la mijlocul `Creating an optimized production build`, care se citește ca o blocare mai degrabă decât ca o memorie lipsită. Acesta este motivul pentru care `Dockerfile` este implicit la webpack (`OMNIROUTE_USE_TURBOPACK=0`), spre deosebire de `npm run dev` / `npm run build`, unde Turbopack este codul implicit: un `docker build .` gol fără argumente de construcție (ceea ce rulează Railway și alte gazde cu un singur clic) nu trebuie să moară în tăcere pe un constructor cu memorie limitată. Imaginile publicate trec deja `OMNIROUTE_USE_TURBOPACK=0` explicit în `docker-publish.yml`. Pentru un constructor cu multe RAM, optați pentru Turbopack pentru o construcție mai rapidă:
 
 ```bash
 docker build --target runner-base \
@@ -299,48 +272,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` este activat, astfel încât `next build` rulează un proces părinte **și** un proces worker,
-iar fiecare respectă separat `OMNIROUTE_BUILD_MEMORY_MB`. Dimensionați limita containerului
-la o valoare mai mare decât aproximativ dublul acestei valori, nu doar o singură dată valoarea.
+`webpackBuildWorker` este activat, deci `next build` rulează un părinte** şi** un proces de muncitor si fiecare onoreaza `OMNIROUTE_BUILD_MEMORY_MB` separat. Măriți plafonul containerului peste aproximativ de două ori această valoare, nu o dată.
 
-Măsurători efectuate pe acest arbore (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
+Măsurat pe acest arbore (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Bundler   | Limita containerului | Rezultat                                        |
-| --------- | -------------------- | ----------------------------------------------- |
-| Turbopack | 8 GiB / 16 GiB       | oprit de OOM la ambele valori, fără mesaj       |
-| webpack   | 8 GiB                | procesul worker de compilare oprit prin SIGKILL |
-| webpack   | 12 GiB               | reușit, cu un vârf de 11.1 GiB                  |
+| Bundler    | Plafonul containerului | Rezultat                             |
+| ---------- | ---------------------- | ------------------------------------ |
+| Turbopack  | 8 GiB / 16 GiB         | OOM-ucis la amândoi, în tăcere       |
+| pachet web | 8 GiB                  | muncitor constructor SIGKILLed       |
+| pachet web | 12 GiB                 | a reușit, a atins vârful la 11,1 GiB |
 
-### Valori implicite pentru timpul de execuție
+### Valori implicite de rulare
 
 Valori implicite exportate de `runner-base`: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
 Comportamentul memoriei în Docker:
 
-- Imaginea setează `OMNIROUTE_MEMORY_MB=1024` și derivă din aceasta `NODE_OPTIONS=--max-old-space-size=1024`.
-- Procesul efectiv al serverului este pornit de lansatorul autonom, care citește `OMNIROUTE_MEMORY_MB` și adaugă `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
-- Node utilizează ultima valoare repetată pentru `--max-old-space-size`, astfel încât setarea `OMNIROUTE_MEMORY_MB` controlează limita efectivă a heap-ului în Docker.
-- Deoarece imaginea setează întotdeauna această variabilă, valoarea de rezervă a lansatorului, calibrată în funcție de RAM, nu se aplică niciodată în Docker. Măriți-o explicit pentru volumul de lucru (tabelul de mai jos). `2048` este în continuare prea puțin pentru `/v1/responses` utilizat de agenții de programare.
+- Imaginea setează `OMNIROUTE_MEMORY_MB=1024` și derivă `NODE_OPTIONS=--max-old-space-size=1024` din aceasta.
+- Procesul propriu-zis al serverului este pornit de lansatorul autonom, care citește `OMNIROUTE_MEMORY_MB` și adaugă `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
+- Nodul folosește ultima valoare `--max-old-space-size` repetată, astfel încât setarea `OMNIROUTE_MEMORY_MB` controlează limita efectivă a heap Docker.
+- Deoarece imaginea o stabilește întotdeauna, funcția de rezervă calibrată de RAM propriu al lansatorului nu se aplică niciodată sub Docker. Creșteți-l în mod explicit pentru volumul de muncă (tabelul de mai jos). `2048` este încă prea mic pentru agentul de codificare `/v1/responses`.
 
-### RAM necesar în timpul execuției pentru agenții de programare
+### Runtime RAM pentru agenți de codare
 
-Valoarea implicită Docker de 1 GiB reprezintă un minimum pentru panoul de control și conversații ușoare, nu o configurație pentru producție. Corpurile lungi ale solicitărilor `POST /v1/responses` (sute de mesaje, zeci de instrumente) păstrează în memorie mai multe grafuri în timpul comprimării. Două solicitări suprapuse de aproximativ 3 MiB / 750.000 de tokenuri au provocat oprirea V8 cu un spațiu vechi de **12 GiB** (`FATAL ERROR: Reached heap limit`) și au declanșat, de asemenea, o eroare OOM pentru un cgroup de 16 GiB. Consultați [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Valoarea implicită de 1 GiB Docker este un etaj dashboard/light-chat, nu o dimensiune de producție. Corpurile `POST /v1/responses` lungi (sute de mesaje, zeci de instrumente) rețin mai multe grafice în memorie în timpul compresiei. Două cereri suprapuse ~ 3 MiB / ~ 750k-token au anulat V8 la un** 12 GiB** vechi-spațiu (`FATAL ERROR: Reached heap limit`) și, de asemenea, a lovit un 16 GiB cgroup OOM. Vezi [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
-Configurați **`--memory` pentru cgroup peste dimensiunea heap-ului** — bufferele native, SQLite și datele intermediare de comprimare se află în afara V8.
+Dimensiune** cgroup `--memory` deasupra mormanului** Bufferele native —, SQLite și intermediarii de compresie se află în afara V8.
 
-| Volum de lucru                                  | `OMNIROUTE_MEMORY_MB`                  | Container / cgroup         | Observații                                                                                                              |
-| ----------------------------------------------- | -------------------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Panou de control, o conversație ușoară          | `1024` (valoarea implicită a imaginii) | ≥2 GiB                     |                                                                                                                         |
-| Un agent de programare (Claude/Codex/Grok)      | `8192`                                 | ≥10 GiB                    | Sesiune unică tipică pentru `/v1/responses`                                                                             |
-| Două solicitări lungi `/v1/responses` simultane | `10240`–`12288`                        | ≥12–16 GiB                 | Oprire V8 măsurată la un heap de aproximativ 12 GiB                                                                     |
-| Trei sau mai multe contexte lungi simultane     | nu utilizați un singur proces          | serializare / mai mult RAM | Limita implicită pentru operațiuni intensive este de 1 solicitare în curs; mărirea ei fără RAM readuce problema opririi |
+| Volumul de muncă                       | `OMNIROUTE_MEMORY_MB`         | Container / cgroup        | Note                                                                                             |
+| -------------------------------------- | ----------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------ |
+| Tabloul de bord, un chat ușor          | `1024` (imagine implicită)    | ≥2 GiB                    |                                                                                                  |
+| Un agent de codare (Claude/Codex/Grok) | `8192`                        | ≥10 GiB                   | `/v1/responses` tipic cu o singură sesiune                                                       |
+| Două `/v1/responses` lungi simultane   | `10240`–`12288`               | ≥12–16 GiB                | Avortarea V8 măsurată la ~ 12 GiB heap                                                           |
+| Trei + contexte lungi concurente       | nu faceți pe un singur proces | serializa / mai multe RAM | Admiterea implicită la categoria grea este 1 în zbor; ridicarea lui fără RAM reintroduce avortul |
 
-Pe un sistem fizic, `omniroute serve` calibrează aproximativ 35% din RAM (limitat la intervalul `[512, 4096]`) atunci când `OMNIROUTE_MEMORY_MB` este **nesetat**. Docker setează întotdeauna valoarea `1024`, astfel încât această calibrare nu este executată niciodată în imaginea oficială.
+`omniroute serve` pe metal goale calibrează ~ 35% din RAM ( `[512, 4096]` prins) când `OMNIROUTE_MEMORY_MB` este** neasezat** . Docker setează întotdeauna `1024`, astfel încât calibrarea nu rulează niciodată în imaginea oficială.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## Variabile de mediu critice
@@ -364,22 +335,13 @@ Pe lângă valorile implicite documentate în [ENVIRONMENT.md](../reference/ENVI
 | `PROD_DASHBOARD_PORT`         | Portul panoului de control de pe gazdă pentru `docker-compose.prod.yml`                                                                                                                                                                                                          | `20130`                    |
 | `CLIPROXYAPI_PORT`            | Portul de pe gazdă pentru sidecar-ul `cliproxyapi`                                                                                                                                                                                                                               | `8317`                     |
 
-## Proxy invers pe o subcale (Traefik / nginx)
+## Proxy invers pe o cale secundară (Traefik / nginx)
 
-`basePath` din Next.js este compilat în pachetul standalone. OmniRoute înregistrează valoarea
-încorporată într-un fișier santinelă din rădăcina aplicației (scris în timpul rulării `npm run build`;
-citit de `scripts/docker/ensure-docker-base-path.mjs`) și o compară cu
-`OMNIROUTE_BASE_PATH` la pornirea containerului. Când acestea diferă, iar imaginea a fost
-construită pentru rădăcina domeniului, entrypoint-ul rescrie manifestele standalone,
-literalii `basePath`/`assetPrefix` încorporați (Next 16 generează URL-urile resurselor SSR
-exclusiv din `assetPrefix` — instrumentul de corecție reflectă subcalea și în acesta), URL-urile
-încorporate ale resurselor `/_next/static` (manifestele referințelor client, importurile media,
-paginile de eroare prerandate) și shim-ul `process.env` al clientului înainte de rularea
-`node dev/run-standalone.mjs`.
+Next.js `basePath` este compilat în pachetul independent. OmniRoute înregistrează valoarea coaptă într-un fișier sentinel la rădăcina aplicației (scris în timpul `npm run build`; citit de `scripts/docker/ensure-docker-base-path.mjs`) și o compară cu `OMNIROUTE_BASE_PATH` când pornește containerul. Când acestea diferă și imaginea a fost construită pentru rădăcina domeniului, punctul de intrare rescrie manifestele de sine stătătoare, literalele `basePath`/`assetPrefix` încorporate (urmatorul 16 redă SSR asset URLs de la `assetPrefix` singur — patch-ul oglindește sub-calea în ea), URLs coapte `/_next/static` (eroare de importare de media clinder, manifestări de preferință, pagini) și clientul `process.env` shim înainte ca `node dev/run-standalone.mjs` să ruleze.
 
-### Compilare cu Compose (recomandat)
+### Compune build (recomandat)
 
-Setați ambele variabile în `.env`, apoi reconstruiți, astfel încât imaginea și mediul de execuție să corespundă:
+Setați ambele variabile în `.env`, apoi reconstruiți astfel încât imaginea și timpul de execuție să fie de acord:
 
 ```bash
 # .env
@@ -391,69 +353,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` transmite `OMNIROUTE_BASE_PATH` atât ca argument de compilare Docker, cât și ca
-variabilă de mediu la momentul execuției.
+`docker-compose.yml` transmite `OMNIROUTE_BASE_PATH` ca Docker build-arg și ca variabilă de mediu de rulare.
 
-### Imagine rădăcină precompilată + subcale la momentul execuției
+### Subcale de rulare a imaginii rădăcină pre-construită +
 
-Imaginile publicate `diegosouzapw/omniroute:*` sunt construite pentru rădăcina domeniului. Puteți totuși
-seta `OMNIROUTE_BASE_PATH` la momentul execuției; containerul corectează pachetul o singură dată la pornire.
-Asociați-o cu originea publică corespunzătoare:
+Imaginile `cheaperinference/omniroute:*` publicate sunt create pentru rădăcina domeniului. Puteți încă seta `OMNIROUTE_BASE_PATH` în timpul execuției; containerul plasează pachetul o dată la pornire. Asociați-l cu originea publică care se potrivește:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-Configurați proxy-ul invers pentru a redirecționa calea externă **completă** (nu eliminați
-prefixul). Traefik trebuie să direcționeze `PathPrefix(`/omniroute`)` către container fără
-`StripPrefix`, astfel încât Next.js să primească `/omniroute/...` și să furnizeze resursele din
-`/omniroute/_next/...`.
+Configurați proxy invers pentru a redirecționa** deplin** cale externă (nu îndepărtați prefixul). Traefik ar trebui să direcționeze `PathPrefix(`/omniroute `)` către container fără `StripPrefix`, astfel încât Next.js primește `/omniroute/...` și servește active de la `/omniroute/_next/...`.
 
-Verificarea stării Docker sondează endpoint-ul simplificat al ciclului de viață `/healthz`, prefixat
-cu valoarea activă `OMNIROUTE_BASE_PATH`. `/api/monitoring/health` rămâne disponibil pentru
-diagnosticare umană/prin panouri de control; pentru a redirecționa HEALTHCHECK-ul containerului către acesta
-(de exemplu, pentru aplicarea unei verificări aprofundate a stării), setați `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`.
-Această cale efectuează o verificare **aprofundată** (baza de date + rezumatul monitorizării) — adecvată pentru
-`HEALTHCHECK`-ul rar al Docker, dacă optați din nou pentru aceasta, dar **nu** pentru intervalele
-`livenessProbe` din Kubernetes.
+Verificarea sănătății Docker verifică punctul final al ciclului de viață `/healthz` ușor prefixat cu `OMNIROUTE_BASE_PATH` activ. `/api/monitoring/health` rămâne disponibil pentru diagnosticarea human/dashboard ; pentru a îndrepta containerul HEALTHCHECK înapoi spre el (de exemplu, pentru aplicarea profundă a sănătății), setați `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. Acea cale este a** adânc** verificați (DB + monitoring summary) — adecvat pentru `HEALTHCHECK` rar al Docker dacă vă înscrieți din nou, dar** nu** pentru intervalele Kubernetes `livenessProbe`.
 
-Pentru orchestratoare (Kubernetes, Nomad etc.):
+Pentru orchestratori (Kubernetes, Nomad etc.):
 
-| Sondă                  | Preferat                                                                 | De evitat                                                                    |
-| ---------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
-| Stare activă           | HTTP `GET /livez` sau TCP pe portul principal (`PORT`, implicit `20128`) | `/api/monitoring/health` ca verificare a stării active                       |
-| Pregătire              | HTTP `GET /healthz`                                                      | Timpi-limită stricți care tratează o buclă de evenimente ocupată ca inactivă |
-| Aprofundată / blackbox | `/api/monitoring/health`                                                 | —                                                                            |
+| Sondă                | Prefera                                                                  | Evita                                                                         |
+| -------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| Vioitate             | HTTP `GET /livez` sau TCP pe portul principal (`PORT`, implicit `20128`) | `/api/monitoring/health` ca viață                                             |
+| Pregătire            | HTTP `GET /healthz`                                                      | Timeout-uri strânse care tratează bucla de evenimente ocupată ca fiind moartă |
+| Adânc / cutie neagră | `/api/monitoring/health`                                                 | —                                                                             |
 
-`/healthz` raportează ciclul de viață al procesului (`ok` / `starting` / `stopping`). `/livez`
-indică doar dacă procesul este activ (200 ori de câte ori handler-ul poate rula; nu așteaptă
-starea de pregătire). Ambele rulează totuși în aceeași buclă de evenimente Node ca procesarea cererilor, astfel încât
-operațiunile asupra catalogului sau de compresie care solicită intens procesorul le pot întârzia — ocupat ≠ inactiv. Preferați
-verificarea stării active prin TCP dacă sondele HTTP expiră. Îndrumări complete privind sondele:
-[Ghid de monitorizare — recomandări pentru sondele Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` raportează ciclul de viață al procesului (`ok` / `starting` / `stopping`). `/livez` este doar proces-alive (200 ori de câte ori handlerul poate rula; nu așteaptă pregătirea). Ambele încă rulează pe aceeași buclă de evenimente Node ca și gestionarea cererilor, astfel încât catalogul legat de CPU sau munca de compresie le poate întârzia — busy ≠ dead. Preferați TCP liveness dacă HTTP sondele expiră. Ghid complet pentru sonde: [Ghid de monitorizare — Recomandări pentru sonde Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
-## Docker Compose cu Caddy (HTTPS Auto-TLS)
+## Docker Compose with Caddy (HTTPS Auto-TLS)
 
-OmniRoute poate fi expus în siguranță folosind furnizarea automată de certificate SSL oferită de Caddy. Asigurați-vă că înregistrarea DNS A a domeniului indică spre adresa IP a serverului.
+OmniRoute poate fi expus în siguranță utilizând furnizarea automată SSL de la Caddy. Asigurați-vă că înregistrarea DNS A a domeniului dvs. indică IP serverului dvs.
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # Originea vizibilă pentru browser, utilizată pentru callback-urile OAuth, linkurile tabloului de bord și URL-urile publice generate.
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # URL intern între servere, utilizat pentru sarcinile programate / cererile către sine.
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -470,12 +415,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy setează anteturile standard de redirecționare pentru containerul din amonte. OmniRoute utilizează
-`NEXT_PUBLIC_BASE_URL` ca origine publică canonică pentru callback-urile OAuth și linkurile publice
-generate; operațiunile de scriere autentificate din tabloul de bord utilizează cereri de aceeași origine și protecție CSRF
-asociată sesiunii. Activați `OMNIROUTE_TRUST_PROXY` numai pentru implementările avansate în care doriți în mod intenționat
-ca OmniRoute să derive originea publică din anteturile de redirecționare de încredere, în locul unei configurații
-explicite.
+Caddy setează anteturile de expediere standard pentru containerul din amonte. OmniRoute folosește `NEXT_PUBLIC_BASE_URL` ca origine publică canonică pentru apelurile inverse OAuth și legăturile publice generate; scrierile din tabloul de bord autentificat folosesc cereri de aceeași origine plus protecție CSRF legată de sesiune. Activați `OMNIROUTE_TRUST_PROXY` numai pentru implementări avansate în care doriți în mod intenționat ca OmniRoute să obțină originea publică din antetele redirecționate de încredere în loc de configurația explicită.
 
 ## Tunel rapid Cloudflare
 
@@ -492,49 +432,51 @@ Panourile de tunel pentru endpointuri (Cloudflare, Tailscale, ngrok) pot fi afi�
 - Imaginile Docker includ certificatele CA rădăcină ale sistemului și le transmit către instanța `cloudflared` gestionată, ceea ce evită erorile de încredere TLS atunci când tunelul este inițializat în interiorul containerului.
 - Setați `CLOUDFLARED_BIN=/absolute/path/to/cloudflared` dacă doriți ca OmniRoute să utilizeze un binar existent în loc să descarce unul.
 
-## Etichetele imaginilor
+## Etichete de imagine
 
-| Imagine                  | Etichetă | Dimensiune | Descriere                                                                    |
-| ------------------------ | -------- | ---------- | ---------------------------------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB     | Cea mai recentă versiune SemVer stabilă **publicată** (nu ramura git `main`) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB     | Fixați această clasă de etichete pentru GitOps                               |
+| Imagine                      | Etichetă | Dimensiune | Descriere                                                |
+| ---------------------------- | -------- | ---------- | -------------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250 MB   | Cel mai înalt** publicat** SemVer stabil (nu git `main`) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250 MB   | Fixați această clasă de etichete pentru GitOps           |
 
-Manifest multiplatformă: `linux/amd64` + `linux/arm64` nativ (Apple Silicon, AWS Graviton, Raspberry Pi). Docker selectează automat arhitectura corespunzătoare; transmiteți `--platform linux/amd64` dacă trebuie să forțați emularea AMD64 pe gazde ARM.
+Aceleași imagini sunt publicate în trei depozite, cu aceleași rezumate pe arhitectură: `cheaperinference/omniroute` (Docker Hub, organizația Cheaper Inference, începând cu 3.8.53), `ghcr.io/cheaper-inference/omniroute` și moștenirea `diegosouzapw/omniroute`, care își păstrează istoricul de extragere și primește în continuare fiecare lansare. Implementările existente `diegosouzapw/omniroute` continuă să se actualizeze; schimbarea numelui imaginii este opțională. Canalul de pre-lansare `:next` / `:next-web` de mai jos este publicat numai pentru `diegosouzapw/omniroute` și GHCR.
 
-### Canale de lansare
+Manifest multiplatformă: `linux/amd64` + `linux/arm64` nativ (Apple Silicon, AWS Graviton, Raspberry Pi). Docker selectează automat arhitectura potrivită; treceți `--platform linux/amd64` dacă trebuie să forțați emularea AMD64 pe gazdele ARM.
 
-OmniRoute publică separat canale Docker pentru versiuni stabile, testarea ramurii active de lansare și compilările de dezvoltare.
+### Lansați canale
 
-| Canal                           | Sursă                                                 | Mutabilitate                     | Utilizare recomandată                                                                                                                         |
-| ------------------------------- | ----------------------------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | Versiune semnată/numerotată                           | Imuabilă                         | Implementări în producție care fixează o versiune exactă                                                                                      |
-| `:latest` / `:latest-web`       | Cea mai recentă versiune SemVer stabilă **publicată** | Indicator stabil mutabil         | Urmează versiunile stabile **după** o sarcină de publicare SemVer — **nu** urmărește ramura `main` sau commiturile nelansate din `release/v*` |
-| `:next` / `:next-web`           | Ramura `release/v*` implicită actuală                 | Indicator de pre-lansare mutabil | Testarea remedierilor care au ajuns în ramura activă de lansare, dar nu sunt încă incluse într-o versiune stabilă                             |
-| `:main` / `:main-web`           | Ramura `main`                                         | Indicator de dezvoltare mutabil  | Numai pentru dezvoltare și testarea integrării                                                                                                |
+OmniRoute publică canale Docker separate pentru lansări stabile, testare activă a ramurilor de lansare și versiuni de dezvoltare.
+
+| Canal                           | Sursă                                    | Mutabilitate                         | Utilizare recomandată                                                                                                     |
+| ------------------------------- | ---------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `:<version>` / `:<version>-web` | eliberare Signed/versioned               | Imuabil                              | Implementări de producție care fixează o lansare exactă                                                                   |
+| `:latest` / `:latest-web`       | Cel mai înalt** publicat** SemVer stabil | Indicator stabil mutabil             | Urmează lansări stabile** după** a SemVer publish job — does** nu** urmăriți comiterile `main` sau `release/v*` nelansate |
+| `:next` / `:next-web`           | Ramura `release/v*` implicită curentă    | Indicator de pre-lansare modificabil | Testarea corecțiilor care au ajuns pe ramura de lansare activă, dar nu sunt încă într-o ediție stabilă                    |
+| `:main` / `:main-web`           | `main`                                   | Indicator de dezvoltare mutabil      | Numai teste de dezvoltare și integrare                                                                                    |
 
 #### Furnizori de sesiuni web: imaginile `-web`
 
-Fiecare canal de mai sus are și o etichetă `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), construită din etapa `runner-web` — aceeași imagine, dar cu Playwright și un browser Chromium. Imaginea obișnuită este livrată **fără** Chromium; `gemini-web`, `claude-web` și `claude-turnstile` au nevoie de acesta.
+Fiecare canal de mai sus funcționează ca o etichetă `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), construit din etapa `runner-web` — aceeași imagine plus Playwright și un browser Chromium. Imaginea simplă este trimisă** fără** Crom; `gemini-web`, `claude-web` și `claude-turnstile` au nevoie de el.
 
-Eroarea este amânată, nu apare la pornire: acești furnizori își listează modelele și apar drept conectați în tabloul de bord, iar numai prima cerere eșuează cu
+Eșecul este amânat, nu timpul de pornire: acei furnizori își listează modelele și se afișează ca fiind conectați în tabloul de bord și doar prima solicitare eșuează cu
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-Dacă utilizați acești furnizori, descărcați eticheta `-web` a canalului pe care îl utilizați deja — nimic altceva nu se schimbă. În cazul unei instalări npm/CLI (fără imagine Docker), componenta echivalentă care lipsește este binarul browserului: rulați `npx playwright install chromium` pe gazdă.
+Dacă utilizați acești furnizori, trageți eticheta `-web` a canalului pe care vă aflați deja — nimic altceva nu se schimbă. La o instalare npm/CLI (fără imagine Docker ), piesa echivalentă lipsă este binarul browserului: rulați `npx playwright install chromium` pe gazdă.
 
-#### Utilizarea canalului de pre-lansare
+#### Folosind canalul de pre-lansare
 
-Canalul `next` este reconstruit la fiecare push către ramura implicită curentă `release/v*` și este publicat atât pentru AMD64, cât și pentru ARM64. Ramurile de mentenanță mai vechi nu îl pot suprascrie. Canalul oferă o imagine care poate fi descărcată pentru remedierile care au fost îmbinate în ramura de versiune activă înainte de crearea următorului tag stabil.
+Canalul `next` este reconstruit la fiecare apăsare către ramura `release/v*` implicită curentă și este publicat atât pentru AMD64 cât și ARM64. Ramurile de întreținere mai vechi nu o pot suprascrie. Canalul oferă o imagine extrasă pentru corecțiile care au fuzionat în ramura de lansare activă înainte ca următoarea etichetă stabilă să fie tăiată.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Pentru Docker Compose, suprascrieți tagul imaginii utilizat de profilul selectat, apoi descărcați imaginea și recreați serviciul:
+Pentru Docker Compose, suprascrieți eticheta de imagine utilizată de profilul selectat, apoi trageți și recreați serviciul:
 
 ```yaml
 services:
@@ -547,32 +489,32 @@ docker compose pull
 docker compose up -d
 ```
 
-#### Siguranță și revenire
+#### Siguranță și rollback
 
-`next` este un canal flotant de prelansare. Se poate modifica la orice push către ramura de versiune activă și **nu este acceptat pentru utilizare în producție**. Fixați digestul imaginii atunci când evaluați un anumit build:
+`next` este un canal plutitor de pre-lansare. Se poate schimba la orice apăsare către ramura de eliberare activă și este** nu este acceptat pentru utilizare în producție** . Fixați rezumatul imaginii în timp ce evaluați o anumită construcție:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-Înainte de testare, creați o copie de rezervă a volumului de date OmniRoute sau a directorului de date montat prin bind mount. Pentru a reveni, restaurați versiunea stabilă sau digestul utilizat anterior și recreați containerul:
+Înainte de testare, faceți o copie de rezervă a volumului de date OmniRoute sau a directorului de date montat în legătură. Pentru a derula înapoi, restaurați versiunea stabilă utilizată anterior sau digerați și recreați containerul:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-Un build al ramurii de versiune nu poate muta niciodată `latest`; numai o versiune semantică stabilă eligibilă poate actualiza indicatorul stabil. Imaginile `next` păstrează verificarea imaginii de versiune și pragul de blocare pentru vulnerabilități CRITICAL.
+O construcție de lansare-ramură nu poate muta niciodată `latest`; numai o versiune semantică stabilă eligibilă poate promova indicatorul stabil. Imaginile `next` rețin inspecția imaginii de lansare și blocarea poarta de vulnerabilitate CRITICA.
 
-**`latest` nu garantează actualitatea față de git.** Remedierile îmbinate în `main` sau în ramura activă `release/v*` **nu** sunt incluse în `:latest` până când nu este publicată o imagine SemVer stabilă, iar jobul de publicare nu promovează `:latest` (același digest ca acea versiune SemVer). Dacă `latest` pare să fi rămas neschimbat, deși GitHub afișează deja remedierea, descărcați `:next` pentru a testa ramura de versiune sau așteptați tagul SemVer.
+**`latest` nu este o garanție valutară pentru git.** Remedierile îmbinate pe `main` sau pe ramura activă `release/v*` sunt** nu** în `:latest` până când este publicată o imagine SemVer stabilă și jobul de publicare promovează `:latest` (același digest ca acel SemVer). Dacă `latest` pare înghețat în timp ce GitHub arată deja remedierea, trageți `:next` pentru a testa ramura de lansare sau așteptați eticheta SemVer.
 
-| Ce doriți                                                                           | Utilizați                               |
-| ----------------------------------------------------------------------------------- | --------------------------------------- |
-| GitOps / producție fără abateri                                                     | Fixați `:X.Y.Z` (sau digestul imaginii) |
-| Urmărirea versiunilor stabile publicate și acceptarea recreării la fiecare versiune | `:latest`                               |
-| Testarea commiturilor `release/v*` nelansate                                        | `:next` (nu pentru producție)           |
-| Testarea `main`                                                                     | `:main` (nu pentru producție)           |
+| Tu vrei                                                                  | Utilizare                                |
+| ------------------------------------------------------------------------ | ---------------------------------------- |
+| GitOps / producție care nu trebuie să derive                             | Fixați `:X.Y.Z` (sau rezumatul imaginii) |
+| Urmăriți grajdurile publicate și acceptați o recreare la fiecare lansare | `:latest`                                |
+| Testați comiterile `release/v*` nelansate                                | `:next` (nu producție)                   |
+| Testează `main`                                                          | `:main` (nu producție)                   |
 
 ## Actualizări ale panoului de control în Docker
 

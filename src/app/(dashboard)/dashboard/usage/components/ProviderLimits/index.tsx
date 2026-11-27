@@ -15,6 +15,7 @@ import {
   compareQuotaConnections,
   quotaStatusLevel,
 } from "./utils";
+import { ToggleChip } from "@omniroute/ui-kit/toggle-chip";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
@@ -196,28 +197,23 @@ interface ProviderLimitsProps {
   autoRefreshInterval?: number;
 }
 
-/** Toggle chip for the quota filters (purchase type / tier / env) on the kit Button. */
+/** Toggle chip for the quota filters (purchase type / tier / env): the kit ToggleChip. */
 function FilterChip({
   active,
   onClick,
+  count,
   children,
 }: {
   active: boolean;
   onClick: () => void;
+  /** Accounts behind the filter; part of the chip's accessible name. */
+  count: number;
   children: React.ReactNode;
 }) {
   return (
-    <Button
-      variant={active ? "secondary" : "outline"}
-      size="sm"
-      aria-pressed={active}
-      onClick={onClick}
-      className={`h-7 min-h-7 gap-1.5 rounded-full px-2.5 text-xs ${
-        active ? "border-primary text-text-main" : "text-text-muted"
-      }`}
-    >
+    <ToggleChip size="sm" pressed={active} count={count} onClick={onClick}>
       {children}
-    </Button>
+    </ToggleChip>
   );
 }
 
@@ -808,7 +804,7 @@ export default function ProviderLimits({
   const renderInlineQuotaSummary = (quotas: any[]) => {
     if (!quotas || quotas.length === 0) return null;
     return (
-      <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] text-text-muted">
+      <div className="mt-1 flex flex-wrap items-center gap-1.5 text-3xs text-text-muted">
         {quotas.slice(0, 3).map((q, index) => {
           const pct = q.unlimited
             ? 100
@@ -854,7 +850,9 @@ export default function ProviderLimits({
       <Card padding="lg">
         <div className="text-center py-12">
           <Icon name="cloud_off" size={64} className="opacity-15" />
-          <h3 className="mt-4 text-lg text-text-main">{t(emptyCard.title)}</h3>
+          <h3 className="ci-heading mt-4" data-size="lg">
+            {t(emptyCard.title)}
+          </h3>
           <p className="mt-2 text-sm text-text-muted max-w-[400px] mx-auto">{t(emptyCard.hint)}</p>
         </div>
       </Card>
@@ -866,7 +864,9 @@ export default function ProviderLimits({
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg text-text-main m-0">{t("providerLimits")}</h2>
+          <h2 className="ci-heading m-0" data-size="lg">
+            {t("providerLimits")}
+          </h2>
           <span className="text-[13px] text-text-muted">
             {t("accountsCount", { count: visibleConnections.length })}
             {visibleConnections.length !== sortedConnections.length &&
@@ -919,7 +919,7 @@ export default function ProviderLimits({
 
           {/* Purchase Type filter */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[11px] uppercase tracking-wider text-text-muted font-semibold mr-1">
+            <span className="ci-eyebrow mr-1" data-size="2xs" data-weight="medium">
               {tr("filterPurchaseTypeLabel", "Type")}
             </span>
             {PURCHASE_TYPES.map((type) => {
@@ -930,10 +930,10 @@ export default function ProviderLimits({
                 <FilterChip
                   key={type.key}
                   active={active}
+                  count={count}
                   onClick={() => handleSetPurchaseFilter(type.key)}
                 >
-                  <span>{tr(type.labelKey, type.fallback)}</span>
-                  <span className="opacity-85">{count}</span>
+                  {tr(type.labelKey, type.fallback)}
                 </FilterChip>
               );
             })}
@@ -941,16 +941,20 @@ export default function ProviderLimits({
 
           {/* Tier filter */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[11px] uppercase tracking-wider text-text-muted font-semibold mr-1">
+            <span className="ci-eyebrow mr-1" data-size="2xs" data-weight="medium">
               {tr("filterTierLabel", "Tier")}
             </span>
             {TIER_FILTERS.map((tier) => {
               if (tier.key !== "all" && !tierCounts[tier.key]) return null;
               const active = tierFilter === tier.key;
               return (
-                <FilterChip key={tier.key} active={active} onClick={() => setTierFilter(tier.key)}>
-                  <span>{tier.label || t(tier.labelKey!)}</span>
-                  <span className="opacity-85">{tierCounts[tier.key] || 0}</span>
+                <FilterChip
+                  key={tier.key}
+                  active={active}
+                  count={tierCounts[tier.key] || 0}
+                  onClick={() => setTierFilter(tier.key)}
+                >
+                  {tier.label || t(tier.labelKey!)}
                 </FilterChip>
               );
             })}
@@ -961,7 +965,7 @@ export default function ProviderLimits({
               the persisted choice no longer exists in this session. */}
           {providerOptions.length > 1 && (
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] uppercase tracking-wider text-text-muted font-semibold mr-1">
+              <span className="ci-eyebrow mr-1" data-size="2xs" data-weight="medium">
                 {tr("filterProviderLabel", "Provider")}
               </span>
               <Select
@@ -988,7 +992,7 @@ export default function ProviderLimits({
           {/* Env filter — only renders when at least one connection has a tag */}
           {envTags.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] uppercase tracking-wider text-text-muted font-semibold mr-1">
+              <span className="ci-eyebrow mr-1" data-size="2xs" data-weight="medium">
                 {tr("filterEnvLabel", "Env")}
               </span>
               {(["all", ...envTags] as string[]).map((tag) => {
@@ -996,9 +1000,13 @@ export default function ProviderLimits({
                 const active = envFilter === tag;
                 const label = tag === "all" ? tr("filterEnvAll", "All") : tag;
                 return (
-                  <FilterChip key={tag} active={active} onClick={() => handleSetEnvFilter(tag)}>
-                    <span>{label}</span>
-                    <span className="opacity-85">{count}</span>
+                  <FilterChip
+                    key={tag}
+                    active={active}
+                    count={count}
+                    onClick={() => handleSetEnvFilter(tag)}
+                  >
+                    {label}
                   </FilterChip>
                 );
               })}

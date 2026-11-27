@@ -1,0 +1,1 @@
+- **build(docker):** The `-bun` and `-web-bun` images now use a digest-pinned Wolfi base, the same Bun binary as the build stage, and the same `bun` user with UID 1000. The `-web-bun` image still ships Playwright's Chromium.

@@ -21,7 +21,7 @@ const CORE_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "mig-dup-col-leftovers-")
 fs.writeFileSync(
   path.join(CORE_DIR, "001_initial_schema.sql"),
   [
-    "CREATE TABLE subs (id INTEGER PRIMARY KEY, control_url TEXT);",
+    "CREATE TABLE subs (id INTEGER PRIMARY KEY, control_url TEXT, extra TEXT);",
     "CREATE TABLE subs_log (id INTEGER PRIMARY KEY);",
     "CREATE INDEX idx_subs_log_id ON subs_log(id);",
   ].join("\n")
@@ -60,7 +60,7 @@ test("a replay that fails on an existing table/index falls back to recording the
     const ledger = db.prepare("SELECT version FROM _omniroute_migrations ORDER BY rowid").all();
     assert.deepEqual(ledger, [{ version: "001" }, { version: "002" }]);
     // The failed replay ran in one transaction: nothing of it is left half-applied.
-    assert.deepEqual(columns(db, "subs"), ["id", "control_url"]);
+    assert.deepEqual(columns(db, "subs"), ["id", "control_url", "extra"]);
   } finally {
     db.close();
   }

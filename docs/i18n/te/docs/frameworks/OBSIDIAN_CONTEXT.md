@@ -96,6 +96,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### భద్రత & రవాణా
+
+WebDAV ప్రమాణీకరణ ప్రతి-IP వైఫల్యం ట్రాకింగ్ మరియు లాకౌట్ను అమలు చేస్తుంది (60-సెకన్ల విండోలో 10 విఫల ప్రయత్నాలు `429 Too Many Requests` మరియు `Retry-After` లతో 5 నిమిషాల లాకౌట్ను ప్రేరేపిస్తాయి). WebDAV ప్రాథమిక ప్రమాణీకరణ ఆధారాలను ప్రసారం చేస్తుంది కాబట్టి, లూప్బ్యాక్ వెలుపల WebDAV ఎండ్పాయింట్ను యాక్సెస్ చేస్తున్నప్పుడు TLS ముగించడం (లేదా Tailscale లేదా Cloudflare Tunnel వంటి సురక్షిత సొరంగం ద్వారా రూటింగ్ చేయడం) గట్టిగా సిఫార్సు చేయబడింది.
+
 ### ఒక్కో API కీకి కాంటెక్స్ట్ సోర్స్ (ఐచ్ఛికం)
 
 `api_key_context_sources` పట్టిక (`src/lib/db/apiKeyContextSources.ts`) ద్వారా Obsidian

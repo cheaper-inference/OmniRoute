@@ -9,7 +9,7 @@ import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFol
 
 settleConnectionFollowUpsAfterEachTest();
 
-// uncloseai is in NOAUTH_PROVIDERS and is not in FREE_APIKEY_PROVIDER_IDS, so
+// cloudflare-playground is in NOAUTH_PROVIDERS and is not in FREE_APIKEY_PROVIDER_IDS, so
 // isManagedProviderConnectionId() does not admit it. POST still returned
 // { error: "Invalid provider" } for that real catalog id. (opencode is not the
 // witness: it is already on the free-apikey allowlist.)
@@ -85,9 +85,9 @@ test("POST /api/providers accepts catalogued noauth ids and rejects unknown ids"
   assert.equal(inherited.status, 400);
   assert.deepEqual(inherited.body, { error: "Invalid provider" });
 
-  const noauth = await postProvider("uncloseai");
+  const noauth = await postProvider("cloudflare-playground");
   assert.notDeepEqual(noauth.body, { error: "Invalid provider" });
   assert.equal(noauth.status, 201, JSON.stringify(noauth.body));
-  assert.equal(noauth.body.connection?.provider, "uncloseai");
+  assert.equal(noauth.body.connection?.provider, "cloudflare-playground");
   assert.equal(JSON.stringify(noauth.body).includes("at /"), false);
 });

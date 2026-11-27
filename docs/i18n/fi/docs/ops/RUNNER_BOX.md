@@ -137,36 +137,22 @@ kerrallaan ja vain sen ollessa käyttämätön** siten, että käyttämättömyy
   minuuttia, kun taas sen lähettäminen levyltä kesti 2 minuuttia.
 - `.15`-VPS on tarkoitettu vain homologointiin — siinä ei koskaan suoriteta CI-suorittajia.
 
-## GitHub-hostattu suorituskaista (GitHub-hosted runners)
+## Isännöity kaista (GitHubin isännöimät juoksijat)
 
-Repositorio kuuluu `cheaper-inference`-organisaatiolle, joka on **Team**-tilauksessa: käytettävissä on **60
-samanaikaista GitHub-hostattua työtä**, jotka jaetaan kaikkien organisaation repositorioiden, kaikkien PR-tarkistusten,
-kaikkien push-tapahtumien käynnistämien työnkulkujen ja CodeQL:n oletusmäärityksen kesken. Alla olevat luvut mitattiin
-**Pro**-tilauksen aikana (40 samanaikaista GitHub-hostattua työtä). Mittauksessa 2026-10-18
-yhdistämiskampanjan aikana (~10 yhdistämistä tunnissa haarassa `release/v3.8.52`) **2 500 työnkulun suoritusta luotiin
-24 tunnissa**, haaraan tehtiin 44 push-tapahtumaa 6 tunnissa ja **106 GitHub-hostattua työtä jäi jonoon**, kun PR-tarkistukset odottivat
-tunteja ja PR:t yhdistettiin ilman niitä. Yhdeksän työnkulkua käynnistyi jokaisesta haaraan tehdystä push-tapahtumasta:
+Arkisto kuuluu `cheaper-inference` -organisaatiolle** Joukkue** suunnitelma:** 60 concurrent hosted jobs** , joka jaetaan organisaation jokaisen arkiston, jokaisen PR tarkistuksen, jokaisen push-käynnistetty työnkulun ja CodeQL:n oletusasetuksen kanssa. The figures below were measured on the** Pro** plan (40 concurrent hosted jobs). Mitattu 18.10.2026 yhdistämiskampanjan aikana (~ 10 merges/hour on `release/v3.8.52`):** 2,500 workflow runs created in 24 h** , 44 pushes to the branch in 6 h,** 106 isännöityä työtä jonossa** kun PR -shekit odottivat tunteja ja PRs yhdistettiin ilman niitä. Yhdeksän työnkulkua käynnistettiin jokaisella oksalle tehdyllä työnnöllä:
 
-| per push kohteeseen `release/v*`            | GitHub-hostattuja töitä | lopputulos ruuhkan aikana                                                              | 2026-10-18 alkaen                                                                  |
-| ------------------------------------------- | ----------------------: | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `ci.yml` (koko matriisi)                    |             enintään 30 | seuraava push peruutti, 24/24 yhden päivän aikana                                      | ei käynnistetä `release/**`-push-tapahtumista (PR-suoritus + Release-Green)        |
-| `quality.yml`                               |                      ~6 | peruutettiin, 23/23                                                                    | ei käynnistetä `release/**`-push-tapahtumista                                      |
-| `Release-Green` `--quick`                   |                       0 | suoritettiin `omni-build`-ympäristössä, 97/100 peruutettiin                            | `omni-release`-paikka, ei koskaan peruuteta, odottavat suoritukset yhdistetään     |
-| `Lock released branch`, `OpenSSF Scorecard` |                       2 | yksi jonotettu suoritus kutakin push-tapahtumaa kohden                                 | yksi suoritus viitettä kohden (`tests/unit/build/hosted-lane-concurrency.test.ts`) |
-| `Release acceptance` (varjoraportti)        |                       1 | yksi GitHub-hostattu `npm ci` kutakin push-tapahtumaa kohden, ei koskaan peruuteta     | ennallaan — ehdokas `paths:`-suodattimelle                                         |
-| `Publish to Docker Hub` → `Deploy to VPS`   |                       2 | peruutetaan push-tapahtumakohtaisesti; amd64-osuus kilpailee `omni-build`-ympäristössä | ennallaan — omistajan käyttöönottokanava                                           |
-| CodeQL:n oletusmääritys (`dynamic`)         |                       4 | `javascript-typescript`, `actions`, `c-cpp`, `python` kutakin push-tapahtumaa kohden   | ennallaan — Settings → Code security; `c-cpp`/`python` eivät skannaa täällä mitään |
+| per työntö `release/v*`                     | isännöityjä työpaikkoja | lopputulos myrskyn alla                                          | 18.10.2026 alkaen                                                                   |
+| ------------------------------------------- | ----------------------: | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `ci.yml` (täysi matriisi)                   |                 30 asti | peruutettu seuraavan työnnön yhteydessä, 24/24 päivässä          | ei käynnistynyt `release/**` -työntöillä (PR run + Release-Green)                   |
+| `quality.yml`                               |                      ~6 | peruutettu, 23/23                                                | ei käynnistynyt `release/**` -työntöillä                                            |
+| `Release-Green` `--quick`                   |                       0 | juoksi `omni-build`, peruutettu 97/100                           | `omni-release` -paikka, ei koskaan peruutettu, odotusaika romahtaa                  |
+| `Lock released branch`, `OpenSSF Scorecard` |                       2 | yksi jonossa oleva juoksu työntöä kohden                         | yksi juoksu per ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)            |
+| `Release acceptance` (varjoraportti)        |                       1 | yksi isännöity `npm ci` työntöä kohti, ei koskaan peruutettu     | muuttumaton — ehdokas `paths:` -suodattimelle                                       |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                       2 | peruutettu työntöä kohti; amd64 jalka kilpailee `omni-build`     | muuttumaton — omistajan käyttöönottokanava                                          |
+| CodeQL oletusasetukset (`dynamic`)          |                       4 | `javascript-typescript`, `actions`, `c-cpp`, `python` per työntö | muuttumaton — Asetukset → Koodin suojaus; `c-cpp`/`python` ei skannaa täällä mitään |
 
-`tests/unit/build/push-storm-diet.test.ts` lukitsee `ci.yml`- ja
-`quality.yml`-tiedostojen push-käynnistimen vain `main`-haaraan. Sivuvaikutus: Codecov ei enää vastaanota peruslatausta kustakin julkaisuhaaran push-tapahtumasta (vaihe on
-vain informatiivinen ja käyttää `continue-on-error`-asetusta); repositorion sisäinen kattavuusportti ja PR-kommentti
-eivät muutu.
+`tests/unit/build/push-storm-diet.test.ts` kiinnittää `ci.yml` ja `quality.yml`:n `main` -only push -liipaisimen. Sivuvaikutus: Codecov ei enää saa peruslatausta julkaisutyöntöä kohden (vaihe on informatiivinen ja `continue-on-error`); in-repo coverage gate ja PR kommentti eivät muutu.
 
-**Itse ylläpidetyn kapasiteetin lisääminen ei korjaa GitHub-hostattua jonoa.** Kehityspalvelin
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) voisi isännöidä runneria, mutta agentti-istunnot pitävät jo
-sen kuorman tasolla 20–26, agenttisäilössä ei ole Docker-daemonia, ja ylikuormittunut kaista on
-GitHub-hostattu. `.113`-palvelimella oli samalla hetkellä 71 GB vapaata tilaa ja kuorma 5–8; sen rajoitteena
-on edellä mainittu kuuntelijakohtainen muistibudjetti (enintään 6 kuuntelijaa), ei CPU. Jäljellä olevat keinot
-liittyvät prosessiin: yhdistä kampanjan PR:t Mergify-jonon kautta (`label=queue`, jolloin erät jakavat
-yhden `merge_group`-CI-suorituksen sen sijaan, että kutakin PR:ää ja push-tapahtumaa kohden tehtäisiin oma suoritus), karsi CodeQL:n
-oletusmäärityksen kielet ja suodata `release-acceptance.yml` sen lukemien tiedostojen perusteella.
+**Enemmän itseisännöityä kapasiteettia ei korjaa isännöityä jonoa.** Devbox (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) voisi isännöidä juoksijaa, mutta agenttiistunnot pitävät jo kuormituksensa 20–26:ssa, agenttisäiliössä ei ole Docker daemonia ja kyllästetty kaista on isännöity. `.113` laatikossa oli 71 GB vapaata ja kuormaa 5–8 samalla hetkellä; sen rajoitus on yllä oleva kuuntelijakohtainen muistibudjetti (6 kuuntelijan enimmäismäärä), ei CPU. Loput ovat prosessivipuja: laske kampanja PRs Mergify-jonon läpi (`label=queue`, erät jakavat yhden `merge_group` CI -ajon yhden ajon sijasta PR kohti plus yksi per push), leikkaa CodeQL oletusasetuskieliä ja suodata `release-acceptance.yml` sen lukemien tiedostojen mukaan.
+
+> **19.11.2026: Mergify-yhdistämisjono on poistettu käytöstä** (omistajan päätös). `.mergify.yml` ei enää määritä jonoa ja hylkää yhdistämiskomennot, jotka yhdistävät tai kirjoittavat uudelleen vetopyynnön. Julkaisut PRs yhdistetään käsin arkiston sääntöjoukon "Vaadi vihreät portit aktiivisessa julkaisussa" (`Gate / CI` + `Gate / Quality`) mukaisesti, kunnes omni-queue toimii live-tilassa, ja omni-jonon kautta sen jälkeen ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). The Mergify lever above no longer exists.

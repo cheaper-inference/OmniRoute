@@ -1,5 +1,10 @@
 import { CORS_HEADERS } from "@/shared/utils/cors";
-import { getLiveWsPath, resolveLiveWsPublicUrl } from "@/shared/utils/wsPath";
+import {
+  getLiveWsPath,
+  isLiveWsSameOriginRelayActive,
+  isLiveWsServerEnabled,
+  resolveLiveWsPublicUrl,
+} from "@/shared/utils/wsPath";
 import { authorizeWebSocketHandshake } from "@/lib/ws/handshake";
 import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import {
@@ -126,9 +131,15 @@ function handshakeResponse(request: Request, auth: WsHandshakeAuth): Response {
       authType: auth.authType,
       protocol: getWsProtocol(),
       live: {
+        // KEA-9514: `false` when OMNIROUTE_ENABLE_LIVE_WS turned the server off, so the
+        // dashboard does not dial it at all.
+        enabled: isLiveWsServerEnabled(),
         port: parseInt(process.env.LIVE_WS_PORT || "20132", 10),
         publicUrl: getLivePublicUrl(),
         path: getLiveWsPath(),
+        // KEA-9514: `true` when the main HTTP port relays `path` to the live server, so a
+        // page served off loopback can dial its own origin instead of `port`.
+        sameOrigin: isLiveWsSameOriginRelayActive(),
         protocol: "json",
         channels: ["requests", "combo", "credentials"],
         auth: "dashboard-session | api-key:manage",

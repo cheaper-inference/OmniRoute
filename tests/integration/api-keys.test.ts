@@ -3,12 +3,17 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { setImmediate } from "node:timers/promises";
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
 
-const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-api-keys-route-"));
+const TEST_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-api-keys-route-"));
+const TEST_DATA_DIR = path.join(TEST_DIR, "data");
+const STORAGE_PATH = path.join(TEST_DATA_DIR, "storage.sqlite");
+const TEMPLATE_PATH = path.join(TEST_DIR, "template.sqlite");
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = "test-api-key-secret";
 process.env.CLOUD_URL = "http://cloud.example";
+process.env.APP_LOG_FILE_PATH = path.join(TEST_DIR, "app.log");
 
 const core = await import("../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
@@ -20,16 +25,41 @@ const compliance = await import("../../src/lib/compliance/index.ts");
 const listRoute = await import("../../src/app/api/keys/route.ts");
 const keyRoute = await import("../../src/app/api/keys/[id]/route.ts");
 const revealRoute = await import("../../src/app/api/keys/[id]/reveal/route.ts");
+const { closeLogRotation } = await import("../../src/lib/logRotation.ts");
+const { closeSharedLoggerResource } = await import("../../src/shared/utils/loggerResource.ts");
 
 const MACHINE_ID = "1234567890abcdef";
 
-async function resetStorage() {
+function resetStorageState() {
   delete process.env.ALLOW_API_KEY_REVEAL;
   delete process.env.INITIAL_PASSWORD;
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
+}
+
+function resetStorage() {
+  resetStorageState();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
+  fs.copyFileSync(TEMPLATE_PATH, STORAGE_PATH);
+}
+
+async function waitForCloudSync(fetchCalled: Promise<void>) {
+  let deadline: NodeJS.Timeout | undefined;
+  try {
+    await Promise.race([
+      fetchCalled,
+      new Promise<never>((_, reject) => {
+        deadline = setTimeout(() => {
+          reject(new Error("Timed out after 10 seconds waiting for the cloud sync fetch stub"));
+        }, 10_000);
+      }),
+    ]);
+    // Let the background task consume the stub response or catch its rejection.
+    await setImmediate();
+  } finally {
+    clearTimeout(deadline);
+  }
 }
 
 async function enableManagementAuth() {
@@ -60,13 +90,24 @@ function makeRequest(
   });
 }
 
-test.beforeEach(async () => {
-  await resetStorage();
+test.before(() => {
+  core.getDbInstance();
+  // Closing checkpoints the WAL so the template only needs the main SQLite file.
+  resetStorageState();
+  fs.copyFileSync(STORAGE_PATH, TEMPLATE_PATH);
 });
 
+test.beforeEach(resetStorage);
+
 test.after(async () => {
-  await resetStorage();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  try {
+    resetStorageState();
+  } finally {
+    closeLogRotation();
+    await closeSharedLoggerResource().finally(() => {
+      fs.rmSync(TEST_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    });
+  }
 });
 
 test("API keys routes require management auth when login protection is enabled", async () => {
@@ -338,8 +379,10 @@ test("POST /api/keys triggers cloud sync when cloud mode is enabled", async () =
   await createManagementKey();
   const originalFetch = globalThis.fetch;
   const calls = [];
+  const { promise: fetchCalled, resolve: signalFetchCalled } = Promise.withResolvers<void>();
   globalThis.fetch = async (url, options = {}) => {
     calls.push({ url, options });
+    signalFetchCalled();
     return Response.json({ changes: { apiKeys: 1 } });
   };
 
@@ -350,15 +393,12 @@ test("POST /api/keys triggers cloud sync when cloud mode is enabled", async () =
         body: { name: "Cloud Synced Key" },
       })
     );
+    await waitForCloudSync(fetchCalled);
     const body = (await response.json()) as any;
 
     assert.equal(response.status, 201);
     assert.equal(body.name, "Cloud Synced Key");
 
-    // #6570: cloud sync is fire-and-forget so it no longer blocks the
-    // response — give the background task a moment to run before asserting
-    // it happened.
-    await new Promise((resolve) => setTimeout(resolve, 50));
     const syncPayload = JSON.parse(calls[0].options.body);
     assert.equal(calls.length, 1);
     assert.match(String(calls[0].url), /^http:\/\/cloud\.example\/sync\//);
@@ -408,9 +448,11 @@ test("POST /api/keys still succeeds when cloud sync fails after creation", async
   await createManagementKey();
   const originalFetch = globalThis.fetch;
   let syncAttempts = 0;
+  const { promise: fetchCalled, resolve: signalFetchCalled } = Promise.withResolvers<void>();
 
   globalThis.fetch = async () => {
     syncAttempts += 1;
+    signalFetchCalled();
     throw new Error("cloud sync offline");
   };
 
@@ -421,6 +463,7 @@ test("POST /api/keys still succeeds when cloud sync fails after creation", async
         body: { name: "Cloud Failure Tolerated" },
       })
     );
+    await waitForCloudSync(fetchCalled);
     const body = (await response.json()) as any;
     const stored = await apiKeysDb.getApiKeyById(body.id);
 
@@ -428,10 +471,6 @@ test("POST /api/keys still succeeds when cloud sync fails after creation", async
     assert.equal(body.name, "Cloud Failure Tolerated");
     assert.equal(stored?.name, "Cloud Failure Tolerated");
 
-    // #6570: cloud sync is fire-and-forget so it no longer blocks the
-    // response — give the background task a moment to run before asserting
-    // the (failed) sync attempt happened and was tolerated.
-    await new Promise((resolve) => setTimeout(resolve, 50));
     assert.equal(syncAttempts, 1);
   } finally {
     globalThis.fetch = originalFetch;
