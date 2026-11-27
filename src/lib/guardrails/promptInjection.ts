@@ -280,6 +280,29 @@ function localRiskScore(detections: Detection[]): number {
   return top / SEVERITY_SCORES.high;
 }
 
+function logClassifierOutcome(
+  logger: GuardrailContext["log"] | Console,
+  mode: "block" | "warn" | "log",
+  blocked: boolean,
+  severity: "medium" | "high",
+  result: { detections: Detection[]; piiDetections: unknown[] }
+) {
+  const summary = result.detections.map((d) => ({ pattern: d.pattern, severity: d.severity }));
+  if (blocked) {
+    emitGuardrailLog(logger, "warn", "Request blocked by prompt injection guard", {
+      detections: summary,
+    });
+  } else if (mode === "log" || (mode === "warn" && severity === "high")) {
+    // The same warn/log policy as evaluatePromptInjection, on the detections the classifier added.
+    emitGuardrailLog(
+      logger,
+      mode === "log" ? "info" : "warn",
+      "Prompt injection guard flagged request",
+      { detections: summary, pii: result.piiDetections.length }
+    );
+  }
+}
+
 /**
  * evaluatePromptInjection plus the optional semantic classifier (OMNIROUTE_INJECTION_CLASSIFIER_URL,
  * default off: then this returns exactly the regex decision). See ./injectionClassifier.ts.
@@ -307,25 +330,7 @@ export async function evaluatePromptInjectionWithClassifier(
   const result = { ...decision.result, detections, flagged: true };
   const mode = getMode(options);
   const blocked = mode === "block" && shouldBlock(detections, getThreshold(options));
-  const summary = detections.map((d) => ({ pattern: d.pattern, severity: d.severity }));
-  if (blocked) {
-    emitGuardrailLog(
-      getLogger(options, context),
-      "warn",
-      "Request blocked by prompt injection guard",
-      {
-        detections: summary,
-      }
-    );
-  } else if (mode === "log" || (mode === "warn" && severity === "high")) {
-    // The same warn/log policy as evaluatePromptInjection, on the detections the classifier added.
-    emitGuardrailLog(
-      getLogger(options, context),
-      mode === "log" ? "info" : "warn",
-      "Prompt injection guard flagged request",
-      { detections: summary, pii: result.piiDetections.length }
-    );
-  }
+  logClassifierOutcome(getLogger(options, context), mode, blocked, severity, result);
   return { blocked, result };
 }
 
