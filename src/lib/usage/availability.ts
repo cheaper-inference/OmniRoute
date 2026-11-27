@@ -31,6 +31,7 @@ import {
 } from "@omniroute/open-sse/config/codexQuotaScopes.ts";
 import { formatQuotaWindowLabel } from "@omniroute/open-sse/services/quotaWindowLabel.ts";
 import { availabilityScopes } from "./availabilityScopes";
+import { reconcileDisplayWindows } from "./availabilityDisplayWindows";
 import { appendSavedRouterScopes, savedRouterBlockers } from "./availabilityRouterFilters";
 import { combineQuotaAlternatives } from "./availabilityAlternatives";
 import { cutoffBlockingWindows, exhaustedBlockingWindows } from "./availabilityWindows";
@@ -50,17 +51,25 @@ function timestamp(value: number | string | null | undefined): string | null {
 
 /** Seed only a private read view, using precisely the routing cache's normalizers. */
 function seedReadView(id: string, provider: string, usage: Usage) {
-  if (getQuotaCache(id) || !usage.quotas) return;
+  const cached = getQuotaCache(id);
+  if (!usage.quotas || (cached && (provider === "codex" || usage.source !== "quota-snapshot")))
+    return;
   const fetchedAt = Date.parse(usage.fetchedAt || "");
   if (!Number.isFinite(fetchedAt)) return;
   const raw = provider === "codex" ? omitCodexDisplayOnlyQuotas(usage.quotas) : usage.quotas;
-  const quotas = normalizeConnectionQuotas(raw, provider);
+  const quotas = reconcileDisplayWindows(
+    cached,
+    usage,
+    normalizeConnectionQuotas(raw, provider),
+    fetchedAt
+  );
+  if (!quotas) return;
   const exhausted = isExhausted(quotas);
   getRequestQuotaCacheState().cache.set(id, {
     connectionId: id,
     provider,
     quotas,
-    modelQuotas: normalizeQuotas(usage.modelQuotas || {}),
+    modelQuotas: cached?.modelQuotas ?? normalizeQuotas(usage.modelQuotas || {}),
     fetchedAt,
     exhausted,
     nextResetAt: exhausted ? capParkWindow(earliestResetAt(quotas), fetchedAt) : null,

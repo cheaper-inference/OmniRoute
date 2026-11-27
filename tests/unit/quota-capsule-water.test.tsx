@@ -51,6 +51,16 @@ it("anchors a cooldown fill at the top and a remaining-quota fill at the bottom"
   expect(healthy.getAttribute("data-fill-direction")).not.toBe("down");
 });
 
+it("distinguishes an unknown quota from a measured zero without inventing a fill", () => {
+  const unknown = render(<CapsuleWater kind="ok" fill={null} />).container;
+  expect(maybeFill(unknown)).toBeNull();
+  expect(unknown.querySelector("[data-quota-unknown]")).not.toBeNull();
+  cleanup();
+  const zero = render(<CapsuleWater kind="ok" fill={0} />).container;
+  expect(zero.querySelector("[data-quota-unknown]")).toBeNull();
+  expect(fillOf(zero).style.height).toBe("0%");
+});
+
 it("draws no fill when the projection reports none", () => {
   expect(maybeFill(render(<CapsuleWater kind="act" fill={null} />).container)).toBeNull();
 });
