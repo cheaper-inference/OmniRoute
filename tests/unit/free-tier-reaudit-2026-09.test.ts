@@ -154,8 +154,9 @@ test("modelscope: 250 魔粒/day → 6M/month, one pool, behind mainland real-na
     assert.equal(r.tos, "caution");
   }
   const t = computeFreeModelTotals();
-  assert.equal(t.gatedRecurringTokens, 6_000_000);
-  assert.deepEqual(t.gatedProviders, ["modelscope"]);
+  // https://www.aionlabs.ai/docs/rate-limits/ (2026-11-27): Aion adds 0.6M behind a card.
+  assert.equal(t.gatedRecurringTokens, 6_600_000);
+  assert.deepEqual(t.gatedProviders, ["aion", "modelscope"]);
   assert.ok(!t.uncappedProviders.includes("modelscope"));
 });
 

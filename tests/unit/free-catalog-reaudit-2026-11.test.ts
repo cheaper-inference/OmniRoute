@@ -253,8 +253,9 @@ test("requesty and aion: the ids that left the free list are retired", () => {
     "nvidia/nemotron-3-ultra-550b-a55b",
     "nvidia/nemotron-3.5-lightning-30b-a3b",
   ]);
+  // https://api.aionlabs.ai/v1/models (2026-11-27): 3.5 and 3.5 Mini are live.
   assertRetired("aion", ["aion-labs/aion-2.5"]);
-  assert.equal(live("aion").length, 4);
+  assert.equal(live("aion").length, 6);
 });
 
 test("agentrouter stays free on the id listed today, with no token credit", () => {
@@ -291,9 +292,11 @@ test("only official API rows feed the real figure", () => {
 test("public free-token figures after the re-audit", () => {
   const pub = computePublicFreeHeadline();
   // E1a adds 6M + 4.8M + 4.8M + 3.6M + 3.456M + 2.4M + 2.4M to both headlines.
-  assert.equal(pub.steadyRecurringTokens, 117_236_000);
-  assert.equal(pub.firstMonthRealisticTokens, 180_736_000);
-  assert.equal(pub.gatedRecurringTokens, 6_000_000);
+  // E1b adds MegaNova (1.2M), Free.ai (0.8M), and Kenari (1.2M) to both headlines.
+  // Aion's 0.6M is card-gated (https://www.aionlabs.ai/docs/rate-limits/, 2026-11-27).
+  assert.equal(pub.steadyRecurringTokens, 120_436_000);
+  assert.equal(pub.firstMonthRealisticTokens, 183_936_000);
+  assert.equal(pub.gatedRecurringTokens, 6_600_000);
   assert.equal(pub.socialGatedRecurringTokens, 15_000_000);
   // E1a adds the 24M DGrid deposit allowance to the previous 24M.
   assert.equal(pub.boostMonthlyTokens, 48_000_000);
@@ -302,10 +305,11 @@ test("public free-token figures after the re-audit", () => {
 test("row-sum reading and retired ledger after the re-audit", () => {
   const m = computeRowSumMirror();
   // E1a adds 10 Zylo token rows × 6M; the other six providers are metered by requests.
-  assert.equal(m.liveTokens, 219_000_000);
+  // E1b adds six Aion token rows × 0.6M (https://www.aionlabs.ai/docs/rate-limits/, 2026-11-27).
+  assert.equal(m.liveTokens, 222_600_000);
   assert.equal(m.retiredTokens, 11_190_500_000);
-  assert.equal(m.totalTokens, 11_409_500_000);
-  assert.equal(Math.round(m.retiredShare * 1000) / 10, 98.1);
+  assert.equal(m.totalTokens, 11_413_100_000);
+  assert.equal(Math.round(m.retiredShare * 1000) / 10, 98);
   assert.equal(RETIRED_FREE_ROWS.length, 135);
 });
 
@@ -313,18 +317,18 @@ test("catalog counts after the re-audit", () => {
   const c = computeFreeCatalogCounts({ membershipOf: membershipFromProviderConstants });
   // #19385 ends one keyless offer covering one model with no published quota.
   // E1a adds seven quota pools and five API-key offers; Requesty and Onomeo already counted.
-  assert.equal(c.publishedQuotaPools, 19);
-  assert.equal(c.providersWithFreeOffer.total, 54);
+  // E1b adds three ungated quota pools and API-key offers. Aion's offer already counted.
+  assert.equal(c.publishedQuotaPools, 22);
+  assert.equal(c.providersWithFreeOffer.total, 57);
   assert.deepEqual(c.providersWithFreeOffer.byAccess, {
-    "api-key": 48,
+    "api-key": 51,
     keyless: 5,
     "tool-account": 1,
     "web-chat": 0,
   });
-  // 41 new identities minus two Requesty retirements: 39 extra access rows.
-  assert.equal(c.accessRows, 252);
-  // Of the 41 new rows, four model IDs already occur elsewhere; both retired ids were distinct.
-  assert.equal(c.freeModels, 219);
+  // E1b adds 35 access rows, including 33 IDs new to the catalog across all providers.
+  assert.equal(c.accessRows, 287);
+  assert.equal(c.freeModels, 252);
 });
 
 // --- Retired pools and their ledger --------------------------------------------------------
@@ -435,10 +439,12 @@ test("every free row with a quota carries dated evidence that matches its econom
   );
   const quota = policy.evidence.filter((e: { claim: string }) => e.claim === "recurring-quota");
   // The seven E1a pools document 43 live model rows, on top of the previous 40 records.
-  assert.equal(quota.length, 83);
+  // E1b adds 39 quota records, including Aion's six card-gated rows.
+  assert.equal(quota.length, 122);
   for (const e of quota) {
-    const sourceDate =
-      PROVIDER_EXPECTATIONS[e.provider]?.lastWave === "E1a" ? "2026-11-27" : "2026-11-23";
+    const sourceDate = ["E1a", "E1b"].includes(PROVIDER_EXPECTATIONS[e.provider]?.lastWave)
+      ? "2026-11-27"
+      : "2026-11-23";
     assert.equal(e.checkedAt, sourceDate, key(e));
     const row = FREE_MODEL_BUDGETS.find((m) => key(m) === key(e));
     assert.equal(e.catalogHash, row && catalogFingerprint(row));
@@ -456,10 +462,11 @@ test("card-gated offers keep their rows and leave every public figure", () => {
   const ungated = computePublicFreeHeadline({
     entries: FREE_MODEL_BUDGETS.map(({ gates: _gates, ...m }) => m),
   });
-  // Vertex (300M) and Nebius (1M) signup credits sit behind a card: out of the first month.
-  assert.equal(ungated.firstMonthRealisticTokens - pub.firstMonthRealisticTokens, 301_000_000);
+  // Vertex (300M) and Nebius (1M) signup credits and Aion's monthly 0.6M sit behind a card.
+  // https://www.aionlabs.ai/docs/rate-limits/ (2026-11-27).
+  assert.equal(ungated.firstMonthRealisticTokens - pub.firstMonthRealisticTokens, 301_600_000);
   assert.ok(!pub.uncappedProviders.includes("aion"), "aion needs a verified card");
-  assert.equal(pub.steadyRecurringTokens, ungated.steadyRecurringTokens);
+  assert.equal(ungated.steadyRecurringTokens - pub.steadyRecurringTokens, 600_000);
 });
 
 test("the xKiro Telegram bonus is a social boost, never a deposit boost", () => {
@@ -477,7 +484,7 @@ test("the xKiro Telegram bonus is a social boost, never a deposit boost", () => 
 // --- Curation date, data-file rule and the legacy per-provider map --------------------------
 
 test("the catalog is curated as of the re-audit day and states where retired quotas go", () => {
-  // E1a reopened the seven providers on 2026-11-27.
+  // E1a and E1b reopened their sources on 2026-11-27.
   assert.equal(FREE_CATALOG_CURATED_AT, "2026-11-27");
   const src = readFileSync(
     new URL("../../open-sse/config/freeModelCatalog.data.ts", import.meta.url),

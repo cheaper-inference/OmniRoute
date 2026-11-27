@@ -31,9 +31,9 @@ test("routeway pins a browser User-Agent (Cloudflare rejects non-browser UAs wit
   assert.match(ua, /Mozilla/, "routeway must send a browser-style User-Agent");
 });
 
-test("providers with no published token quota never inflate the headline", () => {
-  // AINative, Aion and SeaLion have no published quota eligible for these rows.
-  for (const id of ["ainative", "aion", "sealion"]) {
+test("providers with no ungated token quota never inflate the headline", () => {
+  // AINative and SeaLion have no published quota eligible for these rows.
+  for (const id of ["ainative", "sealion"]) {
     const rows = byProvider(id);
     assert.ok(
       rows.every((m) => m.monthlyTokens === 0 && m.creditTokens === 0),
@@ -57,11 +57,15 @@ test("providers with no published token quota never inflate the headline", () =>
     assert.equal(row.monthlyTokens, row.freeType === "recurring-daily" ? 4_800_000 : 0);
     assert.equal(row.creditTokens, 0);
   }
-  assert.ok(
-    byProvider("aion")
-      .filter((m) => m.freeType !== "discontinued")
-      .every((m) => m.gates?.includes("card"))
-  );
+  // https://www.aionlabs.ai/docs/rate-limits/ (2026-11-27): 20,000 tokens/day behind card verification.
+  const aion = byProvider("aion");
+  assert.equal(aion.filter((row) => row.freeType === "recurring-daily").length, 6);
+  for (const row of aion) {
+    assert.ok(row.freeType === "recurring-daily" || row.freeType === "discontinued");
+    assert.equal(row.monthlyTokens, row.freeType === "recurring-daily" ? 600_000 : 0);
+    assert.equal(row.creditTokens, 0);
+    if (row.freeType === "recurring-daily") assert.deepEqual(row.gates, ["card"]);
+  }
   for (const id of ["ainative", "aion", "routeway"])
     assert.ok(!totals.uncappedProviders.includes(id), `${id} has no uncapped offer`);
 });
