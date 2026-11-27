@@ -70,15 +70,22 @@ test("providers with no ungated token quota never inflate the headline", () => {
     assert.ok(!totals.uncappedProviders.includes(id), `${id} has no uncapped offer`);
 });
 
-test("nara was a single shared 7M/day pool; its free plan now lists no models", () => {
+test("nara has one shared 7M/day pool for Agnes 2.5 Flash", () => {
+  // https://router.bynara.id/api/plans and https://router.bynara.id/docs (2026-11-27).
   const rows = byProvider("nara");
   assert.ok(rows.length >= 1);
-  // 7M tokens/day shared across all plan models => 210M/month (2026-09-02); retired on 2026-11-23
-  // (GET /api/plans → "models":[]), so the pool's last quota lives in the ledger.
   assert.ok(rows.every((m) => m.poolKey === "nara-free"));
-  assert.ok(rows.every((m) => m.monthlyTokens === 0 && m.freeType === "discontinued"));
+  const live = rows.filter((m) => m.freeType === "recurring-daily");
+  assert.deepEqual(
+    live.map((m) => m.modelId),
+    ["agnes-2.5-flash"]
+  );
+  assert.equal(live[0].monthlyTokens, 210_000_000);
+  assert.deepEqual(live[0].gates, ["telegram"]);
+  const retired = rows.filter((m) => m.modelId !== live[0].modelId);
+  assert.ok(retired.every((m) => m.monthlyTokens === 0 && m.freeType === "discontinued"));
   const ledger = RETIRED_FREE_ROWS.filter((r) => r.provider === "nara");
-  assert.equal(ledger.length, rows.length);
+  assert.equal(ledger.length, retired.length);
   assert.ok(ledger.every((r) => r.lastListedMonthlyTokens === 210_000_000));
 });
 

@@ -8,15 +8,9 @@ import {
 import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { AI_PROVIDERS, AGGREGATOR_PROVIDER_IDS } from "@/shared/constants/providers.ts";
 
-/**
- * xKiro (xkiro.com) — OpenAI-compatible gateway. Free plan, verified 2026-09-02 on
- * xkiro.com and docs.xkiro.com: "$0 / month · Free forever · Free tokens 5M / day ·
- * No credit card"; past the daily allowance free-model requests get a 429 until the
- * reset. One bucket per account ⇒ one pool of 5M × 30 = 150M.
- * Re-audit 2026-11-23 (xkiro.com, api.xkiro.com/v1/models): "500K free-model tokens a day
- * (1M after Telegram verification)" on 26 free models ⇒ 500K × 30 = 15M; 9 of the 39 catalog
- * ids are still free, the other 30 are discontinued and their last quota is in the ledger.
- */
+// https://api.xkiro.com/v1/models and https://xkiro.com/ (2026-11-27): 38 free chat models
+// share 500K tokens/day. https://docs.xkiro.com/api/rate-limits/ and /api/usage/ document
+// HTTP 429 until reset and no wallet charge when the free allowance is exhausted.
 const rows = FREE_MODEL_BUDGETS.filter((m) => m.provider === "xkiro");
 
 test("xkiro is routable, canonical and classified as an aggregator", () => {
@@ -29,11 +23,11 @@ test("xkiro is routable, canonical and classified as an aggregator", () => {
 });
 
 test("xkiro free plan is one 500K/day account-wide pool = 15M/month, counted once", () => {
-  assert.equal(rows.length, 39);
+  assert.equal(rows.length, 59);
   const live = rows.filter((m) => m.freeType !== "discontinued");
   const retired = rows.filter((m) => m.freeType === "discontinued");
-  assert.equal(live.length, 9);
-  assert.equal(retired.length, 30);
+  assert.equal(live.length, 38);
+  assert.equal(retired.length, 21);
   for (const m of rows) {
     assert.equal(m.poolKey, "xkiro-free", m.modelId);
     assert.equal(m.tos, "caution", m.modelId);

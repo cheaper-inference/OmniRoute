@@ -188,9 +188,8 @@ describe("D. auth bypass lock", () => {
     fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   }
 
-  // The exemption reads catalog membership, never the `:free` suffix. Since the November 2026
-  // re-audit openrouter's only live catalogued id ends in `:free` (google/gemma-4-31b-it:free), so
-  // the suffix-only case is proved by a `:free` id that is NOT catalogued and stays locked.
+  // https://openrouter.ai/api/v1/models (2026-11-27): live catalogued variants end in `:free`.
+  // Exercise the membership check with a live catalogued ID and a synthetic ID with the same suffix.
   test("catalogued free id is still served on credits_exhausted; a :free suffix alone is not", async () => {
     await resetStorage();
     const live = LIVE.find((m) => m.provider === "openrouter");

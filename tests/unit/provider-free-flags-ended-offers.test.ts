@@ -12,7 +12,6 @@ import { getProviderById } from "../../src/shared/constants/providers.ts";
 
 const ENDED = [
   "mistral",
-  "nara",
   "navy",
   "huggingface",
   "bluesminds",
@@ -56,6 +55,9 @@ test("duplicate and dead registry entries are deprecated", () => {
 });
 
 test("confirmed free offers name their payment or account requirements", () => {
+  // https://router.bynara.id/api/plans and https://router.bynara.id/docs (2026-11-27).
+  assert.equal(getProviderById("nara")?.hasFree, true);
+  assert.match(getProviderById("nara")?.freeNote ?? "", /7 million tokens a day.*Telegram/);
   // https://www.scaleway.com/en/docs/billing/how-to/add-payment-method/ (2026-11-27).
   for (const id of ["cerebras", "aion", "scaleway"]) {
     assert.equal(getProviderById(id)?.hasFree, true, id);
@@ -103,7 +105,7 @@ const OLD_PROMISE: Record<string, RegExp> = {
   huggingface: /Free Inference API/i,
   agentrouter: /\$200|\$100/,
   predibase: /\$25 free trial/i,
-  nara: /Free-tier models are pinned|free NaraRouter account/i,
+  nara: /Free-tier models are pinned|free NaraRouter account|every model needs credit/i,
   ainative: /free API key/i,
   navy: /free API key/i,
   llm7: /free token|without API key/i,

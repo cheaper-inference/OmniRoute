@@ -60,8 +60,10 @@ test("groq free plan: 200K TPD per model × 30 = 6M per model, each cap independ
     retired.map((m) => [m.modelId, m.monthlyTokens, m.creditTokens]),
     [["qwen/qwen3.6-27b", 0, 0]]
   );
-  // retired from the free tier on 2026-07-17 / 2026-08-16 (console.groq.com/docs/deprecations)
+  // https://console.groq.com/docs/deprecations.md (2026-11-27) confirms the retired routes.
   for (const dead of [
+    "groq/compound",
+    "groq/compound-mini",
     "llama-3.3-70b-versatile",
     "meta-llama/llama-4-scout-17b-16e-instruct",
     "qwen/qwen3-32b",
@@ -72,9 +74,9 @@ test("groq free plan: 200K TPD per model × 30 = 6M per model, each cap independ
   for (const m of live) assert.ok(registryIds.has(m.modelId), `${m.modelId} must be routable`);
 });
 
-test("nara free plan lists no models: the 8 rows are retired and their 210M pool is in the ledger", () => {
-  // Re-audit 2026-11-23: router.bynara.id/api/plans → plan "free" with "models":[].
-  const free = [
+test("nara restores Agnes 2.5 Flash and keeps the other seven free rows retired", () => {
+  // https://router.bynara.id/api/plans and https://router.bynara.id/docs (2026-11-27).
+  const registered = [
     "agnes-2.0-flash",
     "agnes-2.5-flash",
     "laguna-s-2.1",
@@ -84,19 +86,23 @@ test("nara free plan lists no models: the 8 rows are retired and their 210M pool
     "qwen3.8-27b",
     "stepfun-3.7-flash",
   ];
-  assert.deepEqual(ids("nara"), free);
+  const activeId = "agnes-2.5-flash";
+  const retiredIds = registered.filter((id) => id !== activeId);
+  assert.deepEqual(ids("nara"), registered);
   for (const m of rows("nara")) {
-    assert.equal(m.monthlyTokens, 0, m.modelId);
+    const active = m.modelId === activeId;
+    assert.equal(m.monthlyTokens, active ? 210_000_000 : 0, m.modelId);
     assert.equal(m.creditTokens, 0, m.modelId);
     assert.equal(m.poolKey, "nara-free");
-    assert.equal(m.freeType, "discontinued");
+    assert.equal(m.freeType, active ? "recurring-daily" : "discontinued");
+    assert.deepEqual(m.gates ?? [], active ? ["telegram"] : []);
   }
   const ledger = RETIRED_FREE_ROWS.filter((r) => r.provider === "nara");
-  assert.deepEqual(ledger.map((r) => r.modelId).sort(), free);
+  assert.deepEqual(ledger.map((r) => r.modelId).sort(), retiredIds);
   assert.ok(ledger.every((r) => r.lastListedMonthlyTokens === 210_000_000));
   assert.ok(ledger.every((r) => r.reason === "no-models"));
   // Routing is untouched: the paid models stay reachable with a paid key.
-  assert.deepEqual(REGISTRY.nara.models.map((m) => m.id).sort(), free);
+  assert.deepEqual(REGISTRY.nara.models.map((m) => m.id).sort(), registered);
 });
 
 test("mistral keeps its 1B pool only with a dated console verification on record", () => {
@@ -138,7 +144,8 @@ test("mistral keeps its 1B pool only with a dated console verification on record
 test("legacy provider-level catalog agrees with the per-model catalog for the re-audited providers", () => {
   assert.equal(FREE_TIER_BUDGETS.gemini, undefined);
   assert.equal(FREE_TIER_BUDGETS["ollama-cloud"], undefined);
-  // 4 live models × 6M (re-audit 2026-11-23); nara's free plan lists no models.
+  // https://console.groq.com/docs/rate-limits (2026-11-27): 4 live models × 6M.
+  // https://router.bynara.id/docs (2026-11-27): Nara Free API access needs Telegram.
   assert.equal(FREE_TIER_BUDGETS.groq, 24_000_000);
   assert.equal(FREE_TIER_BUDGETS.nara, undefined);
 });

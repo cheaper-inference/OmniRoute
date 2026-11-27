@@ -77,10 +77,20 @@ test("mistral: the free mode has no API access; the 5-row pool is retired", () =
   assert.ok(rows("mistral").every((m) => m.poolKey === "mistral"));
 });
 
-test("nara: the free plan lists no models; the 8-row pool is retired", () => {
-  assertRetired("nara");
+test("nara: Agnes 2.5 Flash returns with a Telegram-gated 7M daily quota", () => {
+  // https://router.bynara.id/api/plans and https://router.bynara.id/docs (2026-11-27).
+  assertLive("nara", ["agnes-2.5-flash"], {
+    monthlyTokens: 210_000_000,
+    poolKey: "nara-free",
+    freeType: "recurring-daily",
+  });
+  assert.deepEqual(live("nara")[0].gates, ["telegram"]);
+  assertRetired("nara", PROVIDER_EXPECTATIONS.nara.discontinued);
   assert.equal(rows("nara").length, 8);
   assert.ok(rows("nara").every((m) => m.poolKey === "nara-free"));
+  assert.ok(FREE_TIER_PROVIDER_SET.has("nara"));
+  assert.ok(isCatalogFreeModel("nara", "agnes-2.5-flash"));
+  for (const m of retired("nara")) assert.ok(!isCatalogFreeModel("nara", m.modelId));
 });
 
 test("navy: no published quota after three methods; the pool is retired as unverifiable", () => {
@@ -117,24 +127,15 @@ test("ainative, StepFun and Predibase ended their offers, and Routeway retired e
 
 // --- Corrected quotas and dead ids ----------------------------------------------------------
 
-test("xkiro: 500K tokens a day across 9 live free ids; the other 30 ids are gone", () => {
-  assertLive(
-    "xkiro",
-    [
-      "sensenova/sensenova-6.8-flash-lite",
-      "mistralai/mistral-large-2512",
-      "mistralai/mistral-medium-3.5",
-      "mistralai/mistral-small-2603",
-      "mistralai/codestral-2508",
-      "mistralai/devstral-medium",
-      "mistralai/ministral-8b",
-      "mistralai/ministral-3b",
-      "mistralai/ministral-14b",
-    ],
-    { monthlyTokens: 15_000_000, poolKey: "xkiro-free", freeType: "recurring-daily" }
-  );
-  assertRetired("xkiro", ids(retired("xkiro")));
-  assert.equal(retired("xkiro").length, 30);
+test("xkiro: 38 live chat ids share 500K tokens per day", () => {
+  // https://api.xkiro.com/v1/models and https://xkiro.com/ (2026-11-27).
+  assertLive("xkiro", ids(PROVIDER_EXPECTATIONS.xkiro.live), {
+    monthlyTokens: 15_000_000,
+    poolKey: "xkiro-free",
+    freeType: "recurring-daily",
+  });
+  assertRetired("xkiro", PROVIDER_EXPECTATIONS.xkiro.discontinued);
+  assert.equal(retired("xkiro").length, 21);
 });
 
 test("groq: four models at 200K TPD; qwen/qwen3.6-27b was deprecated", () => {
@@ -187,8 +188,9 @@ test("morph: 200 free requests a month", () => {
   });
 });
 
-test("openrouter: one live :free id from today's model list keeps the 50 RPD pool", () => {
-  assertLive("openrouter", ["google/gemma-4-31b-it:free"], {
+test("openrouter: ten live :free ids share the 50 RPD pool", () => {
+  // https://openrouter.ai/api/v1/models and https://openrouter.ai/docs/api_reference/limits (2026-11-27).
+  assertLive("openrouter", ids(PROVIDER_EXPECTATIONS.openrouter.live), {
     monthlyTokens: 1_200_000,
     poolKey: "openrouter-free",
     freeType: "recurring-daily",
@@ -298,7 +300,8 @@ test("public free-token figures after the re-audit", () => {
   // E2 removes 63.5M from first-month signup pools; Scaleway moves behind a payment method.
   assert.equal(pub.firstMonthRealisticTokens, 120_436_000);
   assert.equal(pub.gatedRecurringTokens, 6_600_000);
-  assert.equal(pub.socialGatedRecurringTokens, 15_000_000);
+  // https://router.bynara.id/api/plans and https://router.bynara.id/docs (2026-11-27): 7M/day with Telegram.
+  assert.equal(pub.socialGatedRecurringTokens, 225_000_000);
   // E1a adds the 24M DGrid deposit allowance to the previous 24M.
   assert.equal(pub.boostMonthlyTokens, 48_000_000);
 });
@@ -307,11 +310,14 @@ test("row-sum reading and retired ledger after the re-audit", () => {
   const m = computeRowSumMirror();
   // E1a adds 10 Zylo token rows × 6M; the other six providers are metered by requests.
   // E1b adds six Aion token rows × 0.6M (https://www.aionlabs.ai/docs/rate-limits/, 2026-11-27).
-  assert.equal(m.liveTokens, 222_600_000);
-  assert.equal(m.retiredTokens, 11_190_500_000);
-  assert.equal(m.totalTokens, 11_413_100_000);
-  assert.equal(Math.round(m.retiredShare * 1000) / 10, 98);
-  assert.equal(RETIRED_FREE_ROWS.length, 135);
+  // E1c adds 210M from Nara and (38 - 9) × 15M from xKiro to the live reading.
+  // Returning offers leave the retired reading: Nara -210M and xKiro -17 × 150M.
+  // Eight xKiro IDs leave the free list and enter the ledger at 15M each.
+  assert.equal(m.liveTokens, 867_600_000);
+  assert.equal(m.retiredTokens, 8_550_500_000);
+  assert.equal(m.totalTokens, 9_418_100_000);
+  assert.equal(Math.round(m.retiredShare * 1000) / 10, 90.8);
+  assert.equal(RETIRED_FREE_ROWS.length, 125);
 });
 
 test("catalog counts after the re-audit", () => {
@@ -321,23 +327,24 @@ test("catalog counts after the re-audit", () => {
   // E1b adds three ungated quota pools and API-key offers. Aion's offer already counted.
   assert.equal(c.publishedQuotaPools, 22);
   // E2 removes eight API-key offers after rechecking their routes or eligibility.
-  assert.equal(c.providersWithFreeOffer.total, 49);
+  // E1c adds two API-key offers: BytePlus trial and Nara Free.
+  assert.equal(c.providersWithFreeOffer.total, 51);
   assert.deepEqual(c.providersWithFreeOffer.byAccess, {
-    "api-key": 43,
+    "api-key": 45,
     keyless: 5,
     "tool-account": 1,
     "web-chat": 0,
   });
   // E1b added 35 access rows. E2 removes 65 on net, representing 48 unique model IDs.
-  assert.equal(c.accessRows, 222);
-  assert.equal(c.freeModels, 204);
+  // E1c adds 53 access rows representing 43 previously uncounted model IDs.
+  assert.equal(c.accessRows, 275);
+  assert.equal(c.freeModels, 247);
 });
 
 // --- Retired pools and their ledger --------------------------------------------------------
 
 const RETIRED_POOLS = [
   "mistral",
-  "nara",
   "navy",
   "llm7",
   "huggingface",
@@ -372,7 +379,7 @@ const LEDGER_BLOCKS: Array<[string, number, string]> = [
 test("the ledger keeps the last quota of every retired pool row, with its reason", () => {
   for (const [provider, tokens, reason] of LEDGER_BLOCKS) {
     const ledger = RETIRED_FREE_ROWS.filter((r) => r.provider === provider);
-    assert.deepEqual(ids(ledger), ids(rows(provider)), `${provider} ledger ids`);
+    assert.deepEqual(ids(ledger), ids(retired(provider)), `${provider} ledger ids`);
     for (const r of ledger) {
       assert.equal(r.lastListedMonthlyTokens, tokens, `${provider}/${r.modelId}`);
       assert.equal(r.reason, reason, `${provider}/${r.modelId}`);
@@ -391,7 +398,7 @@ test("the ledger keeps the last quota of every retired pool row, with its reason
 
 test("dead ids of corrected pools keep their last listed quota in the ledger", () => {
   const expect: Array<[string, number, string, number]> = [
-    ["xkiro", 150_000_000, "id-retired", 29],
+    ["xkiro", 150_000_000, "id-retired", 12],
     ["xkiro", 150_000_000, "paid-only", 1],
     ["groq", 6_000_000, "id-retired", 1],
     ["bazaarlink", 3_600_000, "id-retired", 31],
@@ -400,7 +407,9 @@ test("dead ids of corrected pools keep their last listed quota in the ledger", (
     ["sambanova", 6_000_000, "id-retired", 3],
   ];
   for (const [provider, tokens, reason, n] of expect) {
-    const ledger = RETIRED_FREE_ROWS.filter((r) => r.provider === provider && r.reason === reason);
+    const ledger = RETIRED_FREE_ROWS.filter(
+      (r) => r.provider === provider && r.reason === reason && r.retiredAt === "2026-11-23"
+    );
     assert.equal(ledger.length, n, `${provider} ${reason}`);
     for (const r of ledger) {
       assert.equal(r.lastListedMonthlyTokens, tokens, `${provider}/${r.modelId}`);
@@ -415,6 +424,17 @@ test("dead ids of corrected pools keep their last listed quota in the ledger", (
     ),
     ["deepseek/deepseek-v4-flash"]
   );
+  // https://api.xkiro.com/v1/models (2026-11-27): eight former free IDs are absent.
+  const newRetirements = RETIRED_FREE_ROWS.filter(
+    (r) => r.provider === "xkiro" && r.retiredAt === "2026-11-27"
+  );
+  assert.deepEqual(ids(newRetirements), ids(PROVIDER_EXPECTATIONS.xkiro.retired ?? []));
+  for (const row of newRetirements) {
+    assert.equal(row.lastListedMonthlyTokens, 15_000_000);
+    assert.equal(row.reason, "id-retired");
+    assert.equal(row.poolKey, "xkiro-free");
+    assert.match(row.evidence, /https:\/\/api\.xkiro\.com\/v1\/models/);
+  }
   // Rows that never carried a quota stay out of the ledger.
   for (const p of ["onomeo", "routeway", "requesty", "aion", "agentrouter", "cloudflare-ai"])
     assert.ok(!RETIRED_FREE_ROWS.some((r) => r.provider === p), p);
@@ -425,8 +445,12 @@ test("every free row with a quota carries dated evidence that matches its econom
   const policy = read("../../config/quality/free-catalog-evidence.json");
   const seed = read("../../config/quality/free-catalog-legacy-seed.json");
   const key = (m: { provider: string; modelId: string }) => `${m.provider}/${m.modelId}`;
-  // The base is this catalog without the row the re-audit added, so that row counts as new.
-  const added = new Set(["openrouter/google/gemma-4-31b-it:free"]);
+  // Require evidence for the original OpenRouter addition and every E1c live row.
+  const added = new Set(
+    ["byteplus", "nara", "openrouter", "xkiro"].flatMap((provider) =>
+      PROVIDER_EXPECTATIONS[provider].live.map(({ modelId }) => key({ provider, modelId }))
+    )
+  );
   const baseKeys = new Set(FREE_MODEL_BUDGETS.map(key).filter((k) => !added.has(k)));
   assert.deepEqual(
     validateCatalogEvidence(FREE_MODEL_BUDGETS, policy, {
@@ -442,9 +466,10 @@ test("every free row with a quota carries dated evidence that matches its econom
   const quota = policy.evidence.filter((e: { claim: string }) => e.claim === "recurring-quota");
   // The seven E1a pools document 43 live model rows, on top of the previous 40 records.
   // E1b adds 39 quota records, including Aion's six card-gated rows.
-  assert.equal(quota.length, 122);
+  // E1c adds 39 net recurring quota records (29 xKiro, nine OpenRouter, one Nara).
+  assert.equal(quota.length, 161);
   for (const e of quota) {
-    const sourceDate = ["E1a", "E1b"].includes(PROVIDER_EXPECTATIONS[e.provider]?.lastWave)
+    const sourceDate = ["E1a", "E1b", "E1c"].includes(PROVIDER_EXPECTATIONS[e.provider]?.lastWave)
       ? "2026-11-27"
       : "2026-11-23";
     assert.equal(e.checkedAt, sourceDate, key(e));
@@ -455,7 +480,7 @@ test("every free row with a quota carries dated evidence that matches its econom
 
 // --- Card gates and the Telegram bonus ------------------------------------------------------
 
-test("payment-gated offers keep their rows and stay out of the public token figures", () => {
+test("gated offers keep their rows and stay out of the public token figures", () => {
   // https://www.scaleway.com/en/docs/billing/how-to/add-payment-method/ (2026-11-27).
   for (const p of ["cerebras", "aion", "scaleway"]) {
     assert.ok(live(p).length > 0, `${p} stays in the catalog`);
@@ -472,9 +497,10 @@ test("payment-gated offers keep their rows and stay out of the public token figu
   });
   // Scaleway's 1M signup allowance and Aion's monthly 0.6M require a payment method.
   // https://www.scaleway.com/en/generative-apis-signup/ and https://www.aionlabs.ai/docs/rate-limits/ (2026-11-27).
-  assert.equal(ungated.firstMonthRealisticTokens - pub.firstMonthRealisticTokens, 1_600_000);
+  // E1c also excludes 0.5M BytePlus signup tokens (identity verification) and 210M Nara tokens (Telegram).
+  assert.equal(ungated.firstMonthRealisticTokens - pub.firstMonthRealisticTokens, 212_100_000);
   assert.ok(!pub.uncappedProviders.includes("aion"), "aion needs a verified card");
-  assert.equal(ungated.steadyRecurringTokens - pub.steadyRecurringTokens, 600_000);
+  assert.equal(ungated.steadyRecurringTokens - pub.steadyRecurringTokens, 210_600_000);
 });
 
 test("the xKiro Telegram bonus is a social boost, never a deposit boost", () => {
@@ -486,7 +512,8 @@ test("the xKiro Telegram bonus is a social boost, never a deposit boost", () => 
   const pub = computePublicFreeHeadline();
   // E1a adds the 24M DGrid deposit allowance to the previous 24M.
   assert.equal(pub.boostMonthlyTokens, 48_000_000);
-  assert.equal(pub.socialGatedRecurringTokens, 15_000_000);
+  // https://router.bynara.id/api/plans and https://router.bynara.id/docs (2026-11-27): 7M/day with Telegram.
+  assert.equal(pub.socialGatedRecurringTokens, 225_000_000);
 });
 
 // --- Curation date, data-file rule and the legacy per-provider map --------------------------
