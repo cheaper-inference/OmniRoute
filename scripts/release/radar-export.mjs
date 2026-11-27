@@ -27,7 +27,7 @@ const SAIDA = process.argv[2] || path.join(REPO, "export-omniroute.json");
 const { FREE_MODEL_BUDGETS } = await import(
   path.join(REPO, "open-sse/config/freeModelCatalog.data.ts")
 );
-const { computeFreeModelTotals } = await import(
+const { computePublicFreeHeadline } = await import(
   path.join(REPO, "open-sse/config/freeModelCatalog.ts")
 );
 const { REGISTRY } = await import(path.join(REPO, "open-sse/config/providerRegistry.ts"));
@@ -48,10 +48,12 @@ function firstEnv(...names) {
 
 function gitHead() {
   try {
-    return execFileSync("git", ["-C", REPO, "rev-parse", "HEAD"], {
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-    }).trim() || null;
+    return (
+      execFileSync("git", ["-C", REPO, "rev-parse", "HEAD"], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }).trim() || null
+    );
   } catch {
     return null;
   }
@@ -63,7 +65,8 @@ function buildProvenance(geradoEm) {
   const server = firstEnv("GITHUB_SERVER_URL");
   const repository = firstEnv("GITHUB_REPOSITORY");
   const runId = firstEnv("GITHUB_RUN_ID");
-  const runUrl = server && repository && runId ? `${server}/${repository}/actions/runs/${runId}` : null;
+  const runUrl =
+    server && repository && runId ? `${server}/${repository}/actions/runs/${runId}` : null;
   return {
     generatedAt: geradoEm,
     generator: "scripts/release/radar-export.mjs",
@@ -78,7 +81,7 @@ const geradoEm = new Date().toISOString();
 const dados = {
   geradoEm,
   budgets: FREE_MODEL_BUDGETS,
-  totais: computeFreeModelTotals(),
+  totais: computePublicFreeHeadline(),
   // Só as chaves: o consumidor apenas pergunta "sabemos rotear este provider?".
   registry: Object.keys(REGISTRY).sort(),
   provenance: buildProvenance(geradoEm),

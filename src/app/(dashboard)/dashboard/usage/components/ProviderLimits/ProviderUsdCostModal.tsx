@@ -264,6 +264,7 @@ export default function ProviderUsdCostModal({
                         </div>
                       </div>
                       <Progress
+                        semantics="meter"
                         className="mt-2"
                         aria-label={row.apiKeyName}
                         aria-valuetext={formatUsd(row.costUsd)}

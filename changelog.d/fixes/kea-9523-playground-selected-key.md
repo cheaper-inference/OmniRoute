@@ -1,0 +1,1 @@
+- **fix(api):** Playground requests with an unavailable or unauthorized selected API key are refused before provider dispatch. Valid selections apply the key's policy and attribute usage to that key (KEA-9523)

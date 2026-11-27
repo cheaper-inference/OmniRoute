@@ -274,6 +274,63 @@ test("a payload without results normalizes to an empty list", () => {
   assert.deepEqual(out, { results: [], totalResults: null });
 });
 
+const urlOnly = (_providerId: string, item: { url?: string }) => ({ url: item.url }) as never;
+const urlsOf = (out: { results: unknown[] }) =>
+  (out.results as Array<{ url: string }>).map((result) => result.url);
+
+test("skips result rows whose url is not plain http(s)", () => {
+  const out = normalizeKeenableSearchResponse(
+    {
+      results: [
+        { title: "ok", url: "https://example.com/a", snippet: "a" },
+        { title: "script", url: "javascript:alert(1)", snippet: "b" },
+        { title: "data", url: "data:text/html,hi", snippet: "c" },
+        { title: "relative", url: "/relative/path", snippet: "d" },
+        { title: "plain http", url: "HTTP://example.org/e", snippet: "e" },
+      ],
+    },
+    urlOnly
+  );
+  assert.deepEqual(urlsOf(out), ["https://example.com/a", "HTTP://example.org/e"]);
+  assert.equal(out.totalResults, 2);
+});
+
+test("enforces include and exclude domains on the results Keenable cannot filter upstream", () => {
+  const rows = {
+    results: [
+      { title: "root", url: "https://example.com/a" },
+      { title: "sub", url: "https://Docs.Example.com/b" },
+      { title: "lookalike", url: "https://notexample.com/c" },
+      { title: "excluded", url: "https://excluded.org/d" },
+      { title: "excluded sub", url: "https://www.excluded.org/e" },
+      { title: "other", url: "https://other.net/f" },
+    ],
+  };
+  const run = (domainFilter?: string[]) =>
+    normalizeKeenableSearchResponse(rows, urlOnly, domainFilter);
+
+  // Exclusions are never sent upstream (Keenable takes one `site`), so they apply here.
+  assert.deepEqual(urlsOf(run(["-excluded.org"])), [
+    "https://example.com/a",
+    "https://Docs.Example.com/b",
+    "https://notexample.com/c",
+    "https://other.net/f",
+  ]);
+  // Several includes are not sent upstream either: keep each domain and its subdomains.
+  assert.deepEqual(urlsOf(run(["example.com", "other.net"])), [
+    "https://example.com/a",
+    "https://Docs.Example.com/b",
+    "https://other.net/f",
+  ]);
+  // Same include spelling the `site` mapping accepts (scheme, path, case).
+  assert.deepEqual(urlsOf(run(["HTTPS://Example.com/docs/", "-docs.example.com"])), [
+    "https://example.com/a",
+  ]);
+  assert.equal(run(["-excluded.org"]).totalResults, 4, "totalResults counts what is returned");
+  assert.equal(urlsOf(run(undefined)).length, 6, "no filter keeps every row");
+  assert.equal(urlsOf(run([])).length, 6);
+});
+
 // ── handleSearch pipeline ────────────────────────────────────────────────────
 
 test("handleSearch runs keyless through the shared pipeline at zero cost", async () => {
@@ -304,6 +361,33 @@ test("handleSearch runs keyless through the shared pipeline at zero cost", async
   assert.equal(first.snippet, "Page text");
   assert.equal(first.citation.provider, "keenable-search");
   assert.equal(result.data!.usage.search_cost_usd, 0);
+});
+
+test("handleSearch drops results from domains the caller excluded", async () => {
+  const result = await withFetch(
+    async () =>
+      jsonResponse({
+        results: [
+          { title: "kept", url: "https://example.com/a", snippet: "a" },
+          { title: "excluded", url: "https://excluded.org/b", snippet: "b" },
+        ],
+      }),
+    () =>
+      handleSearch({
+        query: params.query,
+        provider: "keenable-search",
+        maxResults: 5,
+        searchType: "web",
+        domainFilter: ["-excluded.org"],
+        credentials: {},
+        log: null,
+      })
+  );
+  assert.equal(result.success, true);
+  assert.deepEqual(
+    result.data!.results.map((item) => item.url),
+    ["https://example.com/a"]
+  );
 });
 
 test("handleSearch sends a configured key only to the fixed keyed endpoint", async () => {

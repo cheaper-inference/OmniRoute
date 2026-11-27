@@ -8,7 +8,9 @@
  */
 
 import { safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
+import { resolveRegisteredFeatureFlag } from "@/shared/utils/featureFlagResolverBridge";
 import { registerDynamicImageModelSource } from "../config/dynamicImageModelSources.ts";
+import { logger } from "../utils/logger.ts";
 
 export const AI_HORDE_API_BASE = "https://aihorde.net/api";
 export const AI_HORDE_ANONYMOUS_KEY = "0000000000";
@@ -37,6 +39,18 @@ export interface HordeImageCatalogSnapshot {
 
 type HordeFetchInit = RequestInit & { timeoutMs?: number };
 type HordeFetch = (input: string, init?: HordeFetchInit) => Promise<Response>;
+type HordeRefreshOptions = { timeoutMs?: number; signal?: AbortSignal };
+
+const log = logger("AI_HORDE_CATALOG");
+
+function isBackgroundRefreshEnabled(): boolean {
+  try {
+    return resolveRegisteredFeatureFlag("AIHORDE_CATALOG_BACKGROUND_REFRESH_ENABLED");
+  } catch {
+    log.warn("Could not resolve the AI Horde background refresh flag. Keeping refresh blocking.");
+    return false;
+  }
+}
 
 // Bounded default transport: fixed trusted host (guard "none"), abort-aware
 // timeout. Callers that inject a custom `fetchImpl` (tests, alternate
@@ -158,27 +172,32 @@ export class HordeImageCatalog {
     this.fetchImpl = fetchImpl;
   }
 
-  async refresh(options: { timeoutMs?: number; signal?: AbortSignal } = {}): Promise<void> {
-    if (this.inflight) return this.inflight;
-    this.inflight = this.refreshOnce(options).finally(() => {
-      this.inflight = null;
-    });
-    return this.inflight;
+  async refresh(options: HordeRefreshOptions = {}): Promise<void> {
+    return this.startRefresh(options);
   }
 
-  async ensureFresh(
-    maxAgeMs = this.pollMs,
-    options: { timeoutMs?: number; signal?: AbortSignal } = {}
-  ): Promise<void> {
+  async ensureFresh(maxAgeMs = this.pollMs, options?: HordeRefreshOptions): Promise<void> {
     if (this.updatedAt !== null && Date.now() - this.updatedAt < maxAgeMs && !this.lastError) {
+      return;
+    }
+    // The models catalog reads the cached list after this returns. Image generation passes
+    // request-specific options and still waits for the worker check before submitting a job.
+    if (options === undefined && isBackgroundRefreshEnabled()) {
+      void this.startRefresh({}, true);
       return;
     }
     await this.refresh(options);
   }
 
-  private async refreshOnce(
-    options: { timeoutMs?: number; signal?: AbortSignal } = {}
-  ): Promise<void> {
+  private startRefresh(options: HordeRefreshOptions, background = false): Promise<void> {
+    if (this.inflight !== null) return this.inflight;
+    this.inflight = this.refreshOnce(options, background).finally(() => {
+      this.inflight = null;
+    });
+    return this.inflight;
+  }
+
+  private async refreshOnce(options: HordeRefreshOptions, background: boolean): Promise<void> {
     try {
       const url = `${AI_HORDE_API_BASE}/v2/status/models?type=image`;
       const response = await this.fetchImpl(url, {
@@ -195,6 +214,7 @@ export class HordeImageCatalog {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.lastError = message;
+      if (background) log.warn("Background refresh failed", { error: message });
     }
   }
 }

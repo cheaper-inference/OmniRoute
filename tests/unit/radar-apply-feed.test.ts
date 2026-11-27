@@ -15,6 +15,7 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
+import { FREE_CATALOG_CURATED_AT } from "../../open-sse/config/freeModelCatalog.data.ts";
 import { applyFeed, type MergedEntry, type FeedModel } from "../../src/lib/radar/applyFeed.ts";
 import {
   getRadarCatalog,
@@ -552,6 +553,7 @@ test("getRadarCatalog: flag off returns baseline and does NOT read cache", () =>
 test("getRadarCatalog: no cache returns baseline", () => {
   const result = getRadarCatalog({
     getFlag: () => true,
+    getSettings: () => ({ optIn: true }),
     getCache: () => null,
     baseline: makeBaseline(),
   });
@@ -568,6 +570,7 @@ test("getRadarCatalog: no cache returns baseline", () => {
 test("getRadarCatalog: corrupt payload returns baseline without throwing", () => {
   const result = getRadarCatalog({
     getFlag: () => true,
+    getSettings: () => ({ optIn: true }),
     getCache: () => ({
       version: "2026.08.01.1",
       tier: "community",
@@ -589,9 +592,11 @@ test("getRadarCatalog: corrupt payload returns baseline without throwing", () =>
 test("getRadarCatalog: valid cache returns merged entries with meta", () => {
   const result = getRadarCatalog({
     getFlag: () => true,
+    getSettings: () => ({ optIn: true }),
     getLocalState: () => ({ localOverrides: new Map(), tombstones: new Set() }),
     getCache: () => ({
       version: "2026.08.01.1",
+      generatedAt: `${FREE_CATALOG_CURATED_AT}T12:00:00.000Z`,
       tier: "community",
       payload: VALID_FEED_JSON,
       fetchedAt: "2026-08-01T12:00:00Z",
@@ -618,6 +623,25 @@ test("getRadarCatalog: valid cache returns merged entries with meta", () => {
   assert.equal(result.entries.length, 3);
 });
 
+test("getRadarCatalog: cache without generatedAt is older than the release", () => {
+  const result = getRadarCatalog({
+    getFlag: () => true,
+    getSettings: () => ({ optIn: true }),
+    getCache: () => ({
+      version: "2026.08.01.1",
+      tier: "community",
+      payload: VALID_FEED_JSON,
+      fetchedAt: "2026-08-01T12:00:00Z",
+    }),
+    baseline: makeBaseline(),
+    localOverrides: new Map(),
+    tombstones: new Set(),
+  });
+
+  assert.equal(result.meta?.olderThanRelease, true);
+  assert.ok(!result.entries.some((entry) => entry.origin === "radar"));
+});
+
 // ---------------------------------------------------------------------------
 // Accessor: schema-valid but wrong feed name => falls back to baseline
 // ---------------------------------------------------------------------------
@@ -638,6 +662,7 @@ test("getRadarCatalog: wrong feed literal falls back to baseline", () => {
 
   const result = getRadarCatalog({
     getFlag: () => true,
+    getSettings: () => ({ optIn: true }),
     getCache: () => ({
       version: "2026.08.01.1",
       tier: "community",

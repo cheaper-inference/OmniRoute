@@ -21,6 +21,7 @@ export const radarCatalogOutput = z.object({
       version: z.string(),
       tier: z.string(),
       fetchedAt: z.string(),
+      olderThanRelease: z.boolean().optional(),
     })
     .nullable(),
   models: z.array(
