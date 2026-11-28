@@ -61,6 +61,7 @@ import { useComboPagination } from "./useComboPagination";
 import { ComboListToolbar, ComboPaginationNav } from "./ComboListControls";
 import { ResponseValidationEditor, type ResponseValidationValue } from "./ResponseValidationEditor";
 import ReasoningTokenBufferToggle from "./ReasoningTokenBufferToggle";
+import ComboLoggingToggle from "./ComboLoggingToggle";
 import ComboTimeoutFields from "./ComboTimeoutFields";
 import ComboContextLengthField from "./ComboContextLengthField";
 import ComboRrLegibilityFields from "./ComboRrLegibilityFields";
@@ -4468,6 +4469,9 @@ function ComboFormModal({
                     </div>
                     <div className="col-span-2">
                       <ReasoningTokenBufferToggle config={config} setConfig={setConfig} t={t} />
+                    </div>
+                    <div className="col-span-2">
+                      <ComboLoggingToggle config={config} setConfig={setConfig} t={t} />
                     </div>
                     <div>
                       <FieldLabelWithHelp
