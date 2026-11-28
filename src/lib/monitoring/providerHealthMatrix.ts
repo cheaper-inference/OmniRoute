@@ -1,3 +1,5 @@
+import { toNumber } from "@/shared/utils/numeric";
+import { TERMINAL_TEST_STATUSES } from "@/shared/utils/parkedStatus";
 import { logicalCallSql } from "@/lib/db/logicalCallSql";
 import { registerDbStateResetter } from "@/lib/db/stateReset";
 import { getSyncedAvailableModelsByConnection } from "@/lib/db/models";
@@ -137,8 +139,6 @@ export const RANGE_MS: Record<ProviderHealthMatrixRange, number> = {
   "30d": 30 * 24 * 60 * 60 * 1000,
 };
 
-const TERMINAL_STATUSES = new Set(["banned", "expired", "credits_exhausted"]);
-
 function toString(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
@@ -146,15 +146,6 @@ function toString(value: unknown): string | null {
 function canonicalProviderId(value: unknown): string | null {
   const provider = toString(value);
   return provider ? (resolveProviderAlias(provider) ?? provider) : null;
-}
-
-function toNumber(value: unknown): number {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "string" && value.trim()) {
-    const parsed = Number(value);
-    if (Number.isFinite(parsed)) return parsed;
-  }
-  return 0;
 }
 
 function parseTimeMs(value: unknown): number | null {
@@ -180,7 +171,7 @@ function isTerminalConnection(connection: JsonRecord): boolean {
   const status = toString(connection.testStatus)?.toLowerCase();
   const errorType = toString(connection.lastErrorType)?.toLowerCase();
   return Boolean(
-    (status && TERMINAL_STATUSES.has(status)) || (errorType && TERMINAL_STATUSES.has(errorType))
+    (status && TERMINAL_TEST_STATUSES.has(status)) || (errorType && TERMINAL_TEST_STATUSES.has(errorType))
   );
 }
 

@@ -108,6 +108,8 @@ test("authoritative validation clears only the exact primary credential during a
   const updated = await providersDb.getProviderConnectionById(connection.id);
   const health = updated.providerSpecificData?.apiKeyHealth as Record<string, StoredKeyHealth>;
 
+  assert.ok(health.primary, "the recovered primary must remain in the committed map");
+  assert.ok(health.extra_0, "the untouched sibling must remain in the committed map");
   assert.equal(health.primary.status, "active");
   assert.equal(health.primary.failures, 0);
   assert.equal(health.extra_0.status, "warning");
@@ -158,4 +160,51 @@ test("model-sync 409 remains model telemetry and cannot mutate API-key health", 
   assert.equal(response.status, 409);
   assert.deepEqual(getAllKeyHealth()[`${connectionId}:primary`], before);
   removeConnectionHealth(connectionId);
+});
+
+test("probe recovery does not overwrite a sibling verdict committed after the probe snapshot", async () => {
+  const connection = await createConnection({
+    name: "probe-sibling-race",
+    primary: WARNING_HEALTH,
+    extra: WARNING_HEALTH,
+  });
+  const snapshot = await providersDb.getProviderConnectionById(connection.id);
+  const { persistConnectionTestHealth } =
+    await import("../../src/app/api/providers/[id]/test/connectionTestHealth.ts");
+  const rejectedAt = "2026-02-01T00:00:00.000Z";
+  await persistConnectionTestHealth({
+    connectionId: connection.id,
+    provider: "openai",
+    connection: snapshot,
+    latest: snapshot,
+    result: { valid: true },
+    diagnosis: { type: "ok", source: "upstream", code: null },
+    operatorDisabled: false,
+    clearErrorState: true,
+    now: "2026-02-01T00:01:00.000Z",
+    persist: async (id, update, options) => {
+      await providersDb.mergeConnectionProviderSpecificData(
+        id,
+        {
+          apiKeyHealth: {
+            extra_0: { ...WARNING_HEALTH, status: "invalid", failures: 2, rejectedAt },
+          },
+        },
+        { mergeApiKeyHealth: true }
+      );
+      return providersDb.updateProviderConnection(id, update, options);
+    },
+  });
+  const after = await providersDb.getProviderConnectionById(connection.id);
+  const health = after.providerSpecificData.apiKeyHealth as Record<
+    string,
+    StoredKeyHealth & { rejectedAt?: string }
+  >;
+  assert.ok(health.primary, "primary recovery is committed");
+  assert.ok(health.extra_0, "the newer sibling rejection must survive the recovery write");
+  assert.equal(health.primary.status, "active");
+  assert.equal(health.extra_0.status, "invalid");
+  assert.equal(health.extra_0.rejectedAt, rejectedAt);
+  assert.equal(getAllKeyHealth()[`${connection.id}:extra_0`]?.status, "invalid");
+  removeConnectionHealth(connection.id);
 });

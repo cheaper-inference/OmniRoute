@@ -23,9 +23,12 @@ import { findChatGptConnectionByRegistration } from "./chatgpt";
 import { sanitizeMergedConnectionOverrides } from "./providers/connectionUpdateSanitize";
 import { normalizeConnectionProviderSpecificData } from "./providers/providerSpecificData";
 import { mergeConnectionProviderSpecificData } from "./providers/providerSpecificDataMerge";
+import { mergeKeyHealthDelta } from "./providers/keyHealthDelta";
+import { applyProbeWriteOutcome } from "./providers/probeWriteReconcile";
 import { registerConnectionStore } from "@omniroute/open-sse/utils/registeredConnectionStore.ts";
 import { applyAutomaticDisableMarker } from "@/lib/providers/operatorDisable";
 import { isRetestAutoDisabledEnabled } from "@/lib/credentialHealth/retestAutoDisabledFlag";
+import { removeCredentialHealth } from "@/lib/credentialHealth/cache";
 import { ensureProviderSpecificDataSecretsEncrypted } from "./providers/migrations";
 import { bumpProxyConfigGeneration, getSettings } from "./settings";
 import { readNewConnectionProxyDefault } from "./newConnectionProxy.mjs";
@@ -1003,6 +1006,14 @@ function _updateConnectionRow(db: DbLike, id: string, data: JsonRecord) {
 export type ProviderConnectionUpdateOpts = UpdateOpts & {
   /** #16190: this isActive:false write is the permanent-ban auto-disable (never retested). */
   permanentBan?: boolean;
+  /** Probe recovery patches only observed key-health entries, never sibling snapshots. */
+  mergeApiKeyHealth?: boolean;
+  /**
+   * A probe reports on the row it read before the probe ran. Everything this write decides
+   * about verdicts is derived from that context and the row read inside this transaction:
+   * a verdict parked while the probe was in flight survives.
+   */
+  probeHealthWrite?: { outcome: "success" | "failure"; startedAt: string };
   expectedCodexFence?: CodexConnectionFence;
   /** Internal token rotation: the exact version committed by this write, never a later reread. */
   onCodexFenceCommitted?: (fence: CodexConnectionFence) => void;
@@ -1061,6 +1072,20 @@ function buildMergedConnectionUpdate(
     ...data,
     updatedAt: new Date().toISOString(),
   };
+  if (opts?.mergeApiKeyHealth) {
+    const currentData = toRecord(existingCamel.providerSpecificData);
+    const delta = toRecord(data.providerSpecificData);
+    merged.providerSpecificData = {
+      ...currentData,
+      ...delta,
+      apiKeyHealth: mergeKeyHealthDelta(
+        currentData,
+        delta.apiKeyHealth,
+        { apiKey: existingCamel.apiKey, accessToken: existingCamel.accessToken },
+        opts
+      ),
+    };
+  }
   merged.providerSpecificData = applyCodexChildCooldownClearOnUpdate(
     data,
     normalizeConnectionProviderSpecificData(
@@ -1071,23 +1096,33 @@ function buildMergedConnectionUpdate(
     )
   );
   sanitizeMergedConnectionOverrides(merged);
+  // A probe result carries the row it read before the probe started. The row read inside this
+  // transaction is fresher: a verdict parked while the probe was in flight must survive it.
+  applyProbeWriteOutcome(merged, existingCamel, opts?.probeHealthWrite);
   // #16190: with CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED on, an automated switch-off is
   // marked so the health sweep can retest it; a permanent-ban switch-off is always marked
   // so that sweep never retests it, whenever the flag is turned on.
   if (typeof data.isActive === "boolean") {
+    // The marker records what this write actually does, which a probe rule may have just
+    // overridden: keeping the caller's value would erase the ban marker on a row it left
+    // disabled and parked.
+    const nextIsActive = typeof merged.isActive === "boolean" ? merged.isActive : data.isActive;
     merged.providerSpecificData = applyAutomaticDisableMarker(
       merged.providerSpecificData,
       existingCamel.isActive,
-      data.isActive,
+      nextIsActive,
       undefined,
       {
-        stampAutomatic: data.isActive === false && isRetestAutoDisabledEnabled(),
+        stampAutomatic: nextIsActive === false && isRetestAutoDisabledEnabled(),
         permanentBan: opts?.permanentBan === true,
       }
     );
   }
   return merged;
 }
+
+/** Fields whose change makes a cached credential verdict describe a different key. */
+const CREDENTIAL_FIELDS = ["apiKey", "accessToken", "refreshToken", "extraApiKeys"] as const;
 
 export async function updateProviderConnection(
   id: string,
@@ -1131,6 +1166,11 @@ export async function updateProviderConnection(
   if (committedFence) opts?.onCodexFenceCommitted?.(committedFence);
   backupDbFile("pre-write");
   invalidateConnectionUpdate(id, data, opts);
+  // The combo gate answers from a cached verdict with a five-minute TTL. A credential swap makes
+  // that verdict describe a key the connection no longer carries, so the cache entry goes with it.
+  if (CREDENTIAL_FIELDS.some((field) => Object.prototype.hasOwnProperty.call(data, field))) {
+    removeCredentialHealth(id);
+  }
   bumpProxyConfigGeneration();
 
   // Zero is the internal move-to-top sentinel. Explicit positive priorities
@@ -1315,6 +1355,7 @@ export {
 } from "./providers/nodes";
 export {
   setConnectionRateLimitUntil,
+  parseCooldownUntilMs,
   markConnectionRateLimitedUntil,
   clearConnectionRateLimit,
   getEffectiveQuotaUsage,

@@ -51,6 +51,7 @@
  * Part of: Group B — Quota Sharing Engine (Fase 3, point #5).
  */
 
+import { TERMINAL_TEST_STATUSES } from "@/shared/utils/parkedStatus";
 import { createHash } from "node:crypto";
 import { computeHeadroom, type HeadroomSaturation } from "./headroomRanking.ts";
 import type { ResolvedComboTarget } from "./types.ts";
@@ -129,14 +130,6 @@ export function __setStickinessConnectionFetcherForTests(
 }
 
 /**
- * Statuses that mean the account is DURABLY dead, not just transiently rate
- * limited — mirrors TERMINAL_PIN_STATUSES used by the LKGP/context-cache pin
- * (combo.ts:558). Duplicated here (rather than imported) so this leaf keeps no
- * static edge into combo.ts, which itself imports this module.
- */
-const TERMINAL_STICKY_STATUSES = new Set(["credits_exhausted", "banned", "expired"]);
-
-/**
  * Resolve the sticky-bound connection's health by fetching its provider_connections
  * row. Uses the same dynamic-import pattern as resolveSaturation so this leaf has
  * no static dependency on src/lib/db. Fail-open (undefined) on any error.
@@ -173,7 +166,7 @@ export function isStickyConnectionTerminallyUnhealthy(
 ): boolean {
   if (!conn) return false;
   const status = typeof conn.testStatus === "string" ? conn.testStatus : "";
-  if (TERMINAL_STICKY_STATUSES.has(status)) return true;
+  if (TERMINAL_TEST_STATUSES.has(status)) return true;
   const rl = conn.rateLimitedUntil ? new Date(String(conn.rateLimitedUntil)).getTime() : 0;
   return Number.isFinite(rl) && rl > now;
 }

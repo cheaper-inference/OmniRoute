@@ -179,7 +179,7 @@ import { updateProviderConnection, getProviderConnectionById } from "@/lib/db/pr
 
 import { connectionHasExtraKeys } from "../services/apiKeyRotator.ts";
 import { shouldKeepConnectionActiveOnRateLimit } from "./chatCore/rateLimitConnectionGuard.ts";
-import { recordKeyHealthStatus as recordKeyHealthStatusFor } from "./chatCore/keyHealth.ts";
+import { bindKeyHealthRecorder } from "./chatCore/keyHealth.ts";
 import { getSkillsModelIdForFormat } from "./chatCore/skillsFormat.ts";
 import { isSemaphoreCapacityError, getSafeErrorMetadata } from "./chatCore/streamErrorResult.ts";
 import { buildCacheUsageLogMeta } from "./chatCore/cacheUsageMeta.ts";
@@ -671,13 +671,7 @@ async function handleChatCoreInner({
   };
   // Key-health updater extracted to chatCore/keyHealth.ts (#3501); bind the per-request log once
   // and delegate so the existing call sites stay byte-identical.
-  const recordKeyHealthStatus = (
-    status: number,
-    creds: Record<string, unknown> | null | undefined,
-    transport?: string,
-    failureDetail?: string,
-    retryAfterMs?: number | null
-  ): void => recordKeyHealthStatusFor(status, creds, log, transport, failureDetail, retryAfterMs);
+  const recordKeyHealthStatus = bindKeyHealthRecorder(log);
   // Endpoint/format resolution extracted to chatCore/requestFormat.ts (#3501); pure derivation
   // from the request. OUTSIDE the try below — persistFailureUsage closes over endpointPath.
   const {

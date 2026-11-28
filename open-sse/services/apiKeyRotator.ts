@@ -55,6 +55,49 @@ export function connectionHasExtraKeys(connectionId: string, extraKeys?: string[
 
 // In-memory health status (synced to DB on state changes)
 // Key format: "primary" | "extra_0" | "extra_1" | ...
+/**
+ * Set or clear the moment this key's credential was proven dead. Passing null means a
+ * served request proved it works again; storing the timestamp instead of a boolean keeps
+ * the verdict ordered with every other state change.
+ */
+export function markKeyRejected(
+  connectionId: string,
+  keyId: string,
+  rejectedAt: string | null
+): void {
+  const health = getOrCreateHealth(connectionId, keyId);
+  if (rejectedAt) health.rejectedAt = rejectedAt;
+  else delete health.rejectedAt;
+}
+
+/** Record the dispatch sequence of the newest outcome applied to this key. */
+export function markKeyOutcomeSeq(connectionId: string, keyId: string, seq: number): void {
+  const health = getOrCreateHealth(connectionId, keyId);
+  health.lastSeq = seq;
+}
+
+/** Stamp the key material this entry describes, resetting state when it changed. */
+export function syncKeyGeneration(
+  connectionId: string,
+  keyId: string,
+  generation: string
+): KeyHealth {
+  const health = getOrCreateHealth(connectionId, keyId);
+  if (health.generation && health.generation !== generation) {
+    health.failures = 0;
+    health.status = "active";
+    health.cooldownUntil = null;
+    delete health.rejectedAt;
+  }
+  health.generation = generation;
+  return health;
+}
+
+/** Read one key's health without creating it. */
+export function getKeyHealthEntry(connectionId: string, keyId: string): KeyHealth | undefined {
+  return _keyHealth.get(`${connectionId}:${keyId}`);
+}
+
 export interface KeyHealth {
   status: "active" | "warning" | "invalid";
   failures: number; // consecutive failures
@@ -66,6 +109,23 @@ export interface KeyHealth {
   // until this ISO timestamp passes; unlike "invalid" it recovers automatically
   // and does not count as a credential failure.
   cooldownUntil?: string | null;
+  /**
+   * When the credential itself was proven dead (rejected key, suspended workspace,
+   * exhausted balance). Cleared to null by a served request. A generic 403 that only
+   * rejects one endpoint leaves this unset: the key may still serve other models.
+   */
+  rejectedAt?: string | null;
+  /**
+   * Dispatch sequence of the newest applied outcome. Older or duplicate dispatches
+   * are ignored. Process-local only; never included in the persisted health snapshot.
+   */
+  lastSeq?: number;
+  /**
+   * Fingerprint of the key material this state describes. A response is only applied
+   * while the credential is still the same one: when an operator or refresh swaps it,
+   * old verdicts say nothing about the new key.
+   */
+  generation?: string | null;
 }
 
 const _keyHealth = new Map<string, KeyHealth>();
@@ -132,6 +192,7 @@ export function recordKeyCooldown(
   const health = getOrCreateHealth(connectionId, keyId);
   health.cooldownUntil = new Date(Date.now() + Math.max(cooldownMs, 0)).toISOString();
   health.totalRequests++;
+
   return { ...health };
 }
 
@@ -292,8 +353,7 @@ export function recordKeyTerminal(connectionId: string, keyId: string): KeyHealt
  * @param keyId - Key identifier ("primary" | "extra_0" | ...)
  * @returns Updated health status
  */
-export function recordKeySuccess(connectionId: string, keyId: string): KeyHealth {
-  const health = getOrCreateHealth(connectionId, keyId);
+function applyKeySuccess(health: KeyHealth): KeyHealth {
   health.failures = 0;
   health.totalRequests++;
   health.lastSuccess = new Date().toISOString();
@@ -302,6 +362,18 @@ export function recordKeySuccess(connectionId: string, keyId: string): KeyHealth
   health.cooldownUntil = null;
 
   return { ...health };
+}
+
+export function recordKeySuccess(connectionId: string, keyId: string): KeyHealth {
+  return applyKeySuccess(getOrCreateHealth(connectionId, keyId));
+}
+
+/** Preview a validated-key recovery without changing runtime state before commit. */
+export function previewKeyHealthRecovery(health: KeyHealth): KeyHealth {
+  const recovered = applyKeySuccess({ ...health });
+  delete recovered.rejectedAt;
+  delete recovered.lastSeq;
+  return recovered;
 }
 
 /**
@@ -403,6 +475,9 @@ export function syncHealthFromDB(connectionId: string, health?: Record<string, K
 
   for (const [keyId, keyHealth] of Object.entries(health)) {
     const scopedKey = `${connectionId}:${keyId}`;
+    // Hydration can race with an outcome already applied in this process. Persisted
+    // snapshots have no dispatch sequence and must not erase the newer live state.
+    if (_keyHealth.get(scopedKey)?.lastSeq !== undefined) continue;
     if (!_keyHealth.has(scopedKey) && _keyHealth.size >= MAX_KEY_HEALTH_ENTRIES) {
       const oldest = _keyHealth.keys().next().value;
       if (oldest !== undefined) _keyHealth.delete(oldest);
@@ -422,12 +497,21 @@ export function recoverKeyHealth(
       ? (providerSpecificData as Record<string, unknown>)
       : {};
   const health = data.apiKeyHealth as Record<string, KeyHealth> | undefined;
-  const currentHealth = health?.[keyId];
-  if (!currentHealth || (currentHealth.status === "active" && currentHealth.failures === 0)) {
+  const currentHealth = getKeyHealthEntry(connectionId, keyId) ?? health?.[keyId];
+  if (
+    !currentHealth ||
+    (currentHealth.status === "active" &&
+      currentHealth.failures === 0 &&
+      !currentHealth.rejectedAt &&
+      !currentHealth.cooldownUntil)
+  ) {
     return undefined;
   }
 
   syncHealthFromDB(connectionId, health);
+  // A validated key is healthy again: the ladder AND the rejection verdict both reset, or
+  // the derived connection predicate keeps treating it as dead while the status says active.
+  markKeyRejected(connectionId, keyId, null);
   return {
     ...data,
     apiKeyHealth: { ...health, [keyId]: recordKeySuccess(connectionId, keyId) },

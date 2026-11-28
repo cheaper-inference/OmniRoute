@@ -6,6 +6,7 @@
  * predicates are re-exported from combo.ts for backward compatibility.
  */
 
+import { TERMINAL_TEST_STATUSES } from "@/shared/utils/parkedStatus";
 import { isMarkedLocalProcessPressureResponse } from "../../utils/localPressureResponse.ts";
 import {
   EXECUTOR_CONTRACT_VIOLATION_CODE,
@@ -799,10 +800,7 @@ export function quotaRemainingPercentFromQuota(
 }
 
 export const QUOTA_BLOCKING_CONNECTION_STATUSES = new Set([
-  "banned",
-  "credits_exhausted",
-  "deactivated",
-  "expired",
+  ...TERMINAL_TEST_STATUSES,
   "rate_limited",
 ]);
 

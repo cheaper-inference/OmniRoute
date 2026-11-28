@@ -116,7 +116,6 @@ test("env parsing: cron default + concurrency clamp", async () => {
 test("integration: opt-in gating — connection not in claudeWarmup.connections is skipped", async () => {
   const { startWarmupScheduler, stopWarmupScheduler, __resetWarmupState } =
     await import("../../src/lib/warmupScheduler.ts");
-  const settingsDb = await import("../../src/lib/db/settings.ts");
 
   await providersDb.createProviderConnection({
     provider: "claude",
@@ -189,6 +188,42 @@ test("integration: opted-in claude_pro connection → fetch fires with Bearer to
   const body = JSON.parse(call.init?.body as string);
   assert.equal(body.max_tokens, 1, "warmup must use max_tokens=1 to minimize quota burn");
   assert.equal(body.model, "claude-3-5-haiku-20241022");
+
+  delete process.env.OMNIROUTE_WARMUP_ENABLED;
+  delete process.env.OMNIROUTE_WARMUP_CRON;
+});
+
+test("integration: a parked connection is never warmed", async () => {
+  const { startWarmupScheduler, stopWarmupScheduler } =
+    await import("../../src/lib/warmupScheduler.ts");
+  const settingsDb = await import("../../src/lib/db/settings.ts");
+
+  const conn = await providersDb.createProviderConnection({
+    provider: "claude",
+    authType: "oauth",
+    name: "Parked User",
+    email: "parked@example.com",
+    accessToken: "tok-parked",
+    refreshToken: "rt-parked",
+    isActive: true,
+    providerSpecificData: { organizationType: "claude_pro" },
+  });
+  await providersDb.updateProviderConnection(conn.id, { testStatus: "deactivated" });
+  await settingsDb.updateSettings({ claudeWarmup: { connections: { [conn.id]: true } } });
+
+  const mock = installMockFetch(() => ({
+    status: 200,
+    body: { usage: { input_tokens: 3, output_tokens: 1 } },
+  }));
+
+  process.env.OMNIROUTE_WARMUP_ENABLED = "1";
+  process.env.OMNIROUTE_WARMUP_CRON = "*/1 * * * *";
+  startWarmupScheduler();
+  await new Promise((r) => setTimeout(r, 50));
+  stopWarmupScheduler();
+  mock.restore();
+
+  assert.equal(mock.calls.length, 0, "a parked row must not be warmed");
 
   delete process.env.OMNIROUTE_WARMUP_ENABLED;
   delete process.env.OMNIROUTE_WARMUP_CRON;

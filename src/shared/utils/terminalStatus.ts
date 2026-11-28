@@ -1,6 +1,7 @@
 import { updateProviderConnection } from "@/lib/db/providers";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
+import { isParkedTestStatus } from "./parkedStatus";
 
 type Patch = {
   testStatus: string;
@@ -10,14 +11,13 @@ type Patch = {
   lastErrorType?: string | null;
   lastErrorAt?: string | null;
 };
-const TERMINAL = new Set(["banned", "expired", "deactivated", "credits_exhausted"]);
 
 export async function writeTerminalStatus(
   connectionId: string,
   patch: Patch,
   origin: "probe" | "production"
 ): Promise<void> {
-  const isTerminal = TERMINAL.has(patch.testStatus.toLowerCase());
+  const isTerminal = isParkedTestStatus(patch.testStatus);
   const persistedLastError =
     patch.lastError == null
       ? null

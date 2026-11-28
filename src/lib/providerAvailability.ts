@@ -9,13 +9,11 @@
  * exhausted, last confirmed at X, recheckable at Y" — instead of collapsing every
  * unavailable case into "No active credentials".
  *
- * Terminal statuses mirror the routing layer's own set (`credits_exhausted`,
- * `banned`, `expired`; see `src/sse/services/auth.ts::isTerminalConnectionStatus`
- * and `src/lib/quota/connectionRecovery.ts::TERMINAL_CONNECTION_STATUSES`).
+ * Terminal statuses are the shared vocabulary in `@/shared/utils/parkedStatus`, the same set the
+ * routing gate and the probe writer read.
  */
 
-/** Stored test statuses that mean "do not auto-recover on a timer". */
-const TERMINAL_STATUSES = new Set(["credits_exhausted", "banned", "expired"]);
+import { TERMINAL_TEST_STATUSES } from "@/shared/utils/parkedStatus";
 
 /** Terminal states confirmed longer ago than this are reported `STALE_TERMINAL`. */
 const DEFAULT_STALENESS_MS = 24 * 60 * 60 * 1000;
@@ -71,7 +69,7 @@ export function resolveProviderAvailability(
   const status = normalize(input.testStatus);
   const thresholdMs = input.stalenessThresholdMs ?? DEFAULT_STALENESS_MS;
 
-  if (TERMINAL_STATUSES.has(status)) {
+  if (TERMINAL_TEST_STATUSES.has(status)) {
     // A terminal state is only trusted as current when it was confirmed recently.
     // An old or unverifiable terminal is STALE_TERMINAL — re-verify with provider
     // evidence. It is NEVER silently cleared to AVAILABLE here just because time passed.

@@ -12,6 +12,7 @@
  *
  * Extracted from combo.ts as a pure move (#3501). No behaviour change.
  */
+import { TERMINAL_TEST_STATUSES } from "@/shared/utils/parkedStatus";
 import { cloneForQuality } from "./preContentTransportFailure.ts";
 import { getCachedProviderPoolConnections } from "../providerConnectionPool.ts";
 import { getCircuitBreaker } from "../../../src/shared/utils/circuitBreaker";
@@ -139,8 +140,6 @@ function buildBaseOptions(a: PreludeBaseOptionArgs): HandleComboChatOptions {
   };
 }
 
-const TERMINAL_PIN_STATUSES = new Set(["credits_exhausted", "banned", "expired"]);
-
 /**
  * Pure decision: should a context-cache pin be DROPPED because its provider has
  * DURABLY fallen? A ccp pin keeps the prompt cache warm by bypassing the combo
@@ -172,7 +171,7 @@ export function pinIsDurablyUnhealthy(
   // briefly cooling down — failover only when every connection is durably down.
   const anyUsable = connections.some((c) => {
     const status = typeof c.testStatus === "string" ? c.testStatus : "";
-    if (TERMINAL_PIN_STATUSES.has(status)) return false;
+    if (TERMINAL_TEST_STATUSES.has(status)) return false;
     if (Number(c.backoffLevel ?? 0) >= backoffThreshold) return false;
     const rl = c.rateLimitedUntil ? new Date(String(c.rateLimitedUntil)).getTime() : 0;
     if (Number.isFinite(rl) && rl - now > graceMs) return false;

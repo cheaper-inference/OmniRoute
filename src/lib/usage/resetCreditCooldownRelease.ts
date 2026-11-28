@@ -10,6 +10,7 @@
  * accounts (banned / expired / deactivated / credits_exhausted) remain locked.
  */
 
+import { TERMINAL_TEST_STATUSES } from "@/shared/utils/parkedStatus";
 import { getProviderConnectionById } from "@/lib/db/providers";
 import { hasUsableQuota } from "@/lib/usage/providerLimits";
 import { clearAccountError } from "@/sse/services/auth";
@@ -22,8 +23,6 @@ import { isCodexChildUnavailable } from "@omniroute/open-sse/services/codexAccou
 import { PROVIDER_ERROR_TYPES } from "@omniroute/open-sse/services/errorClassifier.ts";
 
 type JsonRecord = Record<string, unknown>;
-
-const TERMINAL_STATUSES = new Set(["banned", "expired", "deactivated", "credits_exhausted"]);
 
 // Lockout reasons a quota reset can actually cure. `not_found`, capacity and server errors
 // are unrelated to the redeemed quota and must survive the redemption.
@@ -54,7 +53,7 @@ async function loadReleasableConnection(connectionId: string): Promise<JsonRecor
   const testStatus = String(connection.testStatus ?? "")
     .trim()
     .toLowerCase();
-  return TERMINAL_STATUSES.has(testStatus) ? null : connection;
+  return TERMINAL_TEST_STATUSES.has(testStatus) ? null : connection;
 }
 
 function clearQuotaLockouts(connectionId: string, stillCooling: (model: string) => boolean) {

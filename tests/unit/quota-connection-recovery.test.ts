@@ -7,8 +7,8 @@ import {
   isRecoverableCooldownConnection,
   selectRecoverableConnections,
   runConnectionRecoveryTick,
-  TERMINAL_CONNECTION_STATUSES,
 } from "@/lib/quota/connectionRecovery";
+import { PARKED_EXCEPT_QUOTA_EXHAUSTION } from "@/shared/utils/parkedStatus";
 
 describe("connectionRecovery — credits_exhausted reprobe", () => {
   const nowMs = 1_700_000_000_000;
@@ -149,7 +149,7 @@ describe("connectionRecovery — stale testStatus='error' labels", () => {
   });
 
   it("should NOT recover terminal statuses", () => {
-    for (const status of TERMINAL_CONNECTION_STATUSES) {
+    for (const status of PARKED_EXCEPT_QUOTA_EXHAUSTION) {
       const conn = {
         id: "e-4",
         testStatus: status,

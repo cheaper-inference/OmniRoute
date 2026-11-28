@@ -10,6 +10,7 @@
  * updates the DB, and logs the result.
  */
 
+import { PARKED_EXCEPT_QUOTA_EXHAUSTION } from "@/shared/utils/parkedStatus";
 import {
   getProviderConnections,
   getProviderConnectionById,
@@ -668,11 +669,11 @@ export async function checkConnection(conn: any) {
     conn.testStatus === "expired" &&
     conn.lastErrorType !== "account_deactivated" &&
     getExpiredRetryCount(conn) < EXPIRED_RETRY_MAX;
-  // Skip only banned/expired. Combo pre-skip still hides exhausted rows.
-  const terminalStatuses = new Set(["banned", "expired"]);
+  // Skip banned, expired and deactivated. Combo pre-skip still hides exhausted rows:
+  // quota exhaustion is what this sweep exists to refresh, so it is not terminal here.
   if (
     typeof conn.testStatus === "string" &&
-    terminalStatuses.has(conn.testStatus.toLowerCase()) &&
+    PARKED_EXCEPT_QUOTA_EXHAUSTION.has(conn.testStatus.trim().toLowerCase()) &&
     !isRecoverableGithubCopilotNoRefresh &&
     !isRecoverableCursorExpired &&
     !isRecoverableExpiredWithRetryBudget

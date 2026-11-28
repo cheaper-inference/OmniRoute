@@ -184,3 +184,25 @@ test("the page maps /api/resilience into the rules it edits", async () => {
   });
   assert.equal(toCooldownRules({}).streamStallCooldown, false, "missing setting reads as off");
 });
+
+test("a deactivated connection is terminal and is never cleared in bulk", async () => {
+  await resetStorage();
+  const parked = await seed("codex", { name: "deactivated", testStatus: "deactivated" });
+  await providersDb.updateProviderConnection(parked.id, {
+    rateLimitedUntil: IN_TEN_MINUTES(),
+    lastError: "This account has been deactivated",
+    lastErrorType: "account_deactivated",
+    errorCode: 401,
+  });
+
+  const list = await manager.listConnectionCooldowns("codex");
+  assert.equal(list.find((c) => c.id === parked.id)?.status, "terminal");
+
+  const response = await route.POST(postRequest({ all: true, provider: "codex" }));
+  const result = await response.json();
+  assert.equal(result.skippedTerminal, 1);
+
+  const after = await providersDb.getProviderConnectionById(parked.id);
+  assert.equal(after.testStatus, "deactivated", "the parked verdict must survive a bulk clear");
+  assert.equal(after.lastError, "This account has been deactivated");
+});

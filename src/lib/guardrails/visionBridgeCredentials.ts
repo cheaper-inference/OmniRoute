@@ -5,6 +5,7 @@
  * (visionBridge.ts already imports getBestVisionModel from visionBridgeRouter.ts).
  */
 
+import { PARKED_EXCEPT_QUOTA_EXHAUSTION } from "@/shared/utils/parkedStatus";
 import { resolveProviderId } from "@/shared/constants/providers";
 import {
   isNoAuthProviderKey,
@@ -28,7 +29,6 @@ export type ProviderConnectionLike = {
   testStatus?: string | null;
 };
 
-const TERMINAL_CONNECTION_STATUSES = new Set(["disabled", "banned", "expired"]);
 // Free/noauth only counts when a real key is still present; apikey/cookie need the same.
 const KEY_ONLY_AUTH_TYPES = new Set(["noauth", "none", "", "apikey", "cookie"]);
 const TOKEN_AUTH_TYPES = new Set(["oauth", "access_token", "external_idp"]);
@@ -45,10 +45,12 @@ function hasOAuthCredential(connection: ProviderConnectionLike): boolean {
   );
 }
 
-/** True when the connection row carries a terminal status (disabled/banned/expired). */
+/** True when the connection row carries a terminal status (disabled, or any parked status). */
 export function hasTerminalConnectionStatus(connection: ProviderConnectionLike): boolean {
-  const status = String(connection.testStatus || "").toLowerCase();
-  return TERMINAL_CONNECTION_STATUSES.has(status);
+  const status = String(connection.testStatus || "").trim().toLowerCase();
+  if (!status) return false;
+  // Quota exhaustion is excluded on purpose: the request gate allows it for free models.
+  return status === "disabled" || PARKED_EXCEPT_QUOTA_EXHAUSTION.has(status);
 }
 
 export function isProviderConnectionUsable(connection: ProviderConnectionLike): boolean {
@@ -225,7 +227,7 @@ export async function isBlockedNoAuthProvider(providerIdOrAlias: string): Promis
  * No-auth providers (NOAUTH_PROVIDERS) need no stored API key: their effective
  * credential is the synthetic "noauth" connection, so an empty active set is
  * usable for them (unlike keyed providers). A stored row with a terminal
- * status (disabled/banned/expired) still blocks the provider; any other row
+ * status (disabled, or any parked status) still blocks the provider; any other row
  * is treated as usable (the key requirement does not apply — a noauth row
  * carries no API key by design). A no-auth provider listed in
  * `blockedProviders` is unusable outright, stored rows included: dispatch

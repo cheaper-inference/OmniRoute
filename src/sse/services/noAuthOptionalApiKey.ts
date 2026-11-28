@@ -16,6 +16,7 @@ import type { ProviderConnectionView } from "@/lib/db/providers/lazyConnectionVi
 import { buildConnectionConcurrencyFields } from "./connectionConcurrencyFields.ts";
 import { getCachedRawProviderConnections } from "@/lib/db/readCache";
 import { supportsApiKeyOnFreeProvider } from "@/shared/constants/providers";
+import { isParkedTestStatus } from "@/shared/utils/parkedStatus";
 
 export function noAuthProviderAcceptsOptionalApiKey(providerId: string): boolean {
   if (supportsApiKeyOnFreeProvider(providerId)) return true;
@@ -38,11 +39,6 @@ function hasUsableConnectionCredential(connection: ProviderConnectionView): bool
   return false;
 }
 
-// Terminal statuses stay unavailable until credentials/settings change — an
-// operator reset, not a cooldown expiry, clears them (see auth.ts's
-// isTerminalConnectionStatus, which this mirrors for the optional-key path).
-const TERMINAL_TEST_STATUSES = new Set(["credits_exhausted", "banned", "expired"]);
-
 /**
  * A stored optional key is only usable when it passes the same connection
  * health checks the normal credential-selection path enforces: not in an
@@ -52,10 +48,11 @@ const TERMINAL_TEST_STATUSES = new Set(["credits_exhausted", "banned", "expired"
  * cooldown entirely — instead of falling back to the anonymous no-auth path
  * or rotating to the next healthy key.
  */
-function isConnectionHealthy(connection: ProviderConnectionView): boolean {
+/** Exported so the parked-status rule stays pinned by a test. */
+export function isConnectionHealthy(connection: ProviderConnectionView): boolean {
   if (isAccountUnavailable(connection.rateLimitedUntil)) return false;
   const status = (connection.testStatus || "").trim().toLowerCase();
-  if (TERMINAL_TEST_STATUSES.has(status)) return false;
+  if (isParkedTestStatus(status)) return false;
   if (status === "unavailable") return false;
   return true;
 }

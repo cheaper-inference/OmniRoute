@@ -1,3 +1,4 @@
+import { isParkedTestStatus } from "@/shared/utils/parkedStatus";
 import { createHash } from "node:crypto";
 import { getDbInstance } from "./core";
 import { isExclusiveConnectionActivelyLeased } from "./exclusiveConnectionLeases";
@@ -50,7 +51,7 @@ function assertConnectionAvailable(
     unavailable();
   if (connection.rate_limited_until && Date.parse(connection.rate_limited_until) > Date.now())
     unavailable();
-  if (["banned", "expired", "credits_exhausted", "invalid"].includes(connection.test_status ?? ""))
+  if (isParkedTestStatus(connection.test_status) || connection.test_status === "invalid")
     unavailable();
   if (isExclusiveConnectionActivelyLeased(input.connectionId)) unavailable();
   const data = connection.provider_specific_data

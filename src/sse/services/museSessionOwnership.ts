@@ -1,3 +1,4 @@
+import { isParkedTestStatus } from "@/shared/utils/parkedStatus";
 import {
   museScopeHasRecordedItems,
   pruneIdleMuseOwnershipScopes,
@@ -51,9 +52,7 @@ export function museClaimCandidates(
       unavailable:
         !allowUnavailable &&
         (isAccountUnavailable(connection.rateLimitedUntil) ||
-          ["banned", "expired", "credits_exhausted"].includes(
-            String(connection.testStatus || "").toLowerCase()
-          ) ||
+          isParkedTestStatus(connection.testStatus) ||
           isModelLocked("muse-code", connection.id, model)),
     }));
 }

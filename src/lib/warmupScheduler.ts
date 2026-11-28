@@ -7,9 +7,9 @@ import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch";
 import { logger } from "@omniroute/open-sse/utils/logger";
 import { matchesCron } from "@/lib/jobs/cronMatch";
 import { getCircuitBreakerStore } from "./warmupScheduler/circuitBreakerFactory";
-import { TERMINAL_CONNECTION_STATUSES } from "@/lib/quota/connectionRecovery";
+import { isParkedTestStatus } from "@/shared/utils/parkedStatus";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
-import type { WarmupResult, WarmupFailureKind, WarmupTarget } from "./warmupScheduler/core";
+import type { WarmupResult, WarmupTarget } from "./warmupScheduler/core";
 
 export type { WarmupResult, WarmupFailureKind } from "./warmupScheduler/core";
 
@@ -89,6 +89,14 @@ function toPacificTime(date: Date): Date {
   );
 }
 
+/**
+ * Warming a parked row only records another 429, so every parked status is skipped. Exported for
+ * the test that pins this against the routing vocabulary.
+ */
+export function isWarmupSkippedStatus(testStatus: string | null | undefined): boolean {
+  return isParkedTestStatus(testStatus);
+}
+
 export function startWarmupScheduler(): NodeJS.Timeout | null {
   if (STATE.timer) return STATE.timer;
   if (!isEnabled()) {
@@ -165,7 +173,8 @@ async function executeWarmup(): Promise<void> {
       log.debug("warmup skip", { connectionId: conn.id, reason: "not subscription" });
       continue;
     }
-    if (conn.testStatus && TERMINAL_CONNECTION_STATUSES.has(conn.testStatus.toLowerCase())) {
+    // Warming a quota-exhausted row only records another 429, so every parked status is skipped here.
+    if (isWarmupSkippedStatus(conn.testStatus)) {
       log.debug("warmup skip", {
         connectionId: conn.id,
         reason: "terminal",

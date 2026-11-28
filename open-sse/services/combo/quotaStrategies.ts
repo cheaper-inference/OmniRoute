@@ -24,6 +24,7 @@
  * Pure leaf: this module never imports from the combo barrel.
  */
 
+import { isParkedTestStatus } from "@/shared/utils/parkedStatus";
 import {
   getRuntimeProviderProfile,
   cooldownUntilMs,
@@ -110,9 +111,7 @@ async function getQuotaAwareConnectionsForTarget(
               ? (connections as Array<Record<string, unknown>>).filter(
                   (connection) =>
                     connection.isActive !== false &&
-                    String(connection.testStatus || "")
-                      .trim()
-                      .toLowerCase() !== "banned"
+                    !isParkedTestStatus(connection.testStatus)
                 )
               : [];
             if (provider === "antigravity" || provider === "agy") {
@@ -263,10 +262,7 @@ export async function expandTargetsByQuotaAwareConnections(
           .toLowerCase();
         // Terminal or exhausted accounts do not recover merely because this
         // timer expires. ACL and pool membership were already checked above.
-        if (
-          !quotaExhausted &&
-          !["banned", "deactivated", "expired", "credits_exhausted"].includes(status)
-        ) {
+        if (!quotaExhausted && !isParkedTestStatus(status)) {
           exclusions.push({
             provider: target.provider,
             model: parseModel(target.modelStr).model || target.modelStr,

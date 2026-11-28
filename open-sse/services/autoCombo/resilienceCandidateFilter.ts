@@ -7,6 +7,7 @@
  * Pure filter kept separate from `virtualFactory.ts` for unit testing, mirroring
  * `paidModelFilter.ts` and `candidateOverrides.ts` in this directory.
  */
+import { TERMINAL_TEST_STATUSES } from "@/shared/utils/parkedStatus";
 import { isAccountUnavailable, isModelLocked } from "../accountFallback.ts";
 import { isOpencodeFreeTierSkipped } from "../opencodeFreeTierSkip.ts";
 import { recordAutoExclusion } from "./autoEvaluationTrace";
@@ -27,13 +28,6 @@ export function allowlistPermitsSyntheticNoAuth(
   if (!Array.isArray(allowedConnections) || allowedConnections.length === 0) return true;
   return allowedConnections.includes(SYNTHETIC_NOAUTH_CONNECTION_ID);
 }
-
-const TERMINAL_CONNECTION_STATUSES = new Set([
-  "banned",
-  "expired",
-  "credits_exhausted",
-  "deactivated",
-]);
 
 interface ResilienceFilterCandidate {
   provider: string;
@@ -61,7 +55,7 @@ function isConnectionResilienceBlocked(connection: ConnectionResilienceView): bo
   if (isAccountUnavailable(connection.rateLimitedUntil)) return true;
   const status = connection.testStatus;
   if (status === "unavailable") return true;
-  if (typeof status === "string" && TERMINAL_CONNECTION_STATUSES.has(status)) return true;
+  if (typeof status === "string" && TERMINAL_TEST_STATUSES.has(status)) return true;
   return false;
 }
 

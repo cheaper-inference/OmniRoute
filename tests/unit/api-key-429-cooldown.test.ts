@@ -16,7 +16,13 @@ import {
   hasEligibleKey,
   recordKeySuccess,
 } from "../../open-sse/services/apiKeyRotator.ts";
-import { recordKeyHealthStatus } from "../../open-sse/handlers/chatCore/keyHealth.ts";
+import {
+  __setKeyHealthPersistenceSink,
+  bindKeyHealthRecorder,
+  recordKeyHealthStatus,
+} from "../../open-sse/handlers/chatCore/keyHealth.ts";
+import { executeProviderRequest } from "../../open-sse/handlers/chatCore/executeProviderRequest.ts";
+import { makeRequestDeps } from "../helpers/executeProviderRequestFixture.ts";
 import { shouldKeepConnectionActiveOnRateLimit } from "../../open-sse/handlers/chatCore/rateLimitConnectionGuard.ts";
 
 const noopLog = { warn: () => {}, error: () => {} };
@@ -187,7 +193,7 @@ describe("recordKeyHealthStatus 429 handling", () => {
     const conn = "kh-429-cool";
     recordKeyHealthStatus(
       429,
-      creds(conn, { selectedKeyId: "extra_0" }),
+      creds(conn, { selectedKeyId: "extra_0", extraApiKeys: ["extra-fixture"] }),
       noopLog,
       undefined,
       "",
@@ -232,6 +238,48 @@ describe("recordKeyHealthStatus 429 handling", () => {
   });
 });
 
+it("an initial streaming 429 cools only the key selected for that dispatch", async ({ mock }) => {
+  const now = Date.parse("2026-02-01T00:00:00Z");
+  mock.timers.enable({ apis: ["Date"], now });
+  const conn = "stream-initial-429";
+  const extras = ["sk-test", "sibling-fixture"];
+  const selected = {
+    ...creds(conn, { selectedKeyId: "extra_0", extraApiKeys: extras }),
+    provider: "openai",
+  };
+  const writes: { connectionId: string; keys: string[] }[] = [];
+  __setKeyHealthPersistenceSink((connectionId, delta) => {
+    writes.push({ connectionId, keys: Object.keys(delta) });
+  });
+  try {
+    const body = JSON.stringify({ error: { message: "Rate limited" } });
+    const response = new Response(body, {
+      status: 429,
+      headers: { "content-type": "application/json", "retry-after": "7" },
+    });
+    const deps = makeRequestDeps(response, bindKeyHealthRecorder(noopLog), true);
+    deps.getExecutionCredentials = () => selected;
+    const result = await executeProviderRequest(deps);
+
+    assert.equal(result.response.status, 429);
+    assert.equal(
+      await result.response.text(),
+      body,
+      "recording must not consume the response body"
+    );
+    const health = getAllKeyHealth()[`${conn}:extra_0`];
+    assert.ok(health, "the rejected dispatch must leave a selected-key cooldown");
+    assert.equal(health.cooldownUntil, new Date(now + 7_000).toISOString());
+    assert.equal(health.status, "active", "rate limiting does not invalidate the credential");
+    assert.equal(health.failures, 0);
+    assert.deepEqual(writes, [{ connectionId: conn, keys: ["extra_0"] }]);
+    const fallback = getValidApiKey(conn, "primary-fixture", extras);
+    assert.ok(fallback && fallback.keyId !== "extra_0", "a sibling must remain selectable");
+  } finally {
+    __setKeyHealthPersistenceSink(null);
+  }
+});
+
 describe("shouldKeepConnectionActiveOnRateLimit", () => {
   it("true when extras exist and at least one key is eligible", () => {
     const conn = "rlguard-keep";
@@ -272,20 +320,11 @@ describe("chatCore wiring (source-locked)", () => {
     "utf8"
   );
 
-  it("streaming executor site records 429 into key health (not only 2xx/401/403)", () => {
-    const i = executeSrc.indexOf("recordResponseKeyHealth(res.response,");
-    assert.notEqual(i, -1, "streaming recordResponseKeyHealth call site must exist");
+  it("the shared health recorder preserves the response owner fence", () => {
     assert.match(
       executeSrc,
-      /runWithCodexResponseFence\(\s*response,\s*\(\) =>\s*recordKeyHealthStatus\(\s*response\.status,/,
+      /runWithCodexResponseFence\(\s*response,\s*\(\) =>\s*record\(\s*response\.status,/,
       "the shared health recorder must preserve the response owner fence"
-    );
-    // Only the condition head counts — comments inside the block must not satisfy this.
-    const condStart = executeSrc.lastIndexOf("if (", i);
-    const cond = executeSrc.slice(condStart, condStart + 700);
-    assert.ok(
-      cond.includes("HTTP_STATUS.RATE_LIMITED"),
-      "streaming condition head must admit 429 via HTTP_STATUS.RATE_LIMITED"
     );
   });
 

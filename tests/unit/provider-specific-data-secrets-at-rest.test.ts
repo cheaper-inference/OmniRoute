@@ -308,3 +308,32 @@ test("without STORAGE_ENCRYPTION_KEY the column stays plaintext, like api_key", 
     process.env.STORAGE_ENCRYPTION_KEY = saved;
   }
 });
+
+test("inference key-delta identity checks work against encrypted extras without plaintext writes", async () => {
+  const created = await createPool("health-delta", { extraApiKeys: [EXTRA_ONE] });
+  const { recordKeyHealthStatus, __setKeyHealthPersistenceSink } =
+    await import("../../open-sse/handlers/chatCore/keyHealth.ts");
+  const { removeConnectionHealth } = await import("../../open-sse/services/apiKeyRotator.ts");
+  __setKeyHealthPersistenceSink(null);
+  try {
+    recordKeyHealthStatus(
+      429,
+      {
+        connectionId: created.id,
+        apiKey: uniqueKey("health-delta"),
+        providerSpecificData: { ...psdOf(created), selectedKeyId: "extra_0" },
+      },
+      undefined,
+      undefined,
+      "",
+      30_000,
+      1
+    );
+    const stored = rawPsd(created.id);
+    assert.ok((stored.apiKeyHealth as Record<string, unknown>)?.extra_0);
+    assert.ok(String((stored.extraApiKeys as string[])[0]).startsWith(ENC_PREFIX));
+    assert.ok(!JSON.stringify(stored).includes(EXTRA_ONE));
+  } finally {
+    removeConnectionHealth(created.id);
+  }
+});

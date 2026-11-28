@@ -5,10 +5,19 @@ import { ERROR_TYPE_LABELS, providerText } from "../providerPageHelpers";
 // inferErrorType
 // ---------------------------------------------------------------------------
 
+const PARKED_ROW_ERROR_TYPE: Record<string, string | undefined> = {
+  deactivated: "account_deactivated",
+  expired: "expired",
+};
+
 function inferErrorType(connection: ConnectionRowConnection, isCooldown: boolean): string | null {
   if (isCooldown) return "upstream_rate_limited";
   if (connection.testStatus === "banned") return "banned";
   if (connection.testStatus === "credits_exhausted") return "credits_exhausted";
+  // The other parked verdicts carry no error type of their own, so the row would show whatever the
+  // last failure said. Name them here, the way the model-health endpoint already does.
+  const parked = PARKED_ROW_ERROR_TYPE[connection.testStatus];
+  if (parked) return parked;
   if (connection.lastErrorType) return connection.lastErrorType;
 
   const code = Number(connection.errorCode);
@@ -16,43 +25,26 @@ function inferErrorType(connection: ConnectionRowConnection, isCooldown: boolean
   if (code === 429) return "upstream_rate_limited";
   if (code >= 500) return "upstream_unavailable";
 
-  const msg = (connection.lastError || "").toLowerCase();
+  return inferTypeFromMessage((connection.lastError || "").toLowerCase());
+}
+
+/** The wording of the last failure, for rows that carry no status or code of their own. */
+function inferTypeFromMessage(msg: string): string | null {
   if (!msg) return null;
-  if (
-    msg.includes("runtime") ||
-    msg.includes("not runnable") ||
-    msg.includes("not installed") ||
-    msg.includes("healthcheck")
-  )
-    return "runtime_error";
+  if (RUNTIME_WORDING.some((needle) => msg.includes(needle))) return "runtime_error";
   if (msg.includes("refresh failed")) return "token_refresh_failed";
   if (msg.includes("token expired") || msg.includes("expired")) return "token_expired";
-  if (
-    msg.includes("invalid api key") ||
-    msg.includes("token invalid") ||
-    msg.includes("revoked") ||
-    msg.includes("access denied") ||
-    msg.includes("unauthorized")
-  )
-    return "upstream_auth_error";
-  if (
-    msg.includes("rate limit") ||
-    msg.includes("quota") ||
-    msg.includes("too many requests") ||
-    msg.includes("429")
-  )
-    return "upstream_rate_limited";
-  if (
-    msg.includes("fetch failed") ||
-    msg.includes("network") ||
-    msg.includes("timeout") ||
-    msg.includes("econn") ||
-    msg.includes("enotfound")
-  )
-    return "network_error";
+  if (AUTH_WORDING.some((needle) => msg.includes(needle))) return "upstream_auth_error";
+  if (RATE_WORDING.some((needle) => msg.includes(needle))) return "upstream_rate_limited";
+  if (NETWORK_WORDING.some((needle) => msg.includes(needle))) return "network_error";
   if (msg.includes("not supported")) return "unsupported";
   return "upstream_error";
 }
+
+const RUNTIME_WORDING = ["runtime", "not runnable", "not installed", "healthcheck"];
+const AUTH_WORDING = ["invalid api key", "token invalid", "revoked", "access denied", "unauthorized"];
+const RATE_WORDING = ["rate limit", "quota", "too many requests", "429"];
+const NETWORK_WORDING = ["fetch failed", "network", "timeout", "econn", "enotfound"];
 
 // ---------------------------------------------------------------------------
 // getStatusPresentation

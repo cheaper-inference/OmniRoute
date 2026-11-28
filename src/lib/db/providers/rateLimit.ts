@@ -7,6 +7,7 @@ import { invalidateDbCache } from "../readCache";
 import { backupDbFile } from "../backup";
 import { bumpProxyConfigGeneration } from "../settings";
 import { stripCodexChildCooldownsFromConnection } from "./codexAccountState";
+import { isParkedTestStatus } from "@/shared/utils/parkedStatus";
 import { withCodexConnectionWrite } from "../codexConnectionFences";
 
 interface StatementLike<TRow = unknown> {
@@ -98,9 +99,10 @@ export function isConnectionRateLimited(connectionId: string): boolean {
   const db = getDbInstance() as unknown as DbLike;
   const row = db
     .prepare("SELECT rate_limited_until FROM provider_connections WHERE id = ?")
-    .get(connectionId) as { rate_limited_until?: number | null } | undefined;
-  if (!row?.rate_limited_until) return false;
-  return Date.now() < row.rate_limited_until;
+    .get(connectionId) as { rate_limited_until?: number | string | null } | undefined;
+  const deadline = parseCooldownUntilMs(row?.rate_limited_until);
+  if (deadline === null) return false;
+  return Date.now() < deadline;
 }
 
 /**
@@ -152,15 +154,15 @@ export function getEffectiveQuotaUsage(
  * dashboard/AUTH path). Returns null when the value is absent or unparseable —
  * callers treat that as "no usable deadline".
  */
-function parseCooldownUntilMs(value: string | number | null | undefined): number | null {
+export function parseCooldownUntilMs(value: string | number | null | undefined): number | null {
   if (value == null || value === "") return null;
   if (typeof value === "number") return Number.isFinite(value) ? value : null;
   const raw = String(value).trim();
   if (raw === "") return null;
-  if (/^\d+$/.test(raw)) {
-    const numeric = Number(raw);
-    return Number.isFinite(numeric) ? numeric : null;
-  }
+  // The chat path stores epoch ms in a TEXT column, which SQLite renders as "1797880065844.0";
+  // Number() covers that shape as well as plain integer strings.
+  const numeric = Number(raw);
+  if (Number.isFinite(numeric)) return numeric;
   const parsed = Date.parse(raw);
   return Number.isFinite(parsed) ? parsed : null;
 }
@@ -177,7 +179,7 @@ function parseCooldownUntilMs(value: string | number | null | undefined): number
  *
  * Safe invariants:
  *  - Only connections with `rate_limited_until IS NOT NULL` are touched.
- *  - Terminal states (`banned`, `expired`, `credits_exhausted`) are skipped —
+ *  - Parked states (see `@/shared/utils/parkedStatus`) are skipped —
  *    those require a deliberate credential change or operator reset.
  *  - Past timestamps are cleared: they are already expired in the lazy
  *    expiry sense, but clearing them resets `backoffLevel` / transient error
@@ -201,10 +203,9 @@ export function clearStaleCrashCooldowns(): { cleared: number } {
   const now = new Date().toISOString();
   const nowMs = Date.now();
 
-  // Fetch all connections that have a rate_limited_until set and are NOT in
-  // a terminal state.  We do the terminal-status filter in JS to reuse the
-  // canonical `TERMINAL_STATUSES` set rather than duplicating the list in SQL.
-  const TERMINAL_STATUSES = new Set(["banned", "expired", "credits_exhausted"]);
+  // Fetch all connections that have a rate_limited_until set and are NOT parked.
+  // The filter runs in JS so it reuses the canonical predicate instead of
+  // duplicating the list in SQL.
 
   const rows = db
     .prepare(
@@ -218,7 +219,7 @@ export function clearStaleCrashCooldowns(): { cleared: number } {
 
   const toReset = rows.filter((r) => {
     const status = (r.test_status || "").trim().toLowerCase();
-    if (TERMINAL_STATUSES.has(status)) return false;
+    if (isParkedTestStatus(status)) return false;
     const untilMs = parseCooldownUntilMs(r.rate_limited_until);
     // Unparseable → clear (cannot expire lazily). Future → keep.
     return untilMs === null || untilMs <= nowMs;
