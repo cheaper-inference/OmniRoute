@@ -15,8 +15,11 @@ import assert from "node:assert/strict";
 
 // Load usage.ts up-front so module-evaluation side effects finish before fetch is stubbed.
 const { getUsageForProvider } = await import("../../open-sse/services/usage.ts");
-const { clearAntigravityVersionCaches, ANTIGRAVITY_IDE_FALLBACK_VERSION } =
-  await import("../../open-sse/services/antigravityVersion.ts");
+const {
+  clearAntigravityVersionCaches,
+  ANTIGRAVITY_IDE_FALLBACK_VERSION,
+  ANTIGRAVITY_CLI_FALLBACK_VERSION,
+} = await import("../../open-sse/services/antigravityVersion.ts");
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 
 const FEED_HOST = "antigravity-auto-updater";
@@ -152,7 +155,7 @@ test("unreachable release feed falls back to the 2.5.5 floor and still fetches u
   const quotaCalls = calls.filter((call) => call.url.includes("fetchAvailableModels"));
   assert.equal(cliFeedCalls.length, 1, "the CLI release is attempted once");
   assert.ok(quotaCalls.length >= 1, "fetchAvailableModels must still be called");
-  assertFingerprints(calls, "2.5.5", "1.3.4");
+  assertFingerprints(calls, ANTIGRAVITY_IDE_FALLBACK_VERSION, ANTIGRAVITY_CLI_FALLBACK_VERSION);
   assert.ok(result && "quotas" in result, "usage result should carry quotas");
   if (result && "quotas" in result) {
     assert.ok(result.quotas["gemini-3.8-flash-high"], "quota bucket should be parsed");
