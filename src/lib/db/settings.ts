@@ -353,6 +353,12 @@ export async function getSettings() {
     // connection on, since pinging burns a small amount of real quota (Hard Rule #20
     // spirit: never mutate/consume on the operator's behalf by default).
     codexAutoPing: { connections: {} },
+
+    // Opt-in global kill switch for quota window ping targets
+    // (src/lib/db/quotaWindowPing.ts; tables quota_ping_targets/quota_ping_runs).
+    // OFF by default: every ping consumes real quota. Targets stay stored and a
+    // manual run only records a skipped kill_switch_off row while this is false.
+    quotaWindowPing: { enabled: false },
     // Opt-in auto-apply of banked resets (Codex credits, Claude grants, Claude weekly
     // session reset). OFF and dry-run by default — never redeems on the operator's behalf
     // until enabled. Stored values are merged with these defaults by

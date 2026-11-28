@@ -9,6 +9,7 @@ import {
 } from "@omniroute/open-sse/config/providerErrorRules.ts";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
+import { refreshQuotaWindowPingFromSettings } from "./quotaWindowPingRefresh";
 import {
   normalizeCliVersionOverrides,
   setCliVersionOverrides,
@@ -34,7 +35,8 @@ export type RuntimeReloadSection =
   | "authzBypass"
   | "bannedSignals"
   | "opencodeServer"
-  | "cliVersionOverrides";
+  | "cliVersionOverrides"
+  | "quotaWindowPing";
 
 export interface RuntimeReloadChange {
   section: RuntimeReloadSection;
@@ -67,6 +69,7 @@ interface RuntimeSettingsSnapshot {
   opencodeServerUrl: string;
   providerErrorDefaults: Record<string, OperatorProviderErrorDefault> | null;
   cliVersionOverrides: CliVersionOverrides;
+  quotaWindowPing: unknown;
 }
 
 // Default bypass policy: kill-switch on, `/api/mcp/` and the read-only
@@ -100,6 +103,7 @@ const DEFAULT_RUNTIME_SETTINGS_SNAPSHOT: RuntimeSettingsSnapshot = {
   opencodeServerUrl: "",
   providerErrorDefaults: null,
   cliVersionOverrides: {},
+  quotaWindowPing: null,
 };
 
 let lastAppliedSnapshot: RuntimeSettingsSnapshot | null = null;
@@ -348,6 +352,7 @@ export function buildRuntimeSettingsSnapshot(
       typeof settings.opencode_server_url === "string" ? settings.opencode_server_url.trim() : "",
     providerErrorDefaults: normalizeOperatorProviderErrorDefaults(settings.providerErrorDefaults),
     cliVersionOverrides: normalizeCliVersionOverrides(settings.cliVersionOverrides),
+    quotaWindowPing: settings.quotaWindowPing ?? null,
   };
 }
 
@@ -698,6 +703,17 @@ export async function applyRuntimeSettings(
   ) {
     setCliVersionOverrides(currentSnapshot.cliVersionOverrides);
     markChanged("cliVersionOverrides");
+  }
+
+  // Quota window ping scheduler: arm/disarm after any settings write. The scheduler
+  // itself is lazy (kill switch off or zero enabled targets means no timer), and a
+  // failed arm only means the next settings write or the next tick retries. It is
+  // registered by instrumentation-node: importing the scheduler here (even
+  // dynamically) pulls the runner and open-sse executors into the dashboard
+  // typecheck program and regresses check:dashboard-typecheck.
+  if (force || hasChanged(currentSnapshot.quotaWindowPing, previousSnapshot.quotaWindowPing)) {
+    await refreshQuotaWindowPingFromSettings();
+    markChanged("quotaWindowPing");
   }
 
   lastAppliedSnapshot = currentSnapshot;

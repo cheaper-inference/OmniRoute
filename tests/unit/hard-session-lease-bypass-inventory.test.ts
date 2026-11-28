@@ -154,6 +154,7 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "open-sse/services/compression/eval/executorModelClient.ts": 1,
     "src/lib/compression/judgeModelClient.ts": 1,
     "src/lib/services/quotaAutoPing.ts": 1,
+    "src/lib/services/quotaWindowPingExecutor.ts": 1,
   },
   connection: {
     // The read-only auto-candidate inspector no longer re-resolves connections one by one
@@ -436,6 +437,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
     "open-sse/services/compression/eval/executorModelClient.ts": "B",
     "src/lib/compression/judgeModelClient.ts": "B",
     "src/lib/services/quotaAutoPing.ts": "B",
+    "src/lib/services/quotaWindowPingExecutor.ts": "B",
   },
   connection: Object.fromEntries(
     Object.keys(EXPECTED.connection).map((file) => [
@@ -568,6 +570,7 @@ test("managed request surfaces are fenced centrally or rejected before independe
     "src/lib/modelValidation/runner.ts",
     "src/lib/services/quotaAutoPing.ts",
     "src/lib/services/quotaAutoPingManual.ts",
+    "src/lib/services/quotaWindowPingExecutor.ts",
     "src/lib/usage/claudeResetCredits.ts",
     "src/lib/usage/codexResetCredits.ts",
     "src/lib/usage/glmResetCards.ts",

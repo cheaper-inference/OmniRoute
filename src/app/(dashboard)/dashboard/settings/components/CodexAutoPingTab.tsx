@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Card, Toggle, InfoTooltip } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import CodexWakeupsSection from "./CodexWakeupsSection";
+import QuotaWindowPingSection from "./QuotaWindowPingSection";
 
 type CodexConnection = {
   id: string;
@@ -133,7 +134,9 @@ export default function CodexAutoPingTab() {
   const { connections, enabledMap, loading, savingId, status, toggleConnection } =
     useCodexAutoPingSettings();
 
-  if (!loading && connections.length === 0) return null;
+  // Ping targets are provider-neutral: keep the section visible when no Codex
+  // OAuth account exists instead of hiding the whole tab.
+  if (!loading && connections.length === 0) return <QuotaWindowPingSection />;
 
   return (
     <Card
@@ -162,6 +165,7 @@ export default function CodexAutoPingTab() {
           <CodexWakeupsSection
             accounts={connections.map((conn) => ({ id: conn.id, label: connectionLabel(conn) }))}
           />
+          <QuotaWindowPingSection />
         </>
       )}
     </Card>

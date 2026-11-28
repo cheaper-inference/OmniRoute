@@ -251,6 +251,216 @@ Snapshots are taken **on every request** that uses > 0 cost, and used to:
 
 ---
 
+## Quota Window Pings (Subscription Windows)
+
+Some subscription providers grant quota in **first-use windows**: the window's
+`resetAt` only starts counting down after the first billed request lands inside
+it, so an idle window keeps sliding forward and the first real request pays the
+warm-up. A quota window ping is one tiny, opt-in request that starts the window
+so the next real request does not have to.
+
+Open **Settings → AI → Codex Quota Auto-Ping** to manage targets. The section
+sits after Codex Wakeups and is management-authenticated.
+
+### Eligibility
+
+A window is targetable only when the provider reports a **first-use** window
+with a **global upstream `resetAt`** that the first billed request sets. A target
+also needs:
+
+- an OAuth connection for the same provider (API-key connections are rejected),
+- a known window duration,
+- a fresh usage reading that reports the window, its `resetAt`, and its
+  remaining fraction, plus the longer window when a session gate applies (below).
+
+Per-model reset windows, sliding windows, fixed-calendar windows, token buckets,
+and windows without a global `resetAt` are **not** targetable. The targetable set
+is the fixed descriptor registry in `src/shared/constants/quotaWindowPing.ts`;
+adding a provider is a registry change, not a runtime setting.
+
+### Default-off and kill switch
+
+The feature is off at every level by default:
+
+- `settings.quotaWindowPing.enabled` defaults to `false`
+  (`src/lib/db/settings.ts`).
+- Every new target stores `enabled = 0`.
+- The scheduler is lazy: no timer and no target query until the kill switch is
+  on **and** at least one enabled target exists. It ticks every 30 seconds.
+- With the kill switch off, scheduled runs skip. **Ping now** still records a
+  `kill_switch_off` skip and sends no request. Targets remain listed and
+  editable.
+
+Turning the kill switch on or off re-evaluates the scheduler immediately, so a
+settings write arms or disarms it without a restart.
+
+### Per-target opt-in and schedules
+
+Each target is one `(connection, window)` pair. Enabling a target requires a
+schedule (except manual-only windows). Supported schedules:
+
+| Kind     | Options                                                                       |
+| -------- | ----------------------------------------------------------------------------- |
+| Daily    | `HH:mm` in an IANA timezone, one or more weekdays (0 = Sunday … 6 = Saturday) |
+| Interval | Every 5 to 10,080 minutes (7 days)                                            |
+
+A disabled target has no persisted schedule; the editor keeps the draft in the
+page until you enable and save. A manual-only target shows no schedule controls
+and uses **Ping now**.
+
+Limits: at most 100 targets, one target per connection + window, and the newest
+200 finished run rows are retained.
+
+### Provider support matrix
+
+| Provider                   | Window                | Policy                             | Notes                                                                                                                             |
+| -------------------------- | --------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Codex                      | Session (5h)          | Scheduled                          | The existing Codex auto-ping (`settings.codexAutoPing`) is unchanged; both share the per-reset dedupe key on the same connection. |
+| Codex                      | Weekly                | Scheduled                          | No longer window to guard; the same telemetry and per-reset dedupe gates apply.                                                   |
+| Claude                     | Session (5h)          | Manual by default, schedule opt-in | Requires the billable confirmation and risk acknowledgement described below.                                                      |
+| Claude                     | Weekly (7d)           | Manual by default, schedule opt-in | Same confirmation gate.                                                                                                           |
+| Claude                     | Weekly `<model>` (7d) | Excluded                           | Per-model `resetAt`, not one global window.                                                                                       |
+| Antigravity, `agy`, Google | n/a                   | Telemetry only                     | No descriptor is registered; the windows are observed but never pinged.                                                           |
+| Any other provider         | n/a                   | Telemetry only                     | Pinging requires a descriptor with a first-use window and a global upstream reset.                                                |
+
+The matrix comes from the descriptor registry. "Telemetry only" providers can
+still show quota in the dashboard; they simply have no ping target.
+
+### Claude: billable confirmation and risk
+
+A Claude ping is a real request against the Claude subscription and can spend
+remaining quota. Scheduled Claude targets therefore require an explicit checkbox
+("I understand this target sends automatic billable requests to Claude and spends
+real quota."). The API rejects an enabled Claude target without
+`claudeBillableConfirmed = true`; the UI disables the enable toggle and schedule
+editor until it is checked. A target that was enabled before the confirmation
+shows a warning and stays blocked until repaired.
+
+Scheduled Claude targets are off by default: the add form creates the target
+disabled, and enabling one requires a saved schedule plus this confirmation.
+
+> **Risk:** every ping, manual or scheduled, consumes real provider quota. Use
+> dry run first to see what would happen before sending requests.
+
+### Longer-window threshold
+
+Session windows guard the longer window first:
+
+- Codex session → weekly
+- Claude session → weekly (7d)
+
+A session ping is skipped when the longer window is exhausted
+(`longer_window_exhausted`). A target window with no remaining quota is skipped
+as `window_exhausted`. The optional **Minimum remaining on longer window
+(%)** gate (`minLongerWindowRemainingPct`, 0-100, default 0) adds a headroom
+requirement: the ping is skipped when the longer window's remaining percentage
+is **below** the value. A value equal to the threshold passes. `0` keeps only
+the exhausted check. Weekly targets have no longer window, so the threshold
+field is not shown for them.
+
+### Dry run
+
+Dry run evaluates every gate, including the usage read, but sends no request and
+writes no call-log row. It records a `skipped` run with reason `would_ping` and a
+`dry run` marker, so you can confirm the decision and reset fingerprint before
+spending quota. Dry run is available on manual-only targets too.
+
+### Skip reasons and where to see them
+
+Every evaluation writes one run row (a `running` lease row, then its final
+status). The per-target **Last decision** line and the collapsible **Recent
+decisions** list show the newest 20 runs (the API returns the newest 50). Each
+row carries the reason, status, trigger (`scheduled` or `manual`), target and
+window, reset fingerprint, dry-run marker, and a sanitized detail code.
+
+Pre-fetch skip reasons, in evaluation order:
+
+1. `target_disabled`: the target is disabled (manual **Ping now** bypasses this one)
+2. `kill_switch_off`: the global kill switch is off
+3. `account_disabled`: the connection is missing, inactive, or in a terminal state
+4. `breaker_open`: the provider circuit breaker is open
+5. `breaker_cooling`: rate-limited now or within 15 minutes of a failure
+6. `exclusive_lease`: another activity holds the connection's exclusive lease
+7. `in_flight`: this target already has a live run (same process or DB lease)
+8. `no_model`: no selectable ping model in the provider catalog
+
+Post-fetch skip reasons, in evaluation order:
+
+9. `telemetry_stale`: the usage reading is stale, message-only, or missing a required field
+10. `window_exhausted`: the target window has no remaining quota
+11. `window_active`: reset-horizon evidence proves the window already started (Codex session only)
+12. `longer_window_exhausted`: the longer window is exhausted
+13. `longer_window_below_threshold`: the longer window is below the configured threshold
+14. `already_pinged_reset`: this target (or, for Codex, the legacy auto-ping) already pinged this reset, or the last successful ping of this target was under 10 minutes ago
+
+Outcome reasons for runs that reach the provider: `completed`, `not_completed`,
+`timeout`, `error`, `auth_failed`, and `no_token`. `would_ping` is dry run only.
+A ping failure sets a 15-minute failure cooldown and surfaces as
+`breaker_cooling` on later evaluations.
+
+### Execution and labeling
+
+Pings use the normal provider executor registry, never a feature-local HTTP
+client, and run inside the connection's resolved proxy context. The request is
+the smallest body that starts a window:
+
+- **Codex:** Responses stream, input "hi", instructions "Reply with OK.",
+  reasoning effort `none`, `store: false`. Only a `response.completed` event
+  counts as success.
+- **Claude:** non-streaming message, `max_tokens: 1`, content "hi". Only a
+  complete `message` object with a string `stop_reason` counts as success.
+
+A 60-second timeout aborts the request. There is no retry, no account rotation,
+and no fallback to the default egress; the exclusive lease is re-checked
+immediately before dispatch. Credential refresh follows the legacy auto-ping
+behavior (no rotating refresh).
+
+Each executed attempt writes one call-log row with
+`request_type = quota_window_ping`, metadata only (no prompt/completion tokens,
+no cost), so quota pings are visible in request history without polluting spend
+analytics. A successful ping writes the minute-rounded reset fingerprint to the
+target and, for cross-feature dedupe, to the connection's
+`last_pinged_reset_key` (Codex and Claude). One ping per reset fingerprint,
+plus a 10-minute minimum interval after a successful ping of the same target.
+
+### Management API
+
+- `GET /api/settings/quota-window-ping` returns the kill switch, descriptors,
+  targets, and the newest 50 runs.
+- `POST /api/settings/quota-window-ping` accepts
+  `{ action: "create" | "update" | "delete" | "run", ... }`.
+- `PATCH /api/settings` with `{ "quotaWindowPing": { "enabled": true } }` toggles
+  the global kill switch.
+
+### Non-goals
+
+This feature does not implement:
+
+- true sliding windows or token buckets,
+- pings for providers without a first-use window backed by a global upstream
+  `resetAt`,
+- per-model windows (for example Claude weekly per model),
+- Antigravity or Google windows (telemetry only),
+- account rotation, multi-account selection, or fallback on failure.
+
+### Unresolved provider semantics
+
+- **Claude "window not started":** Claude telemetry does not attest whether a
+  session window is already running, so the `window_active` evidence applies to
+  Codex only (`windowActiveEvidence = "none"` for Claude). Whether a Claude ping
+  starts a window or spends quota in an already-started window is **not
+  verified** by this implementation; only the per-reset dedupe prevents a
+  repeat.
+- **Claude token refresh:** scheduled Claude pings use the same non-rotating
+  credential refresh as the legacy auto-ping, so an expired token tends to
+  surface as `telemetry_stale` rather than `auth_failed`. Forcing a rotating
+  refresh for scheduled Claude pings remains an open product decision.
+- **Legacy race:** the legacy Codex auto-ping has no DB claim, so an overlapping
+  legacy ping and a new target can both send once in the same reset. New-target
+  to new-target, and new-target after legacy, are deduped.
+
+---
+
 ## REST API
 
 ### List Usage Records
