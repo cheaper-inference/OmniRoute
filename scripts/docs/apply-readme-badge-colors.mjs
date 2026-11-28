@@ -27,16 +27,16 @@ export const KIT_COLORS = { color: "e5ac82", labelColor: "20211c" };
 // the label, so both are spelled out to keep the badge's text and logo as they were.
 const HEADER_BADGES = [
   {
-    path: "github/stars/diegosouzapw/OmniRoute",
+    paths: ["github/stars/diegosouzapw/OmniRoute", "github/stars/cheaper-inference/OmniRoute"],
     set: { style: "flat", logo: "github", logoColor: "white", label: "Stars" },
   },
-  { path: "badge/Follow_Diego_on-LinkedIn-0A66C2" },
-  { path: "github/followers/diegosouzapw" },
-  { path: "badge/Discord-5865F2" },
-  { path: "badge/Telegram-26A5E4" },
-  { path: "badge/WhatsApp_Global-25D366" },
-  { path: "badge/WhatsApp_Brasil-25D366" },
-  { path: "badge/Website-omniroute.online-blue" },
+  { paths: ["badge/Follow_Diego_on-LinkedIn-0A66C2"] },
+  { paths: ["github/followers/diegosouzapw"] },
+  { paths: ["badge/Discord-5865F2"] },
+  { paths: ["badge/Telegram-26A5E4"] },
+  { paths: ["badge/WhatsApp_Global-25D366"] },
+  { paths: ["badge/WhatsApp_Brasil-25D366"] },
+  { paths: ["badge/Website-omniroute.online-blue"] },
 ];
 
 const SHIELDS_URL = /https:\/\/img\.shields\.io\/([^?\s)"'<>]+)(\?[^\s)"'<>]*)?/g;
@@ -71,7 +71,7 @@ function mergeQuery(query, overrides) {
 /** Returns the URL in kit colors, or the same string when it is not a header badge. */
 export function recolorBadgeUrl(url) {
   const match = /^https:\/\/img\.shields\.io\/([^?]+)(\?.*)?$/.exec(url);
-  const badge = match && HEADER_BADGES.find((b) => b.path === match[1]);
+  const badge = match && HEADER_BADGES.find((b) => b.paths.includes(match[1]));
   if (!badge) return url;
   return `https://img.shields.io/${match[1]}?${mergeQuery(match[2], badge.set ?? {})}`;
 }
@@ -84,7 +84,7 @@ export function recolorMarkdown(source) {
     .split("\n")
     .map((line) => {
       const next = line.replace(SHIELDS_URL, (url, path) => {
-        if (HEADER_BADGES.some((b) => b.path === path)) found.push(path);
+        if (HEADER_BADGES.some((b) => b.paths.includes(path))) found.push(path);
         return recolorBadgeUrl(url);
       });
       if (next !== line) changedLines += 1;
@@ -112,7 +112,9 @@ function main(argv) {
   for (const file of targets) {
     const source = readFileSync(file, "utf8");
     const { text, changedLines, found } = recolorMarkdown(source);
-    const missing = HEADER_BADGES.filter((b) => !found.includes(b.path)).map((b) => b.path);
+    const missing = HEADER_BADGES.filter((b) => !b.paths.some((path) => found.includes(path))).map(
+      (b) => b.paths[0]
+    );
     if (missing.length) incomplete.push(`${relative(ROOT, file)}: ${missing.join(", ")}`);
     if (text === source) continue;
     totalLines += changedLines;

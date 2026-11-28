@@ -101,7 +101,7 @@ Provider and model totals for v3.8.55 to v3.8.59 are measured when each release 
 [![npm downloads per month](https://img.shields.io/npm/dm/omniroute?label=npm%2Fmonth&color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 [![Latest release](https://img.shields.io/github/v/release/cheaper-inference/OmniRoute?label=latest%20release&logo=github&color=20211c)](https://github.com/cheaper-inference/OmniRoute/releases/latest)
 [![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
-[![Docker pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker pulls](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcheaper-inference%2FOmniRoute%2FHEAD%2Fdocs%2Fbadges%2Fdocker-pulls.json)](https://hub.docker.com/r/cheaperinference/omniroute)
 [![Release asset downloads](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=release%20asset%20downloads&logo=github&color=47848F)](https://github.com/cheaper-inference/OmniRoute/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
@@ -775,7 +775,7 @@ Provider limits and eligibility change; check the provider before you rely on a 
 
 <p align="center">
   <a href="https://www.npmjs.com/package/omniroute"><img src="https://img.shields.io/npm/dm/omniroute?logo=npm&label=npm%20downloads" alt="npm downloads per month"/></a>
-  <a href="https://hub.docker.com/r/diegosouzapw/omniroute"><img src="https://img.shields.io/docker/pulls/diegosouzapw/omniroute?logo=docker&label=docker%20pulls" alt="Docker pulls of diegosouzapw/omniroute"/></a>
+  <a href="https://hub.docker.com/r/cheaperinference/omniroute"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fcheaper-inference%2FOmniRoute%2FHEAD%2Fdocs%2Fbadges%2Fdocker-pulls.json" alt="Docker pulls of diegosouzapw/omniroute and cheaperinference/omniroute combined"/></a>
   <a href="https://github.com/cheaper-inference/OmniRoute/releases"><img src="https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?logo=github&label=release%20asset%20downloads" alt="GitHub release asset downloads"/></a>
   <a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"><img src="https://img.shields.io/open-vsx/v/diegosouzapw/omnicopilot?label=OmniCopilot%20on%20Open%20VSX" alt="OmniCopilot version on Open VSX"/></a>
   <a href="https://github.com/zoispag/omniroute-tray/releases"><img src="https://img.shields.io/github/downloads/zoispag/omniroute-tray/total?logo=apple&label=OmniRouteTray%20downloads" alt="OmniRouteTray DMG downloads"/></a>
@@ -814,8 +814,8 @@ Provider limits and eligibility change; check the provider before you rely on a 
 | ---------------------------------- | ---------: | ---------------------------------------------------------------------------- |
 | npm downloads, last 30 days        |   371,000+ | `omniroute`, 17 October – 15 November 2026                                   |
 | npm downloads since first publish  | 1,450,000+ | `omniroute`, 14 February – 15 November 2026                                  |
-| Docker pulls, historical image     | 1,900,000+ | `diegosouzapw/omniroute`, since February 2026                                |
-| Docker pulls, organization image   |        143 | `cheaperinference/omniroute`, the official image since 16 November 2026      |
+| Docker pulls, historical image     |  2,149,902 | `diegosouzapw/omniroute`, February – 28 November 2026                        |
+| Docker pulls, organization image   |      7,092 | `cheaperinference/omniroute`, the official image, 16 – 28 November 2026      |
 | Desktop installer downloads        |   201,000+ | Release assets ending in `.exe`, `.dmg`, `.AppImage` or `.deb`, 283 releases |
 | All GitHub release asset downloads |   574,000+ | Installers plus update manifests, source archives, SBOMs and optional packs  |
 | OmniCopilot, VS Code Marketplace   |    49,000+ | Marketplace `install` statistic                                              |

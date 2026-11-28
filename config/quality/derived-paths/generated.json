@@ -25,6 +25,12 @@
       "refreshedBy": "npm run release:refresh-derived (or npm run facts)"
     },
     {
+      "id": "docker-pulls-badge",
+      "paths": ["docs/badges/docker-pulls.json"],
+      "why": "shields.io endpoint payload for the README docker pulls badge: the pull counts of diegosouzapw/omniroute (legacy, keeps the history) and cheaperinference/omniroute (organization), which Docker Hub counts separately, summed by the docker-pulls step. It stores only the formatted message, so it changes only when the displayed number does.",
+      "refreshedBy": "npm run release:refresh-derived (step docker-pulls)"
+    },
+    {
       "id": "provider-reference",
       "paths": ["docs/reference/PROVIDER_REFERENCE.md"],
       "why": "Generated from src/shared/constants/providers.ts (whole catalog + totals + version/date header): every provider PR rewrote it, 30 of 321 open PRs on 2026-11-13.",
