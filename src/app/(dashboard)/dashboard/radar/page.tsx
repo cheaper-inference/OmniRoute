@@ -395,7 +395,9 @@ export default function RadarPage() {
             <Card>
               <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 py-8 text-center">
                 <Icon name="radar" size={36} className="text-primary" />
-                <h2 className="text-xl font-semibold">{t("activateTitle")}</h2>
+                <h2 className="ci-heading" data-size="xl">
+                  {t("activateTitle")}
+                </h2>
                 <p className="max-w-2xl text-text-muted">{t("activateDescription")}</p>
 
                 <RadarAccessExplainer />
@@ -436,7 +438,7 @@ export default function RadarPage() {
                 <div className="w-full flex flex-col gap-3 text-left">
                   <p className="text-sm font-medium">{t("keySectionTitle")}</p>
                   {hasSupporterKey && !showKeyForm ? (
-                    <div className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border">
+                    <Card.Section className="flex items-center justify-between gap-3">
                       <span className="font-mono text-sm text-text-muted">
                         {supporterKeyMasked}
                       </span>
@@ -448,7 +450,7 @@ export default function RadarPage() {
                       >
                         {t("changeKeyButton")}
                       </Button>
-                    </div>
+                    </Card.Section>
                   ) : (
                     <div className="flex flex-col sm:flex-row gap-2">
                       <Input
@@ -458,7 +460,7 @@ export default function RadarPage() {
                         placeholder="omr_..."
                         aria-label={t("keySectionTitle")}
                         className="flex-1"
-                        inputClassName="font-mono"
+                        mono
                       />
                       <Button
                         onClick={handleSubmitKey}
@@ -536,7 +538,9 @@ export default function RadarPage() {
               )}
 
               <div>
-                <h3 className="text-lg font-semibold mb-3">{t("campaignsTitle")}</h3>
+                <h3 className="ci-heading mb-3" data-size="lg">
+                  {t("campaignsTitle")}
+                </h3>
                 {referrals.campaigns.length === 0 ? (
                   <Card>
                     <p className="text-text-muted text-center py-6">

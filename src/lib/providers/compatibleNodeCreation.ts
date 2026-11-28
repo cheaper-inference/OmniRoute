@@ -26,6 +26,8 @@ export function hydrateCompatibleNodeCreation(
     ...(node.chatPath ? { chatPath: node.chatPath } : {}),
     ...(node.modelsPath ? { modelsPath: node.modelsPath } : {}),
     ...(node.customHeaders ? { customHeaders: node.customHeaders } : {}),
+    // Custom JSON API nodes: the connection runs the node's template, never a client copy.
+    ...(node.customJsonConfig ? { customJson: node.customJsonConfig } : {}),
   };
   const supplied = incoming ?? {};
   const conflict =
@@ -40,8 +42,10 @@ export function hydrateCompatibleNodeCreation(
             )
         );
 
+  const data = { ...supplied, ...nodeFields };
+  delete data.customHeaderOverrideNames;
   return {
-    data: { ...supplied, ...nodeFields },
+    data,
     error: conflict
       ? `providerSpecificData.${conflict} conflicts with the resolved provider node. Use its concrete node id or matching node settings.`
       : null,

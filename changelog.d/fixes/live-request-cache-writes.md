@@ -1,0 +1,1 @@
+- **fix(dashboard):** Show reported cache-write counts in the live request log.

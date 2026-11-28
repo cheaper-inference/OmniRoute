@@ -186,29 +186,92 @@ Celoten seznam več kot 30 tabel je v `src/lib/db/migrations/`.
 
 ## Migracije
 
-OmniRoute uporablja **različicene, idempotentne migracije** v `src/lib/db/migrations/`. Vsaka migracija je ena datoteka SQL, poimenovana `NNN_description.sql`.
+OmniRoute uporablja** verzionirane, idempotentne migracije** v `src/lib/db/migrations/`. Vsaka migracija je ena datoteka SQL. Soobstajata dva formata poimenovanja; različica, zapisana v `_omniroute_migrations` je številska predpona.
 
-### Poimenovanje migracij
+### Poimenovanje selitve
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Oblika                                           | Primer                               | Uporablja se za                                                                                                                                                              |
+| ------------------------------------------------ | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (natanko 3 števke)         | `241_seen_models.sql`                | Stara serija `001`–`241`. Zamrznjeno, ko je format časovnega žiga pristal (`240` in `241` sta bila združena tik pred njim): nobena nova datoteka ne dobi zaporedne številke. |
+| `YYYYMMDDHHMMSS_description.sql` (14 števk, UTC) | `20261113120000_add_usage_index.sql` | Vsaka selitev, ustvarjena od 13.11.2026 naprej.                                                                                                                              |
 
-### Kako se izvajajo migracije
+Zakaj sprememba: pri zaporednih številkah je vzporedni PRs izbral isto naslednjo številko in vse razen enega je bilo treba pred združitvijo preštevilčiti. Časovni žig UTC daje vsakemu PR svojo različico.
+
+Pravila za obliko časovnega žiga (uveljavi `npm run check:migration-numbering`, deli z generatorjem v `scripts/check/lib/migrationNaming.mjs`):
+
+- Časovni žig je pravi datum in čas UTC, ne prej kot `20261113000000` in ne več kot 10 minut v prihodnosti.
+- Opis je mala `snake_case` ki se začne s črko (`a-z`, `0-9`, enojni `_` med besedami), največ 80 znakov.
+- Dve datoteki z enakim časovnim žigom sta dvojnika.
+- Pravilo brez vrzeli velja samo za staro vrsto: vsako število od `001` do `241` mora obstajati, razen znanih vrzeli `026`, `055` in `121`. Brisanje `241` (ali katere koli stare datoteke) ne uspe. `001` in `241` ni mogoče nikoli dodati na seznam dovoljenih `KNOWN_GAPS`. Datoteke s časovnim žigom nikoli ne ustvarijo vrzeli.
+- Vsak vnos v `src/lib/db/migrations/` mora biti navadna datoteka z veljavnim imenom `.sql` z malimi črkami. Imenik, simbolna povezava, datoteka `.SQL` ali `.sql.bak`, skrita datoteka ali ime s presledkom ne prenese vrat, ker bi jo tekač tiho preskočil ali pa se zrušil ob zagonu.
+
+**Uporabi naročilo.** Tekmovalec razvrsti po številski vrednosti predpone, ne po besedilu: najprej stare datoteke `001`–`241`, nato datoteke s časovnim žigom v vrstnem redu časovnih žigov, nato vsi imeniki z imenskim prostorom, registrirani z `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (različice, kot je `ee-001`). Čakajoča selitev je katera koli datoteka, katere različica ni v `_omniroute_migrations`, tako da selitev iz starejše veje, ki se združi za novejšo, še vedno velja za obstoječe baze podatkov.
+
+**Časovni žig je vrstni red ustvarjanja, ne vrstni red spajanja.** Če je vaša selitev odvisna od tabele ali stolpca, ustvarjenega s selitvijo z a** novejši** časovni žig (na primer enega iz drugega PR, ki se je prvi združil), bi nova zbirka podatkov najprej zagnala vašo in ne bi uspela. Medtem ko je vaš PR še vedno odprt, ponovno ustvarite ime datoteke z `npm run db:new-migration`, da bo dobila novejši časovni žig, ali pa ga naredite neodvisnega. `npm run test:migrations:fresh` uporabi vsako selitev v prazno zbirko podatkov in to ujame.
+
+### Združena selitev se nikoli ne izbriše ali preimenuje
+
+Ko je datoteka za selitev v izdajni veji ali `main`, se je že izvajala v homolognih in razvijalskih bazah podatkov, pri namestitvah VPS in v Enterprise sync. Od takrat naprej:
+
+- **Nikoli ga ne izbrišite.** Sveže namestitve bi izgubile svojo shemo, medtem ko jo nadgrajene baze podatkov ohranijo.
+- **Nikoli ga ne preimenujte.** Različica v `_omniroute_migrations` se ne bi več ujemala z datoteko, zato bi jo vsaka baza podatkov, ki jo je že uporabila, znova zagnala. Neidempotentni SQL nato podvoji podatke ali ustavi zagon.
+- **Potrebujete drugačno shemo?** Ustvarite novo selitev z `npm run db:new-migration`.
+
+Preimenovanje je varno samo za datoteko, ki še ni združena, kar je primer, na katerega se nanašajo namigi vrat. Oznaka izdaje tukaj ne spremeni ničesar: vsak pritisk na vejo `release/v*` objavi sliko Docker `:next` in deluje na homologu, namestitvah VPS in sinhronizaciji Enterprise, tako da se je združena migracija izvajala v resničnih bazah podatkov, preden obstaja katera koli oznaka `vX.Y.Z`. Vrata ne uspejo pri vsaki odstranitvi osnovne datoteke, označene ali ne.
+
+- **Razveljavitev združene selitve.** `git revert`, ki izbriše datoteko, ne uspe. Ohranite datoteko in razveljavite njeno shemo v novi selitvi: `npm run db:new-migration -- <description>`, z `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` in tako naprej. Nadgrajene in sveže baze podatkov se nato končajo z isto shemo.
+- **Eno sprejeto preimenovanje: vnos združljivosti in enaka vsebina.** Če se mora združena datoteka premakniti (na primer, dve združeni datoteki si delita časovni žig in se izvajalec ustavi s trkom različic), preimenujte poznejšo, ne da bi se dotaknili njenega SQL, in dodajte `{ fromVersion, fromName, toVersion, toName }` v `RENAMED_MIGRATION_COMPATIBILITY` v `src/lib/db/migrationRunner/constants.ts`. Baze podatkov, ki so uporabljale staro različico, se vrstica `_omniroute_migrations` premaknejo, namesto da bi znova zagnali datoteko. Vrata opozorijo na takšno preimenovanje in vedno zaženejo komutacijsko preverjanje na njem, ne glede na nov časovni žig: sveže namestitve datoteko uporabijo na njenem novem položaju, nadgrajene baze podatkov pa ne, zato izberite nov časovni žig blizu starega. Vrata ne uspejo preimenovati, če se je vsebina spremenila (sprememba sheme še vedno poteka pri novi selitvi) ali če ciljne datoteke vnosa ni na disku.
+- **Nikoli ne preimenujte znotraj istega časovnega žiga.** Preimenovanje, ki obdrži časovni žig in spremeni samo opis, ne preide v vrata, z ali brez vnosa. Z vnosom, katerega `toVersion` je enak njegovemu `fromVersion`, izvajalec izbriše staro vrstico `_omniroute_migrations` in znova uporabi datoteko v vsaki bazi podatkov, ki jo je že izvajala. Brez vnosa tekalnik sledi samo različici: preskoči datoteko v teh bazah podatkov (nova vsebina se tam nikoli ne zažene) in ob vsakem zagonu zabeleži napako pri preštevilčenju. Uporabite drug časovni žig in vnos združljivosti ali obdržite ime.
+- **Vrata preverijo, da se preimenovana datoteka ne zažene znova.** Za vsako pokrito preimenovanje vrata posredujejo novo ime datoteke komutacijskemu preverjanju z `--must-not-apply`. Preverjanje zažene nadgrajeno zbirko podatkov s pravim izvajalcem in če izvajalec ponovno uporabi to datoteko (na primer, ker ima vnos napačno različico ali ime ali ker razčlenjevalnik besedila vrat prebere `constants.ts` drugače kot TypeScript), vrata ne uspejo z `migration renomeada rodaria de novo` in vas prosijo, da preverite stare in nove različice in imena vnosa.
+
+### Kaj vrata preverjajo glede na bazo
+
+Pri izvajanju zahteve za vleko in čakalne vrste združevanja `npm run check:migration-numbering` primerja `src/lib/db/migrations/` na disku z istim imenikom v osnovni veji. Osnova je v tem vrstnem redu: `--base-latest-tag`, `--base <ref>`, spremenljivka `MIGRATION_BASE_REF` ali, kadar je `GITHUB_EVENT_NAME` `pull_request`, `pull_request_target` ali `merge_group`, prvi nadrejeni potrditev združevanja, `merge_group.base_sha` koristnega tovora dogodka ali `git merge-base HEAD origin/$GITHUB_BASE_REF`. Pri zahtevi za vlečenje ali izvajanju čakalne vrste združevanja brez razločljive baze vrata ne uspejo. Zunaj CI brez `--base` natisne `comparação com a base: pulada (sem --base)` in preskoči ta pravila.
+
+`--base-latest-tag` primerja z najnovejšo oznako izdaje (`vX.Y.Z` v vrstnem redu semver; oznake s priponami, kot je nightlies, ne štejejo), ki je v zgodovini `HEAD`, z enakimi pravili kot `--base`. Release-Green (`scripts/quality/validate-release-green.mjs`) zažene vrata na ta način, ker potisni in načrtovani zagoni nimajo osnove za zahteve po vleki in združevanje lahko pristane brez novega zagona CI. Brez oznake za sprostitev v zgodovini vrata ne uspejo; zaženite `git fetch --tags` (v CI `actions/checkout` z `fetch-depth: 0` prinese oznake).
+
+| Sprememba zahteve za vlečenje                                                                             | Rezultat                                                                                                                                                                                                                                                                                                                                           |
+| --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Datoteka, ki obstaja v bazi, se preimenuje z vnosom `RENAMED_MIGRATION_COMPATIBILITY`                     | **Opozorilo** če je vsebina enaka in se preverjanje komutacije izvaja ne glede na nov časovni žig; ne uspe, če novi položaj spremeni končno shemo (razveljavi preimenovanje ali izbere drug nov časovni žig, kjer se premika) ali če bi tekač znova uporabil preimenovano datoteko v nadgrajeni bazi podatkov.** ne uspe** če se vsebina spremeni. |
+| Datoteka, ki obstaja na bazi, se preimenuje, pri čemer se ohrani njen časovni žig (spremeni se samo opis) | **ne uspe** , z ali brez vnosa: tekač bi ga znova uporabil (z vnosom) ali preskočil po različici (brez njega). Uporabite drug časovni žig in vnos združljivosti ali obdržite ime.                                                                                                                                                                  |
+| Datoteka, ki obstaja na bazi, se izbriše ali preimenuje brez vnosa                                        | **ne uspe** , ne glede na to, ali je datoteka v oznaki izdaje ali ne. Če želite to razveljaviti, obnovite datoteko z `git checkout <base> -- src/lib/db/migrations/<file>`; če želite razveljaviti njegovo shemo, dodajte novo selitev z `DROP ... IF EXISTS`.                                                                                     |
+| Datoteka, ki obstaja v bazi, ima drugačno vsebino                                                         | **Opozorilo** (opomba `::warning` v dejanjih GitHub ) in zažene se preverjanje komutacije. Ne uspe, če urejanje spremeni končno shemo, ker nadgrajene baze podatkov urejene datoteke ne uporabijo znova: spremembo vnesite v novo selitev. Neškodljivo urejanje (komentar, `IF NOT EXISTS`) samo opozori.                                          |
+| Datoteka s časovnim žigom je dodana s časovnim žigom, ki ni novejši od najnovejšega v bazi                | Zažene preverjanje komutacije, opisano spodaj.                                                                                                                                                                                                                                                                                                     |
+| Datoteka starega formata `NNN_` je dodana s številko pod najnovejšo osnovno datoteko starega formata      | **ne uspe** , tudi če je `KNOWN_GAPS` urejen v isti zahtevi za vlečenje: stara serija je zamrznjena, ustvarite selitev z `npm run db:new-migration`. Sprejemajo se datoteke starega formata, ki so nad najnovejšo osnovno datoteko (povlečna zahteva `release/v*` v `main` ).                                                                      |
+| Neurejena, urejena ali preimenovana datoteka vsebuje stavke `INSERT`, `UPDATE`, `DELETE` ali `REPLACE`    | **Opozorilo** : preverjanje komutacije ne primerja podatkov, zato preverite, ali vrstni red, v katerem ga uporabljajo nadgrajene in sveže zbirke podatkov, spremeni rezultat.                                                                                                                                                                      |
+
+En zagon komutacijskega preverjanja zajema datoteke v okvari, urejene in preimenovane datoteke skupaj.
+
+Preverjanje komutacije (`scripts/check/migration-commutation.ts`) zgradi dve začasni bazi podatkov s pravo namestitveno potjo:** nadgrajena** ena (zagon z osnovnimi selitvami, nato znova zagon iste datoteke s selitvami zahteve za vlečenje) in** sveže** ena (en zagon s selitvami zahteve za vlečenje). Primerja dobljene sheme: tabele in stolpce (ne upošteva vrstnega reda stolpcev), omejitve UNIQUE / PRIMARY KEY in FOREIGN KEY, normalizirano besedilo `CREATE TABLE` vsake tabele (ki zajema omejitve CHECK, primerjave, ustvarjene stolpce in možnosti tabele), indekse, sprožilce in poglede. Podatki vrstic se ne primerjajo. Če se ujemajo, vrata natisnejo, da datoteka ni v redu, vendar se premika in preide. Če se razlikujejo, vrata ne uspejo z razliko in namigom za primer: za datoteko, ki ni v redu, ponovno ustvarite njeno ime z `npm run db:new-migration`, kar je varno, ker datoteka še ni združena; za urejeno osnovno datoteko obnovite osnovno vsebino in vnesite spremembo v novo selitev; za preimenovano datoteko razveljavite preimenovanje ali izberite drug nov časovni žig, kjer se premika, nikoli istega časovnega žiga z drugim imenom. Če samo preverjanje ne more začeti, vrata ne uspejo v CI in opozorijo le lokalno. Za urejeno osnovno datoteko je nadgrajena zbirka podatkov zgrajena z osnovno vsebino te datoteke, drugi zagon pa jo preskoči, ker je njena različica že zabeležena. Za preimenovano datoteko je nadgrajena zbirka podatkov zgrajena z datoteko pod njenim starim imenom, drugi zagon pa premakne njeno vrstico `_omniroute_migrations` skozi vnos združljivosti, namesto da bi jo znova zagnal; vrata posredujejo novo ime z `--must-not-apply`, tako da preverjanje ne uspe, če ga uporabi drugi zagon. Če se migracija zahteve za vleko ne uveljavi na nadgrajeni poti, to je po vsaki osnovni selitvi (ne glede na to, ali ne uspe tudi pri novi namestitvi), vrata poročajo `migration do PR não aplica` in vas prosijo, da popravite SQL glede na trenutno shemo baze; če je datoteka odvisna od druge migracije zahteve po vleku s poznejšim časovnim žigom, ponovno ustvarite njeno ime z `npm run db:new-migration`.
+
+Če želite zagnati isto primerjavo lokalno, izrecno posredujte osnovo, na primer `npm run check:migration-numbering -- --base origin/<base-branch>` ali `npm run check:migration-numbering -- --base-latest-tag` za primerjavo z najnovejšo izdajo.
+
+### Pretvorba migracije PR Open `NNN`
+
+Zahteva za vlečenje, odprta pred stikalom, lahko še vedno nosi zaporedno datoteko, kot je `242_add_widgets.sql`. Stare številke nad `241` so zavrnjene, zato jih pretvorite pred združitvijo:
+
+1. **Preimenujte datoteko z generatorjem in obdržite opis.** Zaženite `npm run db:new-migration -- <same description>`, da dobite novo ime, premaknite SQL vanj in izbrišite staro datoteko `NNN_`. Opis mora ostati enak: spodnji vnos združljivosti se ujema z njim.
+2. **Dodajte vnos združljivosti, če je trajna zbirka podatkov izvajala staro številko.** Če je katera koli baza podatkov, ki se hrani (homolog, VPS, lastna namestitev sodelavca), zagnala gradnjo PR z datoteko `NNN_`, dodajte `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` v `RENAMED_MIGRATION_COMPATIBILITY` v `src/lib/db/migrationRunner/constants.ts`. To je** potrebno za `237` v `241`** : te reže zdaj vsebujejo kanonične `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` in `241_seen_models.sql` in brez vnosa takšna zbirka podatkov za vedno preskoči kanonično selitev in znova zažene pretvorjeno. Deluje tudi za režo, ki ostane prazna, kot je `242`, ko je cilj časovni žig. Če ste v dvomih, dodajte vnos. Kje ga dodate v matriko, ni pomembno: ko ciljna reža vnosa še vedno vsebuje vrstico, ki jo drugi vnos premakne (na primer `237` drži vrstico PR medtem ko starejša vrstica `usage_history_calculated_cost` čaka, da se premakne v `237`), tekač pusti ta vnos počakati, dokler se reža ne sprosti. Samo pravi konflikt, kot je reža, ki jo drži vrstica, v kateri se noben vnos ne premakne, ali dva vnosa, ki zamenjata reži, ustavi zagon z `Cannot reconcile ...`.
+3. **Naj bo SQL idempotenten** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), ker lahko pretvorjena selitev sreča zbirko podatkov, kjer njena shema že obstaja.
+4. **Premik posebnih primerov s ključem različice.** Če je PR dodal črke za svojo staro številko v `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) ali v `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), spremenite ključ v nov časovni žig.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` je delujoč primer testa za preimenovano selitev.
+
+### Vrata v veje pred preklopom
+
+Nikoli ne izbirajte in ne prenašajte datoteke `YYYYMMDDHHMMSS_` v vejo, ki je bila pred zamenjavo (na primer starejša veja `release/v*` ). Tamkajšnji tekalnik razvrsti imena datotek kot besedilo, tako da bi se datoteka s časovnim žigom izvajala med `201_` in `202_` v novi zbirki podatkov, tamkajšnja stara vrata pa ne razumejo 14-mestnih predpon. Na takšno vejo zapišite spremembo kot lastno naslednjo datoteko `NNN_` te veje, idempotentno, tako da je brez operacije, ko različica s časovnim žigom prispe pozneje.
+
+### Kako potekajo migracije
 
 Ob zagonu `migrationRunner.ts`:
 
-1. Ustvari tabelo `_omniroute_migrations`, če še ne obstaja
-2. Pridobi že uporabljene migracije
-3. Po vrsti uporabi vse nove migracije, vsako v svoji transakciji
-4. Zabeleži vsako uporabljeno migracijo skupaj s časovnim žigom
+1. Ustvari tabelo `_omniroute_migrations`, če ne obstaja
+2. Poizvedbe za že uporabljene migracije
+3. Uporabi vse nove selitve po vrstnem redu, vsako v transakciji
+4. Beleži vsako uporabljeno selitev s časovnim žigom
 
 ```ts
-// src/lib/db/migrationRunner.ts (poenostavljeno)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -223,9 +286,9 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 }
 ```
 
-### Idempotentnost
+### Idempotenca
 
-Migracije morajo biti **idempotentne** — njihov vnovični zagon ne sme povzročiti sprememb:
+Migracije morajo biti** idempotenten** — ki jih dvakrat zažene, bi moral biti brez operacije:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,27 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Obsežno uporabljajte stavke `IF NOT EXISTS`, `IF EXISTS` in `OR IGNORE` / `OR REPLACE`.
+Izjemno uporabljajte klavzule `IF NOT EXISTS`, `IF EXISTS` in `OR IGNORE` / `OR REPLACE`.
 
 ### Dodajanje nove migracije
 
-1. **Določite naslednjo številko**: `ls src/lib/db/migrations/ | tail -1`
-2. **Ustvarite datoteko**: `NNN_my_change.sql`
-3. **Uporabite varen DDL**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Previdno dopolnite obstoječe podatke**: uporabite `UPDATE ... WHERE ...` za obravnavo obstoječih vrstic
-5. **Preizkusite na kopiji**: nepreizkušenih migracij nikoli ne izvajajte v produkciji
+1. **Ustvarite datoteko z generatorjem** : `npm run db:new-migration -- <description>` (na primer `npm run db:new-migration -- add combo priority`). Zapiše `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` s trenutnim časom UTC in glavo komentarja, premakne se za eno sekundo naprej, če je zajet ta časovni žig, in nikoli ne prepiše datoteke. Ne izbirajte številk z roko.
+2. **Uporabite varno DDL** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Previdno zapolnite podatke** : uporabite `UPDATE ... WHERE ...` za obravnavo obstoječih vrstic
+4. **Preverite vrstni red in poimenovanje** : `npm run test:migrations:fresh` (vse selitve na prazno zbirko podatkov) in `npm run check:migration-numbering`
+5. **Test na kopiji** : nikoli ne izvajajte nepreizkušenih migracij v proizvodnji
+6. **Tudi tabela, ustvarjena iz kode, potrebuje selitev** : če modul tudi leno ustvari tabelo (`CREATE TABLE IF NOT EXISTS`, ki se hrani kot pot samozdravljenja), jo mora selitev ustvariti z istim DDL. V nasprotnem primeru se čista namestitev in nadgrajena namestitev končata z različnimi shemami, odvisno od tega, ali se je ta kodna pot izvajala. `tests/unit/db/lazy-table-migration-guard.test.ts` pregleda `src/` in `open-sse/` in ne uspe na lenem `CREATE` brez selitve (#20557). Primer: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
-Primer:
+primer:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Spremembe, ki niso združljive za nazaj** (npr. odstranjevanje stolpcev), so zahtevne. OmniRoute NE podpira vrnitve na starejšo različico — ko je migracija uporabljena, je sprememba sheme trajna. Načrtujte temu primerno.
+> **Za nazaj nezdružljive spremembe** (npr. izpuščanje stolpcev) so zapleteni. OmniRoute ali NOT podpira znižanje —, ko se uporabi selitev, je sprememba sheme trajna. Ustrezno načrtujte.
 
 ---
 
@@ -403,52 +467,53 @@ To uporablja SQLite API za spletno varnostno kopiranje — izvajanje je varno tu
 
 ---
 
-## Prilagajanje zmogljivosti
+## Nastavitev zmogljivosti
 
-### Način WAL
+### način WAL
 
-WAL je privzeto omogočen. Pri delovnih obremenitvah z veliko zapisovanja upoštevajte:
+WAL je privzeto omogočen. Za velike pisalne obremenitve upoštevajte:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Kontrolna točka vsakih 1000 strani
-PRAGMA journal_size_limit = 67108864;  -- Omejitev WAL na 64 MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute ne nastavi `journal_size_limit`. Kontrolna točka premakne okvirje WAL v glavno datoteko, vendar datoteka WAL ohrani svojo največjo dodeljeno velikost. Varovalo `OMNIROUTE_WAL_GUARD_MAX_MB` samo opozori in zažene `wal_checkpoint(RESTART)`; ni omejitev velikosti diska.
 
 ### Indeksi
 
-Ključni indeksi za zmogljivost (samodejno ustvarjeni z migracijami):
+Ključni indeksi za uspešnost (samodejno ustvarjeni s selitvami):
 
-- `idx_models_provider` — iskanje modelov po ponudniku
-- `idx_combo_targets_combo_id` — razširjanje ciljev kombinacije
+- Iskanje modelov `idx_models_provider` — po ponudniku
+- `idx_combo_targets_combo_id` — kombinirana ciljna razširitev
 - `idx_usage_history_api_key_timestamp` — analitika uporabe
-- `idx_quota_snapshots_api_key_window` — spremljanje kvot
-- `idx_call_logs_timestamp` — poizvedbe po dnevniku klicev
+- `idx_quota_snapshots_api_key_window` — sledenje kvotam
+- `idx_call_logs_timestamp` — poizvedbe dnevnika klicev
 
-Če želite dodati nov indeks, ustvarite migracijo:
+Če želite dodati nov indeks, ustvarite selitev:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### V/I s preslikavo v pomnilnik
+### Memory-Mapped I/O
 
-Za zelo velike podatkovne zbirke (>10 GB) lahko preslikavo v pomnilnik prilagodite prek pragme SQLite:
+Za zelo velike zbirke podatkov (> 10 GB) je mogoče preslikavo pomnilnika prilagoditi prek pragme SQLite :
 
 ```sql
--- Nastavite prek pragme SQLite (prilagodite v core.ts ali med izvajanjem)
-PRAGMA mmap_size = 268435456;  -- 256 MB
+-- Set via SQLite pragma (adjust in core.ts or runtime)
+PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Zgoščevanje
+### Zbijanje
 
-Dolgotrajno delujočim primerkom OmniRoute koristi občasna izvedba ukaza `VACUUM`:
+Dolgo delujočim primerkom OmniRoute koristi občasni `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Zaženite ga enkrat mesečno v obdobjih nizkega prometa. (Način WAL zmanjša potrebo po tem, vendar je ne odpravi.)
+Zaženite mesečno med okni z nizkim prometom. (način WAL zmanjša potrebo, vendar je ne odpravi.)
 
 ---
 

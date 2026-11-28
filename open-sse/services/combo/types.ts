@@ -81,10 +81,12 @@ export type HandleSingleModel = (
  * `true` means the target may be dispatched.
  * `false` is the generic availability bucket (credentials, key policy, hidden).
  * `"model_not_in_catalog"` is the live-catalog miss, recorded separately.
+ * `"agent_guard_refused"` is a request-scoped agent guard refusal, not a provider failure.
  */
 export type ModelAvailabilityResult =
   | boolean
   | "model_not_in_catalog"
+  | "agent_guard_refused"
   | { available: false; reason: "connection_cooldown"; retryAfterMs: number };
 
 export type IsModelAvailable = (
@@ -128,6 +130,8 @@ export type ComboNestingContext = {
 export type HiddenModelsByProvider = ReadonlyMap<string, ReadonlySet<string>>;
 
 export type HandleComboChatOptions = {
+  /** Dispatch surface; filter incompatible candidates before scoring or credential selection. */
+  endpointCapability?: import("../../config/comboEndpoints.ts").ComboEndpoint;
   /** #10681: optional opaque parent invocation id for the decision trace. */
   invocationId?: string;
   body: Record<string, unknown>;

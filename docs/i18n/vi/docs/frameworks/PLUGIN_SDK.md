@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## Tham chiếu API
+## tham khảo API
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Hàm factory tạo một đối tượng Plugin với các giá trị mặc định.
+Hàm xuất xưởng tạo đối tượng Plugin có giá trị mặc định.
 
-**Tham số:**
+**Thông số:**
 
-- `name` (string, bắt buộc) — Tên plugin ở định dạng kebab-case
-- `priority` (number, tùy chọn, mặc định: 100) — Giá trị thấp hơn sẽ chạy trước
-- `enabled` (boolean, tùy chọn, mặc định: true) — Có bật khi khởi động không?
-- `onRequest` (function, tùy chọn) — Chạy trước trình xử lý chat
-- `onResponse` (function, tùy chọn) — Chạy sau trình xử lý chat
-- `onError` (function, tùy chọn) — Chạy khi trình xử lý gặp lỗi
+- `name` (chuỗi, bắt buộc) Tên plugin — trong trường hợp kebab
+- `priority` (số, tùy chọn, mặc định: 100) — Hạ chạy trước
+- `enabled` (boolean, tùy chọn, mặc định: true) — Đã bật tính năng Bắt đầu chưa?
+- `onRequest` (chức năng, tùy chọn) — Chạy trước trình xử lý trò chuyện
+- `onResponse` (chức năng, tùy chọn) — Chạy sau trình xử lý trò chuyện
+- `onError` (chức năng, tùy chọn) — Chạy do lỗi xử lý
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Chặn yêu cầu và tùy chọn trả về một phản hồi tùy chỉnh.
+Chặn yêu cầu và tùy ý trả về phản hồi tùy chỉnh.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Sửa đổi phần thân yêu cầu trước khi yêu cầu được chuyển đến nhà cung cấp.
+Sửa đổi nội dung yêu cầu trước khi nó đến nhà cung cấp.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Ngữ cảnh plugin (`PluginContext`)
+## Bối cảnh plugin (`PluginContext`)
 
-| Trường      | Kiểu                      | Mô tả                         |
-| ----------- | ------------------------- | ----------------------------- |
-| `requestId` | `string`                  | Mã định danh yêu cầu duy nhất |
-| `model`     | `string`                  | Tên mô hình được yêu cầu      |
-| `provider`  | `string`                  | ID nhà cung cấp đích          |
-| `body`      | `Record<string, unknown>` | Phần thân yêu cầu             |
-| `headers`   | `Record<string, string>`  | Các tiêu đề yêu cầu           |
-| `metadata`  | `Record<string, unknown>` | Siêu dữ liệu có thể thay đổi  |
-| `timestamp` | `number`                  | Dấu thời gian của yêu cầu     |
+| Cánh đồng    | Kiểu                      | Sự miêu tả                          |
+| ------------ | ------------------------- | ----------------------------------- |
+| `requestId`  | `string`                  | Mã định danh yêu cầu duy nhất       |
+| `model`      | `string`                  | Tên mẫu được yêu cầu                |
+| `provider`   | `string`                  | Nhà cung cấp mục tiêu ID            |
+| `body`       | `Record<string, unknown>` | Nội dung yêu cầu                    |
+| `headers`    | `Record<string, string>`  | Tiêu đề yêu cầu (xem ghi chú)       |
+| `metadata`   | `Record<string, unknown>` | Siêu dữ liệu có thể thay đổi        |
+| `timestamp`  | `number`                  | Yêu cầu dấu thời gian               |
+| `apiKeyInfo` | `object` (tùy chọn)       | Siêu dữ liệu khóa API (xem ghi chú) |
+
+Ngữ cảnh không bao giờ mang thông tin xác thực của khách hàng: các tiêu đề `authorization`, `x-api-key`, `proxy-authorization` và `cookie` bị xóa (bất kỳ cách viết hoa nào) và `apiKeyInfo` giữ siêu dữ liệu của khóa (chẳng hạn như `id`, `name` và `scopes`) nhưng không giữ giá trị khóa hoặc dấu vân tay của nó (`redactPluginContext()` trong `src/lib/plugins/hooks.ts`). Điều này áp dụng cho `onRequest`, `onResponse` và `onError`.
 
 ## Manifest (`plugin.json`)
 
@@ -138,19 +141,18 @@ Hoặc dưới dạng các giá trị boolean đơn giản (độ ưu tiên mặ
 }
 ```
 
-## Hệ thống quyền
+## Hệ thống cấp phép
 
-Các plugin chạy trong ngữ cảnh máy ảo được cô lập. Việc truy cập tài nguyên bên ngoài yêu cầu các quyền rõ ràng:
+Plugin là** không có hộp cát** . Mỗi plugin hoạt động chạy như một quy trình con Node.js thông thường, riêng biệt (`loadPlugin()` trong `src/lib/plugins/loader.ts`) dưới cùng một người dùng hệ điều hành như OmniRoute, không có ngữ cảnh VM và không có cờ cấp phép Node.js. Mã plugin có thể sử dụng `node:fs`, `node:child_process`, `fetch` và mọi Node.js API khác : nó có thể đọc và ghi bất kỳ tệp nào mà người dùng OmniRoute có thể (bao gồm cả thư mục dữ liệu), chạy chương trình và truy cập mạng.
 
-| Quyền        | Cấp quyền                                                    |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Proxy `process.env` chỉ đọc                                  |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+`requires.permissions` của tệp kê khai chấp nhận `network`, `file-read`, `file-write`, `env` và `exec`, nhưng hôm nay chỉ `env` có hiệu lực trong thời gian chạy:
 
-Nếu không có quyền, các biến toàn cục tương ứng đơn giản là không khả dụng trong sandbox.
+| Sự cho phép                                  | Có hiệu lực ngay hôm nay                                                                                                                                                                                                                    |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Quá trình plugin cũng nhận được `PORT`, `HOSTNAME`, `TZ` và `TMPDIR`. Không có nó, nó chỉ nhận được `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` và `PLUGIN_NAME` (cộng với `SystemRoot` và `windir` trên Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Không có. Chúng chỉ là những lời khai báo: không có gì bị chặn khi chúng bị thiếu.                                                                                                                                                          |
+
+Cài đặt plugin cũng giống như cài đặt bất kỳ chương trình nào khác trên máy chủ. Chỉ cài đặt các plugin có nguồn mà bạn tin cậy.
 
 ## Lược đồ cấu hình
 
@@ -194,7 +196,7 @@ Các giá trị cấu hình được lưu trữ trong cơ sở dữ liệu và c
 
 ## Ví dụ
 
-### Trình ghi nhật ký yêu cầu
+### Trình ghi yêu cầu
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Trình giới hạn tốc độ
+### Giới hạn tỷ lệ
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 phút
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -228,16 +230,13 @@ export default definePlugin({
     requests.set(key, timestamps);
 
     if (timestamps.length > maxRequests) {
-      return blockRequest({
-        error: "Đã vượt quá giới hạn tốc độ",
-        status: 429,
-      });
+      return blockRequest({ error: "Rate limit exceeded", status: 429 });
     }
   },
 });
 ```
 
-### Trình chuyển đổi phản hồi
+### Máy biến áp đáp ứng
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

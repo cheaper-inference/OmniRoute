@@ -1,5 +1,6 @@
 "use client";
 
+import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
 import Textarea from "@/shared/components/Textarea";
 import Button from "@/shared/components/Button";
@@ -118,7 +119,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
       {/* Existing tools */}
       {tools.length > 0 && (
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium text-text-muted uppercase tracking-wider">
+          <span className="ci-eyebrow" data-weight="medium">
             {t("toolsCount", { count: tools.length })}
           </span>
           {tools.map((tool, idx) => {
@@ -133,7 +134,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
                     <Icon name="function" size={14} className="text-text-muted" />
                     <code className="text-xs font-mono text-text-main">{tool.function.name}</code>
                     {tool.function.description && (
-                      <span className="text-[11px] text-text-muted truncate max-w-[200px]">
+                      <span className="text-xs text-text-muted truncate max-w-[200px]">
                         — {tool.function.description}
                       </span>
                     )}
@@ -144,16 +145,15 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
                         variant="ghost"
                         size="icon-sm"
                         onClick={() => startEdit(idx)}
-                        className="text-text-muted"
+                        tone="muted"
                         aria-label={t("editTool", { name: tool.function.name })}
                         icon="edit"
                       />
                     )}
                     <Button
-                      variant="ghost"
+                      variant="destructive-ghost"
                       size="icon-sm"
                       onClick={() => remove(idx)}
-                      className="text-text-muted hover:text-error"
                       aria-label={t("removeTool", { name: tool.function.name })}
                       icon="delete"
                     />
@@ -169,7 +169,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
                       onChange={(e) => setEditDraft({ ...editDraft, name: e.target.value })}
                       placeholder={t("toolNamePlaceholder")}
                       aria-label={t("toolNamePlaceholder")}
-                      inputClassName="text-xs"
+                      size="xs"
                     />
                     <Input
                       type="text"
@@ -177,7 +177,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
                       onChange={(e) => setEditDraft({ ...editDraft, description: e.target.value })}
                       placeholder={t("toolDescPlaceholder")}
                       aria-label={t("toolDescPlaceholder")}
-                      inputClassName="text-xs"
+                      size="xs"
                     />
                     <Textarea
                       value={editDraft.parametersRaw}
@@ -186,7 +186,8 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
                       }
                       rows={6}
                       aria-label={t("toolParamsJsonSchema")}
-                      className="text-xs font-mono resize-y"
+                      mono
+                      className="resize-y"
                     />
                     {toolError && <p className="text-xs text-error">{toolError}</p>}
                     <div className="flex items-center gap-2">
@@ -206,8 +207,8 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
       )}
 
       {/* Add tool form */}
-      <div className="border border-border rounded-lg p-3 flex flex-col gap-2 bg-surface">
-        <span className="text-xs font-medium text-text-muted uppercase tracking-wider">
+      <Card.Section className="flex flex-col gap-2">
+        <span className="ci-eyebrow" data-weight="medium">
           {t("addTool")}
         </span>
 
@@ -217,7 +218,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           placeholder={t("toolNameRequiredPlaceholder")}
           aria-label={t("toolNameRequiredPlaceholder")}
-          inputClassName="text-xs"
+          size="xs"
         />
 
         <Input
@@ -226,11 +227,11 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
           onChange={(e) => setForm({ ...form, description: e.target.value })}
           placeholder={t("toolDescPlaceholder")}
           aria-label={t("toolDescPlaceholder")}
-          inputClassName="text-xs"
+          size="xs"
         />
 
         <div className="flex flex-col gap-1">
-          <span className="text-[10px] text-text-muted uppercase tracking-wider" aria-hidden="true">
+          <span className="ci-eyebrow" data-size="3xs" aria-hidden="true">
             {t("toolParamsLabel")}
           </span>
           <Textarea
@@ -238,7 +239,8 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
             onChange={(e) => setForm({ ...form, parametersRaw: e.target.value })}
             rows={6}
             aria-label={t("toolParamsJsonSchema")}
-            className="text-xs font-mono resize-y"
+            mono
+            className="resize-y"
           />
         </div>
 
@@ -247,7 +249,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
         <Button size="sm" icon="add" onClick={handleAdd} className="self-start">
           {t("addTool")}
         </Button>
-      </div>
+      </Card.Section>
     </div>
   );
 }

@@ -53,9 +53,8 @@ OmniRoute has three distinct but related resilience mechanisms. Each has a diffe
 | ------- | ----------- | ----------- | ------------- |
 | OAuth   | 5 failures  | 8 failures  | 60s           |
 | API-key | 7 failures  | 12 failures | 30s           |
-| Local   | derived     | 2 failures  | 15s           |
 
-`degradationThreshold` controls when a provider enters `DEGRADED`; `failureThreshold` controls when it opens and is skipped. Local provider profiles are not exposed on the Resilience settings page yet.
+`degradationThreshold` controls when a provider enters `DEGRADED`; `failureThreshold` controls when it opens and is skipped. `PROVIDER_PROFILES.local` (2 failures / 15s) is defined in `open-sse/config/constants.ts` but **not wired yet**: `getProviderCategory()` returns only `oauth` or `apikey`, so local providers use the OAuth or API-key profile.
 
 **Trip codes:** only provider-level statuses `[408, 500, 502, 503, 504]`. Do NOT trip for account-level errors (most 401/403/429 — those belong to cooldown or lockout).
 
@@ -1018,11 +1017,31 @@ rate limit is the same signal as an exhausted quota. Honest limits:
 
 ## Other Resilience Features
 
-- **20 routing strategies** (priority, weighted, round-robin, context-relay, fill-first, p2c, random, least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted, strict-random, auto, lkgp, context-optimized, cache-optimized, fusion, pipeline) — see [AUTO-COMBO.md](../routing/AUTO-COMBO.md).
+- **22 routing strategies** (priority, weighted, round-robin, context-relay, fill-first, p2c, random, least-used, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted, strict-random, auto, lkgp, context-optimized, cache-optimized, fusion, pipeline, jev) — see [AUTO-COMBO.md](../routing/AUTO-COMBO.md).
 - **Reset-aware routing** (v3.8.0) — prioritizes connections by quota reset time.
 - **Background mode degradation** — Responses API `background: true` degraded to sync with warning.
 - **Dynamic tool limit detection** — backs off providers when tool count limits hit.
 - **Emergency fallback** — controlled by `OMNIROUTE_EMERGENCY_FALLBACK`; operators can override it from the Feature Flags page without a restart.
+
+---
+
+## When OmniRoute itself is unreachable
+
+The provider circuit breaker, connection cooldown, and model lockout all run inside the
+gateway. If the client cannot reach the gateway, it gets a connection error. OmniRoute cannot
+intercept that failure. The client decides whether to retry and what message to show.
+
+OmniRoute currently provides no client-side fallback and defines no policy for it. Configure
+any alternate route in the client or in front of the gateway.
+
+- `GET /api/health` checks liveness without authentication.
+- `GET /api/health/ping` checks readiness, including whether the database responds.
+- `GET /api/monitoring/health` gives authenticated callers a deeper health overview.
+- `omniroute launch <tool>` probes `/api/monitoring/health` before starting the client. It can
+  start a local gateway automatically. With `--no-start`, an unreachable gateway results in
+  `GatewayUnreachable` and exit code `69`.
+
+To disconnect a client from OmniRoute, follow [Revert client configuration](../guides/UNINSTALL.md#revert-client-configuration).
 
 ---
 
@@ -1085,10 +1104,16 @@ breaker runs on `circuitBreakerThreshold` / `circuitBreakerReset`:
 | ------- | ----------: | -----------------------------------: | ----------------------------: |
 | OAuth   |         `5` |                                  `8` |                         `60s` |
 | API key |         `7` |                                 `12` |                         `30s` |
-| Local   |   (derived) |                                  `2` |                         `15s` |
+
+A `local` profile (`2` failures / `15s`) also exists in `PROVIDER_PROFILES`, but it is not
+wired into the breaker: `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) only
+accepts `oauth` or `apikey`, and `getProviderCategory()`
+(`open-sse/config/providerRegistry.ts`) returns one of those two (unregistered providers get
+`apikey`).
 
 `PROVIDER_PROFILES` also defines `providerFailureThreshold` (10/15/2),
-`providerFailureWindowMs` (15/30/5 min) and `providerCooldownMs` (5/10/1 min): these power the
+`providerFailureWindowMs` (15/30/5 min) and `providerCooldownMs` (5/10/1 min) — OAuth/API
+key/local, where the local values are inert for the same reason as above: these power the
 **window gate of the opt-in global Provider Cooldown** (`PROVIDER_COOLDOWN_ENABLED`, default
 off) — a provider-level entry in `open-sse/services/providerCooldownTracker.ts` only counts as
 cooling after `providerFailureThreshold` failures inside `providerFailureWindowMs`, and then

@@ -1,7 +1,8 @@
 "use client";
 
-import { type ReactNode, useCallback, useEffect, useState } from "react";
-import { Button, Card, Select } from "@/shared/components";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { ScopeChip } from "@omniroute/ui-kit/scope-chip";
+import { Button, Card, Input, NumberInput, Select, whenNumber } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { useNotificationStore } from "@/store/notificationStore";
@@ -9,7 +10,7 @@ import { useTranslations } from "next-intl";
 import AutoDisableCard from "./AutoDisableCard";
 import ModelLockoutCard from "./ModelLockoutCard";
 import TokenRefreshBreakerCard, { type TokenRefreshBreakerValue } from "./TokenRefreshBreakerCard";
-import { NumberField, BooleanField } from "./ResilienceFields";
+import { BooleanField } from "./ResilienceFields";
 import { throwIfResilienceSaveFailed } from "./resilienceSaveError";
 import PreferredAccountFailoverCard from "./PreferredAccountFailoverCard";
 import type { PreferredAccountFailoverSettings } from "@/lib/resilience/settings/types";
@@ -149,13 +150,15 @@ function ProfileColumn({
   children: ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-border bg-bg-subtle p-4">
+    <Card.Section>
       <div className="mb-4 flex items-center gap-2">
         <Icon name={icon} size={16} className="text-primary" />
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-text-main">{title}</h3>
+        <h3 className="ci-eyebrow" data-weight="medium">
+          {title}
+        </h3>
       </div>
       <div className="space-y-3">{children}</div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -218,7 +221,9 @@ function RequestQueueCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="speed" size={20} className="text-primary" />
-            <h2 className="text-lg font-semibold">{t("resilienceRequestQueueTitle")}</h2>
+            <h2 className="ci-heading" data-size="lg">
+              {t("resilienceRequestQueueTitle")}
+            </h2>
           </div>
           <SectionDescription
             scope={t("resilienceRequestQueueScope")}
@@ -254,103 +259,108 @@ function RequestQueueCard({
                 setDraft((prev) => ({ ...prev, autoEnableApiKeyProviders }))
               }
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceRequestsPerMinute")}
               value={draft.requestsPerMinute}
               min={1}
-              onChange={(requestsPerMinute) => setDraft((prev) => ({ ...prev, requestsPerMinute }))}
+              onValueChange={whenNumber((requestsPerMinute) =>
+                setDraft((prev) => ({ ...prev, requestsPerMinute }))
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceMinTimeBetweenRequests")}
               value={draft.minTimeBetweenRequestsMs}
+              min={0}
               suffix="ms"
-              onChange={(minTimeBetweenRequestsMs) =>
+              onValueChange={whenNumber((minTimeBetweenRequestsMs) =>
                 setDraft((prev) => ({ ...prev, minTimeBetweenRequestsMs }))
-              }
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceConnectionScopeConcurrentRequests")}
               value={draft.concurrentRequests}
               min={1}
-              onChange={(concurrentRequests) =>
+              onValueChange={whenNumber((concurrentRequests) =>
                 setDraft((prev) => ({ ...prev, concurrentRequests }))
-              }
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceGlobalConcurrentRequests")}
               value={draft.globalConcurrentRequests}
               min={0}
-              onChange={(globalConcurrentRequests) =>
+              onValueChange={whenNumber((globalConcurrentRequests) =>
                 setDraft((prev) => ({ ...prev, globalConcurrentRequests }))
-              }
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceMaxQueueWait")}
               value={draft.maxWaitMs}
               min={1}
               suffix="ms"
-              onChange={(maxWaitMs) => setDraft((prev) => ({ ...prev, maxWaitMs }))}
+              onValueChange={whenNumber((maxWaitMs) =>
+                setDraft((prev) => ({ ...prev, maxWaitMs }))
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceMaxExecutionWait")}
               value={draft.executionMaxWaitMs}
               min={1}
               suffix="ms"
-              onChange={(executionMaxWaitMs) =>
+              onValueChange={whenNumber((executionMaxWaitMs) =>
                 setDraft((prev) => ({ ...prev, executionMaxWaitMs }))
-              }
+              )}
             />
           </>
         ) : (
           <>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            <Card.Section>
               <div className="text-xs text-text-muted">
                 {t("resilienceAutoEnableApiKeyProviders")}
               </div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.autoEnableApiKeyProviders ? t("statusEnabled") : t("statusDisabled")}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceRequestsPerMinute")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.requestsPerMinute}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceMinTimeBetweenRequests")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.minTimeBetweenRequestsMs)}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">
                 {t("resilienceConnectionScopeConcurrentRequests")}
               </div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.concurrentRequests}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">
                 {t("resilienceGlobalConcurrentRequests")}
               </div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.globalConcurrentRequests || t("statusDisabled")}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceMaxQueueWait")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.maxWaitMs)}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceMaxExecutionWait")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.executionMaxWaitMs)}
               </div>
-            </div>
+            </Card.Section>
           </>
         )}
       </div>
@@ -383,14 +393,14 @@ function ConnectionCooldownCard({
       <ProfileColumn title={title} icon={icon}>
         {editing ? (
           <>
-            <NumberField
+            <NumberInput
               label={t("resilienceBaseCooldown")}
               value={current.baseCooldownMs}
               min={0}
               suffix="ms"
-              onChange={(baseCooldownMs) =>
+              onValueChange={whenNumber((baseCooldownMs) =>
                 setDraft((prev) => ({ ...prev, [key]: { ...prev[key], baseCooldownMs } }))
-              }
+              )}
             />
             <BooleanField
               label={t("resilienceUseUpstreamRetryHints")}
@@ -437,13 +447,13 @@ function ConnectionCooldownCard({
                 { value: "off", label: t("resilienceAlwaysOff") },
               ]}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceMaxBackoffSteps")}
               value={current.maxBackoffSteps}
               min={0}
-              onChange={(maxBackoffSteps) =>
+              onValueChange={whenNumber((maxBackoffSteps) =>
                 setDraft((prev) => ({ ...prev, [key]: { ...prev[key], maxBackoffSteps } }))
-              }
+              )}
             />
           </>
         ) : (
@@ -486,7 +496,9 @@ function ConnectionCooldownCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="timer_off" size={20} className="text-primary" />
-            <h2 className="text-lg font-semibold">{t("resilienceConnectionCooldownTitle")}</h2>
+            <h2 className="ci-heading" data-size="lg">
+              {t("resilienceConnectionCooldownTitle")}
+            </h2>
           </div>
           <SectionDescription
             scope={t("resilienceConnectionCooldownScope")}
@@ -563,30 +575,30 @@ function ProviderBreakerCard({
       <ProfileColumn title={title} icon={icon}>
         {editing ? (
           <>
-            <NumberField
+            <NumberInput
               label={t("resilienceFailureThreshold")}
               value={current.failureThreshold}
               min={1}
-              onChange={(failureThreshold) =>
+              onValueChange={whenNumber((failureThreshold) =>
                 setDraft((prev) => ({ ...prev, [key]: { ...prev[key], failureThreshold } }))
-              }
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceDegradationThreshold")}
               value={current.degradationThreshold}
               min={1}
-              onChange={(degradationThreshold) =>
+              onValueChange={whenNumber((degradationThreshold) =>
                 setDraft((prev) => ({ ...prev, [key]: { ...prev[key], degradationThreshold } }))
-              }
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceResetTime")}
               value={current.resetTimeoutMs}
               min={1000}
               suffix="ms"
-              onChange={(resetTimeoutMs) =>
+              onValueChange={whenNumber((resetTimeoutMs) =>
                 setDraft((prev) => ({ ...prev, [key]: { ...prev[key], resetTimeoutMs } }))
-              }
+              )}
             />
           </>
         ) : (
@@ -615,7 +627,9 @@ function ProviderBreakerCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="electrical_services" size={20} className="text-primary" />
-            <h2 className="text-lg font-semibold">{t("resilienceProviderBreakerTitle")}</h2>
+            <h2 className="ci-heading" data-size="lg">
+              {t("resilienceProviderBreakerTitle")}
+            </h2>
           </div>
           <SectionDescription
             scope={t("resilienceProviderBreakerScope")}
@@ -673,7 +687,9 @@ function WaitForCooldownCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="hourglass_top" size={20} className="text-primary" />
-            <h2 className="text-lg font-semibold">{t("resilienceWaitForCooldownTitle")}</h2>
+            <h2 className="ci-heading" data-size="lg">
+              {t("resilienceWaitForCooldownTitle")}
+            </h2>
           </div>
           <SectionDescription
             scope={t("resilienceWaitForCooldownScope")}
@@ -707,38 +723,42 @@ function WaitForCooldownCard({
               checked={draft.enabled}
               onChange={(enabled) => setDraft((prev) => ({ ...prev, enabled }))}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceMaxAttempts")}
               value={draft.maxRetries}
               min={0}
-              onChange={(maxRetries) => setDraft((prev) => ({ ...prev, maxRetries }))}
+              onValueChange={whenNumber((maxRetries) =>
+                setDraft((prev) => ({ ...prev, maxRetries }))
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceMaxWaitPerAttempt")}
               value={draft.maxRetryWaitSec}
               min={0}
               suffix="sec"
-              onChange={(maxRetryWaitSec) => setDraft((prev) => ({ ...prev, maxRetryWaitSec }))}
+              onValueChange={whenNumber((maxRetryWaitSec) =>
+                setDraft((prev) => ({ ...prev, maxRetryWaitSec }))
+              )}
             />
           </>
         ) : (
           <>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceEnableServerWait")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.enabled ? t("statusEnabled") : t("statusDisabled")}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceMaxAttempts")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">{value.maxRetries}</div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceMaxWaitPerAttempt")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.maxRetryWaitSec}s
               </div>
-            </div>
+            </Card.Section>
           </>
         )}
       </div>
@@ -775,7 +795,9 @@ function ComboCooldownWaitCard({
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
           <Icon name="timer" size={20} className="text-primary" />
-          <h2 className="text-lg font-semibold">{title}</h2>
+          <h2 className="ci-heading" data-size="lg">
+            {title}
+          </h2>
         </div>
         <ActionRow
           editing={editing}
@@ -806,51 +828,55 @@ function ComboCooldownWaitCard({
               checked={draft.enabled}
               onChange={(enabled) => setDraft((prev) => ({ ...prev, enabled }))}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceComboCooldownMaxWaitMs")}
               value={draft.maxWaitMs}
               min={0}
               suffix="ms"
-              onChange={(maxWaitMs) => setDraft((prev) => ({ ...prev, maxWaitMs }))}
+              onValueChange={whenNumber((maxWaitMs) =>
+                setDraft((prev) => ({ ...prev, maxWaitMs }))
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceMaxAttempts")}
               value={draft.maxAttempts}
               min={0}
-              onChange={(maxAttempts) => setDraft((prev) => ({ ...prev, maxAttempts }))}
+              onValueChange={whenNumber((maxAttempts) =>
+                setDraft((prev) => ({ ...prev, maxAttempts }))
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceComboCooldownBudgetMs")}
               value={draft.budgetMs}
               min={0}
               suffix="ms"
-              onChange={(budgetMs) => setDraft((prev) => ({ ...prev, budgetMs }))}
+              onValueChange={whenNumber((budgetMs) => setDraft((prev) => ({ ...prev, budgetMs })))}
             />
           </>
         ) : (
           <>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceEnableServerWait")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.enabled ? t("statusEnabled") : t("statusDisabled")}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceComboCooldownMaxWaitMs")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.maxWaitMs)}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceMaxAttempts")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">{value.maxAttempts}</div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceComboCooldownBudgetMs")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.budgetMs)}
               </div>
-            </div>
+            </Card.Section>
           </>
         )}
       </div>
@@ -887,7 +913,9 @@ function QuotaShareConcurrencyLimitCard({
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
           <Icon name="filter_list" size={20} className="text-primary" />
-          <h2 className="text-lg font-semibold">{title}</h2>
+          <h2 className="ci-heading" data-size="lg">
+            {title}
+          </h2>
         </div>
         <ActionRow
           editing={editing}
@@ -918,12 +946,12 @@ function QuotaShareConcurrencyLimitCard({
             onChange={(enabled) => setDraft((prev) => ({ ...prev, enabled }))}
           />
         ) : (
-          <div className="rounded-xl border border-border bg-bg-subtle p-4">
+          <Card.Section>
             <div className="text-xs text-text-muted">{t("resilienceEnableServerWait")}</div>
             <div className="mt-1 text-sm font-semibold text-text-main">
               {value.enabled ? t("statusEnabled") : t("statusDisabled")}
             </div>
-          </div>
+          </Card.Section>
         )}
       </div>
     </Card>
@@ -955,7 +983,9 @@ export function ProviderCooldownCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="timer" size={20} className="text-primary" />
-            <h2 className="text-lg font-semibold">{t("resilienceProviderCooldownTitle")}</h2>
+            <h2 className="ci-heading" data-size="lg">
+              {t("resilienceProviderCooldownTitle")}
+            </h2>
           </div>
           <SectionDescription
             scope={t("resilienceProviderCooldownScope")}
@@ -989,49 +1019,49 @@ export function ProviderCooldownCard({
               checked={editing.enabled}
               onChange={(enabled) => setEditing((prev) => ({ ...prev, enabled }))}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceProviderCooldownMin")}
               value={editing.minRetryCooldownMs}
               min={0}
               max={300000}
               suffix="ms"
-              onChange={(minRetryCooldownMs) =>
+              onValueChange={whenNumber((minRetryCooldownMs) =>
                 setEditing((prev) => ({ ...prev, minRetryCooldownMs }))
-              }
+              )}
             />
-            <NumberField
+            <NumberInput
               label={t("resilienceProviderCooldownMax")}
               value={editing.maxRetryCooldownMs}
               min={0}
               max={3600000}
               suffix="ms"
-              onChange={(maxRetryCooldownMs) =>
+              onValueChange={whenNumber((maxRetryCooldownMs) =>
                 setEditing((prev) => ({ ...prev, maxRetryCooldownMs }))
-              }
+              )}
             />
           </>
         ) : (
           <>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            <Card.Section>
               <div className="text-xs text-text-muted">
                 {t("resilienceProviderCooldownEnabled")}
               </div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {value.enabled ? t("statusEnabled") : t("statusDisabled")}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceProviderCooldownMin")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.minRetryCooldownMs)}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            </Card.Section>
+            <Card.Section>
               <div className="text-xs text-text-muted">{t("resilienceProviderCooldownMax")}</div>
               <div className="mt-1 text-sm font-semibold text-text-main">
                 {formatMs(value.maxRetryCooldownMs)}
               </div>
-            </div>
+            </Card.Section>
           </>
         )}
       </div>
@@ -1066,7 +1096,9 @@ function CredentialHealthCheckCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="health_and_safety" size={20} className="text-primary" />
-            <h2 className="text-lg font-semibold">{t("resilienceCredentialHealthTitle")}</h2>
+            <h2 className="ci-heading" data-size="lg">
+              {t("resilienceCredentialHealthTitle")}
+            </h2>
           </div>
           <SectionDescription
             scope={t("resilienceCredentialHealthScope")}
@@ -1094,21 +1126,23 @@ function CredentialHealthCheckCard({
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         {isEditing ? (
           <>
-            <NumberField
+            <NumberInput
               label={t("resilienceCredentialHealthInterval")}
               value={editing.intervalMinutes}
               min={0}
               max={1440}
               suffix="min"
-              onChange={(intervalMinutes) => setEditing((prev) => ({ ...prev, intervalMinutes }))}
+              onValueChange={whenNumber((intervalMinutes) =>
+                setEditing((prev) => ({ ...prev, intervalMinutes }))
+              )}
             />
-            <div className="rounded-xl border border-border bg-bg-subtle p-4 text-xs text-text-muted">
+            <Card.Section className="text-xs text-text-muted">
               {t("resilienceCredentialHealthHint")}
-            </div>
+            </Card.Section>
           </>
         ) : (
           <>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4">
+            <Card.Section>
               <div className="text-xs text-text-muted">
                 {t("resilienceCredentialHealthInterval")}
               </div>
@@ -1119,10 +1153,10 @@ function CredentialHealthCheckCard({
                       minutes: value.intervalMinutes,
                     })}
               </div>
-            </div>
-            <div className="rounded-xl border border-border bg-bg-subtle p-4 text-xs text-text-muted">
+            </Card.Section>
+            <Card.Section className="text-xs text-text-muted">
               {t("resilienceCredentialHealthHint")}
-            </div>
+            </Card.Section>
           </>
         )}
       </div>
@@ -1130,12 +1164,28 @@ function CredentialHealthCheckCard({
   );
 }
 
+// Mirrors `customBannedSignals: z.array(z.string().max(200))` in
+// src/shared/validation/settingsSchemas.ts — keep the two in sync.
+const MAX_BANNED_KEYWORD_LENGTH = 200;
+
 export default function ResilienceTab() {
   const notify = useNotificationStore();
   const t = useTranslations("settings");
+  const tc = useTranslations("common");
   const [data, setData] = useState<ResilienceResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [savingSection, setSavingSection] = useState<string | null>(null);
+  const [bannedKeywords, setBannedKeywords] = useState<string[]>([]);
+  const [bannedKeywordInput, setBannedKeywordInput] = useState("");
+  const [bannedKeywordsLoading, setBannedKeywordsLoading] = useState(true);
+  const [bannedKeywordsLoadFailed, setBannedKeywordsLoadFailed] = useState(false);
+  const [savingBannedKeywords, setSavingBannedKeywords] = useState(false);
+  const [bannedKeywordsLoadToken, setBannedKeywordsLoadToken] = useState(0);
+  // The ref is the single source of truth: it always holds the last list the
+  // server confirmed. Rapid add/remove clicks therefore cannot build on a
+  // stale closure value, and a failed PATCH never desyncs UI from server.
+  const bannedKeywordsRef = useRef<string[]>([]);
+  const bannedKeywordsSavingRef = useRef(false);
   const tx = useCallback(
     (key: string, fallback: string) => {
       if (typeof t.has === "function" && t.has(key as never)) {
@@ -1145,6 +1195,102 @@ export default function ResilienceTab() {
     },
     [t]
   );
+
+  // Custom banned keywords live in /api/settings, not in the resilience
+  // payload, so this card loads and saves them independently. It belongs on
+  // the Resilience page next to AutoDisableCard: it decides when an upstream
+  // error permanently bans and disables a connection.
+  useEffect(() => {
+    let mounted = true;
+    const load = async () => {
+      setBannedKeywordsLoading(true);
+      setBannedKeywordsLoadFailed(false);
+      try {
+        const res = await fetch("/api/settings");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const settings = await res.json();
+        if (!mounted) return;
+        // The classifier lowercases the error body but NOT the signal itself, so
+        // uppercase values imported elsewhere would never match. Normalise on
+        // load (trim + lowercase + dedupe); keep long values rather than
+        // silently discarding server-side data — adding is guarded separately.
+        const list: string[] = Array.isArray(settings?.customBannedSignals)
+          ? Array.from(
+              new Set(
+                settings.customBannedSignals
+                  .filter((v: unknown) => typeof v === "string")
+                  .map((v: string) => v.trim().toLowerCase())
+                  .filter(Boolean)
+              )
+            )
+          : [];
+        bannedKeywordsRef.current = list;
+        setBannedKeywords(list);
+      } catch (error) {
+        console.error("Failed to load custom banned signals:", error);
+        // Never show the "no keywords" empty state when loading failed:
+        // editing from there would overwrite the real server-side list.
+        if (mounted) setBannedKeywordsLoadFailed(true);
+      } finally {
+        if (mounted) setBannedKeywordsLoading(false);
+      }
+    };
+    void load();
+    return () => {
+      mounted = false;
+    };
+  }, [bannedKeywordsLoadToken]);
+
+  // Commit only after the server accepts the write. The synchronous ref lock
+  // serialises edits so two quick clicks cannot race on a stale array.
+  const saveBannedKeywords = async (next: string[]): Promise<boolean> => {
+    if (bannedKeywordsSavingRef.current) return false;
+    bannedKeywordsSavingRef.current = true;
+    setSavingBannedKeywords(true);
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customBannedSignals: next }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      bannedKeywordsRef.current = next;
+      setBannedKeywords(next);
+      return true;
+    } catch (error) {
+      console.error("Failed to update custom banned signals:", error);
+      notify.error(tx("saveFailed", "Failed to save banned keywords"));
+      return false;
+    } finally {
+      bannedKeywordsSavingRef.current = false;
+      setSavingBannedKeywords(false);
+    }
+  };
+
+  const bannedKeywordsBusy =
+    bannedKeywordsLoading || bannedKeywordsLoadFailed || savingBannedKeywords;
+
+  const addBannedKeyword = async () => {
+    if (bannedKeywordsBusy || bannedKeywordsSavingRef.current) return;
+    const keyword = bannedKeywordInput.trim().toLowerCase();
+    if (!keyword || bannedKeywordsRef.current.includes(keyword)) return;
+    // Defence in depth for the Input's maxLength: the server rejects strings
+    // longer than 200 chars (settingsSchemas.ts), which would otherwise be a
+    // silent failure.
+    if (keyword.length > MAX_BANNED_KEYWORD_LENGTH) {
+      notify.error(tx("saveFailed", "Failed to save banned keywords"));
+      return;
+    }
+    const saved = await saveBannedKeywords([...bannedKeywordsRef.current, keyword]);
+    if (saved) setBannedKeywordInput("");
+  };
+
+  // Remove by value, not by index: with an async save an index can go stale
+  // between two quick clicks (and makes a stable React key).
+  const removeBannedKeyword = (keyword: string) => {
+    if (bannedKeywordsBusy || bannedKeywordsSavingRef.current) return;
+    void saveBannedKeywords(bannedKeywordsRef.current.filter((k) => k !== keyword));
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -1199,29 +1345,111 @@ export default function ResilienceTab() {
     }
   };
 
+  // The banned-keyword editor reads /api/settings, not /api/resilience.
+  // Keep it outside the resilience-data guards: if /api/resilience fails,
+  // keyword management must still work (SecurityTab no longer has an editor).
+  const bannedKeywordsCard = (
+    <Card
+      icon="report"
+      title={tx("customBannedSignals", "Banned Keywords")}
+      subtitle={tx(
+        "customBannedSignalsDesc",
+        "Additional keywords that trigger permanent account ban detection. Built-in keywords always apply."
+      )}
+    >
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+          <Input
+            className="flex-1"
+            aria-label={tx("customBannedSignals", "Banned Keywords")}
+            placeholder={tx("customBannedSignalsPlaceholder", "e.g. api key revoked")}
+            value={bannedKeywordInput}
+            maxLength={MAX_BANNED_KEYWORD_LENGTH}
+            disabled={bannedKeywordsBusy}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setBannedKeywordInput(e.target.value)
+            }
+            onKeyDown={(e: React.KeyboardEvent) => {
+              if (e.key === "Enter") void addBannedKeyword();
+            }}
+          />
+          <Button
+            variant="secondary"
+            size="sm"
+            icon="add"
+            onClick={() => void addBannedKeyword()}
+            disabled={bannedKeywordsBusy || !bannedKeywordInput.trim()}
+          >
+            {tc("add")}
+          </Button>
+        </div>
+        {bannedKeywordsLoadFailed ? (
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-error">{tx("errorOccurred", "An error occurred")}</p>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="refresh"
+              onClick={() => setBannedKeywordsLoadToken((n) => n + 1)}
+            >
+              {tx("retry", "Retry")}
+            </Button>
+          </div>
+        ) : bannedKeywordsLoading ? (
+          <Spinner decorative size="sm" />
+        ) : bannedKeywords.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {bannedKeywords.map((keyword) => (
+              // Removing while a save runs is a no-op (removeBannedKeyword checks the saving ref).
+              <ScopeChip
+                key={keyword}
+                tone="danger"
+                onRemove={() => removeBannedKeyword(keyword)}
+                removeLabel={`${tx("remove", "Remove")} ${keyword}`}
+              >
+                {keyword}
+              </ScopeChip>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-text-muted">
+            {tx("noCustomBannedSignals", "No custom keywords. Only built-in keywords are active.")}
+          </p>
+        )}
+      </div>
+    </Card>
+  );
+
   if (loading && !data) {
     return (
-      <Card className="p-6">
-        <div role="status" className="flex items-center gap-2 text-sm text-text-muted">
-          <Spinner decorative size="sm" />
-          {tx("loadingResilience", "Loading resilience settings...")}
-        </div>
-      </Card>
+      <div className="space-y-6">
+        {bannedKeywordsCard}
+        <Card className="p-6">
+          <div role="status" className="flex items-center gap-2 text-sm text-text-muted">
+            <Spinner decorative size="sm" />
+            {tx("loadingResilience", "Loading resilience settings...")}
+          </div>
+        </Card>
+      </div>
     );
   }
 
   if (!data) {
     return (
-      <Card className="p-6">
-        <p className="text-sm text-text-muted">
-          {tx("failedLoadResilience", "Unable to load resilience settings.")}
-        </p>
-      </Card>
+      <div className="space-y-6">
+        {bannedKeywordsCard}
+        <Card className="p-6">
+          <p className="text-sm text-text-muted">
+            {tx("failedLoadResilience", "Unable to load resilience settings.")}
+          </p>
+        </Card>
+      </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      {bannedKeywordsCard}
       <AutoDisableCard />
       {data.preferredAccountFailover && (
         <PreferredAccountFailoverCard

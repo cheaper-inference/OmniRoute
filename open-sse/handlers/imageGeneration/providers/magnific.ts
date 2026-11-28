@@ -9,21 +9,16 @@
 
 import { saveCallLog } from "../../imageResult.ts";
 import { sleep } from "../../../utils/sleep.ts";
+import { clampPollIntervalMs, clampPollTimeoutMs } from "../../../utils/pollBounds.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
 import {
   UPSTREAM_MEDIA_LIMITS,
   downloadUpstreamMedia,
   upstreamMediaErrorText,
-} from "@/shared/network/remoteImageFetch";
+} from "../../../utils/remoteMediaFetch.ts";
 
 const DEFAULT_POLL_INTERVAL_MS = 4000;
 const DEFAULT_POLL_TIMEOUT_MS = 180000;
-
-function normalizePositiveNumber(value: unknown, fallback: number): number {
-  const n = Number(value);
-  if (!Number.isFinite(n) || n <= 0) return fallback;
-  return Math.floor(n);
-}
 
 interface MagnificProviderConfig {
   baseUrl: string;
@@ -267,8 +262,8 @@ export async function handleMagnificImageGeneration({
   const startTime = Date.now();
   const token = credentials?.apiKey || "";
   const prompt = typeof body.prompt === "string" ? body.prompt : String(body.prompt ?? "");
-  const pollIntervalMs = normalizePositiveNumber(body.poll_interval_ms, DEFAULT_POLL_INTERVAL_MS);
-  const pollTimeoutMs = normalizePositiveNumber(body.poll_timeout_ms, DEFAULT_POLL_TIMEOUT_MS);
+  const pollIntervalMs = clampPollIntervalMs(body.poll_interval_ms, DEFAULT_POLL_INTERVAL_MS);
+  const pollTimeoutMs = clampPollTimeoutMs(body.poll_timeout_ms, DEFAULT_POLL_TIMEOUT_MS);
   if (log) {
     log.info(
       "IMAGE",

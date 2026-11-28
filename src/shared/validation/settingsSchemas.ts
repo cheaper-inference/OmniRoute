@@ -26,6 +26,7 @@ import {
 // this schema is reachable from client components (dashboard onboarding wizard), and
 // routeGuard drags in server runtime (→ ioredis) that breaks the client/CLI build.
 import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
+import { corsOriginsSchema } from "@/shared/validation/corsOrigins";
 import { isHttpUrl } from "@/shared/validation/schemas/misc";
 import {
   BANKED_RESET_ACCOUNT_SCOPES,
@@ -222,7 +223,7 @@ export const updateSettingsSchema = z.object({
   customLogoBase64: z.string().max(100000).optional(),
   customFaviconUrl: z.string().max(2000).optional(),
   customFaviconBase64: z.string().max(50000).optional(),
-  corsOrigins: z.string().max(500).optional(),
+  corsOrigins: corsOriginsSchema.optional(),
   cloudUrl: z.string().max(500).optional(),
   baseUrl: z.string().max(500).optional(),
   setupComplete: z.boolean().optional(),
@@ -360,7 +361,7 @@ export const updateSettingsSchema = z.object({
   codexServiceTier: z
     .object({
       enabled: z.boolean().optional(),
-      tier: z.enum(["default", "priority", "flex"]).optional(),
+      tier: z.enum(["default", "priority", "flex", "ultrafast"]).optional(),
       supportedModels: z.array(z.string().max(200)).max(200).optional(),
     })
     .optional(),
@@ -435,6 +436,9 @@ export const updateSettingsSchema = z.object({
         planWeights: z
           .record(z.string().trim().min(1).max(40), z.number().finite().min(0.01).max(100))
           .optional(),
+        /** expiry-first: "rate" (default) or "deadline" (nearest reset first while quota lasts). */
+        expiryFirstOrder: z.enum(["rate", "deadline"]).optional(),
+        expiryFirstDeadlineTieMinutes: z.number().finite().min(0).max(1440).optional(),
       })
     )
     .optional(),

@@ -10,7 +10,7 @@ const root = new URL("../../../", import.meta.url);
 const verifier = fileURLToPath(new URL("scripts/ci/release-green-result.mjs", root));
 const sha = "1".repeat(40);
 
-function verify(check: Record<string, unknown>) {
+function verify(check: Record<string, unknown>, validatorExit = "0") {
   const dir = mkdtempSync(join(tmpdir(), "omni-green-evidence-"));
   try {
     const path = join(dir, "report.json");
@@ -20,12 +20,12 @@ function verify(check: Record<string, unknown>) {
         schemaVersion: 1,
         candidateSha: sha,
         profile: "full",
-        releaseGreen: true,
-        hardFailures: [],
+        releaseGreen: validatorExit === "0",
+        hardFailures: validatorExit === "0" ? [] : [check],
         checks: [{ id: "typecheck", kind: "hard", ok: true }, check],
       })
     );
-    const result = spawnSync(process.execPath, [verifier, path, "0", sha, "schedule"], {
+    const result = spawnSync(process.execPath, [verifier, path, validatorExit, sha, "schedule"], {
       encoding: "utf8",
       env: { ...process.env, GITHUB_OUTPUT: "" },
       timeout: 10_000,
@@ -36,6 +36,28 @@ function verify(check: Record<string, unknown>) {
     rmSync(dir, { recursive: true, force: true });
   }
 }
+
+test("the public verifier distinguishes incomplete hosted receipts from a measured test failure", () => {
+  for (const id of ["unit", "integration", "vitest", "hosted-suites"]) {
+    const result = verify({ id, kind: "hard", ok: false, evidenceState: "INCOMPLETE" }, "1");
+    assert.equal(result.status, 1);
+    assert.equal(result.report.verdict, "UNKNOWN");
+    assert.equal(result.report.evidenceState, "INCOMPLETE");
+  }
+  const measured = verify(
+    {
+      id: "unit",
+      kind: "hard",
+      ok: false,
+      detail: "unit-6 exit 1 — failed assertion",
+      evidenceState: "COMPLETE",
+    },
+    "1"
+  );
+  assert.equal(measured.status, 1);
+  assert.equal(measured.report.verdict, "FAIL");
+  assert.equal(measured.report.evidenceState, "COMPLETE");
+});
 
 test("the public verifier rejects missing scanners reported as nonblocking drift", () => {
   const result = verify({
@@ -74,11 +96,22 @@ function observe({
   mkdirSync(artifacts, { recursive: true });
   const dir = mkdtempSync(join(artifacts, "workflow-evidence-test-"));
   try {
-    writeFileSync(join(dir, "package.json"), '{"type":"commonjs"}\n');
+    writeFileSync(
+      join(dir, "package.json"),
+      JSON.stringify({
+        type: "commonjs",
+        scripts: { "check:workflows": "node scripts/check/check-workflows.mjs" },
+      }) + "\n"
+    );
     for (const path of ["scripts/quality", "config/quality", ".github/workflows", "bin"]) {
       mkdirSync(join(dir, path), { recursive: true });
     }
-    for (const name of ["validate-release-green.mjs", "gate-process.mjs"]) {
+    for (const name of [
+      "validate-release-green.mjs",
+      "gate-process.mjs",
+      "release-green-static-profile.mjs",
+      "eslint-measurement.mjs",
+    ]) {
       cpSync(new URL(`scripts/quality/${name}`, root), join(dir, "scripts/quality", name));
     }
     writeFileSync(
@@ -92,6 +125,30 @@ function observe({
       })
     );
     writeFileSync(join(dir, ".github/workflows/ci.yml"), workflow);
+    // --full-ci executes the reviewed static profile (never workflow shell). This fixture
+    // declares the workflow audit under the ratchet policy so the evidence boundary — not
+    // the repository's declared bucket — is what these tests exercise.
+    writeFileSync(
+      join(dir, ".github/workflows/quality.yml"),
+      "jobs:\n  fast:\n    steps:\n      - run: |\n          gates=(\n            workflows\n          )\n          ratchet_gates=(\n            workflows\n          )\n"
+    );
+    writeFileSync(
+      join(dir, "config/quality/release-green-static-profile.json"),
+      JSON.stringify({
+        schemaVersion: 1,
+        sourceJobs: ["lint"],
+        exclusions: [],
+        gates: [
+          {
+            id: "check:workflows",
+            job: "lint",
+            args: ["run", "check:workflows", "--", "--ratchet"],
+            kind: "drift",
+            command: "node scripts/check/check-workflows.mjs",
+          },
+        ],
+      })
+    );
     const bin = join(dir, "bin");
     symlinkSync("/bin/sh", join(bin, "sh"));
     if (scanners !== "missing") {
@@ -121,9 +178,17 @@ function observe({
         `if (process.argv[3] === "check:complexity-ratchets") console.log("complexity=0\\ncognitiveComplexity=0\\n[complexity] OK — 0 violações (baseline 0)\\n[cognitive-complexity] OK — 0 violações (baseline 0)");\n`,
       { mode: 0o755 }
     );
-    writeFileSync(join(bin, "npx"), `#!${process.execPath}\nconsole.log("[]");\n`, {
-      mode: 0o755,
-    });
+    // ESLint is not under test here; emit one complete zero-count measurement record.
+    const lintReport = JSON.stringify([
+      { filePath: "/fixture.ts", errorCount: 0, warningCount: 0 },
+    ]);
+    writeFileSync(
+      join(bin, "npx"),
+      `#!${process.execPath}\nconsole.log(${JSON.stringify(lintReport)});\n`,
+      {
+        mode: 0o755,
+      }
+    );
     writeFileSync(join(bin, "git"), `#!${process.execPath}\nconsole.log("${sha}");\n`, {
       mode: 0o755,
     });

@@ -16,6 +16,8 @@ import {
   KiroOAuthWrapper,
   OAuthModal,
   Select,
+  Notice,
+  IconChip,
 } from "@/shared/components";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import ProviderTosNotice from "@/shared/components/ProviderTosNotice";
@@ -122,21 +124,17 @@ function localizeProviderOptions(
 
 function StepPill({ active, done, label }: { active: boolean; done: boolean; label: string }) {
   return (
-    <div
-      className={`flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
-        active
-          ? "border-primary/50 bg-primary/10 text-primary"
-          : done
-            ? "border-success/30 bg-success/10 text-success"
-            : "border-border bg-bg-subtle text-text-muted"
-      }`}
+    <Badge
+      variant={active ? "primary" : done ? "success" : "default"}
+      icon={
+        <Icon
+          name={done ? "check" : active ? "radio_button_checked" : "radio_button_unchecked"}
+          size={14}
+        />
+      }
     >
-      <Icon
-        name={done ? "check" : active ? "radio_button_checked" : "radio_button_unchecked"}
-        size={16}
-      />
       {label}
-    </div>
+    </Badge>
   );
 }
 
@@ -168,7 +166,7 @@ function ProviderOptionCard({
       variant="outline"
       onClick={onSelect}
       aria-pressed={selected}
-      className={`h-full w-full flex-col items-stretch justify-start gap-3 whitespace-normal rounded-xl p-4 text-left font-normal ${
+      className={`h-full w-full flex-col items-stretch justify-start gap-3 whitespace-normal rounded-xl p-4 text-left ${
         selected ? "border-primary/60 bg-primary/10" : "hover:border-primary/40"
       }`}
     >
@@ -224,19 +222,15 @@ function ResultSummary({
     <Card padding="lg">
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          <div
-            className={`flex size-12 items-center justify-center rounded-full ${
-              valid
-                ? "bg-success/10 text-success"
-                : failed
-                  ? "bg-error/10 text-error"
-                  : "bg-primary/10 text-primary"
-            }`}
+          <IconChip
+            size="lg"
+            shape="circle"
+            tone={valid ? "success" : failed ? "danger" : "accent"}
           >
-            <Icon name={valid ? "check_circle" : failed ? "error" : "dns"} size={28} />
-          </div>
+            <Icon name={valid ? "check_circle" : failed ? "error" : "dns"} />
+          </IconChip>
           <div>
-            <h2 className="text-xl font-semibold text-text-main">
+            <h2 className="text-xl text-text-main">
               {valid
                 ? providerText(t, "onboardingProviderConnected", "Provider connected")
                 : failed
@@ -256,7 +250,7 @@ function ResultSummary({
         </div>
 
         {testResult && (
-          <div className="rounded-lg border border-border bg-bg-subtle p-3 text-sm text-text-muted">
+          <Card.Section className="text-sm text-text-muted">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={valid ? "success" : "error"}>
                 {valid
@@ -273,14 +267,10 @@ function ResultSummary({
                 {testResult.error || testResult.warning || testResult.diagnosis?.message}
               </p>
             )}
-          </div>
+          </Card.Section>
         )}
 
-        {error && (
-          <div className="rounded-lg border border-error/30 bg-error/10 p-3 text-sm text-error">
-            {error}
-          </div>
-        )}
+        {error && <Notice variant="critical">{error}</Notice>}
 
         <div className="flex flex-wrap gap-2">
           {(() => {
@@ -298,7 +288,7 @@ function ResultSummary({
           })()}
           <Link
             href="/dashboard/providers"
-            className="inline-flex items-center justify-center rounded-lg border border-border bg-bg-subtle px-4 py-2 text-sm font-medium text-text-main transition-colors hover:bg-bg-card"
+            className="inline-flex items-center justify-center rounded-lg border border-border bg-bg-subtle px-4 py-2 text-sm font-medium text-text-main transition-colors hover:bg-surface"
           >
             {providerText(t, "backToProviders", "Back to providers")}
           </Link>
@@ -574,11 +564,7 @@ export default function ProviderOnboardingWizard() {
         />
       </div>
 
-      {status && (
-        <div className="rounded-lg border border-primary/25 bg-primary/10 p-3 text-sm text-primary">
-          {status}
-        </div>
-      )}
+      {status && <Notice variant="info">{status}</Notice>}
 
       {selectedProvider && (step === "credentials" || step === "oauth") && (
         <ProviderTosNotice providerId={selectedProvider.id} />
@@ -620,13 +606,13 @@ export default function ProviderOnboardingWizard() {
                 key={item.id}
                 variant="outline"
                 onClick={() => resetProviderSelection(item.id)}
-                className="h-auto w-full flex-col items-start justify-start gap-0 whitespace-normal rounded-xl p-5 text-left font-normal hover:border-primary/50"
+                className="h-auto w-full flex-col items-start justify-start gap-0 whitespace-normal rounded-xl p-5 text-left hover:border-primary/50"
               >
                 {/* Wrapped: the kit sizes direct svg children of .ci-button to the icon token. */}
                 <span aria-hidden className="text-primary">
                   <Icon name={item.icon} size={32} />
                 </span>
-                <h2 className="mt-3 text-lg font-semibold text-text-main">{item.title}</h2>
+                <h2 className="mt-3 text-lg text-text-main">{item.title}</h2>
                 <p className="mt-2 text-sm text-text-muted">{item.text}</p>
               </Button>
             ))}
@@ -639,7 +625,7 @@ export default function ProviderOnboardingWizard() {
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
-                <h2 id={providerListHeadingId} className="text-xl font-semibold text-text-main">
+                <h2 id={providerListHeadingId} className="text-xl text-text-main">
                   {kind === "oauth"
                     ? text("onboardingChooseOAuthProvider", "Choose an OAuth provider")
                     : text("onboardingChooseApiKeyProvider", "Choose an API-key provider")}
@@ -685,7 +671,7 @@ export default function ProviderOnboardingWizard() {
           <div className="flex flex-col gap-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-text-main">
+                <h2 className="text-xl text-text-main">
                   {text("onboardingAddProvider", "Add {provider}", {
                     provider: selectedProvider.name,
                   })}
@@ -767,7 +753,7 @@ export default function ProviderOnboardingWizard() {
           <div className="flex flex-col gap-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-text-main">
+                <h2 className="text-xl text-text-main">
                   {text(
                     "onboardingCreateCustomCompatibleProvider",
                     "Create custom compatible provider"
@@ -881,7 +867,7 @@ export default function ProviderOnboardingWizard() {
           <div className="flex flex-col gap-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-text-main">
+                <h2 className="text-xl text-text-main">
                   {text("onboardingConnectProvider", "Connect {provider}", {
                     provider: selectedProvider.name,
                   })}
@@ -892,12 +878,12 @@ export default function ProviderOnboardingWizard() {
                 {text("onboardingChangeProvider", "Change provider")}
               </Button>
             </div>
-            <div className="rounded-lg border border-border bg-bg-subtle p-4 text-sm text-text-muted">
+            <Card.Section className="text-sm text-text-muted">
               {text(
                 "onboardingOAuthFlowDescription",
                 "OmniRoute will open the existing OAuth flow for this provider. After login, the wizard reloads the saved connection and runs the same connection test as the provider page."
               )}
-            </div>
+            </Card.Section>
             <div className="flex flex-wrap gap-2">
               <Button onClick={openOAuth} disabled={submitting}>
                 {text("onboardingStartOAuthFlow", "Start OAuth flow")}

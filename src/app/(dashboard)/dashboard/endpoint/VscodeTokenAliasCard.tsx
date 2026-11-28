@@ -117,13 +117,11 @@ export default function VscodeTokenAliasCard({
       <Card className={`overflow-hidden ${className}`.trim()}>
         <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
           <Icon name="key" size={14} className="text-primary" />
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-            {t("vscodeAliasTitle")}
-          </h3>
+          <h3 className="ci-eyebrow">{t("vscodeAliasTitle")}</h3>
           <div className="flex-1 h-px bg-border/30" />
           <Link
             href="/dashboard/cli-tools"
-            className="shrink-0 text-[11px] font-medium text-primary hover:underline"
+            className="shrink-0 text-2xs font-medium text-primary hover:underline"
           >
             {t("vscodeAliasManage")}
           </Link>
@@ -154,7 +152,7 @@ export default function VscodeTokenAliasCard({
     <div className={`rounded-lg border border-info/20 bg-info/5 p-3 ${className}`.trim()}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-info">
+          <p className="ci-eyebrow text-info" data-size="3xs" data-weight="medium">
             {t("vscodeAliasTitle")}
           </p>
           <p className="mt-1 text-xs text-text-muted">{description}</p>
@@ -199,17 +197,18 @@ function CopyableEndpointRow({
   const rowClassName =
     variant === "catalog"
       ? "flex items-center gap-2 min-w-0 rounded-lg border border-border bg-surface-2 px-3 py-2.5"
-      : "flex items-center gap-2 min-w-0 rounded-md border border-info/15 bg-background/60 px-2.5 py-2";
+      : "flex items-center gap-2 min-w-0 rounded-md border border-info/15 bg-bg/60 px-2.5 py-2";
 
   return (
     <div className={rowClassName}>
-      <span className="w-24 shrink-0 text-[11px] font-medium text-text-muted">{label}</span>
-      <code className="flex-1 min-w-0 truncate text-[11px] font-mono text-text-main">{url}</code>
+      <span className="w-24 shrink-0 text-2xs font-medium text-text-muted">{label}</span>
+      <code className="flex-1 min-w-0 truncate text-2xs font-mono text-text-main">{url}</code>
       <Button
         variant="outline"
         size="icon-sm"
         onClick={() => copy(url, copyKey)}
-        className="shrink-0 text-text-muted"
+        className="shrink-0"
+        tone="muted"
         aria-label={`${label}: ${url}`}
         title={url}
         icon={copied === copyKey ? "check" : "content_copy"}

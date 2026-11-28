@@ -18,27 +18,24 @@ jobs:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: ".node-version"
           cache: npm
       - uses: ./.github/actions/npm-ci-retry
         with:
           cache: "false"
-      - name: Emit shadow acceptance report
-        run: |
-          node scripts/quality/validate-release-acceptance.mjs \
-            --plan tests/fixtures/release-acceptance/plan-lint.json \
-            --manifests tests/fixtures/release-acceptance/shadow-manifests \
-            --out release-acceptance-report.json
+      - name: Validate and retain the live gate inventory
+        run: node scripts/quality/release-acceptance/run-shadow.mjs "$RUNNER_TEMP/release-acceptance-shadow"
         continue-on-error: true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: release-acceptance-report
-          path: release-acceptance-report.json
-          if-no-files-found: ignore
+          path: ${{ runner.temp }}/release-acceptance-shadow/
+          if-no-files-found: error
           retention-days: 30

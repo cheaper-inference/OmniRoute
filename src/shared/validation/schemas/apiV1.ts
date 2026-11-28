@@ -4,6 +4,7 @@ import {
   ROUTING_STRATEGY_VALUES,
 } from "@/shared/constants/routingStrategies";
 import { SUPPORTED_BATCH_ENDPOINTS } from "@/shared/constants/batchEndpoints";
+import { WEB_FETCH_URL_MAX_LENGTH } from "@/shared/constants/formLimits";
 import { MAX_REQUEST_BODY_LIMIT_MB, MIN_REQUEST_BODY_LIMIT_MB } from "@/shared/constants/bodySize";
 import { COMBO_CONFIG_MODES } from "@/shared/constants/comboConfigMode";
 import { providerAllowsOptionalApiKey } from "@/shared/constants/providers";
@@ -633,9 +634,10 @@ export const v1SearchSchema = z.preprocess(
       // exa-search, tavily-search, firecrawl, google-pse-search, linkup-search, ollama-search,
       // searchapi-search, youcom-search, searxng-search, zai-search, jina-search, jina-ai,
       // jina, duckduckgo-free, x-search, x_search, xquik-search, xquik, anysearch-search,
-      // anysearch, parallel-search, parallel (plus short aliases resolved by
-      // SEARCH_PROVIDER_ALIASES).
+      // anysearch, parallel-search, parallel, keenable-search, keenable (plus short aliases
+      // resolved by SEARCH_PROVIDER_ALIASES).
       provider: z.string().min(1).optional(),
+      model: z.string().trim().min(1).max(300).optional(),
       max_results: z.coerce.number().int().min(1).max(100).default(5),
       search_type: z.enum(["web", "news", "x", "finance"]).default("web"),
       offset: z.coerce.number().int().min(0).default(0),
@@ -680,6 +682,9 @@ export const v1SearchSchema = z.preprocess(
       strict_filters: z.boolean().default(false),
     })
     .catchall(z.unknown())
+    .refine((body) => !(body.model && body.provider), {
+      message: "Specify a routing combo in model or an explicit provider, not both",
+    })
 );
 
 export const searchResultSchema = z.object({
@@ -737,22 +742,31 @@ export const v1BatchCreateSchema = z.object({
 
 // ── Web Fetch ─────────────────────────────────────────────────────────────────
 
-export const v1WebFetchSchema = z.object({
-  url: z.string().url("url must be a valid URL (http/https)"),
-  provider: z
-    .enum([
-      "firecrawl",
-      "jina-reader",
-      "tavily-search",
-      "tinyfish",
-      "context7",
-      "nimble-search",
-      "anysearch-search",
-      "parallel-search",
-    ])
-    .optional(),
-  format: z.enum(["markdown", "html", "links", "screenshot"]).default("markdown"),
-  depth: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(0),
-  wait_for_selector: z.string().max(256).optional(),
-  include_metadata: z.boolean().default(false),
-});
+export const v1WebFetchSchema = z
+  .object({
+    url: z
+      .string()
+      .max(WEB_FETCH_URL_MAX_LENGTH, `url must be at most ${WEB_FETCH_URL_MAX_LENGTH} characters`)
+      .url("url must be a valid URL (http/https)"),
+    model: z.string().trim().min(1).max(300).optional(),
+    provider: z
+      .enum([
+        "firecrawl",
+        "jina-reader",
+        "tavily-search",
+        "tinyfish",
+        "context7",
+        "nimble-search",
+        "anysearch-search",
+        "parallel-search",
+        "keenable-search",
+      ])
+      .optional(),
+    format: z.enum(["markdown", "html", "links", "screenshot"]).default("markdown"),
+    depth: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(0),
+    wait_for_selector: z.string().max(256).optional(),
+    include_metadata: z.boolean().default(false),
+  })
+  .refine((body) => !(body.model && body.provider), {
+    message: "Specify a routing combo in model or an explicit provider, not both",
+  });

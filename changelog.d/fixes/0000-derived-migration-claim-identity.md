@@ -1,0 +1,1 @@
+- Derived documentation refresh now recognizes migration edits already located in translated database rows. It preserves unrelated historical numbers with the same value and requires matching, complete claim identities before refreshing translation state.

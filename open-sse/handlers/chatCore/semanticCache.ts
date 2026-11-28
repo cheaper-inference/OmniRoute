@@ -1,6 +1,6 @@
 import {
   generateSignature,
-  getCachedResponse,
+  getCachedResponseEntry,
   isCacheableForRead,
   recordSemanticCacheHit,
   outputContractOf,
@@ -13,6 +13,26 @@ import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { extractUsageFromResponse } from "../usageExtractor.ts";
 import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
 import { getSemanticCacheManager } from "../../services/cache/semanticCacheManager.ts";
+import { FORMATS } from "../../translator/formats.ts";
+import { getHeaderValueCaseInsensitive } from "./headers.ts";
+import { resolveChatCoreRequestFormat } from "./requestFormat.ts";
+
+/**
+ * A HIT is served verbatim (JSON body, or chat-completion SSE built from it). Serve it only
+ * when that is the wire format this client expects; otherwise treat it as a miss. A miss
+ * costs one upstream call; a wrong replay breaks the client.
+ */
+function canReplayCachedResponse(
+  cached: Record<string, unknown>,
+  clientFormat: string,
+  stream: boolean
+): boolean {
+  if (clientFormat === FORMATS.OPENAI) return Array.isArray(cached.choices);
+  if (stream) return false;
+  if (clientFormat === FORMATS.CLAUDE) return cached.type === "message";
+  if (clientFormat === FORMATS.OPENAI_RESPONSES) return cached.object === "response";
+  return false;
+}
 
 export function isSemanticCacheEnabled(
   settings: Record<string, unknown>,
@@ -48,7 +68,7 @@ export async function checkSemanticCache({
   // Only the fields this read path actually touches are named; everything else
   // on the request body stays `unknown` via the index signature.
   body: Record<string, unknown> & { temperature?: number; top_p?: number };
-  clientRawRequest: { headers?: unknown } | null;
+  clientRawRequest: { headers?: unknown; endpoint?: unknown } | null;
   model: string;
   provider: string;
   stream: boolean;
@@ -78,11 +98,13 @@ export async function checkSemanticCache({
     });
 
     let cached: Record<string, unknown> | null = null;
+    let originalCostUsd: number | null | undefined;
     let hitType: "exact" | "semantic" = "exact";
     let similarity: number | undefined;
 
     if (managerResult.hit && managerResult.entry) {
       cached = managerResult.entry.response;
+      originalCostUsd = managerResult.entry.originalCostUsd;
       hitType = managerResult.type || "exact";
       similarity = managerResult.similarity;
     } else {
@@ -98,10 +120,27 @@ export async function checkSemanticCache({
         apiKeyId ?? undefined,
         outputContractOf(body)
       );
-      const legacyCached = getCachedResponse(signature);
-      if (legacyCached) {
-        cached = legacyCached as Record<string, unknown>;
-        hitType = "exact";
+      const legacyEntry = getCachedResponseEntry(signature);
+      if (legacyEntry) {
+        cached = legacyEntry.response as Record<string, unknown>;
+        originalCostUsd = legacyEntry.originalCostUsd;
+      }
+    }
+
+    if (cached) {
+      const headers = clientRawRequest?.headers as Record<string, unknown> | Headers | null;
+      const { clientResponseFormat } = resolveChatCoreRequestFormat({
+        clientRawRequest: { endpoint: clientRawRequest?.endpoint, headers },
+        body,
+        provider,
+        userAgent: getHeaderValueCaseInsensitive(headers, "user-agent"),
+      });
+      if (!canReplayCachedResponse(cached, clientResponseFormat, stream)) {
+        log?.debug?.(
+          "CACHE",
+          `Semantic cache entry skipped: not replayable as ${clientResponseFormat} (stream=${stream})`
+        );
+        cached = null;
       }
     }
 
@@ -111,11 +150,14 @@ export async function checkSemanticCache({
       const cachedUsage =
         extractUsageFromResponse(cached, provider) ||
         (cached?.usage as Record<string, unknown> | undefined);
-      const cachedCost = cachedUsage
-        ? await calculateCost(provider, model, cachedUsage as Record<string, number>, {
-            serviceTier: effectiveServiceTier,
-          })
-        : 0;
+      // Older entries and streaming writes can lack the original cost.
+      const cachedCost =
+        originalCostUsd ??
+        (cachedUsage
+          ? await calculateCost(provider, model, cachedUsage as Record<string, number>, {
+              serviceTier: effectiveServiceTier,
+            })
+          : 0);
       persistAttemptLogs({
         status: 200,
         tokens: cached?.usage,

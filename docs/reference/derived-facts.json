@@ -1,0 +1,332 @@
+{
+  "schemaVersion": 1,
+  "version": "3.8.55",
+  "providers": 394,
+  "providerReferenceTotal": 394,
+  "migrations": 252,
+  "locales": 67,
+  "routingStrategies": 22,
+  "scoringFactors": 16,
+  "coverageFloors": {
+    "statements": 67.33,
+    "lines": 67.33,
+    "functions": 72.02,
+    "branches": 65.08
+  },
+  "executors": 179,
+  "oauthProviders": 32,
+  "a2aSkills": 6,
+  "cloudAgents": 4,
+  "code": {
+    "freeSteady": 89805000,
+    "entries": 466,
+    "freeFirst": 164305000,
+    "freeGated": 6000000,
+    "freePools": 26,
+    "engines": 12,
+    "cliTotal": 39,
+    "cliCode": 28,
+    "cliAgent": 11,
+    "mcpTools": 110,
+    "mcpScopes": 33,
+    "providers": 394,
+    "freeForever": 40,
+    "modePacks": [
+      "ship-fast",
+      "cost-saver",
+      "quality-first",
+      "offline-friendly",
+      "reliability-first",
+      "chaos-mode"
+    ],
+    "catalogDate": "2026-11-23",
+    "sortBy": "reliability",
+    "intelligentKeys": 16,
+    "hardStop": 44,
+    "trainsOnPrompts": 22,
+    "freeTierCount": 62,
+    "freeTierReg": 62,
+    "manifestFreeTier": 62,
+    "freeTierBudget": {
+      "steady": 89805000,
+      "first": 164305000,
+      "boost": 24000000,
+      "gated": 6000000,
+      "poolCount": 26,
+      "modelCount": 466,
+      "discontinued": 181,
+      "avoidProviders": 12,
+      "pools": [
+        {
+          "provider": "groq",
+          "name": "Groq",
+          "tokens": 24000000,
+          "caps": 4
+        },
+        {
+          "provider": "api-airforce",
+          "name": "Api.airforce",
+          "tokens": 24000000,
+          "caps": 0
+        },
+        {
+          "provider": "cloudflare-ai",
+          "name": "Cloudflare Workers AI",
+          "tokens": 22700000,
+          "caps": 0
+        },
+        {
+          "provider": "xkiro",
+          "name": "xKiro",
+          "tokens": 15000000,
+          "caps": 0
+        },
+        {
+          "provider": "bazaarlink",
+          "name": "BazaarLink",
+          "tokens": 1440000,
+          "caps": 0
+        },
+        {
+          "provider": "openrouter",
+          "name": "OpenRouter",
+          "tokens": 1200000,
+          "caps": 0
+        },
+        {
+          "provider": "cohere",
+          "name": "Cohere",
+          "tokens": 800000,
+          "caps": 0
+        },
+        {
+          "provider": "sambanova",
+          "name": "SambaNova",
+          "tokens": 480000,
+          "caps": 0
+        },
+        {
+          "provider": "morph",
+          "name": "Morph",
+          "tokens": 160000,
+          "caps": 0
+        },
+        {
+          "provider": "kiro",
+          "name": "Kiro AI",
+          "tokens": 25000,
+          "caps": 0
+        }
+      ],
+      "oneTime": [
+        {
+          "provider": "glm-cn",
+          "v": 20000000
+        },
+        {
+          "provider": "doubao",
+          "v": 15000000
+        },
+        {
+          "provider": "ai21",
+          "v": 10000000
+        },
+        {
+          "provider": "longcat",
+          "v": 10000000
+        },
+        {
+          "provider": "deepseek",
+          "v": 5000000
+        },
+        {
+          "provider": "hyperbolic",
+          "v": 5000000
+        },
+        {
+          "provider": "nscale",
+          "v": 5000000
+        },
+        {
+          "provider": "deepinfra",
+          "v": 1000000
+        },
+        {
+          "provider": "fireworks",
+          "v": 1000000
+        },
+        {
+          "provider": "qoder",
+          "v": 1000000
+        },
+        {
+          "provider": "scaleway",
+          "v": 1000000
+        },
+        {
+          "provider": "novita",
+          "v": 500000
+        }
+      ],
+      "uncappedNames": [
+        "Agnes AI",
+        "Baidu",
+        "Gemini",
+        "GLM Coding",
+        "Kilo Gateway",
+        "NVIDIA NIM",
+        "onomeo",
+        "Requesty",
+        "SEA-LION",
+        "Token Harbor"
+      ],
+      "gatedProviderNames": ["ModelScope"]
+    },
+    "headlineSteady": 89780000,
+    "headlineFirst": 153280000,
+    "headlineGated": 6000000,
+    "headlineSocialGated": 15000000,
+    "rowSumLive": 159000000,
+    "rowSumRetired": 11190500000,
+    "rowSumTotal": 11349500000,
+    "rowSumRetiredShare": 0.986,
+    "freeProviders": {
+      "total": 50,
+      "apiKey": 43,
+      "keyless": 6,
+      "toolAccount": 1,
+      "webChat": 0
+    },
+    "freeModels": 185,
+    "freeAccessRows": 214,
+    "freePublishedPools": 12,
+    "hasFreeProviders": 144,
+    "freeSearchProviders": 8,
+    "freeAudioProviders": 1,
+    "headlineSteadyLabel": "~90M",
+    "headlineFirstLabel": "~153M",
+    "rowSumLiveLabel": "~159M",
+    "rowSumTotalLabel": "~11.3B",
+    "publicFreeTierBudget": {
+      "steady": 89780000,
+      "first": 153280000,
+      "boost": 24000000,
+      "gated": 6000000,
+      "poolCount": 16,
+      "modelCount": 395,
+      "discontinued": 181,
+      "avoidProviders": 0,
+      "pools": [
+        {
+          "provider": "groq",
+          "name": "Groq",
+          "tokens": 24000000,
+          "caps": 4
+        },
+        {
+          "provider": "api-airforce",
+          "name": "Api.airforce",
+          "tokens": 24000000,
+          "caps": 0
+        },
+        {
+          "provider": "cloudflare-ai",
+          "name": "Cloudflare Workers AI",
+          "tokens": 22700000,
+          "caps": 0
+        },
+        {
+          "provider": "xkiro",
+          "name": "xKiro",
+          "tokens": 15000000,
+          "caps": 0
+        },
+        {
+          "provider": "bazaarlink",
+          "name": "BazaarLink",
+          "tokens": 1440000,
+          "caps": 0
+        },
+        {
+          "provider": "openrouter",
+          "name": "OpenRouter",
+          "tokens": 1200000,
+          "caps": 0
+        },
+        {
+          "provider": "cohere",
+          "name": "Cohere",
+          "tokens": 800000,
+          "caps": 0
+        },
+        {
+          "provider": "sambanova",
+          "name": "SambaNova",
+          "tokens": 480000,
+          "caps": 0
+        },
+        {
+          "provider": "morph",
+          "name": "Morph",
+          "tokens": 160000,
+          "caps": 0
+        }
+      ],
+      "oneTime": [
+        {
+          "provider": "glm-cn",
+          "v": 20000000
+        },
+        {
+          "provider": "doubao",
+          "v": 15000000
+        },
+        {
+          "provider": "longcat",
+          "v": 10000000
+        },
+        {
+          "provider": "deepseek",
+          "v": 5000000
+        },
+        {
+          "provider": "hyperbolic",
+          "v": 5000000
+        },
+        {
+          "provider": "nscale",
+          "v": 5000000
+        },
+        {
+          "provider": "deepinfra",
+          "v": 1000000
+        },
+        {
+          "provider": "qoder",
+          "v": 1000000
+        },
+        {
+          "provider": "scaleway",
+          "v": 1000000
+        },
+        {
+          "provider": "novita",
+          "v": 500000
+        }
+      ],
+      "uncappedNames": [
+        "Agnes AI",
+        "Baidu",
+        "Gemini",
+        "GLM Coding",
+        "Kilo Gateway",
+        "NVIDIA NIM",
+        "onomeo",
+        "Requesty",
+        "SEA-LION",
+        "Token Harbor"
+      ],
+      "gatedProviderNames": ["ModelScope"]
+    }
+  }
+}

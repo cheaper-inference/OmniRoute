@@ -82,6 +82,20 @@ export function getModelCap(poolId: string, apiKeyId: string, model: string): Mo
     .get(poolId, apiKeyId, model);
   return row ? rowToModelCap(row) : null;
 }
+
+/** Caps of one key in one pool, ordered by model. */
+export function listModelCapsForApiKey(poolId: string, apiKeyId: string): ModelCap[] {
+  return getDb()
+    .prepare<ModelCapRow>(
+      `SELECT pool_id, api_key_id, model, cap_value, cap_unit
+       FROM quota_allocation_model_caps
+       WHERE pool_id = ? AND api_key_id = ?
+       ORDER BY model`
+    )
+    .all(poolId, apiKeyId)
+    .map(rowToModelCap);
+}
+
 export function setModelCap(cap: ModelCap): void {
   getDb()
     .prepare(

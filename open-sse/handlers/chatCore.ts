@@ -3,7 +3,7 @@ import type {
   HttpAttemptRejectionSlot,
 } from "../utils/providerHttpAttempts.ts";
 import { finalizeTranslatedRequest } from "./chatCore/translatedRequestFinalize.ts";
-import { isPassiveCodex } from "../services/tokenRefresh/passiveCodex.ts";
+import { isPassiveCodex, adoptPassiveCodex } from "../services/tokenRefresh/passiveCodex.ts";
 import { enforceResponsesToolHistory } from "../translator/helpers/responsesToolHistory.ts";
 import {
   injectMemoryAndSkills,
@@ -31,7 +31,7 @@ export {
   hoistLeadingTextSystemMessages,
   relocateDirectiveOnlyMessages,
 } from "./chatCore/claudeSystemRole.ts";
-import { checkIdempotencyCache } from "./chatCore/idempotency.ts";
+import { checkIdempotencyCache, readIdempotencyResponse } from "./chatCore/idempotency.ts";
 import {
   acquireTurnExecutionWithWait,
   createTurnInProgressResult,
@@ -52,7 +52,11 @@ import { runStreamingTail } from "./chatCore/streamingTail.ts";
 import { sanitizeChatRequestBody } from "./chatCore/sanitization.ts";
 import { isReasoningContinuationIncompatible } from "./chatCore/reasoningInputGate.ts";
 
-import { getHeaderValueCaseInsensitive, resolveCompressionHeader } from "./chatCore/headers.ts";
+import {
+  getHeaderValueCaseInsensitive,
+  resolveCompressionHeader,
+  resolveNoLogEnabled,
+} from "./chatCore/headers.ts";
 
 import {
   isCodexOriginatedHeaders,
@@ -154,6 +158,7 @@ import {
 } from "@/shared/utils/featureFlags.ts";
 import { resolveNoAuthEchoModel } from "./chatCore/noAuthEchoModel.ts";
 import { toPositiveInteger } from "../services/reasoningTokenBuffer.ts";
+import { buildReasoningCacheScope } from "../services/reasoningCache.ts";
 import {
   buildErrorBody,
   createErrorResult,
@@ -250,7 +255,11 @@ import { runPluginOnResponseHook } from "./chatCore/pluginOnResponse.ts";
 import { applyPostTranslationCompression } from "./chatCore/postTranslationCompression.ts";
 import { isJsonRecord } from "./chatCore/nonStreamingResponseParse.ts";
 import { recordNonStreamingUsageStats } from "./chatCore/nonStreamingUsageStats.ts";
-import { resolveUsageAgentContext } from "./chatCore/agentContext.ts";
+import {
+  resolveCallLogSessionTag,
+  resolveLaunchSessionTag,
+  resolveUsageAgentContext,
+} from "./chatCore/agentContext.ts";
 import { getModelNormalizeToolCallId, getModelPreserveOpenAIDeveloperRole } from "@/lib/db/models";
 import { extractSessionAffinityKey } from "@/sse/services/auth";
 import { createManagedLeaseFence } from "./chatCore/managedLeaseFence.ts";
@@ -263,6 +272,7 @@ import {
   redactPendingBody,
 } from "@/lib/guardrails/videoBridgeSnapshotRedaction";
 import {
+  normalizeGeminiPromptCacheMode,
   shouldPreserveCacheControl,
   resolveConnectionCacheOverride,
 } from "../utils/cacheControlPolicy.ts";
@@ -294,6 +304,7 @@ import {
   shouldDeferAntigravityQuotaStateToCaller,
 } from "../services/accountFallback.ts";
 import { saveIdempotencyWithConfiguredWindow } from "@/lib/idempotencyLayer";
+import { hasMintedPiiTokens } from "../utils/piiTokenVault.ts";
 
 import { computeRequestHash, shouldDeduplicate } from "../services/requestDedup.ts";
 import {
@@ -324,6 +335,21 @@ import { generateRequestId } from "@/shared/utils/requestId";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
+import {
+  captureCodexConnectionFence,
+  captureCodexConnectionOwnerFence,
+  adoptCodexConnectionFence,
+  runWithCodexConnectionFence,
+  bindCodexResponseFence,
+  getCodexOperationFence,
+  isCodexConnectionFenceCurrent,
+  StaleCodexOperationError,
+  type CodexConnectionFence,
+} from "../services/codexAccount/fences.ts";
+import {
+  adoptCommittedCodexRefresh,
+  persistCodexRefresh,
+} from "../services/codexAccount/refreshPersistence.ts";
 import { handleToolCallExecution } from "@/lib/skills/interception";
 import { buildClaudeCodeBridgeBody } from "./chatCore/claudeCodeBridgeBody.ts";
 import { setGeminiThoughtSignatureMode } from "../services/geminiThoughtSignatureStore.ts";
@@ -361,9 +387,73 @@ type VideoBridgeLogParam = { observed: boolean; redaction: VideoBridgeLogRedacti
 // extractSystemRoleMessages extracted to chatCore/claudeSystemRole.ts (#3501); re-exported above so
 // existing importers (e.g. tests/unit/system-role-extraction.test.ts) keep resolving it from here.
 export async function handleChatCore(args: Parameters<typeof handleChatCoreInner>[0]) {
-  // one implicit resilience store per attempt (combo legs each run
-  // handleChatCore, so each leg gets its own isolated store).
-  return withResilienceActionsContext([args], (forwarded) => handleChatCoreInner(forwarded));
+  // One immutable owner snapshot for this invocation, including delayed stream callbacks.
+  let fence: CodexConnectionFence | null = null;
+  try {
+    if (args.modelInfo?.provider === "codex") {
+      if (isPassiveCodex("codex")) {
+        const credentials = args.credentials ?? {};
+        fence = captureCodexConnectionOwnerFence(credentials, args.connectionId);
+        const adopted = await adoptPassiveCodex(credentials);
+        fence = adoptCodexConnectionFence(fence, credentials, adopted, args.connectionId);
+        if (args.credentials) Object.assign(args.credentials, adopted);
+      } else {
+        fence = captureCodexConnectionFence(args.credentials ?? {}, args.connectionId);
+      }
+    }
+  } catch (error) {
+    if (error instanceof StaleCodexOperationError)
+      return createErrorResult(409, error.message, null, error.code);
+    throw error;
+  }
+  return runWithCodexConnectionFence(fence, async () => {
+    const result = await withResilienceActionsContext([args], (forwarded) =>
+      handleChatCoreInner(forwarded)
+    );
+    if (result?.response) bindCodexResponseFence(result.response, fence);
+    return result;
+  });
+}
+
+async function readLatestRefreshToken(connectionId: string): Promise<string | null> {
+  const latest = await getProviderConnectionById(connectionId);
+  return typeof latest?.refreshToken === "string" ? latest.refreshToken : null;
+}
+
+function adoptRefreshedCodexCredentials({
+  provider,
+  refreshFence,
+  targetCredentials,
+  credentials,
+  newCredentials,
+}: {
+  provider: string;
+  refreshFence: CodexConnectionFence | null;
+  targetCredentials: Record<string, unknown>;
+  credentials: Record<string, unknown>;
+  newCredentials: Record<string, unknown>;
+}): "passive" | "committed" | "stale" | null {
+  const passive = isPassiveCodex(provider);
+  if (passive) {
+    try {
+      adoptCodexConnectionFence(refreshFence, targetCredentials, {
+        ...targetCredentials,
+        ...newCredentials,
+      });
+    } catch (error) {
+      if (error instanceof StaleCodexOperationError) return "stale";
+      throw error;
+    }
+  } else {
+    if (!refreshFence) return null;
+    // Every mutex waiter adopts the same durable version instead of writing again.
+    if (!adoptCommittedCodexRefresh(newCredentials, refreshFence)) {
+      throw new StaleCodexOperationError();
+    }
+  }
+  Object.assign(targetCredentials, newCredentials);
+  Object.assign(credentials, newCredentials);
+  return passive ? "passive" : "committed";
 }
 
 /** Process a chat request through admission, translation, dispatch, and response handling. */
@@ -383,12 +473,15 @@ async function handleChatCoreInner({
   comboName,
   comboStrategy = null,
   isCombo = false,
+  // Virtual routes have no persisted combo settings, even if a legacy row shares the name.
+  isVirtualAutoCombo = false,
   routingComboId = null,
   sessionAffinityKey = null,
   comboStepId = null,
   comboExecutionKey = null,
   cachedSettings = null,
   skipUpstreamRetry = false,
+  nonReplayableRequest = false,
   createPiiTransform = null,
   correlationId = null,
   conversationId = null,
@@ -440,6 +533,10 @@ async function handleChatCoreInner({
   // (chatCore/memoryExtraction.ts::runMemoryExtractionGate).
   const videoBridgeObserved: boolean =
     (videoBridgeLog as VideoBridgeLogParam | undefined)?.observed === true;
+  // Reversible PII vault: tokens minted for this request resolve only inside it, so memory and
+  // the idempotency / semantic cache writes are skipped. Read here, while the request scope is
+  // live; the streaming tail runs after it.
+  const piiTokensMinted = hasMintedPiiTokens();
   // resume flag from chat.ts, noted under the attempt store opened above.
   notePreviousResponseResumed(previousResponseResumed);
   const resilienceSettings = resolveResilienceSettings(cachedSettings);
@@ -533,7 +630,19 @@ async function handleChatCoreInner({
   ): EffectiveServiceTier | null => resolveReportedServiceTierFor(provider, payload, maxDepth);
   let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let providerResponse;
-  const agentContext = resolveUsageAgentContext(body, clientRawRequest?.headers, apiKeyInfo);
+  // Per-key no-log flag OR the per-request `x-omniroute-no-log` header. Resolved
+  // before agent-context extraction so a header-only no-log request also drops
+  // prompt-derived project/branch fields from usage attribution.
+  const noLogEnabled = resolveNoLogEnabled(apiKeyInfo, clientRawRequest?.headers ?? null);
+  const agentContext = resolveUsageAgentContext(
+    body,
+    clientRawRequest?.headers,
+    apiKeyInfo,
+    noLogEnabled
+  );
+  // `omniroute launch` session tag (olx_ bearer) unless an explicit x-omniroute-session-id
+  // header is present; null for every other request, so their session_tag is unchanged.
+  const launchSessionTag = resolveLaunchSessionTag(clientRawRequest?.headers, apiKeyInfo);
   // Failure usage record building extracted to chatCore/failureUsage.ts (#3501); the handler keeps
   // the fire-and-forget save + computes latencyMs, so the call sites stay byte-identical.
   const persistFailureUsage = (
@@ -585,7 +694,7 @@ async function handleChatCoreInner({
   // ── Phase 9.2: Idempotency check ──
   // Resolve the idempotency key once here and reuse it at the Phase 9.2 save site below,
   // rather than re-deriving it. (#3821-review LEDGER-6)
-  const { hit: idempotencyHit, idempotencyKey } = await checkIdempotencyCache({
+  const idempotencyContext = {
     clientRawRequest,
     provider,
     model,
@@ -597,7 +706,8 @@ async function handleChatCoreInner({
     startTime,
     log,
     videoTranscriptSensitive: videoBridgeObserved,
-  });
+  };
+  const { hit: idempotencyHit, idempotencyKey } = await checkIdempotencyCache(idempotencyContext);
   if (idempotencyHit) {
     return idempotencyHit;
   }
@@ -622,7 +732,13 @@ async function handleChatCoreInner({
   // Preserve chatCore's canonical formatting while the guarded body remains byte-stable.
   // prettier-ignore
   try {
-    // T07: Inject connectionId into credentials so executors can rotate API keys
+  // A previous turn may have cached its response while this request waited for the slot.
+  if (idempotencyKey) {
+    const replay = await readIdempotencyResponse(idempotencyKey, idempotencyContext);
+    if (replay) return replay;
+  }
+
+  // T07: Inject connectionId into credentials so executors can rotate API keys
   // using providerSpecificData.extraApiKeys (API Key Round-Robin feature)
   if (connectionId && credentials && !credentials.connectionId) {
     credentials.connectionId = connectionId;
@@ -786,7 +902,7 @@ async function handleChatCoreInner({
       providerRequest: initialPendingBody(body, effectiveModel, videoBridgeObserved),
       stage: "registered",
       correlationId,
-      sessionTag: conversationId || null,
+      sessionTag: resolveCallLogSessionTag(launchSessionTag, conversationId, null),
     }) || generateRequestId();
   // Capture before any await: retries can reuse the public preview ID.
   const pendingRequestGeneration = getPendingById().get(pendingRequestId)?.attemptGeneration;
@@ -858,10 +974,9 @@ async function handleChatCoreInner({
       `Converted ${webFetchFallbackPlan.convertedToolCount} web_fetch tool(s) to OmniRoute fallback for ${provider}`
     );
   }
-  const noLogEnabled = apiKeyInfo?.noLog === true;
   // Consolidate settings reads — fetch once, reuse throughout the request
   const settings = cachedSettings ?? (await getCachedSettings());
-  const geminiPromptCacheMode = settings.geminiPromptCacheMode === "implicit" ? "implicit" : "off";
+  const geminiPromptCacheMode = normalizeGeminiPromptCacheMode(settings.geminiPromptCacheMode);
   const isScopedGeminiCacheTarget =
     (provider === "antigravity" || provider === "agy") &&
     effectiveModel
@@ -930,9 +1045,14 @@ async function handleChatCoreInner({
         )) || null;
   const pipelineSessionId = explicitSessionIdHeader || skillRequestId;
   const reasoningReplaySessionKey = sessionAffinityKey || explicitSessionIdHeader;
-  const reasoningCacheScope = reasoningReplaySessionKey
-    ? `api-key:${String(apiKeyInfo?.id ?? "local")}\x1f${String(reasoningReplaySessionKey)}`
-    : null;
+  // One upstream Antigravity session per conversation (prompt-cache scope); the
+  // non-streaming server-tool follow-up leg must reuse it, or it falls back to the
+  // account-wide session and evicts parallel conversations' caches.
+  const antigravitySessionKey = conversationId || sessionAffinityKey || null;
+  const reasoningCacheScope = buildReasoningCacheScope(
+    apiKeyInfo?.id,
+    reasoningReplaySessionKey ? String(reasoningReplaySessionKey) : null
+  );
   // Normalized OpenAI transcript the reasoning replay pass digested for a
   // Responses-API target (reported by translateRequest). A Responses body has
   // `input`, not `messages`, so the replay-cache write side would otherwise digest
@@ -961,6 +1081,7 @@ async function handleChatCoreInner({
       pendingRequestId,
       pendingRequestGeneration,
       clientRawRequest,
+      agentContext, // identifies the attempt whose session turn a failure drops (#14864)
       requestedModel,
       credentials,
       startTime,
@@ -979,7 +1100,12 @@ async function handleChatCoreInner({
       // present — it's populated for every request now, not just ones where the
       // client explicitly sent x-omniroute-session-id. The raw header remains a
       // fallback for any caller that somehow bypassed conversationId resolution.
-      sessionTag: conversationId || explicitSessionIdHeader,
+      // A launch session (olx_ bearer, no explicit header) tags every call of the launch.
+      sessionTag: resolveCallLogSessionTag(
+        launchSessionTag,
+        conversationId,
+        explicitSessionIdHeader
+      ),
       // #12150 P1b surface 1: undefined for every non-video request (byte-identical
       // to before this param existed) — see applyVideoBridgeLogRedaction.
       videoBridgeLogRedaction: (videoBridgeLog as VideoBridgeLogParam | undefined)?.redaction,
@@ -1376,7 +1502,7 @@ async function handleChatCoreInner({
         compressionComboApplied = true;
         return true;
       };
-      if ((isCombo && comboName) || routingComboId) {
+      if (!isVirtualAutoCombo && ((isCombo && comboName) || routingComboId)) {
         try {
           const { getComboByName } = await import("@/lib/db/combos");
           let comboConfig = await getComboByName(comboName);
@@ -1878,7 +2004,7 @@ async function handleChatCoreInner({
           : "Prompt Compression engines disabled; reactive context compaction is ALSO disabled — large histories will NOT be trimmed before reaching the upstream provider"
       );
     }
-    if (isCombo && comboName) {
+    if (isCombo && comboName && !isVirtualAutoCombo) {
       log?.info?.("CONTEXT", `Attempting to resolve combo limits for comboName=${comboName}`);
       try {
         const { getComboByName } = await import("@/lib/db/combos");
@@ -2371,6 +2497,7 @@ async function handleChatCoreInner({
           signatureNamespace: connectionId,
           copilotClient: copilotCompatibleReasoning,
           reasoningCacheScope,
+          antigravitySessionKey,
           videoTranscriptSensitive: videoBridgeObserved,
           onReasoningReplayHistory: (messages) => {
             reasoningReplayHistory = messages;
@@ -2643,6 +2770,7 @@ async function handleChatCoreInner({
     resilienceSettings,
     settings,
     skipUpstreamRetry,
+    nonReplayableRequest,
     requestUpstreamStartTimeoutMs,
     stream,
     streamController,
@@ -2778,28 +2906,29 @@ async function handleChatCoreInner({
     }
 
     const targetCredentials = (currentCreds || credentials || {}) as Record<string, unknown>;
+    const refreshFence = provider === "codex" ? (getCodexOperationFence(String(targetCredentials.connectionId || connectionId || "")) ?? captureCodexConnectionFence(targetCredentials)) : null;
     const attemptedRefreshToken =
       typeof targetCredentials?.refreshToken === "string" ? targetCredentials.refreshToken : null;
     credentialRefreshPersistRan = false;
-    const persistFn = onCredentialsRefreshed
+    const persistFn = refreshFence && !isPassiveCodex(provider)
       ? async (refreshResult: Record<string, unknown>) => {
+          await persistCodexRefresh(refreshResult, refreshFence);
           credentialRefreshPersistRan = true;
-          Object.assign(targetCredentials, refreshResult);
-          Object.assign(credentials, refreshResult);
-          await onCredentialsRefreshed(refreshResult);
         }
-      : undefined;
+      : onCredentialsRefreshed && provider !== "codex"
+        ? async (refreshResult: Record<string, unknown>) => {
+            credentialRefreshPersistRan = true;
+            Object.assign(targetCredentials, refreshResult);
+            Object.assign(credentials, refreshResult);
+            await onCredentialsRefreshed(refreshResult);
+          }
+        : undefined;
 
     const casConnectionId =
       typeof targetCredentials?.connectionId === "string"
         ? targetCredentials.connectionId.trim()
         : "";
-    const casReread = casConnectionId
-      ? async () => {
-          const latest = await getProviderConnectionById(casConnectionId);
-          return typeof latest?.refreshToken === "string" ? latest.refreshToken : null;
-        }
-      : null;
+    const casReread = casConnectionId ? () => readLatestRefreshToken(casConnectionId) : null;
 
     const newCredentials = (await refreshWithRetry(
       () =>
@@ -2820,6 +2949,18 @@ async function handleChatCoreInner({
     )) as null | Record<string, unknown>;
 
     if (newCredentials?.accessToken || newCredentials?.copilotToken) {
+      const adoption = adoptRefreshedCodexCredentials({
+        provider,
+        refreshFence,
+        targetCredentials,
+        credentials,
+        newCredentials,
+      });
+      if (adoption === "stale") return null;
+      if (adoption) {
+        if (adoption === "committed") credentialRefreshPersistRan = true;
+        return newCredentials;
+      }
       log?.info?.("TOKEN", `${provider?.toUpperCase()} | refreshed`);
       if (!credentialRefreshPersistRan) {
         Object.assign(targetCredentials, newCredentials);
@@ -2876,7 +3017,7 @@ async function handleChatCoreInner({
     retryAfterMs?: number | null;
     targetModel: string;
   }) => {
-    let errorType = classifyProviderError(statusCode, message, provider);
+    let errorType = classifyProviderError(statusCode, message, provider, upstreamErrorBody);
     if (statusCode === 429 && isModelScope()) {
       const decision = classifyModelScope429(message, normalizeHeaders(headers));
       errorType =
@@ -2890,6 +3031,8 @@ async function handleChatCoreInner({
     }
     const persistentMessage = projectRetainedProviderFailureMessage(message, videoBridgeObserved);
     const errorConnectionId = getCurrentConnectionId() || connectionId;
+    const failureFence = errorConnectionId ? getCodexOperationFence(errorConnectionId) : null;
+    if (failureFence && !isCodexConnectionFenceCurrent(failureFence)) return;
     if (errorConnectionId && errorType) {
       try {
         if (
@@ -3071,12 +3214,16 @@ async function handleChatCoreInner({
                 `[provider] Node ${errorConnectionId} ModelScope model quota exhausted (${statusCode}) for ${targetModel} - ${Math.ceil(quotaCooldownMs / 1000)}s (connection stays active)`
               );
             } else if (
+              // #20969: keep the upstream message/status on the model lock — the connection
+              // stays active, so nothing else records why this model is cooling down.
               lockModelIfPerModelQuota(
                 provider,
                 errorConnectionId,
                 model,
                 "quota_exhausted",
-                quotaCooldownMs
+                quotaCooldownMs,
+                undefined,
+                { lastError: persistentMessage, errorCode: statusCode }
               ) ||
               (targetModel &&
                 targetModel !== model &&
@@ -3085,7 +3232,9 @@ async function handleChatCoreInner({
                   errorConnectionId,
                   targetModel,
                   "quota_exhausted",
-                  quotaCooldownMs
+                  quotaCooldownMs,
+                  undefined,
+                  { lastError: persistentMessage, errorCode: statusCode }
                 ))
             ) {
               const quotaScope = getQuotaScopeLabelForProvider(provider, targetModel);
@@ -3403,6 +3552,7 @@ async function handleChatCoreInner({
       persistFailureUsage,
       pipelineRecovered,
       pipelineSessionId,
+      antigravitySessionKey,
       preserveCacheControl,
       provider,
       providerHeaders,
@@ -3418,6 +3568,7 @@ async function handleChatCoreInner({
       reqLogger,
       requestToolIdentityMap,
       resolveReportedServiceTier,
+      piiTokensMinted,
       runMemoryExtractionGate,
       runPluginOnResponseHook,
       sanitizeErrorMessage,
@@ -3520,6 +3671,7 @@ async function handleChatCoreInner({
     pendingRequestOwner,
     persistAttemptLogs,
     persistFailureUsage,
+    piiTokensMinted,
     pipelineSessionId,
     provider,
     providerHeaders,

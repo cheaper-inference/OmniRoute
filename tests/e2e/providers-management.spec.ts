@@ -261,7 +261,7 @@ test.describe("Providers management", () => {
     const addDialog = page.getByRole("dialog");
     await expect(addDialog).toBeVisible();
     await addDialog.getByLabel(/name/i).fill("Primary OpenAI");
-    await addDialog.getByLabel(/api key/i).fill("sk-openai-valid");
+    await addDialog.getByLabel(/^api key$/i).fill("sk-openai-valid");
     await addDialog.getByRole("button", { name: /^save$/i }).click();
 
     await expect
@@ -276,7 +276,7 @@ test.describe("Providers management", () => {
     await expect(page.getByRole("dialog")).toHaveCount(0);
     expect((await readProviderMockState(page)).syncCalls).toBe(0);
 
-    await page.getByTitle(/^edit$/i).click();
+    await page.getByRole("button", { name: /^edit$/i }).click();
     const editDialog = page.getByRole("dialog");
     await editDialog.getByLabel(/name/i).fill("Primary OpenAI Edited");
     await editDialog.getByLabel(/priority/i).fill("3");
@@ -298,7 +298,7 @@ test.describe("Providers management", () => {
     await page.getByRole("button", { name: /^add$/i }).first().click();
     const invalidDialog = page.getByRole("dialog");
     await invalidDialog.getByLabel(/name/i).fill("Broken OpenAI");
-    await invalidDialog.getByLabel(/api key/i).fill("invalid-key");
+    await invalidDialog.getByLabel(/^api key$/i).fill("invalid-key");
     await invalidDialog.getByRole("button", { name: /^save$/i }).click();
 
     await expect(invalidDialog.getByText(/api key validation failed/i)).toBeVisible();
@@ -314,7 +314,7 @@ test.describe("Providers management", () => {
 
     // #7361 replaced the native window.confirm() with a ConfirmModal, so the old
     // page.once("dialog") handler never fires and the delete request was never sent.
-    await page.getByTitle(/^delete$/i).click();
+    await page.getByRole("button", { name: /^delete$/i }).click();
     const confirmDialog = page
       .getByRole("alertdialog")
       .filter({ hasText: /delete this connection/i });

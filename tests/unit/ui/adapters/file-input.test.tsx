@@ -8,7 +8,9 @@ vi.mock("next-intl", () => ({
     params ? `${namespace}.${key}:${JSON.stringify(params)}` : `${namespace}.${key}`,
 }));
 
-const { FileInput, FileDropZone } = await import("@/shared/components/FileInput");
+const { FileInput, FileDropZone, FileTrigger } = await import("@/shared/components/FileInput");
+const { default: Button } = await import("@/shared/components/Button");
+const kit = await import("@omniroute/ui-kit/file-input");
 const barrel = await import("@/shared/components");
 
 afterEach(() => cleanup());
@@ -123,5 +125,60 @@ describe("FileDropZone adapter → kit FileDropZone", () => {
     expect(zone.getAttribute("data-disabled")).toBe("true");
     fireEvent.drop(zone, { dataTransfer: { files: [file("a.json")], types: ["Files"] } });
     expect(onFilesChange).not.toHaveBeenCalled();
+  });
+});
+
+// Kit `file-trigger`: a toolbar "Import" button opens the picker itself; the hand-written
+// `<input type="file" className="hidden">` + `ref.click()` pairs go away.
+describe("FileTrigger re-export → kit FileTrigger", () => {
+  it("is the kit component, from the adapter module and from the barrel", () => {
+    expect(FileTrigger).toBe(kit.FileTrigger);
+    expect(barrel.FileTrigger).toBe(kit.FileTrigger);
+  });
+
+  it("opens the hidden native picker from the Button adapter and reports the accepted files", () => {
+    const onFilesChange = vi.fn();
+    const onFilesRejected = vi.fn();
+    const { getByRole, getByTestId, container } = render(
+      <FileTrigger
+        accept=".json"
+        data-testid="import-input"
+        onFilesChange={onFilesChange}
+        onFilesRejected={onFilesRejected}
+      >
+        <Button variant="secondary">Import</Button>
+      </FileTrigger>
+    );
+    const button = getByRole("button", { name: "Import" }) as HTMLButtonElement;
+    expect(button.type).toBe("button");
+    const input = getByTestId("import-input") as HTMLInputElement;
+    expect(input.type).toBe("file");
+    expect(input.hidden).toBe(true);
+    expect(input.tabIndex).toBe(-1);
+    // one visible control: no "Choose file" button and no status line
+    expect(container.querySelector("[data-slot='file-input']")).toBeNull();
+    const click = vi.spyOn(input, "click");
+    fireEvent.click(button);
+    expect(click).toHaveBeenCalledTimes(1);
+    const good = file("combos.json");
+    const bad = file("notes.txt", "text/plain");
+    pick(input, [good]);
+    pick(input, [bad]);
+    expect(onFilesChange.mock.calls).toEqual([[[good]]]);
+    expect(onFilesRejected.mock.calls).toEqual([[[{ file: bad, reason: "type" }]]]);
+  });
+
+  it("a disabled trigger disables the child and keeps the picker closed", () => {
+    const { getByRole, container } = render(
+      <FileTrigger disabled>
+        <Button>Import</Button>
+      </FileTrigger>
+    );
+    const button = getByRole("button", { name: "Import" }) as HTMLButtonElement;
+    expect(button.disabled).toBe(true);
+    const input = container.querySelector("input[type=file]") as HTMLInputElement;
+    const click = vi.spyOn(input, "click");
+    fireEvent.click(button);
+    expect(click).not.toHaveBeenCalled();
   });
 });

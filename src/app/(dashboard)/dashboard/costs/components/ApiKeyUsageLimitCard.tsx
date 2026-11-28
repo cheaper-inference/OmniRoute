@@ -2,8 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Card, Input, Toggle } from "@/shared/components";
+import Badge from "@/shared/components/Badge";
+import { Button, Toggle } from "@/shared/components";
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
+import NumberInput from "@/shared/components/NumberInput";
 
 export interface ApiKeyUsageLimitPayload {
   key: {
@@ -64,10 +67,12 @@ function formatResetHint(resetAtIso: string | null, t: ReturnType<typeof useTran
 
 function UsageQuotaMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
-      <p className="text-xs uppercase tracking-wide text-text-muted font-semibold">{label}</p>
+    <Card.Section>
+      <p className="ci-eyebrow" data-weight="medium">
+        {label}
+      </p>
       <p className="text-lg font-semibold text-text-main mt-1">{value}</p>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -133,11 +138,13 @@ export function ApiKeyUsageLimitCard({
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <Icon name="paid" size={18} className="text-success" />
-            <h3 className="text-sm font-semibold text-text-main">{t("apiKeyUsdQuota")}</h3>
+            <h3 className="ci-heading" data-size="sm">
+              {t("apiKeyUsdQuota")}
+            </h3>
             {payload?.key.name && (
-              <span className="truncate rounded bg-bg-subtle px-2 py-0.5 text-xs text-text-muted">
+              <Badge size="sm" className="min-w-0 truncate">
                 {payload.key.name}
-              </span>
+              </Badge>
             )}
           </div>
           <p className="mt-1 text-xs text-text-muted">{t("apiKeyUsdQuotaDescription")}</p>
@@ -160,29 +167,27 @@ export function ApiKeyUsageLimitCard({
           label={t("weeklySpend")}
           value={loading || !status ? "..." : formatter.format(status.weeklySpentUsd)}
         />
-        <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
-          <Input
-            type="number"
+        <Card.Section>
+          <NumberInput
             min={0}
-            step="0.01"
+            step={0.01}
             label={t("dailyQuota")}
-            value={dailyLimit}
-            onChange={(event) => setDailyLimit(event.target.value)}
+            value={dailyLimit === "" ? null : Number(dailyLimit)}
+            onValueChange={(value) => setDailyLimit(value === null ? "" : String(value))}
             placeholder="0.00"
           />
-        </div>
-        <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
-          <Input
-            type="number"
+        </Card.Section>
+        <Card.Section>
+          <NumberInput
             min={0}
-            step="0.01"
+            step={0.01}
             label={t("weeklyQuota")}
-            value={weeklyLimit}
-            onChange={(event) => setWeeklyLimit(event.target.value)}
+            value={weeklyLimit === "" ? null : Number(weeklyLimit)}
+            onValueChange={(value) => setWeeklyLimit(value === null ? "" : String(value))}
             placeholder="0.00"
             hint={formatResetHint(status?.weeklyResetAtIso ?? null, t)}
           />
-        </div>
+        </Card.Section>
       </div>
 
       {error && (

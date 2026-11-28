@@ -5,11 +5,12 @@
  */
 "use client";
 
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Icon from "@/shared/components/Icon";
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Card, Textarea } from "@/shared/components";
+import { Button, Card, Textarea, IconChip } from "@/shared/components";
 
 // ── Pure validator (exported for unit tests) ──────────────────────────────────
 
@@ -148,18 +149,16 @@ export function CliproxyModelMappingEditor() {
   return (
     <Card padding="md">
       <div className="flex items-center gap-3 mb-4">
-        <div className="size-8 rounded-lg flex items-center justify-center border border-border bg-bg-subtle text-text-main">
-          <Icon name="account_tree" size={20} />
-        </div>
+        <IconChip size="sm">
+          <Icon name="account_tree" />
+        </IconChip>
         <div>
-          <h3 className="font-medium text-sm">{t("modelMapping")}</h3>
+          <h3 className="ci-heading" data-size="sm">
+            {t("modelMapping")}
+          </h3>
           <p className="text-xs text-text-muted">
             {t.rich("modelMappingDescription", {
-              example: () => (
-                <code className="font-mono bg-bg-subtle px-1 rounded">
-                  {'"gpt-4o": "openai-gpt-4o"'}
-                </code>
-              ),
+              example: () => <InlineCode>{'"gpt-4o": "openai-gpt-4o"'}</InlineCode>,
             })}
           </p>
         </div>
@@ -177,7 +176,8 @@ export function CliproxyModelMappingEditor() {
       )}
 
       <Textarea
-        className="min-h-[120px] resize-y font-mono text-xs"
+        mono
+        className="min-h-[120px] resize-y"
         error={!isValid && rawText !== EMPTY_MAPPING}
         value={rawText}
         onChange={(e) => {

@@ -1,0 +1,1 @@
+- **build(docker):** Move the final base, `-web`, and CLI images from Debian trixie to digest-pinned Wolfi (`wolfi-base`). Trivy found 0 CVEs in the prototype images. The builder stays on Debian, the `node` user keeps UID 1000, and the web image still uses Playwright's Chromium.

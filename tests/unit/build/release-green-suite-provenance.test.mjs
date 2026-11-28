@@ -24,7 +24,7 @@ const command = (name) => ({
 });
 
 // Public observer JSON + exit, with only unrelated external commands substituted.
-function observe(mutate = () => {}, { extra = false, workflow = workflowSha } = {}) {
+function observe(mutate = () => {}, { extra = false, omitSuite, workflow = workflowSha } = {}) {
   mkdirSync(join(root, "_artifacts"), { recursive: true });
   const dir = mkdtempSync(join(root, "_artifacts/suite-provenance-"));
   try {
@@ -39,7 +39,12 @@ function observe(mutate = () => {}, { extra = false, workflow = workflowSha } = 
       mkdirSync(join(dir, path), { recursive: true });
     writeFileSync(join(dir, "package.json"), '{"type":"commonjs"}');
     writeFileSync(join(dir, "package-lock.json"), "{}");
-    for (const file of ["validate-release-green.mjs", "gate-process.mjs"])
+    for (const file of [
+      "validate-release-green.mjs",
+      "gate-process.mjs",
+      "eslint-measurement.mjs",
+      "release-green-static-profile.mjs",
+    ])
       copyFileSync(join(root, "scripts/quality", file), join(dir, "scripts/quality", file));
     writeFileSync(
       join(dir, "config/quality/quality-baseline.json"),
@@ -63,7 +68,10 @@ function observe(mutate = () => {}, { extra = false, workflow = workflowSha } = 
     const executable = (name, body) =>
       writeFileSync(join(dir, "bin", name), `#!${process.execPath}\n${body}`, { mode: 0o755 });
     executable("git", `console.log("${sha}");`);
-    executable("npx", 'console.log("[]");');
+    executable(
+      "npx",
+      'console.log(JSON.stringify([{filePath:"fixture.ts",errorCount:0,warningCount:0}]));'
+    );
     executable(
       "npm",
       `
@@ -72,6 +80,7 @@ function observe(mutate = () => {}, { extra = false, workflow = workflowSha } = 
     `
     );
     for (const name of names) {
+      if (name === omitSuite) continue;
       const receipt = {
         schemaVersion: 1,
         name,
@@ -134,6 +143,26 @@ function observe(mutate = () => {}, { extra = false, workflow = workflowSha } = 
 }
 
 test(
+  "a missing hosted receipt blocks the observer with incomplete evidence",
+  { skip: process.platform === "win32" },
+  () => {
+    const { status, report } = observe(() => {}, { omitSuite: "unit-1" });
+    assert.equal(status, 1);
+    assert.equal(report.releaseGreen, false);
+    assert.deepEqual(
+      report.checks.find((check) => check.id === "unit"),
+      {
+        id: "unit",
+        kind: "hard",
+        ok: false,
+        detail: "unit-1 no result",
+        evidenceState: "INCOMPLETE",
+      }
+    );
+  }
+);
+
+test(
   "the observer rejects a successful hosted suite from a different candidate",
   { skip: process.platform === "win32" },
   () => {
@@ -142,6 +171,10 @@ test(
     });
     assert.equal(result.status, 1);
     assert.equal(result.report.releaseGreen, false);
+    assert.equal(
+      result.report.checks.find((check) => check.id === "unit").evidenceState,
+      "INCOMPLETE"
+    );
   }
 );
 
@@ -176,6 +209,10 @@ test(
     const result = observe(() => {}, { extra: true });
     assert.equal(result.status, 1);
     assert.equal(result.report.releaseGreen, false);
+    assert.equal(
+      result.report.checks.find((check) => check.id === "hosted-suites").evidenceState,
+      "INCOMPLETE"
+    );
   }
 );
 
@@ -350,12 +387,14 @@ test(
   "a complete failing suite stays a failure and missing context cannot write a receipt",
   { skip: process.platform === "win32" },
   () => {
+    const failed = observe((receipt) => {
+      receipt.code = 1;
+      receipt.detail = "failed assertion";
+    });
+    assert.equal(failed.status, 1);
     assert.equal(
-      observe((receipt) => {
-        receipt.code = 1;
-        receipt.detail = "failed assertion";
-      }).status,
-      1
+      failed.report.checks.find((check) => check.id === "unit").evidenceState,
+      "COMPLETE"
     );
     const result = writeReceipt({ context: false });
     assert.notEqual(result.status, 0);

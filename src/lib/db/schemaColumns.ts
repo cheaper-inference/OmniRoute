@@ -12,24 +12,34 @@ import type { SqliteAdapter } from "./adapters/types";
 
 type SqliteDatabase = SqliteAdapter;
 
+const PROVIDER_CONNECTION_HEALED_COLUMNS: ReadonlyArray<readonly [string, string]> = [
+  ["auth_type", "TEXT"],
+  ["name", "TEXT"],
+  ["email", "TEXT"],
+  ["display_name", "TEXT"],
+  ["provider_specific_data", "TEXT"],
+  ["rate_limit_protection", "INTEGER DEFAULT 0"],
+  ["last_used_at", "TEXT"],
+  ["default_model", "TEXT"], // legacy-schema hole; later data migrations read it
+  ["last_ping_at", "TEXT"], // added by 123_quota_auto_ping; back-filled here for divergent lineages
+  ["last_pinged_reset_key", "TEXT"], // added by 123_quota_auto_ping; back-filled here for divergent lineages
+  // 001 columns a pre-001 legacy table can lack; the Codex fence triggers (228) read them on
+  // every provider_connections UPDATE, so a missing one would fail every write.
+  ["access_token", "TEXT"],
+  ["project_id", "TEXT"],
+  ["test_status", "TEXT"],
+  ["last_error", "TEXT"],
+  ["last_error_at", "TEXT"],
+  ["rate_limited_until", "TEXT"],
+];
+
 export function ensureProviderConnectionsColumns(db: SqliteDatabase) {
   try {
     const columns = db.prepare("PRAGMA table_info(provider_connections)").all() as Array<{
       name?: string;
     }>;
     const columnNames = new Set(columns.map((column) => String(column.name ?? "")));
-    for (const [column, type] of [
-      ["auth_type", "TEXT"],
-      ["name", "TEXT"],
-      ["email", "TEXT"],
-      ["display_name", "TEXT"],
-      ["provider_specific_data", "TEXT"],
-      ["rate_limit_protection", "INTEGER DEFAULT 0"],
-      ["last_used_at", "TEXT"],
-      ["default_model", "TEXT"], // legacy-schema hole; later data migrations read it
-      ["last_ping_at", "TEXT"], // added by 123_quota_auto_ping; back-filled here for divergent lineages
-      ["last_pinged_reset_key", "TEXT"], // added by 123_quota_auto_ping; back-filled here for divergent lineages
-    ]) {
+    for (const [column, type] of PROVIDER_CONNECTION_HEALED_COLUMNS) {
       if (!columnNames.has(column)) {
         db.exec(`ALTER TABLE provider_connections ADD COLUMN ${column} ${type}`);
         console.log(`[DB] Added provider_connections.${column} column`);
@@ -91,13 +101,19 @@ export function ensureProviderConnectionsColumns(db: SqliteDatabase) {
   }
 }
 
-// Each index on the left is a leftmost prefix of the index on the right, so it only adds write
-// cost. Old migrations (001, 007, 025) still create them; this runs after migrations on every
-// boot and drops them. The wider index must exist first, so no lookup is left without an index.
+// Each index on the left is a leftmost prefix of the index on the right (or has exactly the same
+// columns), so it only adds write cost. Old migrations (001, 007, 025, 047, 048) still create
+// them; this runs after migrations on every boot and drops them. The wider index must exist
+// first, so no lookup is left without an index. The summary tables' UNIQUE indexes (048) back the
+// rollup's ON CONFLICT and stay.
 const PREFIX_DUPLICATE_INDEXES = [
   ["idx_uh_provider", "idx_uh_provider_model_timestamp"],
   ["idx_uh_timestamp", "idx_uh_dedup"],
   ["idx_call_logs_request_type", "idx_cl_request_provider"],
+  ["idx_daily_usage_provider_model_date", "idx_daily_usage_unique"],
+  ["idx_daily_usage_provider_model_date_composite", "idx_daily_usage_unique"],
+  ["idx_hourly_usage_provider_model_date", "idx_hourly_usage_unique"],
+  ["idx_hourly_usage_provider_model_date_composite", "idx_hourly_usage_unique"],
 ] as const;
 
 export function dropPrefixDuplicateIndexes(db: SqliteDatabase) {
@@ -327,6 +343,11 @@ export function ensureCallLogsColumns(db: SqliteDatabase) {
     if (!columnNames.has("queue_wait_ms")) {
       db.exec("ALTER TABLE call_logs ADD COLUMN queue_wait_ms INTEGER DEFAULT NULL");
       console.log("[DB] Added call_logs.queue_wait_ms column");
+    }
+    // The call-log INSERT names this column on every write (provider-reported charge).
+    if (!columnNames.has("buyer_cost_micro")) {
+      db.exec("ALTER TABLE call_logs ADD COLUMN buyer_cost_micro INTEGER DEFAULT NULL");
+      console.log("[DB] Added call_logs.buyer_cost_micro column");
     }
     if (!columnNames.has("added_wait_cause")) {
       db.exec("ALTER TABLE call_logs ADD COLUMN added_wait_cause TEXT DEFAULT NULL");

@@ -284,7 +284,7 @@ export default function Header({ onOpenCommandPalette }: HeaderProps) {
           </div>
         )}
       </div>
-      <div className="ms-auto flex items-center gap-2">
+      <div className="ms-auto flex shrink-0 items-center gap-2">
         <ProductSwitcher
           items={KEAK_PRODUCT_LINKS}
           activeProduct={KEAK_ACTIVE_PRODUCT}
@@ -298,7 +298,6 @@ export default function Header({ onOpenCommandPalette }: HeaderProps) {
             icon="search"
             onClick={onOpenCommandPalette}
             title={t("quickNavigationTitle")}
-            aria-label={t("openQuickNavigation")}
             className="hidden md:inline-flex"
           >
             <span className="text-xs">{t("quickNavigation")}</span>

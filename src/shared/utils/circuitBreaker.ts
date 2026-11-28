@@ -23,6 +23,7 @@ import {
   deleteCircuitBreakerState,
   deleteAllCircuitBreakerStates,
 } from "../../lib/db/domainState";
+import { registerDbStateResetter } from "../../lib/db/stateReset";
 import type { FailureKind } from "./classify429";
 
 /**
@@ -227,6 +228,8 @@ export class CircuitBreaker {
   state: CircuitState;
   failureCount: number;
   successCount: number;
+  /** Probe successes in the current HALF_OPEN episode; `halfOpenRequests` of them close the breaker. */
+  halfOpenSuccesses = 0;
   lastFailureTime: number | null;
   halfOpenAllowed: number;
   halfOpenProbeStartedAt: number | null;
@@ -247,6 +250,8 @@ export class CircuitBreaker {
   transitionHistory: TransitionRecord[];
   /** Max transition history entries */
   maxTransitionHistory: number;
+  /** JSON of the row last written to SQLite; an identical row is not written again. */
+  _lastPersisted: string | null;
 
   constructor(name: string, options: CircuitBreakerOptions = {}) {
     this.name = name;
@@ -276,6 +281,7 @@ export class CircuitBreaker {
     this.openCycleCount = 0;
     this.transitionHistory = [];
     this.maxTransitionHistory = 20;
+    this._lastPersisted = null;
 
     this._restoreFromDb();
   }
@@ -316,7 +322,7 @@ export class CircuitBreaker {
 
   _persistToDb() {
     try {
-      saveCircuitBreakerState(this.name, {
+      const record = {
         state: this.state,
         failureCount: this.failureCount,
         lastFailureTime: this.lastFailureTime,
@@ -328,7 +334,13 @@ export class CircuitBreaker {
           openCycleCount: this.openCycleCount,
           kindFailureCounts: this.kindFailureCounts,
         },
-      });
+      };
+      // Healthy traffic asks for the breaker and records a success on every request without
+      // changing the row. Skip the synchronous write when the row would be identical.
+      const serialized = JSON.stringify(record);
+      if (serialized === this._lastPersisted) return;
+      saveCircuitBreakerState(this.name, record);
+      this._lastPersisted = serialized;
     } catch {
       // Non-critical
     }
@@ -503,11 +515,15 @@ export class CircuitBreaker {
       this.kindFailureCounts = {};
     } else if (this.state === STATE.HALF_OPEN) {
       this.successCount++;
-      this._transition(STATE.CLOSED, "probe-success");
-      this.failureCount = 0;
-      this.lastFailureKind = null;
-      this.openCycleCount = 0;
-      this.kindFailureCounts = {};
+      this.halfOpenSuccesses++;
+      // A flapping provider can pass one probe by luck: all allowed probes must pass.
+      if (this.halfOpenSuccesses >= this.halfOpenRequests) {
+        this._transition(STATE.CLOSED, "probe-success");
+        this.failureCount = 0;
+        this.lastFailureKind = null;
+        this.openCycleCount = 0;
+        this.kindFailureCounts = {};
+      }
     } else {
       // CLOSED or DEGRADED: reset counts
       this.failureCount = Math.max(0, this.failureCount - 1); // gradual recovery
@@ -651,6 +667,7 @@ export class CircuitBreaker {
       Date.now() - this.halfOpenProbeStartedAt >= this.resetTimeout
     ) {
       this.halfOpenAllowed = this.halfOpenRequests;
+      this.halfOpenSuccesses = 0;
       this.halfOpenProbeStartedAt = null;
       this.halfOpenProbeGeneration++;
     }
@@ -665,6 +682,7 @@ export class CircuitBreaker {
     }
     this.halfOpenProbeGeneration++;
     this.halfOpenProbeStartedAt = null;
+    this.halfOpenSuccesses = 0;
     // Record transition
     this.transitionHistory.push({
       from: oldState,
@@ -699,6 +717,12 @@ export class CircuitBreakerOpenError extends Error {
 
 const MAX_REGISTRY_SIZE = 500;
 const registry = new Map<string, CircuitBreaker>();
+
+// A restore or import swaps the database file under live breakers. What they last wrote is no
+// longer in the file, so forget it: the next change check writes the live state over a restored row.
+registerDbStateResetter(() => {
+  for (const breaker of registry.values()) breaker._lastPersisted = null;
+});
 
 /** Test-only: current number of registered circuit breakers. */
 export function __getCircuitRegistrySizeForTests(): number {

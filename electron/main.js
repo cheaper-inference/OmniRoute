@@ -227,23 +227,37 @@ function resolveDataDir(overridePath, env = process.env) {
   const configured = env.DATA_DIR?.trim();
   if (configured) return path.resolve(configured);
 
-  // Preserve an existing legacy dir so an upgrade never splits secrets from the database.
+  // Preserve an existing legacy dir so an upgrade never splits secrets from the database,
+  // unless the platform dir holds the database and the legacy dir does not.
   const legacyDir = path.join(require("os").homedir(), ".omniroute");
+  let legacyIsDir = false;
   try {
-    if (fs.statSync(legacyDir).isDirectory()) return legacyDir;
+    legacyIsDir = fs.statSync(legacyDir).isDirectory();
   } catch {
     // absent or unreadable — fall through to the platform default
   }
 
+  let platformDir = null;
   if (process.platform === "win32") {
     const appData = env.APPDATA || path.join(require("os").homedir(), "AppData", "Roaming");
-    return path.join(appData, "omniroute");
+    platformDir = path.join(appData, "omniroute");
+  } else {
+    const xdg = env.XDG_CONFIG_HOME?.trim();
+    if (xdg) platformDir = path.join(path.resolve(xdg), "omniroute");
   }
 
-  const xdg = env.XDG_CONFIG_HOME?.trim();
-  if (xdg) return path.join(path.resolve(xdg), "omniroute");
+  if (legacyIsDir && !(platformDir && !hasDatabase(legacyDir) && hasDatabase(platformDir))) {
+    return legacyDir;
+  }
+  return platformDir ?? legacyDir;
+}
 
-  return legacyDir;
+function hasDatabase(dir) {
+  try {
+    return fs.statSync(path.join(dir, "storage.sqlite")).isFile();
+  } catch {
+    return false;
+  }
 }
 
 function getPreferredEnvFilePath(env = process.env) {
@@ -1203,6 +1217,13 @@ function setupIpcHandlers() {
 app.whenReady().then(async () => {
   // Fix #15: Set up CSP before any content loads
   setupContentSecurityPolicy();
+
+  // Creator credit in the native About panel ("About OmniRoute" in the macOS app menu).
+  // `credits` is read on macOS/Windows, `authors` on Linux.
+  app.setAboutPanelOptions({
+    credits: "Created by Diego Souza (https://github.com/diegosouzapw)",
+    authors: ["Diego Souza (https://github.com/diegosouzapw)"],
+  });
 
   // Headless mode check: supports running without any UI windows or tray icons
   const isHeadless =

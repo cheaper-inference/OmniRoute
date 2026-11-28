@@ -15,6 +15,7 @@ import {
   setCachedResponse as defaultSetCachedResponse,
   isCacheableForWrite as defaultIsCacheableForWrite,
   isTruncatedStreamBody as defaultIsTruncatedStreamBody,
+  isRefusalOrUnavailableCompletion as defaultIsRefusalOrUnavailableCompletion,
   responseCarriesToolCalls,
 } from "@/lib/semanticCache";
 import { isSmallEnoughForSemanticCache as defaultIsSmallEnough } from "../../utils/estimateSize.ts";
@@ -33,6 +34,7 @@ export interface StreamingSemanticCacheStoreDeps {
   isCacheableForWrite: typeof defaultIsCacheableForWrite;
   /** Optional so pre-existing callers/tests with partial deps keep working. */
   isTruncatedStreamBody?: typeof defaultIsTruncatedStreamBody;
+  isRefusalOrUnavailableCompletion?: typeof defaultIsRefusalOrUnavailableCompletion;
   isSmallEnoughForSemanticCache: typeof defaultIsSmallEnough;
   generateSignature: typeof defaultGenerateSignature;
   setCachedResponse: typeof defaultSetCachedResponse;
@@ -41,6 +43,7 @@ export interface StreamingSemanticCacheStoreDeps {
 const DEFAULT_DEPS: StreamingSemanticCacheStoreDeps = {
   isCacheableForWrite: defaultIsCacheableForWrite,
   isTruncatedStreamBody: defaultIsTruncatedStreamBody,
+  isRefusalOrUnavailableCompletion: defaultIsRefusalOrUnavailableCompletion,
   isSmallEnoughForSemanticCache: defaultIsSmallEnough,
   generateSignature: defaultGenerateSignature,
   setCachedResponse: defaultSetCachedResponse,
@@ -58,6 +61,10 @@ interface StreamingCacheArgs {
   streamUsage?: Record<string, unknown> | null;
   log?: LoggerLike;
   videoTranscriptSensitive?: boolean;
+  /** Reversible PII vault minted tokens: a cached copy would replay unresolvable tokens. */
+  piiTokensMinted?: boolean;
+  /** A response masking transform ran on the client copy: the assembled body is unmasked. */
+  maskingActive?: boolean;
 }
 
 function streamTokensSaved(streamUsage: Record<string, unknown> | null | undefined): number {
@@ -70,7 +77,19 @@ function writeStreamingCacheEntry(
   deps: StreamingSemanticCacheStoreDeps
 ): void {
   try {
-    const cleanBody = { ...(args.streamResponseBody as Record<string, unknown>) };
+    // The assembled stream body is a bare `{ choices, usage }`. Store it as a complete
+    // chat.completion so a later non-stream HIT serves a valid body.
+    const streamed = args.streamResponseBody as Record<string, unknown>;
+    const cleanBody: Record<string, unknown> = {
+      id: `chatcmpl-${Date.now()}`,
+      object: "chat.completion",
+      created: Math.floor(Date.now() / 1000),
+      model: args.model,
+      ...streamed,
+    };
+    if (Array.isArray(streamed.choices)) {
+      cleanBody.choices = streamed.choices.map((choice, index) => ({ index, ...choice }));
+    }
     delete cleanBody._streamed;
     if (!deps.isSmallEnoughForSemanticCache(cleanBody)) return;
     const sig = deps.generateSignature(
@@ -105,13 +124,20 @@ function writeStreamingCacheEntry(
   }
 }
 
-export function storeStreamingSemanticCacheResponse(
-  args: StreamingCacheArgs,
-  deps: StreamingSemanticCacheStoreDeps = DEFAULT_DEPS
-): void {
-  if (
+function skipsForPrivacy(args: StreamingCacheArgs): boolean {
+  return Boolean(
     args.provider === "muse-code" ||
     args.videoTranscriptSensitive ||
+    args.piiTokensMinted ||
+    args.maskingActive
+  );
+}
+
+function isStorableStream(
+  args: StreamingCacheArgs,
+  deps: StreamingSemanticCacheStoreDeps
+): boolean {
+  return !(
     !args.enabled ||
     args.streamStatus !== 200 ||
     !args.streamResponseBody ||
@@ -119,9 +145,17 @@ export function storeStreamingSemanticCacheResponse(
     // The stream summary keeps only a bounded text tail; it is not the whole answer.
     args.streamResponseBody._summary_text_tail === true ||
     (deps.isTruncatedStreamBody ?? defaultIsTruncatedStreamBody)(args.streamResponseBody) ||
+    (deps.isRefusalOrUnavailableCompletion ?? defaultIsRefusalOrUnavailableCompletion)(
+      args.streamResponseBody
+    ) ||
     responseCarriesToolCalls(args.streamResponseBody)
-  ) {
-    return;
-  }
+  );
+}
+
+export function storeStreamingSemanticCacheResponse(
+  args: StreamingCacheArgs,
+  deps: StreamingSemanticCacheStoreDeps = DEFAULT_DEPS
+): void {
+  if (skipsForPrivacy(args) || !isStorableStream(args, deps)) return;
   writeStreamingCacheEntry(args, deps);
 }

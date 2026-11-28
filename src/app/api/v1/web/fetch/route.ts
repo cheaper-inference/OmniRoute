@@ -27,13 +27,12 @@ import {
 } from "@omniroute/open-sse/handlers/webFetch.ts";
 import * as log from "@/sse/utils/logger";
 import { getProviderCredentialsWithQuotaPreflight } from "@/sse/services/auth";
-import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 import { enforceApiKeyPolicyWithScope } from "@/app/api/v1/_shared/keyScopedRoute";
 import {
   keyAdmitsKeylessProviders,
   withoutKeyScopeBlocked,
 } from "@/sse/services/keyConnectionScope";
-import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import { v1WebFetchSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import {
@@ -41,6 +40,10 @@ import {
   rateLimitedProviderResponse,
   type RateLimitedCredentials,
 } from "@/app/api/v1/_shared/rateLimit";
+
+import { runWebEndpointCombo } from "@/lib/combos/webEndpointCombo";
+import { getSettings } from "@/lib/db/settings";
+import type { z } from "zod";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -300,24 +303,44 @@ export async function POST(request: Request) {
   }
   const body = validation.data;
 
-  // Optional auth check — when REQUIRE_API_KEY=false, ignore presented
-  // invalid keys so anonymous access works the same as all other client
-  // APIs (#7785).
-  const { apiKey: apiKeyRaw, valid: apiKeyValid } = await resolveClientApiKey(request);
-  if (isRequireApiKeyEnabled() && !apiKeyRaw) {
-    return errorResponse(HTTP_STATUS.UNAUTHORIZED, "Authentication required");
-  }
-  if (isRequireApiKeyEnabled() && apiKeyRaw && !apiKeyValid) {
-    return errorResponse(HTTP_STATUS.UNAUTHORIZED, "Invalid API key");
-  }
+  // Route-level auth, the same rule clientApiPolicy applies: a valid key or a
+  // signed-in dashboard session passes; with REQUIRE_API_KEY=false an invalid
+  // key degrades to anonymous (#7785) and the Scrape tab's session is no longer
+  // refused (KEA-9515).
+  const authError = await enforceClientApiRouteAuth(request);
+  if (authError) return authError;
 
   // Enforce API key policies. GHSA-3w2r: provider credentials (and the
   // fallback walk) stay inside the key's connection scope, as in chat.
-  const scope = await enforceApiKeyPolicyWithScope(request, "web-fetch");
+  const scope = await enforceApiKeyPolicyWithScope(request, body.model || "web-fetch");
   if (scope.rejection) return scope.rejection;
 
+  if (body.model) {
+    return runWebEndpointCombo({
+      name: body.model,
+      endpoint: "web-fetch",
+      request,
+      body,
+      policy: scope.policy,
+      allowedConnections: scope.allowedConnections,
+      settings: await getSettings(),
+      dispatch: (provider, allowedConnections) =>
+        executeWebFetchBody(
+          { ...body, model: undefined, provider: provider as WebFetchProviderId },
+          allowedConnections
+        ),
+    });
+  }
+  return executeWebFetchBody(body, scope.allowedConnections);
+}
+
+/** Execute a validated page-fetch body through a direct provider or named combo. */
+async function executeWebFetchBody(
+  body: z.infer<typeof v1WebFetchSchema>,
+  allowedConnections: string[] | null
+): Promise<Response> {
   // Resolve provider + credentials (explicit provider never falls back; #8297)
-  const target = await resolveWebFetchTarget(body.provider, scope.allowedConnections);
+  const target = await resolveWebFetchTarget(body.provider, allowedConnections);
   if (!target.ok) return target.response;
 
   log.info("WEB_FETCH", `${target.provider} | ${body.url} | format=${body.format}`);
@@ -338,7 +361,7 @@ export async function POST(request: Request) {
     target.credentials,
     !target.isExplicit,
     target.tried,
-    scope.allowedConnections
+    allowedConnections
   );
 
   if (poolExhausted) {

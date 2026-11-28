@@ -146,11 +146,11 @@ export default function ApiKeyFilterDropdown({
               aria-pressed={isAllSelected}
               onClick={selectAll}
               className={`h-auto min-h-0 w-full justify-start gap-2.5 px-2.5 py-2 text-left text-xs ${
-                isAllSelected ? "bg-accent-light font-semibold text-text-main" : "text-text-muted"
+                isAllSelected ? "bg-accent-light text-text-main" : "text-text-muted"
               }`}
             >
               <span
-                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] ${
+                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-3xs ${
                   isAllSelected
                     ? "border-primary bg-primary text-accent-foreground"
                     : "border-border/60 bg-transparent"
@@ -159,7 +159,7 @@ export default function ApiKeyFilterDropdown({
                 {isAllSelected && <Icon name="check" size={12} />}
               </span>
               {t("filterAllKeys")}
-              <span className="ml-auto text-[10px] text-text-muted font-normal">
+              <span className="ml-auto text-3xs text-text-muted font-normal">
                 {available.length}
               </span>
             </Button>
@@ -184,7 +184,7 @@ export default function ApiKeyFilterDropdown({
                   title={key.name || key.id}
                 >
                   <span
-                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] ${
+                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-3xs ${
                       isChecked
                         ? "border-primary bg-primary text-accent-foreground"
                         : "border-border/60 bg-transparent"

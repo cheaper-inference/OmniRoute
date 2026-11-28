@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import CliStatusBadge from "./CliStatusBadge";
@@ -16,6 +17,9 @@ import { CODEX_DEFAULT_MODELS } from "./codexToolOptions";
 import { cn } from "@/shared/utils/cn";
 import Checkbox from "@/shared/components/Checkbox";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Notice from "@/shared/components/Notice";
+import CodePreview from "@/shared/components/CodePreview";
+import { CardSection } from "@/shared/components/Card";
 
 export default function CodexToolCard({
   tool,
@@ -426,7 +430,9 @@ openai_base_url = "${getEffectiveBaseUrl()}"
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-medium text-sm">{tool.name}</h3>
+              <h3 className="ci-heading" data-size="sm">
+                {tool.name}
+              </h3>
               <CliStatusBadge
                 effectiveConfigStatus={effectiveConfigStatus}
                 batchStatus={batchStatus}
@@ -454,61 +460,63 @@ openai_base_url = "${getEffectiveBaseUrl()}"
 
           {!checkingCodex && codexStatus && !cliReady && (
             <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3 p-4 bg-warning/10 border border-warning/30 rounded-lg">
-                <Icon name="warning" className="text-warning" />
-                <div className="flex-1">
-                  <p className="font-medium text-warning">
-                    {codexStatus.installed
-                      ? t("cliNotRunnable", { tool: "Codex" })
-                      : t("cliNotInstalled", { tool: "Codex" })}
-                  </p>
-                  <p className="text-sm text-text-muted">
-                    {codexStatus.installed
-                      ? t("cliFoundFailedHealthcheck", {
-                          tool: "Codex",
-                          reason: codexStatus.reason ? ` (${codexStatus.reason})` : "",
-                        })
-                      : t("installCodexPrompt")}
-                  </p>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowInstallGuide(!showInstallGuide)}
-                >
-                  <Icon
-                    name={showInstallGuide ? "expand_less" : "help"}
-                    size={18}
-                    className="mr-1"
-                  />
-                  {showInstallGuide ? t("hide") : t("howToInstall")}
-                </Button>
-              </div>
+              <Notice
+                variant="warning"
+                layout="inline"
+                icon="warning"
+                title={
+                  codexStatus.installed
+                    ? t("cliNotRunnable", { tool: "Codex" })
+                    : t("cliNotInstalled", { tool: "Codex" })
+                }
+                actions={
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowInstallGuide(!showInstallGuide)}
+                    >
+                      <Icon
+                        name={showInstallGuide ? "expand_less" : "help"}
+                        size={18}
+                        className="mr-1"
+                      />
+                      {showInstallGuide ? t("hide") : t("howToInstall")}
+                    </Button>
+                  </>
+                }
+              >
+                {codexStatus.installed
+                  ? t("cliFoundFailedHealthcheck", {
+                      tool: "Codex",
+                      reason: codexStatus.reason ? ` (${codexStatus.reason})` : "",
+                    })
+                  : t("installCodexPrompt")}
+              </Notice>
               {showInstallGuide && (
-                <div className="p-4 bg-surface border border-border rounded-lg">
-                  <h4 className="font-medium mb-3">{t("installationGuide")}</h4>
+                <CardSection>
+                  <h4 className="mb-3">{t("installationGuide")}</h4>
                   <div className="space-y-3 text-sm">
                     <div>
                       <p className="text-text-muted mb-1">{t("platforms")}</p>
-                      <code className="block px-3 py-2 bg-bg-subtle rounded font-mono text-xs">
-                        npm install -g @openai/codex
-                      </code>
+                      <CodePreview
+                        showHeader={false}
+                        variant="surface"
+                        code="npm install -g @openai/codex"
+                      />
                     </div>
                     <p className="text-text-muted">
-                      {t("afterInstallationRun")}{" "}
-                      <code className="px-1 bg-bg-subtle rounded">codex</code> {t("toVerify")}
+                      {t("afterInstallationRun")} <InlineCode>codex</InlineCode> {t("toVerify")}
                     </p>
                     <div className="pt-2 border-t border-border">
                       <p className="text-text-muted text-xs">
-                        {t("codexAuthNotePrefix")}{" "}
-                        <code className="px-1 bg-bg-subtle rounded">~/.codex/auth.json</code>{" "}
-                        {t("codexAuthNoteMiddle")}{" "}
-                        <code className="px-1 bg-bg-subtle rounded">OPENAI_API_KEY</code>.{" "}
+                        {t("codexAuthNotePrefix")} <InlineCode>~/.codex/auth.json</InlineCode>{" "}
+                        {t("codexAuthNoteMiddle")} <InlineCode>OPENAI_API_KEY</InlineCode>.{" "}
                         {t("codexAuthNoteSuffix")}
                       </p>
                     </div>
                   </div>
-                </div>
+                </CardSection>
               )}
             </div>
           )}
@@ -546,16 +554,16 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                     placeholder={t("baseUrlPlaceholder")}
                     aria-label={t("baseUrl")}
                     className="min-w-0 w-auto flex-1"
-                    inputClassName="text-xs"
+                    size="xs"
                   />
                   {customBaseUrl && getDisplayUrl() !== normalizeCodexBaseUrl(baseUrl, wireApi) && (
                     <Button
                       variant="ghost"
                       size="icon-sm"
+                      tone="muted"
                       onClick={() => setCustomBaseUrl("")}
                       title={t("resetToDefault")}
                       aria-label={t("resetToDefault")}
-                      className="text-text-muted hover:text-primary"
                     >
                       <Icon name="restart_alt" size={14} />
                     </Button>
@@ -574,7 +582,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                       onChange={(e) => setSelectedApiKey(e.target.value)}
                       aria-label={t("apiKey")}
                       className="min-w-0 w-auto flex-1"
-                      selectClassName="text-xs"
+                      nativeSize="xs"
                     >
                       {apiKeys.map((key) => (
                         <option key={key.id} value={key.id}>
@@ -613,7 +621,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                     placeholder="gpt-5.6-sol"
                     aria-label={t("model")}
                     className="min-w-0 w-auto flex-1"
-                    inputClassName="text-xs"
+                    size="xs"
                   />
                   {selectedModel && (
                     <Button
@@ -640,7 +648,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                     onChange={(e) => setReasoningEffort(e.target.value)}
                     aria-label={t("reasoningEffort")}
                     className="min-w-0 w-auto flex-1"
-                    selectClassName="text-xs"
+                    nativeSize="xs"
                   >
                     <option value="none">{t("effortNone")}</option>
                     <option value="low">{t("effortLow")}</option>
@@ -663,7 +671,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                     onChange={(e) => setWireApi(e.target.value)}
                     aria-label={t("wireApi")}
                     className="min-w-0 w-auto flex-1"
-                    selectClassName="text-xs"
+                    nativeSize="xs"
                   >
                     <option value="chat">{t("wireApiChatCompletions")}</option>
                     <option value="responses">{t("wireApiResponses")}</option>
@@ -680,12 +688,12 @@ openai_base_url = "${getEffectiveBaseUrl()}"
 
                 <div className="h-px bg-border/50 my-2"></div>
 
-                <div className="text-[11px] text-text-muted mb-2 font-medium uppercase tracking-wider text-right">
+                <div className="ci-eyebrow mb-2 text-right" data-size="2xs" data-weight="medium">
                   {t("modelAliases")} ([notice.model_migrations])
                 </div>
                 {CODEX_DEFAULT_MODELS.map((defaultModel) => (
                   <div key={defaultModel} className="flex items-center gap-2 group">
-                    <span className="w-32 shrink-0 text-[11px] font-mono text-text-main text-right truncate opacity-70 group-hover:opacity-100 transition-opacity">
+                    <span className="w-32 shrink-0 text-2xs font-mono text-text-main text-right truncate opacity-70 group-hover:opacity-100 transition-opacity">
                       {defaultModel}
                     </span>
                     <Icon
@@ -714,7 +722,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                       placeholder={t("routeModelPlaceholder", { model: defaultModel })}
                       aria-label={defaultModel}
                       className="min-w-0 w-auto flex-1"
-                      inputClassName="text-xs"
+                      size="xs"
                     />
                     {modelMappings[defaultModel] && (
                       <Button
@@ -737,21 +745,24 @@ openai_base_url = "${getEffectiveBaseUrl()}"
               </div>
 
               {message && (
-                <div
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-success/10 text-success" : message.type === "warning" ? "bg-warning/10 text-warning" : "bg-error/10 text-error"}`}
+                <Notice
+                  variant={
+                    message.type === "success"
+                      ? "success"
+                      : message.type === "warning"
+                        ? "warning"
+                        : "critical"
+                  }
+                  icon={
+                    message.type === "success"
+                      ? "check_circle"
+                      : message.type === "warning"
+                        ? "warning"
+                        : "error"
+                  }
                 >
-                  <Icon
-                    name={
-                      message.type === "success"
-                        ? "check_circle"
-                        : message.type === "warning"
-                          ? "warning"
-                          : "error"
-                    }
-                    size={14}
-                  />
-                  <span>{message.text}</span>
-                </div>
+                  {message.text}
+                </Notice>
               )}
 
               <div className="flex items-center gap-2">
@@ -812,8 +823,11 @@ openai_base_url = "${getEffectiveBaseUrl()}"
 
               {/* Profiles Section */}
               {showProfiles && (
-                <div className="mt-2 p-3 bg-surface border border-border rounded-lg">
-                  <h4 className="text-xs font-semibold text-text-main mb-2 flex items-center gap-1">
+                <CardSection className="mt-2">
+                  <h4
+                    className="ci-heading text-text-main mb-2 flex items-center gap-1"
+                    data-size="xs"
+                  >
                     <Icon name="manage_accounts" size={14} />
                     {t("savedProfiles")}
                   </h4>
@@ -836,20 +850,18 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                           </span>
                           <Button
                             variant="secondary"
-                            size="sm"
+                            size="2xs"
                             onClick={() => handleActivateProfile(p.id)}
                             disabled={activatingProfile === p.id}
-                            className="h-6 px-2 text-[10px]"
                           >
                             {activatingProfile === p.id ? "..." : t("activate")}
                           </Button>
                           <Button
-                            variant="ghost"
+                            variant="destructive-ghost"
                             size="icon-sm"
                             onClick={() => handleDeleteProfile(p.id)}
                             title={t("deleteProfile")}
                             aria-label={t("deleteProfile")}
-                            className="text-text-muted hover:text-error"
                           >
                             <Icon name="delete" size={14} />
                           </Button>
@@ -865,7 +877,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                       placeholder={t("profileNamePlaceholder")}
                       aria-label={t("profileNamePlaceholder")}
                       className="min-w-0 w-auto flex-1"
-                      inputClassName="text-xs"
+                      size="xs"
                       onKeyDown={(e) => e.key === "Enter" && handleSaveProfile()}
                     />
                     <Button
@@ -879,13 +891,16 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                       {t("saveCurrent")}
                     </Button>
                   </div>
-                </div>
+                </CardSection>
               )}
 
               {/* Backups Section */}
               {showBackups && (
-                <div className="mt-2 p-3 bg-surface border border-border rounded-lg">
-                  <h4 className="text-xs font-semibold text-text-main mb-2 flex items-center gap-1">
+                <CardSection className="mt-2">
+                  <h4
+                    className="ci-heading text-text-main mb-2 flex items-center gap-1"
+                    data-size="xs"
+                  >
                     <Icon name="history" size={14} />
                     {t("configBackups")}
                   </h4>
@@ -907,10 +922,9 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                           </span>
                           <Button
                             variant="secondary"
-                            size="sm"
+                            size="2xs"
                             onClick={() => handleRestoreBackup(b.id)}
                             disabled={restoringBackup === b.id}
-                            className="h-6 px-2 text-[10px]"
                           >
                             {restoringBackup === b.id ? "..." : t("restore")}
                           </Button>
@@ -918,7 +932,7 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                       ))}
                     </div>
                   )}
-                </div>
+                </CardSection>
               )}
             </>
           )}

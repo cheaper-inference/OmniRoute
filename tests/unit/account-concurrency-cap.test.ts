@@ -91,11 +91,21 @@ describe("maxConcurrent DB round-trip", () => {
 });
 
 describe("maxConcurrent validation", () => {
-  it("rejects negative values", () => {
+  it("rejects negative values below the adaptive sentinel", () => {
+    for (const maxConcurrent of [-2, -100]) {
+      const result = updateProviderConnectionSchema.safeParse({ maxConcurrent });
+
+      assert.equal(result.success, false);
+    }
+  });
+
+  it("accepts -1 as the adaptive sentinel", () => {
     const result = updateProviderConnectionSchema.safeParse({ maxConcurrent: -1 });
 
-    assert.equal(result.success, false);
+    assert.equal(result.success, true);
+    assert.equal(result.data.maxConcurrent, -1);
   });
+
   it("accepts positive integers", () => {
     const result = updateProviderConnectionSchema.safeParse({ maxConcurrent: 3 });
 

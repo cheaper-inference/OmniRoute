@@ -2,7 +2,7 @@ import {
   UPSTREAM_MEDIA_LIMITS,
   downloadUpstreamMedia,
   upstreamMediaErrorText,
-} from "@/shared/network/remoteImageFetch";
+} from "../../utils/remoteMediaFetch.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 
 // Generated videos are fetched from URLs the provider returns, so they go through the
@@ -84,12 +84,6 @@ function clampRunwayDuration(value) {
   const duration = Math.round(Number(value));
   if (!Number.isFinite(duration)) return 5;
   return Math.min(10, Math.max(2, duration));
-}
-
-export function resolvePositiveInteger(value, fallback) {
-  const numeric = Number(value);
-  if (!Number.isFinite(numeric) || numeric <= 0) return fallback;
-  return Math.floor(numeric);
 }
 
 function extractRunwayOutputUrls(task) {

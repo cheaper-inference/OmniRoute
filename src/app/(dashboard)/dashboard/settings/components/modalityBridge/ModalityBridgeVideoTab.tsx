@@ -3,7 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { Card, Collapsible, Input, ModelSelectField, Select, Toggle } from "@/shared/components";
+import {
+  Card,
+  Collapsible,
+  ModelSelectField,
+  NumberInput,
+  Select,
+  Toggle,
+} from "@/shared/components";
 import type { ApiModel } from "@/shared/components/ModelSelectField";
 import {
   MODALITY_BRIDGE_DEFAULTS,
@@ -15,6 +22,7 @@ import {
 } from "@/shared/constants/modalityBridgeDefaults";
 
 import ModalityBridgeStatsRow from "./ModalityBridgeStatsRow";
+import Notice from "@/shared/components/Notice";
 
 interface VideoState {
   modalityBridgeVideoEnabled: boolean;
@@ -107,9 +115,10 @@ function isLoopbackDashboardHost(hostname: string): boolean {
   );
 }
 
-function clampNumber(raw: string, min: number, max: number, fallback: number): number {
-  const parsed = Number.parseInt(raw, 10);
-  return Math.min(max, Math.max(min, Number.isFinite(parsed) ? parsed : fallback));
+// The field already brings an edited value into min/max when the edit ends; an empty field
+// (`null`) falls back to the default. The clamp stays as the last guard before the PATCH.
+function clampNumber(value: number | null, min: number, max: number, fallback: number): number {
+  return Math.min(max, Math.max(min, Math.trunc(value ?? fallback)));
 }
 
 export default function ModalityBridgeVideoTab({
@@ -119,6 +128,7 @@ export default function ModalityBridgeVideoTab({
   const tRoot = useTranslations();
   const [settings, setSettings] = useState<VideoState | null>(null);
   const [runtime, setRuntime] = useState<RuntimeStatus>({ state: "unknown" });
+  const [promotion, setPromotion] = useState<Record<string, unknown>>({});
   const [errorState, setErrorState] = useState<"load" | "save" | null>(null);
   const persistedSettings = useRef<VideoState | null>(null);
   const isVisionModel = useCallback((model: ApiModel) => model.supportsVision === true, []);
@@ -147,6 +157,7 @@ export default function ModalityBridgeVideoTab({
         persistedSettings.current = loadedSettings;
         setSettings(loadedSettings);
         setRuntime(parseRuntimeStatus(runtimeValue));
+        setPromotion(asRecord(asRecord(asRecord(statsValue).video).promotion));
         setErrorState(null);
       })
       .catch(() => {
@@ -185,17 +196,29 @@ export default function ModalityBridgeVideoTab({
   const setLocal = (patch: Partial<VideoState>) => {
     setSettings((previous) => (previous ? { ...previous, ...patch } : previous));
   };
+  const promotionStatus = (policy: "segmentAware" | "contactSheet") => {
+    // A stale status from a different selected model must not survive a settings edit.
+    const value =
+      promotion.contextVerified === true && promotion.model === settings.modalityBridgeVideoModel
+        ? promotion[policy]
+        : "hold";
+    return value === "eligible"
+      ? t("modalityBridgeVideoPromotionEligible")
+      : value === "experimental"
+        ? t("modalityBridgeVideoPromotionExperimental")
+        : t("modalityBridgeVideoPromotionHold");
+  };
   const commitNumber = (
     key:
       | "modalityBridgeVideoFrameCount"
       | "modalityBridgeVideoMaxVideos"
       | "modalityBridgeVideoTimeout",
-    raw: string,
+    next: number | null,
     min: number,
     max: number,
     fallback: number
   ) => {
-    const value = clampNumber(raw, min, max, fallback);
+    const value = clampNumber(next, min, max, fallback);
     setLocal({ [key]: value });
     void update({ [key]: value });
   };
@@ -208,12 +231,9 @@ export default function ModalityBridgeVideoTab({
     >
       <div className="space-y-4">
         {errorState === "save" ? (
-          <div
-            role="alert"
-            className="rounded-control border border-error/30 p-3 text-sm text-error"
-          >
+          <Notice variant="critical">
             {t("modalityBridgeTestError", { message: tRoot("common.error") })}
-          </div>
+          </Notice>
         ) : null}
         <div
           className={`rounded-control border p-3 text-sm ${
@@ -301,53 +321,66 @@ export default function ModalityBridgeVideoTab({
           className="text-sm"
         />
 
+        <Card.Section
+          data-testid="video-promotion-readiness"
+          className="text-sm"
+          aria-live="polite"
+        >
+          <strong>{t("modalityBridgeVideoPromotionTitle")}</strong>
+          <div className="mt-1">segment_aware: {promotionStatus("segmentAware")}</div>
+          <div>contact_sheet: {promotionStatus("contactSheet")}</div>
+          <p className="mt-2 text-xs text-text-muted">
+            {t("modalityBridgeVideoPromotionContextRequired")}
+          </p>
+        </Card.Section>
+
         <Collapsible title={t("modalityBridgeAdvanced")} icon="tune">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <NumberField
-              testId="modality-bridge-video-frame-count"
+            <NumberInput
+              data-testid="modality-bridge-video-frame-count"
               label={t("modalityBridgeVideoFrameCount")}
               min={1}
               max={16}
               value={settings.modalityBridgeVideoFrameCount}
-              onChange={(value) => setLocal({ modalityBridgeVideoFrameCount: value })}
-              onBlur={(raw) =>
+              onValueChange={(value) => setLocal({ modalityBridgeVideoFrameCount: value ?? 0 })}
+              onValueCommit={(next) =>
                 commitNumber(
                   "modalityBridgeVideoFrameCount",
-                  raw,
+                  next,
                   1,
                   16,
                   MODALITY_BRIDGE_DEFAULTS.videoFrameCount
                 )
               }
             />
-            <NumberField
-              testId="modality-bridge-video-max-videos"
+            <NumberInput
+              data-testid="modality-bridge-video-max-videos"
               label={t("modalityBridgeVideoMaxVideos")}
               min={1}
               max={4}
               value={settings.modalityBridgeVideoMaxVideos}
-              onChange={(value) => setLocal({ modalityBridgeVideoMaxVideos: value })}
-              onBlur={(raw) =>
+              onValueChange={(value) => setLocal({ modalityBridgeVideoMaxVideos: value ?? 0 })}
+              onValueCommit={(next) =>
                 commitNumber(
                   "modalityBridgeVideoMaxVideos",
-                  raw,
+                  next,
                   1,
                   4,
                   MODALITY_BRIDGE_DEFAULTS.videoMaxVideos
                 )
               }
             />
-            <NumberField
-              testId="modality-bridge-video-timeout"
+            <NumberInput
+              data-testid="modality-bridge-video-timeout"
               label={t("modalityBridgeTimeoutMs")}
               min={VIDEO_BRIDGE_TIMEOUT_MIN_MS}
               max={VIDEO_BRIDGE_TIMEOUT_MAX_MS}
               value={settings.modalityBridgeVideoTimeout}
-              onChange={(value) => setLocal({ modalityBridgeVideoTimeout: value })}
-              onBlur={(raw) =>
+              onValueChange={(value) => setLocal({ modalityBridgeVideoTimeout: value ?? 0 })}
+              onValueCommit={(next) =>
                 commitNumber(
                   "modalityBridgeVideoTimeout",
-                  raw,
+                  next,
                   VIDEO_BRIDGE_TIMEOUT_MIN_MS,
                   VIDEO_BRIDGE_TIMEOUT_MAX_MS,
                   MODALITY_BRIDGE_DEFAULTS.videoTimeoutMs
@@ -374,30 +407,5 @@ export default function ModalityBridgeVideoTab({
         <ModalityBridgeStatsRow kind="video" />
       </div>
     </Card>
-  );
-}
-
-interface NumberFieldProps {
-  testId: string;
-  label: string;
-  min: number;
-  max: number;
-  value: number;
-  onChange: (value: number) => void;
-  onBlur: (raw: string) => void;
-}
-
-function NumberField({ testId, label, min, max, value, onChange, onBlur }: NumberFieldProps) {
-  return (
-    <Input
-      type="number"
-      label={label}
-      data-testid={testId}
-      min={min}
-      max={max}
-      value={value}
-      onChange={(event) => onChange(Number.parseInt(event.currentTarget.value, 10) || 0)}
-      onBlur={(event) => onBlur(event.currentTarget.value)}
-    />
   );
 }

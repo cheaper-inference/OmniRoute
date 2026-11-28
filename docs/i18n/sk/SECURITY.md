@@ -4,13 +4,13 @@
 
 ---
 
-## Hlásenie zraniteľností
+## Nahlasovanie zraniteľností
 
-Ak objavíte bezpečnostnú zraniteľnosť v OmniRoute, nahláste ju zodpovedným spôsobom:
+Ak zistíte chybu zabezpečenia v OmniRoute, nahláste ju zodpovedne:
 
-1. **NEOTVÁRAJTE** verejný problém na GitHube
-2. Použite [bezpečnostné upozornenia GitHubu](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Uveďte: opis, kroky na reprodukciu a potenciálny vplyv
+1. **DO NOT** otvoriť verejný problém GitHub
+2. Použite [bezpečnostné rady GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Zahrňte: popis, kroky reprodukcie a potenciálny vplyv
 
 ## Časový harmonogram reakcie
 
@@ -29,26 +29,14 @@ Ak objavíte bezpečnostnú zraniteľnosť v OmniRoute, nahláste ju zodpovedný
 | 3.7.x   | ✅ Bezpečnostná                                      |
 | < 3.7.0 | ❌ Nepodporovaná                                     |
 
-## Obdobie podpory LTS (v3.9.x)
+## okno podpory LTS (v3.9.x)
 
-Po verzii 3.8.59 nasleduje verzia **3.9.0**, ktorá otvára vetvu dlhodobej podpory vo
-vetve `stable/v3` (pozri [`ROADMAP.md`](ROADMAP.md) → „Fáza 3 — v3.9.0 LTS“).
+Po 3.8.59 je ďalšia verzia** 3.9.0** , ktorá otvára líniu dlhodobej podpory na vetve `stable/v3` (pozri [`ROADMAP.md`](ROADMAP.md) → "Fáza 3 — v3.9.0 LTS").
 
-- **Čo dostáva vetva `stable/v3`:** opravy chýb, bezpečnostné záplaty a aktualizácie
-  poskytovateľov. Nové funkcie smerujú do kanála v4; prioritou vetvy LTS je stabilita.
-  `npm install omniroute` (dist-tag `latest`) zostáva na verzii v3 počas celého cyklu v4.
-- **Dĺžka obdobia:** vetva `stable/v3` dostáva **bezpečnostné opravy a opravy kritických
-  regresií počas 12 mesiacov po vydaní verzie 3.9.0 alebo do 90 dní po zverejnení verzie
-  v4.0.0 s označením `latest` — podľa toho, čo nastane neskôr**. Výsledný dátum ukončenia
-  bude pri vydaní zaznamenaný v poznámkach k vydaniu verzie 3.9.0 a v súbore
-  [`ROADMAP.md`](ROADMAP.md).
-- **Nahlásenie zraniteľnosti vo vetve LTS:** použite rovnaký kanál ako pri ktorejkoľvek
-  inej verzii — súkromné [bezpečnostné oznámenie GitHubu](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  nikdy nie verejný problém. Uveďte, ktorú verziu ste testovali (napríklad `3.9.2`);
-  opravy sa najskôr začlenia do vetvy `stable/v3` a následne sa prenesú do v4.
-- **Bezpečnostný základ pri vydaní LTS:** nameraný stav skenera, ochrana trás a
-  dôkazy týkajúce sa verejných prihlasovacích údajov sú zaznamenané v súbore
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **Čo `stable/v3` dostáva:** opravy chýb, bezpečnostné záplaty a aktualizácie poskytovateľov. Nové funkcie idú na kanál v4; línia LTS je predovšetkým stabilita. `npm install omniroute` ( `latest` dist-tag) zostáva na v3 počas celého cyklu v4.
+- **Trvanie okna:** `stable/v3` prijíma** bezpečnostné opravy a kritické regresie na 12 mesiacov po znížení verzie 3.9.0 alebo do 90 dní po vydaní verzie 4.0.0 ako `latest` — podľa toho, čo nastane neskôr** . Výsledný dátum ukončenia je zaznamenaný v poznámkach k vydaniu 3.9.0 a v [`ROADMAP.md`](ROADMAP.md) keď dôjde k vystrihnutiu.
+- **Nahlásenie zraniteľnosti v riadku LTS :** rovnaký kanál ako ktorákoľvek iná verzia — súkromné [bezpečnostné poradenstvo GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), nikdy nie verejný problém. Povedzte, ktorú verziu ste testovali (napríklad `3.9.2`); opravy pristávajú na `stable/v3` a sú prenesené do verzie 4.
+- **Základná línia bezpečnosti pri znížení LTS :** nameraný stav skenera, stráženie trasy a dôkazy o verejnej poverení sú zaznamenané v [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 
@@ -212,7 +200,7 @@ docker run -d \
   -e JWT_SECRET="$(openssl rand -base64 48)" \
   -e API_KEY_SECRET="$(openssl rand -hex 32)" \
   -e STORAGE_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ---

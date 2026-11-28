@@ -1,11 +1,12 @@
 {
   "name": "omniroute-desktop",
-  "version": "3.8.54",
+  "version": "3.8.55",
   "description": "OmniRoute Desktop Application",
   "main": "main.js",
   "author": {
-    "name": "OmniRoute Team",
-    "email": "support@omniroute.online"
+    "name": "Diego Souza",
+    "email": "support@omniroute.online",
+    "url": "https://github.com/diegosouzapw"
   },
   "license": "MIT",
   "homepage": "https://omniroute.online",
@@ -37,12 +38,13 @@
     "plist": "^4.0.0",
     "form-data": "^4.0.6",
     "js-yaml": "^4.2.0",
-    "undici": "^7.29.0"
+    "undici": "^7.30.2",
+    "minimatch@>=9.0.0": "^11.0.9"
   },
   "build": {
     "appId": "online.omniroute.desktop",
     "productName": "OmniRoute",
-    "copyright": "Copyright © 2025 OmniRoute",
+    "copyright": "Copyright © 2026 OmniRoute",
     "buildDependenciesFromSource": false,
     "npmRebuild": false,
     "afterPack": "../scripts/build/afterpack-copy-node-modules.mjs",
@@ -52,7 +54,7 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "diegosouzapw",
+      "owner": "cheaper-inference",
       "repo": "OmniRoute"
     },
     "files": [

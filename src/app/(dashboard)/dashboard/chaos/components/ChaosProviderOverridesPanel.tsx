@@ -2,8 +2,10 @@
 
 import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import { useTranslations } from "next-intl";
+import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
+import Badge from "@/shared/components/Badge";
 
 export interface ChaosProviderInfo {
   id: string;
@@ -70,10 +72,9 @@ function ChaosProviderOverrideRow({
         {override.enabled ? t("on") : t("off")}
       </Button>
       <Button
-        variant="ghost"
+        variant="destructive-ghost"
         size="icon"
         icon="close"
-        className="text-error"
         aria-label={t("removeProvider")}
         title={t("removeProvider")}
         onClick={() => onRemove(index)}
@@ -96,10 +97,10 @@ function ChaosAvailableProvidersHint({
       </DisclosureTrigger>
       <DisclosureContent keepMounted className="mt-1 flex flex-wrap gap-1">
         {availableProviders.map((p) => (
-          <span key={p.id} className="px-1.5 py-0.5 rounded bg-bg-subtle">
+          <Badge key={p.id} size="sm">
             {p.provider}
             {p.defaultModel && <span className="opacity-60 ml-1">({p.defaultModel})</span>}
-          </span>
+          </Badge>
         ))}
       </DisclosureContent>
     </Disclosure>
@@ -132,7 +133,7 @@ export function ChaosProviderOverridesPanel({
 }) {
   const t = useTranslations("chaosConfig");
   return (
-    <div className="p-3 rounded-lg border border-border bg-surface space-y-3">
+    <Card.Section className="space-y-3">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-text-main">{title}</p>
@@ -159,6 +160,6 @@ export function ChaosProviderOverridesPanel({
       ))}
 
       <ChaosAvailableProvidersHint availableProviders={availableProviders} />
-    </div>
+    </Card.Section>
   );
 }

@@ -5,22 +5,23 @@
  */
 "use client";
 
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Icon from "@/shared/components/Icon";
 
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card, Toggle } from "@/shared/components";
+import { Card, Toggle, IconChip } from "@/shared/components";
 import { useServiceStatus } from "../hooks/useServiceStatus";
 
 const NAME = "cliproxy";
 
 function renderPrefix(chunks: ReactNode) {
-  return <code className="font-mono bg-bg-subtle px-1 rounded">{chunks}</code>;
+  return <InlineCode>{chunks}</InlineCode>;
 }
 
 function renderSmallPrefix(chunks: ReactNode) {
-  return <code className="font-mono bg-bg-subtle px-1 rounded text-xs">{chunks}</code>;
+  return <InlineCode>{chunks}</InlineCode>;
 }
 
 export function CliproxyProviderExposureCard() {
@@ -56,11 +57,13 @@ export function CliproxyProviderExposureCard() {
   return (
     <Card padding="md">
       <div className="flex items-center gap-3 mb-3">
-        <div className="size-8 rounded-lg flex items-center justify-center border border-border bg-bg-subtle text-text-main">
-          <Icon name="hub" size={20} />
-        </div>
+        <IconChip size="sm">
+          <Icon name="hub" />
+        </IconChip>
         <div>
-          <h3 className="font-medium text-sm">{t("title")}</h3>
+          <h3 className="ci-heading" data-size="sm">
+            {t("title")}
+          </h3>
           <p className="text-xs text-text-muted">
             {t.rich("description", { prefix: renderPrefix })}
           </p>

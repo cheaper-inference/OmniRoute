@@ -31,7 +31,6 @@ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-search-re
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
-const searchRoute = await import("../../src/app/api/v1/search/route.ts");
 const { fetchWithCheckedRedirects, isRegistryEndpoint } =
   await import("../../open-sse/handlers/search/redirectGuard.ts");
 const { handleSearch } = await import("../../open-sse/handlers/search.ts");
@@ -213,19 +212,26 @@ process.once("exit", () => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
+// The self-hosted instance is the operator's stored connection: a caller
+// `provider_options.baseUrl` must be public (search-caller-baseurl-public-only.test.ts),
+// so loopback redirects are exercised through the operator source.
 async function searchVia(baseUrl: string, query: string) {
-  const response = await searchRoute.POST(
-    new Request("http://localhost/api/v1/search", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        query,
-        provider: "searxng-search",
-        provider_options: { baseUrl },
-      }),
-    })
-  );
-  return { status: response.status, text: await response.text() };
+  try {
+    const result = await handleSearch({
+      query,
+      provider: "searxng-search",
+      maxResults: 5,
+      searchType: "web",
+      log: null,
+      credentials: { providerSpecificData: { baseUrl } },
+    });
+    return {
+      status: result.success ? 200 : result.status || 502,
+      text: JSON.stringify(result.success ? result.data : result),
+    };
+  } catch (error) {
+    return { status: 500, text: String(error) };
+  }
 }
 
 test("a 302 from a permitted SearXNG host to cloud metadata is not followed", async () => {
@@ -619,11 +625,12 @@ test("an operator or caller base URL gets the guarded dispatcher on the first ho
   const caller = await firstHopOf({
     query: "caller base url",
     provider: "searxng-search",
-    providerOptions: { baseUrl: `${origin}/lan` },
+    providerOptions: { baseUrl: "https://searx-mirror.example/lan" },
     credentials: {},
   });
-  assert.ok(caller.url.startsWith(`${origin}/lan/search?`), caller.url);
-  assert.equal(caller.dispatcher, guarded);
+  assert.ok(caller.url.startsWith("https://searx-mirror.example/lan/search?"), caller.url);
+  // A caller base URL must stay public on every hop.
+  assert.equal(caller.dispatcher, getGuardedDispatcher("public-only"));
 });
 
 test("a redirect from a registry first hop still gets the guarded dispatcher", async () => {
@@ -646,8 +653,7 @@ test("a redirect from a registry first hop still gets the guarded dispatcher", a
   await handleSearch({
     query: "registry redirect",
     provider: "searxng-search",
-    providerOptions: { baseUrl: "http://localhost:8888/searxng" },
-    credentials: {},
+    credentials: { providerSpecificData: { baseUrl: "http://localhost:8888/searxng" } },
     maxResults: 5,
     searchType: "web",
     log: null,

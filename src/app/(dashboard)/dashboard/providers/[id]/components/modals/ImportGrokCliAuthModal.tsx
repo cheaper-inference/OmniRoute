@@ -170,7 +170,8 @@ export default function ImportGrokCliAuthModal({
           {/* Paste tab */}
           <SegmentedPanel value="paste" className="flex flex-col gap-3">
             <Textarea
-              className="h-32 resize-none font-mono text-sm"
+              mono
+              className="h-32 resize-none text-sm"
               aria-label={t("grokPasteJson")}
               placeholder='{"https://auth.x.ai::clientId": {"key": "eyJ...", ...}}'
               value={pasteText}

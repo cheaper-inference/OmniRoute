@@ -75,12 +75,17 @@ export function ModelMappingTable({ agentId, mappings, onSave }: ModelMappingTab
         </div>
       ) : (
         <>
-          <Table className="text-sm" scrollbarLabel={t("modelMappingsLabel")}>
+          {/* AgentCard's Card is the frame around this table (#19620). */}
+          <Table
+            variant="plain"
+            scrollbarLabel={t("modelMappingsLabel")}
+            scrollLabel={t("modelMappingsLabel")}
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("sourceModel") || "Source model (agent native)"}</TableHead>
                 <TableHead>{t("targetModel") || "Target model (OmniRoute)"}</TableHead>
-                <TableHead className="w-12">
+                <TableHead action>
                   <span className="sr-only">{t("removeMapping")}</span>
                 </TableHead>
               </TableRow>
@@ -95,7 +100,8 @@ export function ModelMappingTable({ agentId, mappings, onSave }: ModelMappingTab
                       onChange={(e) => updateSource(i, e.target.value)}
                       aria-label={t("sourceModel") || "Source model (agent native)"}
                       placeholder={t("mappingSourcePlaceholder")}
-                      inputClassName="font-mono text-xs"
+                      size="xs"
+                      mono
                     />
                   </TableCell>
                   <TableCell>
@@ -115,7 +121,7 @@ export function ModelMappingTable({ agentId, mappings, onSave }: ModelMappingTab
                       <Icon name="expand_more" size={12} className="text-text-muted" />
                     </Button>
                   </TableCell>
-                  <TableCell>
+                  <TableCell action>
                     <Button
                       variant="ghost"
                       size="icon-sm"

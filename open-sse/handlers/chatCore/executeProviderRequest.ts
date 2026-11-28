@@ -43,6 +43,16 @@ import { HTTP_STATUS, STREAM_RECOVERY } from "../../config/constants.ts";
 import { parseRetryAfterMs } from "../../services/apiKeyRotator.ts";
 import { createRecoverableStream, makeContinuationBody } from "../../services/streamRecovery.ts";
 import { persistCodexChildQuotaResponse } from "../../services/codexAccount/index.ts";
+import {
+  captureCodexConnectionFence,
+  runWithCodexConnectionFence,
+  bindCodexResponseFence,
+  inheritCodexResponseFence,
+  isCodexConnectionFenceCurrent,
+  isCodexResponseCurrent,
+  runWithCodexResponseFence,
+  StaleCodexOperationError,
+} from "../../services/codexAccount/fences.ts";
 import { invalidateQuotaCacheOnStatus } from "../../services/genericQuotaFetcher.ts";
 import {
   isRateLimitEnabled,
@@ -50,8 +60,13 @@ import {
   resolveRequestQueueMaxWaitMs,
 } from "../../services/rateLimitManager.ts";
 import { acquireMany as acquireConcurrencyGates } from "../../services/accountSemaphore.ts";
+import {
+  resolveConnectionConcurrencyCap,
+  recordAdaptiveConnectionResponse,
+} from "../../services/adaptiveConnectionConcurrency.ts";
 import { rethrowAdmissionError, remainingQueueBudgetMs } from "./queueBudget.ts";
 import { deduplicate } from "../../services/requestDedup.ts";
+import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import {
   classifyModelScope429,
   getModelScopeRetryDelayMs,
@@ -149,6 +164,7 @@ export type ExecuteProviderRequestDeps = {
   settings: Record<string, unknown> | null | undefined;
   toolDisclosure?: ToolDisclosureConfig | null;
   skipUpstreamRetry: boolean;
+  nonReplayableRequest?: boolean;
   requestUpstreamStartTimeoutMs?: number;
   stream: boolean;
   streamController: { signal: AbortSignal };
@@ -160,6 +176,20 @@ export type ExecuteProviderRequestDeps = {
   upstreamStream: boolean;
   userAgent: string | undefined;
 };
+
+// Resolve early (the loop's own signal checks then end the request) when the client leaves.
+function sleepUnlessAborted(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    if (signal.aborted) return resolve();
+    const done = () => {
+      clearTimeout(timer);
+      signal.removeEventListener("abort", done);
+      resolve();
+    };
+    const timer = setTimeout(done, ms);
+    signal.addEventListener("abort", done, { once: true });
+  });
+}
 
 export async function executeProviderRequest(
   deps: ExecuteProviderRequestDeps,
@@ -197,6 +227,7 @@ export async function executeProviderRequest(
     resilienceSettings,
     settings,
     skipUpstreamRetry,
+    nonReplayableRequest = false,
     requestUpstreamStartTimeoutMs,
     stream,
     streamController,
@@ -210,6 +241,28 @@ export async function executeProviderRequest(
     userAgent: _userAgent,
   } = deps;
   const body = rawBody;
+  const recordResponseKeyHealth = (
+    response: Response,
+    creds: Record<string, unknown>,
+    transport?: string,
+    failureDetail = ""
+  ) => {
+    if (!isCodexResponseCurrent(response, response.ok)) return;
+    runWithCodexResponseFence(
+      response,
+      () =>
+        recordKeyHealthStatus(
+          response.status,
+          creds,
+          transport,
+          failureDetail,
+          response.status === HTTP_STATUS.RATE_LIMITED
+            ? parseRetryAfterMs(response.headers.get("retry-after"))
+            : null
+        ),
+      response.ok
+    );
+  };
   const execute = async () => {
     // Upstream body preparation extracted to chatCore/upstreamBody.ts (#3501 — first internal
     // sub-slice of executeProviderRequest); produces the body sent upstream (payload rules +
@@ -262,7 +315,14 @@ export async function executeProviderRequest(
           const execCreds = getExecutionCredentials();
           const executionConnectionId = getExecutionConnectionId(execCreds);
           const attemptConnectionId = executionConnectionId || connectionId;
-          const accountSemaphoreMaxConcurrency = resolveAccountSemaphoreMaxConcurrency(
+          const ownerFence =
+            provider === "codex"
+              ? captureCodexConnectionFence(execCreds ?? {}, String(attemptConnectionId || ""))
+              : null;
+          const fencedCredentialsRefreshed: typeof onCredentialsRefreshed = onCredentialsRefreshed
+            ? (next) => runWithCodexConnectionFence(ownerFence, () => onCredentialsRefreshed(next))
+            : undefined;
+          const configuredAccountConcurrency = resolveAccountSemaphoreMaxConcurrency(
             execCreds,
             typeof attemptConnectionId === "string" && isRateLimitEnabled(attemptConnectionId)
           );
@@ -280,6 +340,16 @@ export async function executeProviderRequest(
             credentials: execCreds,
           });
           const canonicalProviderKey = resolveProviderId(String(provider).trim().toLowerCase());
+          const providerDefaultConcurrency =
+            resilienceSettings.providerQuotaOverrides[canonicalProviderKey]
+              ?.defaultConnectionConcurrency;
+          const accountSemaphoreMaxConcurrency = accountSemaphoreKey
+            ? resolveConnectionConcurrencyCap(
+                configuredAccountConcurrency,
+                providerDefaultConcurrency,
+                accountSemaphoreKey
+              )
+            : configuredAccountConcurrency;
           const providerConcurrency =
             resilienceSettings.providerQuotaOverrides[canonicalProviderKey]?.providerConcurrency ??
             0;
@@ -344,6 +414,8 @@ export async function executeProviderRequest(
                   stage: "rate_limit_slot_acquired",
                 });
                 assertManagedLeaseFence(attemptConnectionId);
+                if (ownerFence && !isCodexConnectionFenceCurrent(ownerFence))
+                  throw new StaleCodexOperationError();
                 return executeWithUpstreamStartTimeout({
                   executor,
                   provider,
@@ -366,8 +438,9 @@ export async function executeProviderRequest(
                         upstreamExtraHeaders: buildUpstreamHeadersForExecute(modelToCall),
                         clientHeaders: getExecutorClientHeaders(),
                         clientResponseFormat,
-                        onCredentialsRefreshed,
+                        onCredentialsRefreshed: fencedCredentialsRefreshed,
                         skipUpstreamRetry,
+                        nonReplayableRequest,
                         contextEditing: { enabled: contextEditingEnabled },
                         correlationId,
                       });
@@ -383,7 +456,14 @@ export async function executeProviderRequest(
               }
             );
             const res = normalizeExecutorResult(rawExecutorResult);
-            res.response = markEmptyTurnExecution(res.response, res.url, execCreds);
+            if (configuredAccountConcurrency === -1 && accountSemaphoreKey) {
+              recordAdaptiveConnectionResponse(accountSemaphoreKey, res.response.status);
+            }
+            bindCodexResponseFence(res.response, ownerFence);
+            res.response = inheritCodexResponseFence(
+              res.response,
+              markEmptyTurnExecution(res.response, res.url, execCreds)
+            );
             trace("post_executor", { status: res?.response?.status });
 
             // When a payload override rewrote body.model (custom-model alias →
@@ -405,12 +485,17 @@ export async function executeProviderRequest(
               !(await shouldIsolateProbeFailures())
             ) {
               try {
-                const persistedQuota = await persistCodexChildQuotaResponse({
-                  connectionId: String(attemptConnectionId),
-                  model: modelToCall || model || requestedModel || "",
-                  headers: normalizeHeaders(res.response.headers),
-                  status: res.response.status,
-                });
+                const persistedQuota = await runWithCodexConnectionFence(
+                  ownerFence,
+                  () =>
+                    persistCodexChildQuotaResponse({
+                      connectionId: String(attemptConnectionId),
+                      model: modelToCall || model || requestedModel || "",
+                      headers: normalizeHeaders(res.response.headers),
+                      status: res.response.status,
+                    }),
+                  res.response.status >= 200 && res.response.status < 300
+                );
                 if (persistedQuota) {
                   execCreds.providerSpecificData = persistedQuota.providerSpecificData;
                   if (persistedQuota.exhaustionLog) {
@@ -422,7 +507,11 @@ export async function executeProviderRequest(
                 log?.debug?.("CODEX", `Failed to persist codex quota state: ${errMessage}`);
               }
             }
-            if (attemptConnectionId && res.response.status === 429) {
+            if (
+              attemptConnectionId &&
+              res.response.status === 429 &&
+              (!ownerFence || isCodexConnectionFenceCurrent(ownerFence))
+            ) {
               // Dropped generic quota cache after 429 — bespoke fetchers drop their
               // own cache through the registry; the generic wrapper is the fallback.
               invalidateQuotaCacheOnStatus({
@@ -454,15 +543,7 @@ export async function executeProviderRequest(
               const failureDetail = res.response.ok
                 ? ""
                 : await readResponseTextWithinCap(res.response.clone()).catch(() => "");
-              recordKeyHealthStatus(
-                res.response.status,
-                execCreds,
-                res.transport,
-                failureDetail,
-                res.response.status === HTTP_STATUS.RATE_LIMITED
-                  ? parseRetryAfterMs(res.response.headers.get("retry-after"))
-                  : null
-              );
+              recordResponseKeyHealth(res.response, execCreds, res.transport, failureDetail);
             }
 
             if (isModelScope() && res.response.status === 429 && attempts < maxAttempts - 1) {
@@ -478,7 +559,7 @@ export async function executeProviderRequest(
                   `429 ${decision.kind}; retrying in ${delay}ms (model remaining: ${decision.snapshot.modelRemaining ?? "unknown"})`
                 );
                 releaseAccountSemaphore();
-                await new Promise((r) => setTimeout(r, delay));
+                await sleepUnlessAborted(delay, streamController.signal);
                 attempts++;
                 continue;
               }
@@ -547,6 +628,7 @@ export async function executeProviderRequest(
                 ): Promise<ReadableStream<Uint8Array> | null> => {
                   try {
                     assertManagedLeaseFence(attemptConnectionId);
+                    if (ownerFence && !isCodexConnectionFenceCurrent(ownerFence)) return null;
                     const retryRaw = await executeWithUpstreamStartTimeout({
                       executor,
                       provider,
@@ -571,8 +653,9 @@ export async function executeProviderRequest(
                             upstreamExtraHeaders: buildUpstreamHeadersForExecute(modelToCall),
                             clientHeaders: getExecutorClientHeaders(),
                             clientResponseFormat,
-                            onCredentialsRefreshed,
+                            onCredentialsRefreshed: fencedCredentialsRefreshed,
                             skipUpstreamRetry,
+                            nonReplayableRequest,
                             contextEditing: { enabled: contextEditingEnabled },
                             correlationId,
                           });
@@ -641,13 +724,16 @@ export async function executeProviderRequest(
               return {
                 ...res,
                 _executionCredentials: execCreds,
-                response: inheritEmptyTurnPolicy(
+                response: inheritCodexResponseFence(
                   res.response,
-                  new Response(clientBody, {
-                    status: res.response.status,
-                    statusText: res.response.statusText,
-                    headers: new Headers(normalizeHeaders(res.response.headers)),
-                  })
+                  inheritEmptyTurnPolicy(
+                    res.response,
+                    new Response(clientBody, {
+                      status: res.response.status,
+                      statusText: res.response.statusText,
+                      headers: new Headers(normalizeHeaders(res.response.headers)),
+                    })
+                  )
                 ),
               };
             }
@@ -706,16 +792,14 @@ export async function executeProviderRequest(
       // failures stay in routing telemetry; authoritative success only recovers this key.
       if (
         rawResult._executionCredentials?.connectionId &&
-        (rawResult._executionCredentials.apiKey || rawResult._executionCredentials.accessToken)
+        (rawResult._executionCredentials.apiKey || rawResult._executionCredentials.accessToken) &&
+        !(await shouldIsolateProbeFailures())
       ) {
-        recordKeyHealthStatus(
-          status,
+        recordResponseKeyHealth(
+          rawResult.response,
           rawResult._executionCredentials,
           rawResult.transport,
-          status >= 400 ? payload : "",
-          status === HTTP_STATUS.RATE_LIMITED
-            ? parseRetryAfterMs(responseHeaders.get("retry-after"))
-            : null
+          status >= 400 ? payload : ""
         );
       }
       releaseRawResultAccountSemaphore();
@@ -723,9 +807,12 @@ export async function executeProviderRequest(
 
       return {
         ...rawResult,
-        response: inheritEmptyTurnPolicy(
+        response: inheritCodexResponseFence(
           rawResult.response,
-          new Response(payload, { status, statusText, headers: responseHeaders })
+          inheritEmptyTurnPolicy(
+            rawResult.response,
+            new Response(payload, { status, statusText, headers: responseHeaders })
+          )
         ),
         _dedupSnapshot: {
           status,
@@ -745,7 +832,16 @@ export async function executeProviderRequest(
   };
 
   if (allowDedup && dedupEnabled && dedupHash) {
-    const dedupResult = await deduplicate(dedupHash, execute);
+    // The shared call is tied to the FIRST caller's client signal. When that client leaves, the
+    // shared promise rejects with its abort. A joiner whose own client is still connected must
+    // not inherit it: it runs its own call once, outside the dedup map.
+    let dedupResult;
+    try {
+      dedupResult = await deduplicate(dedupHash, execute);
+    } catch (error) {
+      if (streamController.signal.aborted || !isLocalStreamLifecycleError(error)) throw error;
+      return execute();
+    }
     if (dedupResult.wasDeduplicated) {
       log?.debug?.("DEDUP", `Joined in-flight request hash=${dedupHash}`);
     }

@@ -132,7 +132,9 @@ export const OAUTH_PROVIDERS = {
     color: "#FF9900",
     textIcon: "AQ",
     website: "https://aws.amazon.com/q/developer/",
-    hasFree: true,
+    hasFree: false,
+    freeNote:
+      "No new Free Tier sign-ups since 2026-05-15; the IDE plugins reach end of support on 2027-04-30 (checked 2026-11-23).",
     authHint:
       "Uses the same AWS Builder ID or imported refresh-token flow as Kiro, but keeps Amazon Q connections separate.",
   },

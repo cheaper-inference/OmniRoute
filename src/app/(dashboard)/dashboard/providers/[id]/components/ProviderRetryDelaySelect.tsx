@@ -8,7 +8,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card } from "@/shared/components";
+import { Card, IconChip } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
 import Select from "@/shared/components/Select";
 import { useNotificationStore } from "@/store/notificationStore";
@@ -39,6 +39,20 @@ export function computeRetryDelayOverrides(
     entry.rateLimitCooldownSeconds = Math.trunc(seconds);
   }
   if (Object.keys(entry).length > 0) next[providerId] = entry;
+  else delete next[providerId];
+  return next;
+}
+
+export function computeDefaultConnectionConcurrencyOverrides(
+  current: ProviderQuotaOverrides | null | undefined,
+  providerId: string,
+  value: string
+): ProviderQuotaOverrides {
+  const next: ProviderQuotaOverrides = { ...current };
+  const entry = { ...(next[providerId] || {}) };
+  if (value === RETRY_DELAY_AUTO) delete entry.defaultConnectionConcurrency;
+  else entry.defaultConnectionConcurrency = Number(value);
+  if (Object.keys(entry).length) next[providerId] = entry;
   else delete next[providerId];
   return next;
 }
@@ -109,7 +123,9 @@ function useRetryDelayOverrides(providerId: string) {
   const handleChange = useCallback(
     async (value: string) => {
       const previous = overrides;
-      const next = computeRetryDelayOverrides(previous, providerId, value);
+      const next = value.startsWith("default:")
+        ? computeDefaultConnectionConcurrencyOverrides(previous, providerId, value.slice(8))
+        : computeRetryDelayOverrides(previous, providerId, value);
       const failedText = providerText(t, "retryDelayUpdateFailed", "Failed to update retry delay");
       setOverrides(next);
       setSaving(true);
@@ -152,12 +168,30 @@ export default function ProviderRetryDelaySelect({ providerId }: ProviderRetryDe
 
   return (
     <Card>
-      <div className="flex items-center gap-3">
-        <div className="inline-flex shrink-0 items-center justify-center w-10 h-10 rounded-full bg-warning/10 text-warning">
-          <Icon name="timer" size={20} />
-        </div>
+      <div className="flex items-center gap-3 mb-4">
         <div className="flex-1 min-w-0">
-          <h2 className="text-sm font-semibold">{title}</h2>
+          <h2 className="text-sm">{t("defaultConnectionConcurrencyLabel")}</h2>
+          <p className="text-sm text-text-muted">{t("defaultConnectionConcurrencyHint")}</p>
+        </div>
+        <Select
+          aria-label={`∅ → ${t("accountConcurrencyCapLabel")}`}
+          compact
+          className="w-auto shrink-0"
+          value={String(overrides?.[providerId]?.defaultConnectionConcurrency || RETRY_DELAY_AUTO)}
+          disabled={!loaded || saving}
+          options={[
+            { value: RETRY_DELAY_AUTO, label: t("retryDelayAuto") },
+            ...[1, 2, 4, 6, 8, 12, 16, 24, 32].map((n) => ({ value: String(n), label: String(n) })),
+          ]}
+          onChange={(event) => void handleChange(`default:${event.target.value}`)}
+        />
+      </div>
+      <div className="flex items-center gap-3">
+        <IconChip tone="warning" shape="circle" className="shrink-0">
+          <Icon name="timer" />
+        </IconChip>
+        <div className="flex-1 min-w-0">
+          <h2 className="text-sm">{title}</h2>
           <p className="text-sm text-text-muted">
             {providerText(
               t,

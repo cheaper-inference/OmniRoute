@@ -52,11 +52,12 @@
 // with no live network. The exception is downloading an http(s) input image, which goes
 // through the guarded remote-image fetch (its own test seam is setPinnedFetchTestOverride).
 
-import { fetchUntrustedRemoteImage } from "@/shared/network/remoteImageFetch";
+import { fetchUntrustedRemoteImage } from "../../../utils/remoteMediaFetch.ts";
 import { resolveUcCredential } from "../../../executors/uc/credentials.ts";
 import { mintUcSessionToken } from "../../../executors/uc/clerkAuth.ts";
 import { UC_ORIGIN } from "../../../executors/uc/constants.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
+import { clampVideoPollIntervalMs, clampPollTimeoutMs } from "../../../utils/pollBounds.ts";
 
 /** Persona signed-upload-URL endpoint (for the image-to-video input image). */
 export const UC_PERSONA_SIGNED_URL = "https://internal-6.pubyar.com/generate-signed-url";
@@ -559,8 +560,8 @@ async function handleUcPersonaVideo(ctx: PersonaContext): Promise<UcVideoResult>
     Number.isFinite(timeoutSeconds) && timeoutSeconds > 0
       ? timeoutSeconds * 1000
       : normalizePositiveNumber(process.env.UC_VIDEO_POLL_TIMEOUT_MS, UC_POLL_TIMEOUT_MS_DEFAULT);
-  const timeoutMs = normalizePositiveNumber(body.timeout_ms, defaultTimeoutMs);
-  const pollIntervalMs = normalizePositiveNumber(
+  const timeoutMs = clampPollTimeoutMs(body.timeout_ms, defaultTimeoutMs);
+  const pollIntervalMs = clampVideoPollIntervalMs(
     body.poll_interval_ms,
     normalizePositiveNumber(process.env.UC_VIDEO_POLL_INTERVAL_MS, UC_POLL_INTERVAL_MS_DEFAULT)
   );
@@ -702,8 +703,8 @@ async function handleUcDirectVideo(ctx: DirectContext): Promise<UcVideoResult> {
 
   // Poll status_url until complete or timeout.
   const statusUrl = extracted.statusUrl;
-  const timeoutMs = normalizePositiveNumber(body.timeout_ms, UC_POLL_TIMEOUT_MS_DEFAULT);
-  const pollIntervalMs = normalizePositiveNumber(
+  const timeoutMs = clampPollTimeoutMs(body.timeout_ms, UC_POLL_TIMEOUT_MS_DEFAULT);
+  const pollIntervalMs = clampVideoPollIntervalMs(
     body.poll_interval_ms,
     UC_POLL_INTERVAL_MS_DEFAULT
   );

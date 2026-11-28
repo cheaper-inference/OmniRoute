@@ -45,16 +45,34 @@ describe("Header on the kit shell", () => {
       expect(screen.getByRole("button", { name: "Collapse sidebar" })).not.toBeNull();
       expect(screen.getByRole("heading", { level: 1 }).textContent).toMatch(/Providers/);
       expect(screen.getByRole("navigation", { name: "Keak products" })).not.toBeNull();
-      const quickNav = screen.getAllByRole("button", { name: "Open quick navigation" });
-      expect(quickNav).toHaveLength(2); // desktop outline + mobile icon (jsdom ignores md:hidden)
-      fireEvent.click(quickNav[0]);
+      // jsdom omits the separators that the browser derives from the flex layout.
+      const desktopQuickNav = screen.getByRole("button", { name: /^Quick nav\s*Ctrl\s*K$/ });
+      const mobileQuickNav = screen.getByRole("button", { name: "Open quick navigation" });
+      fireEvent.click(desktopQuickNav);
       expect(open).toHaveBeenCalledTimes(1);
+      fireEvent.click(mobileQuickNav);
+      expect(open).toHaveBeenCalledTimes(2);
       expect(screen.getByRole("button", { name: "Logout" }).className).toContain(
         "ci-button--ghost"
       );
       expect(header.querySelector(".material-symbols-outlined")).toBeNull();
     }
   );
+
+  it("keeps the action group at full width so a long page subtitle truncates instead", () => {
+    render(
+      <SidebarProvider>
+        <Header onOpenCommandPalette={() => {}} />
+      </SidebarProvider>
+    );
+    // At 1280 px the Cache page subtitle squeezed this group and wrapped "Keak OmniRoute" and
+    // "Quick nav" onto two lines; the title column (min-w-0 + truncate) must give way instead.
+    const actions = screen.getByRole("button", { name: "Logout" }).parentElement!;
+    expect(actions.className).toContain("shrink-0");
+    const title = screen.getByRole("heading", { level: 1 });
+    expect(title.className).toContain("truncate");
+    expect(title.closest("div.min-w-0")).not.toBeNull();
+  });
 
   it("shows the quick navigation shortcut as kit keys, hidden below lg", () => {
     render(

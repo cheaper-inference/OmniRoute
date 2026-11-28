@@ -1,9 +1,12 @@
 // @vitest-environment jsdom
+import fs from "node:fs";
+import path from "node:path";
 import React from "react";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const { default: Button } = await import("@/shared/components/Button");
+const { default: GuardedAction } = await import("@/shared/components/GuardedAction");
 
 afterEach(() => cleanup());
 
@@ -17,6 +20,8 @@ describe("Button adapter → kit Button", () => {
       ["ghost", "ci-button--ghost"],
       ["danger", "ci-button--destructive"],
       ["warning", "ci-button--warning"],
+      // Quiet destructive action for rows and lists (kit 0.0.110, keak-ai/cheaper-inference-ui-kit#191).
+      ["destructive-ghost", "ci-button--destructive-ghost"],
     ];
     for (const [variant, cls] of cases) {
       const { getByRole, unmount } = render(<Button variant={variant as any}>Go</Button>);
@@ -84,6 +89,61 @@ describe("Button adapter → kit Button", () => {
     expect(getByRole("button", { name: "Search" }).className).toContain("ci-button--size-icon");
     rerender(<Button size="icon-sm" icon="search" aria-label="Search" />);
     expect(getByRole("button", { name: "Search" }).className).toContain("ci-button--size-icon-sm");
+  });
+
+  // Kit dense sizes (`Button size="2xs" | "icon-2xs"`, 24px): row and inline actions that used
+  // to be shrunk by hand with `size-6 min-h-6`.
+  it("maps the dense 2xs sizes onto the kit 24px buttons", () => {
+    const { getByRole, rerender } = render(
+      <Button size="2xs" icon="search">
+        Find
+      </Button>
+    );
+    const text = getByRole("button", { name: "Find" });
+    expect(text.className).toContain("ci-button--size-2xs");
+    expect(text.querySelector("svg.oi-icon")?.getAttribute("width")).toBe("14");
+    rerender(<Button size="icon-2xs" icon="search" aria-label="Search" />);
+    const icon = getByRole("button", { name: "Search" });
+    expect(icon.className).toContain("ci-button--size-icon-2xs");
+    expect(icon.querySelector("svg.oi-icon")?.getAttribute("width")).toBe("14");
+  });
+
+  // Kit `Button tone="muted"`: muted resting ink that keeps the variant's own hover, instead
+  // of a `text-text-muted` class that also mutes the hover.
+  it('passes tone="muted" to the kit button, and so does GuardedAction', () => {
+    const { getByRole } = render(
+      <>
+        <Button variant="ghost" tone="muted">
+          Quiet
+        </Button>
+        <GuardedAction variant="outline" tone="muted">
+          Guarded
+        </GuardedAction>
+        <Button variant="ghost">Plain</Button>
+      </>
+    );
+    for (const name of ["Quiet", "Guarded"]) {
+      const btn = getByRole("button", { name });
+      expect(btn.className, name).toContain("ci-button--tone-muted");
+      expect(btn.getAttribute("data-tone"), name).toBe("muted");
+    }
+    const plain = getByRole("button", { name: "Plain" });
+    expect(plain.className).not.toContain("ci-button--tone-");
+    expect(plain.hasAttribute("data-tone")).toBe(false);
+  });
+
+  // The tests are not type-checked, and an undeclared prop still reaches the kit through the
+  // rest spread. The dashboard screens are type-checked, so the props must be declared.
+  it("declares tone and the dense sizes in the adapter's types", () => {
+    const source = fs.readFileSync(
+      path.resolve(process.cwd(), "src/shared/components/Button.tsx"),
+      "utf8"
+    );
+    const sizes = /export type ButtonSize =([^;]+);/.exec(source)?.[1] ?? "";
+    expect(sizes).toContain('"2xs"');
+    expect(sizes).toContain('"icon-2xs"');
+    const props = /export interface ButtonProps[^{]*\{([\s\S]*?)\n\}/.exec(source)?.[1] ?? "";
+    expect(props).toMatch(/\btone\?: ButtonTone;/);
   });
 
   it("an explicit type overrides the default type=button", () => {

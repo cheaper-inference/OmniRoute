@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { CheckboxGroup } from "@omniroute/ui-kit/checkbox";
-import { Button, Checkbox, Input, Select, Toggle } from "@/shared/components";
+import { Button, Card, Checkbox, Input, NumberInput, Select, Toggle } from "@/shared/components";
 
 type Schedule =
   | { kind: "interval"; minutes: number }
@@ -210,7 +210,7 @@ function WakeupForm({
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
+    <Card.Section className="flex flex-col gap-3">
       <Input
         label={t("codexWakeups.name")}
         value={name}
@@ -230,13 +230,12 @@ function WakeupForm({
       {kind === "daily" ? (
         <DailyFields value={daily} onChange={setDaily} />
       ) : (
-        <Input
-          type="number"
+        <NumberInput
           min={5}
           max={10080}
           label={t("codexWakeups.minutes")}
-          value={String(minutes)}
-          onChange={(e) => setMinutes(Number(e.target.value))}
+          value={minutes}
+          onValueChange={(value) => setMinutes(value ?? 0)}
         />
       )}
       <div>
@@ -250,7 +249,7 @@ function WakeupForm({
           {t("codexWakeups.add")}
         </Button>
       </div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -346,7 +345,7 @@ export default function CodexWakeupsSection({ accounts }: { accounts: WakeupAcco
       aria-labelledby="codex-wakeups-title"
     >
       <div>
-        <h4 id="codex-wakeups-title" className="text-sm font-semibold">
+        <h4 id="codex-wakeups-title" className="ci-heading" data-size="sm">
           {t("codexWakeups.title")}
         </h4>
         <p className="text-xs text-text-muted">{t("codexWakeups.desc")}</p>

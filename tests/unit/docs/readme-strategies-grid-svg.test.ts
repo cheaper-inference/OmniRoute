@@ -1,11 +1,25 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { ROUTING_STRATEGY_VALUES } from "../../../src/shared/constants/routingStrategies.ts";
 import {
   renderStrategiesGrid,
   STRATEGIES_GRID_COPY,
 } from "../../../scripts/docs/gen-readme-strategies-grid.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { releaseOnlyUnlessTouched } from "../../../scripts/check/lib/derivedArtifactScope.mjs";
+import { loadFactsSnapshot } from "../../../scripts/release/facts.mjs";
+
+// The numbers drawn in this diagram are DERIVED (plan 2026-11-13): the release refresh
+// (`npm run release:refresh-derived`) regenerates the SVG from docs/reference/derived-facts.json.
+// Between releases the live code moves ahead of the drawing by design, so the counts gate's
+// readers are run here with the snapshot facts the drawing was generated from, never with the
+// live code. The live comparison is release mode's job.
+const snapshotFacts = loadFactsSnapshot();
+assert.ok(
+  snapshotFacts,
+  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
+);
 
 // The committed strategies grid must be exactly what the generator produces, draw the kit type as outlines, keep every string as text, keep the counts gate's "16-factor" claim readable
 // as text and declare both palettes. Same staleness contract as
@@ -14,15 +28,23 @@ import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
 const FILE = "docs/diagrams/strategies-grid.svg";
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-test("the committed strategies grid is exactly what the generator produces", async () => {
-  const generated = await renderStrategiesGrid();
-  const committed = readFileSync(FILE, "utf8");
-  assert.equal(
-    committed,
-    generated,
-    `${FILE} is stale — regenerate with \`node scripts/docs/gen-readme-strategies-grid.mjs\``
-  );
-});
+// Release mode (and a change that edits this file) compares it byte for byte; a feature PR
+// leaves the drift to the release refresh (scripts/check/lib/derivedArtifactScope.mjs).
+const stalenessCheck = { skip: releaseOnlyUnlessTouched("docs/diagrams/strategies-grid.svg") };
+
+test(
+  "the committed strategies grid is exactly what the generator produces",
+  stalenessCheck,
+  async () => {
+    const generated = await renderStrategiesGrid();
+    const committed = readFileSync(FILE, "utf8");
+    assert.equal(
+      committed,
+      generated,
+      `${FILE} is stale — regenerate with \`node scripts/docs/gen-readme-strategies-grid.mjs\``
+    );
+  }
+);
 
 test("the only embedded font is the mono subset for the strategy identifiers, and nothing is external", async () => {
   const svg = await renderStrategiesGrid();
@@ -32,7 +54,7 @@ test("the only embedded font is the mono subset for the strategy identifiers, an
   assert.doesNotMatch(style, /Switzer|CI Serif|CI Sans/, "the mono subset is the only face");
   assert.match(svg, /<use href="#g[0-9a-z]+"/, "the Switzer text is drawn as outlines");
   assert.doesNotMatch(svg, /https?:\/\/(?!www\.w3\.org\/2000\/svg)|@import|<script|<foreignObject/);
-  assert.match(svg, /^<svg viewBox="0 0 1200 644" [^>]*role="img"/);
+  assert.match(svg, /^<svg viewBox="0 0 1200 808" [^>]*role="img"/);
   assert.ok(Buffer.byteLength(svg) < 200 * 1024, "must stay under the 200 KB studio target");
 });
 
@@ -41,13 +63,22 @@ test("every copy string stays in the file as text", async () => {
   for (const s of Object.values(STRATEGIES_GRID_COPY).flat()) {
     assert.ok(svg.includes(esc(s)), `string not drawn: ${s}`);
   }
-  // 18 of the 20 strategies by design — the README table carries the other two.
-  assert.equal(STRATEGIES_GRID_COPY.names.length, 18);
 });
 
-test("the counts gate's own readers of this file accept the generated content (live code)", async () => {
+test("the grid draws exactly one tile per public combo routing strategy", async () => {
   const svg = await renderStrategiesGrid();
-  const checks = buildChecks().filter((c) => Array.isArray(c.files) && c.files.includes(FILE));
+  assert.deepEqual([...STRATEGIES_GRID_COPY.names].sort(), [...ROUTING_STRATEGY_VALUES].sort());
+  assert.equal(
+    svg.match(/<rect width="173" height="158"/g)?.length,
+    ROUTING_STRATEGY_VALUES.length
+  );
+});
+
+test("the counts gate's own readers of this file accept the generated content (snapshot facts)", async () => {
+  const svg = await renderStrategiesGrid();
+  const checks = buildChecks({ facts: snapshotFacts }).filter(
+    (c) => Array.isArray(c.files) && c.files.includes(FILE)
+  );
   assert.ok(checks.length > 0, `no counts-gate check reads ${FILE}`);
   for (const c of checks) {
     const r = c.validate(svg);

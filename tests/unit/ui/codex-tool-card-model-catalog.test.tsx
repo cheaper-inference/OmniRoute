@@ -147,6 +147,8 @@ describe("CodexToolCard model catalog", () => {
     });
     await waitFor(() => !!container.textContent?.includes("codexCatalogWarning"));
     expect(container.textContent).toContain("settingsApplied codexCatalogWarning");
-    expect(container.querySelector(".text-warning")).not.toBeNull();
+    // The message is the Notice adapter: the kit warning variant, not the critical one.
+    expect(container.querySelector('[data-slot="alert"][data-variant="warning"]')).not.toBeNull();
+    expect(container.querySelector('[data-slot="alert"][data-variant="critical"]')).toBeNull();
   });
 });

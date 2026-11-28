@@ -10,7 +10,9 @@ import {
   TableRow,
 } from "@omniroute/ui-kit/table";
 import Button from "@/shared/components/Button";
+import GuardedAction from "@/shared/components/GuardedAction";
 import Input from "@/shared/components/Input";
+import NumberInput from "@/shared/components/NumberInput";
 
 interface Row {
   engine: string;
@@ -98,7 +100,7 @@ function VerifyControls({
       <Input
         label={t("provider")}
         className="w-28"
-        inputClassName="h-8 min-h-8 text-xs"
+        size="xs"
         value={provider}
         onChange={(e) => onProvider(e.target.value)}
       />
@@ -106,35 +108,34 @@ function VerifyControls({
         label={t("judgeModel")}
         data-testid="verify-model"
         className="w-40"
-        inputClassName="h-8 min-h-8 text-xs"
+        size="xs"
         value={judgeModel}
         onChange={(e) => onJudgeModel(e.target.value)}
         placeholder={t("judgeModelPlaceholder")}
       />
-      <Input
-        type="number"
+      <NumberInput
         label={t("maxCostUsd")}
-        step="0.01"
-        min="0"
+        size="xs"
+        step={0.01}
+        min={0}
         className="w-24"
-        inputClassName="h-8 min-h-8 text-xs"
         value={capUsd}
-        onChange={(e) => onCapUsd(Number(e.target.value))}
+        onValueChange={(cap) => onCapUsd(cap ?? 0)}
       />
-      <Button
+      <GuardedAction
         variant="secondary"
         size="sm"
         icon="balance"
         data-testid="verify-all"
         onClick={onVerify}
         loading={verifying}
-        disabled={verifying || !judgeModel}
-        title={!judgeModel ? t("enterJudgeModel") : undefined}
+        disabled={verifying}
+        reason={!judgeModel ? t("enterJudgeModel") : undefined}
       >
         {verifying ? t("verifying") : t("verifyAll")}
-      </Button>
+      </GuardedAction>
       {spent !== null && (
-        <span className="text-[10px] text-text-muted">
+        <span className="text-3xs text-text-muted">
           {t("spent", { spent: spent.toFixed(3), cap: capUsd.toFixed(2) })}
           {capped ? ` · ${t("capReached")}` : ""}
         </span>
@@ -152,7 +153,12 @@ function ComparisonTable({
 }) {
   const t = useTranslations("compressionStudio");
   return (
-    <Table scrollbarLabel={t("compareTab")} className="min-w-0 text-xs">
+    <Table
+      scrollbarLabel={t("compareTab")}
+      scrollLabel={t("compareTab")}
+      density="compact"
+      className="min-w-0"
+    >
       <TableHeader>
         <TableRow>
           <TableHead>{t("engine")}</TableHead>
@@ -167,7 +173,7 @@ function ComparisonTable({
           const verdict = verdicts[row.engine];
           return (
             <TableRow key={row.engine} data-testid="compare-row">
-              <TableCell className="font-semibold">{row.engine}</TableCell>
+              <TableCell>{row.engine}</TableCell>
               <TableCell>−{row.meanSavingsPercent.toFixed(0)}%</TableCell>
               <TableCell>{Math.round(row.meanRetention * 100)}%</TableCell>
               <TableCell>{row.totalCompressedTokens}</TableCell>

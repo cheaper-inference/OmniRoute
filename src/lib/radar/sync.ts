@@ -75,6 +75,7 @@ export interface SyncDeps {
   getSettings?: () => RadarSettingsSnapshot;
   getCache?: () => RadarCacheEntry | null;
   setCache?: (entry: RadarCacheEntry) => void;
+  touchCache?: (fetchedAt: string) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -160,8 +161,8 @@ export function nextSyncTime(lastSyncAt: string | null): Date {
  *  3. GET feed with timeout.
  *  4. Verify Ed25519 signature over exact bytes.
  *  5. Parse+validate with RadarFeedSchema.
- *  6. Version floor: incoming must be strictly newer than cache.
- *  7. Cache the result.
+ *  6. Check the version floor and refresh the fetch time on a matching version and tier.
+ *  7. Cache a replacement when the version, entitlement, or schema allows it.
  *
  * @param deps - Injectable dependencies for testing.
  */
@@ -173,6 +174,7 @@ export async function syncRadar(deps: SyncDeps = {}): Promise<SyncStatus> {
     getSettings: getSettingsFn,
     getCache: getCacheFn,
     setCache: setCacheFn,
+    touchCache: touchCacheFn,
   } = deps;
 
   try {
@@ -282,7 +284,7 @@ export async function syncRadar(deps: SyncDeps = {}): Promise<SyncStatus> {
     // first catalog pull, and the community snapshot can be older.
     const servedTier = parseServedTierHeader(res.headers.get("x-omniroute-feed-tier")) ?? feed.tier;
 
-    // Step 8: Version floor. Same/older versions are rejected within a tier,
+    // Step 8: Version floor. Same/older versions generally keep the cached payload,
     // but a verified live -> community transition must replace the privileged
     // cache even when the community snapshot is older.
     let existingCache: RadarCacheEntry | null = null;
@@ -309,6 +311,15 @@ export async function syncRadar(deps: SyncDeps = {}): Promise<SyncStatus> {
       !isSameVersionSchemaUpgrade &&
       versionComparison <= 0
     ) {
+      if (versionComparison === 0 && existingCache.tier === servedTier) {
+        const fetchedAt = now().toISOString();
+        if (touchCacheFn) {
+          touchCacheFn(fetchedAt);
+        } else {
+          const mod = await import("@/lib/db/radar");
+          mod.touchRadarCacheFetchedAt(fetchedAt);
+        }
+      }
       return { status: "stale" };
     }
 

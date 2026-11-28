@@ -18,6 +18,7 @@ import {
 } from "./passthroughHelpers.ts";
 import { recoverAnthropicThinkingSignature } from "../chatCore/thinkingSignatureRecovery.ts";
 import { runProviderExecutionPipeline } from "../chatCore/providerExecutionPipeline.ts";
+import { admitQuotaShareRotation } from "../chatCore/quotaSharePreHook.ts";
 import { markCodexScopeRateLimited } from "../chatCore/codexFailover.ts";
 import { deleteSessionAccountAffinityBestEffort } from "@/lib/db/sessionAccountAffinity";
 import { buildStreamingResponseHeaders, stripStaleForwardingHeaders } from "./responseHeaders.ts";
@@ -94,7 +95,11 @@ import {
   relogFallbackDiagnostic,
 } from "../../executors/antigravityUpstreamError.ts";
 
-import { getProviderCredentials, extractSessionAffinityKey } from "@/sse/services/auth";
+import {
+  getProviderCredentials,
+  getProviderCredentialsWithQuotaPreflight,
+  extractSessionAffinityKey,
+} from "@/sse/services/auth";
 
 import { updateFromHeaders, updateFromResponseBody } from "../../services/rateLimitManager.ts";
 import * as localLimiterErrors from "../../services/rateLimitManager/errors.ts";
@@ -110,6 +115,11 @@ import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import { createRequestFamilyFallback } from "../../services/modelFamilyFallbackPolicy.ts";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
+import {
+  inheritCodexResponseFence,
+  isCodexResponseCurrent,
+  runWithCodexResponseFence,
+} from "../../services/codexAccount/fences.ts";
 
 /**
  * Core chat handler - shared between SSE and Worker
@@ -138,6 +148,14 @@ type Loose = any;
 export type StreamingDeps = Record<string, Loose>;
 
 export async function runStreamingResponse(deps: StreamingDeps) {
+  const result = await runStreamingResponseInner(deps);
+  if (result?.carry?.providerResponse && result.response?.response) {
+    inheritCodexResponseFence(result.carry.providerResponse, result.response.response);
+  }
+  return result;
+}
+
+async function runStreamingResponseInner(deps: StreamingDeps) {
   const {
     apiKeyInfo,
     persistAttemptLogs,
@@ -255,7 +273,15 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         refreshCredentials: executeRefreshCredentials,
         assertManagedLeaseFence: (id) => assertManagedLeaseFence(id),
         getProviderCredentials,
+        getProviderCredentialsWithQuotaPreflight,
         allowedConnections: deps.allowedConnections ?? null,
+        admitRotation: (nextConnectionId) =>
+          admitQuotaShareRotation({
+            apiKeyInfo,
+            connectionId: nextConnectionId,
+            provider,
+            model,
+          }),
       },
       wire: {
         body: translatedBody as Record<string, unknown>,
@@ -367,23 +393,21 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     } else {
       updatePendingScope(pendingScope, { stage: "provider_response_started" });
     }
-    // Update rate limiter from response headers (learn limits dynamically)
-    updateFromHeaders(
-      provider,
-      responseConnectionId,
-      providerResponse.headers,
-      providerResponse.status,
-      model
-    );
+    // Ignore observations belonging to an obsolete Codex owner/credential.
+    if (isCodexResponseCurrent(providerResponse, providerResponse.ok))
+      updateFromHeaders(
+        provider,
+        responseConnectionId,
+        providerResponse.headers,
+        providerResponse.status,
+        model
+      );
 
     // Store rate-limit headers for quota saturation signals
     try {
       const { storeRateLimitHeaders } = await import("@/lib/quota/saturationSignals");
-      storeRateLimitHeaders(
-        responseConnectionId,
-        provider,
-        providerResponse.headers as Record<string, string>
-      );
+      if (isCodexResponseCurrent(providerResponse, providerResponse.ok))
+        storeRateLimitHeaders(responseConnectionId, provider, providerResponse.headers);
     } catch {
       // fail-open: saturation signal is best-effort
     }
@@ -670,6 +694,8 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     (providerResponse.status === HTTP_STATUS.UNAUTHORIZED ||
       providerResponse.status === HTTP_STATUS.FORBIDDEN) &&
     !hadStreamOptions && // Skip refresh if failure may be from stream_options removal, not auth
+    // Codex recovery already ran through the owner-checked pipeline. Never bypass it here.
+    !(pipelineRecovered && provider === "codex") &&
     !(await shouldIsolateProbeFailures()) &&
     !(await shouldSkipCredentialRefresh(provider, providerResponse))
   ) {
@@ -1037,14 +1063,16 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     }
 
     const errorConnectionId = getCurrentConnectionId() || connectionId;
-    await applyProviderFailureClassification({
-      statusCode,
-      message,
-      headers: providerResponse.headers,
-      upstreamErrorBody,
-      retryAfterMs,
-      targetModel: currentModel,
-    });
+    await runWithCodexResponseFence(providerResponse, () =>
+      applyProviderFailureClassification({
+        statusCode,
+        message,
+        headers: providerResponse.headers,
+        upstreamErrorBody,
+        retryAfterMs,
+        targetModel: currentModel,
+      })
+    );
 
     appendRequestLog({
       model,

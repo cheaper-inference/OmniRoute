@@ -14,11 +14,11 @@ import {
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import Badge from "@/shared/components/Badge";
-import Button from "@/shared/components/Button";
+import GuardedAction from "@/shared/components/GuardedAction";
 import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
-import { cn } from "@/shared/utils/cn";
+
 import { matchesSearch } from "@/shared/utils/turkishText";
 import FileDetailModal from "./FileDetailModal";
 import ExpirationBadge from "./components/ExpirationBadge";
@@ -187,9 +187,10 @@ export default function FilesListTab({
       {/* Table */}
       <Card padding="none" className="overflow-hidden">
         <Table
-          className="text-sm"
+          density="compact"
           aria-label={t("batchFilesListFilesTable")}
           scrollbarLabel={t("batchFilesListFilesTable")}
+          variant="plain"
         >
           <TableHeader>
             <TableRow>
@@ -239,16 +240,15 @@ export default function FilesListTab({
                 return (
                   <TableRow
                     key={file.id}
-                    onClick={() => handleFileClick(file)}
-                    data-state={selectedFileId === file.id ? "selected" : undefined}
-                    className={cn("cursor-pointer", selectedFileId === file.id && "bg-accent/10")}
+                    onActivate={() => handleFileClick(file)}
+                    selected={selectedFileId === file.id}
                   >
-                    <TableCell className="font-mono text-xs text-text-muted max-w-[140px]">
+                    <TableCell className="font-mono text-text-muted max-w-[140px]">
                       <span className="truncate block" title={file.id}>
                         {file.id}
                       </span>
                     </TableCell>
-                    <TableCell className="text-text-main text-xs max-w-[180px]">
+                    <TableCell className="text-text-main max-w-[180px]">
                       <span className="truncate block" title={file.filename}>
                         {file.filename}
                       </span>
@@ -256,11 +256,11 @@ export default function FilesListTab({
                     <TableCell>
                       <PurposeBadge value={file.purpose} />
                     </TableCell>
-                    <TableCell className="text-xs text-text-muted whitespace-nowrap">
+                    <TableCell className="text-text-muted whitespace-nowrap">
                       {formatBytes(file.bytes)}
                     </TableCell>
                     {/* "Used by" column (D12) — shows batch id + role (input/output/error) per plan §4 */}
-                    <TableCell className="text-xs">
+                    <TableCell>
                       {related.length === 0 ? (
                         <span className="text-text-muted">{t("filesListUsedByNone")}</span>
                       ) : (
@@ -277,13 +277,13 @@ export default function FilesListTab({
                               title={related.map((b) => `${b.id} (${roleFor(b)})`).join(", ")}
                             >
                               {related.slice(0, 2).map((b) => (
-                                <span key={b.id} className="font-mono text-[10px] text-text-main">
+                                <span key={b.id} className="font-mono text-3xs text-text-main">
                                   {b.id.slice(0, 12)}…{" "}
                                   <span className="text-text-muted">({roleFor(b)})</span>
                                 </span>
                               ))}
                               {related.length > 2 && (
-                                <span className="text-[10px] text-text-muted">
+                                <span className="text-3xs text-text-muted">
                                   +{related.length - 2}
                                 </span>
                               )}
@@ -292,10 +292,10 @@ export default function FilesListTab({
                         })()
                       )}
                     </TableCell>
-                    <TableCell className="text-xs text-text-muted whitespace-nowrap">
+                    <TableCell className="text-text-muted whitespace-nowrap">
                       {fileCreatedAt ? relativeTime(fileCreatedAt, locale) : "—"}
                     </TableCell>
-                    <TableCell className="text-xs text-text-muted whitespace-nowrap">
+                    <TableCell className="text-text-muted whitespace-nowrap">
                       {fileExpiresAt ? (
                         <ExpirationBadge expiresAt={fileExpiresAt} variant="compact" />
                       ) : (
@@ -323,27 +323,23 @@ export default function FilesListTab({
                           <Icon name="download" size={16} />
                         </a>
                         {/* Delete button */}
-                        <Button
-                          variant="ghost"
+                        <GuardedAction
+                          variant="destructive-ghost"
                           size="icon-sm"
                           onClick={(e) => {
                             e.stopPropagation();
                             void handleDeleteFile(file);
                           }}
-                          disabled={!canDelete || deletingId === file.id}
-                          title={
-                            canDelete ? t("filesListDelete") : t("batchFileInUseByActiveBatch")
-                          }
-                          aria-label={
-                            canDelete ? t("filesListDelete") : t("batchFileInUseByActiveBatch")
-                          }
-                          className="text-text-muted hover:text-error"
+                          disabled={deletingId === file.id}
+                          reason={canDelete ? undefined : t("batchFileInUseByActiveBatch")}
+                          title={t("filesListDelete")}
+                          aria-label={t("filesListDelete")}
                         >
                           <Icon
                             name={deletingId === file.id ? "hourglass_empty" : "delete"}
                             size={16}
                           />
-                        </Button>
+                        </GuardedAction>
                       </div>
                     </TableCell>
                   </TableRow>

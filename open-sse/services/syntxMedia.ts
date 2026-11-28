@@ -17,7 +17,7 @@ import {
   type SyntxMediaKind,
 } from "./syntxMediaCatalog.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
-import { openUpstreamMedia, upstreamMediaErrorText } from "@/shared/network/remoteImageFetch";
+import { openUpstreamMedia, upstreamMediaErrorText } from "../utils/remoteMediaFetch.ts";
 
 export { looksLikeJwt, resolveSyntxToken };
 
@@ -172,8 +172,10 @@ export function applySyntxProviderRules(
   settings: JsonRecord,
   ctx: { modelType: string; fileCount?: number }
 ): void {
+  // aiName comes from the caller's model id: only the table's own entries may run, never a
+  // member inherited from Object.prototype ("constructor", "__proto__", ...). CodeQL #1392.
+  if (!Object.hasOwn(PROVIDER_RULES, aiName)) return;
   const handler = PROVIDER_RULES[aiName];
-  if (!handler) return;
   handler(ctx.modelType || "", ctx.fileCount ?? 0, settings);
 }
 

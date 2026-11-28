@@ -4,7 +4,7 @@
 # trusts the compromised eMudhra intermediates (https://emudhra.we-have-a-problem.com/).
 # 26.12.1 is the first 26.x that rejects them; tests/unit/build/docker-ca-baseline.test.mjs
 # keeps it from going below that.
-FROM node:26.12.1-trixie-slim AS base
+FROM node:26.13.0-trixie-slim AS base
 WORKDIR /app
 
 # Mirrors for builders whose network cannot reach the default sources
@@ -249,8 +249,36 @@ RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-next-cache,targ
   && npm run build \
   && node --input-type=module -e "import { createRequire } from 'node:module'; import { pathToFileURL } from 'node:url'; const standaloneRoot = '/app/.build/next/standalone/node_modules/'; const require = createRequire('/app/.build/next/standalone/package.json'); for (const pkg of ['@atjsh/llmlingua-2', '@huggingface/transformers', 'js-tiktoken']) { const resolved = require.resolve(pkg); if (!resolved.startsWith(standaloneRoot)) throw new Error(pkg + ' resolved outside standalone: ' + resolved); await import(pathToFileURL(resolved).href); } const onnxRuntime = require.resolve('onnxruntime-node'); if (!onnxRuntime.startsWith(standaloneRoot)) throw new Error('onnxruntime-node resolved outside standalone: ' + onnxRuntime); await import(pathToFileURL(onnxRuntime).href);"
 
+# ── Runtime OS (Wolfi) ─────────────────────────────────────────────────────
+# The runner stages start from Wolfi (Chainguard's open, glibc-based container distro), not
+# from Debian. Debian trixie ships its security fixes slowly: 3.8.54 carried 49 HIGH findings
+# in the base image and ~150 in -web, almost none with a fix published. Wolfi rebuilds its
+# packages as fixes land, so the same runtime scans clean (Trivy 0/0/0/0, measured on the .113
+# build host, 2026-11-24). The builder stays on the Debian `base` stage above: Wolfi's glibc
+# (2.44) is newer than trixie's (2.41), so the native addons built there run here unchanged.
+# Unlike Docker Hardened Images, wolfi-base keeps a shell (busybox) and apk, which the
+# entrypoint script, child_process.exec() and the npm-based installers need; unlike Alpine it
+# is glibc, which onnxruntime-node requires. Pinned by digest (Dependabot docker bumps it);
+# `apk add` then pulls the current, patched package set at build time.
+FROM cgr.dev/chainguard/wolfi-base:latest@sha256:7974283557d272e72834dfae1a9a5b98b6bdfc90ecf88b352cf2778f15c5481d AS runtime-os
+WORKDIR /app
+# Same `node` user and UID/GID 1000 as the Debian image, so an existing /app/data volume keeps
+# working after an upgrade. The Node floor (26.12.1) is the eMudhra root-store rule that
+# tests/unit/build/docker-ca-baseline.test.mjs enforces for the Debian base.
+RUN apk add --no-cache nodejs-26 npm-12 libsecret libstdc++ ca-certificates-bundle tzdata \
+  && addgroup -g 1000 node \
+  && adduser -u 1000 -G node -h /home/node -s /bin/sh -D node \
+  && node -e "const [a,b,c]=process.versions.node.split('.').map(Number); if (a<26 || (a===26 && (b<12 || (b===12 && c<1)))) { console.error('node ' + process.version + ' is below the 26.12.1 floor'); process.exit(1); } console.log('node', process.version);" \
+  && npm --version
+
 # ── Runner base ────────────────────────────────────────────────────────────
-FROM base AS runner-base
+FROM runtime-os AS runner-base
+
+# Optional for MediaRecorder WebM uploads to MiniMax ASR. Keep the default image lean.
+ARG OMNIROUTE_INSTALL_FFMPEG=0
+RUN if [ "$OMNIROUTE_INSTALL_FFMPEG" = "1" ]; then \
+      apk add --no-cache ffmpeg; \
+    fi
 
 LABEL org.opencontainers.image.title="omniroute" \
   org.opencontainers.image.description="Unified AI proxy — route any LLM through one endpoint" \
@@ -272,10 +300,12 @@ ENV NODE_OPTIONS="--max-old-space-size=${OMNIROUTE_MEMORY_MB}"
 
 # Data directory inside Docker — must match the volume mount in docker-compose.yml
 ENV DATA_DIR=/app/data
-RUN mkdir -p /app/data && chown node:node /app /app/data
+# New Compose named volumes inherit the ownership of their mount points in the image.
+RUN mkdir -p /app/data /run/codex-appserver /home/node/.codex \
+  && chown node:node /app /app/data /run/codex-appserver /home/node/.codex
 
 # #13679: default the PUBLISHED image to requiring an API key. A bare
-# `docker run -p 20128:20128 … diegosouzapw/omniroute` (README/QUICK-START
+# `docker run -p 20128:20128 … cheaperinference/omniroute` (README/QUICK-START
 # one-liners) does not pass `--env-file .env`, so without this default the
 # anonymous /v1 LLM proxy would be both keyless AND world-reachable on the
 # published container. This does NOT change the npm/CLI local-dev default
@@ -307,6 +337,10 @@ ENV OMNIROUTE_MIGRATIONS_DIR=/app/migrations
 # Docker healthcheck script — not traced by Next.js standalone output, so copy
 # it explicitly. The HEALTHCHECK CMD references it as `node healthcheck.mjs`.
 COPY --chown=node:node --from=builder /app/scripts/dev/healthcheck.mjs ./healthcheck.mjs
+
+# Next.js standalone tracing omits the root LICENSE, so the published image shipped
+# without the license text. Copy it explicitly.
+COPY --chown=node:node --from=builder /app/LICENSE ./LICENSE
 
 # Every COPY above hands its files to the baked-in `node` non-root user
 # (UID/GID 1000) at copy time. Do NOT add a `RUN chown -R node:node /app`
@@ -357,19 +391,36 @@ COPY --from=builder /app/node_modules/playwright ./node_modules/playwright
 
 # xvfb is installed explicitly (#15300): zai-web needs a headed Chromium and the browser pool
 # starts a private Xvfb when the container has no DISPLAY.
-# Install Playwright browser binaries + OS dependencies under root, then hand
-# ownership of the browsers cache to the node user.
-# PLAYWRIGHT_BROWSERS_PATH overrides the default ~/.cache/ms-playwright so the
-# browsers land under /home/node which persists across image layers and is
-# accessible to the non-root runtime user.
+# Chromium is Playwright's own build, as before. Its system libraries come from Wolfi; the
+# list is what Wolfi's chromium package depends on, minus Qt (Playwright's build does not link
+# it) and minus Wolfi's chromium itself, whose free channel stopped at 149 and carries hundreds
+# of fixed-upstream CVEs. The NSS/NSPR libraries are requested by soname because the `nss`
+# package does not ship libnss3.so. The ld-linux check fails the build if any library is
+# missing, instead of a launch failing at runtime. Xvfb needs xkbcomp + xkeyboard-config to
+# start. The build creates /tmp/.X11-unix owned by `node`, which runs Xvfb.
+# Mode 0755 grants write permission only to the owner.
+# PLAYWRIGHT_BROWSERS_PATH puts the browsers under /home/node, owned by the runtime user.
+# /usr/bin/chromium points to Playwright's build for the system-browser lookups in
+# ChatGPT Web, Codex Web, and the Adobe Firefly login.
 ENV PLAYWRIGHT_BROWSERS_PATH=/home/node/.cache/ms-playwright
-RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-cache,target=/var/cache/apt,sharing=locked \
-  --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-lists,target=/var/lib/apt/lists,sharing=locked \
-  apt-get update \
-  && node node_modules/playwright/cli.js install chromium --with-deps \
-  && apt-get install -y --no-install-recommends xvfb \
-  && chown -R node:node /home/node/.cache \
-  && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache fontconfig font-liberation font-opensans gtk-3 mesa mesa-glx \
+     so:libnss3.so so:libnssutil3.so so:libsmime3.so so:libnspr4.so \
+     so:libX11.so.6 so:libXcomposite.so.1 so:libXdamage.so.1 so:libXext.so.6 so:libXfixes.so.3 \
+     so:libXrandr.so.2 so:libasound.so.2 so:libatk-1.0.so.0 so:libatk-bridge-2.0.so.0 so:libatspi.so.0 \
+     so:libcairo.so.2 so:libcups.so.2 so:libdbus-1.so.3 so:libexpat.so.1 so:libgbm.so.1 \
+     so:libglib-2.0.so.0 so:libpango-1.0.so.0 so:libxcb.so.1 so:libxkbcommon.so.0 so:libudev.so.1 \
+     xvfb xkbcomp xkeyboard-config \
+  && install -d -o node -g node -m 0755 /tmp/.X11-unix \
+  && node node_modules/playwright/cli.js install chromium \
+  && for bin in "$PLAYWRIGHT_BROWSERS_PATH"/*/*/chrome "$PLAYWRIGHT_BROWSERS_PATH"/*/*/chrome-headless-shell; do \
+       missing="$(/lib/ld-linux-*.so.* --list "$bin" 2>&1 | grep 'not found' || true)"; \
+       if [ -n "$missing" ]; then echo "$bin is missing libraries:"; echo "$missing"; exit 1; fi; \
+     done \
+  && ln -sf "$(node -e 'process.stdout.write(require("playwright-core").chromium.executablePath())')" /usr/bin/chromium \
+  && /usr/bin/chromium --version \
+  && chown -R node:node /home/node/.cache
+
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
 
 USER node
 
@@ -390,11 +441,7 @@ COPY --from=builder /app/node_modules/playwright-core ./node_modules/playwright-
 COPY --from=builder /app/node_modules/playwright ./node_modules/playwright
 
 # Install system dependencies required by openclaw (git+ssh references).
-RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-cache,target=/var/cache/apt,sharing=locked \
-  --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-lists,target=/var/lib/apt/lists,sharing=locked \
-  apt-get update \
-  && apt-get install -y --no-install-recommends git ca-certificates \
-  && rm -rf /var/lib/apt/lists/* \
+RUN apk add --no-cache git openssh-client \
   && git config --system url."https://github.com/".insteadOf "ssh://git@github.com/"
 
 # Install CLI tools globally. Separate layer from apt for better cache reuse.
@@ -439,10 +486,6 @@ FROM runner-cli-core AS runner-cli
 
 USER root
 
-RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-cache,target=/var/cache/apt,sharing=locked \
-  --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-apt-lists,target=/var/lib/apt/lists,sharing=locked \
-  apt-get update \
-  && apt-get install -y --no-install-recommends docker.io docker-compose \
-  && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache docker-cli docker-compose
 
 USER node

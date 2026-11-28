@@ -1,5 +1,6 @@
 import { fisherYatesShuffle, getNextFromDeck } from "../../../src/shared/utils/shuffleDeck";
 import { generateRoutingHints } from "../manifestAdapter";
+import { isAccountSemaphoreFull } from "../accountSemaphore.ts";
 import { resolveMaxConcurrentByConnection } from "./concurrencyCaps.ts";
 import { sortTargetsByContextSize } from "./comboStructure.ts";
 import { selectQuotaShareTarget } from "./quotaShareStrategy.ts";
@@ -13,6 +14,7 @@ import {
   orderTargetsByQuotaWeighted,
   orderTargetsByResetAwareQuota,
   orderTargetsByResetWindow,
+  orderTargetsByExpiryFirst,
 } from "./quotaStrategies.ts";
 import {
   orderTargetsByPowerOfTwoChoices,
@@ -243,14 +245,12 @@ async function orderByQuotaWeighted(
 
 async function orderByQuotaShare(
   orderedTargets: ResolvedComboTarget[],
-  { combo, body, log }: ApplyStrategyOrderingDeps
+  { combo, log }: ApplyStrategyOrderingDeps
 ): Promise<ApplyStrategyOrderingResult> {
   // Internal quota-share combos (qtSd/): delegate to the dedicated module (DRR +
   // P2C in-flight + per-model bucket gating + per-connection concurrency gating).
-  const qsModel =
-    typeof body?.model === "string" ? body.model : (orderedTargets[0]?.modelStr ?? "");
   const qsMaxConcurrent = await resolveMaxConcurrentByConnection(orderedTargets);
-  const qsSelection = selectQuotaShareTarget(orderedTargets, combo.name, qsModel, Date.now(), {
+  const qsSelection = selectQuotaShareTarget(orderedTargets, combo.name, Date.now(), {
     maxConcurrentByConnection: qsMaxConcurrent,
   });
   const nextTargets = qsSelection.orderedTargets;
@@ -283,8 +283,20 @@ const STRATEGY_ORDERERS: Record<
     );
     return orderedOnly(orderedTargets);
   },
-  p2c: (orderedTargets, { combo, log }) => {
-    const nextTargets = orderTargetsByPowerOfTwoChoices(orderedTargets, combo.name);
+  p2c: async (orderedTargets, { combo, log }) => {
+    // An account at its max_concurrent cap would queue the request while a sibling sits
+    // idle. Draw only among accounts with room; full ones stay behind as last fallbacks.
+    const caps = await resolveMaxConcurrentByConnection(orderedTargets);
+    const isFull = (t: ResolvedComboTarget): boolean => {
+      const cap = t.connectionId ? caps.get(t.connectionId) : null;
+      return Boolean(cap && isAccountSemaphoreFull(t.provider, t.connectionId as string, cap));
+    };
+    const full = orderedTargets.filter(isFull);
+    const open = orderedTargets.filter((t) => !full.includes(t));
+    const nextTargets =
+      full.length === 0 || open.length === 0
+        ? orderTargetsByPowerOfTwoChoices(orderedTargets, combo.name)
+        : [...orderTargetsByPowerOfTwoChoices(open, combo.name), ...full];
     log.info("COMBO", `Power-of-two-choices ordering: selected ${nextTargets[0]?.modelStr}`);
     return orderedOnly(nextTargets);
   },
@@ -322,6 +334,17 @@ const STRATEGY_ORDERERS: Record<
       exclusions
     );
     log.info("COMBO", `Reset-window ordering: ${describeFirstTarget(nextTargets)} first`);
+    return orderedOnly(nextTargets);
+  },
+  "expiry-first": async (orderedTargets, { combo, config, log, apiKeyAllowedConnections }) => {
+    const nextTargets = await orderTargetsByExpiryFirst(
+      orderedTargets,
+      combo.name,
+      config,
+      log,
+      apiKeyAllowedConnections
+    );
+    log.info("COMBO", `Expiry-first ordering: ${describeFirstTarget(nextTargets)} first`);
     return orderedOnly(nextTargets);
   },
   "context-optimized": (orderedTargets, { log }) => {

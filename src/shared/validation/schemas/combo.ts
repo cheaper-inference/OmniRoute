@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isReservedComboName } from "@/shared/constants/autoComboNames";
 import {
   ACCOUNT_FALLBACK_STRATEGY_VALUES,
   ROUTING_STRATEGY_VALUES,
@@ -13,7 +14,12 @@ import {
   isForbiddenCustomHeaderName,
 } from "@/shared/constants/upstreamHeaders";
 import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
+import {
+  COMBO_ENDPOINTS,
+  COMBO_NON_CHAT_STRATEGIES,
+} from "@omniroute/open-sse/config/comboEndpoints.ts";
 import { OPENAI_SERVICE_TIER_VALUES } from "@omniroute/open-sse/config/serviceTier.ts";
+import { decisionRoutingConfigSchema } from "@omniroute/open-sse/services/decision/schema.ts";
 
 // ──── Combo Schemas ────
 
@@ -258,6 +264,16 @@ export const comboRuntimeConfigSchema = z
       })
       .strict()
       .optional(),
+    // `decision` auto-router strategy (open-sse/services/autoCombo/decisionStrategy.ts).
+    // Strict: the credential is a connectionId reference, never a stored apiKey.
+    decision: decisionRoutingConfigSchema.optional(),
+    // Virtual/auto combos keep their router knobs under `config.auto`; only its decision
+    // block is validated here, the rest stays as free-form as before.
+    auto: z
+      .object({ decision: decisionRoutingConfigSchema.optional() })
+      .passthrough()
+      .nullable()
+      .optional(),
     compositeTiers: compositeTiersSchema.optional(),
     resetAwareSessionWeight: z.coerce.number().min(0).max(100).optional(),
     resetAwareWeeklyWeight: z.coerce.number().min(0).max(100).optional(),
@@ -366,7 +382,10 @@ export const comboRuntimeConfigSchema = z
     return config;
   });
 
-export const comboNameSchema = z
+export const RESERVED_COMBO_NAME_MESSAGE =
+  "auto and names starting with auto/ are reserved for the built-in automatic routes";
+
+const comboNameBaseSchema = z
   .string()
   .trim()
   .min(1, "Name is required")
@@ -375,6 +394,53 @@ export const comboNameSchema = z
     /^[a-zA-Z0-9_/.\-\[\] ]+$/,
     "Name can only contain letters, numbers, spaces, -, _, /, ., [ and ]."
   );
+
+export const comboNameSchema = comboNameBaseSchema.refine(
+  (name) => !isReservedComboName(name),
+  RESERVED_COMBO_NAME_MESSAGE
+);
+
+export const comboCapabilityRouteSchema = z
+  .object({
+    models: z.array(comboModelEntry).min(1, "a capability route requires at least one model"),
+    strategy: comboStrategySchema.optional().default("priority"),
+    config: comboRuntimeConfigSchema.optional(),
+  })
+  .strict()
+  .superRefine(validateQuotaOnlyComboRefs);
+
+export const comboCapabilityRoutesSchema = z
+  .object({
+    chat: comboCapabilityRouteSchema.optional(),
+    search: comboCapabilityRouteSchema.optional(),
+    "web-fetch": comboCapabilityRouteSchema.optional(),
+    embeddings: comboCapabilityRouteSchema.optional(),
+    rerank: comboCapabilityRouteSchema.optional(),
+    images: comboCapabilityRouteSchema.optional(),
+    "image-edits": comboCapabilityRouteSchema.optional(),
+    videos: comboCapabilityRouteSchema.optional(),
+    music: comboCapabilityRouteSchema.optional(),
+    ocr: comboCapabilityRouteSchema.optional(),
+    "audio-speech": comboCapabilityRouteSchema.optional(),
+    "audio-transcriptions": comboCapabilityRouteSchema.optional(),
+    "audio-translations": comboCapabilityRouteSchema.optional(),
+    "audio-generation": comboCapabilityRouteSchema.optional(),
+  })
+  .strict()
+  .superRefine((routes, ctx) => {
+    const supported = new Set<string>(COMBO_NON_CHAT_STRATEGIES);
+    for (const endpoint of COMBO_ENDPOINTS) {
+      if (endpoint === "chat") continue;
+      const route = routes[endpoint];
+      if (route && !supported.has(route.strategy)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Strategy ${route.strategy} is not supported for ${endpoint}`,
+          path: [endpoint, "strategy"],
+        });
+      }
+    }
+  });
 
 type QuotaOnlyComboRefState = {
   models?: Array<z.infer<typeof comboModelEntry>>;
@@ -435,6 +501,7 @@ export const createComboSchema = z
     models: z.array(comboModelEntry).min(1, "a combo requires at least one model"),
     strategy: comboStrategySchema.optional().default("priority"),
     config: comboRuntimeConfigSchema.optional(),
+    routes: comboCapabilityRoutesSchema.optional(),
     universal_handoff: universalHandoffSchema.optional(),
     universalHandoff: universalHandoffSchema.optional(),
     allowedProviders: z.array(z.string().trim().min(1).max(200)).max(100).optional(),
@@ -493,7 +560,7 @@ export const updateComboDefaultsSchema = z
 
 export const updateComboSchema = z
   .object({
-    name: comboNameSchema.optional(),
+    name: comboNameBaseSchema.optional(),
     description: z.string().max(2000).optional().nullable(),
     displayName: z.string().trim().max(200).optional().nullable(),
     // An update may not remove every model from a combo, or a working combo
@@ -505,6 +572,7 @@ export const updateComboSchema = z
       .optional(),
     strategy: comboStrategySchema.optional(),
     config: comboRuntimeConfigSchema.optional(),
+    routes: comboCapabilityRoutesSchema.optional().nullable(),
     isActive: z.boolean().optional(),
     // Stored on the combo record and honoured by the readers — the builder's
     // option list and the dashboard grid both filter on it — but omitted here,
@@ -541,6 +609,7 @@ export const updateComboSchema = z
       value.models === undefined &&
       value.strategy === undefined &&
       value.config === undefined &&
+      value.routes === undefined &&
       value.isActive === undefined &&
       value.isHidden === undefined &&
       value.allowedProviders === undefined &&
@@ -579,6 +648,17 @@ export const reorderCombosSchema = z
 export const testComboSchema = z.object({
   comboName: z.string().trim().min(1, "comboName is required"),
 });
+
+// POST /api/combos/decision-preview - Menu descriptions and an optional test decision for an
+// unsaved `decision` auto-router combo (dashboard combo builder).
+export const decisionPreviewSchema = z
+  .object({
+    decision: decisionRoutingConfigSchema.optional(),
+    // Combo step model strings (`provider/model`); combo refs and wildcards are not sent.
+    models: z.array(z.string().trim().min(1).max(300)).max(200),
+    prompt: z.string().trim().min(1).max(8_000).optional(),
+  })
+  .strict();
 
 // POST /api/combos/duplicate - Resolve an auto-combo template (e.g. "auto/best-coding")
 // into a static, editable combo snapshot.

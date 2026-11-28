@@ -1,159 +1,83 @@
-// Contract for .mergify.yml (rail G11, v3.8.54). Mergify silently ignores or
-// rejects a bad config, so the queue's load-bearing keys are pinned here.
+// Contract for .mergify.yml after the owner retired the Mergify merge queue (2026-11-19).
+// The Mergify GitHub App is still installed and reads this file from the default branch; Mergify
+// silently ignores or rejects a bad config, so what is left of it is pinned here: no queue, no
+// auto-merge, no merging rule, and every command that would merge or rewrite a pull request
+// refused by a condition list no pull request can match. Until 2026-11-19 this file pinned the
+// `release` and `relay-integration` queue rules; their admission contract (the required checks
+// and the checks timeout) now belongs to omni-queue, the replacement queue, and its timeout
+// rationale is carried over at the end of this file.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import * as yaml from "js-yaml";
 
-type QueueRule = Record<string, unknown> & { name: string };
-type MergifyConfig = {
-  merge_protections_settings?: { auto_merge_conditions?: unknown[] };
-  queue_rules?: QueueRule[];
-  pull_request_rules?: unknown[];
+type CommandRestriction = { conditions?: unknown };
+type MergifyConfig = Record<string, unknown> & {
+  commands_restrictions?: Record<string, CommandRestriction>;
 };
 
 const config = yaml.load(
   readFileSync(new URL("../../.mergify.yml", import.meta.url), "utf8")
 ) as MergifyConfig;
 
-// p95 wall-clock (createdAt -> updatedAt) of the last 100 successful quality.yml
-// runs, measured 2026-10-09 over 2026-09-28..2026-10-08: 119.75 min. The queue's
-// checks_timeout must be at least 2x this so a slow-but-healthy run is not dequeued.
-const MEASURED_QUALITY_P95_MINUTES = 119.75;
+const omniQueue = JSON.parse(
+  readFileSync(new URL("../../config/merge-queue/config.json", import.meta.url), "utf8")
+) as { label: string; checksTimeoutMinutes: number; requiredChecks: string[] };
 
-function durationToMinutes(value: unknown): number {
-  assert.equal(typeof value, "string", "checks_timeout must be a duration string");
-  const match = /^(\d+)\s*(seconds?|s|min|minutes?|m|hours?|h)$/i.exec(String(value).trim());
-  assert.ok(match, `unparseable duration: ${String(value)}`);
-  const n = Number(match[1]);
-  const unit = match[2].toLowerCase();
-  if (unit.startsWith("s")) return n / 60;
-  if (unit.startsWith("h")) return n * 60;
-  return n;
-}
+// Mergify commands that land, enqueue, rewrite or copy a pull request. `refresh` (re-evaluate)
+// and `dequeue` (leave a queue) do neither and keep Mergify's defaults.
+const MUTATING_COMMANDS = ["queue", "requeue", "rebase", "update", "squash", "backport", "copy"];
 
-const release = config.queue_rules?.find((rule) => rule.name === "release");
-
-test("release queue rule exists and keeps squash merges", () => {
-  assert.ok(release, "queue_rules must define the `release` queue");
-  assert.equal(release.merge_method, "squash");
+test("the file is kept (not deleted) and holds only command restrictions", () => {
+  // Deleting it would not turn Mergify off: with no configuration, `@mergifyio queue` merges a PR
+  // once its required checks pass (docs.mergify.com/merge-queue/setup).
+  assert.deepEqual(Object.keys(config), ["commands_restrictions"]);
 });
 
-test("release queue only accepts owner-labelled, non-draft, conflict-free release PRs", () => {
-  const conditions = release?.queue_conditions as string[];
-  assert.ok(conditions.includes("label=queue"));
-  assert.ok(conditions.includes("-draft"));
-  assert.ok(conditions.includes("-conflict"));
-  assert.ok(conditions.some((c) => c.startsWith("base~=^release/")));
-  assert.deepEqual(config.merge_protections_settings?.auto_merge_conditions, ["label = queue"]);
-});
-
-test("merge conditions stay fail-closed on the always-on anchor check", () => {
-  const conditions = JSON.stringify(release?.merge_conditions);
-  assert.match(conditions, /#check-pending=0/);
-  assert.match(conditions, /#check-success>=1/);
-  assert.match(conditions, /check-success=Merge integrity \(changelog \+ generated skills\)/);
-});
-
-test("checks_timeout is at least 2x the measured quality.yml p95", () => {
-  const minutes = durationToMinutes(release?.checks_timeout);
-  assert.ok(
-    minutes >= 2 * MEASURED_QUALITY_P95_MINUTES,
-    `checks_timeout ${minutes} min < 2 x p95 (${2 * MEASURED_QUALITY_P95_MINUTES} min)`
+test("no Mergify queue: no queue_rules, no auto-merge conditions", () => {
+  assert.equal("queue_rules" in config, false, "a second queue would act on release PRs");
+  assert.equal(
+    "merge_protections_settings" in config,
+    false,
+    "auto_merge_conditions would merge labelled PRs outside the release process"
   );
-  // Mergify's floor is 60 s; an absurd ceiling would make the timeout meaningless.
-  assert.ok(minutes <= 8 * 60, "checks_timeout above 8 h no longer protects the queue");
+  assert.equal("pull_request_rules" in config, false, "no rule may merge, label or rewrite a PR");
+  assert.equal("defaults" in config, false);
 });
 
-test("no paid-tier batch keys (free plan dequeues every PR with them, #7220)", () => {
-  for (const key of [
-    "batch_size",
-    "batch_max_wait_time",
-    "batch_max_failure_resolution_attempts",
-  ]) {
-    assert.equal(key in (release ?? {}), false, `${key} requires a paid Mergify tier`);
-  }
-});
-
-test("deprecated queue keys are not used", () => {
-  for (const key of [
-    "allow_inplace_checks",
-    "allow_queue_branch_edit",
-    "autoqueue",
-    "speculative_checks",
-  ]) {
-    assert.equal(key in (release ?? {}), false, `${key} is deprecated/removed in Mergify`);
-  }
-});
-
-const integration = config.queue_rules?.find((rule) => rule.name === "relay-integration");
-
-test("the opt-in Relay integration queue preserves original commits without paid batching", () => {
-  assert.ok(integration, "queue_rules must define the opt-in integration queue");
-  assert.equal(integration.merge_method, "merge");
-  assert.equal(integration.update_method, "merge", "rebasing would rewrite contributor heads");
-  assert.equal(integration.checks_timeout, release?.checks_timeout);
-  for (const rule of config.queue_rules ?? []) {
-    for (const key of [
-      "batch_size",
-      "batch_max_wait_time",
-      "batch_max_failure_resolution_attempts",
-      "allow_inplace_checks",
-      "allow_queue_branch_edit",
-      "autoqueue",
-      "speculative_checks",
-      "queue_branch_merge_method",
-      "merge_bot_account",
-      "update_bot_account",
-    ]) {
-      assert.equal(
-        key in rule,
-        false,
-        `${rule.name}: unexpected paid, bypass or rewrite option ${key}`
-      );
-    }
-  }
-});
-
-test("integration routing is owner-only, exact-target and separately reviewed", () => {
-  assert.deepEqual(integration?.queue_conditions, [
-    "base=release/v3.8.52",
-    "head=fix/relay-integration-candidate-20261015",
-    "author=diegosouzapw",
-    "label=queue",
-    "label=integration-reviewed",
-    "-draft",
-    "-conflict",
-  ]);
-  const conditions = release?.queue_conditions as string[];
-  assert.ok(conditions.includes("-label=integration-reviewed"));
-  assert.ok(
-    conditions.includes("-head~=^fix/relay-integration-candidate-"),
-    "a missing review label must not route the candidate to squash"
-  );
-});
-
-test("integration admission retains every ordinary gate and requires both aggregate verdicts", () => {
-  assert.deepEqual(integration?.merge_conditions, release?.merge_conditions);
-  for (const rule of config.queue_rules ?? []) {
-    const conditions = rule.merge_conditions as unknown[];
-    assert.ok(conditions.includes("check-success=Gate / CI"), `${rule.name}: missing CI verdict`);
-    assert.ok(
-      conditions.includes("check-success=Gate / Quality"),
-      `${rule.name}: missing Quality verdict`
+test("every command that merges or rewrites a pull request is refused", () => {
+  const restrictions = config.commands_restrictions ?? {};
+  assert.deepEqual(Object.keys(restrictions).sort(), [...MUTATING_COMMANDS].sort());
+  for (const command of MUTATING_COMMANDS) {
+    // Conditions in one list are ANDed: `closed` and `-closed` can never both hold.
+    assert.deepEqual(
+      restrictions[command]?.conditions,
+      ["closed", "-closed"],
+      `${command}: must keep an unsatisfiable condition list`
     );
   }
 });
 
-test("ordinary admission keeps its exact failure allowance instead of broadening it", () => {
-  assert.deepEqual(release?.merge_conditions, [
-    {
-      or: ["#check-failure=0", { and: ["#check-failure=1", "check-failure=Build (advisory)"] }],
-    },
-    "#check-pending=0",
-    "#check-success>=1",
-    "check-success=Merge integrity (changelog + generated skills)",
-    "check-success=Gate / CI",
-    "check-success=Gate / Quality",
-  ]);
+test("the retired `queue` label is not omni-queue's label", () => {
+  assert.notEqual(omniQueue.label, "queue", "a leftover `queue` label must not enter omni-queue");
+});
+
+// p95 wall-clock (createdAt -> updatedAt) of the last 100 successful quality.yml runs, measured
+// 2026-10-09 over 2026-09-28..2026-10-08: 119.75 min. It sized Mergify's checks_timeout (240 min);
+// the replacement queue must keep at least 2x this so a slow-but-healthy run is not dequeued.
+const MEASURED_QUALITY_P95_MINUTES = 119.75;
+
+test("omni-queue keeps the retired queue's timeout floor and both aggregate verdicts", () => {
+  assert.ok(
+    omniQueue.checksTimeoutMinutes >= 2 * MEASURED_QUALITY_P95_MINUTES,
+    `checksTimeoutMinutes ${omniQueue.checksTimeoutMinutes} < 2 x p95 (${2 * MEASURED_QUALITY_P95_MINUTES})`
+  );
+  assert.ok(omniQueue.checksTimeoutMinutes <= 8 * 60, "above 8 h the timeout no longer protects");
+  for (const check of [
+    "Gate / CI",
+    "Gate / Quality",
+    "Merge integrity (changelog + generated skills)",
+  ]) {
+    assert.ok(omniQueue.requiredChecks.includes(check), `omni-queue must require ${check}`);
+  }
 });

@@ -3,9 +3,9 @@
 #
 # Why: in a merge-storm, waiting for each PR's CI after each sibling merge costs
 # O(N²) CI runs. The train merges every queued PR into a throwaway worktree cut from
-# the release tip, runs the fast-gates parity suite ONCE on the final result, and
-# prints the evidence block that authorizes `gh pr merge --squash --admin` for each
-# train member (merge-gates.md §7 — owner-approved policy extension of §4, 2026-07-09).
+# the release tip and runs the fast-gates parity suite once on the final result.
+# It prints diagnostic evidence for the owner's dossier for each train member.
+# Merge approval still requires the owner's authorization and the release gates.
 #
 # Designed for the 32-core runner box (192.168.0.113) or any checkout with
 # node_modules. It only READS from origin — it never pushes, never merges PRs, never
@@ -70,14 +70,14 @@ STATIC_GATES=(
   "node scripts/check/check-complexity.mjs"
   "node scripts/check/check-cognitive-complexity.mjs"
   "env CHANGELOG_BASE_REF=${CHANGELOG_BASE_REF_Q} node scripts/check/check-changelog-integrity.mjs"
-  # i18n contract (2026-09-22): the train is where en.json keys without catalogs and docs
-  # without mirrors slipped into the release tip three times in 48 h despite the PR CI —
-  # each combined tree must carry every en key in all 65 catalogs (UI + CLI), keep the
-  # real-translation ratio, and bring the mirrors of every doc it edits (section-level:
-  # `npm run i18n:run -- --files=<doc>`; UI keys: `npm run i18n:translate-new-keys`).
-  "npm run i18n:check-keys"
-  "npm run i18n:check-keys:cli"
-  "npm run i18n:check-ratio"
+  # i18n contract (2026-09-22, revised 2026-11-14 by plan "derived numbers resolved only at
+  # release"): feature PRs add keys to en.json only; the other catalogs are completed by the
+  # release refresh (`npm run release:refresh-derived`, step ui-keys) or a translation wave.
+  # The train therefore runs these gates in pr mode: each catalog the boarded PRs changed is
+  # still judged against the merge base, but a key that exists only in en.json is not a red.
+  "env OMNIROUTE_GATE_MODE=pr npm run i18n:check-keys"
+  "env OMNIROUTE_GATE_MODE=pr npm run i18n:check-keys:cli"
+  "env OMNIROUTE_GATE_MODE=pr npm run i18n:check-ratio"
   # Docs mirrors are advisory on the train since 2026-10-28 (same policy as the PR CI step in
   # ci.yml): a doc PR boards without its 66 mirrors and the post-merge `npm run i18n:run`
   # batch refreshes them. `--warn` still prints every drifted source in the train log; the
@@ -107,7 +107,12 @@ STATIC_GATES=(
 FULL_ONLY_GATES=(
   "npm run check:agent-skills-sync"       # ~76s  — generated SKILL.md out of date
   "npm run check:route-guard-membership"  # ~46s  — new local-only route left unclassified
-  "npm run check:docs-counts"             # ~164s — README/AGENTS/llm.txt counts vs code
+  # Derived numbers are refreshed at release (plan 2026-11-13). Each boarded PR's own CI already
+  # judged the managed values it wrote (pr mode), and the detached train cannot tell a writer
+  # branch (the nightly refresh PR, a translation wave) from a feature, so the train runs the
+  # gate as a batch: content invariants only. The strict counts-vs-code verdict is
+  # `release:refresh-derived --check`.
+  "env OMNIROUTE_GATE_MODE=pr OMNIROUTE_GATE_BATCH=1 npm run check:docs-counts" # ~10s
   "npm run check:dashboard-typecheck"     # minutes — TS errors under the dashboard tsconfig
 )
 # Full mode: the box-speed runner (same coverage as the two CI shards combined —
@@ -148,7 +153,7 @@ if [ "$PLAN" = "1" ]; then
   echo "[merge-train]     as INHERITED and the train continues; any ADDED violation, more violation"
   echo "[merge-train]     lines, or no recognisable violation line (fail-closed) → exit 2"
   i=$((i + 1))
-  echo "[merge-train] ${i}. green → print --admin evidence per PR; red → exit 2 (bisect + eject)"
+  echo "[merge-train] ${i}. green → print diagnostic evidence per PR for the owner's dossier only. red → exit 2 (operator bisects and ejects)"
   echo "[merge-train] ${i}. teardown: git worktree remove --force (trap EXIT)"
   exit 0
 fi
@@ -403,7 +408,7 @@ if [ ${#INHERITED[@]} -gt 0 ]; then
 else
   echo "[merge-train] ✅ SUITE GREEN on ${TIP}"
 fi
-echo "[merge-train] evidence line for each PR (paste before gh pr merge --squash --admin):"
+echo "[merge-train] Diagnostic evidence per PR for the owner's dossier only. Merge approval is separate."
 for N in "${BOARDED[@]}"; do
   echo "  #${N}: Validated in local merge-train ${LOG} on $(hostname) @ ${TIP} (${MODE_NOTE})"
 done

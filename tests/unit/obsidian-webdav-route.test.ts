@@ -49,14 +49,22 @@ function makeRequest(url: string, options?: RequestInit): NextRequest {
   return Object.assign(new Request(url, options), { ip: "127.0.0.1" }) as unknown as NextRequest;
 }
 
-function postVault(vaultPath: string): Promise<Response> {
-  return route.POST(
-    makeRequest("http://localhost/api/settings/obsidian/webdav", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ vaultPath }),
-    })
-  );
+/**
+ * POST carrying an operator credential (dashboard session). Choosing the vault is an
+ * operator-only action on this ALWAYS_PROTECTED route (CodeQL #1372/#1373): the handler no
+ * longer treats an anonymous open-mode caller as the operator — the authz pipeline already
+ * refused that caller over HTTP — so the tests below that enable WebDAV sign in first.
+ */
+async function makeOperatorPost(body: Record<string, unknown>): Promise<NextRequest> {
+  const req = await makeManagementSessionRequest("http://localhost/api/settings/obsidian/webdav", {
+    method: "POST",
+    body,
+  });
+  return Object.assign(req, { ip: "127.0.0.1" }) as unknown as NextRequest;
+}
+
+async function postVault(vaultPath: string): Promise<Response> {
+  return route.POST(await makeOperatorPost({ vaultPath }));
 }
 
 async function errorMessageOf(res: Response): Promise<string | undefined> {
@@ -113,11 +121,7 @@ test("GET with no config → webdavEnabled:false, all creds null", async () => {
 test("POST with a valid temp dir → returns { username, password }, GET shows enabled", async () => {
   const vaultDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-vault-"));
   try {
-    const req = makeRequest("http://localhost/api/settings/obsidian/webdav", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ vaultPath: vaultDir }),
-    });
+    const req = await makeOperatorPost({ vaultPath: vaultDir });
     const res = await route.POST(req);
 
     assert.equal(res.status, 200);
@@ -154,13 +158,7 @@ test("GET masks the WebDAV password for anonymous callers but reveals it to a ma
   const vaultDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-vault-62vw-"));
   try {
     // Enable WebDAV so there is a stored password to leak.
-    const enableRes = await route.POST(
-      makeRequest("http://localhost/api/settings/obsidian/webdav", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ vaultPath: vaultDir }),
-      })
-    );
+    const enableRes = await route.POST(await makeOperatorPost({ vaultPath: vaultDir }));
     assert.equal(enableRes.status, 200);
 
     // Anonymous (open-mode) caller: password masked, flag still set.
@@ -192,11 +190,7 @@ test("GET masks the WebDAV password for anonymous callers but reveals it to a ma
 
 test("POST with a non-existent path → 400, body does NOT contain a stack trace", async () => {
   const nonExistentPath = path.join(os.tmpdir(), "omni-nonexistent-vault-" + Date.now());
-  const req = makeRequest("http://localhost/api/settings/obsidian/webdav", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ vaultPath: nonExistentPath }),
-  });
+  const req = await makeOperatorPost({ vaultPath: nonExistentPath });
   const res = await route.POST(req);
 
   assert.equal(res.status, 400);
@@ -276,11 +270,7 @@ test("POST with a directory unrelated to the data directory still succeeds (sibl
 });
 
 test("POST with invalid body (missing vaultPath) → 400", async () => {
-  const req = makeRequest("http://localhost/api/settings/obsidian/webdav", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({}),
-  });
+  const req = await makeOperatorPost({});
   const res = await route.POST(req);
   assert.equal(res.status, 400);
 });
@@ -289,11 +279,7 @@ test("DELETE after enable → webdavEnabled:false, creds cleared in GET", async 
   const vaultDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-vault2-"));
   try {
     // Enable first
-    const enableReq = makeRequest("http://localhost/api/settings/obsidian/webdav", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ vaultPath: vaultDir }),
-    });
+    const enableReq = await makeOperatorPost({ vaultPath: vaultDir });
     const enableRes = await route.POST(enableReq);
     assert.equal(enableRes.status, 200);
 
@@ -322,11 +308,7 @@ test("GET when disabled does not leak password even if stale data exists", async
   const vaultDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-vault3-"));
   try {
     // Enable, then disable
-    const enableReq = makeRequest("http://localhost/api/settings/obsidian/webdav", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ vaultPath: vaultDir }),
-    });
+    const enableReq = await makeOperatorPost({ vaultPath: vaultDir });
     await route.POST(enableReq);
     const deleteReq = makeRequest("http://localhost/api/settings/obsidian/webdav", {
       method: "DELETE",

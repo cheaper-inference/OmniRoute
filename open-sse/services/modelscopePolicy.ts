@@ -1,3 +1,5 @@
+import { isCustomJsonProviderData } from "../utils/customJson.ts";
+
 type ModelScopeRateLimitSnapshot = {
   modelRemaining: number | null;
   modelLimit: number | null;
@@ -44,6 +46,8 @@ export function isModelScopeProvider(
       .toLowerCase() === "modelscope"
   )
     return true;
+  // A custom JSON business endpoint keeps its never-replayed contract on any host.
+  if (isCustomJsonProviderData(providerSpecificData)) return false;
   const baseUrl = getProviderBaseUrl(providerSpecificData);
   return MODELSCOPE_HOST_MARKERS.some((marker) => baseUrl.includes(marker));
 }
@@ -55,15 +59,14 @@ export function parseModelScopeRateLimitHeaders(
     modelRemaining: parseHeaderInteger(
       headers["modelscope-ratelimit-model-requests-remaining"] ?? null
     ),
-    modelLimit: parseHeaderInteger(
-      headers["modelscope-ratelimit-model-requests-limit"] ?? null
-    ),
-    totalRemaining: parseHeaderInteger(
-      headers["modelscope-ratelimit-requests-remaining"] ?? null
-    ),
+    modelLimit: parseHeaderInteger(headers["modelscope-ratelimit-model-requests-limit"] ?? null),
+    totalRemaining: parseHeaderInteger(headers["modelscope-ratelimit-requests-remaining"] ?? null),
     totalLimit: parseHeaderInteger(headers["modelscope-ratelimit-requests-limit"] ?? null),
   };
 }
+
+// A server-sent Retry-After must not park a request for minutes.
+const MAX_RETRY_DELAY_MS = 10_000;
 
 export function classifyModelScope429(
   errorText: string,
@@ -87,11 +90,14 @@ export function classifyModelScope429(
   return { kind: "rate_limited", retryable: true, snapshot };
 }
 
-export function getModelScopeRetryDelayMs(headers: Record<string, string>, attempt: number): number {
+export function getModelScopeRetryDelayMs(
+  headers: Record<string, string>,
+  attempt: number
+): number {
   const retryAfter = headers["retry-after"] ?? null;
   if (retryAfter) {
     const parsed = Number.parseFloat(retryAfter);
-    if (Number.isFinite(parsed) && parsed > 0) return parsed * 1000;
+    if (Number.isFinite(parsed) && parsed > 0) return Math.min(parsed * 1000, MAX_RETRY_DELAY_MS);
   }
   return 3000 * (attempt + 1);
 }

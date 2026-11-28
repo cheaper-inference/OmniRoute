@@ -763,6 +763,7 @@ export async function cleanupExpiredLogs() {
   const mcpCutoff = new Date(Date.now() - mcpAuditRetentionDays * day).toISOString();
 
   let deletedUsage = 0;
+  let usageRollupFailed = false;
   let deletedCallLogs = 0;
   let deletedProxyLogs = 0;
   let deletedRequestDetailLogs = 0;
@@ -794,6 +795,8 @@ export async function cleanupExpiredLogs() {
       } catch (error) {
         console.error("[compliance] usage rollup failed; usage_history rows are kept", error);
       }
+      // A skipped deletion is audited as partial, not success.
+      usageRollupFailed = !rolledUp;
       if (rolledUp) {
         try {
           deletedUsage = await deleteWholeDaysBefore("usage_history", "timestamp", usageCutoffDate);
@@ -882,8 +885,9 @@ export async function cleanupExpiredLogs() {
     actor: "system",
     target: "log-retention",
     resourceType: "maintenance",
-    status: "success",
+    status: usageRollupFailed ? "partial" : "success",
     details: {
+      usageRollupFailed,
       deletedUsage,
       deletedCallLogs,
       deletedProxyLogs,

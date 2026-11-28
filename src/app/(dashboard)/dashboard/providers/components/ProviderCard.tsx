@@ -10,9 +10,15 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { brandTintVars } from "@omniroute/ui-kit/brand-tint";
 
+import {
+  CODEX_ULTRAFAST_LABEL,
+  CODEX_ULTRAFAST_MODEL_LABEL,
+} from "@/lib/providers/codexServiceTierModels";
+import type { CodexServiceTier } from "@/lib/providers/requestDefaults";
 import { Badge, Button, Card, Modal, Toggle } from "@/shared/components";
 import ProviderTestSlideOver from "@/shared/components/ProviderTestSlideOver";
 import ProviderIcon from "@/shared/components/ProviderIcon";
+import { flowColorAlpha } from "@/shared/components/flow/edgeStyles";
 import {
   isAnthropicCompatibleProvider,
   isClaudeCodeCompatibleProvider,
@@ -45,7 +51,7 @@ interface ProviderStats {
   errorTime?: string | null;
   allDisabled?: boolean;
   expiryStatus?: "expired" | "expiring_soon" | string | null;
-  codexServiceTier?: "default" | "priority" | "flex" | null;
+  codexServiceTier?: CodexServiceTier | null;
 }
 
 const KIND_LABEL_KEYS: Record<string, { key: string; fallback: string }> = {
@@ -102,8 +108,9 @@ interface ProviderCardProps {
 // Category identity dots (a legend shared with ProviderSummaryCard and the page's section
 // headers) come from the kit chart tokens via providerCategoryPalette.ts (KEA-7886, P8). Only
 // these auth types get their own dot; anything else keeps the API-key dot, as before.
+// Sponsor chips are kit badges in the sponsor's own tint (the kit has no brand tone).
 const SPONSOR_CHIP_CLASS =
-  "ci-brand-tint inline-flex items-center gap-0.5 rounded-full border border-[var(--ci-brand-border)] bg-[var(--ci-brand-subtle)] px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wide leading-none text-[var(--ci-brand-ink)]";
+  "ci-brand-tint border border-[var(--ci-brand-border)] bg-[var(--ci-brand-subtle)] uppercase text-[var(--ci-brand-ink)]";
 
 const CARD_DOT_CATEGORIES = new Set([
   "free",
@@ -139,6 +146,38 @@ function providerText(
     );
   }
   return fallback;
+}
+
+function renderCodexServiceTierChip(
+  providerId: string,
+  tier: CodexServiceTier | null | undefined,
+  t: ProviderMessageTranslator
+): ReactNode {
+  const codexServiceTierLabel =
+    tier === "ultrafast"
+      ? CODEX_ULTRAFAST_LABEL
+      : tier === "flex"
+        ? providerText(t, "codexTierFlexLabel", "Flex")
+        : providerText(t, "codexTierFastLabel", "Fast");
+  return providerId === "codex" && tier && tier !== "default" ? (
+    <Badge
+      key="codex-service-tier"
+      variant="info"
+      tone={tier === "flex" ? "chart-2" : undefined}
+      size="sm"
+      icon={<Icon name={tier === "flex" ? "speed" : "bolt"} size={12} />}
+      className="uppercase"
+      title={
+        tier === "ultrafast"
+          ? CODEX_ULTRAFAST_MODEL_LABEL
+          : providerText(t, "codexServiceTierActive", "Codex {tier} service tier is active", {
+              tier: codexServiceTierLabel,
+            })
+      }
+    >
+      {codexServiceTierLabel}
+    </Badge>
+  ) : null;
 }
 
 interface WarningBadgeDetails {
@@ -350,34 +389,14 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
   const isSponsorPartner = isKimiPartner || isCheaperInferencePartner;
   const sponsorBrand = SPONSOR_BRAND_COLORS[provider.id || providerId];
   const openRouterStat = useOpenRouterProviderStat(provider.id || providerId);
-  const codexServiceTierLabel =
-    stats.codexServiceTier === "flex"
-      ? providerText(t, "codexTierFlexLabel", "Flex")
-      : providerText(t, "codexTierFastLabel", "Fast");
-  const codexServiceTierChip =
-    providerId === "codex" && stats.codexServiceTier && stats.codexServiceTier !== "default" ? (
-      <span
-        key="codex-service-tier"
-        className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0 text-[9px] font-semibold uppercase tracking-wide ${
-          stats.codexServiceTier === "flex" ? "bg-chart-2/10 text-chart-2" : "bg-info/10 text-info"
-        }`}
-        title={providerText(t, "codexServiceTierActive", "Codex {tier} service tier is active", {
-          tier: codexServiceTierLabel,
-        })}
-      >
-        <Icon
-          name={stats.codexServiceTier === "flex" ? "speed" : "bolt"}
-          size={10}
-          className="leading-none"
-        />
-        {codexServiceTierLabel}
-      </span>
-    ) : null;
+  const codexServiceTierChip = renderCodexServiceTierChip(providerId, stats.codexServiceTier, t);
 
   // Kimi (Moonshot AI) official-partnership badge.
   const kimiOfficialSupporterChip = isKimiPartner ? (
-    <span
+    <Badge
       key="kimi-official-supporter"
+      size="sm"
+      icon={<Icon name="verified" size={12} />}
       className={SPONSOR_CHIP_CLASS}
       style={brandTintVars(KIMI_BRAND_COLOR) as CSSProperties}
       title={providerText(
@@ -386,15 +405,16 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
         "Kimi (Moonshot AI) is OmniRoute's founding Open Source Friend"
       )}
     >
-      <Icon name="verified" size={10} className="leading-none" />
       {providerText(t, "kimiOfficialSupporterBadge", "Founding Friend")}
-    </span>
+    </Badge>
   ) : null;
 
   // Cheaper Inference Open Source Friend badge.
   const cheaperInferenceSupporterChip = isCheaperInferencePartner ? (
-    <span
+    <Badge
       key="cheaperinference-supporter"
+      size="sm"
+      icon={<Icon name="verified" size={12} />}
       className={SPONSOR_CHIP_CLASS}
       style={brandTintVars(CHEAPERINFERENCE_BRAND_COLOR) as CSSProperties}
       title={providerText(
@@ -403,9 +423,8 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
         "Cheaper Inference backs OmniRoute as an Open Source Friend"
       )}
     >
-      <Icon name="verified" size={10} className="leading-none" />
       {providerText(t, "cheaperInferenceSupporterBadge", "Open Source Friend")}
-    </span>
+    </Badge>
   ) : null;
 
   const openRouterTooltipBits: string[] = [];
@@ -429,16 +448,16 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
   // provider directory + usage rankings (see src/lib/catalog/openrouterProviderStats.ts).
   // Absent entirely for providers OpenRouter doesn't track; never affects routing.
   const openRouterPopularityChip = openRouterStat ? (
-    <span
+    <Badge
       key="openrouter-popularity"
-      className="inline-flex items-center gap-0.5 rounded-full border border-border bg-bg-subtle px-1.5 py-0 text-[9px] font-semibold leading-none text-text-muted"
+      size="sm"
+      icon={<Icon name="trending_up" size={12} />}
       title={openRouterTooltip}
     >
-      <Icon name="trending_up" size={10} className="leading-none" />
       {providerText(t, "openRouterPopularityBadge", "OR #{rank}", {
         rank: openRouterStat.popularityRank,
       })}
-    </span>
+    </Badge>
   ) : null;
 
   const dotLabels: Record<string, string> = {
@@ -496,7 +515,7 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
             <div className="flex items-start gap-3 min-w-0">
               <div
                 className="size-9 rounded-lg flex items-center justify-center shrink-0"
-                style={{ backgroundColor: `${provider.color || "#64748b"}15` }}
+                style={{ backgroundColor: flowColorAlpha(provider.color || "#64748b", 8) }}
               >
                 {provider.iconUrl ? (
                   <ProviderIcon
@@ -521,7 +540,7 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
                   <ProviderIcon providerId={provider.id || providerId} size={24} type="color" />
                 )}
               </div>
-              <h3 className="text-sm font-semibold leading-snug flex-1 min-w-0">
+              <h3 className="ci-heading flex-1 min-w-0" data-size="sm">
                 <span
                   className={`block break-words ${provider.deprecated ? "line-through opacity-60" : ""}`}
                   title={provider.name}
@@ -541,9 +560,9 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
                 {provider.subscriptionRisk === true && (
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon-2xs"
                     icon="info"
-                    className="size-5 text-warning"
+                    className="text-warning"
                     title={t("riskNotice.tooltip")}
                     aria-label={t("riskNotice.tooltip")}
                     aria-haspopup="dialog"
@@ -657,12 +676,11 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
                 )}
                 {isLlmProvider && (
                   <Button
-                    size="sm"
+                    size="2xs"
                     variant="outline"
                     icon="play_arrow"
                     onClick={handleTestClick}
                     title={tp("expandTest")}
-                    className="h-6 gap-0.5 px-2 text-[11px]"
                   >
                     {tp("testLabel")}
                   </Button>

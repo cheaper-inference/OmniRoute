@@ -1,19 +1,45 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, CSSProperties, ReactNode } from "react";
 import { cn } from "./lib/utils";
 import { NumberTicker } from "./number-ticker";
 
-export type ProgressTone = "default" | "success" | "warning" | "danger";
+export type ProgressTone = "default" | "success" | "warning" | "danger" | "info";
+/** Track height: `xs` is 4px, `sm` is 6px and `md` (default) is 8px. */
+export type ProgressSize = "xs" | "sm" | "md";
+/** `progress` is a task that advances to completion; `meter` is a measurement inside a known range. */
+export type ProgressSemantics = "progress" | "meter";
 
 export interface ProgressSegment {
   value: number;
   /** Colour of this part. Defaults to the bar's `tone`. */
   tone?: ProgressTone;
+  /** Any CSS colour for this part, for example `chartSeries(index).color`. Wins over `tone`; defaults to the bar's `color` when the part has no `tone`. */
+  color?: string;
 }
 
-export interface ProgressProps extends Omit<ComponentProps<"div">, "children"> {
+/** One allocation band with its own track: `max` is its capacity, `value` the used part inside it. */
+export interface ProgressBand {
+  /** Stable identity of this band across renders. Defaults to `label`. */
+  id?: string;
+  /** Used amount inside this band, clamped to `[0, max]`. */
+  value: number;
+  /** Capacity of this band. Its track takes a share of the bar width proportional to it. Bands without capacity are dropped. */
+  max: number;
+  /** Accessible name of this band's progressbar, for example "Paid credit". */
+  label: string;
+  /** Spoken value of this band, for example "$12.00 of $19.00 used". */
+  valueText?: string;
+  /** Colour of this band's edge and fill. Defaults to the bar's `tone`. */
+  tone?: ProgressTone;
+  /** Any CSS colour for this band's edge and fill, for example `chartSeries(index).color`. Wins over `tone`; defaults to the bar's `color` when the band has no `tone`. */
+  color?: string;
+  /** Visible caption under this band, aligned with its track. */
+  legend?: ReactNode;
+}
+
+export interface ProgressProps extends Omit<ComponentProps<"div">, "children" | "color"> {
   /** Current value. Omit it (or pass `indeterminate`) when the amount of work is unknown. */
   value?: number;
   max?: number;
@@ -25,14 +51,42 @@ export interface ProgressProps extends Omit<ComponentProps<"div">, "children"> {
   delay?: number;
   /** Indicator colour. "default" keeps the accent gradient. */
   tone?: ProgressTone;
+  /**
+   * Any CSS colour for the indicator, set through `--ci-progress-color`. Prefer `chartSeries(index).color`,
+   * so the bar matches its series in a chart or a `LegendMarker`. Wins over `tone`.
+   */
+  color?: string;
+  /** Track height: `xs` is 4px, `sm` is 6px and `md` (default) is 8px. Applies to `segments` and `bands` too. */
+  size?: ProgressSize;
+  /**
+   * `progress` (default) is a `progressbar`: a task that advances to completion. `meter` is a `meter`:
+   * a measurement inside a known range, such as quota used, coverage or a share of a total. Both are
+   * named the same way. An unknown value is always a `progressbar`, because a meter has a value.
+   */
+  semantics?: ProgressSemantics;
   /** Unknown amount of work: a looping sweep and no `aria-valuenow`. Wins over `value` and `segments`. */
   indeterminate?: boolean;
   /** Stacked parts of one total (for example completed + failed). Their sum is the bar value; `value` is ignored. */
   segments?: ProgressSegment[];
+  /**
+   * Allocation bands, each with its own track sized by its capacity and its own used fill
+   * (for example a paid band and a bonus band). Each band is a named progressbar inside a group
+   * named by `label`, `aria-label` or `aria-labelledby`. Wins over `segments` and `value`.
+   */
+  bands?: ProgressBand[];
 }
 
 // Only NaN has no meaningful position; ±Infinity is clamped to [0, max] below, as before.
 const orZero = (value: number) => (Number.isNaN(value) ? 0 : value);
+
+// The most specific colour wins: the part's own colour, then the part's own tone, then the bar's colour.
+const partColor = (part: { color?: string; tone?: ProgressTone }, barColor: string | undefined) =>
+  part.color || (part.tone == null ? barColor : undefined) || undefined;
+
+// A coloured part carries its colour instead of a tone; a part without a colour is marked exactly as before.
+const paint = (color: string | undefined, tone: ProgressTone) =>
+  color ? { "data-color": "" } : { "data-tone": tone === "default" ? undefined : tone };
+const colorVar = (color: string | undefined) => (color ? ({ "--ci-progress-color": color } as CSSProperties) : undefined);
 
 export function Progress({
   className,
@@ -43,8 +97,12 @@ export function Progress({
   animate = true,
   delay = 0,
   tone = "default",
+  color,
+  size = "md",
+  semantics = "progress",
   indeterminate = false,
   segments,
+  bands,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
   "aria-describedby": ariaDescribedBy,
@@ -53,9 +111,16 @@ export function Progress({
 }: ProgressProps) {
   const labelId = useId();
   const safeMax = Math.max(max, 1);
+  const bandParts = (bands ?? [])
+    .filter((band) => Number.isFinite(band.max) && band.max > 0)
+    .map((band) => {
+      const amount = Math.min(Math.max(orZero(band.value), 0), band.max);
+      return { ...band, tone: band.tone ?? tone, color: partColor(band, color), amount, percent: (amount / band.max) * 100 };
+    });
+  const hasBands = !indeterminate && bandParts.length > 0;
   const hasSegments = Boolean(segments?.length);
-  const isIndeterminate = indeterminate || (value == null && !hasSegments);
-  const sourceParts: ProgressSegment[] = segments?.length ? segments : [{ value: value ?? 0, tone }];
+  const isIndeterminate = indeterminate || (value == null && !hasSegments && !hasBands);
+  const sourceParts: ProgressSegment[] = segments?.length ? segments : [{ value: value ?? 0 }];
   // Each part is capped so the stacked total never exceeds max. Empty segments
   // are dropped so they do not draw a seam; a plain bar always keeps its indicator.
   let used = 0;
@@ -63,11 +128,24 @@ export function Progress({
     .map((part) => {
       const amount = Math.min(Math.max(orZero(part.value), 0), safeMax - used);
       used += amount;
-      return { tone: part.tone ?? tone, amount, percent: (amount / safeMax) * 100 };
+      return { tone: part.tone ?? tone, color: partColor(part, color), amount, percent: (amount / safeMax) * 100 };
     })
     .filter((part) => !hasSegments || part.amount > 0);
   const current = used;
-  const percent = (current / safeMax) * 100;
+  const bandCapacity = bandParts.reduce((sum, band) => sum + band.max, 0);
+  // Growth factors that total less than 1 leave part of the row empty, so fractional capacities scale up.
+  const growScale = bandCapacity > 0 && bandCapacity < 1 ? 1 / bandCapacity : 1;
+  // Bands keep their identity (and their legend state) when an earlier band is dropped or reordered.
+  const seenBandKeys = new Set<string>();
+  const bandKeys = bandParts.map((band, index) => {
+    const base = band.id ?? band.label;
+    const key = seenBandKeys.has(base) ? `${base}#${index}` : base;
+    seenBandKeys.add(key);
+    return key;
+  });
+  const percent = hasBands
+    ? (bandParts.reduce((sum, band) => sum + band.amount, 0) / bandCapacity) * 100
+    : (current / safeMax) * 100;
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(!animate);
 
@@ -107,6 +185,8 @@ export function Progress({
   // aria-labelledby wins, then aria-label, then the visible `label`.
   const hasVisibleLabel = label != null && label !== false && label !== "";
   const labelledBy = ariaLabelledBy ?? (ariaLabel == null && hasVisibleLabel ? labelId : undefined);
+  // A meter always has a value, so the indeterminate sweep stays a progressbar.
+  const role = semantics === "meter" && !isIndeterminate ? "meter" : "progressbar";
 
   return (
     <div
@@ -115,6 +195,8 @@ export function Progress({
       {...props}
       // After the forwarded props, so a consumer data-state cannot switch the sweep off.
       {...(isIndeterminate ? { "data-state": "indeterminate" } : null)}
+      {...(hasBands ? { "data-layout": "bands" } : null)}
+      {...(size === "xs" || size === "sm" ? { "data-size": size } : null)}
     >
       {(label != null || (showValue && !isIndeterminate)) && (
         <div className="ci-progress__header">
@@ -129,34 +211,75 @@ export function Progress({
           )}
         </div>
       )}
-      <div
-        role="progressbar"
-        aria-label={ariaLabel}
-        aria-labelledby={labelledBy}
-        aria-describedby={ariaDescribedBy}
-        aria-valuetext={isIndeterminate ? undefined : ariaValueText}
-        aria-valuemin={0}
-        aria-valuemax={safeMax}
-        aria-valuenow={isIndeterminate ? undefined : current}
-        className="ci-progress__track"
-        data-segmented={hasSegments && !isIndeterminate ? "" : undefined}
-      >
-        {isIndeterminate ? (
-          <span className="ci-progress__indicator" data-tone={tone === "default" ? undefined : tone} />
-        ) : (
-          parts.map((part, index) => (
-            <span
-              key={index}
-              className={cn("ci-progress__indicator", hasSegments && "ci-progress__segment")}
-              data-tone={part.tone === "default" ? undefined : part.tone}
-              style={{
-                width: isVisible ? `${part.percent}%` : "0%",
-                transitionDelay: isVisible ? `${delay}s` : "0s",
-              }}
-            />
-          ))
-        )}
-      </div>
+      {hasBands ? (
+        <div
+          role="group"
+          aria-label={ariaLabel}
+          aria-labelledby={labelledBy}
+          aria-describedby={ariaDescribedBy}
+          className="ci-progress__bands"
+        >
+          {bandParts.map((band, index) => (
+            <div
+              key={bandKeys[index]}
+              className="ci-progress__band"
+              {...paint(band.color, band.tone)}
+              style={{ flexGrow: band.max * growScale, ...colorVar(band.color) }}
+            >
+              <div
+                role={role}
+                aria-label={band.label}
+                aria-valuetext={band.valueText}
+                aria-valuemin={0}
+                aria-valuemax={band.max}
+                aria-valuenow={band.amount}
+                className="ci-progress__track"
+              >
+                <span
+                  className="ci-progress__indicator"
+                  style={{
+                    width: isVisible ? `${band.percent}%` : "0%",
+                    transitionDelay: isVisible ? `${delay}s` : "0s",
+                  }}
+                />
+              </div>
+              {band.legend != null && band.legend !== false && band.legend !== "" ? (
+                <div className="ci-progress__band-legend">{band.legend}</div>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div
+          role={role}
+          aria-label={ariaLabel}
+          aria-labelledby={labelledBy}
+          aria-describedby={ariaDescribedBy}
+          aria-valuetext={isIndeterminate ? undefined : ariaValueText}
+          aria-valuemin={0}
+          aria-valuemax={safeMax}
+          aria-valuenow={isIndeterminate ? undefined : current}
+          className="ci-progress__track"
+          data-segmented={hasSegments && !isIndeterminate ? "" : undefined}
+        >
+          {isIndeterminate ? (
+            <span className="ci-progress__indicator" {...paint(color || undefined, tone)} style={colorVar(color)} />
+          ) : (
+            parts.map((part, index) => (
+              <span
+                key={index}
+                className={cn("ci-progress__indicator", hasSegments && "ci-progress__segment")}
+                {...paint(part.color, part.tone)}
+                style={{
+                  width: isVisible ? `${part.percent}%` : "0%",
+                  transitionDelay: isVisible ? `${delay}s` : "0s",
+                  ...colorVar(part.color),
+                }}
+              />
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }

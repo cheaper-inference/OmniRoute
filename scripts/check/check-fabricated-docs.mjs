@@ -128,6 +128,7 @@ const ENV_VAR_ALLOWLIST = new Set([
   "AUTO_UPDATE_HOST_REPO_DIR", // docker-compose self-update mount (DOCKER_GUIDE.md)
   "LINUX_GPG_KEY", // electron AppImage signing key, CI/build only (ELECTRON_GUIDE.md)
   "BRANCH_LOCK_TOKEN", // release branch-protection ops token (QUALITY_GATE_PLAYBOOK.md)
+  "GHCR_LEGACY_TOKEN", // repository secret, not an env var: docker-org-mirror.yml passes it to the script as MIRROR_TOKEN (RELEASE_CHECKLIST.md)
   "NEXT_LOCALE", // next-intl locale cookie name (I18N.md)
   // Telegram Mini App integration (proposal TELEGRAM-MINIAPP.md, not yet implemented): env vars named in the feasibility analysis but no code reads them yet.
   "TELEGRAM_WEBHOOK_URL", // proposal-only: Telegram webhook public endpoint (TELEGRAM-MINIAPP.md, future feature)
@@ -583,16 +584,20 @@ export function buildCodebaseIndex(root = ROOT) {
   // literal `process.env.<KEY>`, so the code-read index cannot see those reads.
   // Every key in FEATURE_FLAG_DEFINITIONS is therefore a real, env-overridable
   // knob (docs/reference/FEATURE_FLAGS.md documents the catalog 1:1).
-  // The catalog also spreads per-area modules (searchFeatureFlagDefinitions.ts, #17933).
+  // The catalog also spreads per-area modules: prefix-named (searchFeatureFlagDefinitions.ts,
+  // #17933) and suffix-named splits kept under the file-size cap
+  // (featureFlagDefinitionsFal.ts, featureFlagDefinitionsCodeAssist.ts, #18060).
   function readFeatureFlagContract() {
+    // featureFlagDefinitions.ts plus the per-area modules it spreads in
+    // (featureFlagDefinitionsSystemOne.ts, searchFeatureFlagDefinitions.ts, …).
     const dir = path.join(root, "src", "shared", "constants");
-    let names = [];
+    let files = [];
     try {
-      names = fs.readdirSync(dir).filter((name) => /featureflagdefinitions\.ts$/i.test(name));
+      files = fs.readdirSync(dir).filter((name) => /featureflagdefinitions\w*\.ts$/i.test(name));
     } catch {
       /* ignore */
     }
-    for (const name of names) {
+    for (const name of files) {
       try {
         const t = fs.readFileSync(path.join(dir, name), "utf8");
         for (const m of t.matchAll(/^\s*key:\s*"([A-Z][A-Z0-9_]+)"/gm)) envVars.add(m[1]);

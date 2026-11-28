@@ -276,6 +276,31 @@ test("an admin oma_ access token still updates an ordinary setting", async () =>
 
 // ─── Dashboard session: operator, but the password re-auth now covers the new keys ─────
 
+test("rejects the KEA-9580 CORS origins without replacing the saved list", () =>
+  keepingSeededPolicy(async () => {
+    const response = await sessionPatch({
+      corsOrigins: "<b>x</b> 😀, http://",
+      currentPassword: PASSWORD,
+    });
+
+    assert.equal(response.status, 400);
+    const body = (await response.json()) as { error: { details: { field: string }[] } };
+    assert.deepEqual(
+      body.error.details.map(({ field }) => field),
+      ["corsOrigins"]
+    );
+    assert.equal(await stored("corsOrigins"), SEEDED_POLICY.corsOrigins);
+  }));
+
+test("saves a valid list of CORS origins and accepts an empty list to clear it", () =>
+  keepingSeededPolicy(async () => {
+    for (const corsOrigins of ["https://admin.example.com, http://localhost:3000", ""]) {
+      const response = await sessionPatch({ corsOrigins, currentPassword: PASSWORD });
+      assert.equal(response.status, 200, await response.clone().text());
+      assert.equal(await stored("corsOrigins"), corsOrigins);
+    }
+  }));
+
 test("a dashboard session PATCHing corsOrigins without currentPassword gets 400 PASSWORD_REQUIRED", () =>
   keepingSeededPolicy(async () => {
     const response = await sessionPatch({ corsOrigins: SECURITY_POLICY_CHANGES.corsOrigins });

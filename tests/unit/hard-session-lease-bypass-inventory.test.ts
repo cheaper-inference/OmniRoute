@@ -33,13 +33,30 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // emptyTurnRetryLoop.ts — still dispatched through executeProviderRequest(), still
     // fenced centrally (class A).
     "open-sse/handlers/chatCore/emptyTurnRetryLoop.ts": 1,
-    "open-sse/handlers/chatCore/providerExecutionPipeline.ts": 2,
+    // #18425: the codex 429 rotation now prefers the injected quota-preflight selector
+    // (`connection.getProviderCredentialsWithQuotaPreflight`) and falls back to the plain
+    // `connection.getProviderCredentials` when the leg does not wire it — two call
+    // expressions for the same rotation site, 2->3. Same gate as before
+    // (`policy.allowAccountRotation`, derived from !managedLease), so still class B.
+    "open-sse/handlers/chatCore/providerExecutionPipeline.ts": 3,
     "open-sse/services/imageCombo.ts": 1,
+    // #15279: the jev combo strategy reads the scoped `typesafe` credential for its
+    // opt-in System One choice call (COMBO_JEV_STRATEGY_ENABLED). The call never
+    // dispatches chat; the chosen targets still go through the normal path (class B).
+    "open-sse/services/combo/jevAsk.ts": 1,
+    // Unified decision routing: the `decision` auto-router reads the key of the decider's
+    // referenced connection (or the scoped `typesafe` one) inside the API key allowlist,
+    // only behind COMBO_DECISION_ROUTER_ENABLED. The call never dispatches chat; the chosen
+    // model still goes through the normal path (class B, same as jevAsk).
+    "open-sse/services/decision/credentials.ts": 1,
     // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.
     "open-sse/services/speechCombo.ts": 2,
     "open-sse/services/videoCombo.ts": 2,
+    // #15279: the combo test summary only checks whether a TypeSafe key exists so it
+    // can say "Jev is not configured"; no request is made with it (class B).
+    "src/app/api/combos/test/route.ts": 1,
     "src/app/api/compression/compare/verify/route.ts": 1,
     "src/app/api/internal/codex-responses-ws/route.ts": 1,
     // PR #11390: rerank listing endpoint probes configured credentials so the
@@ -51,6 +68,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #13987: System One decisions (/v1/systemone), same
     // scoped quota-preflight credential lookup as /v1/classify (class B).
     "src/app/api/v1/_shared/systemOneRoute.ts": 1,
+    // #18838 (salvage): native OpenAI Decisions (/v1/decisions), the same scoped
+    // quota-preflight lookup as /v1/systemone, handed to the decision credential resolver
+    // inside the key's connection scope; it posts a typed decision, never chat (class B).
+    "src/app/api/v1/_shared/decisionsRoute.ts": 1,
     // GHSA-3w2r: keyless providers (local zero-config defaults, keyless
     // remotes) look up an in-scope connection for a connection-scoped API key
     // before running (chat's #9057 rule) — one extra scoped lookup per site.
@@ -146,8 +167,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "open-sse/handlers/cursorCliProxy.ts": 1,
     "open-sse/services/alibabaFreeTier.ts": 1,
     "open-sse/services/alibabaFreeTierQuotaFetcher.ts": 1,
-    // Family cooldown persist looks the row up to write PSD, not dispatch.
-    "open-sse/services/antigravityFamilyCooldown.ts": 1,
+    // Family cooldown persist looks the row up to write PSD, not dispatch. #20481 adds
+    // clearAntigravityFamilyCooldown, which reads the row to drop one saved family deadline
+    // after a passing quota probe: a PSD state write as well, no dispatch.
+    "open-sse/services/antigravityFamilyCooldown.ts": 2,
     // #12864: on the first REQUEST_REJECTED refusal seen by this process the
     // streak seeder reads the row's lastErrorType/lastErrorAt so a crash loop
     // cannot reset the backoff count on every boot — a state read, not dispatch.
@@ -194,7 +217,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // management route; the per-model probes it dispatches still go through the
     // fenced chat pipeline, so it never selects a connection itself (class C).
     "src/app/api/models/test-all/route.ts": 1,
-    "src/app/api/monitoring/health/route.ts": 1,
+    // The health payload reads every row for its counts; `?provider=<id>` reads the active rows
+    // of one provider for a pool summary (counts only). Both are monitoring reads behind
+    // management auth, never connection selection or dispatch (class C).
+    "src/app/api/monitoring/health/route.ts": 2,
     "src/app/api/oauth/[provider]/[action]/route.ts": 4,
     // Microsoft 365 sign-in: behind the OAuth route's management guard, the authorize step reads
     // the rows only to confirm a reconnect target exists; no selection or dispatch (class C).
@@ -225,7 +251,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // call site landed here without a golden-inventory update at the time.
     // +1: bulk PATCH reads the row to carry the operator-disable marker in
     // providerSpecificData next to isActive — a state read, not dispatch.
-    "src/app/api/providers/route.ts": 4,
+    // +1: creating a key on a compatible node reads its sibling rows to copy the
+    // node's "Quota check" preset — a state read, not dispatch (class C).
+    "src/app/api/providers/route.ts": 5,
     "src/app/api/providers/test-batch/route.ts": 2,
     "src/app/api/rate-limits/route.ts": 1,
     "src/app/api/services/dario/admin/import-from-omniroute/route.ts": 2,
@@ -277,7 +305,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #11698/#11720 retirement PRs' combined getProviderConnectionById
     // fallback in the three write-path functions): not introduced by this PR.
     // #15485: the priority-0 move-to-top edit re-reads the row by id after reorderConnections (3 -> 4).
-    "src/lib/db/providers.ts": 4,
+    // #18347: after an owner-fenced Codex update, re-read the durable row instead of returning
+    // the pre-write snapshot. State lookup only; it does not select or dispatch (class C).
+    "src/lib/db/providers.ts": 5,
     "src/lib/db/readCache.ts": 2,
     // #16472: guarded session-affinity eviction resolves the failed connection's shared
     // account identity before a compare-and-delete on the optional Redis store. Read-only
@@ -370,12 +400,16 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/vscode/tagModels.ts": 1,
     "src/lib/warmupScheduler.ts": 1,
     "src/shared/services/codexCatalogRevalidation.ts": 2,
+    // #11777: the scheduled model health check lists opted-in connections and fences each
+    // one with isConnectionUnavailableToAuxiliaryActivity before probing it.
+    "src/shared/services/modelHealthCheckScheduler.ts": 1,
     "src/shared/services/modelSyncScheduler.ts": 1,
     // #15234: Muse session ownership lists the active muse-code OAuth connections only to
     // pick/validate the session's owner account. It selects nothing for dispatch — every
     // attempt still resolves credentials through the class-A path in chat.ts, pinned to that
-    // owner's connection id — so this is a state read (class C).
-    "src/sse/handlers/chat/museOwnership.ts": 1,
+    // owner's connection id — so this is a state read (class C). Two reads: the claim, and
+    // `museSessionIsOwned` deciding whether provider failover may change provider.
+    "src/sse/handlers/chat/museOwnership.ts": 2,
     "src/sse/handlers/chatHelpers.ts": 1,
     "src/sse/services/auth.ts": 4,
   },
@@ -427,6 +461,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
         "src/lib/usage/providerLimits.ts",
         "src/lib/vncSession/service.ts",
         "src/lib/warmupScheduler.ts",
+        "src/shared/services/modelHealthCheckScheduler.ts",
         "src/shared/services/modelSyncScheduler.ts",
         "src/sse/services/auth.ts",
       ].includes(file)
@@ -539,6 +574,7 @@ test("managed request surfaces are fenced centrally or rejected before independe
     "src/lib/usage/grokResetCredits.ts",
     "src/lib/vncSession/service.ts",
     "src/lib/warmupScheduler.ts",
+    "src/shared/services/modelHealthCheckScheduler.ts",
     "src/shared/services/modelSyncScheduler.ts",
   ].map((file) => fs.readFileSync(path.join(REPO_ROOT, file), "utf8"));
   const unfencedUsageRefreshSource = fs.readFileSync(

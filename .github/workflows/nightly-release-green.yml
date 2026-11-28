@@ -114,7 +114,8 @@ jobs:
     needs: resolve-target
     if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Match native CI for unit shards and use 30 minutes for integration and Vitest.
+    timeout-minutes: ${{ matrix.script == 'test:unit:ci:shard' && 35 || 30 }}
     strategy:
       fail-fast: false
       matrix:
@@ -134,12 +135,16 @@ jobs:
       JWT_SECRET: ci-nightly-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-nightly-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
+      # Same gate mode as the observer's own HARD gates (withHardGateMode in
+      # validate-release-green.mjs): these results feed its verdict through --suites-from.
+      # Release-mode assertions (e.g. locale key parity) belong to the release cut.
+      OMNIROUTE_GATE_MODE: "pr"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ needs.resolve-target.outputs.sha }}
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ needs.resolve-target.outputs.node-version }}
           cache: npm
@@ -170,7 +175,7 @@ jobs:
           exit "$code"
       - name: Upload the suite result
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: release-green-suite-${{ github.run_attempt }}-${{ matrix.name }}
           path: suite-results/
@@ -201,7 +206,7 @@ jobs:
       API_KEY_SECRET: ci-nightly-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -261,7 +266,7 @@ jobs:
         id: revision
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ needs.resolve-target.outputs.node-version || '24' }}
           cache: npm
@@ -271,7 +276,7 @@ jobs:
       - name: Collect the hosted suite results
         if: github.event_name != 'push'
         continue-on-error: true
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           # A partial re-run cannot reuse receipts from an earlier attempt;
           # rerun all suite jobs for a new complete observation of the same tip.
@@ -280,17 +285,24 @@ jobs:
           merge-multiple: true
 
       # Use the immutable workflow revision, not the target checkout (which may
-      # predate this installer). Both scanners are required even for --quick.
-      - name: Prepare pinned workflow scanners
+      # predate these installers). Quick requires the workflow pair; full also
+      # requires security scanners.
+      - name: Prepare pinned quality scanners
         id: workflow_scanners
         env:
           WORKFLOW_SHA: ${{ github.workflow_sha }}
+          EVENT_NAME: ${{ github.event_name }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          installer=$(mktemp "${RUNNER_TEMP:?}/workflow-scanners-installer.XXXXXX")
-          git show "${WORKFLOW_SHA}:scripts/ci/install-workflow-scanners.sh" > "$installer"
-          bash "$installer"
+          installers=$(mktemp -d "${RUNNER_TEMP:?}/quality-scanners-installers.XXXXXX")
+          git show "${WORKFLOW_SHA}:scripts/ci/install-workflow-scanners.sh" > "$installers/install-workflow-scanners.sh"
+          if [ "$EVENT_NAME" = "push" ]; then
+            bash "$installers/install-workflow-scanners.sh"
+          else
+            git show "${WORKFLOW_SHA}:scripts/ci/install-quality-scanners.sh" > "$installers/install-quality-scanners.sh"
+            bash "$installers/install-quality-scanners.sh"
+          fi
 
       - name: Release-green validation (full)
         id: validate
@@ -329,6 +341,7 @@ jobs:
         if: steps.validate.outputs.exit != '0'
         env:
           GH_TOKEN: ${{ github.token }}
+          VALIDATED_SHA: ${{ steps.revision.outputs.sha }}
           TARGET: ${{ steps.branch.outputs.target }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           EVENT_NAME: ${{ github.event_name }}
@@ -336,6 +349,10 @@ jobs:
           AFTER_SHA: ${{ github.event.after }}
         run: |
           set -euo pipefail
+          if [[ ! "${VALIDATED_SHA:-}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::warning::No validated revision for the tracking issue; skipping the update."
+            exit 0
+          fi
           TITLE="🔴 Release branch not green: ${TARGET}"
           {
             echo "The **release-green** validation found HARD failures on \`${TARGET}\`."
@@ -343,6 +360,7 @@ jobs:
             echo "signature on the exact base before attributing a defect to a contributor."
             echo ""
             echo "**Run:** ${RUN_URL} (mode: ${EVENT_NAME})"
+            echo "Validated revision \`${VALIDATED_SHA}\`."
             # This is an observed range, not proof of causality. Compare with the base.
             if [ "$EVENT_NAME" = "push" ] && [ -n "${BEFORE_SHA:-}" ] && \
                git cat-file -e "$BEFORE_SHA" 2>/dev/null; then
@@ -366,6 +384,19 @@ jobs:
 
           EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
             --search "in:title $TITLE" --json number --jq '.[0].number' 2>/dev/null || echo "")
+          # The observer can finish after another commit reaches the branch.
+          # Keep its verdict and artifact tied to the tested SHA.
+          REF="refs/heads/$TARGET"
+          REMOTE_ENTRY=$(git ls-remote --exit-code --refs origin "$REF") || REMOTE_ENTRY=""
+          CURRENT_SHA=${REMOTE_ENTRY%%$'\t'*}
+          if [[ ! "$CURRENT_SHA" =~ ^[0-9a-f]{40}$ || "$REMOTE_ENTRY" != "$CURRENT_SHA"$'\t'"$REF" ]]; then
+            echo "::warning::Could not verify the current revision of $REF; skipping the tracking issue update."
+            exit 0
+          fi
+          if [ "$CURRENT_SHA" != "$VALIDATED_SHA" ]; then
+            echo "::notice::Skipping the tracking issue update for $REF at $VALIDATED_SHA (current $CURRENT_SHA)."
+            exit 0
+          fi
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file issue-body.md
             echo "Updated existing issue #$EXISTING"
@@ -407,7 +438,7 @@ jobs:
       - name: Upload report artifact
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: release-green-report
           path: |
@@ -453,7 +484,8 @@ jobs:
     needs: [resolve-target, resolve-main]
     if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || (github.repository == 'cheaper-inference/OmniRoute' && github.event.schedule == '23 5 * * *')) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Match native CI for unit shards and use 30 minutes for integration and Vitest.
+    timeout-minutes: ${{ matrix.script == 'test:unit:ci:shard' && 35 || 30 }}
     strategy:
       fail-fast: false
       matrix:
@@ -473,12 +505,16 @@ jobs:
       JWT_SECRET: ci-nightly-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-nightly-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
+      # Same gate mode as the observer's own HARD gates (withHardGateMode in
+      # validate-release-green.mjs): these results feed its verdict through --suites-from.
+      # Release-mode assertions (e.g. locale key parity) belong to the release cut.
+      OMNIROUTE_GATE_MODE: "pr"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ needs.resolve-main.outputs.sha }}
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ needs.resolve-target.outputs.node-version }}
           cache: npm
@@ -509,7 +545,7 @@ jobs:
           exit "$code"
       - name: Upload the suite result
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: main-green-suite-${{ github.run_attempt }}-${{ matrix.name }}
           path: suite-results/
@@ -546,7 +582,7 @@ jobs:
       API_KEY_SECRET: ci-nightly-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event_name == 'push' && github.sha || needs.resolve-main.outputs.sha || 'main' }}
           fetch-depth: 0
@@ -557,7 +593,7 @@ jobs:
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       # hostedSuiteIdentity compares nodeVersion exactly, so match the hosted suites' runtime.
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ needs.resolve-target.outputs.node-version || '24' }}
           cache: npm
@@ -567,7 +603,7 @@ jobs:
       - name: Collect the hosted suite results
         if: github.event_name != 'push'
         continue-on-error: true
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           # A partial re-run cannot reuse receipts from an earlier attempt;
           # rerun all suite jobs for a new complete observation of the same tip.
@@ -575,17 +611,23 @@ jobs:
           path: suite-results
           merge-multiple: true
 
-      # main can predate the installer: obtain tooling from the workflow SHA.
-      - name: Prepare pinned workflow scanners
+      # main can predate the installers: materialize both from the workflow SHA.
+      - name: Prepare pinned quality scanners
         id: workflow_scanners
         env:
           WORKFLOW_SHA: ${{ github.workflow_sha }}
+          EVENT_NAME: ${{ github.event_name }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          installer=$(mktemp "${RUNNER_TEMP:?}/workflow-scanners-installer.XXXXXX")
-          git show "${WORKFLOW_SHA}:scripts/ci/install-workflow-scanners.sh" > "$installer"
-          bash "$installer"
+          installers=$(mktemp -d "${RUNNER_TEMP:?}/quality-scanners-installers.XXXXXX")
+          git show "${WORKFLOW_SHA}:scripts/ci/install-workflow-scanners.sh" > "$installers/install-workflow-scanners.sh"
+          if [ "$EVENT_NAME" = "push" ]; then
+            bash "$installers/install-workflow-scanners.sh"
+          else
+            git show "${WORKFLOW_SHA}:scripts/ci/install-quality-scanners.sh" > "$installers/install-quality-scanners.sh"
+            bash "$installers/install-quality-scanners.sh"
+          fi
 
       - name: Main-green validation
         id: validate
@@ -617,10 +659,15 @@ jobs:
         if: steps.validate.outputs.exit != '0'
         env:
           GH_TOKEN: ${{ github.token }}
+          VALIDATED_SHA: ${{ steps.revision.outputs.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
+          if [[ ! "${VALIDATED_SHA:-}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::warning::No validated revision for the tracking issue; skipping the update."
+            exit 0
+          fi
           TITLE="🔴 main branch not green"
           {
             echo "The **main-green** validation found HARD failures on \`main\`."
@@ -633,6 +680,7 @@ jobs:
             echo "\`_shared/merge-gates.md\` §8), NOT chasing each contributor PR."
             echo ""
             echo "**Run:** ${RUN_URL} (mode: ${EVENT_NAME})"
+            echo "Validated revision \`${VALIDATED_SHA}\`."
             echo ""
             echo '```'
             if grep -q '──────── verdict ────────' main-green.log; then
@@ -647,6 +695,19 @@ jobs:
 
           EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
             --search "in:title $TITLE" --json number --jq '.[0].number' 2>/dev/null || echo "")
+          # The observer can finish after another commit reaches the branch.
+          # Keep its verdict and artifact tied to the tested SHA.
+          REF=refs/heads/main
+          REMOTE_ENTRY=$(git ls-remote --exit-code --refs origin "$REF") || REMOTE_ENTRY=""
+          CURRENT_SHA=${REMOTE_ENTRY%%$'\t'*}
+          if [[ ! "$CURRENT_SHA" =~ ^[0-9a-f]{40}$ || "$REMOTE_ENTRY" != "$CURRENT_SHA"$'\t'"$REF" ]]; then
+            echo "::warning::Could not verify the current revision of $REF; skipping the tracking issue update."
+            exit 0
+          fi
+          if [ "$CURRENT_SHA" != "$VALIDATED_SHA" ]; then
+            echo "::notice::Skipping the tracking issue update for $REF at $VALIDATED_SHA (current $CURRENT_SHA)."
+            exit 0
+          fi
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file issue-body.md
             echo "Updated existing issue #$EXISTING"
@@ -683,7 +744,7 @@ jobs:
       - name: Upload report artifact
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: main-green-report
           path: |
@@ -733,7 +794,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
@@ -768,7 +829,7 @@ jobs:
           git checkout "$TARGET"
           git log -1 --oneline
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
           cache: npm
@@ -864,12 +925,12 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 1
           persist-credentials: false
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
           cache: npm
@@ -885,7 +946,7 @@ jobs:
 
       - name: Upload headroom report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: baseline-headroom-${{ github.run_id }}
           path: reports/quality/headroom.*

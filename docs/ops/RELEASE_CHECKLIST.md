@@ -6,7 +6,6 @@ lastUpdated: 2026-10-10
 
 # Release Checklist
 
-> **Last updated:** 2026-08-28 — v3.8.51
 > Streamlined release flow that leverages Claude Code skills for automation.
 >
 > **Keep the queue/branch green between releases:** see [RELEASE_GREEN.md](./RELEASE_GREEN.md)
@@ -89,6 +88,24 @@ build while release notes talk about fixes that only exist on git. Compose
 quickstarts use `:latest`; GitOps should keep pinning `X.Y.Z`. See
 [Docker release channels](../guides/DOCKER_GUIDE.md#release-channels) and #10317.
 
+**Docker Hub organization repository (`cheaperinference/omniroute`):** Docker Hub cannot
+move a repository between namespaces, so `diegosouzapw/omniroute` keeps its pull history
+and every release, and the `mirror-org-dockerhub` job of `docker-publish` copies each
+released version (and `:latest` when promoted) from `ghcr.io/cheaper-inference/omniroute`
+to the organization repository. It needs the `DOCKERHUB_ORG_USERNAME` /
+`DOCKERHUB_ORG_TOKEN` secrets; without them the job stays green with a "Docker Hub org
+mirror skipped" warning and the other registries publish normally. To publish a released
+version there later, run **Actions → Mirror Docker image to the Docker Hub org → Run
+workflow** with `version=X.Y.Z` (and `promote_latest` for the highest stable version): it
+copies the existing images, no rebuild. That repository's Docker Hub overview is set by hand:
+the API that edits it rejects Organization Access Tokens.
+
+The same workflow also copies every release to the legacy GHCR package
+`ghcr.io/diegosouzapw/omniroute` until 2027-06-30, so installs still pinned to it keep updating;
+its index carries a "moved to `ghcr.io/cheaper-inference/omniroute`" description. It needs the
+`GHCR_LEGACY_TOKEN` secret (a classic personal access token of `diegosouzapw` with
+`write:packages`); without it that job skips with a "Legacy GHCR mirror skipped" warning.
+
 ## Hotfix Fast-Lane (label `hotfix`)
 
 A PR labeled `hotfix` skips the heavy CI matrix (9-shard E2E, coverage ratchet,
@@ -148,7 +165,7 @@ matrix automatically, without any label.
 - [ ] `npm run test:vitest` — pass (MCP server, autoCombo, cache)
 - [ ] `npm run test:coverage` — gate 60/60/60/60 satisfied (statements/lines/functions/branches)
 - [ ] `npm run test:integration` — pass (if changes touch DB / handlers)
-- [ ] `npm run test:combo:matrix` — pass (combo strategy matrix: proves all 19 public routing strategies' selection decisions deterministically; run when touching combo routing, strategy resolution, or fallback logic)
+- [ ] `npm run test:combo:matrix` — pass (combo strategy matrix: proves all 22 public routing strategies' selection decisions deterministically; run when touching combo routing, strategy resolution, or fallback logic)
 - [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **optional/manual** (gated real-upstream smoke; sources a read-only DB snapshot from VPS `root@192.168.0.15`; hits real providers, costs credits; never runs in CI; skips cleanly without the gate)
 - [ ] `npm run test:combo:live:vps` — **optional/manual** (Phase-3 VPS live smoke: 7 HTTP scenarios against the live `.15` server via plain Node ESM; requires `ssh root@192.168.0.15`; creates/deletes only `__live_test__*` combos; hits real providers; never runs in CI)
 - [ ] `npm run test:e2e` — pass (UI changes)
@@ -178,7 +195,8 @@ Breaking changes: add `BREAKING CHANGE:` footer or `!` after the scope (e.g. `fe
 ### Documentation
 
 - [ ] `npm run check:docs-sync` passes (auto-run by pre-commit)
-- [ ] `npm run check:docs-all` passes (umbrella: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:docs-all` passes. Its advisory `check:deprecated-versions` flags versions
+      explicitly attributed to OmniRoute (3.6.x and earlier) and ignores dates.
 - [ ] `npm run check:env-doc-sync` exits 0 — code ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env contract is intact
 - [ ] `npm run check:doc-links` exits 0 — no broken internal markdown references after restructuring
 - [ ] `docs/architecture/ARCHITECTURE.md` reviewed for storage/runtime drift
@@ -409,8 +427,8 @@ grafted parent, so cut from a full clone or `git fetch --unshallow origin` first
 tag exists, `package.json` is the target version, a `release-freeze` issue is open, no open
 `Release branch not green` issue
 on an existing release branch — a branch that does not exist reports `?` unknown, never
-green — the Mergify `release` queue is configured (G11: `queue_rules`, `checks_timeout`,
-label `queue`), the `release/*` ruleset still blocks deletion and force-push, and
+green — omni-queue lands the release PRs (G11: `config/merge-queue/config.json` valid, its
+`bases` manage the release branch, `mode` `live`, its label exists), the `release/*` ruleset still blocks deletion and force-push, and
 `stable/v3` and `develop` do not exist yet), the two branch steps, which dormant-workflow
 triggers and `if:` conditions turn true (and which stay gated by a repository variable or
 pinned to the canonical repository), the expected dist-tags (`latest` → 3.9.0, `next` and
@@ -455,7 +473,7 @@ validates that exact build (#8084 slice (a)). Same-repository PRs only; nothing 
 gh workflow run preview-artifact.yml -f pr_number=<N>   # or add the `preview-artifact` label
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
-gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
+gh attestation verify omniroute-*.tgz --repo cheaper-inference/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 

@@ -215,7 +215,8 @@ function BatchRowActions({
           disabled={actions.cancelling}
           title={t("batchActionCancel")}
           aria-label={t("batchActionCancel")}
-          className="size-7 text-text-muted hover:text-warning hover:bg-warning/10"
+          tone="muted"
+          className="size-7 hover:text-warning hover:bg-warning/10"
         >
           <Icon name={actions.cancelling ? "hourglass_empty" : "block"} size={13} />
         </Button>
@@ -280,7 +281,8 @@ function BatchRowActions({
           disabled={actions.retrying}
           title={t("batchActionRetry")}
           aria-label={t("batchActionRetry")}
-          className="size-7 text-text-muted hover:text-info hover:bg-info/10"
+          tone="muted"
+          className="size-7 hover:text-info hover:bg-info/10"
         >
           <Icon name={actions.retrying ? "hourglass_empty" : "replay"} size={13} />
         </Button>
@@ -289,7 +291,7 @@ function BatchRowActions({
       {/* Delete — only for terminal statuses */}
       {isTerminal && (
         <Button
-          variant="ghost"
+          variant="destructive-ghost"
           size="icon-sm"
           onClick={async (e) => {
             e.stopPropagation();
@@ -314,7 +316,7 @@ function BatchRowActions({
           disabled={deletingId === batch.id}
           title={t("batchListDeleteBatchTitle")}
           aria-label={t("batchListDeleteBatchTitle")}
-          className="size-7 text-text-muted hover:text-error hover:bg-error/10"
+          className="size-7"
         >
           <Icon name={deletingId === batch.id ? "hourglass_empty" : "delete"} size={13} />
         </Button>
@@ -433,9 +435,10 @@ export default function BatchListTab({
       {/* Table — 9 columns: Status | ID | Endpoint | Model | Progress | Cost | Created | Expires | Actions */}
       <Card padding="none" className="overflow-hidden">
         <Table
-          className="text-sm"
+          density="compact"
           aria-label={t("batchListBatchesTable")}
           scrollbarLabel={t("batchListBatchesTable")}
+          variant="plain"
         >
           <TableHeader>
             <TableRow>
@@ -493,20 +496,16 @@ export default function BatchListTab({
                 })();
 
                 return (
-                  <TableRow
-                    key={batch.id}
-                    onClick={() => setSelectedBatch(batch)}
-                    className="cursor-pointer"
-                  >
+                  <TableRow key={batch.id} onActivate={() => setSelectedBatch(batch)}>
                     <TableCell>
                       <StatusBadge batch={batch} />
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-text-muted max-w-[180px]">
+                    <TableCell className="font-mono text-text-muted max-w-[180px]">
                       <span className="truncate block" title={batch.id}>
                         {batch.id}
                       </span>
                     </TableCell>
-                    <TableCell className="text-text-main text-xs whitespace-nowrap">
+                    <TableCell className="text-text-main whitespace-nowrap">
                       {(() => {
                         const p = deriveProvider(batch.model);
                         if (p === "unknown") return t("batchListProviderUnknown");
@@ -514,8 +513,8 @@ export default function BatchListTab({
                         return p;
                       })()}
                     </TableCell>
-                    <TableCell className="text-text-main text-xs">{batch.endpoint}</TableCell>
-                    <TableCell className="text-text-muted text-xs">{batch.model ?? "—"}</TableCell>
+                    <TableCell className="text-text-main">{batch.endpoint}</TableCell>
+                    <TableCell className="text-text-muted">{batch.model ?? "—"}</TableCell>
                     {/* Progress — ProgressBarBicolor from F3; spinner when validating (G2); (partial) suffix when expired with failures (G-AUD3) */}
                     <TableCell className="min-w-[140px]">
                       {batch.status === "validating" ? (
@@ -532,7 +531,7 @@ export default function BatchListTab({
                             showLabels
                           />
                           {effectiveStatus(batch) === "expired_with_failures" && (
-                            <span className="text-[10px] text-warning italic">
+                            <span className="text-xs text-warning italic">
                               {t("batchListProgressPartial")}
                             </span>
                           )}
@@ -542,7 +541,7 @@ export default function BatchListTab({
                       )}
                     </TableCell>
                     {/* Cost column — heuristic estimate (D8) with -50% badge per wireframe §3 (G-AUD2) */}
-                    <TableCell className="text-xs whitespace-nowrap">
+                    <TableCell className="whitespace-nowrap">
                       <span className="text-text-muted">{estimatedCost}</span>
                       {estimatedCost !== "—" && (
                         <Badge variant="success" size="sm" className="ml-1 align-middle">
@@ -550,11 +549,11 @@ export default function BatchListTab({
                         </Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs text-text-muted whitespace-nowrap">
+                    <TableCell className="text-text-muted whitespace-nowrap">
                       {relativeTime(batch.createdAt)}
                     </TableCell>
                     {/* Expiration — countdown badge for active batches (D11) */}
-                    <TableCell className="text-xs text-text-muted whitespace-nowrap">
+                    <TableCell className="text-text-muted whitespace-nowrap">
                       {["in_progress", "validating", "finalizing"].includes(batch.status) ? (
                         <ExpirationBadge expiresAt={batch.expiresAt ?? null} variant="compact" />
                       ) : batch.expiresAt ? (

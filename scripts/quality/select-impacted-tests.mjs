@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { readTestImpactMap } from "./build-test-impact-map.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const HUB_RE =
@@ -12,14 +13,14 @@ const HUB_RE =
 // tests, and `src/**/__tests__`/`open-sse/**/__tests__`, which can't run under node:test.
 // Keep in sync with package.json test:unit* braces + serial + dashboard + *.test.mjs.
 const UNIT_SUBDIRS =
-  "api|auth|authz|build|cli|cli-helper|combo|compression|correctness|cors|dashboard|db|db-adapters|docs|gamification|guardrails|lib|mcp|memory|runtime|security|services|settings|shared|translator|ui|usage|serial";
+  "api|auth|authz|build|chatcore|cli|cli-helper|combo|compression|correctness|cors|dashboard|db|db-adapters|docs|gamification|guardrails|lib|mcp|memory|runtime|security|services|settings|shared|translator|ui|usage|serial";
 // .ts: top-level + UNIT_SUBDIRS (mirrors package.json brace globs).
 // .mjs: package.json uses tests/unit/**/*.test.mjs (any depth under tests/unit).
 const TEST_RE = new RegExp(
   `^tests/unit/([^/]+\\.test\\.(ts|mjs)$|(${UNIT_SUBDIRS})/.*\\.test\\.(ts|mjs)$|.*\\.test\\.mjs$)`
 );
 
-export function selectImpacted({ changed, map }) {
+export function selectImpacted({ changed, map, ciUnitShards = 0, onCiDeferral = undefined }) {
   const out = new Set();
   for (const f of changed) {
     if (HUB_RE.test(f)) return ["__RUN_ALL__"];
@@ -38,6 +39,20 @@ export function selectImpacted({ changed, map }) {
     const hits = map.sources[f];
     if (!hits) return ["__RUN_ALL__"];
     hits.forEach((t) => out.add(t));
+  }
+  // Only a caller with a required full CI matrix opts in. An older map without the
+  // test file count keeps the uncapped subset.
+  if (
+    Number.isSafeInteger(ciUnitShards) &&
+    ciUnitShards > 0 &&
+    Number.isSafeInteger(map.testFileCount) &&
+    map.testFileCount > 0
+  ) {
+    const limit = Math.ceil(map.testFileCount / ciUnitShards);
+    if (out.size > limit) {
+      onCiDeferral?.(out.size, limit);
+      return ["__RUN_ALL__"];
+    }
   }
   return [...out].sort();
 }
@@ -71,11 +86,20 @@ if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
   const mapPath = path.join(ROOT, "config/quality/test-impact-map.json");
   let map;
   try {
-    map = JSON.parse(fs.readFileSync(mapPath, "utf8"));
+    map = readTestImpactMap(mapPath);
   } catch {
     console.log("__RUN_ALL__");
     process.exit(0);
   }
-  const sel = selectImpacted({ changed: changedFiles(), map });
+  const shardArg = process.argv.slice(2).find((arg) => arg.startsWith("--ci-unit-shards="));
+  const sel = selectImpacted({
+    changed: changedFiles(),
+    map,
+    ciUnitShards: Number(shardArg?.slice("--ci-unit-shards=".length)),
+    onCiDeferral: (selected, limit) =>
+      console.error(
+        `TIA selected ${selected} unit files (one CI shard averages ${limit}); deferring to the full CI matrix.`
+      ),
+  });
   process.stdout.write(sel.join("\n") + "\n");
 }

@@ -8,8 +8,6 @@ lastUpdated: 2026-10-05
 
 🌐 **Languages:** 🇺🇸 [English](./ARCHITECTURE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/architecture/ARCHITECTURE.md) | 🇸🇦 [العربية](../i18n/ar/docs/architecture/ARCHITECTURE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/architecture/ARCHITECTURE.md) | 🇧🇬 [Български](../i18n/bg/docs/architecture/ARCHITECTURE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/architecture/ARCHITECTURE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/architecture/ARCHITECTURE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/architecture/ARCHITECTURE.md) | 🇩🇰 [Dansk](../i18n/da/docs/architecture/ARCHITECTURE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/architecture/ARCHITECTURE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/architecture/ARCHITECTURE.md) | 🇪🇸 [Español](../i18n/es/docs/architecture/ARCHITECTURE.md) | 🇪🇪 [Eesti](../i18n/et/docs/architecture/ARCHITECTURE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/architecture/ARCHITECTURE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/architecture/ARCHITECTURE.md) | 🇫🇷 [Français](../i18n/fr/docs/architecture/ARCHITECTURE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/architecture/ARCHITECTURE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/architecture/ARCHITECTURE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/architecture/ARCHITECTURE.md) | 🇮🇱 [עברית](../i18n/he/docs/architecture/ARCHITECTURE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/architecture/ARCHITECTURE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/architecture/ARCHITECTURE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/architecture/ARCHITECTURE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/architecture/ARCHITECTURE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/architecture/ARCHITECTURE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/architecture/ARCHITECTURE.md) | 🇮🇹 [Italiano](../i18n/it/docs/architecture/ARCHITECTURE.md) | 🇯🇵 [日本語](../i18n/ja/docs/architecture/ARCHITECTURE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/architecture/ARCHITECTURE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/architecture/ARCHITECTURE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/architecture/ARCHITECTURE.md) | 🇰🇷 [한국어](../i18n/ko/docs/architecture/ARCHITECTURE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/architecture/ARCHITECTURE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/architecture/ARCHITECTURE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/architecture/ARCHITECTURE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/architecture/ARCHITECTURE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/architecture/ARCHITECTURE.md) | 🇲🇹 [Malti](../i18n/mt/docs/architecture/ARCHITECTURE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/architecture/ARCHITECTURE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/architecture/ARCHITECTURE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/architecture/ARCHITECTURE.md) | 🇳🇴 [Norsk](../i18n/no/docs/architecture/ARCHITECTURE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/architecture/ARCHITECTURE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/architecture/ARCHITECTURE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/architecture/ARCHITECTURE.md) | 🇵🇱 [Polski](../i18n/pl/docs/architecture/ARCHITECTURE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/architecture/ARCHITECTURE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/architecture/ARCHITECTURE.md) | 🇷🇴 [Română](../i18n/ro/docs/architecture/ARCHITECTURE.md) | 🇷🇺 [Русский](../i18n/ru/docs/architecture/ARCHITECTURE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/architecture/ARCHITECTURE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/architecture/ARCHITECTURE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/architecture/ARCHITECTURE.md) | 🇷🇸 [Српски](../i18n/sr/docs/architecture/ARCHITECTURE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/architecture/ARCHITECTURE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/architecture/ARCHITECTURE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/architecture/ARCHITECTURE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/architecture/ARCHITECTURE.md) | 🇹🇭 [ไทย](../i18n/th/docs/architecture/ARCHITECTURE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/architecture/ARCHITECTURE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/architecture/ARCHITECTURE.md) | 🇵🇰 [اردو](../i18n/ur/docs/architecture/ARCHITECTURE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/architecture/ARCHITECTURE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/architecture/ARCHITECTURE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/architecture/ARCHITECTURE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/architecture/ARCHITECTURE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/architecture/ARCHITECTURE.md)
 
-_Last updated: 2026-06-28_
-
 ## Executive Summary
 
 OmniRoute is a local AI routing gateway and dashboard built on Next.js.
@@ -17,7 +15,7 @@ It provides a single OpenAI-compatible endpoint (`/v1/*`) and routes traffic acr
 
 Core capabilities:
 
-- OpenAI-compatible API surface for CLI/tools (389 providers, 159 executor modules)
+- OpenAI-compatible API surface for CLI/tools (394 providers, 159 executor modules)
 - Request/response translation across provider formats
 - Model combo fallback (multi-model sequence)
 - Structured combo steps (`provider + model + connection`) with runtime ordering by `compositeTiers`
@@ -318,9 +316,9 @@ Domain layer modules:
 
 - Cost rules/budgets: `src/domain/costRules.ts`
 - Fallback policy: `src/domain/fallbackPolicy.ts`
-- Combo resolver: `src/domain/comboResolver.ts`
+- Reserved combo-resolution contract: `src/domain/comboResolver.ts`; live routing uses `open-sse/services/combo.ts`
 - Lockout policy: `src/domain/lockoutPolicy.ts`
-- Policy engine: `src/domain/policyEngine.ts` — centralized lockout → budget → fallback evaluation
+- Reserved policy-evaluation contract: `src/domain/policyEngine.ts`; the request path enforces API-key policy through `src/shared/utils/apiKeyPolicy.ts` and resolved-target authorization through `src/sse/handlers/chat/resolvedModelPolicy.ts`
 - Error codes catalog: `src/shared/constants/errorCodes.ts`
 - Request ID: `src/shared/utils/requestId.ts`
 - Fetch timeout: `src/shared/utils/fetchTimeout.ts`
@@ -368,16 +366,16 @@ relying on a static combo definition. It powers the `auto/*` model prefix family
 
 - Engine entry: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
   `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Resolver: `src/domain/comboResolver.ts` (auto-detection of `auto/` prefix)
+- Live combo entry: `open-sse/services/combo.ts` (`handleComboChat`, `resolveComboTargets`), called by `src/sse/handlers/chat.ts`
 - Dashboard: `/dashboard/auto-combo`
 - Telemetry: `auto_combo_decisions` SQLite table
 
 Key capabilities:
 
-- **20 routing strategies** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+- **22 routing strategies** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted,
   strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
-  pipeline) —
+  pipeline, jev) —
   auto is the headline addition in v3.8.0; `fusion` (panel fan-out + judge synthesis,
   `open-sse/services/fusion.ts`) is new in v3.8.36.
 - **16-factor scoring**: quota, health, inverse cost, inverse latency, task fit and
@@ -431,17 +429,27 @@ For ruleset authoring and threshold tuning, see
 
 ### D. Domain Layer
 
-The `src/domain/` namespace centralizes policy decisions so route handlers do not
-have to assemble lockout/budget/fallback logic themselves.
+The `src/domain/` namespace contains domain services and reserved evaluation contracts.
+It is not one mandatory policy entry point for every request.
 
-- Policy engine: `src/domain/policyEngine.ts` — single entry point for
-  pre-execution evaluation (lockout → budget → fallback ordering)
+The live chat path calls `enforceApiKeyPolicy()` from
+`src/shared/utils/apiKeyPolicy.ts`; authorization of resolved models and combo members
+is implemented in `src/sse/handlers/chat/resolvedModelPolicy.ts`. The self-hosted
+entry in `src/app/api/v1/chat/completions/route.ts` also enforces API-key policy before
+dispatch. Combo resolution runs through `open-sse/services/combo.ts`.
+
+`src/domain/policyEngine.ts`, `src/domain/comboResolver.ts` and `src/lib/container.ts`
+remain tested contracts, not the wiring of that request path. The container registers
+the policy engine, but the inspected production request path does not resolve it.
+Changing those contracts alone does not change live chat policy or combo routing;
+connecting or removing them requires a separate design decision.
+
+- Reserved policy engine: `src/domain/policyEngine.ts` — lockout → budget → fallback evaluation
 - Cost rules: `src/domain/costRules.ts`
 - Fallback policy: `src/domain/fallbackPolicy.ts`
 - Lockout policy: `src/domain/lockoutPolicy.ts`
 - Tag-based routing: `src/domain/tagRouter.ts`
-- Combo resolver: `src/domain/comboResolver.ts` — resolves combo names, auto/\*
-  prefixes, and wildcard model targets to concrete execution plans
+- Reserved combo resolver: `src/domain/comboResolver.ts` — standalone selection contract; live combo routing is implemented in `open-sse/services/combo.ts`
 - Connection/model rule joiner: `src/domain/connectionModelRules.ts`
 - Model availability snapshots: `src/domain/modelAvailability.ts`
 - Provider expiration tracking: `src/domain/providerExpiration.ts`
@@ -572,6 +580,7 @@ Domain State DB (SQLite):
 - Scheduler init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Periodic task: `src/shared/services/cloudSyncScheduler.ts`
 - Periodic task: `src/shared/services/modelSyncScheduler.ts`
+- Periodic task (opt-in per connection): `src/shared/services/modelHealthCheckScheduler.ts` — tests a connection's models, auto-hides failures and restores only what it hid itself (`src/lib/db/modelHealthAutoHidden.ts`)
 - Control route: `src/app/api/sync/cloud/route.ts`
 
 ## Request Lifecycle (`/v1/chat/completions`)

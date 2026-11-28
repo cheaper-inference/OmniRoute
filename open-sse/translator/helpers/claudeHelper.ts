@@ -1,6 +1,10 @@
 // Claude helper functions for translator
 import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../../config/defaultThinkingSignature.ts";
-import { lookupReasoning, recordReplay } from "../../services/reasoningCache.ts";
+import {
+  buildToolCallCacheKey,
+  lookupReasoning,
+  recordReplay,
+} from "../../services/reasoningCache.ts";
 import { getModelTargetFormat } from "../../config/providerModels.ts";
 import { NON_ANTHROPIC_THINKING_PLACEHOLDER } from "../../utils/reasoningPlaceholder.ts";
 import { sanitizeToolId } from "./schemaCoercion.ts";
@@ -431,10 +435,19 @@ export function enforceCacheControlBlockLimit(
   body: ClaudeRequestBody,
   limit = MAX_CACHE_CONTROL_BLOCKS
 ): number {
-  const holders: Array<{ obj: Record<string, unknown> }> = [];
+  const marked = markedCacheControlBlocks(body);
+  if (marked.length <= limit) return 0;
+  const toRemove = marked.length - limit;
+  for (let i = 0; i < toRemove; i++) delete marked[i].cache_control;
+  return toRemove;
+}
+
+/** Blocks that carry a cache_control marker, in request order (system, tools, messages). */
+function markedCacheControlBlocks(body: ClaudeRequestBody): Array<Record<string, unknown>> {
+  const marked: Array<Record<string, unknown>> = [];
   const push = (block: unknown) => {
-    if (block && typeof block === "object" && "cache_control" in block) {
-      holders.push({ obj: block as Record<string, unknown> });
+    if (block && typeof block === "object" && (block as Record<string, unknown>).cache_control) {
+      marked.push(block as Record<string, unknown>);
     }
   };
   if (Array.isArray(body?.system)) body.system.forEach(push);
@@ -444,11 +457,21 @@ export function enforceCacheControlBlockLimit(
       if (Array.isArray(msg?.content)) msg.content.forEach(push);
     }
   }
-  const marked = holders.filter((h) => h.obj.cache_control !== undefined);
-  if (marked.length <= limit) return 0;
-  const toRemove = marked.length - limit;
-  for (let i = 0; i < toRemove; i++) delete marked[i].obj.cache_control;
-  return toRemove;
+  return marked;
+}
+
+/**
+ * A tool loop ends with the results of the last assistant turn's tool calls, after that
+ * turn's breakpoint, so they are billed as fresh input. When the 4-marker budget has room,
+ * mark the final user turn so the next request reads them from cache.
+ */
+function markFinalToolResults(body: ClaudeRequestBody, ttl?: string): void {
+  const last = body.messages?.[body.messages.length - 1];
+  if (last?.role !== "user" || !Array.isArray(last.content)) return;
+  if (!last.content.some((block) => block.type === "tool_result")) return;
+  if (last.content.some((block) => block.cache_control)) return;
+  if (markedCacheControlBlocks(body).length >= MAX_CACHE_CONTROL_BLOCKS) return;
+  markMessageCacheControl(last, ttl);
 }
 
 function markMessageCacheControl(msg: ClaudeMessage, ttl?: string): boolean {
@@ -592,7 +615,7 @@ export function prepareClaudeRequest(
   provider: string | null = null,
   preserveCacheControl = false,
   model: string | null = null,
-  opts: { fallbackToHeuristicWhenNoMarkers?: boolean } = {}
+  opts: { fallbackToHeuristicWhenNoMarkers?: boolean; reasoningCacheScope?: string | null } = {}
 ): ClaudeRequestBody {
   // 0. Strip Anthropic `output_config` for providers that reject it on their
   // Claude-compatible endpoints (MiniMax). Must run before any downstream
@@ -705,18 +728,21 @@ export function prepareClaudeRequest(
         // histories can carry ids with `.`/`:`/`#` (e.g. replayed from another
         // provider), which 400s as TOOL_SCHEMA_INVALID. Rewrite both sides with the
         // same function so tool_use/tool_result pairing survives — the later
-        // ordering passes match on these ids.
-        for (const block of msg.content) {
+        // ordering passes match on these ids. The rewritten block is a copy: the caller's
+        // blocks are shared with later combo targets.
+        msg.content = msg.content.map((block) => {
           if (block.type === "tool_use" && typeof block.id === "string" && block.id) {
-            block.id = sanitizeToolId(block.id);
-          } else if (
+            return { ...block, id: sanitizeToolId(block.id) };
+          }
+          if (
             block.type === "tool_result" &&
             typeof block.tool_use_id === "string" &&
             block.tool_use_id
           ) {
-            block.tool_use_id = sanitizeToolId(block.tool_use_id);
+            return { ...block, tool_use_id: sanitizeToolId(block.tool_use_id) };
           }
-        }
+          return block;
+        });
       }
     }
 
@@ -958,7 +984,9 @@ export function prepareClaudeRequest(
                 if (!text) {
                   const pairedToolUseId = toolUseIds[thinkingBlockIdx];
                   if (pairedToolUseId) {
-                    const cached = lookupReasoning(pairedToolUseId);
+                    const cached = lookupReasoning(
+                      buildToolCallCacheKey(opts.reasoningCacheScope, pairedToolUseId)
+                    );
                     if (cached) {
                       text = cached;
                       recordReplay();
@@ -999,7 +1027,9 @@ export function prepareClaudeRequest(
             let text = "";
             const firstToolUseId = toolUseIds[0];
             if (firstToolUseId) {
-              const cached = lookupReasoning(firstToolUseId);
+              const cached = lookupReasoning(
+                buildToolCallCacheKey(opts.reasoningCacheScope, firstToolUseId)
+              );
               if (cached) {
                 text = cached;
                 recordReplay();
@@ -1041,6 +1071,9 @@ export function prepareClaudeRequest(
   // the upstream API, not caching policy, so preserveCacheControl does not
   // exempt them (they were the 400 sources on claude 5.x since 2026-09-29).
   hoistToolResultCacheControl(body);
+  if (!preserveCacheControl && supportsPromptCaching) {
+    markFinalToolResults(body, createClaudeTailCacheControl(provider).ttl);
+  }
   if (supportsPromptCaching) {
     enforceCacheControlBlockLimit(body);
   }

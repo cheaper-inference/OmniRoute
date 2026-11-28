@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import type { ComboBuilderOptionsPayload } from "../../src/lib/combos/builderOptions.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-combo-builder-options-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -52,6 +53,43 @@ test.beforeEach(async () => {
 test.after(() => {
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
+
+test("search/fetch operations are selectable without LLM models and retain account choices", async () => {
+  const a = await seedConnection("serper-search", { name: "Serper A" });
+  const b = await seedConnection("serper-search", { name: "Serper B" });
+  await seedConnection("tavily-search");
+  await seedConnection("jina-reader");
+  // Older manual placeholders carry chat defaults; native operation metadata must win.
+  await modelsDb.addCustomModel("tavily-search", "web", "Tavily operations");
+  const response = await route.GET();
+  const body = (await response.json()) as ComboBuilderOptionsPayload;
+  assert.equal(response.status, 200);
+  const serper = body.providers.find((entry) => entry.providerId === "serper-search")!;
+  assert.equal(serper.models.length, 1);
+  assert.equal(serper.models[0].qualifiedModel, "serper-search/web");
+  assert.deepEqual(serper.models[0].supportedEndpoints, ["search"]);
+  assert.deepEqual(new Set(serper.connections.map((entry) => entry.id)), new Set([a.id, b.id]));
+  const tavily = body.providers.find((entry) => entry.providerId === "tavily-search")!;
+  assert.equal(tavily.models.length, 1);
+  assert.equal(tavily.models[0].qualifiedModel, "tavily-search/web");
+  assert.deepEqual(tavily.models[0].supportedEndpoints, ["search", "web-fetch"]);
+  const reader = body.providers.find((entry) => entry.providerId === "jina-reader")!;
+  assert.ok(
+    reader.models.some(
+      (entry) => entry.id === "fetch" && entry.supportedEndpoints?.includes("web-fetch")
+    )
+  );
+});
+
+test("hidden web operation targets stay hidden in combo builder options", async () => {
+  await seedConnection("serper-search");
+  modelsDb.mergeModelCompatOverride("serper-search", "web", { isHidden: true });
+  const body = (await (await route.GET()).json()) as ComboBuilderOptionsPayload;
+  assert.deepEqual(
+    body.providers.find((entry) => entry.providerId === "serper-search")!.models,
+    []
+  );
 });
 
 test("combo builder options route aggregates providers, connections, models and combo refs", async () => {
@@ -201,27 +239,34 @@ test("combo builder options route aggregates providers, connections, models and 
   );
 });
 
-test("combo builder options route includes no-auth provider (uncloseai) even without provider_connections rows", async () => {
-  // No connections seeded — uncloseai has noAuth: true and never gets a provider_connections row.
+test("combo builder options route includes no-auth provider (cloudflare-playground) even without provider_connections rows", async () => {
+  // No connections seeded — cloudflare-playground has noAuth: true and never gets a provider_connections row.
   const response = await route.GET();
   const body = (await response.json()) as any;
 
   assert.equal(response.status, 200);
   assert.ok(Array.isArray(body.providers), "providers should be an array");
 
-  const noAuth = body.providers.find((p: any) => p.providerId === "uncloseai");
-  assert.ok(noAuth, "uncloseai should appear in combo builder options even without connections");
-  assert.equal(noAuth.connectionCount, 0, "uncloseai should have 0 connections");
-  assert.equal(noAuth.activeConnectionCount, 0, "uncloseai should have 0 active connections");
-  assert.ok(noAuth.models.length > 0, "uncloseai should expose its built-in models");
+  const noAuth = body.providers.find((p: any) => p.providerId === "cloudflare-playground");
+  assert.ok(
+    noAuth,
+    "cloudflare-playground should appear in combo builder options even without connections"
+  );
+  assert.equal(noAuth.connectionCount, 0, "cloudflare-playground should have 0 connections");
+  assert.equal(
+    noAuth.activeConnectionCount,
+    0,
+    "cloudflare-playground should have 0 active connections"
+  );
+  assert.ok(noAuth.models.length > 0, "cloudflare-playground should expose its built-in models");
   // Spot-check a known built-in model from providerRegistry.ts
   assert.ok(
-    noAuth.models.some((m: any) => m.id === "turboderp/Qwen3.8-27B-exl3"),
-    "the built-in model should be among uncloseai models"
+    noAuth.models.some((m: any) => m.id === "zai-org/glm-5.2"),
+    "the built-in model should be among cloudflare-playground models"
   );
-  // #2901: no-auth providers route under their alias ("unc/"), not their id.
-  assert.equal(noAuth.models[0].qualifiedModel.startsWith("unc/"), true);
-  assert.equal(noAuth.source, "system", "uncloseai should have source=system");
+  // #2901: no-auth providers route under their alias ("cfp/"), not their id.
+  assert.equal(noAuth.models[0].qualifiedModel.startsWith("cfp/"), true);
+  assert.equal(noAuth.source, "system", "cloudflare-playground should have source=system");
 });
 
 test("combo builder options route exposes compatible provider nodes with node metadata", async () => {

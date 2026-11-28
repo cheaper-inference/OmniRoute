@@ -1,4 +1,4 @@
-import test from "node:test";
+import test, { type TestContext } from "node:test";
 import assert from "node:assert/strict";
 
 import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.ts";
@@ -16,12 +16,12 @@ const {
   settingsDb,
 } = harness;
 
-const MODEL = "Lorbus/Qwen3.6-27B-int4-AutoRound";
+const MODEL = "aphrodite/TheDrummer/Cydonia-24B-v4.3";
 const originalFetch = globalThis.fetch;
 
 function chatBody(text: string) {
   return {
-    model: `unc/${MODEL}`,
+    model: `horde/${MODEL}`,
     stream: false,
     messages: [{ role: "user", content: text }],
   };
@@ -43,6 +43,17 @@ async function lockModelWithAnUpstream502() {
     });
   const failed = await handleChat(buildRequest({ body: chatBody("the request that fails") }));
   assert.equal(failed.status, 502);
+}
+
+// Holds the clock from before the lock exists, so a slow failing request cannot eat into the
+// lock's lifetime. The failing request sleeps between retries, so setTimeout stays real until
+// the lock is in place; from then on a server-side wait never completes.
+async function lockModelOnAFrozenClock(t: TestContext) {
+  const now = Date.now();
+  t.mock.timers.enable({ apis: ["Date"], now });
+  await lockModelWithAnUpstream502();
+  t.mock.timers.reset();
+  t.mock.timers.enable({ apis: ["Date", "setTimeout"], now });
 }
 
 test.beforeEach(async () => {
@@ -101,9 +112,8 @@ test(
   "a lock longer than the wait ceiling answers 429 at once with the remaining time",
   { timeout: 30_000 },
   async (t) => {
-    await lockModelWithAnUpstream502();
-    t.mock.timers.enable({ apis: ["Date", "setTimeout"], now: Date.now() });
     try {
+      await lockModelOnAFrozenClock(t);
       await settingsDb.updateSettings({ requestRetry: 1, maxRetryIntervalSec: 1 });
       let fetchCalls = 0;
       globalThis.fetch = async () => {
@@ -158,7 +168,7 @@ test("a lock on one model leaves another model of the provider served immediatel
 
   const response = await handleChat(
     buildRequest({
-      body: { ...chatBody("other model"), model: "unc/other-passthrough-model" },
+      body: { ...chatBody("other model"), model: "horde/other-passthrough-model" },
     })
   );
 
@@ -174,18 +184,15 @@ test(
       name: "noauth-locked-then-keyed",
       strategy: "priority",
       config: { maxRetries: 0, retryDelayMs: 0 },
-      models: [`unc/${MODEL}`, "openai/gpt-4.1"],
+      models: [`horde/${MODEL}`, "openai/gpt-4.1"],
     });
-    await lockModelWithAnUpstream502();
-    // Keep the lock alive while DB and module I/O complete. A retry sleep cannot
-    // complete because the test never advances this clock.
-    t.mock.timers.enable({ apis: ["Date", "setTimeout"], now: Date.now() });
     try {
+      await lockModelOnAFrozenClock(t);
       await settingsDb.updateSettings({ requestRetry: 3, maxRetryIntervalSec: 10 });
       let noAuthCalls = 0;
       let keyedCalls = 0;
       globalThis.fetch = async (url) => {
-        if (new URL(String(url)).hostname === "hermes.ai.unturf.com") {
+        if (new URL(String(url)).hostname === "oai.aihorde.net") {
           noAuthCalls += 1;
           return new Response("{}", { status: 502 });
         }

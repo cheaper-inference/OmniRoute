@@ -1,7 +1,7 @@
 ---
 title: "OmniRoute Auto-Combo Engine"
-version: 3.8.40
-lastUpdated: 2026-06-28
+version: 3.8.55
+lastUpdated: 2026-11-17
 ---
 
 # OmniRoute Auto-Combo Engine
@@ -12,37 +12,55 @@ lastUpdated: 2026-06-28
 
 ## Zero-Config Auto-Routing (`auto/` prefix)
 
-> **NEW:** No combo creation required. Use `auto/` prefix directly in any client.
+No combo creation is required. Use `auto` or an `auto/` variant directly in your client.
 
 ### Quick Examples
 
-| Model ID       | Variant | Behavior                                                                 |
-| -------------- | ------- | ------------------------------------------------------------------------ |
-| `auto`         | default | All connected providers, LKGP strategy, balanced weights                 |
-| `auto/coding`  | coding  | Quality-first weights, suitable for code generation                      |
-| `auto/fast`    | fast    | Low-latency weighted selection                                           |
-| `auto/cheap`   | cheap   | Cost-optimized routing (lowest cost first)                               |
-| `auto/offline` | offline | Favors providers with highest quota availability                         |
-| `auto/smart`   | smart   | Quality-first + higher exploration rate (10%) for better model discovery |
-| `auto/lkgp`    | lkgp    | Explicit LKGP (same as default `auto`)                                   |
-| `auto/chaos`   | chaos   | Parallel fan-out, one model per provider (not fault injection)           |
+| Model ID            | Behavior                                                                                                                               |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`              | Eligible provider models, LKGP strategy and balanced weights                                                                           |
+| `auto/coding`       | Quality-first weights for coding tasks                                                                                                 |
+| `auto/fast`         | Favors lower latency and healthy providers                                                                                             |
+| `auto/cheap`        | Cost-saver weights: favors lower catalog prices; keeps LKGP stickiness, not a strict cheapest-first sort                               |
+| `auto/subscription` | Plan-included quota only, verified live; an empty pool returns HTTP 503, never a billed fallback                                       |
+| `auto/thrifty`      | subscription → keyless → free → cheap → premium, one rung at a time; can bill                                                          |
+| `auto/offline`      | Favors quota availability and provider health (`offline-friendly` pack); not offline inference — requests still go to remote providers |
+| `auto/smart`        | Quality-first weights with a 10% exploration rate                                                                                      |
+| `auto/lkgp`         | Explicit LKGP, with the same weights as default `auto`                                                                                 |
+| `auto/chaos`        | Parallel panel with one model per provider, up to five by default, returning one answer                                                |
+
+The weight variants retain LKGP stickiness, so `fast` and `cheap` express preferences rather
+than guaranteeing the lowest latency or price on every request. `auto/chaos` makes multiple
+upstream calls. `auto/thrifty` may use paid capacity; returning to plan quota depends on
+renewed eligibility and the connection cooldown, not just the reset time. See
+[Subscription-first routing](./SUBSCRIPTION_LADDER.md).
 
 ### Category × Tier Composition (`auto/<category>:<tier>`)
 
 OpenRouter-style suffixes separate **what kind of route** (category) from **how to optimize it** (tier), so you can compose them freely (#4235 Phase B, `open-sse/services/autoCombo/suffixComposition.ts`):
 
-- **Categories** (filter the candidate pool by capability): `coding` · `reasoning` · `vision` · `chat` · `multimodal`. `vision`/`multimodal` keep vision-capable models; `reasoning` keeps reasoning/thinking models.
-- **Tiers** (pick the scoring weights / pool filter): `fast` (ship-fast) · `cheap` (alias `floor`, cost-saver) · `reliable` (circuit-breaker health + latency stability) · `free` / `pro` (filter the pool by model tier via `classifyTier` — free-tier vs. premium).
+- **Categories**: `coding` · `reasoning` · `vision` · `chat` · `multimodal`. `vision`/`multimodal` keep vision-capable models; `reasoning` keeps reasoning/thinking models. `coding` and `chat` do not add a capability filter. Non-chat categories select quality-first weights before any tier override.
+- **Tiers** (pick the scoring weights / pool filter): `fast` (ship-fast) · `cheap` (alias `floor`, cost-saver) · `reliable` (circuit-breaker health + latency stability) · `free` / `pro` (filter the pool by model tier via `classifyTier` — free-tier vs. premium). `subscription` and `thrifty` apply the connection-based [subscription ladder](./SUBSCRIPTION_LADDER.md).
 
-| Example                | Resolves to                                             |
-| ---------------------- | ------------------------------------------------------- |
-| `auto/coding:fast`     | coding pool, low-latency weights                        |
-| `auto/coding:cheap`    | coding pool, cost-optimized (alias `auto/coding:floor`) |
-| `auto/reasoning:pro`   | reasoning/thinking models only, premium tier            |
-| `auto/vision`          | vision-capable models (no tier → balanced weights)      |
-| `auto/multimodal:free` | multimodal-capable models, free tier only               |
+| Example                | Resolves to                                                   |
+| ---------------------- | ------------------------------------------------------------- |
+| `auto/coding:fast`     | eligible pool, low-latency weights                            |
+| `auto/coding:cheap`    | eligible pool, cost-saver weights (alias `auto/coding:floor`) |
+| `auto/reasoning:pro`   | reasoning/thinking models only, premium tier                  |
+| `auto/vision`          | vision-capable models with quality-first weights              |
+| `auto/multimodal:free` | multimodal-capable models, free tier only                     |
 
-Any valid `auto/<category>[:<tier>]` resolves on demand; a curated subset is advertised in `/v1/models` and the dashboard (`AUTO_SUFFIX_VARIANTS` in `open-sse/services/autoCombo/builtinCatalog.ts`). Filtering is **fail-open** — if a constraint matches no connected models, the full pool is used so routing never breaks. The core scorer (`combo.ts`) is unchanged; the category/tier filter is applied in `buildAutoCandidates`.
+Any valid `auto/<category>[:<tier>]` resolves on demand; a curated subset is advertised in
+`/v1/models` and the dashboard (`AUTO_SUFFIX_VARIANTS` in
+`open-sse/services/autoCombo/builtinCatalog.ts`). Category/tier filtering is **fail-closed by
+default**: if no eligible models match, the virtual combo has an empty pool and the chat
+resolver returns HTTP 503 (`src/sse/handlers/chatHelpers.ts`). The filter is
+`narrowPoolByCategoryTier` in `open-sse/services/autoCombo/virtualFactory.ts`.
+
+`OMNIROUTE_AUTO_FREE_FALLBACK_TO_FULL_POOL=true` restores the legacy category/tier fallback
+to the full pool when the filter matches nothing; this can discard the requested tier or
+capability constraint. Model-family filters never use that fallback, and subscription-only
+routing still requires verified plan-included capacity.
 
 > **Live model intelligence:** auto-routing fitness is informed by live **Arena ELO** rankings + **models.dev** tier data when the `ARENA_ELO_SYNC_ENABLED` flag is on (falls back to the static fitness map otherwise).
 
@@ -55,17 +73,17 @@ API Key:  <your-endpoint-key>
 
 # In your code/config, set model to:
 model: "auto"                 # balanced default
-model: "auto/coding"          # best for coding tasks
-model: "auto/fast"            # fastest available
-model: "auto/cheap"           # cheapest per token
+model: "auto/coding"          # favor coding task fit
+model: "auto/fast"            # favor lower latency
+model: "auto/cheap"           # favor lower catalog cost
 ```
 
 **What happens:**
 
 1. OmniRoute detects `auto/` prefix in `src/sse/handlers/chat.ts`
 2. Queries all **active provider connections** from the database
-3. Filters to those with valid credentials (API key or OAuth token)
-4. Determines the model per connection (`connection.defaultModel` or provider's first model)
+3. Applies credential, model-visibility and eligibility filters
+4. Builds logical provider/model candidates from available models, keeping eligible account allowlists for dispatch
 5. Builds a **virtual combo** in-memory (not stored in DB)
 6. Routes using the selected variant's weight profile + LKGP strategy
 
@@ -74,8 +92,8 @@ model: "auto/cheap"           # cheapest per token
 - ✅ **Always-on:** No toggle, no combo creation, no configuration needed
 - ✅ **Dynamic:** Reflects current connected providers automatically
 - ✅ **Session stickiness:** LKGP ensures last successful provider is prioritized
-- ✅ **Multi-account aware:** Each provider connection becomes a separate candidate
-- ✅ **No DB writes:** Virtual combo exists only for the request, zero persistence overhead
+- ✅ **Multi-account aware:** Logical provider/model candidates retain eligible account allowlists
+- ✅ **No saved combo required:** The virtual configuration stays in memory; normal routing metrics and runtime state can still persist
 
 ### Per-key candidate control (#7819, Level 1+2)
 
@@ -169,13 +187,13 @@ the saved preferences for a later switch back.
 A combo whose `name` is identical to a bare model id (e.g. a combo named
 `gpt-5.5`) is an **intentional, supported pattern**, not a bug: it is the
 mechanism for per-model-id provider fallback documented in
-[#6940](https://github.com/diegosouzapw/OmniRoute/issues/6940). Because combo
+[#6940](https://github.com/cheaper-inference/OmniRoute/issues/6940). Because combo
 resolution is checked before bare-model-id resolution
 (`getComboForModel()` in `src/sse/services/model.ts`), a request for the bare
 id `gpt-5.5` is routed through the combo's targets (e.g.
 `acme-responses/gpt-5.5`, `backup-responses/gpt-5.5`) instead of straight to
 a single provider — this reuses the combo-before-rewrite precedence built for
-[#3227/#3233](https://github.com/diegosouzapw/OmniRoute/issues/3227) and is
+[#3227/#3233](https://github.com/cheaper-inference/OmniRoute/issues/3227) and is
 regression-tested by `tests/unit/responses-combo-resolution-3227.test.ts` and
 `tests/unit/combo-name-codex-responses-rewrite.test.ts`.
 
@@ -215,11 +233,17 @@ Two common pitfalls:
 - **`auto` does not use your combos.** `auto`/`auto/*` builds its own zero-config candidate pool and only consults persisted combos if a combo is literally named `auto` (not recommended). To route through a combo, send its exact name — not `auto`.
 - **`openrouter/auto` is a real paid OpenRouter product** ("Auto Best Available"), not an OmniRoute alias. It is the single static model entry of the OpenRouter registry (`open-sse/config/providers/registry/openrouter/index.ts`) and is billed separately. Use Settings → Routing → Hide paid models to exclude it from `auto` pools.
 
-See [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) and [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) for the original confusion this documents.
+See [#7992](https://github.com/cheaper-inference/OmniRoute/issues/7992) and [#7111](https://github.com/cheaper-inference/OmniRoute/issues/7111) for the original confusion this documents.
 
 ## How It Works (Persisted Auto-Combos)
 
-The Auto-Combo Engine dynamically selects the best provider/model for each request using a **16-factor scoring function** (defined in `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). The default weights sum to `1.0`; custom weights are renormalized by `normalizeScoringWeights()`. Two of the sixteen — `cacheAffinity` and `resetWindowAffinity` — carry a default weight of `0`; `reliability` carries `0` in `DEFAULT_WEIGHTS` but `0.03` in generic packs and `0.04` in `reliability-first`, and `quality` carries `0.02` in packs (`0.03` in `quality-first`): they are still computed for every candidate, and `cacheAffinity` gates prompt-cache deduplication outside the score, so the zero-default factors simply do not vote by default while packs do.
+The Auto-Combo Engine dynamically scores provider/model candidates using **16 declared
+factors** (defined in `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS`). The default
+weights sum to `1.0`; custom weights are renormalized by `normalizeScoringWeights()`. Three
+factors have zero weight by default: `cacheAffinity`, `resetWindowAffinity` and `reliability`.
+Mode packs give `reliability` a weight of `0.03`, or `0.04` in `reliability-first`; `quality`
+carries `0.03` by default and in `quality-first`, and `0.02` in the other packs.
+`cacheAffinity` also gates prompt-cache deduplication outside the weighted score.
 
 ![Auto-Combo 16-factor scoring](../diagrams/exported/auto-combo-scoring.svg)
 
@@ -326,32 +350,38 @@ resolved values feed the engine's existing `config.modePack` / `config.budgetCap
 
 ## All Routing Strategies
 
-OmniRoute's combo engine supports **20 routing strategies** (declared in `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). The Auto Combo engine itself is exposed under the `auto` strategy; the others are available for persisted combos.
+OmniRoute's combo engine supports **22 routing strategies** (declared in `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES`). The Auto Combo engine itself is exposed under the `auto` strategy; the others are available for persisted combos.
 
-| Strategy            | Description                                                                                                                                                                               |
-| :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `priority`          | First-target ordered list with explicit priority                                                                                                                                          |
-| `weighted`          | Weighted random by per-target weight                                                                                                                                                      |
-| `round-robin`       | Cycle through targets in order (batched; see below)                                                                                                                                       |
-| `context-relay`     | Hand off context across targets (long conversations)                                                                                                                                      |
-| `fill-first`        | Fill each target's quota before moving to next                                                                                                                                            |
-| `p2c`               | Power-of-2-choices random load balancing                                                                                                                                                  |
-| `random`            | Uniform random selection                                                                                                                                                                  |
-| `least-used`        | Pick target with lowest current load                                                                                                                                                      |
-| `cost-optimized`    | Minimize $ per request given catalog pricing                                                                                                                                              |
-| `reset-aware` ⭐    | Prioritize by quota reset time — short reset windows ranked higher                                                                                                                        |
-| `reset-window`      | Prefer targets whose quota window resets soonest                                                                                                                                          |
-| `headroom`          | Pick the target with the most remaining quota headroom                                                                                                                                    |
-| `quota-weighted`    | Skip exhausted accounts, then pick among the rest in proportion to leftover quota divided by in-flight load; existing conversations stay pinned                                           |
-| `strict-random`     | Random without deduplication of repeats                                                                                                                                                   |
-| `auto`              | Use Auto Combo scoring (16-factor) — **recommended**                                                                                                                                      |
-| `lkgp`              | Last-Known-Good Path (pins to the last successful provider, then falls back to rules)                                                                                                     |
-| `context-optimized` | Pick target with best fit for current context size                                                                                                                                        |
-| `cache-optimized`   | Reorder targets by prompt-cache affinity — the connection likeliest to already hold this request's cached prefix is tried first (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | Fan out to a panel of models in parallel, then synthesize one answer via a judge (see below)                                                                                              |
-| `pipeline`          | Run targets sequentially, threading each step's output into the next step's input; only the final answer is returned (#6396)                                                              |
+| Strategy            | Description                                                                                                                                                                                                                                                                                                                             |
+| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `priority`          | First-target ordered list with explicit priority                                                                                                                                                                                                                                                                                        |
+| `weighted`          | Proportional random draw per request by target weight; the other targets become fallbacks (see below)                                                                                                                                                                                                                                   |
+| `round-robin`       | Cycle through targets in order, in sticky batches (3 successes per target by default; see below)                                                                                                                                                                                                                                        |
+| `context-relay`     | Priority order plus a handoff summary when the conversation moves to another account                                                                                                                                                                                                                                                    |
+| `fill-first`        | Fill each target's quota before moving to next                                                                                                                                                                                                                                                                                          |
+| `p2c`               | Sample two targets and prefer the healthier, faster one                                                                                                                                                                                                                                                                                 |
+| `random`            | Fresh Fisher-Yates shuffle per request; consecutive requests can start on the same target                                                                                                                                                                                                                                               |
+| `least-used`        | Pick the target with the fewest recorded requests in this combo (per model + account)                                                                                                                                                                                                                                                   |
+| `cost-optimized`    | Try the lowest catalog input-token price first; unknown prices go last (not the final request cost)                                                                                                                                                                                                                                     |
+| `reset-aware` ⭐    | Score leftover session and weekly quota plus reset urgency; near-ties rotate                                                                                                                                                                                                                                                            |
+| `reset-window`      | Prefer targets whose quota window resets soonest                                                                                                                                                                                                                                                                                        |
+| `expiry-first`      | Spend the account whose quota would otherwise expire unused first — the highest leftover with the nearest reset deadline goes first                                                                                                                                                                                                     |
+| `headroom`          | Pick the target with the most remaining quota headroom                                                                                                                                                                                                                                                                                  |
+| `quota-weighted`    | Distribute requests by quota availability and in-flight load; preserve session affinity                                                                                                                                                                                                                                                 |
+| `strict-random`     | Shuffled deck per combo: every target is used once before reshuffling; the last of one cycle never starts the next                                                                                                                                                                                                                      |
+| `auto`              | Use Auto Combo scoring (16-factor) — **recommended**                                                                                                                                                                                                                                                                                    |
+| `lkgp`              | Last-Known-Good Path (pins to the last successful provider, then falls back to rules)                                                                                                                                                                                                                                                   |
+| `context-optimized` | Try the largest known context window first (resolved model-capability limits)                                                                                                                                                                                                                                                           |
+| `cache-optimized`   | Prefer the eligible connection likely to hold the prompt prefix in cache (`open-sse/services/combo/promptCacheAffinity.ts`, #8008)                                                                                                                                                                                                      |
+| `fusion` 🧬         | Fan out to a panel of models in parallel, then synthesize one answer via a judge (see below)                                                                                                                                                                                                                                            |
+| `pipeline`          | Run targets sequentially, threading each step's output into the next step's input; only the final answer is returned (#6396)                                                                                                                                                                                                            |
+| `jev`               | User-ranked preference list; TypeSafe Jev admits which entries run for this request. Winner first, other admitted targets keep your order. Opt-in and paid: called only when `COMBO_JEV_STRATEGY_ENABLED` is on (default off); each call sends a bounded excerpt to api.typesafe.ai. Falls back to your order when unavailable (#15276) |
 
 ⭐ = New in v3.8.0 · 🧬 = New in v3.8.36
+
+The `jev` strategy makes paid TypeSafe calls only when `COMBO_JEV_STRATEGY_ENABLED` is enabled.
+A stored TypeSafe key alone does not enable it. With the flag off, the combo keeps the
+operator's order without making that call (`open-sse/services/combo/jevAsk.ts`).
 
 ### `weighted` semantics
 
@@ -449,7 +479,7 @@ Round-robin is batched, not one-request-per-step:
   each provider-level step into per-account targets before rotation. Group-B strategies
   (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp,
   fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion,
-  pipeline) keep a provider-level view until this is on. The combo editor exposes
+  pipeline, jev) keep a provider-level view until this is on. The combo editor exposes
   inherit / on / off; inherit uses the global default (off).
 - Prompt-cache locality routing (`promptCacheAffinityEnabled`, default **true**) reorders
   pinned connections so matching cache keys stay on one account. It takes precedence over
@@ -595,6 +625,9 @@ Persisted `strategy: "auto"` combos can set `config.routerStrategy` (or legacy
 - `lkgp` — last known good provider first
 - `nadir` — ask [Nadir](https://getnadir.com)'s decision API which model in the pool the
   prompt needs; opt-in, fail-open to `rules`
+- `decision` — ask a configured decider (TypeSafe System One, your own decision URL, or one
+  of the combo's own models) which model in the pool fits the request; behind the
+  default-off `COMBO_DECISION_ROUTER_ENABLED` flag, fail-open to `rules`
 
 ### Router strategies in detail
 
@@ -824,6 +857,90 @@ and a frontier model), where always-frontier is the cost you want to cut.
 
 ---
 
+#### 7. `decision` — pluggable decider picks the model
+
+`decision` asks a **decider** which model in the pool fits the request, then narrows the
+pool to that model and lets `rules` pick the connection (quota, health and cost still
+choose the account). The decider is set in the combo's decision block — `config.decision`
+when the router knobs sit at the top of `config` (what the dashboard writes), or
+`config.auto.decision` next to `config.auto.routerStrategy`:
+
+| `decider`     | Who answers                                                                                                         | Needs                                  |
+| ------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), default model `jev-latest`                       | a `typesafe` connection or the env key |
+| `http`        | your own decider at `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) or `"openai-chat"` (chat completions) | `baseUrl` + `model`; key optional      |
+| `combo-model` | one of your provider models, called in process like the fusion judge                                                | `model` as `provider/model` (no combo) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Fields (validated by a strict schema on save and again at request time):
+
+- `decider` — `systemone`, `http` or `combo-model`.
+- `model` — TypeSafe model, the decision model at your URL, or the `provider/model` of a
+  combo-model call (up to 200 characters).
+- `baseUrl` — `http` only: an `http(s)` URL up to 500 characters, without credentials,
+  query or fragment. A URL pointing at this OmniRoute (loopback + `PORT`) is refused.
+- `wire` — `http` only: `systemone` (default) or `openai-chat`.
+- `connectionId` — the stored connection whose key is used (only inside the calling API
+  key's allowed connections). Without it, `systemone` reads a `typesafe` connection and
+  every network decider falls back to `OMNIROUTE_DECISION_API_KEY`. There is no `apiKey`
+  field: a key is never stored in a combo.
+- `timeoutMs` — integer, 100–5000, default 2000.
+- `minConfidence` — 0–1; a lower-confidence answer falls back to `rules` (a decider that
+  reports no confidence counts as 0).
+- `descriptions` — up to 50 entries (key up to 300, text up to 1000 characters), keyed by
+  model id or `provider/model`; unset entries get a generated cost-rank description.
+
+**Flag.** `COMBO_DECISION_ROUTER_ENABLED` (default `false`) gates every decider. While it is
+off, a `decision` combo reads no credential, makes no call and routes with `rules`; the log
+says `fallback (disabled)`. A stored key alone never turns it on. Combos without a decision
+block are not affected at all.
+
+**What leaves the box.** Only the text of the last user message (up to 8000 characters;
+chat/Claude `messages` or Responses `input`) and the menu of model ids with their
+descriptions. Never the system prompt, Responses `instructions`, tools, history, headers or
+account data. Network calls go through the provider outbound guard with no retries, no
+redirects and a 64 KB response cap. The `combo-model` call is non-streaming, tool-free,
+`temperature: 0`, with a 256-token budget; a decision started inside a decision call is
+refused.
+
+**Failure behavior** is fail-open: any failure resolves to the `rules` decision, and the
+reason reads `decision(<decider>): fallback (<reason>)`, with `<reason>` one of
+`disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`,
+`invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`,
+`low_confidence`, `single_option` or `no_user_text`. After a timeout, HTTP error or network
+error the endpoint is skipped for 30 s. A successful pick reads
+`decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. No URL,
+key, prompt or upstream body reaches the log.
+
+The combo builder shows these fields when the router strategy is `decision`, with the
+generated descriptions as placeholders and a **Test decision** button that calls
+`POST /api/combos/decision-preview` once with the unsaved settings (same flag).
+
+**When to use**: mixed-difficulty traffic where you want the tier picked per request by a
+classifier you choose, not by Nadir specifically.
+
+**Alias**: `decision` (no alias)
+
+---
+
 ### Custom router strategies
 
 You can register your own `RouterStrategy` implementation via the public API:
@@ -877,6 +994,7 @@ Then use it:
 | Strict SLOs       | `sla-aware` | Filters by p95/error/cost thresholds |
 | Multi-turn chat   | `lkgp`      | Session stickiness                   |
 | Mixed difficulty  | `nadir`     | Picks the model tier per prompt      |
+| Own classifier    | `decision`  | Your decider picks the model         |
 
 SLA-aware fields:
 
@@ -899,11 +1017,17 @@ SLA-aware fields:
 
 ## Auto Variants Recap
 
-Including the bare `auto` (default) plus the 6 `AutoVariant` values declared in `autoPrefix.ts`, there are **7 invokable model IDs**:
+`AutoVariant` in `autoPrefix.ts` declares **7 values** (`coding`, `fast`, `cheap`, `offline`,
+`smart`, `lkgp`, `chaos`). Together with bare `auto` (handled by `parseAutoPrefix()` as
+`variant: undefined`) and the two flat tier overlays `auto/subscription` and `auto/thrifty`
+(`FLAT_TIER_OVERLAY_IDS` in `builtinCatalog.ts`), there are **10 flat model IDs**:
 
-`auto`, `auto/coding`, `auto/fast`, `auto/cheap`, `auto/offline`, `auto/smart`, `auto/lkgp`
+`auto`, `auto/coding`, `auto/fast`, `auto/cheap`, `auto/offline`, `auto/smart`, `auto/lkgp`,
+`auto/chaos`, `auto/subscription`, `auto/thrifty`
 
-(`AutoVariant` itself enumerates 6 values; the 7th option is "no variant" — bare `auto` — handled by `parseAutoPrefix()` as `variant: undefined`.)
+Beyond those, `auto/<category>[:<tier>]` compositions, model-family IDs (for example
+`auto/claude-opus`) and the `auto/best-*` / `auto/pro-*` aliases in `builtinCatalog.ts` also
+resolve.
 
 ## How tiers fit Auto-Combo
 
@@ -932,11 +1056,13 @@ See [`docs/guides/TIERS.md`](../guides/TIERS.md) for tier definitions and provid
 
 ### Deterministic routing-decision matrix (`npm run test:combo:matrix`)
 
-`tests/integration/combo-matrix/*.test.ts` proves the routing **decision** of all 19
-public strategies end-to-end through the real combo pipeline with a mocked upstream.
+`tests/integration/combo-matrix/*.test.ts` proves the routing **decision** of the public
+strategies it covers end-to-end through the real combo pipeline with a mocked upstream.
 Coverage includes:
 
-- All 19 `ROUTING_STRATEGY_VALUES` strategies (ordered, weighted, cost, context, fusion, …).
+- 18 of the 22 public `ROUTING_STRATEGY_VALUES` strategies (ordered, weighted, cost, context,
+  fusion, …); `quota-weighted`, `cache-optimized`, `pipeline` and `jev` are not exercised by
+  the matrix and rely on their own unit tests.
 - `quota-share` (internal) end-to-end: DRR fairness + saturation deprioritization via the
   real `selectQuotaShareTarget` seam (`registerQuotaFetcher` / `setLKGP` /
   `__setHeadroomSaturationFetcherForTests`).
@@ -970,5 +1096,5 @@ intentionally excluded from CI because they require live credentials and VPS acc
 | `open-sse/services/autoCombo/autoPrefix.ts`               | `auto/` prefix parser + 6 variants                                                                        |
 | `open-sse/services/autoCombo/virtualFactory.ts`           | Builds in-memory `AutoComboConfig` from live connections                                                  |
 | `open-sse/services/autoCombo/providerRegistryAccessor.ts` | Test hook for mocking provider registry                                                                   |
-| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (20 strategies)                                                                 |
+| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (22 strategies)                                                                 |
 | `src/sse/handlers/chat.ts`                                | Integration: auto-prefix short-circuit                                                                    |

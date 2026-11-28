@@ -31,6 +31,7 @@ import {
 } from "./modelSelectLiveProviders";
 import { getModelsByProviderId, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { getCompatibleFallbackModels } from "@/lib/providers/managedAvailableModels";
+import { getWebComboTargets } from "@/shared/utils/webComboTargets";
 import {
   getModelCatalogSourceLabel,
   matchesModelCatalogQuery,
@@ -40,6 +41,7 @@ import {
   OAUTH_PROVIDERS,
   NOAUTH_PROVIDERS,
   APIKEY_PROVIDERS,
+  SEARCH_PROVIDERS,
   isOpenAICompatibleProvider,
   isAnthropicCompatibleProvider,
 } from "@/shared/constants/providers";
@@ -57,6 +59,7 @@ const PROVIDER_ORDER = [
   ...Object.keys(OAUTH_PROVIDERS),
   ...Object.keys(NOAUTH_PROVIDERS),
   ...Object.keys(APIKEY_PROVIDERS),
+  ...Object.keys(SEARCH_PROVIDERS),
 ];
 
 type ModelSelectModalProps = {
@@ -97,6 +100,8 @@ type ModelSelectModalProps = {
   multiSelect?: boolean;
   showCombos?: boolean;
   alwaysIncludeProviders?: string[] | null;
+  /** Enable native search/fetch operations only for endpoint-agnostic combo pickers. */
+  includeWebTargets?: boolean;
   /**
    * When true, picking a model does NOT auto-close the modal — the caller must close
    * explicitly. A "Done" button is rendered in the modal footer so the user has a clear
@@ -125,6 +130,7 @@ export default function ModelSelectModal({
   multiSelect = false,
   showCombos = true,
   alwaysIncludeProviders = [],
+  includeWebTargets = false,
   keepOpenOnSelect = false,
 }: ModelSelectModalProps) {
   const t = useTranslations("common");
@@ -284,7 +290,7 @@ export default function ModelSelectModal({
   }, [isOpen, activeProviders]);
 
   const allProviders = useMemo(
-    () => ({ ...OAUTH_PROVIDERS, ...NOAUTH_PROVIDERS, ...APIKEY_PROVIDERS }),
+    () => ({ ...OAUTH_PROVIDERS, ...NOAUTH_PROVIDERS, ...APIKEY_PROVIDERS, ...SEARCH_PROVIDERS }),
     []
   );
   const alwaysIncludeProvidersKey = Array.isArray(alwaysIncludeProviders)
@@ -434,7 +440,13 @@ export default function ModelSelectModal({
           };
         }
       } else {
-        const systemModels = getModelsByProviderId(providerId);
+        const webTargets = includeWebTargets ? getWebComboTargets(providerId) : [];
+        const systemModels = [
+          ...getModelsByProviderId(providerId).filter(
+            (model) => !webTargets.some((target) => target.id === model.id)
+          ),
+          ...webTargets,
+        ];
 
         // Merge system models with user-added custom models
         const systemEntries = systemModels
@@ -474,6 +486,7 @@ export default function ModelSelectModal({
             alias: alias,
             color: providerInfo.color,
             models: allModels,
+            isWebOperation: webTargets.length > 0,
           };
         }
       }
@@ -488,6 +501,7 @@ export default function ModelSelectModal({
     providerNodes,
     customModels,
     fetchedModels,
+    includeWebTargets,
     hiddenModelsByProvider,
   ]);
 
@@ -575,7 +589,10 @@ export default function ModelSelectModal({
 
   // Same combo-builder gate as Select All — CLI tool cards and other single-pick
   // callers should not grow provider checkboxes / a test toolbar.
-  const showProviderTestControls = keepOpenOnSelect && !multiSelect;
+  const showProviderTestControls =
+    keepOpenOnSelect &&
+    !multiSelect &&
+    Object.values(connectionFilteredGroups).some((group) => !group.isWebOperation);
 
   const workingModelsToSelect = useMemo(
     () =>
@@ -600,7 +617,12 @@ export default function ModelSelectModal({
   );
 
   const visibleProviderIds = useMemo(
-    () => listVisibleProviderIds(connectionFilteredGroups),
+    () =>
+      listVisibleProviderIds(
+        Object.fromEntries(
+          Object.entries(connectionFilteredGroups).filter(([, group]) => !group.isWebOperation)
+        )
+      ),
     [connectionFilteredGroups]
   );
 
@@ -700,7 +722,7 @@ export default function ModelSelectModal({
     const groups: Array<[string, Array<{ value?: string | null; id?: string | null }>]> =
       Object.entries(connectionFilteredGroups).map(([providerId, group]: [string, any]) => [
         providerId,
-        Array.isArray(group?.models) ? group.models : [],
+        !group.isWebOperation && Array.isArray(group?.models) ? group.models : [],
       ]);
 
     const targets = buildProviderTestTargets({
@@ -874,7 +896,7 @@ export default function ModelSelectModal({
               {allVisibleSelected
                 ? labelOrFallback("unselectAll", "Unselect all")
                 : labelOrFallback("selectAll", "Select all")}
-              <span className="ml-1 text-[10px] text-text-muted font-normal">
+              <span className="ml-1 text-3xs text-text-muted font-normal">
                 ({visibleModels.length})
               </span>
             </Button>
@@ -895,7 +917,7 @@ export default function ModelSelectModal({
 
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-[11px] text-text-muted">
+                <span className="text-2xs text-text-muted">
                   {labelOrFallback(
                     "providersSelectedCount",
                     `${selectedProviderIds.size} providers checked`,
@@ -910,7 +932,7 @@ export default function ModelSelectModal({
                   }
                   disabled={visibleProviderIds.length === 0 || testingProviders}
                   data-testid="model-select-toggle-all-providers"
-                  className="text-[11px]"
+                  className="text-2xs"
                 >
                   {allProvidersChecked
                     ? labelOrFallback("clearProviderSelection", "Uncheck providers")
@@ -960,7 +982,7 @@ export default function ModelSelectModal({
                       ? labelOrFallback("unselectWorkingModels", "Unselect working")
                       : labelOrFallback("selectWorkingModels", "Add working")}
                     <span
-                      className={`ml-1 text-[10px] font-normal ${
+                      className={`ml-1 text-3xs font-normal ${
                         canRemoveWorking ? "opacity-80" : "text-text-muted"
                       }`}
                     >
@@ -986,7 +1008,7 @@ export default function ModelSelectModal({
             <div className="flex items-center gap-1.5 mb-1.5 sticky top-0 z-10 bg-surface py-1">
               <Icon name="layers" size={14} className="text-primary" />
               <span className="text-xs font-medium text-primary">{t("combos")}</span>
-              <span className="text-[10px] text-text-muted">({filteredCombos.length})</span>
+              <span className="text-3xs text-text-muted">({filteredCombos.length})</span>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {filteredCombos.map((combo) => {
@@ -1035,7 +1057,7 @@ export default function ModelSelectModal({
                   providerSelected ? "ring-1 ring-inset ring-primary/35" : ""
                 }`}
               >
-                {showProviderTestControls ? (
+                {showProviderTestControls && !group.isWebOperation ? (
                   <Checkbox
                     checked={providerSelected}
                     onChange={() => handleToggleProviderForTest(providerId)}
@@ -1052,7 +1074,7 @@ export default function ModelSelectModal({
                         <span className="text-xs font-medium text-primary truncate">
                           {group.name}
                         </span>
-                        <span className="text-[10px] text-text-muted shrink-0">
+                        <span className="text-3xs text-text-muted shrink-0">
                           ({group.models.length})
                         </span>
                       </span>
@@ -1065,7 +1087,7 @@ export default function ModelSelectModal({
                       style={{ backgroundColor: group.color }}
                     />
                     <span className="text-xs font-medium text-primary">{group.name}</span>
-                    <span className="text-[10px] text-text-muted">({group.models.length})</span>
+                    <span className="text-3xs text-text-muted">({group.models.length})</span>
                   </>
                 )}
               </div>
@@ -1098,17 +1120,17 @@ export default function ModelSelectModal({
                       {isAdded && <span className="mr-0.5 opacity-70">✓</span>}
                       {model.name}
                       {model.source && (
-                        <span className="ml-1 text-[10px] uppercase opacity-70">
+                        <span className="ml-1 text-3xs uppercase opacity-70">
                           {getModelCatalogSourceLabel(model.source)}
                         </span>
                       )}
                       {testStatus === "ok" && (
-                        <span className="ml-1 rounded px-1 py-px text-[9px] font-semibold uppercase tracking-wide bg-success/20 text-success">
+                        <span className="ml-1 rounded px-1 py-px text-3xs font-semibold uppercase tracking-wide bg-success/20 text-success">
                           ok
                         </span>
                       )}
                       {testStatus === "error" && (
-                        <span className="ml-1 rounded px-1 py-px text-[9px] font-semibold uppercase tracking-wide bg-error/20 text-error">
+                        <span className="ml-1 rounded px-1 py-px text-3xs font-semibold uppercase tracking-wide bg-error/20 text-error">
                           fail
                         </span>
                       )}
