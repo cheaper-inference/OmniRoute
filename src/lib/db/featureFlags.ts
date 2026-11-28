@@ -4,13 +4,29 @@
  * Stores per-flag override values in the key_value table under the
  * "feature_flags" namespace. When an override is present it takes precedence
  * over the process environment variable of the same name.
+ *
+ * Persistence lives behind FeatureFlagOverrideRepository. The exports below stay
+ * synchronous (SQLite-only legacy access) because flag reads sit on per-request
+ * hot paths; this facade owns flag-definition validation, the override cache and
+ * model-catalog invalidation.
  */
 
+import type { FeatureFlagOverrideRepository } from "@/domain/persistence/productPolicyRepositories";
 import { FEATURE_FLAG_DEFINITIONS } from "@/shared/constants/featureFlagDefinitions";
 import { getDbInstance } from "./core";
 import { finishModelCatalogWriteWithoutBackup } from "./models/modelCatalogWriteSignals";
+import { productPolicyRepositories } from "./repositories/productPolicyRepositories";
 
-const NAMESPACE = "feature_flags";
+// Resolved per call, never at module load: core.ts reaches this module through
+// the shared flag resolver, so an eager read here would run inside that cycle.
+function legacy() {
+  return productPolicyRepositories.legacySync.featureFlagOverrides;
+}
+
+/** Async persistence contract; it never touches caches on its own. */
+export function getFeatureFlagOverrideRepository(): FeatureFlagOverrideRepository {
+  return productPolicyRepositories.featureFlagOverrides;
+}
 
 // Flag reads sit on hot paths that call them once per string leaf of a request
 // body (sanitizePII, the PII masker guardrail), so a synchronous SELECT per
@@ -54,16 +70,7 @@ const CATALOG_RELEVANT_FEATURE_FLAGS = new Set([
  * Returns all feature flag overrides as a key→value map.
  */
 export function getFeatureFlagOverrides(): Record<string, string> {
-  const db = getDbInstance();
-  const rows = db
-    .prepare("SELECT key, value FROM key_value WHERE namespace = ?")
-    .all(NAMESPACE) as Array<{ key: string; value: string }>;
-
-  const result: Record<string, string> = {};
-  for (const row of rows) {
-    result[row.key] = row.value;
-  }
-  return result;
+  return legacy().list();
 }
 
 /**
@@ -76,11 +83,9 @@ export function getFeatureFlagOverride(key: string): string | undefined {
   const now = Date.now();
   const cached = cache.get(key);
   if (cached && cached.expiresAt > now) return cached.value;
-  const row = db
-    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
-    .get(NAMESPACE, key) as { value: string } | undefined;
-  cache.set(key, { value: row?.value, expiresAt: now + OVERRIDE_CACHE_TTL_MS });
-  return row?.value;
+  const value = legacy().find(key);
+  cache.set(key, { value, expiresAt: now + OVERRIDE_CACHE_TTL_MS });
+  return value;
 }
 
 /**
@@ -100,12 +105,7 @@ export function setFeatureFlagOverride(key: string, value: string): void {
       `Invalid value "${value}" for enum flag ${key}. Allowed: ${definition.enumValues.join(", ")}`
     );
   }
-  const db = getDbInstance();
-  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
-    NAMESPACE,
-    key,
-    value
-  );
+  legacy().set(key, value);
   clearFeatureFlagOverrideCache(key);
   if (CATALOG_RELEVANT_FEATURE_FLAGS.has(key)) {
     finishModelCatalogWriteWithoutBackup();
@@ -117,8 +117,7 @@ export function setFeatureFlagOverride(key: string, value: string): void {
  * behaviour.
  */
 export function removeFeatureFlagOverride(key: string): void {
-  const db = getDbInstance();
-  db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?").run(NAMESPACE, key);
+  legacy().remove(key);
   clearFeatureFlagOverrideCache(key);
   if (CATALOG_RELEVANT_FEATURE_FLAGS.has(key)) {
     finishModelCatalogWriteWithoutBackup();
@@ -129,17 +128,8 @@ export function removeFeatureFlagOverride(key: string): void {
  * Removes all stored feature flag overrides.
  */
 export function clearAllFeatureFlagOverrides(): void {
-  const db = getDbInstance();
-  // Placeholders are derived from the set size — a hardcoded `IN (?, ?, ?)` breaks
-  // (parameter-count mismatch) the moment a flag is added to the set above.
-  const catalogFlags = Array.from(CATALOG_RELEVANT_FEATURE_FLAGS);
-  const placeholders = catalogFlags.map(() => "?").join(", ");
-  const hadRelevantOverride = Boolean(
-    db
-      .prepare(`SELECT 1 FROM key_value WHERE namespace = ? AND key IN (${placeholders}) LIMIT 1`)
-      .get(NAMESPACE, ...catalogFlags)
-  );
-  db.prepare("DELETE FROM key_value WHERE namespace = ?").run(NAMESPACE);
+  const hadRelevantOverride = legacy().hasAny(Array.from(CATALOG_RELEVANT_FEATURE_FLAGS));
+  legacy().clear();
   clearFeatureFlagOverrideCache();
   if (hadRelevantOverride) {
     finishModelCatalogWriteWithoutBackup();

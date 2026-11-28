@@ -10,88 +10,52 @@
  *
  * The sanitizers read this on hot paths (per string leaf / per stream chunk),
  * so reads are cached for a short TTL; writers in this module invalidate it.
+ *
+ * Persistence lives behind PiiSettingsRepository. The exports below stay
+ * synchronous (SQLite-only legacy access) because the sanitizers cannot await;
+ * this facade owns the read cache and its invalidation.
  */
 
-import type { PiiCustomPattern } from "@/shared/utils/piiCustomPatterns";
+import type {
+  PiiSettings,
+  PiiSettingsRepository,
+  PiiSettingsUpdate,
+} from "@/domain/persistence/productPolicyRepositories";
 import { getDbInstance } from "./core";
+import { productPolicyRepositories } from "./repositories/productPolicyRepositories";
 
-const NAMESPACE = "pii_settings";
-const KEY_ENABLED_TYPES = "enabledTypes";
-const KEY_CUSTOM_PATTERNS = "customPatterns";
+export type { PiiSettings } from "@/domain/persistence/productPolicyRepositories";
+
 const CACHE_TTL_MS = 1000;
 
-export interface PiiSettings {
-  /** null = every built-in type (the pre-existing behaviour). */
-  enabledTypes: string[] | null;
-  customPatterns: PiiCustomPattern[];
+// Resolved per call, never at module load (see db/featureFlags.ts: core.ts sits
+// in the same import cycle through the shared flag resolver).
+function legacy() {
+  return productPolicyRepositories.legacySync.piiSettings;
 }
 
 let cache: { db: object; value: PiiSettings; expiresAt: number } | null = null;
 
+/** Async persistence contract; it never touches the read cache on its own. */
+export function getPiiSettingsRepository(): PiiSettingsRepository {
+  return productPolicyRepositories.piiSettings;
+}
+
 export function clearPiiSettingsCache(): void {
   cache = null;
-}
-
-function parseJson(raw: string | undefined): unknown {
-  if (raw === undefined) return undefined;
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return undefined;
-  }
-}
-
-function readFromDb(db: ReturnType<typeof getDbInstance>): PiiSettings {
-  const rows = db
-    .prepare("SELECT key, value FROM key_value WHERE namespace = ?")
-    .all(NAMESPACE) as Array<{ key: string; value: string }>;
-  const byKey = new Map(rows.map((row) => [row.key, row.value]));
-
-  const enabledRaw = parseJson(byKey.get(KEY_ENABLED_TYPES));
-  const customRaw = parseJson(byKey.get(KEY_CUSTOM_PATTERNS));
-  return {
-    enabledTypes: Array.isArray(enabledRaw)
-      ? enabledRaw.filter((entry): entry is string => typeof entry === "string")
-      : null,
-    customPatterns: Array.isArray(customRaw)
-      ? customRaw.filter(
-          (entry): entry is PiiCustomPattern =>
-            !!entry &&
-            typeof entry === "object" &&
-            typeof (entry as PiiCustomPattern).pattern === "string"
-        )
-      : [],
-  };
 }
 
 export function getPiiSettings(): PiiSettings {
   const db = getDbInstance();
   const now = Date.now();
   if (cache && cache.db === db && cache.expiresAt > now) return cache.value;
-  const value = readFromDb(db);
+  const value = legacy().get();
   cache = { db, value, expiresAt: now + CACHE_TTL_MS };
   return value;
 }
 
-export function setPiiSettings(update: {
-  enabledTypes?: string[] | null;
-  customPatterns?: PiiCustomPattern[];
-}): PiiSettings {
-  const db = getDbInstance();
-  const upsert = db.prepare(
-    "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)"
-  );
-  if (update.enabledTypes === null) {
-    db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?").run(
-      NAMESPACE,
-      KEY_ENABLED_TYPES
-    );
-  } else if (update.enabledTypes !== undefined) {
-    upsert.run(NAMESPACE, KEY_ENABLED_TYPES, JSON.stringify(update.enabledTypes));
-  }
-  if (update.customPatterns !== undefined) {
-    upsert.run(NAMESPACE, KEY_CUSTOM_PATTERNS, JSON.stringify(update.customPatterns));
-  }
+export function setPiiSettings(update: PiiSettingsUpdate): PiiSettings {
+  legacy().update(update);
   clearPiiSettingsCache();
   return getPiiSettings();
 }
