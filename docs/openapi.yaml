@@ -4802,7 +4802,12 @@ paths:
             enum: [apiKeys]
       responses:
         "200":
-          description: Usage analytics data
+          description: >-
+            Usage analytics data. `summary.totalCost` is split by provenance into
+            `summary.costReported` (provider-reported `provider_cost_usd`),
+            `summary.costEstimated` (catalog-priced, including stored `calculated_cost_usd`
+            snapshots) and `summary.costUnknown` (archived daily rollups, which keep no
+            provenance); the three parts add up to `totalCost`.
 
   /api/usage/call-logs:
     get:

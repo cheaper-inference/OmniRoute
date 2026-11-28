@@ -160,6 +160,8 @@ export interface DailyCostRow extends CostTokenFields {
   successfulRequests: number;
   lastUsed: string;
   storedCost: number;
+  /** Provider-reported (`provider_cost_usd`) share of `storedCost`. */
+  reportedCost: number;
   isAggregated: number;
 }
 
@@ -189,6 +191,7 @@ export function getDailyCostRows(unifiedSource: string, params: AnalyticsParams)
         COALESCE(SUM(CASE WHEN success = 1 THEN requests ELSE 0 END), 0) as successfulRequests,
         COALESCE(MAX(timestamp), '') as lastUsed,
         COALESCE(SUM(stored_cost), 0.0) as storedCost,
+        COALESCE(SUM(reported_cost), 0.0) as reportedCost,
         MAX(is_aggregated) as isAggregated,
         ${UNIFIED_COST_TOKEN_SUMS}
       FROM ${unifiedSource} AS _u

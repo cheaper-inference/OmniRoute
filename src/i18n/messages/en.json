@@ -2202,6 +2202,8 @@
     "inputTokens": "Input Tokens",
     "outputTokens": "Output Tokens",
     "estCost": "Est. Cost",
+    "costSplit": "Reported {reported} · estimated {estimated}",
+    "costSplitUnverified": "Reported {reported} · estimated {estimated} · unverified {unknown}",
     "infraTitle": "Infrastructure",
     "usedInPeriodTitle": "Used in this period",
     "usedInPeriodHint": "Accounts, providers, API keys and models that handled at least one request in the selected period. Connections and keys without traffic are not counted.",
