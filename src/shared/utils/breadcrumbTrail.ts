@@ -13,7 +13,6 @@ import { SIDEBAR_SECTIONS, getSectionItems } from "@/shared/constants/sidebarVis
  * `src/app/(dashboard)` and fails when a folder gains or loses its page.
  */
 const ROUTE_PREFIXES_WITHOUT_PAGE: readonly string[] = [
-  "/dashboard/api-manager/[id]",
   "/dashboard/gamification",
   "/dashboard/plugins/[name]",
   "/dashboard/resilience",
