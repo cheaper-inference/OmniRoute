@@ -6,7 +6,7 @@ import {
   getMiddlewareHook,
   getHookLogs,
 } from "@/lib/db/middleware";
-import { registerHook, getAllHooks } from "@/lib/middleware/registry";
+import { registerHook, getAllHooks, initPreRequestRegistry } from "@/lib/middleware/registry";
 import type { HookConfig, CreateHookRequest } from "@/lib/middleware/types";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
@@ -55,6 +55,7 @@ export async function GET(request: Request) {
       return NextResponse.json(result);
     }
 
+    initPreRequestRegistry();
     const hooks = getAllMiddlewareHooks();
     const registryHooks = getAllHooks();
 
@@ -105,6 +106,9 @@ export async function POST(request: Request) {
       updatedAt: new Date().toISOString(),
       runCount: 0,
     };
+
+    // Hydrate any persisted hooks before registering the new one
+    initPreRequestRegistry();
 
     // Persist to DB
     const saved = createMiddlewareHook(hookConfig);

@@ -13,6 +13,7 @@
  */
 
 import * as vm from "vm";
+import { getAllMiddlewareHooks } from "@/lib/db/middleware";
 
 import {
   type HookMiddleware,
@@ -357,11 +358,13 @@ export function loadHooksFromConfig(rows: HookConfig[]): void {
   const state = getRegistryState();
   for (const row of rows) {
     if (!state.hooks.has(row.name)) {
-      state.hooks.set(row.name, row);
+      const entry = { ...row };
+      state.hooks.set(row.name, entry);
       try {
         const compiled = compileHookCode(row.code, row.name);
         state.middlewares.set(row.name, compiled);
       } catch (err) {
+        entry.lastError = err instanceof Error ? err.message : "Compilation error";
         console.error(`[Middleware] Failed to compile hook "${row.name}":`, err);
       }
     }
@@ -478,10 +481,20 @@ export function getHookLogs(hookName?: string, limit = 50): HookLogEntry[] {
 }
 
 /**
- * Initialize registry (idempotent).
+ * Initialize registry and hydrate persisted hooks from DB (idempotent).
  */
-export function initPreRequestRegistry(): void {
-  getRegistryState().initialized = true;
+export function initPreRequestRegistry(
+  loadHooks: () => HookConfig[] = getAllMiddlewareHooks
+): void {
+  const state = getRegistryState();
+  if (state.initialized) return;
+
+  try {
+    loadHooksFromConfig(loadHooks());
+    state.initialized = true;
+  } catch (err) {
+    console.error("[Middleware] Failed to load persisted hooks:", err);
+  }
 }
 
 /**
@@ -489,6 +502,7 @@ export function initPreRequestRegistry(): void {
  */
 export function clearAllHooks(): void {
   const state = getRegistryState();
+  state.initialized = false;
   state.hooks.clear();
   state.middlewares.clear();
   state.logs = [];
