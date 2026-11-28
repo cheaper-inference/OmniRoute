@@ -8,7 +8,12 @@
  * @module lib/db/cleanup/usagePurge
  */
 import { getDbInstance } from "../core";
-import { cleanupEmptyCallLogDirs, deleteCallArtifact } from "@/lib/usage/callLogArtifacts";
+import {
+  cleanupEmptyCallLogDirs,
+  deleteCallArtifact,
+  listCallLogArtifactFiles,
+  purgeCallLogArtifactDirectory,
+} from "@/lib/usage/callLogArtifacts";
 import { recordUsagePurgedBefore } from "@/lib/usage/usagePurgedBefore";
 
 export type DeleteByPeriodTarget = {
@@ -42,17 +47,40 @@ export function tableExists(table: string): boolean {
   return Boolean(row?.name);
 }
 
-export function deleteAllFromTable(table: string): number {
+export async function deleteAllFromTable(
+  table: string,
+  options: { batchSize?: number; progress?: DeleteProgress } = {}
+): Promise<number> {
+  const batchSize = options.batchSize ?? DELETE_BATCH_SIZE;
+  if (!Number.isInteger(batchSize) || batchSize < 1) {
+    throw new RangeError(`batchSize must be a positive integer, got ${batchSize}`);
+  }
   if (!tableExists(table)) return 0;
-  return getDbInstance().prepare(`DELETE FROM ${table}`).run().changes;
+
+  const statement = getDbInstance().prepare(
+    `DELETE FROM ${table}
+     WHERE rowid IN (
+       SELECT rowid FROM ${table}
+       LIMIT ?
+     )`
+  );
+  let deleted = 0;
+
+  while (true) {
+    const batch = statement.run(batchSize).changes;
+    deleted += batch;
+    if (options.progress) options.progress.deleted += batch;
+    if (batch < batchSize) return deleted;
+    await yieldToEventLoop();
+  }
 }
 
-export function deleteFromTableBefore(target: DeleteByPeriodTarget, cutoffIso: string): number {
-  if (!tableExists(target.table)) return 0;
-
-  return getDbInstance()
-    .prepare(`DELETE FROM ${target.table} WHERE ${target.column} < ?`)
-    .run(cutoffValue(target, cutoffIso)).changes;
+export async function deleteFromTableBefore(
+  target: DeleteByPeriodTarget,
+  cutoffIso: string,
+  options: { batchSize?: number; progress?: DeleteProgress; deleteArtifacts?: boolean } = {}
+): Promise<number> {
+  return deleteFromTableBeforeInBatches(target, cutoffIso, options);
 }
 
 /**
@@ -66,10 +94,41 @@ function yieldToEventLoop(): Promise<void> {
   return new Promise<void>((resolve) => setImmediate(resolve));
 }
 
+export async function deleteWhereInBatches(
+  table: string,
+  whereClause: string,
+  params: unknown[],
+  options: { batchSize?: number; progress?: DeleteProgress } = {}
+): Promise<number> {
+  const batchSize = options.batchSize ?? DELETE_BATCH_SIZE;
+  if (!Number.isInteger(batchSize) || batchSize < 1) {
+    throw new RangeError(`batchSize must be a positive integer, got ${batchSize}`);
+  }
+  if (!tableExists(table)) return 0;
+
+  const statement = getDbInstance().prepare(
+    `DELETE FROM ${table}
+     WHERE rowid IN (
+       SELECT rowid FROM ${table}
+       WHERE ${whereClause}
+       LIMIT ?
+     )`
+  );
+  let deleted = 0;
+
+  while (true) {
+    const batch = statement.run(...params, batchSize).changes;
+    deleted += batch;
+    if (options.progress) options.progress.deleted += batch;
+    if (batch < batchSize) return deleted;
+    await yieldToEventLoop();
+  }
+}
+
 export async function deleteFromTableBeforeInBatches(
   target: DeleteByPeriodTarget,
   cutoffIso: string,
-  options: { batchSize?: number; progress?: DeleteProgress } = {}
+  options: { batchSize?: number; progress?: DeleteProgress; deleteArtifacts?: boolean } = {}
 ): Promise<number> {
   const batchSize = options.batchSize ?? DELETE_BATCH_SIZE;
   // LIMIT 0 deletes nothing and LIMIT -1 means no limit; either would never
@@ -92,7 +151,7 @@ export async function deleteFromTableBeforeInBatches(
   // rowids, then remove their files: an idle gateway no longer keeps expired bodies until the
   // request-driven orphan scanner finds them. No ORDER BY, so the pick costs what the delete did.
   const pickBatch =
-    target.table === "call_logs"
+    target.table === "call_logs" && options.deleteArtifacts !== false
       ? db.prepare<{ rowid: number; artifact_relpath: string | null }>(
           `SELECT rowid, artifact_relpath FROM call_logs WHERE ${target.column} < ? LIMIT ?`
         )
@@ -214,4 +273,169 @@ export function deleteCallLogArtifacts(relativePaths: string[]): {
 
   cleanupEmptyCallLogDirs();
   return result;
+}
+
+export interface UsageResetResultBase {
+  deleted: number;
+  deletedCallLogs: number;
+  deletedCallLogArtifacts: number;
+  deletedArtifacts?: number;
+  errors: number;
+}
+
+export type UsageResetTarget<T extends UsageResetResultBase> = DeleteByPeriodTarget & {
+  resultKey: keyof T;
+  allOnly?: boolean;
+  deleteBefore?: (
+    cutoffIso: string,
+    options: { batchSize?: number; progress?: DeleteProgress }
+  ) => Promise<number>;
+};
+
+function createTargetProgress<T>(result: T, key: keyof T): DeleteProgress {
+  const record = result as Record<keyof T, number>;
+  return {
+    get deleted() {
+      return Number(record[key] ?? 0);
+    },
+    set deleted(value: number) {
+      record[key] = value;
+    },
+  };
+}
+
+function countTableRows(table: string): number {
+  if (!tableExists(table)) return 0;
+  const row = getDbInstance()
+    .prepare(`SELECT COUNT(*) AS count FROM ${table}`)
+    .get() as { count?: number } | undefined;
+  return Number(row?.count ?? 0);
+}
+
+function getSurvivingCallLogArtifactPaths(): Set<string> {
+  if (!tableExists("call_logs")) return new Set();
+  const rows = getDbInstance()
+    .prepare("SELECT artifact_relpath FROM call_logs WHERE artifact_relpath IS NOT NULL")
+    .all() as Array<{ artifact_relpath?: string | null }>;
+  const surviving = new Set<string>();
+  for (const row of rows) {
+    if (typeof row.artifact_relpath === "string" && row.artifact_relpath.length > 0) {
+      surviving.add(row.artifact_relpath);
+    }
+  }
+  return surviving;
+}
+
+function cleanupAllPeriodArtifacts(callLogsCompleted: boolean, deletedCallLogs: number) {
+  if (!callLogsCompleted && deletedCallLogs === 0) {
+    return { deletedArtifacts: 0, errors: 0 };
+  }
+  if (callLogsCompleted || countTableRows("call_logs") === 0) {
+    return purgeCallLogArtifactDirectory();
+  }
+  const surviving = getSurvivingCallLogArtifactPaths();
+  const orphaned = listCallLogArtifactFiles()
+    .map((file) => file.relativePath)
+    .filter((relPath) => !surviving.has(relPath));
+  return deleteCallLogArtifacts(orphaned);
+}
+
+function cleanupTimedPeriodArtifacts(
+  artifactsToDelete: string[],
+  cutoffIso: string,
+  callLogsCompleted: boolean,
+  deletedCallLogs: number
+) {
+  if (artifactsToDelete.length === 0 || (!callLogsCompleted && deletedCallLogs === 0)) {
+    return { deletedArtifacts: 0, errors: 0 };
+  }
+  if (callLogsCompleted) {
+    return deleteCallLogArtifacts(artifactsToDelete);
+  }
+  const stillPresent = new Set(collectCallLogArtifactsBefore(cutoffIso));
+  const deletedPaths = artifactsToDelete.filter((relPath) => !stillPresent.has(relPath));
+  return deleteCallLogArtifacts(deletedPaths);
+}
+
+async function runResetTargetsLoop<T extends UsageResetResultBase>(
+  period: string,
+  cutoffIso: string | null,
+  targets: Array<UsageResetTarget<T>>,
+  result: T,
+  batchSize?: number
+): Promise<boolean> {
+  let callLogsCompleted = false;
+  for (const target of targets) {
+    if (period !== "all" && target.allOnly) continue;
+    const progress = createTargetProgress(result, target.resultKey);
+    if (period === "all") {
+      await deleteAllFromTable(target.table, { batchSize, progress });
+    } else if (cutoffIso) {
+      if (target.deleteBefore) {
+        await target.deleteBefore(cutoffIso, { batchSize, progress });
+      } else {
+        await deleteFromTableBefore(target, cutoffIso, {
+          batchSize,
+          progress,
+          deleteArtifacts: false,
+        });
+      }
+    }
+    if (target.table === "call_logs") callLogsCompleted = true;
+  }
+  return callLogsCompleted;
+}
+
+function finalizeUsageResetArtifacts<T extends UsageResetResultBase>(
+  period: string,
+  cutoffIso: string | null,
+  artifactsToDelete: string[],
+  callLogsCompleted: boolean,
+  result: T
+): void {
+  try {
+    const artifactResult =
+      period === "all"
+        ? cleanupAllPeriodArtifacts(callLogsCompleted, result.deletedCallLogs)
+        : cleanupTimedPeriodArtifacts(
+            artifactsToDelete,
+            cutoffIso ?? "",
+            callLogsCompleted,
+            result.deletedCallLogs
+          );
+    result.deletedCallLogArtifacts = artifactResult.deletedArtifacts;
+    result.deletedArtifacts = artifactResult.deletedArtifacts;
+    result.errors += artifactResult.errors;
+  } catch (artifactErr: unknown) {
+    console.error("[Cleanup] Error cleaning call log artifacts during reset:", artifactErr);
+    result.errors++;
+  }
+}
+
+export async function executeUsageReset<T extends UsageResetResultBase>(
+  period: string,
+  cutoffIso: string | null,
+  targets: Array<UsageResetTarget<T>>,
+  result: T,
+  options: { batchSize?: number } = {}
+): Promise<void> {
+  const artifactsToDelete =
+    period !== "all" && cutoffIso ? collectCallLogArtifactsBefore(cutoffIso) : [];
+  let callLogsCompleted = false;
+
+  try {
+    callLogsCompleted = await runResetTargetsLoop(
+      period,
+      cutoffIso,
+      targets,
+      result,
+      options.batchSize
+    );
+  } catch (err: unknown) {
+    console.error("[Cleanup] Error resetting usage history:", err);
+    result.errors++;
+  } finally {
+    finalizeUsageResetArtifacts(period, cutoffIso, artifactsToDelete, callLogsCompleted, result);
+    result.deleted = targets.reduce((sum, t) => sum + Number(result[t.resultKey] ?? 0), 0);
+  }
 }

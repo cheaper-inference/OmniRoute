@@ -63,6 +63,8 @@ export const APP_STAGING_ALLOWED_EXACT_PATHS: string[] = [
   // Scoped ESM package survives pruning beneath a CommonJS standalone root.
   "src/lib/logExport/package.json",
   "src/lib/db/healthCheckWorker.js",
+  "src/lib/db/cleanup/vacuumSnapshotWorker.js",
+  "src/lib/db/cleanup/package.json",
   "package.json",
   "peer-stamp.mjs",
   // #13636/#14064: server-ws.mjs imports ./httpClientAbortGuard.mjs (process crash
@@ -261,6 +263,8 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   // Unbundled destination helper also ships through package.json's src/lib/ prefix.
   "src/lib/logExport/destinations/otlpRequestHeaders.ts",
   "dist/src/lib/db/healthCheckWorker.js",
+  "dist/src/lib/db/cleanup/vacuumSnapshotWorker.js",
+  "dist/src/lib/db/cleanup/package.json",
   "dist/open-sse/vendor/codex-chatgpt-web/adapters/chatgpt-web/mcp-server.js",
   "dist/open-sse/services/compression/rules/en/filler.json",
   "dist/server.js",

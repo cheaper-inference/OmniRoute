@@ -240,6 +240,8 @@ export const TRANSITIVE_SPAWN_INFRA_MODULES: Record<string, string> = {
     "spawnSync(process.execPath, ['-e', require('better-sqlite3')]) native-driver probe when the DB opens; fixed argv.",
   "src/lib/db/healthCheckRunner.ts":
     "fork()s the in-repo src/lib/db/healthCheckWorker for the DB health check; fixed script.",
+  "src/lib/db/cleanup/backupPrune.ts":
+    "fork()s the in-repo src/lib/db/cleanup/vacuumSnapshotWorker for VACUUM INTO snapshot hashing; fixed script.",
   "src/shared/utils/machineId.ts":
     "execFileSync of fixed OS commands to read the machine id; no request input.",
   "open-sse/utils/kimiDevice.ts":

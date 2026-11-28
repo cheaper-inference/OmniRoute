@@ -111,6 +111,23 @@ function main() {
     { stdio: "inherit" }
   );
 
+  const vacuumWorkerDest = join(STANDALONE, "src/lib/db/cleanup/vacuumSnapshotWorker.js");
+  mkdirSync(dirname(vacuumWorkerDest), { recursive: true });
+  runBuildTool(
+    "esbuild",
+    "esbuild",
+    [
+      join(ROOT, "src/lib/db/cleanup/vacuumSnapshotWorker.ts"),
+      "--bundle",
+      "--platform=node",
+      "--packages=external",
+      "--format=esm",
+      `--outfile=${vacuumWorkerDest}`,
+    ],
+    { stdio: "inherit" }
+  );
+  console.log("[colocate-standalone] ✅ vacuum snapshot worker bundled");
+
   const callLogWorkerDest = join(STANDALONE, CALL_LOG_WORKER_REL);
   mkdirSync(dirname(callLogWorkerDest), { recursive: true });
   // Never spawn `node_modules/.bin/esbuild` directly: that extensionless path is
@@ -169,6 +186,7 @@ function main() {
   // optional LLMLingua worker dir is added below only when its deps are installed.
   const workerDirs = [
     dirname(healthWorkerDest),
+    dirname(vacuumWorkerDest),
     dirname(callLogWorkerDest),
     dirname(exportChildDest),
     dirname(compressionWorkerDest),

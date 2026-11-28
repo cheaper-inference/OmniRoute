@@ -23,14 +23,14 @@ import {
   type ReclaimStopReason,
 } from "./reclaimFreedPages";
 import {
-  collectCallLogArtifactsBefore,
   deleteAllFromTable,
-  deleteCallLogArtifacts,
-  deleteFromTableBefore,
   deleteFromTableBeforeInBatches,
+  deleteWhereInBatches,
   deleteWholeDaysBefore,
+  executeUsageReset,
   tableExists,
-  type DeleteByPeriodTarget,
+  type DeleteProgress,
+  type UsageResetTarget,
 } from "./cleanup/usagePurge";
 import { ensureCompressionRunTelemetryTable } from "./compressionRunTelemetry";
 import { WINDOW_MS } from "@/lib/quota/dimensions";
@@ -280,7 +280,6 @@ export async function cleanupCompressionEngineBreakdown(): Promise<CleanupResult
  * Clean up old mcp_tool_audit based on retention settings.
  */
 export async function cleanupMcpAudit(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const retention = getRetentionSettings();
 
   const retentionDays = retention.mcpAudit;
@@ -291,9 +290,11 @@ export async function cleanupMcpAudit(): Promise<CleanupResult> {
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
   try {
-    const stmt = db.prepare("DELETE FROM mcp_tool_audit WHERE created_at < ?");
-    const runResult = stmt.run(cutoffISO);
-    result.deleted = runResult.changes;
+    await deleteFromTableBeforeInBatches(
+      { table: "mcp_tool_audit", column: "created_at", cutoff: "iso" },
+      cutoffISO,
+      { progress: result }
+    );
 
     console.log(
       `[Cleanup] Deleted ${result.deleted} mcp_tool_audit older than ${retentionDays} days`
@@ -312,15 +313,15 @@ export async function cleanupMcpAudit(): Promise<CleanupResult> {
 export async function cleanupConfigAudit(
   retentionDays = getRetentionSettings().configAudit
 ): Promise<CleanupResult> {
-  const db = getDbInstance();
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
   try {
-    const stmt = db.prepare(
-      "DELETE FROM config_audit_log WHERE datetime(timestamp) < datetime('now', '-' || ? || ' days')"
+    await deleteWhereInBatches(
+      "config_audit_log",
+      "datetime(timestamp) < datetime('now', '-' || ? || ' days')",
+      [String(retentionDays)],
+      { progress: result }
     );
-    const runResult = stmt.run(String(retentionDays));
-    result.deleted = runResult.changes;
 
     console.log(
       `[Cleanup] Deleted ${result.deleted} config_audit_log older than ${retentionDays} days`
@@ -337,7 +338,6 @@ export async function cleanupConfigAudit(
  * Clean up old a2a_task_events based on retention settings.
  */
 export async function cleanupA2aEvents(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const retention = getRetentionSettings();
 
   const retentionDays = retention.a2aEvents;
@@ -348,9 +348,11 @@ export async function cleanupA2aEvents(): Promise<CleanupResult> {
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
   try {
-    const stmt = db.prepare("DELETE FROM a2a_task_events WHERE created_at < ?");
-    const runResult = stmt.run(cutoffISO);
-    result.deleted = runResult.changes;
+    await deleteFromTableBeforeInBatches(
+      { table: "a2a_task_events", column: "created_at", cutoff: "iso" },
+      cutoffISO,
+      { progress: result }
+    );
 
     console.log(
       `[Cleanup] Deleted ${result.deleted} a2a_task_events older than ${retentionDays} days`
@@ -378,12 +380,14 @@ export async function cleanupMemoryEntries(): Promise<CleanupResult> {
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
   try {
-    const stmt = db.prepare("DELETE FROM memories WHERE created_at < ?");
-    const runResult = stmt.run(cutoffISO);
-    result.deleted = runResult.changes;
+    await deleteFromTableBeforeInBatches(
+      { table: "memories", column: "created_at", cutoff: "iso" },
+      cutoffISO,
+      { progress: result }
+    );
 
-    // Compact FTS5 segments to reclaim space from tombstoned rows left
-    // by the DELETE trigger (memory_fts_ad). Without this, orphaned FTS
+    // Compact FTS5 segments once after all batches to reclaim space from tombstoned
+    // rows left by the DELETE trigger (memory_fts_ad). Without this, orphaned FTS
     // data/docsize rows grow without bound after retention deletes.
     if (result.deleted > 0) {
       try {
@@ -448,7 +452,6 @@ export async function cleanupDomainCostHistory(): Promise<CleanupResult> {
  * Uses `created_at` column (DATETIME string).
  */
 export async function cleanupCompressionCacheStats(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const retention = getRetentionSettings();
 
   const retentionDays = retention.compressionCacheStats;
@@ -459,9 +462,11 @@ export async function cleanupCompressionCacheStats(): Promise<CleanupResult> {
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
   try {
-    const stmt = db.prepare("DELETE FROM compression_cache_stats WHERE created_at < ?");
-    const runResult = stmt.run(cutoffISO);
-    result.deleted = runResult.changes;
+    await deleteFromTableBeforeInBatches(
+      { table: "compression_cache_stats", column: "created_at", cutoff: "iso" },
+      cutoffISO,
+      { progress: result }
+    );
 
     console.log(
       `[Cleanup] Deleted ${result.deleted} compression_cache_stats older than ${retentionDays} days`
@@ -478,7 +483,6 @@ export async function cleanupCompressionCacheStats(): Promise<CleanupResult> {
  * Clean up old xp_audit_log based on retention settings.
  */
 export async function cleanupXpAuditLog(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const retention = getRetentionSettings();
 
   const retentionDays = retention.xpAuditLog;
@@ -489,9 +493,11 @@ export async function cleanupXpAuditLog(): Promise<CleanupResult> {
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
   try {
-    const stmt = db.prepare("DELETE FROM xp_audit_log WHERE created_at < ?");
-    const runResult = stmt.run(cutoffISO);
-    result.deleted = runResult.changes;
+    await deleteFromTableBeforeInBatches(
+      { table: "xp_audit_log", column: "created_at", cutoff: "iso" },
+      cutoffISO,
+      { progress: result }
+    );
 
     console.log(
       `[Cleanup] Deleted ${result.deleted} xp_audit_log older than ${retentionDays} days`
@@ -511,7 +517,6 @@ export async function cleanupXpAuditLog(): Promise<CleanupResult> {
  * domain_cost_history (#9625), which this function was missed by.
  */
 export async function cleanupCompressionRunTelemetry(): Promise<CleanupResult> {
-  const db = getDbInstance();
   ensureCompressionRunTelemetryTable();
   const retention = getRetentionSettings();
 
@@ -523,9 +528,11 @@ export async function cleanupCompressionRunTelemetry(): Promise<CleanupResult> {
   try {
     if (!tableExists("compression_run_telemetry")) return result;
 
-    const stmt = db.prepare("DELETE FROM compression_run_telemetry WHERE timestamp < ?");
-    const runResult = stmt.run(cutoffEpoch);
-    result.deleted = runResult.changes;
+    await deleteFromTableBeforeInBatches(
+      { table: "compression_run_telemetry", column: "timestamp", cutoff: "epochMs" },
+      new Date(cutoffEpoch).toISOString(),
+      { progress: result }
+    );
 
     console.log(
       `[Cleanup] Deleted ${result.deleted} compression_run_telemetry older than ${retentionDays} days`
@@ -835,13 +842,10 @@ export async function runAutoCleanup(): Promise<{
  * Purge ALL quota_snapshots immediately (no retention check).
  */
 export async function purgeQuotaSnapshots(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
   try {
-    const stmt = db.prepare("DELETE FROM quota_snapshots");
-    const runResult = stmt.run();
-    result.deleted = runResult.changes;
+    await deleteAllFromTable("quota_snapshots", { progress: result });
 
     console.log(`[Cleanup] Purged ${result.deleted} quota_snapshots`);
   } catch (err: unknown) {
@@ -856,12 +860,10 @@ export async function purgeQuotaSnapshots(): Promise<CleanupResult> {
  * Purge ALL call_logs immediately (no retention check).
  */
 export async function purgeCallLogs(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const result: CleanupResult = { deleted: 0, deletedArtifacts: 0, errors: 0 };
 
   try {
-    const runResult = db.prepare("DELETE FROM call_logs").run();
-    result.deleted = runResult.changes;
+    await deleteAllFromTable("call_logs", { progress: result });
 
     console.log(`[Cleanup] Purged ${result.deleted} call_logs`);
   } catch (err: unknown) {
@@ -884,13 +886,10 @@ export async function purgeCallLogs(): Promise<CleanupResult> {
  * Purge ALL request_detail_logs immediately (no retention check).
  */
 export async function purgeDetailedLogs(): Promise<CleanupResult> {
-  const db = getDbInstance();
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
   try {
-    const stmt = db.prepare("DELETE FROM request_detail_logs");
-    const runResult = stmt.run();
-    result.deleted = runResult.changes;
+    await deleteAllFromTable("request_detail_logs", { progress: result });
 
     console.log(`[Cleanup] Purged ${result.deleted} request_detail_logs`);
   } catch (err: unknown) {
@@ -980,13 +979,7 @@ function isResetUsageHistoryPeriod(period: string): period is ResetUsageHistoryP
  *   value deletes only time-scoped usage/log rows older than `now - period`.
  *   Throws on an invalid period.
  */
-const RESET_TARGETS: Array<
-  DeleteByPeriodTarget & {
-    resultKey: keyof ResetUsageHistoryResult;
-    allOnly?: boolean;
-    keptWhileBooked?: boolean;
-  }
-> = [
+const RESET_TARGETS: Array<UsageResetTarget<ResetUsageHistoryResult>> = [
   { table: "usage_history", column: "timestamp", cutoff: "iso", resultKey: "deletedUsageHistory" },
   {
     table: "agent_session_messages",
@@ -1067,7 +1060,7 @@ const RESET_TARGETS: Array<
     column: "updated_at",
     cutoff: "epochMs",
     resultKey: "deletedQuotaPercentLedgerTokens",
-    keptWhileBooked: true,
+    deleteBefore: deleteUnbookedPercentCountersBefore,
   },
   {
     table: "conversation_turn_nodes",
@@ -1101,20 +1094,22 @@ const RESET_TARGETS: Array<
  * connection that still has a book. A kept book marks each key against its counter, so the
  * counter stays with it. The reset runs this after the books, so it sees what is left.
  */
-function deleteUnbookedPercentCountersBefore(cutoffIso: string): number {
+async function deleteUnbookedPercentCountersBefore(
+  cutoffIso: string,
+  options: { batchSize?: number; progress?: DeleteProgress } = {}
+): Promise<number> {
   // One migration creates both tables, so the counters never exist without the books.
-  if (!tableExists("quota_percent_ledger_tokens")) return 0;
-  return getDbInstance()
-    .prepare(
-      `DELETE FROM quota_percent_ledger_tokens
-       WHERE updated_at < ?
-         AND NOT EXISTS (
-           SELECT 1 FROM quota_percent_ledger book
-           WHERE book.pool_id = quota_percent_ledger_tokens.pool_id
-             AND book.connection_id = quota_percent_ledger_tokens.connection_id
-         )`
-    )
-    .run(new Date(cutoffIso).getTime()).changes;
+  return deleteWhereInBatches(
+    "quota_percent_ledger_tokens",
+    `updated_at < ?
+      AND NOT EXISTS (
+        SELECT 1 FROM quota_percent_ledger book
+        WHERE book.pool_id = quota_percent_ledger_tokens.pool_id
+          AND book.connection_id = quota_percent_ledger_tokens.connection_id
+      )`,
+    [new Date(cutoffIso).getTime()],
+    options
+  );
 }
 
 export async function resetUsageHistory(period: string): Promise<ResetUsageHistoryResult> {
@@ -1122,7 +1117,6 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
     throw new Error(`Invalid reset period: ${period}`);
   }
 
-  const db = getDbInstance();
   ensureCompressionRunTelemetryTable();
   const result: ResetUsageHistoryResult = {
     deleted: 0,
@@ -1151,48 +1145,17 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
     errors: 0,
   };
 
-  try {
-    let artifactsToDelete: string[] = [];
+  const cutoffIso =
+    period === "all"
+      ? null
+      : new Date(Date.now() - RESET_USAGE_HISTORY_PERIOD_MS[period]).toISOString();
+  await executeUsageReset(period, cutoffIso, RESET_TARGETS, result);
 
-    const runReset = db.transaction(() => {
-      if (period === "all") {
-        for (const target of RESET_TARGETS) {
-          (result[target.resultKey] as number) = deleteAllFromTable(target.table);
-        }
-        return;
-      }
-
-      const cutoffIso = new Date(Date.now() - RESET_USAGE_HISTORY_PERIOD_MS[period]).toISOString();
-      artifactsToDelete = collectCallLogArtifactsBefore(cutoffIso);
-      for (const target of RESET_TARGETS) {
-        if (target.allOnly) continue;
-        (result[target.resultKey] as number) = target.keptWhileBooked
-          ? deleteUnbookedPercentCountersBefore(cutoffIso)
-          : deleteFromTableBefore(target, cutoffIso);
-      }
-    });
-
-    runReset();
-
-    let artifactResult: { deletedArtifacts: number; errors: number };
-    if (period === "all") {
-      artifactResult = purgeCallLogArtifactDirectory();
-    } else {
-      artifactResult = deleteCallLogArtifacts(artifactsToDelete);
-    }
-    result.deletedCallLogArtifacts = artifactResult.deletedArtifacts;
-    result.deletedArtifacts = artifactResult.deletedArtifacts;
-    result.errors += artifactResult.errors;
-
-    result.deleted = RESET_TARGETS.reduce((sum, t) => sum + (result[t.resultKey] as number), 0);
-
+  if (result.errors === 0) {
     console.log(
       `[Cleanup] Reset usage/log data (period=${period}): ${result.deleted} row(s), ` +
         `${result.deletedCallLogArtifacts} call log artifact(s)`
     );
-  } catch (err: unknown) {
-    console.error("[Cleanup] Error resetting usage history:", err);
-    result.errors++;
   }
 
   return result;
@@ -1293,7 +1256,7 @@ export async function runScheduledCleanupPass(phase: "startup" | "periodic"): Pr
 
   // The prune pauses while a snapshot temp directory exists; drop the ones a killed upgrade left.
   removeStaleSnapshotTemps(DB_BACKUPS_DIR ?? path.join(DATA_DIR, "db_backups"));
-  pruneDbBackupsOutsideMigrationWindow();
+  await pruneDbBackupsOutsideMigrationWindow();
 
   // Always run: it also drains pages left over from a previous capped pass or
   // from deletes made outside this scheduler. Costs a few PRAGMA reads when idle.
