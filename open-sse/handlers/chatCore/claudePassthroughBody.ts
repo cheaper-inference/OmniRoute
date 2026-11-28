@@ -31,6 +31,7 @@ import { normalizeAdvisorToolModels } from "./claudeAdvisorTool.ts";
 import {
   extractSystemRoleMessages,
   hoistLeadingTextSystemMessages,
+  liftSystemRoleMessages,
   relocateDirectiveOnlyMessages,
 } from "./claudeSystemRole.ts";
 import type { ClaudeMessage } from "./claudeMessageTypes.ts";
@@ -93,6 +94,22 @@ function acceptsInjectedCacheBreakpoints(
   );
 }
 
+/** Apply documented API system-turn ordering without changing the existing OAuth policy. */
+function normalizeSemanticSystemRoles(
+  payload: Record<string, unknown>,
+  provider: string,
+  model: string
+): void {
+  if (provider === "anthropic") {
+    liftSystemRoleMessages(payload, { provider, sourceFormat: FORMATS.CLAUDE, model });
+  } else if (provider === "claude" && shouldUseMidConversationSystem(payload, model)) {
+    hoistLeadingTextSystemMessages(payload);
+    relocateDirectiveOnlyMessages(payload);
+  } else {
+    extractSystemRoleMessages(payload);
+  }
+}
+
 export function buildClaudePassthroughBody({
   body,
   provider,
@@ -147,22 +164,10 @@ export function buildClaudePassthroughBody({
 
   // Legacy models reject role:"system" messages. Supported models accept
   // them behind a beta, and hoisting them breaks the prompt cache prefix.
-  // Only the native `claude` dispatch sends that beta (selectBetaFlags); the
-  // `anthropic` API-key dispatch does not, so it always hoists.
+  // The native OAuth policy remains unchanged. The regular API has a separate
+  // documented, model-and-shape-scoped policy for plain text system turns.
   if (isClaudeCodeSemanticPassthrough) {
-    if (provider !== "claude" || !shouldUseMidConversationSystem(translatedBody, effectiveModel)) {
-      extractSystemRoleMessages(translatedBody);
-    } else {
-      // The mid-conversation-system path keeps system-role messages inside
-      // messages[], but a directive-only message (content: [] +
-      // output_config) at messages[0] is rejected by Anthropic. Move it past
-      // the first real turn; Anthropic accepts the form at any other position.
-      // A text-bearing system message at messages[0] (e.g. the Output Styles
-      // injection) is rejected there too: hoist the leading run into the
-      // top-level `system` parameter first.
-      hoistLeadingTextSystemMessages(translatedBody);
-      relocateDirectiveOnlyMessages(translatedBody);
-    }
+    normalizeSemanticSystemRoles(translatedBody, provider, effectiveModel);
     if (Array.isArray(translatedBody.messages)) {
       translatedBody.messages = splitMisplacedToolResults(
         translatedBody.messages as ClaudeMessage[]

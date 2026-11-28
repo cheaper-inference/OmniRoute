@@ -18,6 +18,7 @@ export type HoistedCacheBoundary = "moved" | "kept" | "dropped";
 // importers of this module keep working.
 import { relocateDirectiveOnlyMessages } from "../../services/claudeCodeConstraints.ts";
 import { resolveClaudeMidConversationSystemPolicy } from "../../services/claudeMidConversationSystem.ts";
+import { getSystemPromptConfig } from "../../services/systemPrompt.ts";
 import { FORMATS } from "../../translator/formats.ts";
 
 export { relocateDirectiveOnlyMessages };
@@ -229,11 +230,74 @@ export function hoistLeadingTextSystemMessages(payload: Record<string, unknown>)
 
 /** Routing context of a native Claude upstream call (the target format is always Claude). */
 export type SystemRoleRoute = {
+  model?: string | null;
   provider?: string | null;
   sourceFormat?: string | null;
   /** The connection's providerSpecificData (carries the keepMidConversationSystem opt-in). */
   providerSpecificData?: unknown;
 };
+
+const OFFICIAL_MID_SYSTEM_MODEL =
+  /^claude-(?:(?:fable|mythos)-5(?:-[12])?|opus-(?:4-8|5(?:-5)?)|(?:sonnet|haiku)-5-5)(?:-\d{8})?$/;
+
+function isPlainSystemText(content: unknown): boolean {
+  if (typeof content === "string") return content.trim().length > 0;
+  return (
+    Array.isArray(content) &&
+    content.length > 0 &&
+    content.every((block) => {
+      const value = block as Record<string, unknown> | null;
+      return (
+        value?.type === "text" &&
+        typeof value.text === "string" &&
+        value.text.trim().length > 0 &&
+        Object.keys(value).every((key) => key === "type" || key === "text")
+      );
+    })
+  );
+}
+
+/** Preserve only the plain-text placement documented for first-party Messages API calls.
+ * Keep the legacy path for global prompt overrides and unsupported message shapes. */
+function canPreserveOfficialMidSystem(payload: Record<string, unknown>, route?: SystemRoleRoute) {
+  if (route?.provider !== "anthropic" || route.sourceFormat !== FORMATS.CLAUDE) return false;
+  const model = route.model ?? (typeof payload.model === "string" ? payload.model : "");
+  if (!OFFICIAL_MID_SYSTEM_MODEL.test(model) || getSystemPromptConfig().enabled) return false;
+  if (!Array.isArray(payload.messages)) return false;
+  return hasSupportedOfficialSystemPlacement(payload.messages);
+}
+
+/** A content-bearing system turn must end the history or precede an assistant turn. */
+function hasAllowedSystemSuccessor(messages: unknown[], index: number): boolean {
+  if (index === messages.length - 1) return true;
+  const next = messages[index + 1] as { role?: unknown } | null | undefined;
+  return next?.role === "assistant";
+}
+
+function hasSupportedOfficialSystemPlacement(messages: unknown[]): boolean {
+  let previousRole = "";
+  let hasMidSystem = false;
+  for (const [index, raw] of messages.entries()) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return false;
+    const message = raw as Record<string, unknown>;
+    const role = message.role;
+    if (role !== "system") {
+      if (role !== "user" && role !== "assistant") return false;
+      previousRole = role;
+      continue;
+    }
+    if (
+      !isPlainSystemText(message.content) ||
+      Object.keys(message).some((key) => key !== "role" && key !== "content")
+    )
+      return false;
+    if (previousRole === "") continue;
+    if (previousRole !== "user" || !hasAllowedSystemSuccessor(messages, index)) return false;
+    hasMidSystem = true;
+    previousRole = role;
+  }
+  return hasMidSystem;
+}
 
 /**
  * Picks how system/developer turns leave messages[] before a native Claude upstream call.
@@ -259,7 +323,10 @@ export function liftSystemRoleMessages(
   const hasDeveloperTurn = messages.some(
     (m) => typeof m?.role === "string" && m.role.toLowerCase() === "developer"
   );
-  if (preserveMidConversationSystem && !hasDeveloperTurn) {
+  if (
+    !hasDeveloperTurn &&
+    (preserveMidConversationSystem || canPreserveOfficialMidSystem(payload, route))
+  ) {
     hoistLeadingTextSystemMessages(payload);
     relocateDirectiveOnlyMessages(payload);
     return;

@@ -1,0 +1,1 @@
+- Preserve supported plain-text mid-conversation system turns on first-party Anthropic Messages API routes, keeping the legacy hoist for unsupported models, shapes, and configured global prompts.
