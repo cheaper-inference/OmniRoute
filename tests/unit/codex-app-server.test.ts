@@ -1132,6 +1132,87 @@ test("testCodexAppServerConnection: env token + remote psd URL reports unconfigu
   }
 });
 
+test("testCodexAppServerConnection: readyz 200 without a websocket transport reports transport_unavailable (#21515)", async () => {
+  const { testCodexAppServerConnection } =
+    await import("../../src/app/api/providers/[id]/test/codexAppServerHealth.ts");
+  const { __setCodexWebSocketTransportForTesting } =
+    await import("../../open-sse/executors/codex.ts");
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response("ok", { status: 200 });
+  __setCodexWebSocketTransportForTesting(null);
+
+  try {
+    const result = await testCodexAppServerConnection({
+      provider: "codex-app-server",
+      providerSpecificData: {
+        codexAppServerUrl: "ws://127.0.0.1:1456",
+        codexAppServerToken: "deadbeef",
+      },
+    });
+    assert.ok(result);
+    assert.equal(result.valid, false);
+    assert.equal((result.diagnosis as { code?: string })?.code, "app_server_transport_unavailable");
+  } finally {
+    globalThis.fetch = originalFetch;
+    __setCodexWebSocketTransportForTesting(undefined);
+  }
+});
+
+test("testCodexAppServerConnection: an inconclusive auth probe stays valid when the transport exists (#21515)", async () => {
+  const { testCodexAppServerConnection } =
+    await import("../../src/app/api/providers/[id]/test/codexAppServerHealth.ts");
+  const { __setCodexWebSocketTransportForTesting } =
+    await import("../../open-sse/executors/codex.ts");
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response("ok", { status: 200 });
+  __setCodexWebSocketTransportForTesting(async () => {
+    throw new Error("connect ECONNREFUSED");
+  });
+
+  try {
+    const result = await testCodexAppServerConnection({
+      provider: "codex-app-server",
+      providerSpecificData: {
+        codexAppServerUrl: "ws://127.0.0.1:1456",
+        codexAppServerToken: "deadbeef",
+      },
+    });
+    assert.ok(result);
+    assert.equal(result.valid, true);
+  } finally {
+    globalThis.fetch = originalFetch;
+    __setCodexWebSocketTransportForTesting(undefined);
+  }
+});
+
+test("testCodexAppServerConnection: a logged-out app-server reports login_required through the health check (#21515)", async () => {
+  const { testCodexAppServerConnection } =
+    await import("../../src/app/api/providers/[id]/test/codexAppServerHealth.ts");
+  const { __setCodexWebSocketTransportForTesting } =
+    await import("../../open-sse/executors/codex.ts");
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response("ok", { status: 200 });
+  __setCodexWebSocketTransportForTesting(
+    fakeAuthTransport({ result: { requiresOpenaiAuth: true } })
+  );
+
+  try {
+    const result = await testCodexAppServerConnection({
+      provider: "codex-app-server",
+      providerSpecificData: {
+        codexAppServerUrl: "ws://127.0.0.1:1456",
+        codexAppServerToken: "deadbeef",
+      },
+    });
+    assert.ok(result);
+    assert.equal(result.valid, false);
+    assert.equal((result.diagnosis as { code?: string })?.code, "app_server_login_required");
+  } finally {
+    globalThis.fetch = originalFetch;
+    __setCodexWebSocketTransportForTesting(undefined);
+  }
+});
+
 // ── Suffix normalization & effort precedence (#14277) ───────────────────────
 
 test("CodexAppServerExecutor: turn/start receives baseModel and suffix-derived effort (#14277)", async () => {
