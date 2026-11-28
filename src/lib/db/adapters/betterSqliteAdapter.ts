@@ -1,4 +1,5 @@
-import type { SqliteAdapter, PreparedStatement, RunResult } from "./types";
+import type { OpenWitness, SqliteAdapter, PreparedStatement, RunResult } from "./types";
+import { interpretOpenFlag } from "./openFlagWitness";
 import { instrumentSqliteAdapter } from "./slowDiagnostics";
 
 // Same bound as the node:sqlite adapter (nodeSqliteShared.ts).
@@ -28,11 +29,24 @@ export function createBetterSqliteAdapter(db: import("better-sqlite3").Database)
     return stmt;
   }
 
+  // The handle's own flag answers here: the release reads this witness back
+  // after closing, so it cannot be a state copied at open time. Only an exact
+  // boolean is an answer about the handle -- the shared module keeps a
+  // non-boolean unreadable rather than reporting a close nobody observed.
+  function readOpenWitness(): OpenWitness {
+    try {
+      return interpretOpenFlag(db.open).state;
+    } catch {
+      return "unreadable";
+    }
+  }
+
   const adapter: SqliteAdapter = {
     driver: "better-sqlite3",
+    readOpenWitness,
 
     get open() {
-      return db.open;
+      return readOpenWitness() !== "closed";
     },
 
     get name() {

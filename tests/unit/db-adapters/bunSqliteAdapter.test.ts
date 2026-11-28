@@ -145,3 +145,27 @@ test("bun:sqlite adapter get() returns undefined, not null, when no row matches"
   adapter.prepare("INSERT INTO leases (connection_id, state) VALUES (?, ?)").run("c1", "ACTIVE");
   assert.equal((select.get("c1") as { state: string }).state, "ACTIVE");
 });
+
+// The adapter owns this flag, so the witness has to follow it; without this row
+// a mapping that inverts the two answers passes every other test.
+test("bun adapter reports the open witness from its own flag", () => {
+  const db = {
+    query: () => ({
+      run: () => ({ changes: 0, lastInsertRowid: 0 }),
+      get: () => undefined,
+      all: () => [],
+    }),
+    exec: () => {},
+    transaction: (fn: (...args: unknown[]) => unknown) => fn,
+    close: () => {},
+  } as unknown as BunSqliteDatabaseLike;
+  const adapter = createBunSqliteAdapter(db, ":memory:");
+
+  assert.equal(adapter.readOpenWitness(), "open");
+  assert.equal(adapter.open, true);
+
+  adapter.close();
+
+  assert.equal(adapter.readOpenWitness(), "closed");
+  assert.equal(adapter.open, false);
+});

@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import type { PreparedStatement, RunResult, SqliteAdapter } from "./types";
+import type { OpenWitness, PreparedStatement, RunResult, SqliteAdapter } from "./types";
 
 export interface NodeSqliteDatabaseLike {
   prepare(sql: string): {
@@ -10,8 +10,19 @@ export interface NodeSqliteDatabaseLike {
     // are optional here so the shared adapter also accepts lighter test doubles.
     setAllowUnknownNamedParameters?(enabled: boolean): void;
     setAllowBareNamedParameters?(enabled: boolean): void;
+    // node:sqlite statements carry no finalize member on the real driver
+    // (DatabaseSync exposes run/get/all/iterate), so eviction and close lean on
+    // the handle's own close. Optional here so a double that models an explicit
+    // finalization can assert the adapter calls it when it is present.
+    finalize?(): void;
   };
   exec(sql: string): void;
+  // `DatabaseSync.isTransaction` is a boolean on Node 24.18.0. Optional here so
+  // test doubles without it keep compiling; the adapter reports `undefined`
+  // in that case, which callers treat as "state unknown".
+  readonly isTransaction?: boolean;
+  // Native DatabaseSync exposes this witness; lightweight doubles may omit it.
+  readonly isOpen?: boolean;
   close(): void;
 }
 
@@ -66,10 +77,17 @@ function normalizeBindParams(params: unknown[]): unknown[] {
   return params.map(normalizeBindValue);
 }
 
+export interface NodeSqliteAdapterCloseHooks {
+  /** Runs before every driver close attempt while the handle is still open. */
+  onBeforeClose?: (options?: { checkpoint?: boolean }) => void;
+  /** Runs once after the driver confirms close and the adapter marks itself closed. */
+  onClosed?: () => void;
+}
+
 export function createNodeSqliteAdapterFromDatabase(
   db: NodeSqliteDatabaseLike,
   filePath: string,
-  onClose?: () => void
+  closeHooks: NodeSqliteAdapterCloseHooks = {}
 ): SqliteAdapter {
   let _isOpen = true;
   let transactionDepth = 0;
@@ -80,11 +98,15 @@ export function createNodeSqliteAdapterFromDatabase(
   const stmtCache = new Map<string, CachedStatement>();
 
   function finalizeStatement(stmt: NodeSqliteStatement | undefined) {
-    if (stmt && "finalize" in stmt) {
-      try {
+    if (!stmt) return;
+    // The membership check reads the driver object too, so it sits inside the
+    // guard: a statement whose `has` trap throws must not abort the sweep that
+    // follows, or the cache stays populated and onClosed never runs.
+    try {
+      if ("finalize" in stmt) {
         (stmt as NodeSqliteStatement & { finalize: () => void }).finalize();
-      } catch {}
-    }
+      }
+    } catch {}
   }
 
   function getCached(sql: string) {
@@ -152,26 +174,98 @@ export function createNodeSqliteAdapterFromDatabase(
     }
   }
 
-  function close() {
+  function close(options?: { checkpoint?: boolean }) {
+    // A repeated close is a normal path now: releaseExclusiveLock() calls it
+    // again after a refusal, and a second release on a closed handle is
+    // allowed.
+    if (!_isOpen) return;
+    // The caller supplies any checkpoint in onBeforeClose. Keeping the shared
+    // adapter free of checkpoint policy lets callers select a non-blocking
+    // mode appropriate to their release path.
     try {
-      onClose?.();
+      closeHooks.onBeforeClose?.(options);
     } catch {}
-    try {
-      for (const entry of stmtCache.values()) {
-        finalizeStatement(entry.stmt);
-      }
-      stmtCache.clear();
-    } catch {}
+    let closeReturned = false;
     try {
       db.close();
+      closeReturned = true;
     } catch {}
+    // Native state wins even if close throws or returns without closing. A
+    // lightweight double without this property keeps the legacy return check.
+    try {
+      if ("isOpen" in db) {
+        if (db.isOpen !== false) return;
+      } else if (!closeReturned) {
+        return;
+      }
+    } catch {
+      return;
+    }
+    // Only flip the flag once the driver actually closed. A caller reading
+    // `open` as the witness for "the lock is released" gets the truth.
     _isOpen = false;
+    // finalizeStatement guards its own driver call, so one refusing statement
+    // cannot strand the rest; the cache is cleared regardless.
+    for (const entry of stmtCache.values()) {
+      finalizeStatement(entry.stmt);
+    }
+    stmtCache.clear();
+    try {
+      closeHooks.onClosed?.();
+    } catch {}
+  }
+
+  /**
+   * The driver's own state, with "could not answer" as a third value.
+   *
+   * A driver that exposes the property but answers with something other than a
+   * boolean, or throws while reading it, leaves the handle's state unknown. The
+   * boolean `open` cannot say that without throwing, so it reports "not shown
+   * closed" and callers acting on a release read this instead.
+   */
+  function readOpenWitness(): OpenWitness {
+    if (!_isOpen) return "closed";
+    try {
+      // Presence detection reads the driver object too: a proxy's `has` trap
+      // can throw where a plain property read would not, and close() already
+      // guards the same operator for the same reason.
+      if (!("isOpen" in db)) return "open";
+      const state: unknown = db.isOpen;
+      if (state === true) return "open";
+      if (state === false) return "closed";
+      return "unreadable";
+    } catch {
+      return "unreadable";
+    }
   }
 
   return {
     driver: "node:sqlite",
+    readOpenWitness,
     get open() {
-      return _isOpen;
+      // The interface promises a boolean and no exception; a handle the driver
+      // will not describe is not evidence of closure, so it reads as open.
+      return readOpenWitness() !== "closed";
+    },
+    get inTransaction() {
+      // `DatabaseSync.isTransaction` throws ERR_INVALID_STATE once the database
+      // is closed, so closure has to be checked first. After close the honest
+      // answer is false: a closed handle holds no transaction. The driver's own
+      // flag counts too -- a caller can close the handle it owns, and the
+      // adapter's flag stays true through that.
+      try {
+        if (readOpenWitness() === "closed") return false;
+        const state = db.isTransaction;
+        // A driver that does not expose the flag, or exposes it as something
+        // other than a boolean, is reported as unknown rather than false.
+        // Returning false here would tell releaseExclusiveLock() it is safe to
+        // close, and closing on a guess is the silent rollback it exists to
+        // prevent.
+        return typeof state === "boolean" ? state : undefined;
+      } catch {
+        // A read that throws leaves the state unknown for the same reason.
+        return undefined;
+      }
     },
     get name() {
       return filePath;

@@ -1,6 +1,7 @@
 import type { SqliteAdapter } from "./types";
 import {
   createNodeSqliteAdapterFromDatabase,
+  type NodeSqliteAdapterCloseHooks,
   type NodeSqliteDatabaseLike,
 } from "./nodeSqliteShared";
 
@@ -35,7 +36,7 @@ export async function createNodeSqliteAdapter(filePath: string): Promise<SqliteA
   }, CHECKPOINT_INTERVAL_MS);
   (checkpointTimer as unknown as NodeJS.Timeout).unref?.();
 
-  // Declared before gracefulClose so the close path can detach them. Without
+  // Declared before closeHooks so successful close can detach them. Without
   // this, every closed adapter leaves three closures pinned on `process` --
   // each holding this adapter and its DatabaseSync handle alive -- and short-
   // lived adapters (POST /api/db-backups/import opens one per request) trip
@@ -48,17 +49,24 @@ export async function createNodeSqliteAdapter(filePath: string): Promise<SqliteA
     process.exit(0);
   };
 
-  function gracefulClose() {
-    clearInterval(checkpointTimer as unknown as NodeJS.Timeout);
-    try {
-      db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
-    } catch {}
-    process.removeListener("beforeExit", onBeforeExit);
-    process.removeListener("SIGINT", onSignal);
-    process.removeListener("SIGTERM", onSignal);
-  }
+  const closeHooks: NodeSqliteAdapterCloseHooks = {
+    onBeforeClose: (options) => {
+      // The release path closes to drop an EXCLUSIVE lock and must not run a
+      // checkpoint first; an ordinary close keeps trimming the WAL.
+      if (options?.checkpoint === false) return;
+      try {
+        db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
+      } catch {}
+    },
+    onClosed: () => {
+      clearInterval(checkpointTimer as unknown as NodeJS.Timeout);
+      process.removeListener("beforeExit", onBeforeExit);
+      process.removeListener("SIGINT", onSignal);
+      process.removeListener("SIGTERM", onSignal);
+    },
+  };
 
-  const adapter = createNodeSqliteAdapterFromDatabase(db, filePath, gracefulClose);
+  const adapter = createNodeSqliteAdapterFromDatabase(db, filePath, closeHooks);
 
   process.once("beforeExit", onBeforeExit);
   process.once("SIGINT", onSignal);

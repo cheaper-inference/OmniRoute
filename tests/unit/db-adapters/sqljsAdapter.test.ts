@@ -107,8 +107,7 @@ describe("sqljsAdapter", () => {
         .prepare("INSERT INTO provider_connections (provider, is_active) VALUES (?, ?)")
         .run("openai", 0);
 
-      const sql =
-        "SELECT * FROM provider_connections WHERE is_active = @isActive ORDER BY id ASC";
+      const sql = "SELECT * FROM provider_connections WHERE is_active = @isActive ORDER BY id ASC";
       const rows = adapter.prepare(sql).all({ isActive: 1 }) as Array<{ provider: string }>;
 
       assert.equal(rows.length, 1, "expected exactly 1 active provider connection");
@@ -131,14 +130,12 @@ describe("sqljsAdapter", () => {
     test("run() with a single named-params object binds correctly", async () => {
       const adapter = await createSqlJsAdapter(":memory:");
       adapter.exec("CREATE TABLE t (id INTEGER PRIMARY KEY, val TEXT)");
-      const result = adapter
-        .prepare("INSERT INTO t (val) VALUES (@val)")
-        .run({ val: "named-run" });
+      const result = adapter.prepare("INSERT INTO t (val) VALUES (@val)").run({ val: "named-run" });
       assert.equal(result.changes, 1);
 
-      const row = adapter
-        .prepare("SELECT val FROM t WHERE id = ?")
-        .get(result.lastInsertRowid) as { val: string };
+      const row = adapter.prepare("SELECT val FROM t WHERE id = ?").get(result.lastInsertRowid) as {
+        val: string;
+      };
       assert.equal(row.val, "named-run");
       adapter.close();
     });
@@ -173,6 +170,17 @@ describe("sqljsAdapter", () => {
       assert.equal(row.a, "x");
       assert.equal(row.b, "y");
       adapter.close();
+    });
+
+    test("readOpenWitness follows the adapter's own closed flag", async () => {
+      const adapter = await createSqlJsAdapter(":memory:");
+      assert.equal(adapter.readOpenWitness(), "open");
+      assert.equal(adapter.open, true);
+
+      adapter.close();
+
+      assert.equal(adapter.readOpenWitness(), "closed");
+      assert.equal(adapter.open, false);
     });
   });
 });

@@ -16,9 +16,30 @@ export interface PreparedStatement<Row = unknown> {
   all(...params: unknown[]): Row[];
 }
 
+/**
+ * What the driver said about the handle, including that it could not say.
+ *
+ * `open` is a boolean by contract and never throws, so it cannot carry "the
+ * read failed". That answer lives here, and a caller about to act on "closed"
+ * -- releasing a lock, for instance -- reads this rather than the boolean.
+ */
+export type OpenWitness = "open" | "closed" | "unreadable";
+
 export interface SqliteAdapter {
   readonly driver: "better-sqlite3" | "node:sqlite" | "bun:sqlite" | "sql.js";
+  /**
+   * Whether the handle is open. Never throws: a driver that will not answer
+   * reads as open, because an unreadable state is not evidence of closure.
+   */
   readonly open: boolean;
+  /**
+   * Tri-state read of the same state, for callers that must not treat an
+   * unreadable driver as either an open or a closed handle.
+   *
+   * Optional: adapters that only track their own close flag answer through
+   * `open`, and callers fall back to it when this is absent.
+   */
+  readOpenWitness?(): OpenWitness;
   readonly name: string;
   /** Driver transaction state when exposed by the underlying SQLite implementation. */
   readonly inTransaction?: boolean;
@@ -37,7 +58,11 @@ export interface SqliteAdapter {
   backup(destination: string): Promise<void>;
 
   checkpoint(mode?: string): void;
-  close(): void;
+  /** Fecha o handle. Só o adaptador construído por `createNodeSqliteAdapter`
+   *  faz checkpoint antes de fechar; nele, `checkpoint: false` pula esse
+   *  TRUNCATE, que é o que o caminho de liberação do lock exclusivo pede. Os
+   *  demais, inclusive um `node:sqlite` sem hooks, ignoram a opção. */
+  close(options?: { checkpoint?: boolean }): void;
 
   readonly raw: unknown;
 }
