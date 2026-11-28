@@ -398,6 +398,14 @@ export function validateProviderSpecificData(
     });
   }
 
+  if (data.noLog !== undefined && typeof data.noLog !== "boolean") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.noLog must be a boolean",
+      path: ["noLog"],
+    });
+  }
+
   const blockExtraUsage = data.blockExtraUsage;
   if (data.allowPaidCredits !== undefined && typeof data.allowPaidCredits !== "boolean") {
     ctx.addIssue({

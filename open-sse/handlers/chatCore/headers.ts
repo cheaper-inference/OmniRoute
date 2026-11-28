@@ -55,15 +55,104 @@ export function isNoLogRequested(
 }
 
 /**
- * Resolve the effective no-log decision for one request: the API key's persisted
- * `no_log` flag OR the per-request `x-omniroute-no-log` header. Pure so the
- * precedence stays testable without invoking the chat handler.
+ * Global no-log: the `noLogPayloads` settings key (default true = log payloads).
+ * `false` = withhold request/response message content GLOBALLY. `true` or
+ * absent = log payloads (today's behaviour). Pure; takes the settings record.
+ */
+export function isGlobalNoLogEnabled(settings: unknown): boolean {
+  if (!settings || typeof settings !== "object") return false;
+  const record = settings as Record<string, unknown>;
+  // Either alias false opts out globally. Default true (logging ON).
+  return record.noLogPayloads === false || record.loggingEnabled === false;
+}
+
+/**
+ * Resolve the effective no-log decision for one request.
+ *
+ * Precedence (any true wins — monotonic, never un-logged by a lower tier),
+ * listed most specific first:
+ *   1. per-request `x-omniroute-no-log` header (true = withhold)
+ *   2. per-API-key `no_log` flag (true = withhold)
+ *   3. per-model flag `getModelNoLog(...)` (true = withhold;
+ *      undefined = unset, falls through)
+ *   4. per-connection `providerSpecificData.noLog` (true = withhold;
+ *      false = allow logging unless another tier disables it)
+ *   5. global `noLogPayloads` / `loggingEnabled` settings (default true = log
+ *      payloads; false on either alias = withhold globally)
+ *
+ * The first two originals are kept as a positional overload so existing
+ * callers/tests are untouched; the new tiered call passes an options object.
+ * Pure so the OR matrix stays unit-testable without the chat handler.
  */
 export function resolveNoLogEnabled(
   apiKeyInfo: { noLog?: unknown } | null | undefined,
   headers: Record<string, unknown> | Headers | null | undefined
+): boolean;
+export function resolveNoLogEnabled(options: {
+  apiKeyInfo?: { noLog?: unknown } | null;
+  headers?: Record<string, unknown> | Headers | null;
+  /** Resolved global no-log (true = withhold). */
+  globalNoLog?: boolean;
+  /** Resolved per-connection no-log (true = withhold). */
+  connectionNoLog?: boolean;
+  /** Resolved per-model no-log (true = withhold; undefined = unset). */
+  modelNoLog?: boolean | undefined;
+}): boolean;
+export function resolveNoLogEnabled(
+  apiKeyOrOptions:
+    | { noLog?: unknown }
+    | {
+        apiKeyInfo?: { noLog?: unknown } | null;
+        headers?: Record<string, unknown> | Headers | null;
+        globalNoLog?: boolean;
+        connectionNoLog?: boolean;
+        modelNoLog?: boolean | undefined;
+      }
+    | null
+    | undefined,
+  headers?: Record<string, unknown> | Headers | null | undefined
 ): boolean {
-  return apiKeyInfo?.noLog === true || isNoLogRequested(headers);
+  const tiered = readTieredNoLogOptions(apiKeyOrOptions);
+  if (tiered) return resolveTieredNoLog(tiered, headers);
+  return (
+    (apiKeyOrOptions as { noLog?: unknown } | null | undefined)?.noLog === true ||
+    isNoLogRequested(headers)
+  );
+}
+
+type TieredNoLogSource = {
+  apiKeyInfo?: { noLog?: unknown } | null;
+  headers?: Record<string, unknown> | Headers | null;
+  globalNoLog?: boolean;
+  connectionNoLog?: boolean;
+  modelNoLog?: boolean | undefined;
+};
+
+function readTieredNoLogOptions(
+  apiKeyOrOptions: { noLog?: unknown } | TieredNoLogSource | null | undefined
+): TieredNoLogSource | null {
+  if (!apiKeyOrOptions || typeof apiKeyOrOptions !== "object") return null;
+  const record = apiKeyOrOptions as Record<string, unknown>;
+  const isTiered = ["apiKeyInfo", "headers", "globalNoLog", "connectionNoLog", "modelNoLog"].some(
+    (key) => key in record
+  );
+  return isTiered ? (apiKeyOrOptions as TieredNoLogSource) : null;
+}
+
+function resolveTieredNoLog(
+  opts: TieredNoLogSource,
+  _headers: Record<string, unknown> | Headers | null | undefined
+): boolean {
+  // Listed most specific first, matching the doc comment above. The OR is
+  // monotonic, so the order affects neither the result nor the cost: every
+  // tier is already resolved by the caller before this runs.
+  return (
+    isNoLogRequested(opts.headers ?? null) ||
+    opts.apiKeyInfo?.noLog === true ||
+    opts.modelNoLog === true ||
+    opts.connectionNoLog === true ||
+    opts.globalNoLog === true
+  );
 }
 
 /**

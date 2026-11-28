@@ -350,6 +350,7 @@ export async function PUT(request) {
       preserveOpenAIDeveloperRole,
       upstreamHeaders,
       compatByProtocol,
+      noLog,
       contextWindowOverride,
       maxOutputTokenOverride,
       supportsVision,
@@ -373,6 +374,7 @@ export async function PUT(request) {
     if ("preserveOpenAIDeveloperRole" in raw)
       updates.preserveOpenAIDeveloperRole = preserveOpenAIDeveloperRole;
     if ("upstreamHeaders" in raw) updates.upstreamHeaders = upstreamHeaders;
+    if ("noLog" in raw) updates.noLog = noLog;
     if ("supportsVision" in raw) updates.supportsVision = supportsVision;
     if ("isFree" in raw) updates.isFree = isFree;
     // #9820: video-generation job preset — schema is non-nullable optional, so
@@ -408,9 +410,9 @@ export async function PUT(request) {
     // that would turn a native/synced catalog model into a "custom" one
     // (/v1/models overlay, apiFormat flip, availability under a live catalog).
     const contextOnly =
-      ("contextWindowOverride" in raw || "thinkingReplay" in raw) &&
+      ("contextWindowOverride" in raw || "thinkingReplay" in raw || "noLog" in raw) &&
       Object.keys(raw).every((k) =>
-        ["provider", "modelId", "contextWindowOverride", "thinkingReplay"].includes(k)
+        ["provider", "modelId", "contextWindowOverride", "thinkingReplay", "noLog"].includes(k)
       );
 
     const model = await updateCustomModel(provider, storedModelId, updates, {
@@ -435,6 +437,7 @@ export async function PUT(request) {
             "preserveOpenAIDeveloperRole",
             "upstreamHeaders",
             "compatByProtocol",
+            "noLog",
             "contextWindowOverride",
             "maxOutputTokenOverride",
             "apiFormat",
@@ -447,6 +450,7 @@ export async function PUT(request) {
           "preserveOpenAIDeveloperRole" in raw ||
           "upstreamHeaders" in raw ||
           "compatByProtocol" in raw ||
+          "noLog" in raw ||
           "contextWindowOverride" in raw ||
           "maxOutputTokenOverride" in raw ||
           "apiFormat" in raw ||
@@ -498,6 +502,9 @@ export async function PUT(request) {
             supportsVision === null || typeof supportsVision === "boolean"
               ? supportsVision
               : undefined;
+        }
+        if ("noLog" in raw) {
+          patch.noLog = noLog === null || typeof noLog === "boolean" ? noLog : undefined;
         }
         if ("thinkingReplay" in raw && thinkingReplay !== undefined) {
           patch.thinkingReplay = thinkingReplay;

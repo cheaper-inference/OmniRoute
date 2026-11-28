@@ -126,13 +126,13 @@ describe("PassthroughModelRow — inline alias edit", () => {
     const el = mountPassthrough({ alias: "my-alias" });
     const span = el.querySelector("span.cursor-pointer");
     expect(span).toBeTruthy();
-    expect(el.querySelector("input")).toBeNull();
+    expect(el.querySelector("input:not([role=switch])")).toBeNull();
 
     act(() => {
       span!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    expect(el.querySelector("input")).toBeTruthy();
+    expect(el.querySelector("input:not([role=switch])")).toBeTruthy();
   });
 
   it("Enter key calls onSetAlias with the new value", () => {
@@ -144,7 +144,7 @@ describe("PassthroughModelRow — inline alias edit", () => {
       span!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    const input = el.querySelector("input") as HTMLInputElement;
+    const input = el.querySelector("input:not([role=switch])") as HTMLInputElement;
     expect(input).toBeTruthy();
 
     const setter = Object.getOwnPropertyDescriptor(
@@ -169,7 +169,7 @@ describe("PassthroughModelRow — inline alias edit", () => {
       span!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    const input = el.querySelector("input") as HTMLInputElement;
+    const input = el.querySelector("input:not([role=switch])") as HTMLInputElement;
     const setter = Object.getOwnPropertyDescriptor(
       window.HTMLInputElement.prototype,
       "value"
@@ -181,7 +181,7 @@ describe("PassthroughModelRow — inline alias edit", () => {
     });
 
     expect(onSetAlias).not.toHaveBeenCalled();
-    expect(el.querySelector("input")).toBeNull();
+    expect(el.querySelector("input:not([role=switch])")).toBeNull();
   });
 
   it("shows placeholder text when no alias is set", () => {

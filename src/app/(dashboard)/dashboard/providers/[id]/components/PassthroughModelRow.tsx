@@ -17,6 +17,7 @@ import { Input as KitInput } from "@omniroute/ui-kit/input";
 import { Badge, Button } from "@/shared/components";
 import { providerText } from "../providerPageHelpers";
 import ModelCompatPopover from "./ModelCompatPopover";
+import ModelLoggingToggle from "./ModelLoggingToggle";
 import ModelVisionOverrideEditor from "./ModelVisionOverrideEditor";
 import ModelEndpointTagsEditor, { type ModelEndpointEditorInfo } from "./ModelEndpointTagsEditor";
 import ModelComboBadge from "./ModelComboBadge";
@@ -44,6 +45,8 @@ export interface PassthroughModelRowProps {
   source?: string;
   isFree?: boolean;
   isHidden?: boolean;
+  /** Per-model no-log flag as persisted (undefined = unset = logging ON). */
+  noLog?: boolean;
   /** Combo names that reference this model, for the "used in combo" badge. */
   combos?: string[];
   copied?: string;
@@ -91,6 +94,7 @@ export default function PassthroughModelRow({
   source,
   isFree,
   isHidden,
+  noLog,
   combos,
   copied,
   onCopy,
@@ -367,6 +371,16 @@ export default function PassthroughModelRow({
               }
             />
           )}
+          <ModelLoggingToggle
+            modelNoLog={noLog}
+            disabled={compatDisabled}
+            t={t}
+            onToggleLogging={(nextLoggingEnabled) =>
+              saveModelCompatFlags(modelId, {
+                noLog: nextLoggingEnabled ? null : true,
+              })
+            }
+          />
           <ModelCompatPopover
             t={t}
             providerId={provider}

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import DebugModeCard from "../components/DebugModeCard";
 import LogToolSourcesCard from "../components/LogToolSourcesCard";
+import LoggingSettingsCard from "../components/LoggingSettingsCard";
 import PayloadRulesTab from "../components/PayloadRulesTab";
 import RequestLimitsTab from "../components/RequestLimitsTab";
 import CliproxyapiSettingsTab from "../components/CliproxyapiSettingsTab";
@@ -20,6 +21,7 @@ export default function SettingsAdvancedPage() {
       />
       <DebugModeCard />
       <LogToolSourcesCard />
+      <LoggingSettingsCard />
       <PayloadRulesTab />
       <RequestLimitsTab />
       <CliproxyapiSettingsTab />

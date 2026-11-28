@@ -92,7 +92,7 @@ describe("catalog ModelRow context-window override", () => {
   it("shows no affordance and no badge without a callback", () => {
     const el = mount({ contextWindowOverride: 5000 });
     expect(overrideButton(el)).toBeUndefined();
-    expect(el.querySelector("input")).toBeNull();
+    expect(el.querySelector("input:not([role=switch])")).toBeNull();
     // Without a callback the row is exactly as before: not even a badge.
     expect(overrideBadge(el)).toBeNull();
   });
@@ -120,7 +120,7 @@ describe("catalog ModelRow context-window override", () => {
     await pressKey(input, "Enter");
     expect(saved).toEqual([["gpt-5", 1000000]]);
     // Saved successfully -> editor closes.
-    expect(el.querySelector("input")).toBeNull();
+    expect(el.querySelector("input:not([role=switch])")).toBeNull();
   });
 
   it("saves null when the field is blank (clears the override)", async () => {
@@ -167,7 +167,7 @@ describe("catalog ModelRow context-window override", () => {
     await act(async () => setInputValue(input, "99"));
     await pressKey(input, "Escape");
     expect(saved).toEqual([]);
-    expect(el.querySelector("input")).toBeNull();
+    expect(el.querySelector("input:not([role=switch])")).toBeNull();
     expect(el.textContent).toContain("8,000");
   });
 });
