@@ -62,6 +62,7 @@ export const USAGE_FETCHER_PROVIDERS = [
   "xai-oauth",
   "xao",
   "grok-cli",
+  "grok-bot",
   "vertex",
   "vertex-partner",
   "codebuddy-cn",

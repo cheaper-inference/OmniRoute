@@ -299,6 +299,8 @@ const EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS = new Set([
   "huggingchat",
   "gitlawb",
   "gitlawb-gmi",
+  // Grok Bot uses OAuth credentials rather than a generic API key.
+  "grok-bot",
 ]);
 
 export function providerAllowsOptionalApiKey(providerId: unknown): boolean {

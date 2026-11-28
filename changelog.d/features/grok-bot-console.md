@@ -1,0 +1,1 @@
+- **feat(dashboard):** add the Grok Bot console for account login, transcript watch, cards, and sending — thanks @HouMinXi

@@ -253,6 +253,15 @@ const TOOLS_GROUP: SidebarItemGroup = {
       icon: "cloud",
     },
     {
+      id: "grok-bot",
+      href: "/dashboard/grok-bot",
+      i18nKey: "grokBot",
+      subtitleKey: "grokBotSubtitle",
+      icon: "forum",
+      labelFallback: "Grok Bot",
+      subtitleFallback: "Read-only view of signed-in bots",
+    },
+    {
       id: "conductor",
       href: "/dashboard/conductor",
       i18nKey: "conductor",

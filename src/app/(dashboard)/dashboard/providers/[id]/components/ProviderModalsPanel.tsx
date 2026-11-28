@@ -9,6 +9,7 @@ import {
   OAuthModal,
   KiroOAuthWrapper,
   CursorAuthModal,
+  GrokBotAuthModal,
   TraeAuthModal,
   ProxyConfigModal,
 } from "@/shared/components";
@@ -158,6 +159,88 @@ interface ProviderModalsPanelProps {
   t: ProviderMessageTranslator;
 }
 
+interface ProviderOAuthModalProps {
+  providerId: string;
+  providerInfo: ProviderInfo;
+  oauthProviderId: ReturnType<typeof resolveProviderOAuthBackendId>;
+  isOpen: boolean;
+  reauthConnection: ConnectionRowConnection | null;
+  onSuccess: () => void;
+  onClose: () => void;
+}
+
+/** The OAuth modal of the provider: a dedicated flow where one exists, the generic one otherwise. */
+function ProviderOAuthModal({
+  providerId,
+  providerInfo,
+  oauthProviderId,
+  isOpen,
+  reauthConnection,
+  onSuccess,
+  onClose,
+}: ProviderOAuthModalProps) {
+  switch (providerId) {
+    case "kiro":
+    case "amazon-q":
+      return (
+        <KiroOAuthWrapper
+          isOpen={isOpen}
+          reauthConnection={reauthConnection}
+          providerInfo={{ ...providerInfo, id: providerId }}
+          onSuccess={onSuccess}
+          onClose={onClose}
+        />
+      );
+    case "chatgpt":
+      return (
+        <ChatGptOAuthModal
+          isOpen={isOpen}
+          reauthConnection={reauthConnection}
+          onSuccess={onSuccess}
+          onClose={onClose}
+        />
+      );
+    case "cursor":
+      return (
+        <CursorAuthModal
+          isOpen={isOpen}
+          reauthConnection={reauthConnection}
+          onSuccess={onSuccess}
+          onClose={onClose}
+        />
+      );
+    case "grok-bot":
+      return (
+        <GrokBotAuthModal
+          isOpen={isOpen}
+          reauthConnection={reauthConnection}
+          onSuccess={onSuccess}
+          onClose={onClose}
+        />
+      );
+    case "trae":
+      return (
+        <TraeAuthModal
+          isOpen={isOpen}
+          reauthConnection={reauthConnection}
+          onSuccess={onSuccess}
+          onClose={onClose}
+        />
+      );
+    default:
+      return (
+        <OAuthModal
+          isOpen={isOpen}
+          reauthConnection={reauthConnection}
+          provider={oauthProviderId}
+          providerInfo={providerInfo}
+          onSuccess={onSuccess}
+          onClose={onClose}
+        />
+      );
+  }
+}
+
 export default function ProviderModalsPanel({
   providerId,
   providerInfo,
@@ -269,46 +352,17 @@ export default function ProviderModalsPanel({
           t={t}
         />
       )}
-      {!isUpstreamProxyProvider &&
-        (providerId === "kiro" || providerId === "amazon-q" ? (
-          <KiroOAuthWrapper
-            isOpen={showOAuthModal}
-            reauthConnection={reauthConnection}
-            providerInfo={{ ...providerInfo, id: providerId }}
-            onSuccess={handleOAuthSuccess}
-            onClose={() => setShowOAuthModal(false)}
-          />
-        ) : providerId === "chatgpt" ? (
-          <ChatGptOAuthModal
-            isOpen={showOAuthModal}
-            reauthConnection={reauthConnection}
-            onSuccess={handleOAuthSuccess}
-            onClose={() => setShowOAuthModal(false)}
-          />
-        ) : providerId === "cursor" ? (
-          <CursorAuthModal
-            isOpen={showOAuthModal}
-            reauthConnection={reauthConnection}
-            onSuccess={handleOAuthSuccess}
-            onClose={() => setShowOAuthModal(false)}
-          />
-        ) : providerId === "trae" ? (
-          <TraeAuthModal
-            isOpen={showOAuthModal}
-            reauthConnection={reauthConnection}
-            onSuccess={handleOAuthSuccess}
-            onClose={() => setShowOAuthModal(false)}
-          />
-        ) : (
-          <OAuthModal
-            isOpen={showOAuthModal}
-            reauthConnection={reauthConnection}
-            provider={oauthProviderId}
-            providerInfo={providerInfo}
-            onSuccess={handleOAuthSuccess}
-            onClose={() => setShowOAuthModal(false)}
-          />
-        ))}
+      {!isUpstreamProxyProvider && (
+        <ProviderOAuthModal
+          providerId={providerId}
+          providerInfo={providerInfo}
+          oauthProviderId={oauthProviderId}
+          isOpen={showOAuthModal}
+          reauthConnection={reauthConnection}
+          onSuccess={handleOAuthSuccess}
+          onClose={() => setShowOAuthModal(false)}
+        />
+      )}
       {providerId === "siliconflow" && (
         <SiliconFlowEndpointModal
           isOpen={showSiliconFlowEndpointModal}

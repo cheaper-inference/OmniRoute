@@ -68,6 +68,7 @@ test("primary sidebar items place limits after cache", () => {
       "cli-agents",
       "acp-agents",
       "cloud-agents",
+      "grok-bot",
       "conductor",
       "orchestration", // +1: orchestration (PR-2 of the orchestration canvas)
       "agent-bridge",
@@ -122,9 +123,10 @@ test("sidebar visibility drops stale entries from saved settings", () => {
     false
   );
   assert.equal((allSidebarItemIds as string[]).includes("settings"), false);
-  assert.deepEqual(sidebarVisibility.normalizeHiddenSidebarItems(["auto-combo" as any, "logs"]), [
-    "logs",
-  ]);
+  assert.deepEqual(
+    sidebarVisibility.normalizeHiddenSidebarItems(["auto-combo" as unknown as never, "logs"]),
+    ["logs"]
+  );
 });
 
 test("help sidebar exposes changelog after docs and issues", () => {
