@@ -591,12 +591,18 @@ export class GlmExecutor extends DefaultExecutor {
     // streaming request with a complete JSON body — running the SSE readiness
     // scan on that body reads it to EOF without ever seeing a `data:` frame
     // and fails the request with 502 STREAM_EARLY_EOF even though the
-    // generation succeeded. Scope the gate to event-stream responses; a JSON
-    // answer to a stream request is complete by definition and passes through.
+    // generation succeeded. On the OpenAI transport such a body is a complete
+    // answer and passes through to the non-stream handling downstream.
+    // The exemption is transport-scoped: the Anthropic transport translates
+    // its own stream (translateSseResponse) and has no JSON-for-stream path,
+    // so a JSON body there must still take the verdict — the failed verdict is
+    // what sends the request to the fallback transport rather than returning
+    // an empty 200 stream.
     const isEventStreamResponse = (response.headers?.get?.("content-type") || "")
       .toLowerCase()
       .includes("event-stream");
-    if (input.stream && response.ok && isEventStreamResponse) {
+    const needsReadinessVerdict = transport === "anthropic" || isEventStreamResponse;
+    if (input.stream && response.ok && needsReadinessVerdict) {
       const readiness = await ensureStreamReadiness(response, {
         timeoutMs: STREAM_READINESS_TIMEOUT_MS,
         provider: this.provider,
