@@ -228,6 +228,7 @@ import { ucProvider } from "./registry/uc/index.ts";
 import { ucDirectProvider } from "./registry/uc-direct/index.ts";
 import { veniceProvider } from "./registry/venice/index.ts";
 import { kiroProvider } from "./registry/kiro/index.ts";
+import { kiroCliProvider } from "./registry/kiro-cli/index.ts";
 import { openadapterProvider } from "./registry/openadapter/index.ts";
 import { ditProvider } from "./registry/dit/index.ts";
 import { tokenrouterProvider } from "./registry/tokenrouter/index.ts";
@@ -532,6 +533,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   "uc-direct": ucDirectProvider,
   venice: veniceProvider,
   kiro: kiroProvider,
+  "kiro-cli": kiroCliProvider,
   byteplus: byteplusProvider,
   wafer: waferProvider,
   openadapter: openadapterProvider,

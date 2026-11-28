@@ -1,7 +1,7 @@
 import { type ChildProcess } from "node:child_process";
 import { Readable, Writable } from "node:stream";
 import * as acp from "@agentclientprotocol/sdk";
-import { boundedFrames } from "./buffers";
+import { boundedFrames } from "./acpFrames.ts";
 
 export class NativeAcpClient {
   readonly connection: acp.ClientConnection;
@@ -25,7 +25,7 @@ export class NativeAcpClient {
     this.connection = app.connect(acp.ndJsonStream(output, input.pipeThrough(boundedFrames())));
   }
 
-  async initialize(cwd: string): Promise<void> {
+  async initialize(cwd: string, expected?: { mode: string; model: string }): Promise<void> {
     const response = await this.connection.agent.request(acp.methods.agent.initialize, {
       protocolVersion: acp.PROTOCOL_VERSION,
       clientCapabilities: {},
@@ -37,14 +37,30 @@ export class NativeAcpClient {
       mcpServers: [],
     });
     this.sessionId = session.sessionId;
+    if (expected) {
+      const option = (category: string) =>
+        session.configOptions?.find((entry) => entry.category === category);
+      const current = (category: string) => {
+        const entry = option(category);
+        return entry && "currentValue" in entry ? entry.currentValue : undefined;
+      };
+      const selected = session as { models?: { currentModelId?: string } };
+      if (
+        (session.modes?.currentModeId ?? current("mode")) !== expected.mode ||
+        (selected.models?.currentModelId ?? current("model")) !== expected.model
+      ) {
+        throw new Error("ACP session did not confirm the requested mode and model");
+      }
+    }
   }
 
-  async prompt(text: string): Promise<void> {
+  async prompt(text: string, requireEndTurn = false): Promise<void> {
     if (!this.sessionId) throw new Error("ACP session is not initialized");
-    await this.connection.agent.request(acp.methods.agent.session.prompt, {
+    const result = await this.connection.agent.request(acp.methods.agent.session.prompt, {
       sessionId: this.sessionId,
       prompt: [{ type: "text", text }],
     });
+    if (requireEndTurn && result.stopReason !== "end_turn") throw new Error("Incomplete ACP turn");
   }
 
   async cancel(): Promise<void> {

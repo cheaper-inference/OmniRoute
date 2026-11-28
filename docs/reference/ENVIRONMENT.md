@@ -2128,3 +2128,10 @@ Used by `scripts/cli/omniroute-media-mcp.mjs`. Set these in the local tool proce
 | Variable | Default | Source File | Description |
 | --- | --- | --- | --- |
 | `OMNIROUTE_SESSION_TTL_MIN` | `15` | `open-sse/services/sessionManager.ts` | Idle TTL in minutes for the in-memory session map. Governs sticky connection reuse (`getSessionConnection`) and the active-sessions views; raising it keeps a session pinned to its connection longer. Read once at startup. Blank, non-numeric or `<= 0` values fall back to the default. |
+
+## Optional Kiro CLI transport
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `OMNIROUTE_KIRO_CLI_BIN` | unset | Absolute path to the operator-installed ACP-capable Kiro executable on Linux. |
+| `OMNIROUTE_KIRO_CLI_DATA_DIR` | unset | Private data directory of a dedicated Kiro CLI login. See the [Kiro setup guide](../guides/KIRO_SETUP.md). |

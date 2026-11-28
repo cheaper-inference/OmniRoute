@@ -2,9 +2,9 @@
  * Host-availability checks for local-CLI no-auth providers (#18753).
  *
  * `/v1/models` must not advertise `auggie` / `zcode` models when their binary
- * cannot be resolved on the machine running the server. Only these two have a
- * detector; every other `isLocalCli` provider (devin-cli-agentic,
- * codex-app-server) stays fail-open because the CLI may run elsewhere.
+ * cannot be resolved on the machine running the server. Kiro CLI additionally
+ * requires an explicit executable and private login directory. Other local
+ * providers stay fail-open because their CLI may run elsewhere.
  *
  * Mirrors bin/cli/utils/localCliAvailability.mjs and the executors' own
  * discovery order (open-sse/executors/auggie.ts resolveAuggieBin(),
@@ -15,11 +15,16 @@
 import { existsSync, statSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { detectLocalCliProvider } from "../../../bin/cli/utils/localCliAvailability.mjs";
 
 type Ctx = { env: NodeJS.ProcessEnv; platform: string; homedir: string };
 
 /** providerId -> alias, for the providers that have a detector. */
 const GATED_PROVIDERS: Record<string, { alias: string; detect: (ctx: Ctx) => boolean }> = {
+  "kiro-cli": {
+    alias: "kiro-cli",
+    detect: (ctx) => detectLocalCliProvider("kiro-cli", ctx).available,
+  },
   auggie: { alias: "aug", detect: detectAuggie },
   zcode: { alias: "zc", detect: detectZcode },
 };
