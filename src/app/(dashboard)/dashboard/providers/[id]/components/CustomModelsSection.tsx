@@ -20,6 +20,7 @@ import {
   type ModelSupportedEndpoint,
 } from "@/shared/constants/modelSupportedEndpoints";
 import { useNotificationStore } from "@/store/notificationStore";
+import { isDiscoveryImportedCustomSource as isDiscoveryImportedSource } from "@/lib/providers/modelListingCapability";
 import {
   buildCompatMap,
   anyNormalizeCompatBadge,
@@ -646,6 +647,18 @@ export default function CustomModelsSection({
                       >
                         {providerText(t, "overridesUpstreamModel", "Overrides upstream")}
                       </Badge>
+                    )}
+                    {!hasSyncedBase && isDiscoveryImportedSource(model.source) && (
+                      <span
+                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-info/10 text-info font-medium"
+                        title={providerText(
+                          t,
+                          "discoveredModelHint",
+                          "Imported from the provider's model list, not typed by you"
+                        )}
+                      >
+                        {providerText(t, "discoveredModel", "Discovered")}
+                      </span>
                     )}
                     {model.targetFormat && (
                       <Badge variant="success" size="sm" title={t("targetFormatHint")}>
