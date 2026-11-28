@@ -18,8 +18,7 @@ export interface UseTranslateSessionReturn {
 }
 
 function sanitizeError(raw: unknown): string {
-  const text =
-    raw instanceof Error ? raw.message : typeof raw === "string" ? raw : "Unknown error";
+  const text = raw instanceof Error ? raw.message : typeof raw === "string" ? raw : "Unknown error";
   return text
     .replace(/\sat\s\/[^\s]+/g, "")
     .replace(/sk-[A-Za-z0-9_-]{16,}/g, "[REDACTED]")
@@ -158,15 +157,13 @@ export function useTranslateSession(): UseTranslateSessionReturn {
           const sendRes = await fetch("/api/translator/send", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ provider, body: translatedResult }),
+            body: JSON.stringify({ provider, body: translatedResult, sourceFormat: source }),
           });
           if (!sendRes.ok) {
             const errorBody = (await sendRes.json().catch(() => ({
               error: `HTTP ${sendRes.status}`,
             }))) as { error?: unknown };
-            throw new Error(
-              typeof errorBody.error === "string" ? errorBody.error : "Send failed"
-            );
+            throw new Error(typeof errorBody.error === "string" ? errorBody.error : "Send failed");
           }
           const reader = sendRes.body?.getReader();
           if (reader) {
@@ -189,8 +186,16 @@ export function useTranslateSession(): UseTranslateSessionReturn {
                 /* ignore */
               }
             } finally {
-              try { reader.cancel(); } catch { /* swallow — connection might already be closed */ }
-              try { (reader as { releaseLock?: () => void }).releaseLock?.(); } catch { /* same */ }
+              try {
+                reader.cancel();
+              } catch {
+                /* swallow — connection might already be closed */
+              }
+              try {
+                (reader as { releaseLock?: () => void }).releaseLock?.();
+              } catch {
+                /* same */
+              }
             }
           }
         }

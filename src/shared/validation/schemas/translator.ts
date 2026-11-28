@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FORMATS } from "@omniroute/open-sse/translator/formats.ts";
 import {
   ACCOUNT_FALLBACK_STRATEGY_VALUES,
   ROUTING_STRATEGY_VALUES,
@@ -23,6 +24,7 @@ export const translatorDetectSchema = z.object({
 export const translatorSendSchema = z.object({
   provider: z.string().trim().min(1, "Provider is required"),
   body: nonEmptyJsonRecordSchema,
+  sourceFormat: z.enum(FORMATS).optional(),
 });
 
 export const translatorTranslateSchema = z

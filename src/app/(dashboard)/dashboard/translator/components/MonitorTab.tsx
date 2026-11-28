@@ -353,7 +353,9 @@ export default function MonitorTab({ onGoToTranslate }: MonitorTabProps) {
                           )}
                         </TableCell>
                         <TableCell numeric className="text-xs text-text-muted">
-                          {event.latency ? formatLatency(event.latency) : notAvailable}
+                          {typeof event.latency === "number" && Number.isFinite(event.latency)
+                            ? formatLatency(event.latency)
+                            : notAvailable}
                         </TableCell>
                       </TableRow>
                     );

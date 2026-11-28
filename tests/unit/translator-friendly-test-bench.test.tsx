@@ -46,7 +46,8 @@ vi.mock("next-intl", () => ({
     if (key === "scenarioSystemPrompt") return "System Prompt";
     if (key === "scenarioStreaming") return "Streaming";
     if (key === "advancedTestBenchTitle") return "Test Bench (8 cenários)";
-    if (key === "advancedTestBenchSubtitle") return "Roda todos os cenários e reporta pass/fail + compatibilidade %.";
+    if (key === "advancedTestBenchSubtitle")
+      return "Roda todos os cenários e reporta pass/fail + compatibilidade %.";
     return key;
   },
 }));
@@ -83,13 +84,11 @@ vi.mock("@/shared/components/Collapsible", () => ({
 
 // ── Shared components stubs ─────────────────────────────────────────────────
 vi.mock("@/shared/components", () => ({
-  Card: ({
-    children,
-    className,
-  }: {
-    children: React.ReactNode;
-    className?: string;
-  }) => <div data-testid="card" className={className}>{children}</div>,
+  Card: ({ children, className }: { children: React.ReactNode; className?: string }) => (
+    <div data-testid="card" className={className}>
+      {children}
+    </div>
+  ),
 
   Button: ({
     children,
@@ -160,128 +159,122 @@ vi.mock("@/shared/components", () => ({
 }));
 
 // ── Hook stubs ──────────────────────────────────────────────────────────────
-vi.mock(
-  "@/app/(dashboard)/dashboard/translator/hooks/useProviderOptions",
-  () => ({
-    useProviderOptions: () => ({
-      provider: "openai",
-      setProvider: vi.fn(),
-      providerOptions: [
-        { value: "openai", label: "OpenAI" },
-        { value: "anthropic", label: "Anthropic" },
-      ],
-      loading: false,
-    }),
+vi.mock("@/app/(dashboard)/dashboard/translator/hooks/useProviderOptions", () => ({
+  useProviderOptions: () => ({
+    provider: "openai",
+    setProvider: vi.fn(),
+    providerOptions: [
+      { value: "openai", label: "OpenAI" },
+      { value: "anthropic", label: "Anthropic" },
+    ],
+    loading: false,
   }),
-);
+}));
 
-vi.mock(
-  "@/app/(dashboard)/dashboard/translator/hooks/useAvailableModels",
-  () => ({
-    useAvailableModels: () => ({
-      model: "gpt-4o",
-      setModel: vi.fn(),
-      availableModels: ["gpt-4o", "gpt-3.5-turbo", "claude-sonnet-4-20250514"],
-      loading: false,
-      pickModelForFormat: (format: string) => {
-        if (format === "claude") return "claude-sonnet-4-20250514";
-        return "gpt-4o";
-      },
-    }),
+vi.mock("@/app/(dashboard)/dashboard/translator/hooks/useAvailableModels", () => ({
+  useAvailableModels: () => ({
+    model: "gpt-4o",
+    setModel: vi.fn(),
+    availableModels: ["gpt-4o", "gpt-3.5-turbo", "claude-sonnet-4-20250514"],
+    loading: false,
+    pickModelForFormat: (format: string) => {
+      if (format === "claude") return "claude-sonnet-4-20250514";
+      return "gpt-4o";
+    },
   }),
-);
+}));
 
 // ── exampleTemplates stub ───────────────────────────────────────────────────
-vi.mock(
-  "@/app/(dashboard)/dashboard/translator/exampleTemplates",
-  () => ({
-    getExampleTemplates: () => [
-      {
-        id: "simple-chat",
-        name: "Simple Chat",
-        icon: "chat",
-        description: "Simple chat",
-        formats: {
-          claude: { model: "claude-sonnet-4-20250514", messages: [{ role: "user", content: "Hello" }] },
-          openai: { model: "gpt-4o", messages: [{ role: "user", content: "Hello" }] },
+vi.mock("@/app/(dashboard)/dashboard/translator/exampleTemplates", () => ({
+  getExampleTemplates: () => [
+    {
+      id: "simple-chat",
+      name: "Simple Chat",
+      icon: "chat",
+      description: "Simple chat",
+      formats: {
+        claude: {
+          model: "claude-sonnet-4-20250514",
+          messages: [{ role: "user", content: "Hello" }],
         },
+        openai: { model: "gpt-4o", messages: [{ role: "user", content: "Hello" }] },
       },
-      {
-        id: "tool-calling",
-        name: "Tool Calling",
-        icon: "build",
-        description: "Tool calling",
-        formats: {
-          openai: { model: "gpt-4o", messages: [{ role: "user", content: "Weather?" }] },
-        },
-      },
-      {
-        id: "multi-turn",
-        name: "Multi-Turn",
-        icon: "forum",
-        description: "Multi-turn",
-        formats: {
-          openai: { model: "gpt-4o", messages: [] },
-        },
-      },
-      {
-        id: "thinking",
-        name: "Thinking",
-        icon: "psychology",
-        description: "Thinking",
-        formats: {
-          openai: { model: "o3-mini", messages: [] },
-        },
-      },
-      {
-        id: "system-prompt",
-        name: "System Prompt",
-        icon: "settings",
-        description: "System prompt",
-        formats: {
-          openai: { model: "gpt-4o", messages: [] },
-        },
-      },
-      {
-        id: "streaming",
-        name: "Streaming",
-        icon: "stream",
-        description: "Streaming",
-        formats: {
-          openai: { model: "gpt-4o", messages: [] },
-        },
-      },
-      {
-        id: "vision",
-        name: "Vision",
-        icon: "image",
-        description: "Vision",
-        formats: {
-          openai: { model: "gpt-4o", messages: [] },
-        },
-      },
-      {
-        id: "schema-coercion",
-        name: "Schema Coercion",
-        icon: "schema",
-        description: "Schema coercion",
-        formats: {
-          openai: { model: "gpt-4o", messages: [] },
-        },
-      },
-    ],
-    FORMAT_META: {
-      openai: { label: "OpenAI", color: "emerald", icon: "smart_toy" },
-      claude: { label: "Claude", color: "orange", icon: "psychology" },
-      gemini: { label: "Gemini", color: "blue", icon: "auto_awesome" },
     },
-    FORMAT_OPTIONS: [
-      { value: "openai", label: "OpenAI" },
-      { value: "claude", label: "Claude" },
-      { value: "gemini", label: "Gemini" },
-    ],
-  }),
-);
+    {
+      id: "tool-calling",
+      name: "Tool Calling",
+      icon: "build",
+      description: "Tool calling",
+      formats: {
+        openai: { model: "gpt-4o", messages: [{ role: "user", content: "Weather?" }] },
+      },
+    },
+    {
+      id: "multi-turn",
+      name: "Multi-Turn",
+      icon: "forum",
+      description: "Multi-turn",
+      formats: {
+        openai: { model: "gpt-4o", messages: [] },
+      },
+    },
+    {
+      id: "thinking",
+      name: "Thinking",
+      icon: "psychology",
+      description: "Thinking",
+      formats: {
+        openai: { model: "o3-mini", messages: [] },
+      },
+    },
+    {
+      id: "system-prompt",
+      name: "System Prompt",
+      icon: "settings",
+      description: "System prompt",
+      formats: {
+        openai: { model: "gpt-4o", messages: [] },
+      },
+    },
+    {
+      id: "streaming",
+      name: "Streaming",
+      icon: "stream",
+      description: "Streaming",
+      formats: {
+        openai: { model: "gpt-4o", messages: [] },
+      },
+    },
+    {
+      id: "vision",
+      name: "Vision",
+      icon: "image",
+      description: "Vision",
+      formats: {
+        openai: { model: "gpt-4o", messages: [] },
+      },
+    },
+    {
+      id: "schema-coercion",
+      name: "Schema Coercion",
+      icon: "schema",
+      description: "Schema coercion",
+      formats: {
+        openai: { model: "gpt-4o", messages: [] },
+      },
+    },
+  ],
+  FORMAT_META: {
+    openai: { label: "OpenAI", color: "emerald", icon: "smart_toy" },
+    claude: { label: "Claude", color: "orange", icon: "psychology" },
+    gemini: { label: "Gemini", color: "blue", icon: "auto_awesome" },
+  },
+  FORMAT_OPTIONS: [
+    { value: "openai", label: "OpenAI" },
+    { value: "claude", label: "Claude" },
+    { value: "gemini", label: "Gemini" },
+  ],
+}));
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -297,12 +290,14 @@ function makeContainer(): HTMLElement {
 /**
  * Build a mock fetch that returns success for translate + a readable stream for send.
  */
-function makeFetchMock(opts: {
-  translateOk?: boolean;
-  sendOk?: boolean;
-  translateError?: string;
-  sendHttpStatus?: number;
-} = {}) {
+function makeFetchMock(
+  opts: {
+    translateOk?: boolean;
+    sendOk?: boolean;
+    translateError?: string;
+    sendHttpStatus?: number;
+  } = {}
+) {
   const { translateOk = true, sendOk = true, translateError, sendHttpStatus = 200 } = opts;
 
   return vi.fn().mockImplementation((url: string) => {
@@ -313,7 +308,7 @@ function makeFetchMock(opts: {
           Promise.resolve(
             translateOk
               ? { success: true, result: { model: "gpt-4o", messages: [] } }
-              : { success: false, error: translateError ?? "translate error" },
+              : { success: false, error: translateError ?? "translate error" }
           ),
       });
     }
@@ -370,18 +365,16 @@ describe("TestBenchAccordion", () => {
   // ── Module export ──────────────────────────────────────────────────────────
 
   it("exports a default function component", async () => {
-    const mod = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const mod =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     expect(typeof mod.default).toBe("function");
   });
 
   // ── Smoke render (closed by default) ─────────────────────────────────────
 
   it("renders Collapsible with correct title and icon when defaultOpen=false", async () => {
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -397,9 +390,8 @@ describe("TestBenchAccordion", () => {
   // ── Lazy-render guard ──────────────────────────────────────────────────────
 
   it("does not render scenario cards when defaultOpen is false (lazy-render guard)", async () => {
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -413,9 +405,8 @@ describe("TestBenchAccordion", () => {
   // ── forceOpen renders content immediately ─────────────────────────────────
 
   it("renders TestBenchContent immediately when forceOpen=true", async () => {
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -427,9 +418,8 @@ describe("TestBenchAccordion", () => {
   });
 
   it("Collapsible gets defaultOpen=true when forceOpen=true", async () => {
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -442,9 +432,8 @@ describe("TestBenchAccordion", () => {
   // ── Controls render ───────────────────────────────────────────────────────
 
   it("renders source select, provider select, and Run All button when open", async () => {
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -459,9 +448,8 @@ describe("TestBenchAccordion", () => {
   });
 
   it("renders 8 scenario buttons (one per scenario) when open", async () => {
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -469,8 +457,8 @@ describe("TestBenchAccordion", () => {
     });
     const buttons = container.querySelectorAll("[data-testid='button']");
     // 1 Run All + 8 scenario Run Test buttons
-    const runTestBtns = Array.from(buttons).filter((b) =>
-      b.textContent?.includes("Run Test") || b.textContent?.includes("Re-Run")
+    const runTestBtns = Array.from(buttons).filter(
+      (b) => b.textContent?.includes("Run Test") || b.textContent?.includes("Re-Run")
     );
     expect(runTestBtns.length).toBe(8);
   });
@@ -481,9 +469,8 @@ describe("TestBenchAccordion", () => {
     const fetchMock = makeFetchMock();
     vi.stubGlobal("fetch", fetchMock);
 
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -492,8 +479,7 @@ describe("TestBenchAccordion", () => {
 
     const buttons = container.querySelectorAll("[data-testid='button']");
     const runAllBtn = Array.from(buttons).find((b) => b.textContent?.includes("Run All")) as
-      | HTMLButtonElement
-      | undefined;
+      HTMLButtonElement | undefined;
     expect(runAllBtn).toBeTruthy();
 
     await act(async () => {
@@ -501,10 +487,10 @@ describe("TestBenchAccordion", () => {
     });
 
     const translateCalls = fetchMock.mock.calls.filter((c) =>
-      (c[0] as string).includes("/api/translator/translate"),
+      (c[0] as string).includes("/api/translator/translate")
     );
     const sendCalls = fetchMock.mock.calls.filter((c) =>
-      (c[0] as string).includes("/api/translator/send"),
+      (c[0] as string).includes("/api/translator/send")
     );
     // 8 scenarios × 1 translate each
     expect(translateCalls.length).toBe(8);
@@ -518,9 +504,8 @@ describe("TestBenchAccordion", () => {
     const fetchMock = makeFetchMock();
     vi.stubGlobal("fetch", fetchMock);
 
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -529,17 +514,16 @@ describe("TestBenchAccordion", () => {
 
     const buttons = container.querySelectorAll("[data-testid='button']");
     const runAllBtn = Array.from(buttons).find((b) => b.textContent?.includes("Run All")) as
-      | HTMLButtonElement
-      | undefined;
+      HTMLButtonElement | undefined;
 
     await act(async () => {
       runAllBtn?.click();
     });
 
     // After completion, scenario buttons should show "Re-Run" (result exists)
-    const reRunBtns = Array.from(
-      container.querySelectorAll("[data-testid='button']"),
-    ).filter((b) => b.textContent?.includes("Re-Run"));
+    const reRunBtns = Array.from(container.querySelectorAll("[data-testid='button']")).filter((b) =>
+      b.textContent?.includes("Re-Run")
+    );
     // All 8 should show re-run
     expect(reRunBtns.length).toBe(8);
   });
@@ -548,9 +532,8 @@ describe("TestBenchAccordion", () => {
     const fetchMock = makeFetchMock();
     vi.stubGlobal("fetch", fetchMock);
 
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -559,8 +542,7 @@ describe("TestBenchAccordion", () => {
 
     const buttons = container.querySelectorAll("[data-testid='button']");
     const runAllBtn = Array.from(buttons).find((b) => b.textContent?.includes("Run All")) as
-      | HTMLButtonElement
-      | undefined;
+      HTMLButtonElement | undefined;
 
     await act(async () => {
       runAllBtn?.click();
@@ -583,9 +565,8 @@ describe("TestBenchAccordion", () => {
     const fetchMock = makeFetchMock();
     vi.stubGlobal("fetch", fetchMock);
 
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -595,8 +576,7 @@ describe("TestBenchAccordion", () => {
     // Run All first to populate results
     const buttons = container.querySelectorAll("[data-testid='button']");
     const runAllBtn = Array.from(buttons).find((b) => b.textContent?.includes("Run All")) as
-      | HTMLButtonElement
-      | undefined;
+      HTMLButtonElement | undefined;
     await act(async () => {
       runAllBtn?.click();
     });
@@ -606,9 +586,9 @@ describe("TestBenchAccordion", () => {
     expect(callCountAfterAll).toBe(16);
 
     // Now click Re-Run on first scenario
-    const reRunBtns = Array.from(
-      container.querySelectorAll("[data-testid='button']"),
-    ).filter((b) => b.textContent?.includes("Re-Run")) as HTMLButtonElement[];
+    const reRunBtns = Array.from(container.querySelectorAll("[data-testid='button']")).filter((b) =>
+      b.textContent?.includes("Re-Run")
+    ) as HTMLButtonElement[];
     expect(reRunBtns.length).toBeGreaterThan(0);
 
     await act(async () => {
@@ -626,9 +606,8 @@ describe("TestBenchAccordion", () => {
     const fetchMock = makeFetchMock({ translateOk: false, translateError: "Invalid format" });
     vi.stubGlobal("fetch", fetchMock);
 
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -637,9 +616,8 @@ describe("TestBenchAccordion", () => {
 
     // Run first scenario only
     const buttons = container.querySelectorAll("[data-testid='button']");
-    const firstRunBtn = Array.from(buttons).find((b) =>
-      b.textContent?.includes("Run Test"),
-    ) as HTMLButtonElement | undefined;
+    const firstRunBtn = Array.from(buttons).find((b) => b.textContent?.includes("Run Test")) as
+      HTMLButtonElement | undefined;
     await act(async () => {
       firstRunBtn?.click();
     });
@@ -656,9 +634,8 @@ describe("TestBenchAccordion", () => {
     const fetchMock = makeFetchMock({ translateOk: true, sendOk: false, sendHttpStatus: 503 });
     vi.stubGlobal("fetch", fetchMock);
 
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -666,9 +643,8 @@ describe("TestBenchAccordion", () => {
     });
 
     const buttons = container.querySelectorAll("[data-testid='button']");
-    const firstRunBtn = Array.from(buttons).find((b) =>
-      b.textContent?.includes("Run Test"),
-    ) as HTMLButtonElement | undefined;
+    const firstRunBtn = Array.from(buttons).find((b) => b.textContent?.includes("Run Test")) as
+      HTMLButtonElement | undefined;
     await act(async () => {
       firstRunBtn?.click();
     });
@@ -687,12 +663,11 @@ describe("TestBenchAccordion", () => {
           return Promise.reject(new Error("Network error"));
         }
         return Promise.reject(new Error("Unexpected"));
-      }),
+      })
     );
 
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -700,9 +675,8 @@ describe("TestBenchAccordion", () => {
     });
 
     const buttons = container.querySelectorAll("[data-testid='button']");
-    const firstRunBtn = Array.from(buttons).find((b) =>
-      b.textContent?.includes("Run Test"),
-    ) as HTMLButtonElement | undefined;
+    const firstRunBtn = Array.from(buttons).find((b) => b.textContent?.includes("Run Test")) as
+      HTMLButtonElement | undefined;
     await act(async () => {
       firstRunBtn?.click();
     });
@@ -720,16 +694,17 @@ describe("TestBenchAccordion", () => {
       "fetch",
       vi.fn().mockImplementation((url: string) => {
         if ((url as string).includes("/api/translator/translate")) {
-          const errWithStack = new Error("foo\n    at /home/user/dev/file.ts:42:10\n    at /node_modules/bar.js:1:1");
+          const errWithStack = new Error(
+            "foo\n    at /home/user/dev/file.ts:42:10\n    at /node_modules/bar.js:1:1"
+          );
           return Promise.reject(errWithStack);
         }
         return Promise.reject(new Error("Unexpected"));
-      }),
+      })
     );
 
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -737,9 +712,8 @@ describe("TestBenchAccordion", () => {
     });
 
     const buttons = container.querySelectorAll("[data-testid='button']");
-    const firstRunBtn = Array.from(buttons).find((b) =>
-      b.textContent?.includes("Run Test"),
-    ) as HTMLButtonElement | undefined;
+    const firstRunBtn = Array.from(buttons).find((b) => b.textContent?.includes("Run Test")) as
+      HTMLButtonElement | undefined;
     await act(async () => {
       firstRunBtn?.click();
     });
@@ -755,9 +729,8 @@ describe("TestBenchAccordion", () => {
 
   it("calls onOpenChange(true) when accordion opens for the first time", async () => {
     const onOpenChange = vi.fn();
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     // forceOpen=true triggers content mount → sentinel fires onFirstOpen → onOpenChange(true)
@@ -783,9 +756,8 @@ describe("TestBenchAccordion", () => {
     const fetchMock = makeFetchMock();
     vi.stubGlobal("fetch", fetchMock);
 
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -793,15 +765,14 @@ describe("TestBenchAccordion", () => {
     });
 
     const buttons = container.querySelectorAll("[data-testid='button']");
-    const firstRunBtn = Array.from(buttons).find((b) =>
-      b.textContent?.includes("Run Test"),
-    ) as HTMLButtonElement | undefined;
+    const firstRunBtn = Array.from(buttons).find((b) => b.textContent?.includes("Run Test")) as
+      HTMLButtonElement | undefined;
     await act(async () => {
       firstRunBtn?.click();
     });
 
     const translateCall = fetchMock.mock.calls.find((c) =>
-      (c[0] as string).includes("/api/translator/translate"),
+      (c[0] as string).includes("/api/translator/translate")
     );
     expect(translateCall).toBeTruthy();
     const bodyStr = (translateCall?.[1] as RequestInit)?.body as string;
@@ -814,13 +785,12 @@ describe("TestBenchAccordion", () => {
 
   // ── translate:send POST body shape ────────────────────────────────────────
 
-  it("sends translated result to /api/translator/send", async () => {
+  it("sends the translated result and selected source format to /api/translator/send", async () => {
     const fetchMock = makeFetchMock();
     vi.stubGlobal("fetch", fetchMock);
 
-    const { default: TestBenchAccordion } = await import(
-      "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion"
-    );
+    const { default: TestBenchAccordion } =
+      await import("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion");
     const container = makeContainer();
     const root = createRoot(container);
     await act(async () => {
@@ -828,20 +798,24 @@ describe("TestBenchAccordion", () => {
     });
 
     const buttons = container.querySelectorAll("[data-testid='button']");
-    const firstRunBtn = Array.from(buttons).find((b) =>
-      b.textContent?.includes("Run Test"),
-    ) as HTMLButtonElement | undefined;
+    const firstRunBtn = Array.from(buttons).find((b) => b.textContent?.includes("Run Test")) as
+      HTMLButtonElement | undefined;
     await act(async () => {
       firstRunBtn?.click();
     });
 
     const sendCall = fetchMock.mock.calls.find((c) =>
-      (c[0] as string).includes("/api/translator/send"),
+      (c[0] as string).includes("/api/translator/send")
     );
     expect(sendCall).toBeTruthy();
     const bodyStr = (sendCall?.[1] as RequestInit)?.body as string;
     const body = JSON.parse(bodyStr);
     expect(typeof body.provider).toBe("string");
     expect(typeof body.body).toBe("object");
+    expect(body).toEqual({
+      provider: "openai",
+      sourceFormat: "claude",
+      body: { model: "gpt-4o", messages: [] },
+    });
   });
 });
