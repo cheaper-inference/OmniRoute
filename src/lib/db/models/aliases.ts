@@ -1,35 +1,35 @@
 /** db/models/aliases.ts — model alias CRUD (modelAliases namespace, providerAliases namespace). */
 
+import type { ModelAliasRepository } from "@/domain/persistence/modelCatalogRepositories";
 import { getDbInstance } from "../core";
 import { backupDbFile } from "../backup";
 import { getKeyValue } from "./shared";
 import { finishModelCatalogWriteWithBackup } from "./modelCatalogWriteSignals";
+import { modelCatalogRepositories } from "../repositories/modelCatalogRepositories";
+
+// Global aliases and the managed-name marker persist behind ModelAliasRepository. This
+// facade keeps the original async shape and suspension points over the SQLite-only legacy
+// access, so each write, its pre-write backup and the model-catalog cache invalidation
+// still run in the same turn; it also owns marker cleanup on delete and the provider
+// cascade below.
+const legacy = modelCatalogRepositories.legacySync.aliases;
+
+/** Async persistence contract; it never backs up or invalidates caches on its own. */
+export function getModelAliasRepository(): ModelAliasRepository {
+  return modelCatalogRepositories.aliases;
+}
 
 export async function getModelAliases() {
-  const db = getDbInstance();
-  const rows = db
-    .prepare("SELECT key, value FROM key_value WHERE namespace = 'modelAliases'")
-    .all();
-  const result: Record<string, unknown> = {};
-  for (const row of rows) {
-    const { key, value } = getKeyValue(row);
-    if (!key || value === null) continue;
-    result[key] = JSON.parse(value);
-  }
-  return result;
+  return legacy.list();
 }
 
 export async function setModelAlias(alias: string, model: unknown) {
-  const db = getDbInstance();
-  db.prepare(
-    "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES ('modelAliases', ?, ?)"
-  ).run(alias, JSON.stringify(model));
+  legacy.set(alias, model);
   finishModelCatalogWriteWithBackup();
 }
 
 export async function deleteModelAlias(alias: string) {
-  const db = getDbInstance();
-  db.prepare("DELETE FROM key_value WHERE namespace = 'modelAliases' AND key = ?").run(alias);
+  legacy.remove(alias);
   await unmarkManagedModelAlias(alias);
   finishModelCatalogWriteWithBackup();
 }
@@ -41,21 +41,9 @@ export async function deleteModelAlias(alias: string) {
 // must never delete or "adopt" an alias unless its name is present in this set, so a
 // hand-created custom alias that happens to already point at a model's full id is never
 // silently claimed (and later pruned) as if OmniRoute had generated it.
-const MANAGED_ALIAS_NAMES_KEY = "names";
 
 async function getManagedModelAliasNamesRow(): Promise<string[]> {
-  const db = getDbInstance();
-  const row = db
-    .prepare("SELECT value FROM key_value WHERE namespace = 'managedModelAliasNames' AND key = ?")
-    .get(MANAGED_ALIAS_NAMES_KEY);
-  const parsed = getKeyValue(row).value;
-  if (!parsed) return [];
-  try {
-    const v = JSON.parse(parsed);
-    return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
-  } catch {
-    return [];
-  }
+  return legacy.readManagedNames();
 }
 
 /**
@@ -68,10 +56,7 @@ export async function getManagedModelAliasNames(): Promise<Set<string>> {
 }
 
 async function writeManagedModelAliasNames(names: Set<string>): Promise<void> {
-  const db = getDbInstance();
-  db.prepare(
-    "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES ('managedModelAliasNames', ?, ?)"
-  ).run(MANAGED_ALIAS_NAMES_KEY, JSON.stringify(Array.from(names)));
+  legacy.writeManagedNames(names);
 }
 
 /** Record that `alias` was generated/adopted by OmniRoute's own sync logic. */
