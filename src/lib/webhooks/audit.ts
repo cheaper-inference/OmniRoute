@@ -48,21 +48,19 @@ export async function emitWebhookAuditEvent(
   try {
     const { ipAddress, requestId } = getAuditRequestContext(request);
     const actor = await deriveSettingsAuditActor(request);
-    logAuditEvent(
-      {
-        action,
-        actor,
-        resourceType: "webhook",
-        status: "success",
-        ipAddress: ipAddress ?? undefined,
-        requestId,
-        target: getWebhookAuditTarget(webhook),
-        details: previous
-          ? { id, kind, changedFields: getChangedFields(previous, webhook) }
-          : { id, kind },
-      },
-      warn
-    );
+    const written = logAuditEvent({
+      action,
+      actor,
+      resourceType: "webhook",
+      status: "success",
+      ipAddress: ipAddress ?? undefined,
+      requestId,
+      target: getWebhookAuditTarget(webhook),
+      details: previous
+        ? { id, kind, changedFields: getChangedFields(previous, webhook) }
+        : { id, kind },
+    });
+    if (!written) warn();
   } catch {
     warn();
   }
