@@ -760,6 +760,7 @@ export const v1WebFetchSchema = z
         "anysearch-search",
         "parallel-search",
         "keenable-search",
+        "ollama-search",
       ])
       .optional(),
     format: z.enum(["markdown", "html", "links", "screenshot"]).default("markdown"),

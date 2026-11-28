@@ -53,6 +53,20 @@ import {
   type BedrockEmbeddingItem,
 } from "./bedrockEmbeddings.ts";
 import { resolveBedrockRegion } from "../config/bedrock.ts";
+import {
+  VERTEX_EMBEDDING_MAX_RESPONSE_BYTES,
+  buildVertexEmbeddingPlan,
+  mapVertexEmbeddingResponse,
+  resolveVertexEmbeddingUrl,
+  type VertexEmbeddingPlan,
+} from "./vertexEmbeddings.ts";
+import {
+  getAccessToken,
+  looksLikeServiceAccountJson,
+  parseSAFromApiKey,
+  type ServiceAccount,
+} from "../executors/vertexAuth.ts";
+import { readResponseTextWithinCap } from "../utils/responseBodyCap.ts";
 import { getGitHubCopilotChatHeaders } from "../config/providerHeaderProfiles.ts";
 
 interface ClientRawRequest {
@@ -152,6 +166,10 @@ interface PreparedEmbeddingRequest {
   normalizeProviderResponse: ProviderResponseNormalizer;
   /** Set only for `nativeInvokeProtocol: "bedrock-invoke"`; built in the prepare stage so client errors are 400s. */
   bedrock?: BedrockEmbeddingPlan;
+  /** Set only for `nativeInvokeProtocol: "vertex-predict"`. */
+  vertex?: VertexEmbeddingPlan;
+  /** Vertex service account; its token is minted in the dispatch stage. */
+  vertexServiceAccount?: ServiceAccount;
 }
 
 interface ParsedEmbeddingResponse {
@@ -500,6 +518,10 @@ async function applyStructuredTransport(
     await prepareBedrockTransport(runtime, prepared);
     return;
   }
+  if (runtime.providerConfig.nativeInvokeProtocol === "vertex-predict") {
+    await prepareVertexTransport(runtime, prepared);
+    return;
+  }
   const jinaNative = isJinaNativeEmbeddingInput(runtime.body.input);
   const geminiNative = isGeminiNativeEmbeddingInput(runtime.body.input);
   const canonical = hasStructuredEmbeddingInput(runtime.body.input);
@@ -762,6 +784,89 @@ async function prepareBedrockTransport(
   };
 }
 
+/** Bounded read of a Vertex `:predict` body; an oversized or unreadable body is one error. */
+async function readVertexEmbeddingText(response: Response): Promise<string> {
+  try {
+    return await readResponseTextWithinCap(response, VERTEX_EMBEDDING_MAX_RESPONSE_BYTES);
+  } catch {
+    throw new Error("Vertex embedding response was unreadable or too large");
+  }
+}
+
+/**
+ * Vertex prepare stage: service account, project URL and `:predict` body. Every client mistake
+ * throws here, so it surfaces as a 400 and never as a 502 that cools the connection. The token
+ * exchange is an upstream call, so it runs in the dispatch stage.
+ */
+async function prepareVertexTransport(
+  runtime: EmbeddingRuntime,
+  prepared: PreparedEmbeddingRequest
+): Promise<void> {
+  const apiKey = runtime.credentials?.apiKey;
+  if (typeof apiKey !== "string" || !looksLikeServiceAccountJson(apiKey)) {
+    throw new Error("Vertex embeddings need a Service Account JSON connection");
+  }
+  const serviceAccount = parseSAFromApiKey(apiKey);
+  const project = serviceAccount.project_id;
+  if (!project) throw new Error("Service Account JSON is missing project_id");
+  if (!serviceAccount.client_email || !serviceAccount.private_key) {
+    throw new Error(
+      "Service Account JSON is missing required fields (client_email or private_key)"
+    );
+  }
+  const region = runtime.credentials?.providerSpecificData?.region;
+  const plan = buildVertexEmbeddingPlan(
+    runtime.model || "",
+    runtime.body.input,
+    runtime.body.dimensions
+  );
+  prepared.vertex = plan;
+  prepared.upstreamBody = plan.body;
+  prepared.upstreamUrl = resolveVertexEmbeddingUrl(
+    plan.model,
+    project,
+    typeof region === "string" ? region : null
+  );
+  prepared.vertexServiceAccount = serviceAccount;
+}
+
+/**
+ * Dispatch stage for Vertex: token exchange (bounded, an upstream failure is a 502/504), then
+ * one `:predict` call per plan body, each reply read under a byte cap, merged in input order.
+ */
+async function fetchVertexEmbeddingBatch(
+  prepared: PreparedEmbeddingRequest,
+  plan: VertexEmbeddingPlan,
+  reqLogger: RequestLogger
+): Promise<Response> {
+  if (prepared.vertexServiceAccount) {
+    const token = await getAccessToken(
+      prepared.vertexServiceAccount,
+      AbortSignal.timeout(FETCH_TIMEOUT_MS)
+    );
+    prepared.headers.Authorization = `Bearer ${token}`;
+  }
+  const predictions: unknown[] = [];
+  let lastHeaders = new Headers();
+  for (const upstreamBody of plan.bodies) {
+    reqLogger.logTargetRequest(prepared.upstreamUrl, prepared.headers, upstreamBody);
+    const response = await fetch(prepared.upstreamUrl, {
+      method: "POST",
+      headers: prepared.headers,
+      body: JSON.stringify(upstreamBody),
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+    if (!response.ok) return response;
+    lastHeaders = response.headers;
+    const raw = JSON.parse(await readVertexEmbeddingText(response)) as { predictions?: unknown };
+    if (Array.isArray(raw?.predictions)) predictions.push(...raw.predictions);
+  }
+  return new Response(JSON.stringify(mapVertexEmbeddingResponse({ predictions }, plan)), {
+    status: 200,
+    headers: lastHeaders,
+  });
+}
+
 /**
  * Dispatch-stage half of the Bedrock transport: only the upstream calls live here,
  * so a thrown error genuinely means "the provider misbehaved" (502 + cooldown is
@@ -824,6 +929,7 @@ async function dispatchEmbeddingRequest(
 ): Promise<Response> {
   // The plan is only ever set for `nativeInvokeProtocol: "bedrock-invoke"`.
   if (prepared.bedrock) return fetchBedrockEmbeddingBatch(prepared, prepared.bedrock, reqLogger);
+  if (prepared.vertex) return fetchVertexEmbeddingBatch(prepared, prepared.vertex, reqLogger);
   if (singleTexts) return fetchClovaEmbeddingBatch(prepared, singleTexts, reqLogger);
   reqLogger.logTargetRequest(prepared.upstreamUrl, prepared.headers, prepared.upstreamBody);
   return fetch(prepared.upstreamUrl, {
@@ -1018,7 +1124,8 @@ async function executeEmbedding(
   try {
     const response = await dispatchEmbeddingRequest(prepared, singleTexts, runtime.reqLogger);
     // Fan-out providers make one upstream call per body/text; count each one.
-    const requestCount = prepared.bedrock?.bodies.length ?? singleTexts?.length ?? 1;
+    const requestCount =
+      prepared.bedrock?.bodies.length ?? prepared.vertex?.bodies.length ?? singleTexts?.length ?? 1;
     return response.ok
       ? handleUpstreamSuccess(runtime, prepared, response, requestCount)
       : handleUpstreamFailure(runtime, response);

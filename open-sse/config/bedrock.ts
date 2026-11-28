@@ -34,6 +34,35 @@ export function resolveBedrockRegion(providerSpecificData: unknown): string {
   return extractBedrockRegionFromBaseUrl(baseUrl) || BEDROCK_DEFAULT_REGION;
 }
 
+/**
+ * AWS IAM static keys from a connection: providerSpecificData.awsAccessKeyId is the key id, the
+ * connection apiKey is the secret access key, awsSessionToken is optional. Null means the
+ * connection uses a bearer API key.
+ */
+export type BedrockIamKeys = {
+  accessKeyId: string;
+  secretAccessKey: string;
+  sessionToken?: string;
+};
+
+export function getBedrockIamKeys(credentials: {
+  apiKey?: unknown;
+  providerSpecificData?: unknown;
+}): BedrockIamKeys | null {
+  const data =
+    credentials?.providerSpecificData && typeof credentials.providerSpecificData === "object"
+      ? (credentials.providerSpecificData as Record<string, unknown>)
+      : {};
+  const accessKeyId = typeof data.awsAccessKeyId === "string" ? data.awsAccessKeyId.trim() : "";
+  const secretAccessKey = typeof credentials?.apiKey === "string" ? credentials.apiKey : "";
+  if (!accessKeyId || !secretAccessKey) return null;
+  const sessionToken =
+    typeof data.awsSessionToken === "string" && data.awsSessionToken.trim()
+      ? data.awsSessionToken.trim()
+      : undefined;
+  return { accessKeyId, secretAccessKey, ...(sessionToken ? { sessionToken } : {}) };
+}
+
 export function buildBedrockControlBaseUrl(region: string): string {
   return `https://bedrock.${normalizeBedrockRegion(region)}.amazonaws.com`;
 }

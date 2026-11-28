@@ -19,7 +19,7 @@ export type SingleTextEmbeddingProtocol = "clova-v2";
  * shape are chosen per MODEL family, not per provider — see
  * `open-sse/handlers/embeddings.ts` for the four Bedrock shapes.
  */
-export type NativeInvokeEmbeddingProtocol = "bedrock-invoke";
+export type NativeInvokeEmbeddingProtocol = "bedrock-invoke" | "vertex-predict";
 
 export interface EmbeddingModel {
   id: string;
@@ -222,6 +222,28 @@ export const EMBEDDING_PROVIDERS: Record<string, EmbeddingProvider> = {
     models: [
       { id: "text-embedding-3-small", name: "Text Embedding 3 Small (GitHub)", dimensions: 1536 },
       { id: "text-embedding-ada-002", name: "Text Embedding Ada 002 (GitHub)", dimensions: 1536 },
+    ],
+  },
+
+  /**
+   * Vertex AI text embeddings through the publisher `:predict` API with a service-account token.
+   * `baseUrl` is only a marker: the real URL is built from the connection's project and region
+   * (see `open-sse/handlers/vertexEmbeddings.ts`). Express-mode API keys are not supported.
+   */
+  vertex: {
+    id: "vertex",
+    baseUrl: "https://aiplatform.googleapis.com/v1/publishers/google/models/{model}:predict",
+    authType: "oauth",
+    authHeader: "bearer",
+    nativeInvokeProtocol: "vertex-predict",
+    models: [
+      { id: "text-embedding-005", name: "Text Embedding 005 (Vertex)", dimensions: 768 },
+      {
+        id: "text-multilingual-embedding-002",
+        name: "Text Multilingual Embedding 002 (Vertex)",
+        dimensions: 768,
+      },
+      { id: "gemini-embedding-001", name: "Gemini Embedding 001 (Vertex)", dimensions: 3072 },
     ],
   },
 

@@ -1,0 +1,1 @@
+- **feat(embeddings):** `POST /v1/embeddings` accepts Vertex AI text embedding models (`vertex/text-embedding-005`, `vertex/text-multilingual-embedding-002`, `vertex/gemini-embedding-001`) through a Vertex Service Account connection. Usage is estimated locally. Only used when you name a `vertex/` model.

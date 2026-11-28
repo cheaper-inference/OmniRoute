@@ -13,7 +13,11 @@ import { randomUUID } from "node:crypto";
 import { BaseExecutor } from "./base.ts";
 import { opaqueTokenFingerprint } from "../utils/opaqueTokenFingerprint.ts";
 import { PROVIDERS } from "../config/constants.ts";
-import { buildBedrockNativeConverseUrl, resolveBedrockRegion } from "../config/bedrock.ts";
+import {
+  buildBedrockNativeConverseUrl,
+  getBedrockIamKeys,
+  resolveBedrockRegion,
+} from "../config/bedrock.ts";
 import * as prl from "../utils/providerRequestLogging.ts";
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
 import { normalizeClaudeAdaptiveThinking } from "../services/claudeAdaptiveThinking.ts";
@@ -952,14 +956,25 @@ export class BedrockExecutor extends BaseExecutor {
   buildHeaders(credentials) {
     return {
       "Content-Type": "application/json",
-      Authorization: credentials?.apiKey ? "Bearer ***" : "",
+      Authorization: credentials?.apiKey
+        ? getBedrockIamKeys(credentials)
+          ? "AWS4-HMAC-SHA256 ***"
+          : "Bearer ***"
+        : "",
     };
   }
 
   createClient(credentials): BedrockClientLike {
     const region = resolveBedrockRegion(credentials?.providerSpecificData);
     const customUserAgent = getCustomUserAgent(credentials?.providerSpecificData);
-    const keyFingerprint = opaqueTokenFingerprint(credentials.apiKey);
+    // IAM static keys (opt-in by data): the SDK signs with SigV4 instead of sending a bearer key.
+    const iam = getBedrockIamKeys(credentials);
+    // The IAM key id and session token are not in the API key, so they must change the cache key.
+    const keyFingerprint = opaqueTokenFingerprint(
+      iam
+        ? `${credentials.apiKey}\0${iam.accessKeyId}\0${iam.sessionToken ?? ""}`
+        : credentials.apiKey
+    );
     const cacheKey = JSON.stringify([region, customUserAgent, keyFingerprint]);
     const cached = this.clients.get(cacheKey);
     if (cached) return cached;
@@ -968,8 +983,9 @@ export class BedrockExecutor extends BaseExecutor {
       ? this.clientFactory(credentials)
       : new BedrockRuntimeClient({
           region,
-          token: { token: credentials.apiKey },
-          authSchemePreference: ["httpBearerAuth"],
+          ...(iam
+            ? { credentials: iam }
+            : { token: { token: credentials.apiKey }, authSchemePreference: ["httpBearerAuth"] }),
           maxAttempts: 1,
           ...(customUserAgent ? { customUserAgent } : {}),
         });
