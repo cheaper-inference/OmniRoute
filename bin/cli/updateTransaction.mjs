@@ -1344,16 +1344,20 @@ export async function launchManagedUpdateCoordinator({ plan, runtime, environmen
   const planFile = join(opDir, planFileName(plan.operationId));
   writeFileSync(planFile, `${JSON.stringify({ plan, runtime })}\n`, { mode: 0o600 });
 
-  createStateStore(runtime.dataDir, plan.operationId).record({
+  const store = createStateStore(runtime.dataDir, plan.operationId);
+  const startedAt = new Date().toISOString();
+  const launchState = (patch) => ({
     operationId: plan.operationId,
     status: "running",
     phase: "preflight",
     previousVersion: plan.previousVersion,
     targetVersion: plan.targetVersion,
     runningVersion: null,
-    startedAt: new Date().toISOString(),
+    startedAt,
+    ...patch,
     updatedAt: new Date().toISOString(),
   });
+  store.record(launchState({}));
 
   const logFd = openSync(join(opDir, "coordinator.log"), "a", 0o600);
   try {
@@ -1364,11 +1368,40 @@ export async function launchManagedUpdateCoordinator({ plan, runtime, environmen
       stdio: ["ignore", logFd, logFd],
       windowsHide: true,
     });
+    // `spawn()` reports a failure to create the process as an `error` event, never as an
+    // exception: wait for the process to exist before saying the update was accepted.
+    await childHasSpawned(child);
     child.unref?.();
+  } catch (err) {
+    // No coordinator exists to finish this operation, so the record must not stay "running".
+    try {
+      store.record(
+        launchState({
+          status: "unsupported",
+          phase: "finished",
+          reason: "launch-failed",
+          refused: true,
+        })
+      );
+    } catch {
+      // the launch failure itself is what the caller learns
+    }
+    const error = new Error("Could not start the update coordinator", { cause: err });
+    error.code = "launch-failed";
+    throw error;
   } finally {
     closeSync(logFd);
   }
   return { operationId: plan.operationId };
+}
+
+// The `error` listener stays attached on purpose: an error after a successful spawn (a failed
+// signal, say) must not become an unhandled event in the server or the CLI.
+function childHasSpawned(child) {
+  return new Promise((done, fail) => {
+    child.on("error", fail);
+    child.once("spawn", done);
+  });
 }
 
 /**

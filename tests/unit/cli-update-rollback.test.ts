@@ -8,6 +8,7 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { EventEmitter } from "node:events";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -841,7 +842,9 @@ test("launch copies the coordinator out of the package tree and spawns it detach
       {
         spawn: (cmd: string, args: string[], options: SpawnOptionsLike) => {
           spawned.push({ cmd, args, options });
-          return { pid: 777, unref() {} };
+          const child = Object.assign(new EventEmitter(), { pid: 777, unref() {} });
+          setImmediate(() => child.emit("spawn"));
+          return child;
         },
       }
     );

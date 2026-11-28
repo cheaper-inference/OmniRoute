@@ -5,6 +5,7 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { EventEmitter } from "node:events";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -689,5 +690,101 @@ test("the CLI explains the npm prefix refusal in words", async () => {
     assert.match(lines.join("\n"), /different global location/);
   } finally {
     Object.assign(console, orig);
+  }
+});
+
+// ---------------------------------------------------------------------------------------
+// Thread 8: a coordinator that cannot be spawned is a recorded launch failure.
+// ---------------------------------------------------------------------------------------
+
+class FakeChild extends EventEmitter {
+  pid = 777;
+  unrefs = 0;
+  unref() {
+    this.unrefs += 1;
+  }
+}
+
+function launchInput(dataDir: string, nodePath = "/usr/bin/node") {
+  return {
+    plan: makePlan(),
+    runtime: {
+      dataDir,
+      packageRoot: "/usr/lib/node_modules/omniroute",
+      shape: "daemon",
+      port: 20128,
+      oldPids: [4100],
+      nodePath,
+      npmPath: "npm",
+    },
+    environment: { PATH: "/usr/bin" },
+  };
+}
+
+test("launch reports acceptance only after the child has spawned, and detaches it then", async () => {
+  const dataDir = tmp("omni-tx-launch-ok-");
+  try {
+    const child = new FakeChild();
+    let spawnedEmitted = false;
+    const launched = tx.launchManagedUpdateCoordinator(launchInput(dataDir), {
+      spawn: () => {
+        setTimeout(() => {
+          spawnedEmitted = true;
+          child.emit("spawn");
+        }, 20);
+        return child;
+      },
+    });
+    const result = await launched;
+    assert.equal(spawnedEmitted, true, "acceptance waited for the spawn event");
+    assert.equal(result.operationId, OPERATION_ID);
+    assert.equal(child.unrefs, 1);
+    // A late error on a child that did start must not become an unhandled event.
+    child.emit("error", new Error("late"));
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
+
+test("a spawn error is recorded as a terminal launch failure and rejects the launch", async () => {
+  const dataDir = tmp("omni-tx-launch-fail-");
+  try {
+    await assert.rejects(
+      tx.launchManagedUpdateCoordinator(launchInput(dataDir), {
+        spawn: () => {
+          const child = new FakeChild();
+          setTimeout(
+            () => child.emit("error", Object.assign(new Error("spawn ENOENT"), { code: "ENOENT" })),
+            10
+          );
+          return child;
+        },
+      }),
+      (err: { code?: string }) => err.code === "launch-failed"
+    );
+    const state = tx.readManagedUpdateState(dataDir, OPERATION_ID);
+    assert.equal(state.status, "unsupported");
+    assert.equal(state.phase, "finished");
+    assert.equal(state.reason, "launch-failed");
+    assert.equal(state.refused, true);
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
+
+test("a node binary that does not exist is a launch failure, not an uncaught exception", async () => {
+  const dataDir = tmp("omni-tx-launch-real-");
+  const runtimeRoot = tmp("omni-tx-launch-real-pkg-");
+  try {
+    const input = launchInput(dataDir, path.join(runtimeRoot, "no-such-node"));
+    input.runtime.packageRoot = runtimeRoot;
+    await assert.rejects(
+      tx.launchManagedUpdateCoordinator(input),
+      (err: { code?: string }) => err.code === "launch-failed"
+    );
+    assert.equal(tx.readManagedUpdateState(dataDir, OPERATION_ID).reason, "launch-failed");
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+    fs.rmSync(runtimeRoot, { recursive: true, force: true });
   }
 });
