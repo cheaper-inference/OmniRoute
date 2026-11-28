@@ -272,6 +272,11 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
             args,
             extra
           );
+          if (name === "omniroute_ccr_retrieve") {
+            const { mode } = toRecord(args);
+            // The retrieval handler enforces its own byte limit for full blocks.
+            if (mode === undefined || mode === "full") return result;
+          }
           if (Array.isArray(result?.content)) {
             for (const block of result.content) {
               if (block && block.type === "text" && typeof block.text === "string") {

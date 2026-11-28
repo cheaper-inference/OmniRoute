@@ -1891,6 +1891,12 @@ async function getApiKeyMetadataByHash(
   return metadata;
 }
 
+async function getModelPolicyMetadata(key: string, requiredKeyId?: string) {
+  if (!requiredKeyId) return getApiKeyMetadata(key);
+  const metadata = await getRequiredApiKeyMetadata(key, requiredKeyId);
+  return metadata?.id === requiredKeyId ? metadata : null;
+}
+
 /**
  * Check if a model is allowed for a given API key
  * @param {string} key - The API key
@@ -1919,20 +1925,19 @@ export async function isModelAllowedForKey(
     : `${key}:${modelId}`;
   const now = Date.now();
   const catalogGeneration = getModelCatalogCacheVersion();
-  const usesSettingDependentClaudeRouting =
-    isPotentialUnprefixedClaudeCodeModel(modelId) ||
-    (typeof resolvedModelId === "string" && isPotentialUnprefixedClaudeCodeModel(resolvedModelId));
+  const cacheable =
+    !requiredKeyId &&
+    !isPotentialUnprefixedClaudeCodeModel(modelId) &&
+    !(typeof resolvedModelId === "string" && isPotentialUnprefixedClaudeCodeModel(resolvedModelId));
 
   // Check permission cache
   const cached = getCachedModelPermission(cacheKey, now, catalogGeneration);
-  if (!requiredKeyId && !usesSettingDependentClaudeRouting && cached !== undefined) {
+  if (cacheable && cached !== undefined) {
     return cached;
   }
 
-  const metadata = requiredKeyId
-    ? await getRequiredApiKeyMetadata(key, requiredKeyId)
-    : await getApiKeyMetadata(key);
-  if (!metadata || (requiredKeyId && metadata.id !== requiredKeyId)) return false;
+  const metadata = await getModelPolicyMetadata(key, requiredKeyId);
+  if (!metadata) return false;
 
   const decision = await evaluateModelAccess(
     metadata,
@@ -1949,7 +1954,7 @@ export async function isModelAllowedForKey(
   );
 
   // Preserve the cache boundary: early block/publication denials were never cached.
-  if (!requiredKeyId && decision.reason === "permissions" && !usesSettingDependentClaudeRouting) {
+  if (cacheable && decision.reason === "permissions") {
     evictModelPermissionCache();
     setCachedModelPermission(cacheKey, decision.allowed, now, catalogGeneration);
   }

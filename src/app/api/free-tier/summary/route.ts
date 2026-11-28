@@ -7,7 +7,7 @@ import {
   FREE_MODEL_BUDGETS,
 } from "@omniroute/open-sse/config/freeModelCatalog.data.ts";
 import type { MergedEntry } from "@/lib/radar/applyFeed";
-import { getCatalogWithoutOverlay, getRadarCatalog } from "@/lib/radar";
+import { getRadarCatalog } from "@/lib/radar";
 import { sumUsageTokensThisMonth } from "@/lib/db/usageSummary";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
 import { listNoCredentialProviders } from "@/shared/utils/providerCredentialRequirement";
@@ -60,9 +60,7 @@ export async function GET(req: Request): Promise<Response> {
   const url = new URL(req.url);
   const excludeTosAvoid = url.searchParams.get("excludeTosAvoid") === "1";
 
-  // Same catalog resolution as the dashboard screens: one source of
-  // truth, with meta === null meaning "the baseline answered" (flag off, no
-  // cache, or corrupt cache).
+  // Resolve feed age and local model state in the shared catalog accessor.
   const { entries, meta } = getRadarCatalog();
 
   // Entitlement follows the feed server's own download-time decision: the
@@ -70,14 +68,7 @@ export async function GET(req: Request): Promise<Response> {
   // live feed is supporter-key content, so it only reaches callers this
   // instance has authenticated — never anonymous visitors, or an exposed
   // instance would re-publish the paid feed for free.
-  // A feed built before the catalog this release ships is not an overlay, it is a
-  // regression: the totals would be recomputed from data older than the baseline
-  // the operator installed. An unknown build date — a cache row written before the
-  // column existed — counts as older: unknown never outranks known.
-  const overlayIsFresh =
-    meta !== null &&
-    meta.generatedAt !== null &&
-    meta.generatedAt.slice(0, 10) >= FREE_CATALOG_CURATED_AT;
+  const overlayIsFresh = meta !== null && !meta.olderThanRelease;
 
   // #13679: computed once and reused below to also gate the operator-specific
   // usage fields — this endpoint ships an unconditional wildcard CORS header
@@ -88,18 +79,11 @@ export async function GET(req: Request): Promise<Response> {
   const authed = await isAuthenticated(req);
   const serveOverlay = overlayIsFresh && (meta.tier !== "live" || authed);
 
-  // Withheld only because it is stale: drop the feed, keep the operator's own
-  // local state. Falling back to the raw baseline here would resurrect models the
-  // operator disabled or tombstoned.
-  const overlayWithheldAsStale = meta !== null && !overlayIsFresh;
-
-  const totals = serveOverlay
-    ? computeFreeModelTotals({ excludeTosAvoid, entries: entries.map(toBudgetEntry) })
-    : overlayWithheldAsStale
-      ? computeFreeModelTotals({
-          excludeTosAvoid,
-          entries: getCatalogWithoutOverlay().map(toBudgetEntry),
-        })
+  // The accessor has already applied local model state to the shipped catalog
+  // when the feed is stale.
+  const totals =
+    serveOverlay || meta?.olderThanRelease
+      ? computeFreeModelTotals({ excludeTosAvoid, entries: entries.map(toBudgetEntry) })
       : computeFreeModelTotals({ excludeTosAvoid });
 
   // #13679: usedThisMonth/remaining reveal the operator's own local usage —

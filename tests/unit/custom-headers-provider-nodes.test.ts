@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-custom-headers-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -11,6 +12,7 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const providerNodesRoute = await import("../../src/app/api/provider-nodes/route.ts");
 const providerNodesIdRoute = await import("../../src/app/api/provider-nodes/[id]/route.ts");
+const providerConnectionRoute = await import("../../src/app/api/providers/[id]/route.ts");
 const { OPENAI_COMPATIBLE_PREFIX } = await import("../../src/shared/constants/providers.ts");
 const { createProviderNodeSchema, updateProviderNodeSchema } =
   await import("../../src/shared/validation/schemas.ts");
@@ -234,6 +236,227 @@ test("provider nodes route update can clear customHeaders by passing null", asyn
   assert.equal(updateResponse.status, 200);
   assert.equal(updated.node.customHeaders, null);
 });
+
+async function connectionHeaders(connectionId: string) {
+  const connection = (await providersDb.getProviderConnectionById(connectionId)) as {
+    providerSpecificData: { customHeaders?: Record<string, string> };
+  };
+  return connection.providerSpecificData.customHeaders;
+}
+
+type HeaderMap = Record<string, string>;
+type NodePayload = { node: { id: string; customHeaders: HeaderMap | null } };
+
+// #21227: the dashboard Edit node modal has no header editor, so its payload omits customHeaders.
+const EDIT_MODAL_BODY = {
+  name: "Gateway",
+  prefix: "gw21227",
+  baseUrl: "https://gw.example.com/v1",
+};
+
+test("a node save without customHeaders keeps the node's and its connections' headers", async () => {
+  const id = "anthropic-compatible-headers21227a";
+  await providersDb.createProviderNode({
+    id,
+    type: "anthropic-compatible",
+    ...EDIT_MODAL_BODY,
+    customHeaders: { "X-Node": "node-value" },
+  });
+  const connection = await providersDb.createProviderConnection({
+    provider: id,
+    authType: "apikey",
+    name: "conn",
+    apiKey: "sk-1",
+    providerSpecificData: { customHeaders: { "X-Node": "node-value" } },
+  });
+
+  const response = await providerNodesIdRoute.PUT(makeUpdateRequest(id, EDIT_MODAL_BODY), {
+    params: Promise.resolve({ id }),
+  });
+  const body = (await response.json()) as { node: { customHeaders: unknown } };
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(body.node.customHeaders, { "X-Node": "node-value" });
+  assert.deepEqual(await connectionHeaders(connection.id), { "X-Node": "node-value" });
+});
+
+test("a node save without customHeaders keeps connection-level headers", async () => {
+  const id = "anthropic-compatible-headers21227b";
+  await providersDb.createProviderNode({ id, type: "anthropic-compatible", ...EDIT_MODAL_BODY });
+  const connection = await providersDb.createProviderConnection({
+    provider: id,
+    authType: "apikey",
+    name: "conn",
+    apiKey: "sk-1",
+    providerSpecificData: { customHeaders: { "x-test": "1" } },
+  });
+  const put = (body: Record<string, unknown>) =>
+    providerNodesIdRoute.PUT(makeUpdateRequest(id, body), { params: Promise.resolve({ id }) });
+
+  assert.equal((await put(EDIT_MODAL_BODY)).status, 200);
+  assert.deepEqual(await connectionHeaders(connection.id), { "x-test": "1" });
+
+  // A legacy key absent from the previous node map remains a connection override.
+  assert.equal((await put({ ...EDIT_MODAL_BODY, customHeaders: { "X-Test": "1" } })).status, 200);
+  assert.deepEqual(await connectionHeaders(connection.id), { "x-test": "1" });
+  assert.equal((await put({ ...EDIT_MODAL_BODY, customHeaders: null })).status, 200);
+  assert.deepEqual(await connectionHeaders(connection.id), { "x-test": "1" });
+});
+
+test("an OpenAI-compatible node save without customHeaders keeps inherited and own headers", async () => {
+  const editBody = { ...EDIT_MODAL_BODY, apiType: "chat" };
+  const nodeHeaders = { "X-Node-Header": "node-val" };
+  const createResponse = await providerNodesRoute.POST(
+    makeRequest({ ...editBody, customHeaders: nodeHeaders })
+  );
+  assert.equal(createResponse.status, 201);
+  const { node } = (await createResponse.json()) as NodePayload;
+  const headers = { ...nodeHeaders, "X-Conn-Header": "conn-val" };
+  const connection = await createHeaderConnection(node.id, "own", headers);
+
+  const updated = await editNodeHeaders(node.id, { ...editBody, name: "Node Renamed" });
+  assert.deepEqual(updated.customHeaders, nodeHeaders);
+  assert.deepEqual(await connectionHeaders(connection.id), headers);
+});
+
+function createHeaderConnection(provider: string, name: string, customHeaders: HeaderMap) {
+  return providersDb.createProviderConnection({
+    provider,
+    authType: "apikey",
+    name,
+    apiKey: `fixture-key-${name}`,
+    providerSpecificData: { customHeaders },
+  });
+}
+
+async function editNodeHeaders(id: string, body: Record<string, unknown>) {
+  const response = await providerNodesIdRoute.PUT(makeUpdateRequest(id, body), {
+    params: Promise.resolve({ id }),
+  });
+  assert.equal(response.status, 200);
+  return ((await response.json()) as NodePayload).node;
+}
+
+async function createHeaderEditFixture(type: "openai-compatible" | "anthropic-compatible") {
+  const body = {
+    ...EDIT_MODAL_BODY,
+    type,
+    ...(type === "openai-compatible" && { apiType: "chat" }),
+  };
+  const initialHeaders = {
+    "X-21227-Changed": "before",
+    "X-21227-Removed": "old",
+    "X-21227-Shared": "node",
+    "X-21227-Same": "same",
+  };
+  const response = await providerNodesRoute.POST(
+    makeRequest({ ...body, customHeaders: initialHeaders })
+  );
+  assert.equal(response.status, 201);
+  const { node } = (await response.json()) as NodePayload;
+
+  // Legacy copies with the same value are inherited even when the casing differs.
+  const legacyHeaders = { ...initialHeaders, "x-21227-changed": "before" };
+  const inherited = await createHeaderConnection(node.id, "inherited", legacyHeaders);
+  const overridden = await createHeaderConnection(node.id, "overridden", {
+    "x-21227-changed": "before",
+    "X-21227-Removed": "old",
+  });
+  assert.notEqual(inherited.id, overridden.id);
+  const overrideHeaders = {
+    "x-21227-shared": "connection",
+    "x-21227-same": "same",
+    "X-21227-Own": "own",
+  };
+  const write = await providerConnectionRoute.PUT(
+    await makeManagementSessionRequest(`http://localhost/api/providers/${overridden.id}`, {
+      method: "PUT",
+      body: {
+        providerSpecificData: {
+          customHeaders: {
+            "x-21227-changed": "before",
+            "X-21227-Removed": "old",
+            ...overrideHeaders,
+          },
+        },
+      },
+    }),
+    { params: Promise.resolve({ id: overridden.id }) }
+  );
+  assert.equal(write.status, 200, await write.text());
+
+  return {
+    node,
+    body,
+    inherited,
+    overridden,
+    overrideHeaders,
+  };
+}
+
+async function assertConnectionHeaders(
+  provider: string,
+  connectionId: string,
+  expected: HeaderMap
+) {
+  const stored = await connectionHeaders(connectionId);
+  assert.deepEqual(stored, Object.keys(expected).length ? expected : undefined);
+  const executor = new DefaultExecutor(provider);
+  const headers = executor.buildHeaders(
+    { apiKey: "fixture-key", providerSpecificData: { customHeaders: stored } },
+    true
+  );
+  assert.deepEqual(
+    Object.fromEntries(
+      Object.entries(headers).filter(([name]) => name.toLowerCase().startsWith("x-21227-"))
+    ),
+    expected
+  );
+}
+
+for (const type of ["openai-compatible", "anthropic-compatible"] as const) {
+  test(`${type}: consecutive explicit header edits update only inherited values`, async () => {
+    const { node, body, inherited, overridden, overrideHeaders } =
+      await createHeaderEditFixture(type);
+    const first = {
+      "X-21227-Changed": "second",
+      "X-21227-Shared": "connection",
+      "X-21227-Same": "first node edit",
+    };
+    const second = { "x-21227-changed": "third", "X-21227-Shared": "third node value" };
+
+    assert.deepEqual(
+      (await editNodeHeaders(node.id, { ...body, customHeaders: first })).customHeaders,
+      first
+    );
+    await assertConnectionHeaders(node.id, inherited.id, first);
+    await assertConnectionHeaders(node.id, overridden.id, {
+      "X-21227-Changed": "second",
+      ...overrideHeaders,
+    });
+
+    assert.deepEqual(
+      (await editNodeHeaders(node.id, { ...body, customHeaders: second })).customHeaders,
+      second
+    );
+    await assertConnectionHeaders(node.id, inherited.id, second);
+    await assertConnectionHeaders(node.id, overridden.id, {
+      "x-21227-changed": "third",
+      ...overrideHeaders,
+    });
+  });
+
+  for (const clear of [null, {}]) {
+    test(`${type}: clearing headers with ${JSON.stringify(clear)} keeps connection overrides`, async () => {
+      const { node, body, inherited, overridden, overrideHeaders } =
+        await createHeaderEditFixture(type);
+      const updated = await editNodeHeaders(node.id, { ...body, customHeaders: clear });
+      assert.deepEqual(updated.customHeaders, clear);
+      await assertConnectionHeaders(node.id, inherited.id, {});
+      await assertConnectionHeaders(node.id, overridden.id, overrideHeaders);
+    });
+  }
+}
 
 test("DefaultExecutor.buildHeaders applies customHeaders from providerSpecificData", () => {
   const executor = new DefaultExecutor("openai-compatible-test");

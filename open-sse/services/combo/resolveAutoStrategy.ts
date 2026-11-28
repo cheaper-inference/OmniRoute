@@ -24,6 +24,7 @@ import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
 import { parseAutoConfig } from "./autoConfig.ts";
 import { isComboEmptyPoolNoEligibleTargetsEnabled } from "./protectedPriorityStopStatus.ts";
 import { dedupeTargetsByExecutionKey } from "./comboData.ts";
+import { costKey } from "./candidateCost.ts";
 import { restoreIncomingOrder } from "./rungOrder.ts";
 import {
   getModelContextLimitForModelString,
@@ -173,6 +174,45 @@ function emptyCandidatePoolResponse(poolSize: number, comboName: string): Respon
       terminalReason: "no_eligible_targets",
     },
     { code: "no_eligible_targets", type: "api_error" }
+  );
+}
+
+function estimateCandidateCost(candidate: AutoProviderCandidate, estimatedInputTokens: number) {
+  const tokens = estimatedInputTokens > 0 ? estimatedInputTokens : 1000;
+  return (candidate.costPer1MTokens * tokens) / 1_000_000;
+}
+
+function filterCandidatesByBudget(
+  candidates: AutoProviderCandidate[],
+  budgetCap: number | undefined,
+  strict: boolean,
+  estimatedInputTokens: number
+): AutoProviderCandidate[] | Response {
+  if (!budgetCap || candidates.length === 0) return candidates;
+  const cost = (candidate: AutoProviderCandidate) =>
+    estimateCandidateCost(candidate, estimatedInputTokens);
+  const affordable = candidates.filter((candidate) => cost(candidate) <= budgetCap);
+  if (affordable.length > 0) return affordable;
+
+  const cheapest = Math.min(...candidates.map(cost));
+  if (strict) return errorResponse(402, new BudgetExceededError(budgetCap, cheapest).message);
+  return candidates.filter((candidate) => cost(candidate) === cheapest);
+}
+
+function filterBudgetFallbackTargets(
+  targets: ResolvedComboTarget[],
+  candidates: AutoProviderCandidate[],
+  budgetCap: number,
+  estimatedInputTokens: number
+) {
+  // The tail includes unpinned targets, so match the cost by provider and model.
+  const affordableModels = new Set(
+    candidates
+      .filter((candidate) => estimateCandidateCost(candidate, estimatedInputTokens) <= budgetCap)
+      .map((candidate) => costKey(candidate.provider, candidate.modelStr))
+  );
+  return targets.filter((target) =>
+    affordableModels.has(costKey(target.provider, target.modelStr))
   );
 }
 
@@ -448,44 +488,37 @@ export async function resolveAutoStrategyOrder(
     };
   }
   const hasAccountPreferences = Object.keys(accountPreferences).length > 0;
-  let routableCandidates = orderAccountPreferences(unfilteredCandidates, accountPreferences);
+  let preferredCandidates = orderAccountPreferences(unfilteredCandidates, accountPreferences);
   if (hasAccountPreferences) {
-    const eligibleCandidates = routableCandidates.filter(
+    const eligibleCandidates = preferredCandidates.filter(
       (candidate) =>
         candidate.circuitBreakerState !== "OPEN" &&
         (!candidatePool.length || candidatePool.includes(candidate.provider))
     );
     // A soft status penalty (#4540) is last-resort, never an exclusion: penalised
     // accounts follow every healthy account, each group kept in tier order.
-    routableCandidates = [
+    preferredCandidates = [
       ...eligibleCandidates.filter((candidate) => !candidate.statusPenalty),
       ...eligibleCandidates.filter((candidate) => candidate.statusPenalty),
     ];
-    if (budgetCap && routableCandidates.length) {
-      const tokens = estimatedInputTokens > 0 ? estimatedInputTokens : 1000;
-      const cost = (candidate: AutoProviderCandidate) =>
-        (candidate.costPer1MTokens * tokens) / 1_000_000;
-      const affordable = routableCandidates.filter((candidate) => cost(candidate) <= budgetCap);
-      if (affordable.length) {
-        routableCandidates = affordable;
-      } else if (budgetFallback === "strict") {
-        return {
-          earlyResponse: errorResponse(
-            402,
-            new BudgetExceededError(budgetCap, Math.min(...routableCandidates.map(cost))).message
-          ),
-        };
-      } else {
-        const cheapest = Math.min(...routableCandidates.map(cost));
-        routableCandidates = routableCandidates.filter((candidate) => cost(candidate) === cheapest);
-      }
-    }
   }
-  if (hasAccountPreferences && routableCandidates.length === 0) {
+  const strictBudgetCap = budgetFallback === "strict" ? budgetCap : undefined;
+  const restrictToRoutable = hasAccountPreferences || Boolean(strictBudgetCap);
+  // Explicit routers such as LKGP can select without calling the budget-aware rules engine.
+  const routableCandidates = filterCandidatesByBudget(
+    preferredCandidates,
+    restrictToRoutable ? budgetCap : undefined,
+    Boolean(strictBudgetCap),
+    estimatedInputTokens
+  );
+  if (routableCandidates instanceof Response) return { earlyResponse: routableCandidates };
+  if (restrictToRoutable && routableCandidates.length === 0) {
     return {
       earlyResponse: unavailableResponse(
         503,
-        "No eligible accounts remain for this combo's account preferences"
+        hasAccountPreferences
+          ? "No eligible accounts remain for this combo's account preferences"
+          : "No candidates are available for this combo's strict budget check"
       ),
     };
   }
@@ -592,7 +625,7 @@ export async function resolveAutoStrategyOrder(
     const routableKeys = new Set(routableCandidates.map((candidate) => candidate.executionKey));
     const rankedTargets = orderAccountPreferences(
       scoredTargets
-        .filter((entry) => !hasAccountPreferences || routableKeys.has(entry.target.executionKey))
+        .filter((entry) => !restrictToRoutable || routableKeys.has(entry.target.executionKey))
         .map((entry) => entry.target),
       accountPreferences
     );
@@ -607,7 +640,7 @@ export async function resolveAutoStrategyOrder(
         );
       }) ||
       rankedTargets[0] ||
-      eligibleTargets[0];
+      (strictBudgetCap ? undefined : eligibleTargets[0]);
     if (!selectedTarget) {
       return {
         earlyResponse: unavailableResponse(
@@ -627,8 +660,17 @@ export async function resolveAutoStrategyOrder(
     const headTargets = preserveRungOrder
       ? restoreIncomingOrder(rankedTargets, eligibleTargets)
       : [selectedTarget, ...rankedTargets];
+    let fallbackTargets = hasAccountPreferences ? [] : eligibleTargets;
+    if (strictBudgetCap) {
+      fallbackTargets = filterBudgetFallbackTargets(
+        fallbackTargets,
+        candidates,
+        strictBudgetCap,
+        estimatedInputTokens
+      );
+    }
     orderedTargets = dedupeTargetsByExecutionKey(
-      [...headTargets, ...(hasAccountPreferences ? [] : eligibleTargets)].filter(
+      [...headTargets, ...fallbackTargets].filter(
         (entry): entry is ResolvedComboTarget => entry !== undefined && entry !== null
       )
     );
