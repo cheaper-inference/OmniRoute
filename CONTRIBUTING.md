@@ -401,6 +401,45 @@ Write unit tests in `tests/unit/` covering at minimum:
 
 ---
 
+## Fix a free plan in 10 minutes
+
+1. Open the provider's official page. Copy the sentence or JSON field that shows the change.
+2. Find the row in `open-sse/config/freeModelCatalog.data.ts`. Update `monthlyTokens`, `freeType`,
+   or the IDs as needed. Update the `// evidence:` comment with the URL, date, and quote. Set
+   `FREE_CATALOG_CURATED_AT` to the date you checked the source.
+3. For a row that still grants free access, run the helper with the updated provider and model IDs
+   and the official source URL.
+
+   ```bash
+   npm run quality:evidence-stub -- --provider '<id>' --model '<id>' --url '<url>' --source-type public-page
+   ```
+
+   Add the JSON to the `evidence` array in `config/quality/free-catalog-evidence.json`, replacing
+   any entry for that row. Fill every `TODO` with the source excerpt if requested, a summary,
+   the limitations, and your name or GitHub handle. Remove the row's old key from `debt` if present.
+   Remove stale records for model IDs that were removed, renamed, or marked `discontinued`.
+
+4. In the same PR, update the provider's probe in `scripts/quality/catalog-drift/manifest.json`.
+   Update the expected phrase or JSON assertion, `excerpt.sha256_16`, and `backs` as applicable.
+   Add a probe if the provider has none. Use a public GET to a page or API on the provider's
+   own domain. If today's source contradicts the catalog and the fix has to wait, do not change
+   `backs` to hide it. Say so in the issue and in the PR description. If the probe still detects
+   the same change after an issue is closed as completed, the detector comments that the probe
+   still sees the old baseline.
+5. Run both checks.
+
+   ```bash
+   npm run check:free-catalog-evidence
+   node --import tsx/esm --test tests/unit/catalog-drift-live-manifest.test.ts
+   ```
+
+6. Open the PR and add `Closes #<issue>` to its description.
+
+[Report a change to a free plan](https://github.com/cheaper-inference/OmniRoute/issues/new?template=free_tier_change.yml).
+When issue writing is enabled, the daily detector opens `catalog-drift` issues that anyone can pick up.
+
+---
+
 ## Pull Request Checklist
 
 - [ ] Tests pass (`npm test`)

@@ -1,0 +1,74 @@
+name: Free plan changed
+description: Report a change to a provider's free plan using an official source
+title: "free-tier: "
+labels: ["free-tier-report"]
+body:
+  - type: input
+    id: provider
+    attributes:
+      label: Provider
+    validations:
+      required: true
+
+  - type: textarea
+    id: models
+    attributes:
+      label: Affected models
+      description: List the model IDs if you know them.
+
+  - type: dropdown
+    id: change
+    attributes:
+      label: What changed?
+      options:
+        - Quota went down
+        - Quota went up
+        - Free plan ended
+        - New free models
+        - Model no longer free
+        - New requirement (card, phone, deposit, region…)
+        - Provider we don't list has a free plan
+        - Limited-time promotion
+    validations:
+      required: true
+
+  - type: input
+    id: source_url
+    attributes:
+      label: Official source URL
+      description: "A page on the provider's own domain. Social posts and lists are leads, not sources."
+    validations:
+      required: true
+
+  - type: textarea
+    id: quote
+    attributes:
+      label: Quote from the source
+      description: The sentence or JSON field that shows the change, copied from that page.
+    validations:
+      required: true
+
+  - type: input
+    id: checked_on
+    attributes:
+      label: Date checked (YYYY-MM-DD)
+      placeholder: YYYY-MM-DD
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: pr
+    attributes:
+      label: Pull request
+      options:
+        - label: I can open the pull request myself
+
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: Before submitting
+      options:
+        - label: I read this on the provider's own page today
+          required: true
+        - label: This is not a referral code, shared key, multi-account trick or loophole
+          required: true
