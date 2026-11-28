@@ -153,6 +153,7 @@ import {
 } from "./chatHelpers";
 import { buildModalityBridgeResponseHeaders } from "@/lib/guardrails/modalityBridge/bridgeResponseHeaders";
 import { type VideoBridgeLog, deriveVideoBridgeLog } from "./chat/videoBridgeLog.ts";
+import { discardServerOnlyBodyFields } from "./chat/serverOnlyBodyFields.ts";
 import {
   resolveClientSessionId,
   resolveConversationId,
@@ -470,12 +471,7 @@ async function handleChatImplementation(
   if ((body = rejectPayload(body, request, reqId)) instanceof Response) return body;
   // Only the server's policy resolver may attach execution directives or route traces.
   // Discard lookalike JSON fields supplied by callers before evaluating any rule.
-  if (body && typeof body === "object") {
-    body = { ...body };
-    delete body._omnirouteReasoningRule;
-    delete body._omnirouteReasoningRouteTrace;
-    delete body._omniroutePreviousResponseResumed;
-  }
+  body = discardServerOnlyBodyFields(body);
 
   const sourceFormat = detectFormatFromUrl(body, request.url);
 
