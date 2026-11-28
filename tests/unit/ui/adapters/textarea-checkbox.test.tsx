@@ -75,10 +75,33 @@ describe("Textarea / Checkbox adapters", () => {
     expect(box.checked).toBe(true);
   });
 
-  it("Checkbox without label is just the control (custom layouts)", () => {
-    const { container } = render(<Checkbox aria-label="pick" />);
-    expect(container.querySelector("label")).toBeNull();
-    expect(container.querySelector("input[type=checkbox]")).not.toBeNull();
+  // #19961: the bare control is wrapped in a <label htmlFor> (and nothing else), so clicks on
+  // the decorative box reach the native input in custom layouts.
+  it("Checkbox without label is just the control (custom layouts), label-wrapped", () => {
+    const onChange = vi.fn();
+    const { container } = render(
+      <Checkbox aria-label="pick" className="shrink-0" onChange={onChange} />
+    );
+    const labels = container.querySelectorAll("label");
+    expect(labels).toHaveLength(1);
+    const label = labels[0];
+    expect(container.firstElementChild).toBe(label);
+    const input = container.querySelector("input[type=checkbox]") as HTMLInputElement;
+    expect(input).not.toBeNull();
+    expect(input.id).not.toBe("");
+    expect(label.htmlFor).toBe(input.id);
+    // the label wraps only the control: no kit row class, no text block
+    expect(label.className).toBe("");
+    expect(label.hasAttribute("data-slot")).toBe(false);
+    expect(label.children).toHaveLength(1);
+    const control = label.firstElementChild as HTMLElement;
+    expect(control.classList.contains("ci-checkbox__control")).toBe(true);
+    expect(control.classList.contains("shrink-0")).toBe(true);
+    expect(container.querySelector(".ci-checkbox__text")).toBeNull();
+    expect(container.querySelector(".ci-checkbox")).toBeNull();
+    fireEvent.click(container.querySelector(".ci-checkbox__box")!);
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(input.checked).toBe(true);
   });
 
   it("Checkbox forwards indeterminate to the kit's mixed state and clears it", () => {

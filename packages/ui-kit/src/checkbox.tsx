@@ -144,9 +144,18 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
 
     // No label/description/card → just the control, for custom layouts.
     if (label == null && description == null && !card) {
-      return cloneElement(control, {
-        className: cn("ci-checkbox__control", className),
-      });
+      // Wrap the bare control in a label: the decorative box renders above the
+      // native input, so without an explicit htmlFor association only a direct
+      // hit on the input toggles it and clicks on the visible box are swallowed.
+      // That made every bare checkbox dead in custom layouts (dashboard
+      // provider/model selection stopped responding in v3.8.53).
+      return (
+        <label htmlFor={inputId}>
+          {cloneElement(control, {
+            className: cn("ci-checkbox__control", className),
+          })}
+        </label>
+      );
     }
 
     const text = (label != null || description != null) && (
