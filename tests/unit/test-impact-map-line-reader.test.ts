@@ -26,6 +26,7 @@ function tmpFile(name: string): string {
 
 const SAMPLE = {
   generatedFrom: "import-graph",
+  testFileCount: 3,
   sources: {
     "open-sse/utils/error.ts": ["tests/unit/a.test.ts", "tests/unit/b.test.ts"],
     'src/quote"and\\back,slash.ts': ["tests/unit/new\nline.test.ts", "tests/unit/ünïcode.test.ts"],

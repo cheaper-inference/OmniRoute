@@ -38,6 +38,47 @@ test("unmapped source file → run all (fail-safe)", () => {
   assert.deepEqual(sel, ["__RUN_ALL__"]);
 });
 
+test("a PR CI selection larger than one unit shard defers to the full matrix", () => {
+  const source = "src/sse/services/auth.ts";
+  const map = {
+    testFileCount: 16,
+    sources: {
+      [source]: [
+        "tests/unit/auth-admin.test.ts",
+        "tests/unit/auth-keys.test.ts",
+        "tests/unit/sse-auth.test.ts",
+      ],
+    },
+  };
+  const deferrals: number[][] = [];
+  assert.deepEqual(
+    selectImpacted({
+      changed: [source],
+      map,
+      ciUnitShards: 8,
+      onCiDeferral: (selected: number, limit: number) => deferrals.push([selected, limit]),
+    }),
+    ["__RUN_ALL__"]
+  );
+  assert.deepEqual(deferrals, [[3, 2]]);
+  assert.deepEqual(selectImpacted({ changed: [source], map }), map.sources[source]);
+  assert.deepEqual(
+    selectImpacted({ changed: [source], map: { sources: map.sources }, ciUnitShards: 8 }),
+    map.sources[source]
+  );
+});
+
+test("a selection at the rounded shard size keeps its focused tests", () => {
+  assert.deepEqual(
+    selectImpacted({
+      changed: ["open-sse/services/combo.ts", "src/sse/services/auth.ts"],
+      map: { ...MAP, testFileCount: 9 },
+      ciUnitShards: 8,
+    }),
+    ["tests/unit/combo-routing-engine.test.ts", "tests/unit/sse-auth.test.ts"]
+  );
+});
+
 // The TIA step runs selected files via `node --test`, so it must only ever select
 // node:test unit files (the `test:unit` glob). vitest/.tsx/e2e/integration changes
 // must NOT be selected — running them under node:test was the 99-false-failure bug.
@@ -88,6 +129,11 @@ test("changed unit test under combo/ → run itself", () => {
     map: MAP,
   });
   assert.deepEqual(sel, ["tests/unit/combo/routing.test.ts"]);
+});
+
+test("changed unit test under chatcore/ → run itself", () => {
+  const path = "tests/unit/chatcore/response.test.ts";
+  assert.deepEqual(selectImpacted({ changed: [path], map: MAP }), [path]);
 });
 
 test("changed unit test under translator/ → run itself", () => {
