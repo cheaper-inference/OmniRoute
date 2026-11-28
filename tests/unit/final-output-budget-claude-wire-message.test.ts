@@ -49,3 +49,29 @@ test("OpenAI clients keep the provider-aware overflow message", () => {
   if (result.ok) return;
   assert.match(result.message, /^Input exceeds context window for opencode\/mimo-v2\.5-free: /);
 });
+
+test("a null context limit (unsourced placeholder window) never rejects on the window", () => {
+  const result = enforceFinalOutputTokenBudget({
+    ...base,
+    sourceFormat: "openai",
+    finalContextLimit: null,
+  });
+
+  assert.equal(result.ok, true);
+});
+
+test("a null context limit still rejects on an explicit input cap", () => {
+  const result = enforceFinalOutputTokenBudget({
+    ...base,
+    sourceFormat: "openai",
+    finalContextLimit: null,
+    effectiveInputCap: 128_000,
+  });
+
+  assert.equal(result.ok, false);
+  if (result.ok) return;
+  assert.match(
+    result.message,
+    /^Input exceeds maximum input tokens for opencode\/mimo-v2\.5-free: /
+  );
+});
