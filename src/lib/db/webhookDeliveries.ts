@@ -1,21 +1,23 @@
-import { getDbInstance } from "./core";
+import type { WebhookDeliveryRepository } from "@/domain/persistence/webhookRepositories";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { webhookRepositories } from "./repositories/webhookRepositories";
 
-export interface WebhookDelivery {
-  id: number;
-  webhook_id: string;
-  event_type: string;
-  status: string;
-  http_status: number | null;
-  latency_ms: number | null;
-  error: string | null;
-  payload_snapshot: string | null;
-  created_at: string;
+export type {
+  WebhookDelivery,
+  WebhookDeliverySafe,
+} from "@/domain/persistence/webhookRepositories";
+import type { WebhookDeliverySafe } from "@/domain/persistence/webhookRepositories";
+
+/**
+ * Rows live behind WebhookDeliveryRepository; this facade owns error sanitizing and the
+ * per-webhook retention cap, and keeps every export synchronous (SQLite-only legacy access).
+ */
+const legacy = webhookRepositories.legacySync.deliveries;
+
+/** Async persistence contract; it never sanitizes errors on its own. */
+export function getWebhookDeliveryRepository(): WebhookDeliveryRepository {
+  return webhookRepositories.deliveries;
 }
-
-/** Safe projection for the deliveries list API — excludes `payload_snapshot`
- *  by default so audit-list responses never leak the captured request body. */
-export type WebhookDeliverySafe = Omit<WebhookDelivery, "payload_snapshot">;
 
 const MAX_DELIVERIES_PER_WEBHOOK = 100;
 
@@ -28,50 +30,25 @@ export function insertDelivery(opts: {
   error?: string | null;
   payloadSnapshot?: string | null;
 }): void {
-  const db = getDbInstance();
-  const insertStmt = db.prepare(
-    `INSERT INTO webhook_deliveries
-       (webhook_id, event_type, status, http_status, latency_ms, error, payload_snapshot)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
-  );
-  const rotateStmt = db.prepare(
-    `DELETE FROM webhook_deliveries
-     WHERE webhook_id = ?
-       AND id NOT IN (
-         SELECT id FROM webhook_deliveries
-         WHERE webhook_id = ?
-         ORDER BY created_at DESC, id DESC
-         LIMIT ?
-       )`
-  );
   // Sanitize the error before persistence so raw stack traces, hostnames or
   // upstream-internal messages never enter the audit log. The audit log is
   // read back via the deliveries API and rendered in the dashboard.
   const sanitizedError = opts.error != null ? sanitizeErrorMessage(opts.error) || null : null;
-  db.transaction(() => {
-    insertStmt.run(
-      opts.webhookId,
-      opts.eventType,
-      opts.status,
-      opts.httpStatus ?? null,
-      opts.latencyMs ?? null,
-      sanitizedError,
-      opts.payloadSnapshot ?? null
-    );
-    rotateStmt.run(opts.webhookId, opts.webhookId, MAX_DELIVERIES_PER_WEBHOOK);
-  })();
+  legacy.append(
+    {
+      webhookId: opts.webhookId,
+      eventType: opts.eventType,
+      status: opts.status,
+      httpStatus: opts.httpStatus ?? null,
+      latencyMs: opts.latencyMs ?? null,
+      error: sanitizedError,
+      payloadSnapshot: opts.payloadSnapshot ?? null,
+    },
+    MAX_DELIVERIES_PER_WEBHOOK
+  );
 }
 
 /** List recent deliveries excluding `payload_snapshot` (default — used by UI). */
 export function getDeliveries(webhookId: string, limit: number): WebhookDeliverySafe[] {
-  const db = getDbInstance();
-  return db
-    .prepare(
-      `SELECT id, webhook_id, event_type, status, http_status, latency_ms, error, created_at
-       FROM webhook_deliveries
-       WHERE webhook_id = ?
-       ORDER BY created_at DESC, id DESC
-       LIMIT ?`
-    )
-    .all(webhookId, limit) as WebhookDeliverySafe[];
+  return legacy.listRecent(webhookId, limit);
 }
