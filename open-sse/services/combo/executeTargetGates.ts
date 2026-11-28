@@ -123,8 +123,14 @@ export async function evaluateExecuteTargetGates(opts: {
   index: number;
   state: AttemptLoopState;
   deps: AttemptLoopDeps;
+  /**
+   * Bounded cached-quota recovery: every gate still runs in order; only the
+   * credential selection may ignore a cached quota-exhaustion snapshot.
+   */
+  ignoreCachedQuotaExhaustion?: boolean;
 }): Promise<GateDecision> {
   const { index: i, state, deps } = opts;
+  const recovery = opts.ignoreCachedQuotaExhaustion === true;
   const target = state.orderedTargets[i];
   const modelStr = target.modelStr;
   const rawModel = parseModel(modelStr).model || modelStr;
@@ -221,12 +227,14 @@ export async function evaluateExecuteTargetGates(opts: {
         fallbackAttempts: i,
       }
     : { ...target, modelAbortSignal: abortSignal, fallbackAttempts: i };
+  if (recovery) targetForAttempt.ignoreCachedQuotaExhaustion = true;
 
   if (target.connectionId) {
     const persistedSkip = await resolveAndRecordPersistedCooldown(
       state,
       target,
-      (id) => readConnectionForCooldownGate(id, false),
+      // Recovery re-reads the row so a cooldown recorded since the first pass is seen.
+      (id) => readConnectionForCooldownGate(id, recovery),
       allowRateLimitedConnection
     );
     if (persistedSkip) {
@@ -374,6 +382,9 @@ export async function evaluateExecuteTargetGates(opts: {
       return skipAgentGuardRefusal(deps, target, bumpFallback);
     const skipReason = modelAvailabilitySkipReason(available);
     if (skipReason) {
+      if (!recovery && typeof available === "object" && available.cachedQuotaExhausted === true) {
+        (state.cachedQuotaFallbackCandidates ??= new Set()).add(i);
+      }
       recordSkippedConnectionCooldown(state, available);
       deps.log.debug?.(
         "COMBO",

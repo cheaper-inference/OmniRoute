@@ -376,7 +376,9 @@ export async function executeTargetAttempt(
       ...targetForAttempt,
       emptyTurnConnectionId,
       effectiveComboStrategy: deps.strategy,
-      failoverBeforeRetry: deps.config.failoverBeforeRetry,
+      // The bounded cached-quota recovery attempt never retries upstream in-request.
+      failoverBeforeRetry:
+        targetForAttempt.ignoreCachedQuotaExhaustion === true || deps.config.failoverBeforeRetry,
     });
 
     if (preContentTransportRecovery && deps.signal?.aborted) {
@@ -537,14 +539,17 @@ export async function executeTargetAttempt(
         )
           return qualityValidationFailure(quality);
         familyTried.add(modelStr);
-        const familyNext = await getNextComboFamilyFallback({
-          model: modelStr,
-          tried: familyTried,
-          provider,
-          connectionId: effectiveConnectionId,
-          headers: deps.requestHeaders,
-          requestScoped: quality.upstreamFailure?.requestScoped,
-        });
+        // No quality-family hop for the bounded cached-quota recovery attempt.
+        const familyNext = targetForAttempt.ignoreCachedQuotaExhaustion
+          ? null
+          : await getNextComboFamilyFallback({
+              model: modelStr,
+              tried: familyTried,
+              provider,
+              connectionId: effectiveConnectionId,
+              headers: deps.requestHeaders,
+              requestScoped: quality.upstreamFailure?.requestScoped,
+            });
         if (familyNext && familyNext !== modelStr) {
           deps.log.info("COMBO", `Quality fail ${modelStr} -> family sibling ${familyNext}`);
           modelStr = familyNext;

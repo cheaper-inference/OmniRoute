@@ -18,5 +18,15 @@ export function getComboCredentialAvailability(
       : NaN;
   const retryAfterMs = resetAt - now;
   if (!Number.isFinite(retryAfterMs) || retryAfterMs <= 0) return false;
+  // Only an explicit cached-quota verdict may enroll the target for the combo's
+  // bounded recovery attempt; every other cooldown keeps its plain shape.
+  if ("cachedQuotaExhausted" in credentials && credentials.cachedQuotaExhausted === true) {
+    return {
+      available: false,
+      reason: "connection_cooldown",
+      retryAfterMs,
+      cachedQuotaExhausted: true,
+    };
+  }
   return { available: false, reason: "connection_cooldown", retryAfterMs };
 }

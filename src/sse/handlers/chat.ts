@@ -1160,6 +1160,7 @@ async function handleAdmittedChat(
       modelString: string,
       target?: {
         allowRateLimitedConnection?: boolean;
+        ignoreCachedQuotaExhaustion?: boolean;
         connectionId?: string | null;
         allowedConnectionIds?: string[] | null;
         executionKey?: string | null;
@@ -1235,6 +1236,7 @@ async function handleAdmittedChat(
           sessionKey: sessionAffinityKey,
           preferredConnectionIds: apiKeyInfo?.preferredConnections ?? null,
           ...(target?.allowRateLimitedConnection ? { allowRateLimitedConnections: true } : {}),
+          ...(target?.ignoreCachedQuotaExhaustion ? { ignoreCachedQuotaExhaustion: true } : {}),
           ...(target?.connectionId ? { forcedConnectionId: target.connectionId } : {}),
           ...(bypassProviderQuotaPolicy ? { bypassQuotaPolicy: true } : {}),
           ...(managedLease ? { lease: credentialLease(managedLease) } : {}),
@@ -1295,6 +1297,7 @@ async function handleAdmittedChat(
         m: string,
         target?: {
           allowRateLimitedConnection?: boolean;
+          ignoreCachedQuotaExhaustion?: boolean;
           connectionId?: string | null;
           executionKey?: string | null;
           stepId?: string | null;
@@ -1334,6 +1337,7 @@ async function handleAdmittedChat(
             comboExecutionKey: target?.executionKey || target?.stepId || null,
             skipUpstreamRetry: target?.failoverBeforeRetry ?? false,
             allowRateLimitedConnection: target?.allowRateLimitedConnection === true,
+            ignoreCachedQuotaExhaustion: target?.ignoreCachedQuotaExhaustion === true,
             preselectedCredentials: (() => {
               const key = getComboCredentialCacheKey(m, target);
               const credentials = comboPreselectedCredentials.get(key);
@@ -1617,6 +1621,7 @@ async function handleSingleModelChat(
     comboExecutionKey?: string | null;
     skipUpstreamRetry?: boolean;
     allowRateLimitedConnection?: boolean;
+    ignoreCachedQuotaExhaustion?: boolean;
     preselectedCredentials?: any;
     cachedSettings?: any;
     providerId?: string | null;
@@ -1746,6 +1751,7 @@ async function handleSingleModelChat(
             comboExecutionKey: null,
             skipUpstreamRetry: resolvedTarget?.failoverBeforeRetry === true,
             allowRateLimitedConnection: resolvedTarget?.allowRateLimitedConnection === true,
+            ignoreCachedQuotaExhaustion: resolvedTarget?.ignoreCachedQuotaExhaustion === true,
             providerId: comboTargetCredentialProviderId(resolvedTarget),
             correlationId: runtimeOptions?.correlationId ?? null,
             reasoningTransportFallback:
@@ -1835,6 +1841,9 @@ async function handleSingleModelChat(
       ? runtimeOptions.forcedConnectionId.trim()
       : "";
   const hasForcedConnection = forcedConnectionId.length > 0;
+  // Bounded cached-quota recovery: one upstream call, ordinary accounting, no in-request hop.
+  const singleUpstreamAttempt = runtimeOptions.ignoreCachedQuotaExhaustion === true;
+  const noInRequestFallback = hasForcedConnection || singleUpstreamAttempt;
   const pinTarget = { ...runtimeOptions, connectionId: forcedConnectionId };
   const restrictions = resolveConnectionRestrictions(apiKeyInfo, pinTarget, isCombo);
   let effectiveAllowedConnections = restrictions.allowedConnections;
@@ -2045,6 +2054,7 @@ async function handleSingleModelChat(
             ...(runtimeOptions.allowRateLimitedConnection
               ? { allowRateLimitedConnections: true }
               : {}),
+            ignoreCachedQuotaExhaustion: singleUpstreamAttempt,
             ...(forceLiveComboTest
               ? {
                   allowSuppressedConnections: true,
@@ -2601,7 +2611,7 @@ async function handleSingleModelChat(
       if (result.errorCode === REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE) {
         if (
           preferredDeadline.mayRotateOnRequestTimeout &&
-          !preferredFailoverUsed &&
+          !(preferredFailoverUsed || singleUpstreamAttempt) &&
           requestSignal?.aborted !== true
         ) {
           preferredFailoverUsed = true;
@@ -2624,7 +2634,7 @@ async function handleSingleModelChat(
           museOwner,
           result,
           `${provider}/${model}`,
-          requestSignal?.aborted === true
+          requestSignal?.aborted === true || singleUpstreamAttempt
         );
         if (museDelayMs !== null) {
           await new Promise((resolve) => setTimeout(resolve, museDelayMs));
@@ -2704,7 +2714,7 @@ async function handleSingleModelChat(
           isCombo,
           requestSignal?.aborted === true
         ) &&
-        !hasForcedConnection
+        !noInRequestFallback
       ) {
         streamReadinessTimeoutRetries += 1;
         log.warn(
@@ -2729,7 +2739,7 @@ async function handleSingleModelChat(
         // the account unavailable for the early close.
         if (
           shouldRetryStreamEarlyEof(result.errorCode, streamEarlyEofRetries) &&
-          !hasForcedConnection &&
+          !noInRequestFallback &&
           // #16438 (flag-gated): never spend a retry on a client that already left, and
           // let the combo own empty_content recovery so the two layers never stack.
           !(emptyStreamSiblingRecovery && requestSignal?.aborted) &&
@@ -2773,7 +2783,7 @@ async function handleSingleModelChat(
         // not an account/quota failure. Do NOT mark the account unavailable here.
         if (
           isTerminalStreamEarlyEof &&
-          !hasForcedConnection &&
+          !noInRequestFallback &&
           !earlyEofOriginal &&
           isEarlyEofSiblingFailoverOn()
         ) {
@@ -2803,7 +2813,7 @@ async function handleSingleModelChat(
           buildExhaustionOptions(runtimeOptions.correlationId ?? null, { isCombo })
         );
 
-        if (shouldFallback && !hasForcedConnection) {
+        if (shouldFallback && !noInRequestFallback) {
           log.warn(
             "AUTH",
             `Antigravity connection ${accountId}... produced no useful stream content, trying fallback connection`
@@ -2853,7 +2863,7 @@ async function handleSingleModelChat(
           buildExhaustionOptions(runtimeOptions.correlationId ?? null, { isCombo })
         );
 
-        if (shouldFallback && !hasForcedConnection) {
+        if (shouldFallback && !noInRequestFallback) {
           log.warn(
             "AUTH",
             `Antigravity connection ${accountId}... timed out before response headers, trying fallback connection`
@@ -2890,7 +2900,7 @@ async function handleSingleModelChat(
       if (result.errorType === "account_semaphore_capacity") {
         // Local concurrency pressure is not an upstream quota failure. Prefer another
         // account when possible; pinned combo steps fall through to combo orchestration.
-        if (hasForcedConnection) {
+        if (noInRequestFallback) {
           return withRoutingTelemetry(result.response, credentials?.connectionId);
         }
 
@@ -2916,7 +2926,7 @@ async function handleSingleModelChat(
         appliedProxy: appliedProxySink.proxy,
         quotaText: String(result.rawMessage ?? result.error ?? ""),
         attempt: egressRetries,
-        aborted: requestSignal?.aborted === true,
+        aborted: requestSignal?.aborted === true || singleUpstreamAttempt,
         triedKeys: egressTriedKeys,
         resolveNext: () =>
           safeResolveProxy(credentials.connectionId, apiKeyInfo?.id, provider, comboName),
@@ -3177,7 +3187,7 @@ async function handleSingleModelChat(
       // to the next target — with ITS own pin. Same rule the antigravity
       // stream-readiness / pre-response-timeout and account-semaphore paths above
       // already apply.
-      if (shouldFallback && !hasForcedConnection) {
+      if (shouldFallback && !noInRequestFallback) {
         if (Number.isFinite(cooldownMs) && cooldownMs > 0) {
           lastCooldownMs = cooldownMs;
           requestRetryLastCooldownMs = cooldownMs;

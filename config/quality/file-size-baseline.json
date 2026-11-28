@@ -602,7 +602,7 @@
     "src/shared/constants/providers/apikey/gateways.ts": 1908,
     "src/shared/middleware/chatBodyAdmission.ts": 1442,
     "src/shared/services/cliRuntime.ts": 1528,
-    "src/sse/handlers/chat.ts": 3237,
+    "src/sse/handlers/chat.ts": 3246,
     "src/sse/handlers/chatHelpers.ts": 1542,
     "src/sse/services/auth.ts": 4305,
     "tests/unit/account-fallback-service.test.ts": 2944,

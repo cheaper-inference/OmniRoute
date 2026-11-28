@@ -1098,6 +1098,7 @@ export async function getProviderCredentials(
     const allowRateLimitedConnections =
       allowSuppressedConnections || options.allowRateLimitedConnections === true;
     const bypassQuotaPolicy = options.bypassQuotaPolicy === true;
+    const ignoreCachedQuotaExhaustion = options.ignoreCachedQuotaExhaustion === true;
     let forcedConnectionId =
       typeof options.forcedConnectionId === "string" && options.forcedConnectionId.trim().length > 0
         ? options.forcedConnectionId.trim()
@@ -1224,7 +1225,7 @@ export async function getProviderCredentials(
         allowRateLimitedConnections,
         bypassQuotaPolicy,
         isQuotaExhausted: (connectionId) => {
-          if (bypassQuotaPolicy) return false;
+          if (bypassQuotaPolicy || ignoreCachedQuotaExhaustion) return false;
           const conn = connections.find((candidate) => candidate.id === connectionId);
           return isQuotaExhaustedForRequest(
             connectionId,
@@ -1828,7 +1829,8 @@ export async function getProviderCredentials(
       }
       const existing = quotaResults.get(c.id);
       if (existing) existing.exhausted = exhausted;
-      if (!exhausted) {
+      // Combo recovery may ignore only this cached verdict; policy above already applied.
+      if (!exhausted || ignoreCachedQuotaExhaustion) {
         withQuota.push(c);
       } else {
         exhaustedQuota.push(c);
@@ -1923,6 +1925,7 @@ export async function getProviderCredentials(
         retryAfterHuman: formatRetryAfter(retryAfter),
         lastError: `All ${provider} accounts have exhausted their quota (cached quota state, no upstream attempt; earliest ${formatRetryAfter(retryAfter)})`,
         lastErrorCode: 429,
+        cachedQuotaExhausted: true,
       };
     }
 

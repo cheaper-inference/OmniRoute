@@ -387,14 +387,28 @@ export async function dispatchWithCooldownRetry(opts: {
         }
       }
 
-      const executeTarget = async (i: number): Promise<ExecuteTargetResult> => {
-        const gate = await extra.evaluateGates({ index: i, state, deps });
+      // Cached-quota recovery: when the ordered pass made zero upstream attempts and
+      // nothing is in flight, the targets skipped only by a cached quota-exhaustion
+      // snapshot are re-run through the same gates in the same order. The first one
+      // admitted gets exactly one attempt: no retries, set retry, cooldown redispatch,
+      // hedging or quality-family hop.
+      state.cachedQuotaFallbackCandidates = new Set<number>();
+      const orderedPassLength = dispatchIndices.length;
+      const executeTarget = async (i: number, recovery: boolean): Promise<ExecuteTargetResult> => {
+        const gate = await extra.evaluateGates({
+          index: i,
+          state,
+          deps,
+          ...(recovery ? { ignoreCachedQuotaExhaustion: true } : {}),
+        });
         if (gate.kind === "skip") return gate.result;
+        if (recovery) state.cachedQuotaFallbackUsed = true;
         return extra.executeAttempt({
           index: i,
           state,
           deps: {
             ...deps,
+            ...(recovery ? { maxRetries: 0 } : {}),
             retryCooldownWait: {
               attempt: extra.comboCooldownAttempt,
               budgetLeftMs: extra.comboCooldownBudgetLeftMs,
@@ -409,7 +423,14 @@ export async function dispatchWithCooldownRetry(opts: {
         });
       };
 
-      for (const [dispatchPosition, i] of dispatchIndices.entries()) {
+      for (
+        let dispatchPosition = 0;
+        dispatchPosition < dispatchIndices.length;
+        dispatchPosition++
+      ) {
+        const i = dispatchIndices[dispatchPosition];
+        const recovery = dispatchPosition >= orderedPassLength;
+        if (recovery && (state.cachedQuotaFallbackUsed || state.globalAttempts > 0)) break;
         if (anySuccess || state.comboExpired || comboRequestMalformed) break;
         // Another connection of the SAME model rejects the request identically:
         // a request-scoped refusal is not fixable by another account.
@@ -428,7 +449,7 @@ export async function dispatchWithCooldownRetry(opts: {
 
         const task = (async () => {
           try {
-            const res = await executeTarget(i);
+            const res = await executeTarget(i, recovery);
             if (anySuccess) {
               if (res?.ok && res.response) {
                 // A sibling may win while this target is in response-quality validation,
@@ -490,11 +511,12 @@ export async function dispatchWithCooldownRetry(opts: {
         task.finally(() => runningTasks.delete(task));
 
         if (
+          !recovery &&
           zeroLatencyOptimizationsEnabled &&
           deps.config.hedging &&
           bodySmallEnoughToHedge &&
           !hasProtectedPriorityTarget &&
-          dispatchPosition + 1 < dispatchIndices.length
+          dispatchPosition + 1 < orderedPassLength
         ) {
           const hedgeDelay = resolveDelayMs(deps.config.hedgeDelayMs, 500);
           let hedgeTimer: ReturnType<typeof setTimeout> | undefined;
@@ -510,6 +532,21 @@ export async function dispatchWithCooldownRetry(opts: {
           await Promise.race([task, globalPromise, loopSafetyPromise]);
         }
         markLoopExpiredIfSafetyFired();
+
+        if (
+          dispatchPosition === orderedPassLength - 1 &&
+          state.cachedQuotaFallbackCandidates.size > 0 &&
+          runningTasks.size === 0 &&
+          !anySuccess &&
+          state.globalAttempts === 0 &&
+          !state.cachedQuotaFallbackUsed &&
+          !state.comboExpired &&
+          !comboRequestMalformed &&
+          !deps.signal?.aborted
+        ) {
+          const candidates = state.cachedQuotaFallbackCandidates;
+          dispatchIndices.push(...dispatchIndices.filter((index) => candidates.has(index)));
+        }
 
         // Global combo timeout check: after each target completes, stop trying
         // further targets if the total elapsed time exceeds extra.comboTimeoutMs.
@@ -648,12 +685,18 @@ export async function dispatchWithCooldownRetry(opts: {
       if (
         setTry < extra.maxSetRetries &&
         !comboRequestMalformed &&
-        !state.requestScopedFailureSeen
+        !state.requestScopedFailureSeen &&
+        !state.cachedQuotaFallbackUsed
       ) {
         continue;
       }
 
-      if (!state.lastStatus && state.recordedAttempts === 0 && extra.comboCooldownWaitEnabled) {
+      if (
+        !state.cachedQuotaFallbackUsed &&
+        !state.lastStatus &&
+        state.recordedAttempts === 0 &&
+        extra.comboCooldownWaitEnabled
+      ) {
         const circuitOpenWait = resolveCircuitOpenWaitDecision({
           skippedForCircuitOpen: state.skippedForCircuitOpen,
           retryAfterMs: state.earliestCircuitOpenRetryMs,
@@ -872,7 +915,11 @@ export async function dispatchWithCooldownRetry(opts: {
       // only the ceiling — which does NOT cover a quota_exhausted lock carrying a
       // SHORT upstream retry-after. Model lockouts are recorded for all strategies,
       // so the real reason is always available.
-      if (extra.comboCooldownWaitEnabled && state.earliestRetryAfter) {
+      if (
+        !state.cachedQuotaFallbackUsed &&
+        extra.comboCooldownWaitEnabled &&
+        state.earliestRetryAfter
+      ) {
         const decision: ResolveComboCooldownDecisionResult = resolveComboCooldownWaitDecision({
           targets: state.orderedTargets,
           earliestRetryAfter: state.earliestRetryAfter,
