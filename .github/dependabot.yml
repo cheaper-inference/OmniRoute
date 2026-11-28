@@ -1,7 +1,7 @@
 version: 2
 updates:
-  # Wait 7 days after publication before proposing npm versions to reduce supply-chain risk
-  # from newly published malicious packages. Dependabot security updates are exempt.
+  # Wait 7 days after publication before proposing version updates for any ecosystem to reduce
+  # supply-chain risk from newly published dependencies. Dependabot security updates are exempt.
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -116,6 +116,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: "npm"
     directory: "/electron"
@@ -162,5 +164,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "deps"
