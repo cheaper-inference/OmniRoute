@@ -6,6 +6,8 @@ export interface AnalyticsTokenSummary {
   /** Provider-reported cache reads, never cache writes or response-cache hits. */
   cachedInputTokens?: number | null;
   cachedInputTokensComplete?: boolean;
+  /** Exact subtotal from rows with known, consistent cache reads. */
+  knownFreshInputTokens?: number | null;
 }
 
 /** Return a non-negative safe integer, or null for missing or invalid measurements. */
@@ -16,7 +18,7 @@ function tokenCount(value: number | null | undefined): number | null {
 /**
  * Derive display-only token totals from normalized, cache-inclusive input.
  * Cache reads are subtracted only when coverage is complete and counts are consistent;
- * otherwise the noncached input remains unknown. Cache writes stay in input.
+ * otherwise only a positive known fresh-input subtotal is shown as partial. Cache writes stay in input.
  * This does not mutate provider usage or billing counters.
  */
 export function getAnalyticsTokenBreakdown(summary: AnalyticsTokenSummary) {
@@ -26,10 +28,19 @@ export function getAnalyticsTokenBreakdown(summary: AnalyticsTokenSummary) {
   const cacheComplete = cachedInputTokens !== null && summary.cachedInputTokensComplete === true;
   // An incomplete cache subtotal cannot be subtracted to claim an exact fresh-input total.
   // Reject inconsistent values rather than clamping a negative result to a fabricated zero.
-  const inputTokens =
+  const exactInputTokens =
     cacheComplete && totalInputTokens !== null && cachedInputTokens <= totalInputTokens
       ? totalInputTokens - cachedInputTokens
       : null;
+  const knownFresh = tokenCount(summary.knownFreshInputTokens);
+  const partialInput =
+    knownFresh !== null &&
+    knownFresh > 0 &&
+    (totalInputTokens === null || knownFresh <= totalInputTokens)
+      ? knownFresh
+      : null;
+  const inputTokens = exactInputTokens ?? partialInput;
+  const inputTokensPartial = exactInputTokens === null && partialInput !== null;
   return {
     totalTokens:
       totalInputTokens !== null && outputTokens !== null
@@ -37,6 +48,7 @@ export function getAnalyticsTokenBreakdown(summary: AnalyticsTokenSummary) {
         : null,
     totalInputTokens,
     inputTokens,
+    inputTokensPartial,
     cachedInputTokens,
     outputTokens,
     cacheComplete,

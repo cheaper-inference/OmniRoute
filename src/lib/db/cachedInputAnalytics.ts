@@ -3,6 +3,7 @@ import { buildUnifiedSource, type BuildUnifiedSourceOptions } from "./usageAnaly
 
 export type CachedInputMeasurement = {
   cachedInputTokens: number | null;
+  knownFreshInputTokens: number;
   cachedInputTokensComplete: boolean;
 };
 
@@ -10,6 +11,7 @@ type MeasurementRow = {
   provider?: string;
   model?: string;
   cachedInputTokens: number | null;
+  knownFreshInputTokens: number;
   cachedInputTokensComplete: number;
 };
 
@@ -24,6 +26,7 @@ export function getCachedInputAnalytics(
   const { unifiedSource, unifiedParams } = buildUnifiedSource(options);
   const db = getDbInstance();
   const columns = `SUM(cached_input_tokens) as cachedInputTokens,
+    COALESCE(SUM(known_fresh_input), 0) as knownFreshInputTokens,
     COALESCE(SUM(cached_input_unknown_requests), 0) = 0 as cachedInputTokensComplete`;
   const summary = db
     .prepare(`SELECT ${columns} FROM ${unifiedSource} AS _u`)
@@ -56,6 +59,7 @@ export function getCachedInputAnalytics(
   return {
     summary: {
       cachedInputTokens: summary?.cachedInputTokens ?? null,
+      knownFreshInputTokens: summary?.knownFreshInputTokens ?? 0,
       cachedInputTokensComplete:
         !filteredHistoryMissing && Boolean(summary?.cachedInputTokensComplete ?? true),
     },
@@ -65,12 +69,17 @@ export function getCachedInputAnalytics(
 }
 
 function emptyMeasurement(filteredHistoryMissing: boolean): CachedInputMeasurement {
-  return { cachedInputTokens: null, cachedInputTokensComplete: !filteredHistoryMissing };
+  return {
+    cachedInputTokens: null,
+    knownFreshInputTokens: 0,
+    cachedInputTokensComplete: !filteredHistoryMissing,
+  };
 }
 
 function addMeasurement<T extends CachedInputMeasurement>(existing: T, row: MeasurementRow): T {
   if (row.cachedInputTokens !== null)
     existing.cachedInputTokens = (existing.cachedInputTokens ?? 0) + row.cachedInputTokens;
+  existing.knownFreshInputTokens += row.knownFreshInputTokens;
   existing.cachedInputTokensComplete &&= Boolean(row.cachedInputTokensComplete);
   return existing;
 }
@@ -78,7 +87,9 @@ function addMeasurement<T extends CachedInputMeasurement>(existing: T, row: Meas
 // Key-filtered history omits archives because they contain no key identity.
 function keyFilteredHistoryMissing(options: BuildUnifiedSourceOptions): boolean {
   const archiveConditions = ["date < @cutoff", "total_requests > 0"];
-  const archiveParams: Record<string, string> = { cutoff: options.rawCutoffDate };
+  const archiveParams: Record<string, string> = {
+    cutoff: options.rawCutoffDate,
+  };
   if (options.sinceIso) {
     archiveConditions.push("date >= @since");
     archiveParams.since = options.sinceIso.slice(0, 10);

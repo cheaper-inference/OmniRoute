@@ -124,6 +124,7 @@ export default function TokenBreakdownCards({
       label: t("inputTokens"),
       icon: "input",
       value: tokens.inputTokens,
+      suffix: tokens.inputTokensPartial ? partial : "",
       hint: tokens.inputTokens === null ? t("inputSplitUnavailable") : t("inputTokensHint"),
     },
     {

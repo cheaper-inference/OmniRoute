@@ -1,5 +1,9 @@
 // @vitest-environment jsdom
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import React from "react";
+import "@testing-library/jest-dom/vitest";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { NextIntlClientProvider } from "next-intl";
@@ -141,6 +145,61 @@ describe("Analytics token cards", () => {
     expect(count("Total Tokens", "11,000")).toBeTruthy();
   });
 
+  it("labels the exact known fresh-input subtotal as partial", () => {
+    renderCards({ ...summary, cachedInputTokensComplete: false, knownFreshInputTokens: 550 });
+    expect(count("Input Tokens", "550+ (Partial)").textContent).toBe("550+ (Partial)");
+    expect(count("Total Input Tokens", "10,000")).toBeTruthy();
+    expect(screen.queryByText(en.analytics.inputSplitUnavailable)).toBeNull();
+  });
+
+  it("shows only the known fresh-input subtotal when stored cache reads are missing and invalid", async () => {
+    const dataDir = mkdtempSync(join(tmpdir(), "analytics-token-cards-"));
+    vi.stubEnv("DATA_DIR", dataDir);
+    const { getDbInstance, resetDbInstance } = await import("@/lib/db/core");
+    try {
+      const insert = getDbInstance().prepare(`
+        INSERT INTO usage_history
+          (provider, model, timestamp, tokens_input, tokens_output, tokens_cache_read)
+        VALUES ('fixture', 'fixture-model', ?, ?, 0, ?)
+      `);
+      const timestamp = new Date().toISOString();
+      insert.run(timestamp, 100, 20);
+      insert.run(timestamp, 10, 30);
+      insert.run(timestamp, 100, null);
+
+      const { getCachedInputAnalytics } = await import("@/lib/db/cachedInputAnalytics");
+      const { buildUnifiedSource, getUsageSummary } = await import("@/lib/db/usageAnalytics");
+      const options = {
+        sinceIso: null,
+        untilIso: null,
+        rawCutoffDate: timestamp.slice(0, 10),
+        apiKeyWhere: "",
+        apiKeyParams: {},
+      };
+      const { unifiedSource, unifiedParams } = buildUnifiedSource(options);
+      const summary = {
+        ...getUsageSummary(unifiedSource, unifiedParams),
+        ...getCachedInputAnalytics(options).summary,
+      };
+      expect(summary).toMatchObject({
+        promptTokens: 210,
+        cachedInputTokens: 50,
+        cachedInputTokensComplete: false,
+        knownFreshInputTokens: 80,
+      });
+
+      renderCards(summary);
+      expect(count("Input Tokens", "80+ (Partial)").textContent).toBe("80+ (Partial)");
+      expect(count("Total Input Tokens", "210")).toBeTruthy();
+      const input = screen.getByRole("group", { name: "Input Tokens" });
+      expect(input.querySelector("dd")).toHaveAccessibleDescription(en.analytics.inputTokensHint);
+    } finally {
+      resetDbInstance();
+      vi.unstubAllEnvs();
+      rmSync(dataDir, { recursive: true, force: true });
+    }
+  });
+
   it("shows measured zero but does not clamp contradictory provider counts", () => {
     const view = renderCards({ ...summary, cachedInputTokens: 10_000 });
     expect(count("Input Tokens", "0").textContent).toBe("0");
@@ -159,5 +218,32 @@ describe("Analytics token cards", () => {
     expect(count(localized.analytics.cachedInputTokens, "6,000")).toBeTruthy();
     expect(screen.getByText(localized.analytics.inputTokensHint)).toBeTruthy();
     expect(screen.queryByText("analytics.cachedInputTokens")).toBeNull();
+  });
+});
+
+describe("partial input description", () => {
+  const partial = {
+    promptTokens: 1800,
+    cachedInputTokens: 400,
+    knownFreshInputTokens: 550,
+    cachedInputTokensComplete: false,
+  };
+  it.each(["exact", "compact"] as const)("describes the measured subtotal in %s mode", (mode) => {
+    renderCards({ ...partial, promptTokens: 2950, knownFreshInputTokens: 1550 }, mode);
+    const input = screen.getByRole("group", { name: "Input Tokens" });
+    expect(count("Input Tokens", "1,550+ (Partial)").textContent).toBe(
+      mode === "exact" ? "1,550+ (Partial)" : "1.6K+ (Partial)"
+    );
+    expect(input.querySelector("dd")).toHaveAccessibleDescription(en.analytics.inputTokensHint);
+  });
+  it.each([
+    { ...partial, cachedInputTokensComplete: true },
+    { ...partial, cachedInputTokens: 1250 },
+    { ...partial, cachedInputTokens: 1300 },
+    { ...partial, cachedInputTokens: null },
+    { ...partial, knownFreshInputTokens: 0 },
+  ])("omits the numeric remainder for incomplete or exact splits (%j)", (value) => {
+    renderCards(value);
+    expect(screen.queryByText(/not split \(cache read unknown\)/)).toBeNull();
   });
 });
