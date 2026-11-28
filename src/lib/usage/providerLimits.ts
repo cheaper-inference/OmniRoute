@@ -24,6 +24,11 @@ import {
 } from "@/lib/db/providerLimits";
 import { syncToCloud } from "@/lib/cloudSync";
 import { setQuotaCache } from "@/domain/quotaCache";
+import {
+  applyAntigravityArgonEligibilityToPsd,
+  logArgonEligibilityNotices,
+} from "@/lib/usage/antigravityArgonExclusions";
+import type { ArgonEligibilityNotice } from "@/lib/usage/antigravityArgonExclusions";
 import { trackCapAndBuildClaudeExtraUsageUpdate } from "@/domain/claudeExtraUsageCap";
 import { clearRecoveredProviderState } from "@/sse/services/auth";
 import { hasObservedClaudeQuotaResetAfter } from "@/lib/db/quotaResetEvents";
@@ -734,61 +739,23 @@ async function syncClaudeExtraUsageStateIfNeeded(
   };
 }
 
-const AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS = ["gemini-4*", "*argon*"] as const;
-
-/** Ineligible: flag the account and append the auto-managed Argon exclusions (keeps operator ones). */
-function markArgonIneligible(
-  psd: Record<string, unknown>,
-  nextPsd: Record<string, unknown>
-): boolean {
-  let changed = false;
-  if (psd.hasArgon !== false) {
-    nextPsd.hasArgon = false;
-    changed = true;
+/**
+ * Await a write, then run its report; the report is skipped when the write throws.
+ *
+ * Reporting before the write would describe work that may never land, so the ordering lives in
+ * one place that a test can drive with a failing write.
+ */
+export async function persistThenReport<T>(
+  persist: () => Promise<T>,
+  report: () => void
+): Promise<T> {
+  const result = await persist();
+  try {
+    report();
+  } catch {
+    // The write already landed. A failing report must not turn a successful sync into an error.
   }
-
-  const existing = Array.isArray(psd.excludedModels)
-    ? psd.excludedModels.filter((m): m is string => typeof m === "string")
-    : [];
-  const missing = AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS.filter(
-    (pattern) => !existing.includes(pattern)
-  );
-  if (missing.length > 0) {
-    nextPsd.excludedModels = [...existing, ...missing];
-    changed = true;
-  }
-  return changed;
-}
-
-/** Eligible: flag the account and strip only the auto-managed Argon exclusions. */
-function markArgonEligible(
-  psd: Record<string, unknown>,
-  nextPsd: Record<string, unknown>
-): boolean {
-  let changed = false;
-  if (psd.hasArgon !== true) {
-    nextPsd.hasArgon = true;
-    changed = true;
-  }
-
-  if (!Array.isArray(psd.excludedModels)) return changed;
-  const autoSet = new Set<string>(AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS);
-  const filtered = psd.excludedModels.filter((m) => typeof m !== "string" || !autoSet.has(m));
-  if (filtered.length !== psd.excludedModels.length) {
-    nextPsd.excludedModels = filtered;
-    changed = true;
-  }
-  return changed;
-}
-
-export function applyAntigravityArgonEligibilityToPsd(
-  psd: Record<string, unknown>,
-  hasArgon: unknown
-): { nextPsd: Record<string, unknown>; changed: boolean } {
-  const nextPsd: Record<string, unknown> = { ...psd };
-  if (typeof hasArgon !== "boolean") return { nextPsd, changed: false };
-  const changed = hasArgon ? markArgonEligible(psd, nextPsd) : markArgonIneligible(psd, nextPsd);
-  return { nextPsd, changed };
+  return result;
 }
 
 /** Copy tier, plan and a newly discovered projectId from loadCodeAssist into nextPsd. */
@@ -830,11 +797,19 @@ function applyAntigravitySubscriptionInfoToPsd(
   return { changed };
 }
 
-/** Persist Antigravity tier from live loadCodeAssist and Argon eligibility on quota refresh (not only OAuth). */
-async function syncAntigravitySubscriptionIfNeeded(
+/**
+ * Persist Antigravity tier from live loadCodeAssist and Argon eligibility on quota refresh (not
+ * only OAuth).
+ *
+ * `deps.updateProviderConnection` exists so the write path can be exercised without a database;
+ * production always uses the real updater.
+ */
+export async function syncAntigravitySubscriptionIfNeeded(
   connection: ProviderConnectionLike,
-  usage: JsonRecord
+  usage: JsonRecord,
+  deps: { updateProviderConnection?: typeof updateProviderConnection } = {}
 ): Promise<ProviderConnectionLike> {
+  const persist = deps.updateProviderConnection ?? updateProviderConnection;
   if (connection.provider !== "antigravity" && connection.provider !== "agy") return connection;
   if (!usage.subscriptionInfo && typeof usage.hasArgon !== "boolean") return connection;
 
@@ -846,25 +821,42 @@ async function syncAntigravitySubscriptionIfNeeded(
   let changed = subscriptionResult.changed;
   const nextProjectId = subscriptionResult.nextProjectId;
 
+  let pendingArgonNotices: readonly ArgonEligibilityNotice[] | null = null;
   if (typeof usage.hasArgon === "boolean") {
     const argonResult = applyAntigravityArgonEligibilityToPsd(nextPsd, usage.hasArgon);
     if (argonResult.changed) {
       nextPsd = argonResult.nextPsd;
       changed = true;
+      // Held until the write lands, so a failing persist is never described as done.
+      pendingArgonNotices = argonResult.notices;
+    } else {
+      // This branch changes nothing itself. A write may still follow for the subscription
+      // fields, and that one is reported by its own attempt, not by this line.
+      logArgonEligibilityNotices(connection.id, argonResult.notices);
     }
   }
 
   if (!changed) return connection;
 
-  await updateProviderConnection(connection.id, {
-    ...(nextProjectId ? { projectId: nextProjectId, errorCode: null, lastError: null } : {}),
-    providerSpecificData: nextPsd,
-  });
-  return {
-    ...connection,
-    ...(nextProjectId ? { projectId: nextProjectId, errorCode: null, lastError: null } : {}),
-    providerSpecificData: nextPsd,
-  };
+  return persistThenReport(
+    async () => {
+      await persist(connection.id, {
+        ...(nextProjectId ? { projectId: nextProjectId, errorCode: null, lastError: null } : {}),
+        providerSpecificData: nextPsd,
+      });
+      return {
+        ...connection,
+        ...(nextProjectId ? { projectId: nextProjectId, errorCode: null, lastError: null } : {}),
+        providerSpecificData: nextPsd,
+      };
+    },
+    // Reported once, after the write: the no-change branch above already spoke for itself.
+    () => {
+      if (pendingArgonNotices?.length) {
+        logArgonEligibilityNotices(connection.id, pendingArgonNotices);
+      }
+    }
+  );
 }
 
 /** Persist refreshed Claude bootstrap fields into psd; writes only on diff. */
