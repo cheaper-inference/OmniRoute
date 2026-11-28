@@ -58,9 +58,38 @@ export function isCodexPaidOnlyModel(model: string | null | undefined): boolean 
   return isCodexSolModel(model) || CODEX_ASTRA_MODEL_RE.test(model.trim());
 }
 
+/**
+ * Workspace plans arrive as compound identifiers such as
+ * "self_serve_business_prolite", which never equal a bare tier name. Treat a
+ * plan as paid when it is a known tier outright, or when any of its
+ * underscore/dash/space-separated words is one.
+ */
+function isPaidPlanValue(rawPlan: unknown): boolean {
+  const normalized = normalizePlan(rawPlan);
+  if (normalized === null) return false;
+  if (CODEX_SOL_PAID_PLANS.has(normalized)) return true;
+  if (typeof rawPlan !== "string") return false;
+  return rawPlan
+    .toLowerCase()
+    .split(/[\s_-]+/)
+    .some((word) => word.length > 0 && CODEX_SOL_PAID_PLANS.has(word));
+}
+
+function getRawCodexPlanType(providerSpecificData: unknown): unknown {
+  if (!providerSpecificData || typeof providerSpecificData !== "object") return null;
+  const data = providerSpecificData as JsonRecord;
+  return [
+    data.workspacePlanType,
+    data.chatgptPlanType,
+    data.workspace_plan_type,
+    data.chatgpt_plan_type,
+    data.planType,
+    data.plan_type,
+  ].find((candidate) => normalizePlan(candidate) !== null);
+}
+
 export function isCodexPaidPlan(providerSpecificData: unknown): boolean {
-  const plan = getCodexPlanType(providerSpecificData);
-  return plan !== null && CODEX_SOL_PAID_PLANS.has(plan);
+  return isPaidPlanValue(getRawCodexPlanType(providerSpecificData));
 }
 
 /**
@@ -78,7 +107,7 @@ export function isCodexPlanEligibleForModel(
   if (!isCodexPaidOnlyModel(requestedModel)) return true;
   const plan = getCodexPlanType(providerSpecificData);
   if (plan === null || plan === "unknown") return true;
-  return CODEX_SOL_PAID_PLANS.has(plan);
+  return isCodexPaidPlan(providerSpecificData);
 }
 
 /** Plan gate for one connection of `provider`; only Codex connections are ever gated. */

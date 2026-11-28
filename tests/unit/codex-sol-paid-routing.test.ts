@@ -291,3 +291,23 @@ test("isCodexPoolPlanIneligibleForModel reports pools made only of Free/Go accou
     "key that still reaches a paid account"
   );
 });
+
+test("compound workspace plans like self_serve_business_prolite are paid for Sol/Astra", () => {
+  for (const plan of [
+    "self_serve_business_prolite",
+    "self_serve_business",
+    "self-serve-team",
+    "enterprise_cbp",
+  ]) {
+    const data = { workspacePlanType: plan };
+    assert.equal(eligibility.isCodexPaidPlan(data), true, plan);
+    for (const model of ["gpt-6.1-sol", "cx/gpt-6-sol-high", "gpt-5.6-sol", "gpt-6-astra-low"]) {
+      assert.equal(eligibility.isCodexPlanEligibleForModel(data, model), true, `${plan} ${model}`);
+    }
+  }
+  for (const plan of ["free", "go", "self_serve_free", "free_workspace"]) {
+    const data = { workspacePlanType: plan };
+    assert.equal(eligibility.isCodexPaidPlan(data), false, plan);
+    assert.equal(eligibility.isCodexPlanEligibleForModel(data, "gpt-6.1-sol"), false, plan);
+  }
+});
