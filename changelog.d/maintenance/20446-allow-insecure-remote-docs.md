@@ -1,0 +1,1 @@
+- **docs(cli):** the Claude Code guide shows the `omniroute fcc-claude` plain-HTTP refusal and how to opt in with `OMNIROUTE_ALLOW_INSECURE_REMOTE` on a trusted network. (#20446 — thanks @costajohnt)
