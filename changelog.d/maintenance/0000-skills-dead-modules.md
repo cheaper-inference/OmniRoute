@@ -1,1 +1,0 @@
-- **refactor(skills):** remove four unused skills files (`hybrid`, `a2a`, `custom`, `builtin/browser`) and the unused `maxRetries` setting of the skill executor; no production code used them.
