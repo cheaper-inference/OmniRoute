@@ -5,17 +5,26 @@
  * conversation on an assistant turn (prefill, or a tool call not yet answered), so every
  * path that emits Gemini `contents` for these models must drop the trailing model turn.
  *
+ * Vertex also applies this rule to Gemini 4.x chat models and accepts provider-qualified IDs.
+ * Other callers keep the original Gemini 3.x and pro-agent scope.
+ *
  * The gate is deliberately explicit rather than matching every id containing "gemini":
  * image generation has a separate request contract, and the older 2.5 family accepts the
  * trailing turn and is not part of the rejection evidence.
  */
-export function isGeminiTrailingModelTurnRejectingModel(model: unknown): boolean {
+export function isGeminiTrailingModelTurnRejectingModel(
+  model: unknown,
+  provider?: "vertex"
+): boolean {
   if (typeof model !== "string") return false;
-  const normalizedModel = model.toLowerCase().replace(/^[a-z0-9][a-z0-9.-]*\//, "");
+  const vertex = provider === "vertex";
+  const lowerModel = model.toLowerCase();
+  const normalizedModel = vertex ? lowerModel.replace(/^[a-z0-9][a-z0-9.-]*\//, "") : lowerModel;
   if (/(?:^|-)image(?:-|$)/.test(normalizedModel)) {
     return false;
   }
-  return /^gemini-(?:[34](?:\.\d+)?(?:-[a-z0-9-]+)?|pro-agent)$/.test(normalizedModel);
+  const match = /^gemini-(?:([34])(?:\.\d+)?(?:-[a-z0-9-]+)?|pro-agent)$/.exec(normalizedModel);
+  return match !== null && (match[1] !== "4" || vertex);
 }
 
 /**

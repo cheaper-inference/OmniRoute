@@ -14,7 +14,7 @@ import type { ExecuteInput } from "../../open-sse/executors/base.ts";
  * `400 INVALID_ARGUMENT: Requests ending with a model turn are not supported.`
  *
  * Verifies that:
- * 1. isGeminiTrailingModelTurnRejectingModel correctly matches provider-qualified Gemini 3.x and 4.x models.
+ * 1. The Vertex rule correctly matches provider-qualified Gemini 3.x and 4.x models.
  * 2. stripTrailingGeminiModelTurns pops trailing model turns while preserving user turns and lone model turns.
  * 3. VertexExecutor.execute strips trailing model turns from input.body.contents end-to-end.
  */
@@ -36,7 +36,7 @@ test("(a) identifies qualified and unqualified Gemini 3+ and 4+ chat models as r
   ];
   for (const m of restricted) {
     assert.equal(
-      isGeminiTrailingModelTurnRejectingModel(m),
+      isGeminiTrailingModelTurnRejectingModel(m, "vertex"),
       true,
       `Expected ${m} to be restricted from trailing model turns`
     );
@@ -60,7 +60,7 @@ test("(b) leaves models predating the restriction or outside chat scope unrestri
   ];
   for (const m of unrestricted) {
     assert.equal(
-      isGeminiTrailingModelTurnRejectingModel(m),
+      isGeminiTrailingModelTurnRejectingModel(m, "vertex"),
       false,
       `Expected ${m} to NOT be restricted from trailing model turns`
     );
