@@ -113,3 +113,28 @@ for (const fail of [false, true]) {
     await assert.rejects(stat(dir), { code: "ENOENT" });
   });
 }
+
+test("sendAlertEmail redacts secrets with regex characters, in any case", async () => {
+  const tricky = {
+    OMNI_QUEUE_ALERT_EMAIL_TO: "Alerts+Queue@Example.invalid",
+    OMNI_QUEUE_SMTP_USER: "sender@example.invalid",
+    OMNI_QUEUE_SMTP_APP_PASSWORD: "p.ss+(word)*",
+  };
+  const result = await sendAlertEmail({
+    env: tricky,
+    subject: "s",
+    text: "t",
+    now,
+    async run() {
+      throw Object.assign(new Error("x"), {
+        code: 67,
+        stderr: "curl: alerts+queue@example.INVALID SENDER@example.invalid p.ss+(word)* pXss",
+      });
+    },
+  });
+  assert.deepEqual(result, {
+    sent: false,
+    reason: "failed",
+    detail: "exit 67: curl: <redacted> <redacted> <redacted> pXss",
+  });
+});

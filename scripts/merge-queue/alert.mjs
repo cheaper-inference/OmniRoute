@@ -16,6 +16,8 @@ export const ALERT_EMAIL_ENV_KEYS = Object.freeze([
 ]);
 const singleLine = (value) => String(value ?? "").replace(/[\p{Cc}\p{Zl}\p{Zp}]/gu, "");
 const quote = (value) => `"${value.replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
+// Node 22 (still in engines) has no RegExp.escape.
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export function buildAlert({ base, batch, reason, link }) {
   const fields = {
@@ -32,8 +34,8 @@ export function buildAlert({ base, batch, reason, link }) {
 
 function failureDetail(error, secrets) {
   const pattern = secrets
-    .sort((a, b) => b.length - a.length)
-    .map(RegExp.escape)
+    .toSorted((a, b) => b.length - a.length)
+    .map(escapeRegExp)
     .join("|");
   const stderr = String(error?.stderr ?? "").replace(new RegExp(pattern, "gi"), "<redacted>");
   const first = singleLine(stderr.split(/[\r\n]/, 1)[0]).slice(0, 300);
