@@ -43,7 +43,10 @@ import {
 } from "../services/antigravityProjectBootstrap.ts";
 import { persistDiscoveredAntigravityProjectId } from "../services/antigravityProjectPersist.ts";
 import { markAntigravityMissingCloudCodeProject } from "../services/antigravityProjectPersistence.ts";
-import { getAntigravityModelFallbacks } from "../config/antigravityModelAliases.ts";
+import {
+  getAntigravityModelFallbacks,
+  selectAntigravityEffortTier,
+} from "../config/antigravityModelAliases.ts";
 import {
   shouldStripCloudCodeThinking,
   stripCloudCodeThinkingConfig,
@@ -1010,7 +1013,9 @@ export class AntigravityExecutor extends BaseExecutor {
       project: projectId,
       requestId: identity.requestId,
       request: transformedRequest,
-      model: upstreamModel,
+      // Opt-in tier steering: with ANTIGRAVITY_EFFORT_TIER_SELECTION the client's
+      // reasoning_effort (destructured above) picks the tier sibling when one exists.
+      model: selectAntigravityEffortTier(upstreamModel, _reasoningEffort),
       userAgent: getAntigravityEnvelopeUserAgent(credentials),
       requestType,
       ...stripAntigravityHarnessTelemetry(passthroughFields),

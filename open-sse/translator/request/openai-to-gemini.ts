@@ -34,6 +34,7 @@ import {
 } from "../helpers/geminiHelper.ts";
 import { buildGeminiTools, sanitizeGeminiToolName } from "../helpers/geminiToolsSanitizer.ts";
 import { createSchemaBudget } from "../helpers/schemaBudget.ts";
+import { isAntigravityEffortTierSelectionEnabled } from "../../config/antigravityModelAliases.ts";
 import {
   isGeminiTrailingModelTurnRejectingModel,
   stripTrailingGeminiModelTurns,
@@ -1089,6 +1090,12 @@ export function openaiToAntigravityRequest(model, body, stream, credentials = nu
     delete envelope.request.generationConfig.thinkingConfig;
   }
 
+  // The executor's opt-in tier selector (ANTIGRAVITY_EFFORT_TIER_SELECTION) reads the client
+  // effort from the envelope; the executor strips the key before the upstream request. Only
+  // with the flag set, so the default envelope keeps its shape.
+  if (isAntigravityEffortTierSelectionEnabled() && body.reasoning_effort !== undefined) {
+    (envelope as Record<string, unknown>).reasoning_effort = body.reasoning_effort;
+  }
   return envelope;
 }
 

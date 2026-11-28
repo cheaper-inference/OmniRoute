@@ -134,6 +134,43 @@ export function resolveAntigravityModelId(modelId: string): string {
   return (ANTIGRAVITY_MODEL_ALIASES as AntigravityModelAliasMap)[modelId] || modelId;
 }
 
+// Opt-in (ANTIGRAVITY_EFFORT_TIER_SELECTION): let the client's reasoning_effort
+// pick the -high/-medium/-low sibling when the resolved upstream id is in a
+// tiered family. Default off: the id the dispatcher resolved is used unchanged.
+const ANTIGRAVITY_EFFORT_TIER_ENV = "ANTIGRAVITY_EFFORT_TIER_SELECTION";
+const ANTIGRAVITY_EFFORT_TIER_PATTERN = /^(.+)-(high|medium|low)$/;
+const SHARED_MODEL_IDS: ReadonlySet<string> = new Set(
+  ANTIGRAVITY_SHARED_MODELS.map((model) => model.id)
+);
+
+export function isAntigravityEffortTierSelectionEnabled(): boolean {
+  const raw = process.env[ANTIGRAVITY_EFFORT_TIER_ENV];
+  return raw === "true" || raw === "1";
+}
+
+/**
+ * Honour the client's reasoning_effort when the opt-in flag is set. `upstreamId`
+ * is an ALREADY-RESOLVED upstream id (the output of cleanModelName: account
+ * catalog, MITM alias or static alias) and is never resolved again here: a
+ * second pass would rewrite an account-catalog literal such as
+ * gemini-3.7-flash-high to the shared -tiered id. If the id ends in
+ * -high/-medium/-low and the shared catalog lists the effort's sibling, that
+ * sibling wins. Anything else, and every call with the flag unset, returns
+ * `upstreamId` unchanged.
+ */
+export function selectAntigravityEffortTier(upstreamId: string, reasoningEffort: unknown): string {
+  if (!isAntigravityEffortTierSelectionEnabled()) return upstreamId;
+  const tier =
+    reasoningEffort === "high" || reasoningEffort === "medium" || reasoningEffort === "low"
+      ? reasoningEffort
+      : null;
+  if (!tier) return upstreamId;
+  const match = ANTIGRAVITY_EFFORT_TIER_PATTERN.exec(upstreamId);
+  if (!match) return upstreamId;
+  const sibling = `${match[1]}-${tier}`;
+  return SHARED_MODEL_IDS.has(sibling) ? sibling : upstreamId;
+}
+
 export function toClientAntigravityModelId(modelId: string): string {
   if (!modelId) return modelId;
   return ANTIGRAVITY_REVERSE_MODEL_ALIASES[modelId] || modelId;
