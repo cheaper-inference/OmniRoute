@@ -1,3 +1,4 @@
+import { isDigitalOceanPausedKey } from "../utils/digitaloceanError.ts";
 import {
   ACCOUNT_DEACTIVATED_SIGNALS,
   CREDITS_EXHAUSTED_SIGNALS,
@@ -525,6 +526,9 @@ export function classifyProviderError(
       : PROVIDER_ERROR_TYPES.UNAUTHORIZED;
   }
 
+  if (isDigitalOceanPausedKey(provider, statusCode, bodyStr)) {
+    return PROVIDER_ERROR_TYPES.UNAUTHORIZED;
+  }
   if (statusCode === 402) return PROVIDER_ERROR_TYPES.QUOTA_EXHAUSTED;
 
   // Google regional-availability refusal (400 FAILED_PRECONDITION "... location
@@ -672,7 +676,9 @@ export function classifyProviderError(
     }
     return PROVIDER_ERROR_TYPES.FORBIDDEN;
   }
-  if (statusCode >= 500) return PROVIDER_ERROR_TYPES.SERVER_ERROR;
+  if (statusCode >= 500 || (provider === "digitalocean" && statusCode === 424)) {
+    return PROVIDER_ERROR_TYPES.SERVER_ERROR;
+  }
 
   // Antigravity BYOP fast-fail (executor emits 422 with code
   // gcp_project_required when the Google account must Bring Its Own GCP

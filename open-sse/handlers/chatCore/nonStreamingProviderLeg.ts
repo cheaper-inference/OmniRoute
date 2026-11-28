@@ -28,6 +28,8 @@ import { NonStreamingResponseTooLargeError } from "./nonStreamingResponseBody.ts
 import { restoreNonStreamingToolNames } from "./passthroughToolNames.ts";
 import { inheritCodexResponseFence } from "../../services/codexAccount/fences.ts";
 import { extractUsageFromResponse } from "../usageExtractor.ts";
+import { readDigitalOceanError } from "../../utils/digitaloceanError.ts";
+import { readDigitalOceanResetAt } from "../../services/rateLimitManager/headers.ts";
 import { cacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { sanitizeUsagePayloadForRequest } from "../../utils/usageTracking.ts";
 import { readBuyerCostMicro } from "../../utils/buyerCostMicro.ts";
@@ -250,18 +252,21 @@ function checkConnectionIdentity(
   return null;
 }
 
-function parseRetryAfterMs(response: Response): number | null {
+function parseRetryAfterMs(response: Response, provider: string | null): number | null {
   const retryAfterHeader = response.headers?.get?.("retry-after");
-  if (!retryAfterHeader) return null;
-  const retryAfterSec = Number.parseInt(retryAfterHeader, 10);
+  const retryAfterSec = Number.parseInt(retryAfterHeader ?? "", 10);
   if (Number.isFinite(retryAfterSec) && retryAfterSec > 0) {
     return retryAfterSec * 1000;
   }
-  const retryAfterDate = new Date(retryAfterHeader).getTime();
+  const retryAfterDate = retryAfterHeader ? new Date(retryAfterHeader).getTime() : NaN;
   if (Number.isFinite(retryAfterDate) && retryAfterDate > Date.now()) {
     return retryAfterDate - Date.now();
   }
-  return null;
+  const resetAt =
+    provider === "digitalocean" && response.status === 429
+      ? readDigitalOceanResetAt(response.headers)
+      : null;
+  return resetAt ? Math.min(resetAt - Date.now(), 86_400_000) : null;
 }
 
 function finishOk(
@@ -497,7 +502,7 @@ export async function runNonStreamingProviderLeg(
           formatted,
           undefined,
           // Keep the upstream retry hint on the sanitized response.
-          outcome.result.response ? parseRetryAfterMs(outcome.result.response) : null,
+          outcome.result.response ? parseRetryAfterMs(outcome.result.response, provider) : null,
           outcome.result.errorCode,
           outcome.result.errorType,
           { passthrough: input.sourceFormat === "claude" }
@@ -679,7 +684,12 @@ export async function runNonStreamingProviderLeg(
         (typeof errObj?.message === "string" ? errObj.message : null) ??
         errorBodyText.slice(0, 200) ??
         "Provider request failed";
-      upstreamErrorCode = typeof errObj?.code === "string" ? errObj.code : undefined;
+      upstreamErrorCode =
+        typeof errObj?.code === "string"
+          ? errObj.code
+          : provider === "digitalocean"
+            ? readDigitalOceanError(parsedErrorBody).code
+            : undefined;
       upstreamErrorType = typeof errObj?.type === "string" ? errObj.type : undefined;
     } catch (readErr) {
       message =
@@ -689,7 +699,7 @@ export async function runNonStreamingProviderLeg(
     }
 
     // Parse Retry-After from upstream response headers
-    retryAfterMs = parseRetryAfterMs(providerResponse);
+    retryAfterMs = parseRetryAfterMs(providerResponse, provider);
 
     // -- Model-unavailable -> family fallback (initial only) --------------------
     if (allowModelFallback && isModelUnavailableError(statusCode, message, provider)) {

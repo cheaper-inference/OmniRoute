@@ -1,0 +1,1 @@
+- **fix(providers):** Use the documented DigitalOcean Inference key links and model-specific Responses routing. Add embeddings and base64 image generation, preserve prompt cache usage, and handle upstream dependency failures, paused keys, and rate-limit resets.

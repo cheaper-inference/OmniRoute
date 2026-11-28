@@ -12,6 +12,8 @@ import {
   MICROSOFT_DESIGNER_WEB_RETIRED_MESSAGE,
 } from "@/shared/constants/designerWebRetirement";
 
+import { markAccountUnavailable } from "@/sse/services/auth.ts";
+
 import { getImageProvider, parseImageModel } from "../config/imageRegistry.ts";
 import { handleGrokImageGeneration } from "./grokMedia.ts";
 import { saveCallLog, saveImageSuccessResult, saveImageErrorResult } from "./imageResult.ts";
@@ -1445,15 +1447,17 @@ async function handleOpenAIImageGeneration({
     const output = prepareImageGenerationOptions(provider, body);
     if ("error" in output) return { success: false, status: 400, error: output.error };
     Object.assign(upstreamBody, output.options);
-    if (body.n !== undefined) upstreamBody.n = body.n;
-    if (body.size !== undefined) upstreamBody.size = body.size;
-    if (body.quality !== undefined) upstreamBody.quality = body.quality;
-    if (body.response_format !== undefined) upstreamBody.response_format = body.response_format;
-    if (body.style !== undefined) upstreamBody.style = body.style;
+    if (provider !== "digitalocean") {
+      if (body.n !== undefined) upstreamBody.n = body.n;
+      if (body.size !== undefined) upstreamBody.size = body.size;
+      if (body.quality !== undefined) upstreamBody.quality = body.quality;
+      if (body.response_format !== undefined) upstreamBody.response_format = body.response_format;
+      if (body.style !== undefined) upstreamBody.style = body.style;
 
-    const { imageUrl } = extractImageInputs(body);
-    if (imageUrl && OPENAI_IMAGE_TO_IMAGE_MODELS.has(model)) {
-      upstreamBody.image_url = imageUrl;
+      const { imageUrl } = extractImageInputs(body);
+      if (imageUrl && OPENAI_IMAGE_TO_IMAGE_MODELS.has(model)) {
+        upstreamBody.image_url = imageUrl;
+      }
     }
   }
 
@@ -1537,6 +1541,25 @@ async function handleOpenAIImageGeneration({
 
   if (pollinationsAnonSession) {
     reportPollinationsAnonOutcome(pollinationsAnonSession, result.status);
+  }
+
+  if (
+    provider === "digitalocean" &&
+    result.success === false &&
+    (result.status === 429 || result.retryable) &&
+    typeof credentials.connectionId === "string"
+  ) {
+    await markAccountUnavailable(
+      credentials.connectionId,
+      result.status,
+      result.error,
+      provider,
+      model,
+      null,
+      { headers: result.upstreamHeaders }
+    ).catch(() => {
+      log?.warn?.("IMAGE", "Unable to persist DigitalOcean image connection cooldown");
+    });
   }
 
   // Save call log after result is determined

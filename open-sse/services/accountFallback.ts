@@ -1,3 +1,5 @@
+import { isDigitalOceanPausedKey } from "../utils/digitaloceanError.ts";
+import { readDigitalOceanResetAt } from "./rateLimitManager/headers.ts";
 import {
   BACKOFF_STEPS_MS,
   EXECUTOR_CONTRACT_VIOLATION_CODE,
@@ -2070,7 +2072,9 @@ export function checkFallbackError(
     retryAfterMs: number;
     provenance: RetryHintProvenance;
   } | null {
-    const resetTime = parseResetFromHeaders(headers);
+    const resetTime =
+      parseResetFromHeaders(headers) ??
+      (provider === "digitalocean" && status === 429 ? readDigitalOceanResetAt(headers) : null);
     if (resetTime) {
       const waitMs = Math.max(resetTime - Date.now(), 0);
       // Header hints bypass maxCooldownMs downstream, so clamp them here: an
@@ -2175,6 +2179,20 @@ export function checkFallbackError(
       usedUpstreamRetryHint: false,
       reason,
     };
+  }
+
+  if (provider === "digitalocean") {
+    if (status === 424) return buildRetryableFallback(RateLimitReason.SERVER_ERROR);
+    const paused = isDigitalOceanPausedKey(provider, status, errorStr);
+    if (paused || status === 429) {
+      return {
+        ...buildRetryableFallback(
+          paused ? RateLimitReason.AUTH_ERROR : RateLimitReason.RATE_LIMIT_EXCEEDED
+        ),
+        ruleScope: "connection",
+        skipProviderBreaker: true,
+      };
+    }
   }
 
   const m365Scope = getM365FailureScope(provider, status, errorText, structuredError);

@@ -10,7 +10,15 @@ type ImageEndpointSuccess = {
 
 export type ImageEndpointResult =
   | ImageEndpointSuccess
-  | { success: false; status: number; error: string; data?: never; usage?: never };
+  | {
+      success: false;
+      status: number;
+      error: string;
+      data?: never;
+      usage?: never;
+      upstreamHeaders?: Headers;
+      retryable?: boolean;
+    };
 
 /** Keep upstream usage internal while preserving the OpenAI-compatible public payload. */
 export function buildImageEndpointSuccess(

@@ -257,6 +257,19 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
     supportedSizes: ["1024x1024", "1024x1792", "1792x1024"],
   },
 
+  digitalocean: {
+    id: "digitalocean",
+    baseUrl: "https://inference.do-ai.run/v1/images/generations",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "openai",
+    models: [
+      { id: "openai-gpt-image-2", name: "GPT Image 2" },
+      { id: "openai-gpt-image-1.5", name: "GPT Image 1.5" },
+    ],
+    supportedSizes: ["auto", "1536x1024", "1024x1536"],
+  },
+
   codex: CODEX_IMAGE_PROVIDER,
 
   // Cursor plan image generation via the Agent CLI native `generateImage` tool.

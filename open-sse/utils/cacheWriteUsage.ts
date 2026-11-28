@@ -34,7 +34,8 @@ function sources(value: unknown) {
       prompt.cache_write_tokens ??
       input.cache_write_tokens ??
       usage.cache_write_tokens ??
-      usage.cacheCreation,
+      usage.cacheCreation ??
+      usage.cache_created_input_tokens, // DigitalOcean Chat Completions
     rawTiers: usage.cache_creation ?? prompt.cache_creation ?? input.cache_creation,
   };
 }

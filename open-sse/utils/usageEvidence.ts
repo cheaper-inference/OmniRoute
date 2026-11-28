@@ -80,6 +80,7 @@ function cacheEvidence(value: unknown): Pick<UsageEvidence, "cacheRead" | "cache
   let cacheCreation = evidenceFor([
     u.cacheCreation,
     u.cache_creation_input_tokens,
+    u.cache_created_input_tokens,
     u.cache_write_tokens,
     p.cache_creation_tokens,
     i.cache_creation_tokens,
@@ -126,7 +127,7 @@ export function withoutInvalidCacheCounters<T extends Record<string, unknown>>(u
       if (result[name] != null && !usableTokenCounter(result[name])) {
         delete result[name];
         changed = true;
-        if (name.includes("creation") || name.includes("write")) invalidWrite = true;
+        if (name.startsWith("cache_creat") || name.includes("write")) invalidWrite = true;
       }
     return result;
   };
@@ -135,6 +136,7 @@ export function withoutInvalidCacheCounters<T extends Record<string, unknown>>(u
     "cached_tokens",
     "cachedContentTokenCount",
     "cache_creation_input_tokens",
+    "cache_created_input_tokens",
     "cache_write_tokens",
   ]);
   for (const key of ["prompt_tokens_details", "input_tokens_details"])

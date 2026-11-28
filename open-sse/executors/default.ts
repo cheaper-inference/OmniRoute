@@ -232,6 +232,7 @@ export class DefaultExecutor extends BaseExecutor {
       }
       case "perplexity-agent":
         return this.config.baseUrl;
+      case "digitalocean":
       case "mistral":
       case "openai": {
         // Mistral opts in per model; a custom model arrives as the marker, see
@@ -252,7 +253,10 @@ export class DefaultExecutor extends BaseExecutor {
           credentials?.providerSpecificData?._omnirouteForceResponsesUpstream === true ||
           getModelTargetFormat(this.provider, model) === "openai-responses"
         ) {
-          return chatUrl.replace(/\/chat(?:\/completions)?\/?$/, "/responses");
+          return (
+            (this.provider === "digitalocean" && !customBaseUrl && this.config.responsesBaseUrl) ||
+            chatUrl.replace(/\/chat(?:\/completions)?\/?$/, "/responses")
+          );
         }
         return chatUrl;
       }

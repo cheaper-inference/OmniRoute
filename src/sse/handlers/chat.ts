@@ -3152,7 +3152,10 @@ async function handleSingleModelChat(
                   (failureKind === "rate_limit" || failureKind === "transient")
                 ),
                 isCombo,
-                headers: result.response.headers,
+                headers:
+                  provider === "digitalocean"
+                    ? (result.upstreamHeaders ?? result.response.headers)
+                    : result.response.headers,
                 isAvalancheRisk: avalancheRisk?.isAvalancheRisk ?? false,
                 avalancheCooldownMs: avalancheRisk?.suggestedCooldownMs,
                 suppressFallback: avalancheRisk?.shouldSuppressFallback ?? false,

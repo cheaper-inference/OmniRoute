@@ -1,6 +1,8 @@
 import { CORS_HEADERS } from "./cors.ts";
 import { unwrapClinepassEnvelope } from "./clinepassEnvelope.ts";
 import { extractJsonErrorFields } from "./tencentEnvelope.ts";
+import { readDigitalOceanError } from "./digitaloceanError.ts";
+import { readDigitalOceanResetAt } from "../services/rateLimitManager/headers.ts";
 import { classifyProviderSafetyError } from "./providerSafety.ts";
 import {
   redactSensitiveErrorText,
@@ -560,7 +562,9 @@ export async function parseUpstreamError(response: Response, provider: string | 
         typeof extracted.message === "string"
           ? extracted.message
           : `Upstream error: ${response.status}`;
-      errorCode = extracted.errorCode;
+      errorCode =
+        extracted.errorCode ??
+        (provider === "digitalocean" ? readDigitalOceanError(json).code : undefined);
       errorType = extracted.errorType;
     } catch {
       message = text;
@@ -599,6 +603,11 @@ export async function parseUpstreamError(response: Response, provider: string | 
         retryAfterMs = retryAfterDate - Date.now();
       }
     }
+  }
+
+  if (provider === "digitalocean" && response.status === 429 && !retryAfterMs) {
+    const resetAt = readDigitalOceanResetAt(response.headers);
+    if (resetAt) retryAfterMs = resetAt - Date.now();
   }
 
   // #16442: a structured google.rpc.RetryInfo detail (`error.details[].retryDelay`)

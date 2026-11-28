@@ -5,6 +5,7 @@ export const digitaloceanProvider: RegistryEntry = buildOpenAiCompatibleRegistry
   id: "digitalocean",
   alias: "digitalocean",
   baseUrl: "https://inference.do-ai.run/v1/chat/completions",
+  responsesBaseUrl: "https://inference.do-ai.run/v1/responses",
   modelsUrl: "https://inference.do-ai.run/v1/models",
   models: [],
   passthroughModels: true,

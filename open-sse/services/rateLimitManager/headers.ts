@@ -14,6 +14,13 @@ export const STANDARD_HEADERS = {
   overLimit: "x-ratelimit-over-limit",
 };
 
+export const DIGITALOCEAN_HEADERS = {
+  limit: "ratelimit-limit",
+  remaining: "ratelimit-remaining",
+  reset: "ratelimit-reset",
+  retryAfter: STANDARD_HEADERS.retryAfter,
+};
+
 /**
  * Anthropic uses custom headers
  */
@@ -69,6 +76,14 @@ export function parseResetTime(value) {
   } catch {}
 
   return null;
+}
+
+/** DigitalOcean documents the reset as Unix seconds. */
+export function readDigitalOceanResetAt(headers: unknown): number | null {
+  const value = toPlainHeaders(headers)[DIGITALOCEAN_HEADERS.reset];
+  if (!value || !/^\d+$/.test(value)) return null;
+  const epochMs = Number(value) * 1000;
+  return Number.isSafeInteger(epochMs) && epochMs > Date.now() ? epochMs : null;
 }
 
 /**
