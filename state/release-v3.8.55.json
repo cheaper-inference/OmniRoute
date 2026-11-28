@@ -18,11 +18,12 @@
         "labeledAt": "2026-11-28T12:49:58Z"
       }
     ],
-    "stage": "testing",
+    "stage": "landing",
     "startedAt": "2026-11-28T18:18:09.437Z",
     "attempts": 0,
     "bisect": null,
-    "lane": "hotfix"
+    "lane": "hotfix",
+    "landAttempts": 1
   },
   "baseChecks": [
     {
@@ -127,20 +128,6 @@
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-25T07:29:20.395Z",
-      "type": "checks-red",
-      "batchId": "b37",
-      "prs": [
-        21168,
-        21169,
-        21172,
-        21174
-      ],
-      "sha": "dbd1bf7fb797898d338a0f7b26b4bce44cb0ecca",
-      "detail": "Gate / CI, Unit Tests (1/8)",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45568467628"
-    },
     {
       "at": "2026-11-25T07:29:28.955Z",
       "type": "base-check-started",
@@ -2795,8 +2782,22 @@
         "21489": "2026-11-28T12:49:58Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46174871418"
+    },
+    {
+      "at": "2026-11-28T19:35:24.854Z",
+      "type": "checks-green",
+      "batchId": "b82",
+      "prs": [
+        21489
+      ],
+      "sha": "742dde8f8e1f80d28b164391fcd33d32f0ece117",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46181758213"
     }
   ],
-  "updatedAt": "2026-11-28T19:25:55.806Z",
-  "batchWindow": 2
+  "updatedAt": "2026-11-28T19:35:37.112Z",
+  "batchWindow": 2,
+  "landingsWithoutVerdict": {
+    "count": 1,
+    "since": "2026-11-28T19:35:37.112Z"
+  }
 }
