@@ -373,7 +373,7 @@ export const builtinSkills: Record<string, SkillHandler> = {
       content,
       provider_options,
       strict_filters,
-      apiKeyId: context.apiKeyId || null,
+      apiKeyId: context.apiKeyId === "local" ? null : context.apiKeyId || null,
     });
     return {
       success: true,

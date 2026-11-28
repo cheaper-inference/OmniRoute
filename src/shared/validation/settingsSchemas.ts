@@ -666,6 +666,8 @@ export const updateSettingsSchema = z.object({
   // the default (for providers that don't implement Anthropic's web_search server tool).
   // Empty/unset = disabled. Value is a model string ("provider,model" / alias / combo).
   webSearchRouteModel: z.string().max(200).optional(),
+  // Opt-in ranking for automatic search. Unset/empty preserves cost-based selection.
+  searchProviderOrder: z.array(z.string().trim().min(1).max(60)).max(100).optional(),
   // Whole-request budget for /v1/search, in ms. Unset keeps the 15s constant.
   // The floor matches the handler's minimum; the ceiling stops a typo from
   // holding a worker for hours.

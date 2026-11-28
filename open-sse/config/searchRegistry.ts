@@ -686,25 +686,56 @@ function isRemoteCleartextUrl(raw: string): boolean {
   return !(host === "localhost" || host === "::1" || /^127(?:\.\d{1,3}){3}$/.test(host));
 }
 
+/** True only when the operator explicitly listed this provider or one of its aliases. */
+export function isPreferredSearchProvider(providerId: string, preferredOrder: unknown): boolean {
+  return (
+    Array.isArray(preferredOrder) &&
+    preferredOrder.some(
+      (id) => typeof id === "string" && resolveSearchProviderId(id) === providerId
+    )
+  );
+}
+
 /**
- * Auto-select candidates for a search type, cheapest first: every non-fallback provider
- * plus fallback-only providers that may become primary once configured. Callers must
- * confirm the latter with {@link isOperatorConfiguredPrimary} after resolving credentials.
+ * Rank explicit operator preferences before the usual cost-ranked candidates.
+ * Without a preference, fallback-only providers still require their configured-primary opt-in.
  */
-export function autoSearchCandidates(searchType: string): SearchProviderConfig[] {
+export function autoSearchCandidates(
+  searchType: string,
+  preferredOrder?: unknown
+): SearchProviderConfig[] {
+  const order = Array.isArray(preferredOrder)
+    ? preferredOrder
+        .filter((id): id is string => typeof id === "string")
+        .map(resolveSearchProviderId)
+    : [];
+  const rank = (id: string) => {
+    const index = order.indexOf(id);
+    return index < 0 ? Number.MAX_SAFE_INTEGER : index;
+  };
   return Object.values(SEARCH_PROVIDERS)
     .filter(
       (provider) =>
-        (!provider.fallbackOnly || provider.primaryWhenConfigured === true) &&
+        !provider.disabled &&
+        (!provider.fallbackOnly ||
+          provider.primaryWhenConfigured === true ||
+          order.includes(provider.id)) &&
         supportsSearchType(provider, searchType)
     )
-    .sort((a, b) => a.costPerQuery - b.costPerQuery);
+    .sort((a, b) => rank(a.id) - rank(b.id) || a.costPerQuery - b.costPerQuery);
 }
 
-/** Credentials admit this candidate for auto-select (see {@link autoSearchCandidates}). */
-export function admitsAutoCandidate(provider: SearchProviderConfig, credentials: unknown): boolean {
-  if (!credentials) return false;
-  return !provider.fallbackOnly || isOperatorConfiguredPrimary(provider, credentials);
+/** An explicit operator preference promotes a keyless fallback without changing catalog defaults. */
+export function admitsAutoCandidate(
+  provider: SearchProviderConfig,
+  credentials: unknown,
+  preferredOrder?: unknown
+): boolean {
+  if (!credentials || provider.disabled) return false;
+  if (!provider.fallbackOnly) return true;
+  // A self-hosted provider still needs its safe, non-placeholder stored URL.
+  if (provider.primaryWhenConfigured) return isOperatorConfiguredPrimary(provider, credentials);
+  return isPreferredSearchProvider(provider.id, preferredOrder);
 }
 
 export function getSearchProvider(providerId: string): SearchProviderConfig | null {

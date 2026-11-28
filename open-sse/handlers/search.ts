@@ -126,6 +126,8 @@ interface SearchHandlerOptions {
   credentials: Record<string, any>;
   alternateProvider?: string;
   alternateCredentials?: Record<string, any> | null;
+  /** Additional operator-ordered alternates, resolved under the caller's policy. */
+  alternateProviders?: Array<{ provider: string; credentials: Record<string, unknown> }>;
   log?: any;
   /** Connection ID (proxy resolution + call-log attribution) and API key ID (per-key proxy). */
   connectionId?: string;
@@ -155,12 +157,16 @@ function clampSearchTimeoutMs(
   return Math.min(MAX_SEARCH_TIMEOUT_MS, Math.max(floor, Math.floor(override)));
 }
 
-function resolveGlobalTimeoutMs(override?: number, provider?: string, alternate?: string): number {
+function resolveGlobalTimeoutMs(
+  override?: number,
+  provider?: string,
+  alternate?: string,
+  additionalProviders: string[] = []
+): number {
   // An explicit operator budget still wins, including values below Codex's 60s.
-  const fallback =
-    provider === "codex-search" || alternate === "codex-search"
-      ? getSearchProvider("codex-search")!.timeoutMs
-      : DEFAULT_GLOBAL_TIMEOUT_MS;
+  const fallback = [provider, alternate, ...additionalProviders].includes("codex-search")
+    ? getSearchProvider("codex-search")!.timeoutMs
+    : DEFAULT_GLOBAL_TIMEOUT_MS;
   return clampSearchTimeoutMs(override, fallback, MIN_SEARCH_TIMEOUT_MS);
 }
 
@@ -1513,6 +1519,7 @@ export async function handleSearch(options: SearchHandlerOptions): Promise<Searc
     credentials,
     alternateProvider,
     alternateCredentials,
+    alternateProviders,
     log,
     connectionId,
     apiKeyId,
@@ -1520,7 +1527,12 @@ export async function handleSearch(options: SearchHandlerOptions): Promise<Searc
     providerTimeoutsMs,
   } = options;
   const startTime = Date.now();
-  const globalTimeoutMs = resolveGlobalTimeoutMs(timeoutMs, providerId, alternateProvider);
+  const globalTimeoutMs = resolveGlobalTimeoutMs(
+    timeoutMs,
+    providerId,
+    alternateProvider,
+    alternateProviders?.map((candidate) => candidate.provider)
+  );
   const providerTimeoutOverride = clampSearchTimeoutMs(providerTimeoutsMs?.[providerId], 0, 1);
 
   // 1. Sanitize input
@@ -1549,8 +1561,18 @@ export async function handleSearch(options: SearchHandlerOptions): Promise<Searc
     };
   }
 
-  // 3. Get alternate config for failover (pre-resolved by route)
-  const alternateConfig = alternateProvider ? getSearchProvider(alternateProvider) : null;
+  // All alternates are resolved under the caller policy before entering the handler.
+  const seenProviders = new Set([providerId]);
+  const alternates = [
+    ...(alternateProvider && alternateCredentials
+      ? [{ provider: alternateProvider, credentials: alternateCredentials }]
+      : []),
+    ...(alternateProviders ?? []),
+  ].filter((candidate) => {
+    if (seenProviders.has(candidate.provider)) return false;
+    seenProviders.add(candidate.provider);
+    return true;
+  });
 
   const requestParams = {
     query: cleanQuery,
@@ -1572,104 +1594,62 @@ export async function handleSearch(options: SearchHandlerOptions): Promise<Searc
     }
   }
 
-  // 4. Try primary provider (skip catalog-default SearXNG localhost:8888,
-  // unless a request/connection override resolves it to a real URL).
-  const primaryEffectiveBaseUrl = resolveSearchBaseUrl(primaryConfig, {
-    ...requestParams,
-    providerSpecificData:
-      credentials?.providerSpecificData && typeof credentials.providerSpecificData === "object"
-        ? credentials.providerSpecificData
-        : undefined,
-  });
-  if (
-    isUnconfiguredLoopbackSearchProvider({ ...primaryConfig, baseUrl: primaryEffectiveBaseUrl })
-  ) {
-    if (log) {
-      log.warn(
-        "SEARCH",
-        "skipping catalog-default searxng-search at http://localhost:8888/search; set a real SearXNG URL"
-      );
+  let result: SearchHandlerResult = {
+    success: false,
+    status: 503,
+    error: "No usable search provider",
+  };
+  // Preserve the primary provider's failure if every permitted alternate also fails.
+  let firstFailure: SearchHandlerResult | undefined;
+  const attempts = [{ provider: providerId, credentials }, ...alternates];
+  for (const [index, attempt] of attempts.entries()) {
+    if (Date.now() - startTime >= globalTimeoutMs) break;
+    let config = index === 0 ? primaryConfig : getSearchProvider(attempt.provider);
+    if (!config || config.disabled || !config.searchTypes.includes(searchType)) continue;
+    const override = clampSearchTimeoutMs(providerTimeoutsMs?.[config.id], 0, 1);
+    if (override) config = { ...config, timeoutMs: override };
+    const effectiveBaseUrl = resolveSearchBaseUrl(config, {
+      ...requestParams,
+      providerSpecificData: attempt.credentials?.providerSpecificData,
+    });
+    if (isUnconfiguredLoopbackSearchProvider({ ...config, baseUrl: effectiveBaseUrl })) {
+      result = {
+        success: false,
+        status: 503,
+        error:
+          "SearXNG is still on the catalog default http://localhost:8888/search. Configure a real SearXNG URL or disable the provider.",
+      };
+      continue;
     }
-    const alternateEffectiveBaseUrl = alternateConfig
-      ? resolveSearchBaseUrl(alternateConfig, {
-          ...requestParams,
-          providerSpecificData:
-            alternateCredentials?.providerSpecificData &&
-            typeof alternateCredentials.providerSpecificData === "object"
-              ? alternateCredentials.providerSpecificData
-              : undefined,
-        })
-      : "";
-    if (
-      alternateConfig &&
-      alternateCredentials &&
-      !isUnconfiguredLoopbackSearchProvider({
-        ...alternateConfig,
-        baseUrl: alternateEffectiveBaseUrl,
-      })
-    ) {
-      return tryProvider(
-        alternateConfig,
-        requestParams,
-        alternateCredentials,
-        startTime,
-        log,
-        alternateCredentials?.connectionId,
-        apiKeyId,
-        globalTimeoutMs
-      );
-    }
-    return {
-      success: false,
-      status: 503,
-      error:
-        "SearXNG is still on the catalog default http://localhost:8888/search. Configure a real SearXNG URL or disable the provider.",
-    };
-  }
-
-  const result = await tryProvider(
-    primaryConfig,
-    requestParams,
-    credentials,
-    startTime,
-    log,
-    connectionId,
-    apiKeyId,
-    globalTimeoutMs
-  );
-
-  if (result.success) return result;
-
-  // 5. Failover to alternate (only for retriable errors and auto-select mode)
-  if (
-    alternateConfig &&
-    alternateCredentials &&
-    isFailoverStatus(primaryConfig, result.status) &&
-    Date.now() - startTime < globalTimeoutMs
-  ) {
-    if (log) {
-      log.warn(
-        "SEARCH",
-        `${primaryConfig.id} failed (${result.status}), trying ${alternateConfig.id}`
-      );
-    }
-
-    // Resolve alternate connection proxy independently so primary context never leaks
-    const fallbackResult = await tryProvider(
-      alternateConfig,
+    result = await tryProvider(
+      config,
       requestParams,
-      alternateCredentials,
+      attempt.credentials,
       startTime,
       log,
-      alternateCredentials?.connectionId,
+      index === 0 ? connectionId : attempt.credentials.connectionId,
       apiKeyId,
       globalTimeoutMs
     );
-
-    if (fallbackResult.success) return fallbackResult;
+    if (result.success) {
+      if (result.data?.results.length || alternates.length === 0) return result;
+      // A successful transport with no usable sources must not end a configured failover chain.
+      result = {
+        success: false,
+        status: 502,
+        error: "Search provider " + config.id + " returned no usable sources",
+      };
+    }
+    firstFailure ??= result;
+    if (!isFailoverStatus(config, result.status)) return firstFailure;
+    if (index + 1 < attempts.length && Date.now() - startTime < globalTimeoutMs) {
+      log?.warn?.(
+        "SEARCH",
+        config.id + " failed (" + result.status + "), trying the next configured provider"
+      );
+    }
   }
-
-  return result;
+  return firstFailure ?? result;
 }
 
 /**

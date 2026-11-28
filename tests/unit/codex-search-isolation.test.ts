@@ -27,6 +27,9 @@ const CODEX_URL = "https://chatgpt.com/backend-api/codex/responses";
 const CHAT_MODEL = "gpt-5.5";
 const originalFetch = globalThis.fetch;
 const calls: string[] = [];
+// Successful routing fixtures must contain a usable source; empty results now fail over.
+const SEARCH_HIT = { title: "Docs", url: "https://example.com/docs", description: "Reference" };
+const DDG_HTML = '<a href="https://example.com/docs" class="result-link">Docs</a>';
 let sequence = 0;
 let braveFails = false;
 
@@ -99,9 +102,9 @@ test.beforeEach(async () => {
     if (url.includes("api.search.brave.com")) {
       return braveFails
         ? new Response("Unavailable", { status: 503 })
-        : Response.json({ web: { results: [] } });
+        : Response.json({ web: { results: [SEARCH_HIT] } });
     }
-    if (url.includes("duckduckgo.com")) return new Response("<html></html>");
+    if (url.includes("duckduckgo.com")) return new Response(DDG_HTML);
     if (url.includes("google.serper.dev")) return Response.json({ organic: [] });
     throw new Error(`No network permitted: ${url}`);
   };

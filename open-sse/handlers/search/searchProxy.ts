@@ -10,6 +10,7 @@
 
 import { saveCallLog } from "@/lib/usageDb";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
+import { validSearchResultUrl } from "./resultFilters.ts";
 import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 import { formatSearchProviderFailure } from "./providerFailure.ts";
 import { fetchWithCheckedRedirects, isRegistryEndpoint } from "./redirectGuard.ts";
@@ -329,7 +330,9 @@ export async function executeProviderFetch(
     const data = JSON.parse(await readResponseTextWithinCap(response, SEARCH_MAX_BODY_BYTES));
     clearTimeout(timer);
     const normalized = normalize(config.id, data, query, searchType);
-    const results = normalized.results.slice(0, maxResults);
+    const results = normalized.results
+      .filter((result) => validSearchResultUrl(result.url))
+      .slice(0, maxResults);
     const duration = Date.now() - startTime;
 
     logCall({
