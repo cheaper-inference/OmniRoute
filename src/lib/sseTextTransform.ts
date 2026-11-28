@@ -248,7 +248,8 @@ export function createSseTextTransform(
     isStopSignal?: boolean,
     index?: string | number,
     isSnapshot?: boolean,
-    fieldName?: string
+    fieldName?: string,
+    root?: unknown
   ) => string,
   onFlush?: (lastJson: any, isJsonStream?: boolean, lastContentJson?: any) => any,
   onCancel?: () => void,
@@ -409,7 +410,8 @@ export function createSseTextTransform(
                       isStopSignal,
                       compositeKey,
                       isSnapshot,
-                      fieldName
+                      fieldName,
+                      json
                     );
                   } else {
                     obj[key] = val;
@@ -417,7 +419,15 @@ export function createSseTextTransform(
                   matched = true;
                   continue;
                 }
-                obj[key] = processor(val, field, isStopSignal, compositeKey, isSnapshot, fieldName);
+                obj[key] = processor(
+                  val,
+                  field,
+                  isStopSignal,
+                  compositeKey,
+                  isSnapshot,
+                  fieldName,
+                  json
+                );
                 matched = true;
               } else if (typeof obj[key] === "object") {
                 sanitizeObject(obj[key], choiceIdx, toolIdx, isArray ? parentKey : key);

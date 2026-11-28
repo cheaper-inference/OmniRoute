@@ -585,6 +585,13 @@ function drainWindow(
   return redactOutsideDataUrls(raw.slice(0, emitLength));
 }
 
+function drainWholeField(state: DrainState, buffers: TextBuffers, field: BufferedField): string {
+  const raw = buffers[field];
+  if (!raw) return "";
+  state.replace(buffers, field, "");
+  return markUnclosedBeginHead(redactOutsideDataUrls(raw));
+}
+
 function appendAndDrain(
   state: DrainState,
   store: ChoiceBufferStore,
@@ -693,17 +700,74 @@ export function createCredentialSseTransform(
     return flushed;
   };
 
+  const activeFields = new Map<string, BufferedField>();
+
+  /**
+   * Reopen a channel that went quiet before another channel started. Its held tail
+   * must reach the client before the new channel's first visible characters, or a
+   * client that renders blocks in arrival order shows reasoning after the answer
+   * (issue #21545). Only Chat Completions is handled here: its delta can carry both
+   * fields in one frame, and key insertion order defines what the client sees first.
+   */
+  const reopenInactiveChannel = (
+    root: unknown,
+    index: string | number,
+    field: BufferedField,
+    fieldName: string | undefined,
+    isStopSignal: boolean
+  ): void => {
+    if (isStopSignal || !root || typeof root !== "object" || !("choices" in root)) return;
+    const choices = root.choices;
+    if (!Array.isArray(choices)) return;
+    const previous = activeFields.get(String(index));
+    if (!previous || previous === field) return;
+    if (
+      previous === "toolArgs" ||
+      previous === "partialJson" ||
+      field === "toolArgs" ||
+      field === "partialJson"
+    )
+      return;
+    const buffers = store.get(index);
+    if (!buffers[previous]) return;
+    const choiceIndex = Number(String(index).split("_")[0] ?? 0);
+    let delta: Record<string, unknown> | undefined;
+    for (const entry of choices) {
+      if (!entry || typeof entry !== "object") continue;
+      const idx = "index" in entry && typeof entry.index === "number" ? entry.index : 0;
+      if (idx !== choiceIndex) continue;
+      if ("delta" in entry && entry.delta && typeof entry.delta === "object") {
+        // Mutation target for the reopened field; the object shape is checked above.
+        delta = entry.delta as Record<string, unknown>;
+      }
+      break;
+    }
+    if (!delta) return;
+    const tail = drainWholeField(state, buffers, previous);
+    if (!tail) return;
+    // Drop the incoming key first, so the assignment that follows the processor call
+    // re-appends it after the reopened field.
+    delete delta[fieldName ?? String(field)];
+    const previousKey = String(previous);
+    const already = delta[previousKey];
+    delta[previousKey] = (typeof already === "string" ? already : "") + tail;
+  };
+
   const processor = (
     text: string,
     category: FieldCategory,
     isStopSignal = false,
     index: string | number = "0_0",
     isSnapshot = false,
-    fieldName?: string
+    fieldName?: string,
+    root?: unknown
   ): string => {
     const field = bufferField(category, fieldName);
     if (isSnapshot) return redactOutsideDataUrls(text);
-    return appendAndDrain(state, store, field, index, text, isStopSignal);
+    reopenInactiveChannel(root, index, field, fieldName, isStopSignal);
+    const processed = appendAndDrain(state, store, field, index, text, isStopSignal);
+    if (!isStopSignal && text) activeFields.set(String(index), field);
+    return processed;
   };
 
   return createSseTextTransform(processor, onFlush, undefined, {
