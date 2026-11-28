@@ -38,7 +38,7 @@ function stubLaunch(
           for (const resp of pageLoad) await onResponse?.(resp);
         },
         waitForTimeout: async () => {},
-        waitForSelector: async () => ({ click: async () => {} }),
+        waitForSelector: async () => ({ click: async () => {}, getAttribute: async () => "true" }),
         keyboard: {
           type: async () => {},
           insertText: async () => {},

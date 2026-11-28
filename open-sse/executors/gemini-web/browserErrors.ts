@@ -22,7 +22,7 @@ export function abortStatus(signal: AbortSignal | undefined): 499 | 504 | null {
 }
 
 const DEFAULT_RESPONSE_TIMEOUT_MS = 30_000;
-const ARGON_RESPONSE_TIMEOUT_MS = 180_000;
+const SLOW_MODEL_RESPONSE_TIMEOUT_MS = 180_000;
 
 export function resolveResponseTimeoutMs(
   modelId: string,
@@ -30,5 +30,7 @@ export function resolveResponseTimeoutMs(
 ): number {
   const parsed = Number(env.GEMINI_WEB_RESPONSE_TIMEOUT_MS);
   if (Number.isInteger(parsed) && parsed >= 1000 && parsed <= 600_000) return parsed;
-  return /argon/i.test(modelId) ? ARGON_RESPONSE_TIMEOUT_MS : DEFAULT_RESPONSE_TIMEOUT_MS;
+  return /argon|thinking/i.test(modelId)
+    ? SLOW_MODEL_RESPONSE_TIMEOUT_MS
+    : DEFAULT_RESPONSE_TIMEOUT_MS;
 }

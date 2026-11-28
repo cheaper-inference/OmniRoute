@@ -1,22 +1,14 @@
 // #13381 — gemini-web advertised model IDs but never selected the requested
-// model in the Gemini UI: every alias opened the identical page and ran the
-// identical automation, so two structurally different advertised models
-// produced byte-identical Playwright traces, and the OpenAI-shaped `model`
-// field on the response was a caller-supplied label, not an observed fact.
+// model in the Gemini UI: every alias ran the identical automation, so the
+// OpenAI-shaped `model` field on the response was a caller-supplied label, not
+// an observed fact.
 //
-// Owner decision (2026-09-15, Option B): implement real selection. gemini-web
-// now drives an in-browser mode-selection step (open-sse/executors/gemini-web/
-// modeSelection.ts) before typing anything: `gemini-3.1-pro` is the mode
-// gemini.google.com/app already opens to (no interaction, matches every other
-// pre-existing gemini-web test's fake page); every OTHER advertised model
-// (and Extended Thinking, the reporter's 2026-09-11 follow-up) is switched to
-// and READ BACK before the executor proceeds — a confirmed match is required,
-// or the request fails closed with 400 `unsupported_control_for_provider`
-// rather than silently running the account default under the requested
-// label. The mode-selection selectors themselves are UNVALIDATED (no live
-// Gemini account/DOM access from this checkout) — see modeSelection.ts and
-// the PR's "Live check" section. This suite proves the STRUCTURE: the
-// confirmed path proceeds, the unconfirmed path never does.
+// gemini-web now selects the model in Gemini's model menu before typing anything
+// (open-sse/executors/gemini-web/modeSelection.ts): it opens the menu, picks the
+// option whose label is the model name, and confirms it by reopening the menu and
+// reading the option's `aria-checked`. The choice persists on the Google account,
+// so no model is assumed to be already active. Unconfirmed → 400
+// `unsupported_control_for_provider`, never an answer under the wrong label.
 
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -24,8 +16,11 @@ import assert from "node:assert/strict";
 const { GeminiWebExecutor } = await import("../../open-sse/executors/gemini-web.ts");
 const { GEMINI_WEB_UNSUPPORTED_CONTROL_CODE } =
   await import("../../open-sse/executors/gemini-web/capabilities.ts");
-const { GEMINI_WEB_MODEL_MODES, GEMINI_WEB_EXTENDED_THINKING_MODE } =
-  await import("../../open-sse/executors/gemini-web/modeSelection.ts");
+const {
+  GEMINI_WEB_EXTENDED_THINKING_MODE,
+  GEMINI_WEB_MODE_MENU_BUTTON,
+  geminiWebModeOptionSelector,
+} = await import("../../open-sse/executors/gemini-web/modeSelection.ts");
 
 type Call = { fn: string; args: unknown[] };
 
@@ -35,19 +30,37 @@ interface SelectorScriptEntry {
 }
 
 interface PageScript {
-  /** Keyed by the EXACT selector string the production descriptor uses. */
+  /** Gemini's model menu: the option labels it offers and the one that is checked. */
+  menu?: {
+    labels: string[];
+    checked: string;
+    /** true: clicking an option does not change the selection (a failed switch). */
+    ignoresClicks?: boolean;
+    /** Gemini's high-demand fallback: the option it switches to once it has answered. */
+    switchesToAfterAnswer?: string;
+  };
+  /** Text of a StreamGenerate answer fired when Enter is pressed (no answer: 502). */
+  answer?: string;
+  /** Other controls, keyed by the EXACT selector string the production descriptor uses. */
   selectors?: Record<string, SelectorScriptEntry>;
 }
 
 /**
- * A configurable fake Playwright whose `waitForSelector` resolves the prompt
- * editor unconditionally (every pre-#13381 gemini-web test relies on that)
- * and otherwise consults `script.selectors`, keyed by the exact selector
- * string — read from the real `GEMINI_WEB_MODEL_MODES` /
- * `GEMINI_WEB_EXTENDED_THINKING_MODE` descriptors below, never duplicated as
- * a literal, so this suite stays valid across a future selector update.
+ * A configurable fake Playwright. `waitForSelector` resolves the prompt editor
+ * unconditionally, emulates the model menu from `script.menu` (selectors built with
+ * the production helpers, never duplicated as literals), and otherwise consults
+ * `script.selectors`.
  */
+function makeStreamGenerateRaw(text: string): string {
+  const inner = new Array(80).fill(null);
+  inner[4] = [[null, [text]]];
+  return `)]}'\n10\n[["wrb.fr", null, ${JSON.stringify(JSON.stringify(inner))}]]`;
+}
+
 function makeFakePlaywright(calls: Call[], script: PageScript = {}) {
+  const menu = script.menu ? { ...script.menu } : null;
+  let onResponse: ((resp: { url: () => string; text: () => Promise<string> }) => unknown) | null =
+    null;
   return {
     newContext: async (opts: unknown) => {
       calls.push({ fn: "newContext", args: [opts] });
@@ -57,8 +70,9 @@ function makeFakePlaywright(calls: Call[], script: PageScript = {}) {
         },
         cookies: async () => [],
         newPage: async () => ({
-          on: (event: string) => {
+          on: (event: string, cb: typeof onResponse) => {
             calls.push({ fn: "page.on", args: [event] });
+            if (event === "response") onResponse = cb;
           },
           goto: async (url: string, opts2: unknown) => {
             calls.push({ fn: "goto", args: [url, opts2] });
@@ -73,6 +87,24 @@ function makeFakePlaywright(calls: Call[], script: PageScript = {}) {
                 click: async () => {
                   calls.push({ fn: "editor.click", args: [] });
                 },
+              };
+            }
+            if (menu && selector === GEMINI_WEB_MODE_MENU_BUTTON) {
+              return {
+                click: async () => {
+                  calls.push({ fn: "menu.open", args: [] });
+                },
+              };
+            }
+            const label = menu?.labels.find((l) => geminiWebModeOptionSelector(l) === selector);
+            if (menu && label) {
+              return {
+                click: async () => {
+                  calls.push({ fn: "option.click", args: [label] });
+                  if (!menu.ignoresClicks) menu.checked = label;
+                },
+                getAttribute: async (name: string) =>
+                  name === "aria-checked" ? String(menu.checked === label) : null,
               };
             }
             const entry = script.selectors?.[selector];
@@ -93,6 +125,12 @@ function makeFakePlaywright(calls: Call[], script: PageScript = {}) {
             },
             press: async (key: string) => {
               calls.push({ fn: "keyboard.press", args: [key] });
+              if (key !== "Enter" || script.answer === undefined || !onResponse) return;
+              await onResponse({
+                url: () => "https://gemini.google.com/_/BardChatUi/data/x/StreamGenerate?rt=c",
+                text: async () => makeStreamGenerateRaw(script.answer!),
+              });
+              if (menu?.switchesToAfterAnswer) menu.checked = menu.switchesToAfterAnswer;
             },
           },
         }),
@@ -135,78 +173,133 @@ async function runWithFakePage(
   }
 }
 
-// ─── Regression guard: two different advertised models must diverge ────────
+/** The model menu of the account checked live on 2026-11-20. */
+const LIVE_MENU = ["4 Hydrogen", "4 Hydrogen Thinking", "3.1 Pro"];
+const reachedEditor = (calls: Call[]) => calls.some((c) => c.fn === "editor.click");
+const optionClicks = (calls: Call[]) =>
+  calls.filter((c) => c.fn === "option.click").map((c) => c.args[0]);
 
-test(
-  "#13381: distinct advertised gemini-web model IDs drive distinguishable Playwright " +
-    "automation (per-model selection is genuinely attempted)",
-  async () => {
-    // gemini-3.1-pro is the mode gemini.google.com/app already opens to — no mode
-    // switch is attempted, so it reaches the prompt editor and (since this fake page
-    // never fires the "response" event) ends in 502.
-    const runA = await runWithFakePage("gemini-3.1-pro", {});
-    // gemini-3.7-flash requires a confirmed switch. This fake page's script has no
-    // entry for its toggle selector, so the control is reported "not found" and the
-    // request fails closed BEFORE the editor is ever touched.
-    const runB = await runWithFakePage("gemini-3.7-flash", {});
+// ─── The requested model is actually selected ───────────────────────────────
 
-    assert.notDeepEqual(
-      runA.calls,
-      runB.calls,
-      "expected the automation trace to DIFFER between two distinct advertised models " +
-        "(proving model selection is attempted) — an identical trace would mean the " +
-        "executor still never selects the requested Gemini UI mode"
-    );
-
-    assert.equal(runA.status, 502, "the default model proceeds to the (unanswered) prompt");
-    assert.equal(
-      runB.status,
-      400,
-      "an unconfirmed non-default model must fail closed, never silently proceed"
-    );
-    assert.equal((runB.body as ErrorBodyLike).error.code, GEMINI_WEB_UNSUPPORTED_CONTROL_CODE);
-
-    const gotoCall = runA.calls.find((c) => c.fn === "goto");
-    assert.ok(gotoCall);
-    assert.equal(gotoCall!.args[0], "https://gemini.google.com/app");
-
-    // The core dishonesty this issue reported: runB must NOT reach the editor at all —
-    // proceeding under an unconfirmed model label is exactly the bug being fixed.
-    assert.equal(
-      runB.calls.some((c) => c.fn === "editor.click"),
-      false,
-      "an unconfirmed model must never reach the prompt editor"
-    );
-  }
-);
-
-// ─── (a) Read-back confirms -> proceeds ─────────────────────────────────────
-
-test("#13381: a confirmed model-mode read-back lets the request proceed to the prompt", async () => {
-  const descriptor = GEMINI_WEB_MODEL_MODES["gemini-3.7-flash"];
-  assert.ok(descriptor.toggleSelector && descriptor.activeIndicatorSelector);
-
-  const { status, calls } = await runWithFakePage("gemini-3.7-flash", {
-    selectors: {
-      [descriptor.toggleSelector!]: { found: true },
-      [descriptor.activeIndicatorSelector!]: { found: true, text: "Gemini 3.7 Flash" },
-    },
+test("#13381: an already-checked model proceeds without clicking any option", async () => {
+  const { status, calls } = await runWithFakePage("gemini-4-hydrogen", {
+    menu: { labels: LIVE_MENU, checked: "4 Hydrogen" },
   });
 
-  assert.equal(
-    status,
-    502,
-    "a CONFIRMED mode switch must proceed to the (unanswered-by-the-fake-page) prompt, not 400"
-  );
+  // This fake page never fires the "response" event, so reaching the prompt ends in 502.
+  assert.equal(status, 502);
+  assert.deepEqual(optionClicks(calls), []);
+  assert.ok(reachedEditor(calls));
   assert.ok(
-    calls.some((c) => c.fn === "mode.click"),
-    "the mode toggle must have been clicked"
-  );
-  assert.ok(
-    calls.some((c) => c.fn === "editor.click"),
-    "must reach the prompt editor once confirmed"
+    calls.some((c) => c.fn === "keyboard.press" && c.args[0] === "Escape"),
+    "the menu must be closed before typing"
   );
 });
+
+test("#13381: a different model is clicked, read back from the menu, then proceeds", async () => {
+  for (const [model, label] of [
+    ["gemini-4-hydrogen-thinking", "4 Hydrogen Thinking"],
+    ["gemini-3.1-pro", "3.1 Pro"],
+  ]) {
+    const { status, calls } = await runWithFakePage(model, {
+      menu: { labels: LIVE_MENU, checked: "4 Hydrogen" },
+    });
+    assert.equal(status, 502, `${model} must reach the prompt once confirmed`);
+    assert.deepEqual(optionClicks(calls), [label]);
+    assert.equal(
+      calls.filter((c) => c.fn === "menu.open").length,
+      2,
+      "the menu is reopened to read the selection back"
+    );
+    assert.ok(reachedEditor(calls));
+  }
+});
+
+test("#13381: gemini-3.1-pro is no longer assumed active (the account remembers the last model)", async () => {
+  const { calls } = await runWithFakePage("gemini-3.1-pro", {
+    menu: { labels: LIVE_MENU, checked: "4 Hydrogen Thinking" },
+  });
+  assert.deepEqual(optionClicks(calls), ["3.1 Pro"]);
+});
+
+// ─── Anything unconfirmed fails closed ──────────────────────────────────────
+
+test("#13381: a model the account's menu does not offer is a 400, never another model's answer", async () => {
+  const { status, body, calls } = await runWithFakePage("gemini-3.7-flash", {
+    menu: { labels: LIVE_MENU, checked: "4 Hydrogen" },
+  });
+
+  assert.equal(status, 400);
+  const err = (body as ErrorBodyLike).error;
+  assert.equal(err.code, GEMINI_WEB_UNSUPPORTED_CONTROL_CODE);
+  assert.match(err.message, /gemini-3\.7-flash/);
+  assert.match(err.message, /does not offer/);
+  assert.equal(reachedEditor(calls), false);
+  assert.equal(err.message.includes("at /"), false, "error bodies must stay sanitized");
+});
+
+test("#13381: a missing model menu fails closed with 400", async () => {
+  const { status, body, calls } = await runWithFakePage("gemini-4-hydrogen", {});
+  assert.equal(status, 400);
+  assert.equal((body as ErrorBodyLike).error.code, GEMINI_WEB_UNSUPPORTED_CONTROL_CODE);
+  assert.equal(reachedEditor(calls), false);
+});
+
+test("#13381: a click that does not change the selection fails closed with 400", async () => {
+  const { status, body, calls } = await runWithFakePage("gemini-4-hydrogen-thinking", {
+    menu: { labels: LIVE_MENU, checked: "4 Hydrogen", ignoresClicks: true },
+  });
+  assert.equal(status, 400);
+  assert.equal((body as ErrorBodyLike).error.code, GEMINI_WEB_UNSUPPORTED_CONTROL_CODE);
+  assert.equal(reachedEditor(calls), false);
+});
+
+test("#13381: an unmapped model id fails closed instead of running the account's model", async () => {
+  const { status, body, calls } = await runWithFakePage("gemini-4.0-ultra-does-not-exist", {
+    menu: { labels: LIVE_MENU, checked: "4 Hydrogen" },
+  });
+  assert.equal(status, 400);
+  assert.equal((body as ErrorBodyLike).error.code, GEMINI_WEB_UNSUPPORTED_CONTROL_CODE);
+  assert.equal(
+    calls.some((c) => c.fn === "menu.open"),
+    false
+  );
+});
+
+test("#13381: model options are matched by their full label, so 4 Hydrogen is not 4 Hydrogen Thinking", () => {
+  assert.notEqual(
+    geminiWebModeOptionSelector("4 Hydrogen"),
+    geminiWebModeOptionSelector("4 Hydrogen Thinking")
+  );
+  assert.match(geminiWebModeOptionSelector("4 Hydrogen"), /:text-is\("4 Hydrogen"\)/);
+});
+
+// ─── Gemini's high-demand fallback ──────────────────────────────────────────
+
+test("an answer is returned when the requested model is still active afterwards", async () => {
+  const { status, body } = await runWithFakePage("gemini-3.1-pro", {
+    menu: { labels: LIVE_MENU, checked: "4 Hydrogen" },
+    answer: "4",
+  });
+  assert.equal(status, 200);
+  const json = body as { model: string; choices: Array<{ message: { content: string } }> };
+  assert.equal(json.choices[0].message.content, "4");
+  assert.equal(json.model, "gemini-3.1-pro");
+});
+
+test("an answer Gemini gave with another model (high demand) is a 503, not a mislabeled 200", async () => {
+  const { status, body } = await runWithFakePage("gemini-3.1-pro", {
+    menu: { labels: LIVE_MENU, checked: "4 Hydrogen", switchesToAfterAnswer: "4 Hydrogen" },
+    answer: "4",
+  });
+  assert.equal(status, 503);
+  const err = (body as ErrorBodyLike).error;
+  assert.equal(err.code, "server_is_overloaded");
+  assert.match(err.message, /gemini-3\.1-pro/);
+  assert.match(err.message, /high demand/);
+});
+
+// ─── gemini-4-argon opt-in (#16573) ─────────────────────────────────────────
 
 const ARGON_ENV = "OMNIROUTE_GEMINI_WEB_ARGON_ENABLED";
 
@@ -222,88 +315,33 @@ async function withArgonEnv<T>(value: string | undefined, fn: () => Promise<T>):
   }
 }
 
-function argonConfirmedScript(): PageScript {
-  const descriptor = GEMINI_WEB_MODEL_MODES["gemini-4-argon"];
-  assert.ok(descriptor.toggleSelector && descriptor.activeIndicatorSelector);
-  return {
-    selectors: {
-      [descriptor.toggleSelector!]: { found: true },
-      [descriptor.activeIndicatorSelector!]: { found: true, text: "Gemini 4 Argon" },
-    },
-  };
-}
+const ARGON_MENU: PageScript = {
+  menu: { labels: [...LIVE_MENU, "4 Argon"], checked: "4 Hydrogen" },
+};
 
 test("#16573: gemini-4-argon stays an unknown model while its opt-in switch is off", async () => {
   for (const value of [undefined, "0", "false", ""]) {
     const { status, calls, body } = await withArgonEnv(value, () =>
-      runWithFakePage("gemini-4-argon", argonConfirmedScript())
+      runWithFakePage("gemini-4-argon", ARGON_MENU)
     );
     assert.equal(status, 400, `switch=${String(value)} must keep the pre-#16573 rejection`);
     assert.equal((body as ErrorBodyLike).error.code, GEMINI_WEB_UNSUPPORTED_CONTROL_CODE);
     assert.match((body as ErrorBodyLike).error.message, /not one of the advertised/);
     assert.equal(
-      calls.some((c) => c.fn === "mode.click"),
-      false,
-      "with the switch off no mode switch is attempted"
-    );
-    assert.equal(
-      calls.some((c) => c.fn === "editor.click"),
+      calls.some((c) => c.fn === "menu.open"),
       false
     );
+    assert.equal(reachedEditor(calls), false);
   }
 });
 
-test("#13381: gemini-4-argon model-mode read-back confirmed lets request proceed", async () => {
+test("#16573: gemini-4-argon is selected from the menu once its switch is on", async () => {
   const { status, calls } = await withArgonEnv("1", () =>
-    runWithFakePage("gemini-4-argon", argonConfirmedScript())
+    runWithFakePage("gemini-4-argon", ARGON_MENU)
   );
-
-  assert.equal(
-    status,
-    502,
-    "a CONFIRMED mode switch for gemini-4-argon must proceed to the prompt, not 400"
-  );
-  assert.ok(calls.some((c) => c.fn === "mode.click"));
-  assert.ok(calls.some((c) => c.fn === "editor.click"));
-});
-
-// ─── (b) Control missing -> 400, never a silent 200 ─────────────────────────
-
-test("#13381: a missing model-mode control fails closed with 400, not a silent 200", async () => {
-  const { status, body } = await runWithFakePage("gemini-3.1-flash-lite", { selectors: {} });
-
-  assert.notEqual(status, 200);
-  assert.equal(status, 400);
-  const err = (body as ErrorBodyLike).error;
-  assert.equal(err.code, GEMINI_WEB_UNSUPPORTED_CONTROL_CODE);
-  assert.match(err.message, /gemini-3\.1-flash-lite/);
-  assert.equal(err.message.includes("at /"), false, "error bodies must stay sanitized");
-});
-
-// ─── (c) Read-back disagrees -> 400, not a silent success ───────────────────
-
-test("#13381: a mismatched read-back fails closed with 400, not a silent success", async () => {
-  const descriptor = GEMINI_WEB_MODEL_MODES["gemini-3.1-flash-lite"];
-  const { status, body } = await runWithFakePage("gemini-3.1-flash-lite", {
-    selectors: {
-      [descriptor.toggleSelector!]: { found: true },
-      // Toggle clicked, but the UI actually shows a different mode than requested.
-      [descriptor.activeIndicatorSelector!]: { found: true, text: "Gemini 3.1 Pro" },
-    },
-  });
-
-  assert.notEqual(status, 200);
-  assert.equal(status, 400);
-  assert.equal((body as ErrorBodyLike).error.code, GEMINI_WEB_UNSUPPORTED_CONTROL_CODE);
-});
-
-// ─── Unknown model id -> 400, not a silent account-default run ──────────────
-
-test("#13381: an advertised-but-unmapped model id fails closed instead of running the account default", async () => {
-  const { status, body } = await runWithFakePage("gemini-4.0-ultra-does-not-exist", {});
-
-  assert.equal(status, 400);
-  assert.equal((body as ErrorBodyLike).error.code, GEMINI_WEB_UNSUPPORTED_CONTROL_CODE);
+  assert.equal(status, 502);
+  assert.deepEqual(optionClicks(calls), ["4 Argon"]);
+  assert.ok(reachedEditor(calls));
 });
 
 // ─── Extended Thinking (#13381 follow-up, 2026-09-11 reporter comment) ──────
@@ -313,6 +351,7 @@ test("#13381: Extended Thinking is attempted and, once confirmed, the request pr
   const { status, calls } = await runWithFakePage(
     "gemini-3.1-pro",
     {
+      menu: { labels: LIVE_MENU, checked: "3.1 Pro" },
       selectors: {
         [descriptor.toggleSelector!]: { found: true },
         [descriptor.activeIndicatorSelector!]: { found: true, text: "Deep Think enabled" },
@@ -331,7 +370,7 @@ test(
   async () => {
     const { status, body } = await runWithFakePage(
       "gemini-3.1-pro",
-      { selectors: {} },
+      { menu: { labels: LIVE_MENU, checked: "3.1 Pro" } },
       { reasoning_effort: "high" }
     );
 
@@ -347,7 +386,7 @@ test("#13381: reasoning_effort none/minimal never triggers the Extended Thinking
   for (const effort of ["none", "minimal"]) {
     const { status, calls } = await runWithFakePage(
       "gemini-3.1-pro",
-      {},
+      { menu: { labels: LIVE_MENU, checked: "3.1 Pro" } },
       { reasoning_effort: effort }
     );
     assert.equal(
