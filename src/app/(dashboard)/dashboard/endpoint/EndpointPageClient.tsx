@@ -1,5 +1,6 @@
 "use client";
 
+import { decisionEndpointModelCount } from "@/shared/constants/decisionEndpointModels";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { Alert } from "@omniroute/ui-kit/alert";
@@ -28,6 +29,12 @@ import McpDashboardPage from "./components/MCPDashboard";
 import NotionSourceCard from "./components/NotionSourceCard";
 import ObsidianSourceCard from "./components/ObsidianSourceCard";
 import VscodeTokenAliasCard from "./VscodeTokenAliasCard";
+
+const DECISION_ENDPOINTS = [
+  { title: "OpenAI Decisions", path: "/v1/decisions" },
+  { title: "Gemini Decisions", path: "/v1beta/decisions" },
+  { title: "System One", path: "/v1/systemone" },
+] as const;
 
 const BUILD_TIME_CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL || null;
 const CLOUD_ACTION_TIMEOUT_MS = 15000;
@@ -411,7 +418,15 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
     const modelUtility =
       (endpointData.rerank.length > 0 ? 1 : 0) + (endpointData.moderation.length > 0 ? 1 : 0);
     const searchCount = searchProviders.length > 0 ? 1 : 0;
-    return chatCount + imageCount + otherMedia + utilityFixed + modelUtility + searchCount;
+    return (
+      chatCount +
+      imageCount +
+      otherMedia +
+      utilityFixed +
+      modelUtility +
+      searchCount +
+      DECISION_ENDPOINTS.length
+    );
   }, [endpointData, searchProviders]);
 
   const postCloudAction = async (action, timeoutMs = CLOUD_ACTION_TIMEOUT_MS) => {
@@ -1962,12 +1977,28 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                 iconBg="bg-chart-3/10"
                 title={t("messagesApi")}
                 path="/v1/messages"
-                models={null}
+                models={endpointData.chat}
+                modelsLoading={modelsLoading}
                 badge="Anthropic"
                 copy={copy}
                 copied={copied}
                 baseUrl={currentEndpoint}
               />
+              {DECISION_ENDPOINTS.map(({ title, path }) => (
+                <EndpointCard
+                  key={path}
+                  icon="rule"
+                  iconColor="text-primary"
+                  iconBg="bg-primary/10"
+                  title={title}
+                  path={path}
+                  modelCount={decisionEndpointModelCount(allModels, path)}
+                  modelsLoading={path !== "/v1beta/decisions" && modelsLoading}
+                  copy={copy}
+                  copied={copied}
+                  baseUrl={currentEndpoint}
+                />
+              ))}
             </div>
           </div>
 
@@ -2513,6 +2544,7 @@ function EndpointCard({
   title,
   path,
   models,
+  modelCount = models?.length,
   copy,
   copied,
   baseUrl,
@@ -2524,7 +2556,8 @@ function EndpointCard({
   iconBg: string;
   title: string;
   path: string;
-  models: EndpointModelSummary[] | null;
+  models?: EndpointModelSummary[] | null;
+  modelCount?: number;
   copy: CopyHandler;
   copied?: string | null;
   baseUrl: string;
@@ -2551,11 +2584,11 @@ function EndpointCard({
             )}
           </div>
           <span className="text-xs text-text-muted mt-0.5 block">
-            {models === null
+            {modelCount === undefined
               ? "—"
               : modelsLoading
                 ? "..."
-                : t("modelsCount", { count: models.length })}
+                : t("modelsCount", { count: modelCount })}
           </span>
         </div>
       </div>
