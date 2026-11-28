@@ -56,6 +56,17 @@ function dropInvalidSettings(settings: Record<string, unknown>) {
   return { valid, ignoredKeys };
 }
 
+function importErrorResponse(err: unknown) {
+  if (err instanceof ReservedSystemApiKeyImportError) {
+    return NextResponse.json({ error: sanitizeErrorMessage(err.message) }, { status: 400 });
+  }
+  console.error("[API] Error importing JSON backup:", err);
+  return NextResponse.json(
+    { error: sanitizeErrorMessage(err instanceof Error ? err.message : String(err)) },
+    { status: 500 }
+  );
+}
+
 /**
  * POST /api/settings/import-json
  *
@@ -148,13 +159,6 @@ export async function POST(request: Request) {
       ...(ignoredKeys.length > 0 ? { ignoredKeys } : {}),
     });
   } catch (err) {
-    if (err instanceof ReservedSystemApiKeyImportError) {
-      return NextResponse.json({ error: sanitizeErrorMessage(err.message) }, { status: 400 });
-    }
-    console.error("[API] Error importing JSON backup:", err);
-    return NextResponse.json(
-      { error: sanitizeErrorMessage(err instanceof Error ? err.message : String(err)) },
-      { status: 500 }
-    );
+    return importErrorResponse(err);
   }
 }

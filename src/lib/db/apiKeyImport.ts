@@ -36,6 +36,12 @@ function matchesHash(row: IdentityRow, hash: string): boolean {
   return typeof raw === "string" && opaqueTokenFingerprint(raw) === hash;
 }
 
+function assertImportRetryMatches(row: IdentityRow, requestedId: string | undefined, hash: string) {
+  if (row.source === SYSTEM_API_KEY_SOURCE || !requestedId || !matchesHash(row, hash)) {
+    throw new ApiKeyImportConflictError();
+  }
+}
+
 /**
  * Import is insert-only. The IMMEDIATE lock covers identity checks and the complete policy
  * insert, including permission overrides; updateApiKeyPermissions is async and must NOT be
@@ -68,9 +74,7 @@ export function importApiKey(input: ImportKeyInput, machineId: string) {
       .prepare("SELECT id, key_hash, key, source FROM api_keys WHERE id = ?")
       .get(id) as IdentityRow | undefined;
     if (existing) {
-      if (existing.source === SYSTEM_API_KEY_SOURCE || !data.id || !matchesHash(existing, hash)) {
-        throw new ApiKeyImportConflictError();
-      }
+      assertImportRetryMatches(existing, data.id, hash);
       return;
     }
     // key_hash is intentionally NOT UNIQUE upstream; encrypted ciphertext uniqueness cannot

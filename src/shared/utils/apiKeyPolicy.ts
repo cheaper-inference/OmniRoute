@@ -1181,9 +1181,15 @@ async function runLimitValidators(
  * allowances are not charged twice.
  */
 async function validateSelfLoopScopedAccess(
-  context: Parameters<typeof validateQuotaAccess>[0]
+  context: PolicyContext,
+  requiredBinding?: boolean
 ): Promise<Response | null> {
-  return (await validateQuotaAccess(context)) ?? (await validateModelAccess(context));
+  const endpointRejection = requiredBinding ? validateEndpointAccess(context) : null;
+  return (
+    endpointRejection ??
+    (await validateQuotaAccess(context)) ??
+    (await validateModelAccess(context))
+  );
 }
 
 function isFalReceiptRead(request: Request, options?: EnforceApiKeyPolicyOptions): boolean {
@@ -1249,13 +1255,10 @@ export async function enforceApiKeyPolicy(
     return { apiKey, apiKeyInfo, rejection: await validateFalReceiptPolicy(context) };
   }
   if (selfLoopScope.key) {
-    const endpointRejection = selfLoopScope.requiredBinding
-      ? validateEndpointAccess(context)
-      : null;
     return {
       apiKey,
       apiKeyInfo,
-      rejection: endpointRejection ?? (await validateSelfLoopScopedAccess(context)),
+      rejection: await validateSelfLoopScopedAccess(context, selfLoopScope.requiredBinding),
     };
   }
   const scheduleRejection = await validateKeyScheduleAndUsage(context);
