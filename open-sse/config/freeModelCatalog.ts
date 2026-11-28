@@ -314,6 +314,17 @@ function dedupedSum(
   return loose;
 }
 
+/** Ungated recurring pools among the models already selected for aggregation. */
+export function getLiveFreePools(models: readonly FreeModelBudget[]): Set<string> {
+  const pools = new Set<string>();
+  for (const m of models) {
+    if (m.poolKey && STEADY_MONTHLY.has(m.freeType) && !isCountingGated(m) && !isSocialGated(m)) {
+      pools.add(m.poolKey);
+    }
+  }
+  return pools;
+}
+
 export function computeFreeModelTotals(
   opts: {
     excludeTosAvoid?: boolean;
@@ -366,12 +377,7 @@ export function computeFreeModelTotals(
   const steadyWithRecurringCreditsTokens = steadyRecurringTokens + recurringCredits;
   const firstMonthRealisticTokens = steadyWithRecurringCreditsTokens + oneTimeCredits;
 
-  // Live pools: a recurring pool anyone can open without a gate. Boosts attach to them.
-  const livePools = new Set(
-    models
-      .filter((m) => STEADY_MONTHLY.has(m.freeType) && m.poolKey && !isOut(m))
-      .map((m) => m.poolKey)
-  );
+  const livePools = getLiveFreePools(models);
   const poolCount = livePools.size;
 
   // Deposit-unlock boost: sum the deposit boosts whose pool still has a live recurring model

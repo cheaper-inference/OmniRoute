@@ -10,17 +10,16 @@ name: Radar Export
 on:
   workflow_dispatch: # o operador pode publicar sob demanda (de qualquer ref)
   push:
-    # `main` e a release ativa (default branch) publicam no mesmo asset estável: o
-    # radar-server só consome o asset, então um merge de catálogo na release que ficasse
-    # à espera do cron semanal deixava o feed até 7 dias atrás do README (2026-09-14: a
-    # linha da Together removida em d6e62ae só saiu do feed com dispatch manual).
     branches: [main, "release/**"]
     paths:
       - open-sse/config/freeModelCatalog.data.ts
+      - open-sse/config/freeModelCatalog.retired.data.ts
       - open-sse/config/freeModelCatalog.ts
       - open-sse/config/providerRegistry.ts
       - open-sse/config/providers/**
+      - config/quality/free-catalog-evidence.json
       - scripts/release/radar-export.mjs
+      - scripts/release/radar-export-target.mjs
       - .github/workflows/radar-export.yml
   schedule:
     # Diário 03:17 UTC — antes do `radar-feed.timer` do servidor (04:23 UTC), para o ciclo
@@ -31,21 +30,45 @@ permissions:
   contents: read
 
 concurrency:
-  group: radar-export-${{ github.ref }}
-  cancel-in-progress: true
+  group: radar-export
+  # Um push em outra ref pode entrar no grupo e pular a publicação.
+  cancel-in-progress: false
 
 env:
   CI_NODE_VERSION: "24"
 
 jobs:
-  publish-export:
+  resolve-target:
     if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
+    runs-on: ubuntu-latest
+    outputs:
+      target: ${{ steps.select.outputs.target }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts/release/radar-export-target.mjs
+          sparse-checkout-cone-mode: false
+      - name: Select highest stable release branch
+        id: select
+        shell: bash
+        run: |
+          target=$(git ls-remote --heads "https://github.com/$GITHUB_REPOSITORY" 'refs/heads/release/v*' |
+            node scripts/release/radar-export-target.mjs)
+          echo "target=$target" >> "$GITHUB_OUTPUT"
+
+  publish-export:
+    needs: resolve-target
+    if: >-
+      ${{ (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
+      && (github.event_name != 'push' || github.ref_name == needs.resolve-target.outputs.target) }}
     runs-on: ubuntu-latest
     permissions:
       contents: write # gh release upload — clobra o asset estável do export
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          ref: ${{ needs.resolve-target.outputs.target }}
           persist-credentials: false # publish usa GH_TOKEN via gh release, não a credencial do checkout
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
@@ -55,7 +78,12 @@ jobs:
         env:
           ONNXRUNTIME_NODE_INSTALL: "skip"
       - name: Generate catalog export with provenance
-        run: node --import tsx/esm scripts/release/radar-export.mjs "$RUNNER_TEMP/export-omniroute.json"
+        env:
+          RADAR_EXPORT_SOURCE_REF: ${{ needs.resolve-target.outputs.target }}
+        run: |
+          RADAR_EXPORT_SOURCE_SHA=$(git rev-parse HEAD)
+          export RADAR_EXPORT_SOURCE_SHA
+          node --import tsx/esm scripts/release/radar-export.mjs "$RUNNER_TEMP/export-omniroute.json"
       - name: Publish to the stable release asset
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

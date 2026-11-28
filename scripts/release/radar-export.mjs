@@ -19,18 +19,25 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import evidencePolicy from "../../config/quality/free-catalog-evidence.json" with { type: "json" };
+import {
+  FREE_CATALOG_CURATED_AT,
+  FREE_MODEL_BUDGETS,
+} from "../../open-sse/config/freeModelCatalog.data.ts";
+import { RETIRED_FREE_ROWS } from "../../open-sse/config/freeModelCatalog.retired.data.ts";
+import {
+  FREE_TIER_BOOSTS,
+  computePublicFreeHeadline,
+  computeRowSumMirror,
+  getLiveFreePools,
+  resolveFreeQuotaUnit,
+} from "../../open-sse/config/freeModelCatalog.ts";
+import { REGISTRY } from "../../open-sse/config/providerRegistry.ts";
+import { catalogKey } from "../check/freeCatalogEvidence.mjs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(DIR, "../.."); // …/OmniRoute
-const SAIDA = process.argv[2] || path.join(REPO, "export-omniroute.json");
-
-const { FREE_MODEL_BUDGETS } = await import(
-  path.join(REPO, "open-sse/config/freeModelCatalog.data.ts")
-);
-const { computePublicFreeHeadline } = await import(
-  path.join(REPO, "open-sse/config/freeModelCatalog.ts")
-);
-const { REGISTRY } = await import(path.join(REPO, "open-sse/config/providerRegistry.ts"));
 
 /**
  * Proveniência: quem/quando/de-qual-commit gerou o export. Cada campo é `null`
@@ -60,8 +67,8 @@ function gitHead() {
 }
 
 function buildProvenance(geradoEm) {
-  const sourceCommit = firstEnv("GITHUB_SHA") ?? gitHead();
-  const sourceRef = firstEnv("GITHUB_REF_NAME", "GITHUB_REF");
+  const sourceCommit = firstEnv("RADAR_EXPORT_SOURCE_SHA", "GITHUB_SHA") ?? gitHead();
+  const sourceRef = firstEnv("RADAR_EXPORT_SOURCE_REF", "GITHUB_REF_NAME", "GITHUB_REF");
   const server = firstEnv("GITHUB_SERVER_URL");
   const repository = firstEnv("GITHUB_REPOSITORY");
   const runId = firstEnv("GITHUB_RUN_ID");
@@ -77,20 +84,77 @@ function buildProvenance(geradoEm) {
   };
 }
 
-const geradoEm = new Date().toISOString();
-const dados = {
-  geradoEm,
-  budgets: FREE_MODEL_BUDGETS,
-  totais: computePublicFreeHeadline(),
-  // Só as chaves: o consumidor apenas pergunta "sabemos rotear este provider?".
-  registry: Object.keys(REGISTRY).sort(),
-  provenance: buildProvenance(geradoEm),
-};
+export function buildExportBudgets(rows, evidenceEntries = evidencePolicy.evidence) {
+  const evidenceByRow = new Map(
+    evidenceEntries.map((entry) => {
+      const key = catalogKey(entry);
+      if (typeof entry.sourceType !== "string" || !entry.sourceType.trim()) {
+        throw new Error(`Invalid evidence for ${key}: sourceType must be a non-empty string`);
+      }
+      return [key, entry];
+    })
+  );
 
-fs.mkdirSync(path.dirname(path.resolve(SAIDA)), { recursive: true });
-fs.writeFileSync(SAIDA, JSON.stringify(dados));
-console.log(
-  `catálogo exportado → ${path.basename(SAIDA)}: ` +
-    `${dados.budgets.length} modelos, ${dados.registry.length} providers no registry` +
-    ` (commit ${dados.provenance.sourceCommit ?? "desconhecido"})`
-);
+  return rows.map((row) => {
+    const source = evidenceByRow.get(catalogKey(row));
+    const budget = {
+      ...row,
+      quotaUnit: resolveFreeQuotaUnit(row) ?? null,
+      evidence: source
+        ? { url: source.sourceUrl, checkedAt: source.checkedAt, sourceType: source.sourceType }
+        : null,
+    };
+    if (row.gates?.length) {
+      budget.gatedTokensPerMonth = row.monthlyTokens;
+      if (row.poolKey) budget.gatedPoolId = row.poolKey;
+    }
+    return budget;
+  });
+}
+
+export function buildExportPoolBoosts(models, budgets) {
+  const livePools = getLiveFreePools(models);
+  const boosts = [];
+  // FREE_TIER_BOOSTS has one gate per pool, so sorting the pool IDs also orders the pairs.
+  for (const poolId of Object.keys(FREE_TIER_BOOSTS).sort()) {
+    const { gate, boostMonthlyTokens } = FREE_TIER_BOOSTS[poolId];
+    if (!livePools.has(poolId) || gate === undefined || gate === "deposit") continue;
+    if (!budgets.some((row) => row.poolKey === poolId || row.gatedPoolId === poolId)) {
+      throw new Error(
+        `poolBoosts: pool "${poolId}" has no matching poolKey or gatedPoolId in budgets`
+      );
+    }
+    boosts.push({ poolId, gate, tokensPerMonth: boostMonthlyTokens });
+  }
+  return boosts;
+}
+
+function main() {
+  const saida = process.argv[2] || path.join(REPO, "export-omniroute.json");
+  const geradoEm = new Date().toISOString();
+  const budgets = buildExportBudgets(FREE_MODEL_BUDGETS);
+  const totais = computePublicFreeHeadline();
+  const dados = {
+    exportVersion: 2,
+    geradoEm,
+    curatedAt: FREE_CATALOG_CURATED_AT,
+    budgets,
+    totais,
+    rowSum: computeRowSumMirror(),
+    poolBoosts: buildExportPoolBoosts(totais.perModel, budgets),
+    retired: RETIRED_FREE_ROWS,
+    // Só as chaves: o consumidor apenas pergunta "sabemos rotear este provider?".
+    registry: Object.keys(REGISTRY).sort(),
+    provenance: buildProvenance(geradoEm),
+  };
+
+  fs.mkdirSync(path.dirname(path.resolve(saida)), { recursive: true });
+  fs.writeFileSync(saida, JSON.stringify(dados));
+  console.log(
+    `catálogo exportado → ${path.basename(saida)}: ` +
+      `${dados.budgets.length} modelos, ${dados.registry.length} providers no registry` +
+      ` (commit ${dados.provenance.sourceCommit ?? "desconhecido"})`
+  );
+}
+
+if (isMainModule(import.meta.url)) main();

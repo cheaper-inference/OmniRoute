@@ -5,8 +5,14 @@ import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import evidencePolicy from "../../config/quality/free-catalog-evidence.json" with { type: "json" };
 import * as catalog from "../../open-sse/config/freeModelCatalog.ts";
 import * as counts from "../../open-sse/config/freeModelCatalog.counts.ts";
+import {
+  FREE_CATALOG_CURATED_AT,
+  FREE_MODEL_BUDGETS,
+} from "../../open-sse/config/freeModelCatalog.data.ts";
+import { RETIRED_FREE_ROWS } from "../../open-sse/config/freeModelCatalog.retired.data.ts";
 import { buildFreeCatalogFacts } from "../../scripts/release/lib/free-catalog-facts.mjs";
 import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 import { membershipFromProviderConstants } from "./_helpers/providerAccessMembership.ts";
@@ -73,6 +79,151 @@ test("radar export totals agree with the public free catalog and its steady fact
   assert.deepEqual(totais, catalog.computePublicFreeHeadline());
 });
 
+test("radar export v2 includes the curation date, row-sum totals, and retired offers", () => {
+  const data = runExport();
+  assert.equal(data.exportVersion, 2);
+  assert.equal(data.curatedAt, FREE_CATALOG_CURATED_AT);
+  assert.deepEqual(data.rowSum, catalog.computeRowSumMirror());
+  assert.equal(data.retired.length, RETIRED_FREE_ROWS.length);
+});
+
+test("radar export v2 includes sorted social pool boosts with valid budget references", () => {
+  const { budgets, poolBoosts } = runExport();
+  assert.ok(Array.isArray(poolBoosts) && poolBoosts.length > 0);
+  const pairs = new Set();
+  for (const boost of poolBoosts) {
+    assert.deepEqual(Object.keys(boost).sort(), ["gate", "poolId", "tokensPerMonth"]);
+    const { poolId, gate, tokensPerMonth } = boost;
+    for (const value of [poolId, gate]) {
+      assert.equal(typeof value, "string");
+      assert.ok(value.trim().length > 0);
+      assert.doesNotMatch(value, /\p{Cc}|:\/\/|www\./iu);
+      assert.equal(URL.canParse(value), false);
+    }
+    assert.ok(catalog.SOCIAL_GATES.has(gate), gate);
+    assert.ok(Number.isSafeInteger(tokensPerMonth) && tokensPerMonth >= 0);
+    assert.ok(
+      budgets.some((row) => row.poolKey === poolId || row.gatedPoolId === poolId),
+      poolId
+    );
+    const pair = JSON.stringify([poolId, gate]);
+    assert.ok(!pairs.has(pair), pair);
+    pairs.add(pair);
+  }
+  assert.deepEqual([...pairs], [...pairs].sort());
+});
+
+test("radar export accounts for social gated totals with gated rows and pool boosts", () => {
+  const { budgets, poolBoosts = [], totais } = runExport();
+  const gatedRowTokens = budgets
+    .filter((row) => row.gates?.length)
+    .reduce((sum, row) => sum + (row.gatedTokensPerMonth ?? row.monthlyTokens), 0);
+  const poolBoostTokens = poolBoosts.reduce((sum, boost) => sum + boost.tokensPerMonth, 0);
+  assert.ok(totais.socialGatedRecurringTokens <= gatedRowTokens + poolBoostTokens);
+
+  const { socialGatedRecurringTokens: socialRowTokens } = catalog.computeFreeModelTotals({
+    excludeTosAvoid: true,
+    entries: FREE_MODEL_BUDGETS.filter(catalog.isSocialGated),
+  });
+  const { socialGatedRecurringTokens } = catalog.computeFreeModelTotals({ excludeTosAvoid: true });
+  const socialBoostTokens = poolBoosts
+    .filter((boost) => catalog.SOCIAL_GATES.has(boost.gate))
+    .reduce((sum, boost) => sum + boost.tokensPerMonth, 0);
+  assert.equal(socialBoostTokens, socialGatedRecurringTokens - socialRowTokens);
+});
+
+test("radar export accepts a gated pool ID and rejects an unreferenced live pool", async () => {
+  const { buildExportPoolBoosts } = await import("../../scripts/release/radar-export.mjs");
+  const perModel = catalog
+    .computePublicFreeHeadline()
+    .perModel.filter((row) => row.poolKey === "xkiro-free");
+  const boost = catalog.FREE_TIER_BOOSTS["xkiro-free"];
+  assert.deepEqual(buildExportPoolBoosts(perModel, [{ gatedPoolId: "xkiro-free" }]), [
+    { poolId: "xkiro-free", gate: boost.gate, tokensPerMonth: boost.boostMonthlyTokens },
+  ]);
+  assert.throws(() => buildExportPoolBoosts(perModel, []), /poolBoosts: pool "xkiro-free"/);
+});
+
+test("radar export adds gate, quota unit, and evidence metadata to catalog budgets", () => {
+  const { budgets } = runExport();
+  assert.equal(budgets.length, FREE_MODEL_BUDGETS.length);
+  for (const [index, row] of FREE_MODEL_BUDGETS.entries()) {
+    const budget = budgets[index];
+    const label = `${row.provider}/${row.modelId}`;
+    assert.equal(budget.provider, row.provider, label);
+    assert.equal(budget.modelId, row.modelId, label);
+    assert.deepEqual(budget.gates, row.gates, label);
+    if (row.gates?.length) {
+      assert.equal(budget.gatedTokensPerMonth, budget.monthlyTokens, label);
+    } else {
+      assert.equal(Object.hasOwn(budget, "gatedTokensPerMonth"), false, label);
+    }
+    if (row.gates?.length && row.poolKey) {
+      assert.equal(budget.gatedPoolId, budget.poolKey, label);
+    } else {
+      assert.equal(Object.hasOwn(budget, "gatedPoolId"), false, label);
+    }
+
+    assert.equal(budget.quotaUnit, catalog.resolveFreeQuotaUnit(row) ?? null, label);
+    if (row.monthlyTokens > 0) {
+      assert.ok(["tokens", "requests", "credits", "neurons"].includes(budget.quotaUnit), label);
+    }
+
+    const source = evidencePolicy.evidence.find(
+      ({ provider, modelId }) => provider === row.provider && modelId === row.modelId
+    );
+    assert.deepEqual(
+      budget.evidence,
+      source
+        ? { url: source.sourceUrl, checkedAt: source.checkedAt, sourceType: source.sourceType }
+        : null,
+      label
+    );
+  }
+});
+
+test("radar export emits valid evidence on every budget with evidence", () => {
+  const { budgets } = runExport();
+  const budgetsWithEvidence = budgets.filter((budget) => budget.evidence !== null);
+  assert.ok(budgetsWithEvidence.length > 0);
+  for (const { provider, modelId, evidence } of budgetsWithEvidence) {
+    const label = `${provider}/${modelId}`;
+    for (const field of ["url", "checkedAt", "sourceType"]) {
+      assert.equal(typeof evidence[field], "string", `${label} evidence.${field}`);
+      assert.ok(evidence[field].trim().length > 0, `${label} evidence.${field}`);
+    }
+    assert.doesNotThrow(() => new URL(evidence.url), `${label} evidence.url`);
+  }
+});
+
+test("radar export rejects evidence with a missing or blank sourceType", async () => {
+  const { buildExportBudgets } = await import("../../scripts/release/radar-export.mjs");
+  const { sourceType: _sourceType, ...source } = evidencePolicy.evidence[0];
+  const row = FREE_MODEL_BUDGETS.find(
+    ({ provider, modelId }) => provider === source.provider && modelId === source.modelId
+  );
+  assert.ok(row);
+  const expectedMessage = `Invalid evidence for ${source.provider}/${source.modelId}: sourceType must be a non-empty string`;
+  for (const entry of [source, { ...source, sourceType: "" }, { ...source, sourceType: " " }]) {
+    assert.throws(() => buildExportBudgets([row], [entry]), { message: expectedMessage });
+  }
+});
+
+test("radar export keeps the gated quota for a row without a pool and leaves the input intact", async () => {
+  const { buildExportBudgets } = await import("../../scripts/release/radar-export.mjs");
+  const row = Object.freeze({
+    provider: "fixture",
+    modelId: "fixture-gated-model",
+    monthlyTokens: 100,
+    poolKey: null,
+    gates: ["card"],
+  });
+  const [budget] = buildExportBudgets([row]);
+  assert.notEqual(budget, row);
+  assert.equal(budget.gatedTokensPerMonth, row.monthlyTokens);
+  assert.equal(Object.hasOwn(budget, "gatedPoolId"), false);
+});
+
 test("radar export provenance never fabricates unknown fields", () => {
   const data = runExport();
   const p = data.provenance;
@@ -105,4 +256,16 @@ test("radar export provenance reflects the GitHub Actions environment when prese
   assert.equal(p.sourceCommit, sha);
   assert.equal(p.sourceRef, "release/v9.9.9");
   assert.equal(p.runUrl, "https://github.com/cheaper-inference/OmniRoute/actions/runs/42");
+});
+
+test("radar export provenance prefers the checked-out release over the workflow trigger", () => {
+  const sourceCommit = "b".repeat(40);
+  const { provenance } = runExport({
+    GITHUB_REF_NAME: "main",
+    GITHUB_SHA: "a".repeat(40),
+    RADAR_EXPORT_SOURCE_REF: "release/v9.9.9",
+    RADAR_EXPORT_SOURCE_SHA: sourceCommit,
+  });
+  assert.equal(provenance.sourceRef, "release/v9.9.9");
+  assert.equal(provenance.sourceCommit, sourceCommit);
 });

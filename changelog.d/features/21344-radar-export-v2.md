@@ -1,0 +1,1 @@
+- **feat(radar):** the Radar catalog export carries gates, quota units, the row-sum ladder and retired rows, and only the highest release branch exports ([#21344](https://github.com/cheaper-inference/OmniRoute/pull/21344))
