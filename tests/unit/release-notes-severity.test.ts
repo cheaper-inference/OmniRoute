@@ -330,3 +330,54 @@ test("the v3 request is a credential-free GET, and never happens with the flag o
   assert.equal(off.requested.length, 2);
   assert.ok(off.requested.every((entry) => entry.url === releaseNotes.NEWS_JSON_URL));
 });
+
+test("nextNewsTransitionMs leaves room for the hook's one-millisecond offset under the timer limit", () => {
+  const farAway = v3([v3Item({ id: "far", expiresAt: "2027-12-31T00:00:00.000Z" })]);
+  const delay = releaseNotes.nextNewsTransitionMs(farAway, NOW);
+  assert.ok(delay !== null);
+  // setTimeout rejects anything above 2 ** 31 - 1, and the hook schedules `delay + 1`.
+  assert.ok(delay + 1 <= 2 ** 31 - 1, `delay ${delay} + 1 must fit the 32-bit timer limit`);
+});
+
+test("an oversized v3 body without a Content-Length is cut off while streaming", async () => {
+  let pulled = 0;
+  let cancelled = false;
+  const chunk = new Uint8Array(16 * 1024).fill(0x20);
+  const body = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      pulled += 1;
+      // 640 chunks of 16 KiB would be 10 MiB; the reader must stop long before that.
+      if (pulled > 640) controller.close();
+      else controller.enqueue(chunk);
+    },
+    cancel() {
+      cancelled = true;
+    },
+  });
+  const oversized = { ok: true, headers: new Headers(), body } as unknown as FeedResponse;
+  const news = await readNewsFromFixtures(oversized, activeV2);
+  assert.deepEqual(
+    news.map((item: { id: string }) => item.id),
+    ["still-live"]
+  );
+  assert.equal(cancelled, true, "the stream must be cancelled once the budget is exceeded");
+  assert.ok(pulled < 20, `pulled ${pulled} chunks; the budget is 64 KiB`);
+});
+
+test("a v3 body that streams within the budget is still parsed", async () => {
+  const bytes = new TextEncoder().encode(JSON.stringify(v3([v3Item({ id: "streamed" })])));
+  const half = Math.floor(bytes.length / 2);
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(bytes.slice(0, half));
+      controller.enqueue(bytes.slice(half));
+      controller.close();
+    },
+  });
+  const streamed = { ok: true, headers: new Headers(), body } as unknown as FeedResponse;
+  const news = await readNewsFromFixtures(streamed, activeV2);
+  assert.deepEqual(
+    news.map((item: { id: string }) => item.id),
+    ["streamed"]
+  );
+});

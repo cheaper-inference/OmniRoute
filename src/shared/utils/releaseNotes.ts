@@ -165,7 +165,7 @@ export type SeverityNewsAnnouncement = NewsAnnouncement & {
 export type NewsReadOptions = { severityEnabled: boolean; now: Date };
 
 type NewsFetchResponse = Pick<Response, "ok"> &
-  Partial<Pick<Response, "json" | "text" | "headers">>;
+  Partial<Pick<Response, "json" | "text" | "headers" | "body">>;
 type NewsFetch = (url: string, init: RequestInit) => Promise<NewsFetchResponse>;
 
 export type FetchNewsOptions = {
@@ -193,10 +193,40 @@ async function fetchLegacyNewsPayload(
   }
 }
 
+/** Reads a response stream, cancelling it as soon as more than `maxBytes` arrive. */
+async function readStreamWithinBudget(
+  body: ReadableStream<Uint8Array>,
+  maxBytes: number
+): Promise<string | null> {
+  const reader = body.getReader();
+  const chunks: Uint8Array[] = [];
+  let received = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      received += value.byteLength;
+      if (received > maxBytes) {
+        await reader.cancel().catch(() => {});
+        return null;
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const decoder = new TextDecoder();
+  return chunks.map((chunk) => decoder.decode(chunk, { stream: true })).join("") + decoder.decode();
+}
+
 /** Parses a v3 body only when it fits the byte budget; the caller still validates the schema. */
 async function readBoundedJson(response: NewsFetchResponse): Promise<unknown | null> {
   const declared = Number(response.headers?.get("content-length"));
   if (Number.isFinite(declared) && declared > NEWS_V3_MAX_BYTES) return null;
+  if (response.body && typeof response.body.getReader === "function") {
+    const streamed = await readStreamWithinBudget(response.body, NEWS_V3_MAX_BYTES);
+    return streamed === null ? null : JSON.parse(streamed);
+  }
   if (!response.text) return response.json ? await response.json() : null;
   const body = await response.text();
   if (new TextEncoder().encode(body).length > NEWS_V3_MAX_BYTES) return null;
@@ -416,7 +446,8 @@ export function nextNewsTransitionMs(
       if (instant > nowMs && (next === null || instant < next)) next = instant;
     }
   }
-  return next === null ? null : Math.min(next - nowMs, MAX_TIMER_DELAY_MS);
+  // One below the limit: the caller schedules `delay + 1`, which must still fit a 32-bit timer.
+  return next === null ? null : Math.min(next - nowMs, MAX_TIMER_DELAY_MS - 1);
 }
 
 export function selectActiveNews(

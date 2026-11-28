@@ -19,16 +19,50 @@ export type NewsFeedState = {
   now: Date;
 };
 
-async function readSeverityFlag(signal: AbortSignal): Promise<boolean> {
+/** Budget for the flag lookup, request and body together; the public feed never waits longer. */
+export const SEVERITY_FLAG_TIMEOUT_MS = 3000;
+
+type FlagResponse = { ok: boolean; json: () => Promise<unknown> };
+type FlagFetch = (url: string, init: { signal: AbortSignal }) => Promise<FlagResponse>;
+
+/**
+ * Reads the severity flag under its own deadline. When the deadline passes it returns `false`
+ * (the v2 feed, as before the flag existed) and aborts only its own request, never `signal`,
+ * so the feed request that follows is unaffected.
+ */
+export async function readSeverityFlag(
+  signal: AbortSignal,
+  timeoutMs: number = SEVERITY_FLAG_TIMEOUT_MS,
+  fetchFlags: FlagFetch = fetch as FlagFetch
+): Promise<boolean> {
+  const own = new AbortController();
+  const abort = () => own.abort();
+  if (signal.aborted) abort();
+  signal.addEventListener("abort", abort, { once: true });
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<false>((resolve) => {
+    timer = setTimeout(() => {
+      abort();
+      resolve(false);
+    }, timeoutMs);
+  });
+  const read = (async () => {
+    try {
+      const response = await fetchFlags("/api/settings/feature-flags", { signal: own.signal });
+      if (!response.ok) return false;
+      const list = (await response.json()) as FeatureFlagList;
+      const flag = list.flags?.find((entry) => entry.key === SEVERITY_FLAG_KEY);
+      return ENABLED_VALUES.has(flag?.effectiveValue ?? "");
+    } catch {
+      // A failed read keeps the reader on the v2 feed, as before the flag existed.
+      return false;
+    }
+  })();
   try {
-    const response = await fetch("/api/settings/feature-flags", { signal });
-    if (!response.ok) return false;
-    const list = (await response.json()) as FeatureFlagList;
-    const flag = list.flags?.find((entry) => entry.key === SEVERITY_FLAG_KEY);
-    return ENABLED_VALUES.has(flag?.effectiveValue ?? "");
-  } catch {
-    // A failed read keeps the reader on the v2 feed, as before the flag existed.
-    return false;
+    return await Promise.race([read, deadline]);
+  } finally {
+    clearTimeout(timer);
+    signal.removeEventListener("abort", abort);
   }
 }
 
