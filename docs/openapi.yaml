@@ -1650,6 +1650,12 @@ paths:
                 type: string
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: The requested model was not found (`error.code` is `model_not_found`).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "502":
           description: All upstream providers failed
 

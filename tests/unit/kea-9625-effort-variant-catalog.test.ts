@@ -136,7 +136,7 @@ test("KEA-9625: an advertised Cheaper Inference Claude effort ID dispatches its 
     assert.ok(!ids.includes(rejectedId), `${rejectedId} should be absent from the catalog`);
     const rejected = await sendChat(rejectedId);
     const error = await rejected.text();
-    assert.equal(rejected.status, 400, error);
+    assert.equal(rejected.status, 404, error);
     assert.match(error, /not available in the active live catalog/);
   }
   assert.deepEqual(dispatchedModels, [base, base]);
