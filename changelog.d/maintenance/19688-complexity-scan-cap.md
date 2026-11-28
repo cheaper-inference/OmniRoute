@@ -1,0 +1,1 @@
+- **perf(routing):** the complexity classifier reads at most the newest 100,000 characters of a conversation, so its cost no longer grows with a long history. The last user turn is always read. ([#19688](https://github.com/cheaper-inference/OmniRoute/pull/19688))

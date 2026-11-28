@@ -64,6 +64,9 @@ const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_MAX_QUEUE_SIZE = 20;
 const gates = new Map<string, AccountGate>();
 const queuedRequests = new Set<AcquireRequest>();
+// Keys of gates that were blocked. A drain re-checks them, so a waiter on a gate whose
+// block has expired is still woken by the next drain anywhere (as the full rescan did).
+const blockedKeys = new Set<string>();
 
 export function buildAccountSemaphoreKey({
   provider,
@@ -202,7 +205,7 @@ function createCompositeReleaseFn(keys: string[]): () => void {
       const gate = gates.get(key);
       if (gate && gate.running > 0) gate.running--;
     }
-    drainQueues();
+    drainQueues(keys);
     for (const key of keys) {
       const gate = gates.get(key);
       if (gate && gate.running === 0 && gate.queue.length === 0) scheduleCleanup(key);
@@ -210,19 +213,27 @@ function createCompositeReleaseFn(keys: string[]): () => void {
   };
 }
 
-function drainQueues(): void {
-  let progressed = true;
-  while (progressed) {
-    progressed = false;
-    for (const request of queuedRequests) {
-      if (request.settled || !canAcquire(request)) continue;
-      request.settled = true;
-      removeRequest(request);
-      for (const key of request.keys) gates.get(key)!.running++;
-      request.resolve(createCompositeReleaseFn(request.keys));
-      progressed = true;
-      break;
-    }
+/**
+ * Admit the waiters that a change on `keys` can unblock. Only the head of a gate's FIFO
+ * queue can be admitted, so each pass looks at heads, never at the whole queue. Admitting
+ * a request exposes new heads on its other gates, so those keys are checked next.
+ */
+function drainQueues(keys: Iterable<string>): void {
+  const pending = [...keys];
+  for (const key of blockedKeys) {
+    const gate = gates.get(key);
+    if (gate && isBlocked(gate)) continue;
+    blockedKeys.delete(key);
+    pending.push(key);
+  }
+  while (pending.length > 0) {
+    const request = gates.get(pending.pop()!)?.queue[0]?.request;
+    if (!request || request.settled || !canAcquire(request)) continue;
+    request.settled = true;
+    removeRequest(request);
+    for (const key of request.keys) gates.get(key)!.running++;
+    request.resolve(createCompositeReleaseFn(request.keys));
+    pending.push(...request.keys);
   }
 }
 
@@ -326,7 +337,7 @@ export function acquireMany(
           `Semaphore timeout after ${timeoutMs}ms for ${keys.join(",")}`
         )
       );
-      drainQueues();
+      drainQueues(keys);
     }, timeoutMs);
     request.timer.unref?.();
     if (signal) {
@@ -335,13 +346,13 @@ export function acquireMany(
         request.settled = true;
         removeRequest(request);
         reject(makeAbortError(signal));
-        drainQueues();
+        drainQueues(keys);
       };
       signal.addEventListener("abort", request.abortListener, { once: true });
     }
     queuedRequests.add(request);
     for (const key of keys) gates.get(key)!.queue.push({ request });
-    drainQueues();
+    drainQueues(keys);
   });
 }
 
@@ -356,13 +367,14 @@ export function markBlocked(key: string, until: Date | string | number): void {
   const gate = ensureGate(key, gates.get(key)?.maxConcurrency ?? 1);
   clearCleanupTimer(gate);
   gate.blockedUntil = untilMs;
+  blockedKeys.add(key);
 }
 
 export function unblock(key: string): void {
   const gate = gates.get(key);
   if (!gate) return;
   gate.blockedUntil = null;
-  drainQueues();
+  drainQueues([key]);
   cleanupGateIfIdle(key);
 }
 
@@ -406,7 +418,7 @@ export function reset(key: string): void {
   }
   gates.delete(key);
   for (const request of rejections) request.reject(error);
-  drainQueues();
+  drainQueues(rejections.flatMap((request) => request.keys));
 }
 
 export function resetAll(): void {
@@ -421,5 +433,6 @@ export function resetAll(): void {
   for (const gate of gates.values()) clearCleanupTimer(gate);
   gates.clear();
   queuedRequests.clear();
+  blockedKeys.clear();
   for (const request of rejections) request.reject(error);
 }

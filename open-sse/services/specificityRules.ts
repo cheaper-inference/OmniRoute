@@ -67,9 +67,34 @@ export function stripHarnessWrappers(text: string): string {
   return out;
 }
 
-function classifiableText(input: RuleInput): string {
-  return input.messages
-    .map((m) => (typeof m.content === "string" ? stripHarnessWrappers(m.content) : ""))
+const MAX_SCAN_CHARS = 100_000;
+
+/**
+ * The text the keyword and regex detectors read: the newest MAX_SCAN_CHARS characters of message
+ * text, so classifier cost stops growing with history. The last user turn is always included,
+ * even when newer tool or assistant messages would fill the whole cap. Context size does not use
+ * this: it measures the full history by length. Harness wrapper blocks are stripped first.
+ */
+function scanText(input: RuleInput): string {
+  const { messages } = input;
+  const picked = new Map<number, string>();
+  let budget = MAX_SCAN_CHARS;
+  const take = (i: number) => {
+    const content = messages[i]?.content;
+    if (typeof content !== "string" || !content || budget <= 0) return;
+    // Strip first so harness wrapper text never uses up the scan budget.
+    const clean = stripHarnessWrappers(content);
+    if (!clean) return;
+    const text = clean.length > budget ? clean.slice(-budget) : clean;
+    picked.set(i, text);
+    budget -= text.length;
+  };
+  const lastUser = messages.findLastIndex((m) => m.role === "user");
+  if (lastUser >= 0) take(lastUser);
+  for (let i = messages.length - 1; i >= 0; i--) if (!picked.has(i)) take(i);
+  return [...picked]
+    .sort((a, b) => a[0] - b[0])
+    .map(([, text]) => text)
     .join("\n");
 }
 
@@ -126,7 +151,7 @@ function countCodeSpanIndicators(text: string): number {
 }
 
 export function detectCodeComplexity(input: RuleInput): number {
-  const allText = classifiableText(input);
+  const allText = scanText(input);
 
   const codeFenceMatches = allText.match(/```[\s\S]*?```/g);
   const codeBlockCount = codeFenceMatches ? codeFenceMatches.length : 0;
@@ -152,7 +177,7 @@ export function detectCodeComplexity(input: RuleInput): number {
 }
 
 export function detectMathComplexity(input: RuleInput): number {
-  const allText = classifiableText(input);
+  const allText = scanText(input);
 
   const latexMatches = allText.match(/\$\$[\s\S]*?\$\$|\$[^$]+\$/g);
   const latexCount = latexMatches ? latexMatches.length : 0;
@@ -175,7 +200,7 @@ export function detectMathComplexity(input: RuleInput): number {
 }
 
 export function detectReasoningDepth(input: RuleInput): number {
-  const allText = classifiableText(input);
+  const allText = scanText(input);
 
   const reasoningIndicators = [
     /\b(first|step\s*\d|secondly|finally|therefore|thus|consequently|because|since)\b/gi,
@@ -221,7 +246,7 @@ export function detectToolCalling(input: RuleInput): number {
 }
 
 export function detectDomainSpecificity(input: RuleInput): number {
-  const allText = classifiableText(input);
+  const allText = scanText(input);
 
   const domainTerms: Record<string, RegExp[]> = {
     medical: [/\bdiagnosis\b/i, /\bsymptoms\b/i, /\btreatment\b/i, /\bpatient\b/i, /\bclinical\b/i],
@@ -269,7 +294,7 @@ export function detectConversationDepth(input: RuleInput): number {
 }
 
 export function detectFileReferences(input: RuleInput): number {
-  const allText = classifiableText(input);
+  const allText = scanText(input);
 
   const filePatterns = [
     /(?:\/[\w.-]+){2,}/g,
@@ -287,7 +312,7 @@ export function detectFileReferences(input: RuleInput): number {
 }
 
 export function detectErrorContext(input: RuleInput): number {
-  const allText = classifiableText(input);
+  const allText = scanText(input);
 
   const errorPatterns = [
     /\b(?:Error|Exception|TypeError|ReferenceError|SyntaxError)\b/g,
