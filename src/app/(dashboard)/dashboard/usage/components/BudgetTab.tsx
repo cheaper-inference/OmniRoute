@@ -474,14 +474,8 @@ export default function BudgetTab() {
     <div className="flex flex-col gap-4">
       {/* Hero KPIs */}
       <Card className="p-5">
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <div>
-            <h2 className="ci-heading flex items-center gap-2" data-size="xl">
-              <Icon name="account_balance_wallet" size={22} className="text-primary" />
-              {t("budgetPageTitle")}
-            </h2>
-            <p className="text-text-muted text-xs mt-0.5">{t("budgetPageDescription")}</p>
-          </div>
+        {/* The page title and description live in the PageHeader of costs/budget (KEA-9799). */}
+        <div className="flex justify-end mb-4">
           <span className="text-2xs text-text-muted">
             {t("budgetTemplateStorageHint", { count: templates.length })}{" "}
             <code className="text-text-main">{LS_TEMPLATES}</code>

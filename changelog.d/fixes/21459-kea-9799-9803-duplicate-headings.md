@@ -1,0 +1,1 @@
+- **fix(dashboard):** Budget and Pricing no longer repeat the page title as a second heading inside the first card, and the Translator's primary button names its own action ("Send" / "Preview") instead of repeating the active Mode option ([#21459](https://github.com/cheaper-inference/OmniRoute/pull/21459), KEA-9799, KEA-9803)

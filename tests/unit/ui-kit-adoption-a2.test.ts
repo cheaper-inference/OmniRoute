@@ -255,7 +255,9 @@ test("A2/F: settings headings take their size from ci-heading data-size", () => 
   const kitSized = headings.filter(
     ({ attrs }) => /\bci-heading\b/.test(attrs.className ?? "") && "data-size" in attrs
   );
-  assert.ok(kitSized.length >= 65, `expected the migrated headings, found ${kitSized.length}`);
+  // 64: PricingTab's hero "Model Pricing" h2 was removed, not reverted to a utility size; the
+  // costs/pricing PageHeader owns that title (KEA-9799). The no-utility check above still holds.
+  assert.ok(kitSized.length >= 64, `expected the migrated headings, found ${kitSized.length}`);
 });
 
 // A — badge-size-tones: a removable chip (blocked IP, banned keyword, error code, pattern) is

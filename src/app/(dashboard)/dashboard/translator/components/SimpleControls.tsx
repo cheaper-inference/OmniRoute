@@ -106,6 +106,11 @@ export default function SimpleControls({
     [examples, source, onInputChange, onOpenAdvanced]
   );
 
+  // The button names the action with its own verb; repeating the active Mode option's label
+  // made the filled segment and the button read as two copies of one action (KEA-9803).
+  const submitLabel =
+    mode === "preview" ? tr("simpleSubmitPreview", "Preview") : tr("send", "Send");
+
   const modeOptions = [
     { value: "preview", label: tr("simpleModePreview", "Preview translation only") },
     { value: "send", label: tr("simpleModeSend", "Send and see response") },
@@ -222,11 +227,9 @@ export default function SimpleControls({
           onClick={onSubmit}
           disabled={!inputText.trim() || isLoading}
           loading={isLoading}
-          aria-label={tr("simpleModeSend", "Send and see response")}
+          aria-label={submitLabel}
         >
-          {mode === "preview"
-            ? tr("simpleModePreview", "Preview translation only")
-            : tr("simpleModeSend", "Send and see response")}
+          {submitLabel}
         </Button>
 
         <Button
