@@ -519,6 +519,63 @@ function retiredCutoff(asOf: Date): string {
   return isoDate(floorDate);
 }
 
+type PeakQuota = { provider: string; live: number; retired: number };
+
+const pairKey = (row: { provider: string; modelId: string }) =>
+  JSON.stringify([row.provider, row.modelId]);
+
+/**
+ * One entry per provider/model pair: its largest countable live quota and its largest ledger
+ * quota. An ended offer older than the 12-month window drops out unless the pair is live again.
+ */
+function collectPeakQuotas(
+  entries: ReadonlyArray<FreeModelBudget & { enabled?: boolean }>,
+  retired: readonly RetiredFreeRow[],
+  asOf: Date,
+  counts: (row: { provider: string }) => boolean
+): Map<string, PeakQuota> {
+  const quotas = new Map<string, PeakQuota>();
+  for (const m of entries) {
+    if (!isLiveRecurringQuotaRow(m) || !counts(m)) continue;
+    const key = pairKey(m);
+    const live = Math.max(quotas.get(key)?.live ?? 0, m.monthlyTokens);
+    quotas.set(key, { provider: m.provider, live, retired: 0 });
+  }
+  const through = isoDate(asOf);
+  const cutoff = retiredCutoff(asOf);
+  for (const r of retired) {
+    if (r.retiredAt > through || !(r.lastListedMonthlyTokens > 0) || !counts(r)) continue;
+    const key = pairKey(r);
+    const quota = quotas.get(key) ?? { provider: r.provider, live: 0, retired: 0 };
+    if (quota.live === 0 && r.retiredAt <= cutoff) continue;
+    quota.retired = Math.max(quota.retired, r.lastListedMonthlyTokens);
+    quotas.set(key, quota);
+  }
+  return quotas;
+}
+
+/** Each pair counts once, at its larger quota, in the bucket that quota came from. Live wins ties. */
+function splitPeakQuotas(quotas: Map<string, PeakQuota>): {
+  liveTokens: number;
+  retiredTokens: number;
+  byProvider: Map<string, { liveRows: number; retiredRows: number; tokens: number }>;
+} {
+  const byProvider = new Map<string, { liveRows: number; retiredRows: number; tokens: number }>();
+  let liveTokens = 0;
+  let retiredTokens = 0;
+  for (const { provider, live, retired } of quotas.values()) {
+    const fromLedger = retired > live;
+    const tokens = fromLedger ? retired : live;
+    if (fromLedger) retiredTokens += tokens;
+    else liveTokens += tokens;
+    const cur = byProvider.get(provider) ?? { liveRows: 0, retiredRows: 0, tokens: 0 };
+    cur[fromLedger ? "retiredRows" : "liveRows"] += 1;
+    cur.tokens += tokens;
+    byProvider.set(provider, cur);
+  }
+  return { liveTokens, retiredTokens, byProvider };
+}
+
 /**
  * Sums the monthly quota of every live row that grants recurring free access, with or without
  * gates and whatever its ToS verdict, WITHOUT pool dedup — the way catalogs that add every row
@@ -542,46 +599,8 @@ export function computeRowSumMirror(
   const asOf = opts.asOf ?? new Date(`${FREE_CATALOG_CURATED_AT}T00:00:00Z`);
   const counts = unitCounter(opts.countNonTokenUnits === true);
 
-  const byProvider = new Map<string, { liveRows: number; retiredRows: number; tokens: number }>();
-  const bump = (provider: string, field: "liveRows" | "retiredRows", tokens: number) => {
-    const cur = byProvider.get(provider) ?? { liveRows: 0, retiredRows: 0, tokens: 0 };
-    cur[field] += 1;
-    cur.tokens += tokens;
-    byProvider.set(provider, cur);
-  };
-
-  const keyOf = (row: { provider: string; modelId: string }) =>
-    JSON.stringify([row.provider, row.modelId]);
-  const quotas = new Map<string, { provider: string; live: number; retired: number }>();
-  for (const m of entries) {
-    if (!isLiveRecurringQuotaRow(m) || !counts(m)) continue;
-    const key = keyOf(m);
-    const live = Math.max(quotas.get(key)?.live ?? 0, m.monthlyTokens);
-    quotas.set(key, { provider: m.provider, live, retired: 0 });
-  }
-
-  const through = isoDate(asOf);
-  const cutoff = retiredCutoff(asOf);
-  for (const r of retired) {
-    if (r.retiredAt > through || !(r.lastListedMonthlyTokens > 0) || !counts(r)) continue;
-    const key = keyOf(r);
-    const quota = quotas.get(key) ?? { provider: r.provider, live: 0, retired: 0 };
-    if (quota.live === 0 && r.retiredAt <= cutoff) continue;
-    quota.retired = Math.max(quota.retired, r.lastListedMonthlyTokens);
-    quotas.set(key, quota);
-  }
-
-  let liveTokens = 0;
-  let retiredTokens = 0;
-  for (const { provider, live, retired } of quotas.values()) {
-    if (retired > live) {
-      retiredTokens += retired;
-      bump(provider, "retiredRows", retired);
-    } else {
-      liveTokens += live;
-      bump(provider, "liveRows", live);
-    }
-  }
+  const quotas = collectPeakQuotas(entries, retired, asOf, counts);
+  const { liveTokens, retiredTokens, byProvider } = splitPeakQuotas(quotas);
 
   const totalTokens = liveTokens + retiredTokens;
   return {
