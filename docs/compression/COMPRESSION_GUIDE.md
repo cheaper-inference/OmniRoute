@@ -44,6 +44,14 @@ The safest mode — formatting cleanup. Its tool-result truncation is lossy, so 
 path (no `allow-lossy`, `engine:lite` or named-combo opt-in) runs lite with
 `compressToolResults: false`: earlier tool results reach the provider unchanged.
 
+`compressToolResults` keeps this turn's tool results intact and truncates the earlier ones — a
+window that slides every turn. With prompt caching that window is the problem: the tool result
+that was this turn's yesterday is truncated today, so one already-sent message changes bytes on
+every request and the cached prefix from that message onward is invalidated (measured on a
+20-turn Claude Code session: 49,855 re-billed tokens, 2.8× the tokens the step saved). The live
+zone (see Prefix stability, below) freezes the already-sent prefix; without it, keep the lossy
+step off (`compressToolResults: false`, the default) for cache-sensitive clients.
+
 | Technique                | Description                                                                       |
 | ------------------------ | --------------------------------------------------------------------------------- |
 | `collapseWhitespace`     | Merge consecutive blank lines and trailing spaces                                 |
@@ -400,6 +408,23 @@ triggers the downgrade, and markers alone never do (marker detection feeds cache
 telemetry, not the strategy decision).
 
 OpenRouter counts as a caching provider only for `anthropic/*` models: Claude Code requests keep their `cache_control` breakpoints (4 at most) and the guard protects the prefix, while every other OpenRouter family (`openai/`, `google/`, `qwen/`, …) stays stripped and unguarded.
+
+#### Prefix stability (rolling breakpoints)
+
+A provider matches a cached prefix by content, not by where the breakpoint sits — but the
+breakpoint decides which prefix is cached **at all**. When a client moves its breakpoint every
+turn (Claude Code marks the second-to-last message), a transform that behaves differently on a
+marked block produces a body whose early messages change as the marker advances. The provider
+then matches only up to the last breakpoint that still matches — usually the system prompt — and
+re-bills everything after it.
+
+Compression therefore has to stay a **pure function of the content**: `cache_control` is
+metadata that is carried through untouched, never a reason to skip a block.
+`open-sse/services/compression/engines/rtk/index.ts` compresses a marked `tool_result` exactly
+like an unmarked one for this reason (regression:
+`tests/unit/compression/rtk-cache-control-preserve.test.ts`), and the live zone
+(`liveZone.ts`) enforces the same rule one level up by reusing a frozen, byte-stable prefix and
+overlaying only the current request's markers.
 
 ### Progressive Aging
 

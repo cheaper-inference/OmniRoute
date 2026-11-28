@@ -71,6 +71,34 @@ function digest(value: unknown): string | null {
   }
 }
 
+/**
+ * Claude Code moves its rolling `cache_control` breakpoint to a later message on every request.
+ * The marker is not content — upstream matches cached bytes without it — so prefix identity must
+ * ignore it. Otherwise every turn is a live-zone miss, the whole history is re-compressed, and
+ * the rewritten prefix guarantees an upstream prompt-cache miss (the churn the live zone exists
+ * to prevent). Shallow-copies only when a marker is actually present.
+ */
+function withoutCacheMarkers(value: unknown): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  const item = value as Record<string, unknown>;
+  const content = item.content;
+  if (!Array.isArray(content)) return value;
+  let changed = false;
+  const next = content.map((block) => {
+    if (!block || typeof block !== "object" || Array.isArray(block)) return block;
+    if (!("cache_control" in (block as Record<string, unknown>))) return block;
+    changed = true;
+    const { cache_control: _marker, ...rest } = block as Record<string, unknown>;
+    return rest;
+  });
+  return changed ? { ...item, content: next } : value;
+}
+
+/** Prefix-identity digest of one sequence item (content only, cache markers excluded). */
+function digestItem(value: unknown): string | null {
+  return digest(withoutCacheMarkers(value));
+}
+
 function cloneItems(items: unknown[]): unknown[] | null {
   try {
     return structuredClone(items);
@@ -116,6 +144,21 @@ function sequenceField(body: Record<string, unknown>): "messages" | "input" | nu
 function isToolOutputItem(value: unknown): boolean {
   if (!value || typeof value !== "object") return false;
   const item = value as Record<string, unknown>;
+  // Anthropic delivers tool results as a `user` envelope holding `tool_result` blocks; without
+  // this branch no Claude/Claude Code live tail item is ever eligible, so a live-zone hit could
+  // freeze the prefix but never compress the new tool output.
+  if (
+    item.role === "user" &&
+    Array.isArray(item.content) &&
+    item.content.some(
+      (block) =>
+        block &&
+        typeof block === "object" &&
+        (block as Record<string, unknown>).type === "tool_result"
+    )
+  ) {
+    return true;
+  }
   return (
     item.role === "tool" ||
     item.role === "function" ||
@@ -143,6 +186,19 @@ function toolLinkage(value: unknown): string | null {
   const item = value as Record<string, unknown>;
   const link = item.tool_call_id ?? item.call_id ?? item.tool_use_id ?? item.id;
   if (typeof link === "string" && link.length > 0) return `call:${link}`;
+  // Anthropic tool results carry their linkage on the `tool_result` blocks, not on the envelope.
+  if (Array.isArray(item.content)) {
+    const ids = item.content
+      .map((block) =>
+        block &&
+        typeof block === "object" &&
+        (block as Record<string, unknown>).type === "tool_result"
+          ? (block as Record<string, unknown>).tool_use_id
+          : undefined
+      )
+      .filter((id): id is string => typeof id === "string" && id.length > 0);
+    if (ids.length > 0) return `call:${ids.join("+")}`;
+  }
   // Legacy function results use the function name rather than a call ID.
   return item.role === "function" && typeof item.name === "string" && item.name.length > 0
     ? `function:${item.name}`
@@ -223,7 +279,7 @@ function storeSparseRawPrefix(ctx: LiveZoneContext, result: CompressionResult): 
   if (!Array.isArray(items) || items.length !== ctx.rawItemDigests.length) return false;
   const patches: Array<{ index: number; value: unknown }> = [];
   for (let index = 0; index < items.length; index++) {
-    const itemDigest = digest(items[index]);
+    const itemDigest = digestItem(items[index]);
     if (!itemDigest) return false;
     if (itemDigest === ctx.rawItemDigests[index]) continue;
     const value = cloneValue(items[index]);
@@ -334,7 +390,7 @@ function resolveLiveZoneContext(
   if (!field || !key) return null;
 
   const rawItems = body[field] as unknown[];
-  const rawItemDigests = rawItems.map(digest);
+  const rawItemDigests = rawItems.map(digestItem);
   if (rawItemDigests.some((value) => value === null)) return null;
   const rawStableFieldsDigest = digest(pickStableFields(body));
   if (!rawStableFieldsDigest) return null;
@@ -418,7 +474,7 @@ function transformedMatchesContext(
   // unambiguous linkage to copy it back.
   return !liveToolIndexes.some((liveIndex, index) => {
     const ti = noteOffset + liveOffset + liveIndex;
-    if (digest(transformed[ti]) === originalToolDigests[index]) return false;
+    if (digestItem(transformed[ti]) === originalToolDigests[index]) return false;
     const link = liveToolLinks[index];
     return link === null || toolLinkCounts.get(link) !== 1;
   });
@@ -453,7 +509,7 @@ async function compressLiveToolOutputs(
     const link = isToolOutputItem(item) ? toolLinkage(item) : null;
     if (link !== null) toolLinkCounts.set(link, (toolLinkCounts.get(link) ?? 0) + 1);
   }
-  const originalToolDigests = liveToolIndexes.map((index) => digest(transformedLive[index]));
+  const originalToolDigests = liveToolIndexes.map((index) => digestItem(transformedLive[index]));
   const liveToolLinks = liveToolIndexes.map((index) => toolLinkage(transformedLive[index]));
   const liveResult = await compress({ ...body, [field]: compressionItems });
   const transformed = liveResult.body[field];
@@ -484,6 +540,37 @@ async function compressLiveToolOutputs(
   return { liveResult, transformedLive };
 }
 
+/**
+ * Copy the CURRENT request's `cache_control` markers onto a frozen item. The prefix keeps its
+ * bytes (so upstream still hits) but must not resurrect a breakpoint the client has since moved —
+ * and an Anthropic request may carry at most four breakpoints, so stale markers are dropped.
+ * When the engine reshaped the block list, positions no longer align and every marker is dropped.
+ */
+function syncCacheMarkers(target: unknown, source: unknown): unknown {
+  if (!target || typeof target !== "object" || Array.isArray(target)) return target;
+  const item = target as Record<string, unknown>;
+  const content = item.content;
+  if (!Array.isArray(content)) return target; // plain-text content carries no marker
+  const sourceContent = (source as Record<string, unknown> | null | undefined)?.content;
+  const sourceBlocks = Array.isArray(sourceContent) ? sourceContent : null;
+  let changed = false;
+  const next = content.map((block, index) => {
+    if (!block || typeof block !== "object" || Array.isArray(block)) return block;
+    const record = block as Record<string, unknown>;
+    const sourceBlock = sourceBlocks?.[index];
+    const marker =
+      sourceBlock && typeof sourceBlock === "object" && !Array.isArray(sourceBlock)
+        ? (sourceBlock as Record<string, unknown>).cache_control
+        : undefined;
+    if (marker === undefined && record.cache_control === undefined) return block;
+    if (JSON.stringify(marker) === JSON.stringify(record.cache_control)) return block;
+    changed = true;
+    const { cache_control: _stale, ...rest } = record;
+    return marker === undefined ? rest : { ...rest, cache_control: marker };
+  });
+  return changed ? { ...item, content: next } : target;
+}
+
 /** Rebuild only changed tool slots; unchanged source items retain their verified bytes. */
 function restoreFrozenPrefix(rawItems: unknown[], previous: LiveZoneEntry): unknown[] | null {
   if (rawItems.length < previous.rawItemDigests.length) return null;
@@ -498,6 +585,9 @@ function restoreFrozenPrefix(rawItems: unknown[], previous: LiveZoneEntry): unkn
     const value = cloneValue(patch.value);
     if (value === null) return null;
     frozenPrefix[patch.index] = value;
+  }
+  for (let index = 0; index < frozenPrefix.length; index++) {
+    frozenPrefix[index] = syncCacheMarkers(frozenPrefix[index], rawItems[index]);
   }
   return frozenPrefix;
 }
