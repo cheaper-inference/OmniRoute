@@ -493,6 +493,11 @@ function sanitizeUsage(usage: unknown): unknown {
     }
   }
   applyCacheHitTokensToUsage(usageRecord, sanitized); // DeepSeek/MiniMax/Bedrock cache-hit passthrough (#8171)
+  // Preserve DigitalOcean's cache-write alias under the standard internal counter.
+  const cacheCreated = toNumber(usageRecord.cache_created_input_tokens);
+  if (cacheCreated !== undefined && cacheCreated >= 0) {
+    sanitized.cache_creation_input_tokens ??= cacheCreated;
+  }
   // OpenRouter's provider-billed USD cost: keep it only as a finite bare number.
   const reportedCost = usageRecord.cost;
   if (typeof reportedCost === "number" && Number.isFinite(reportedCost) && reportedCost >= 0) {
