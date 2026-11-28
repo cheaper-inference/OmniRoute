@@ -591,3 +591,103 @@ test("two daemons that share one package tree cannot update at the same time", a
     fs.rmSync(root, { recursive: true, force: true });
   }
 });
+
+// ---------------------------------------------------------------------------------------
+// Thread 7: npm must install where the pre-flight verified.
+// ---------------------------------------------------------------------------------------
+
+test(
+  "prepare refuses an npm that would install somewhere else, before the service stops",
+  {
+    skip: LINUX_ONLY,
+  },
+  async () => {
+    const env = await setup();
+    try {
+      const oldPid = startOldServer(env);
+      assert.equal(await waitForPing(env.port), true);
+      const plan = makePlan({ readinessTimeoutMs: 2_500, pollIntervalMs: 100 });
+      const pre = await preflightFor(env, plan);
+      assert.equal(pre.kind, "ok", JSON.stringify(pre));
+      const cases: Array<[string, Record<string, string>]> = [
+        // The daemon's own environment resolves another global prefix.
+        [
+          "another prefix",
+          { FAKE_NPM_GLOBAL_ROOT: path.join(env.root, "other", "lib", "node_modules") },
+        ],
+        ["npm root cannot be read", { FAKE_NPM_ROOT_FAILS: "1" }],
+      ];
+      for (const [label, extra] of cases) {
+        const deps = tx.createDefaultDependencies({
+          plan,
+          runtime: pre.runtime,
+          environment: { ...pre.environment, ...extra },
+        });
+        assert.deepEqual(
+          await deps.prepare(plan),
+          { kind: "refused", reason: "npm-prefix-mismatch" },
+          label
+        );
+      }
+      // The same environment without the override passes.
+      const ok = tx.createDefaultDependencies({
+        plan,
+        runtime: pre.runtime,
+        environment: pre.environment,
+      });
+      assert.deepEqual(await ok.prepare(plan), { kind: "ok" });
+      process.kill(oldPid, 0); // still alive: throws if it was stopped
+      assert.equal(await waitForPing(env.port), true);
+    } finally {
+      teardown(env);
+    }
+  }
+);
+
+test("the global npm root can be resolved with the npm and the environment of the install", async () => {
+  const root = tmp("omni-tx-npmroot-");
+  try {
+    const npm = path.join(root, "npm-stub");
+    fs.writeFileSync(npm, '#!/bin/sh\necho "$STUB_ROOT"\n', { mode: 0o755 });
+    assert.equal(
+      await tx.resolveGlobalNpmRoot({
+        npmPath: npm,
+        env: { PATH: "/usr/bin:/bin", STUB_ROOT: "/x/lib" },
+      }),
+      "/x/lib"
+    );
+    assert.equal(
+      await tx.resolveGlobalNpmRoot({
+        npmPath: npm,
+        env: { PATH: "/usr/bin:/bin", STUB_ROOT: "" },
+      }),
+      null
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("the CLI explains the npm prefix refusal in words", async () => {
+  const lines: string[] = [];
+  const orig = { log: console.log, error: console.error, warn: console.warn };
+  const push = (...args: unknown[]) => lines.push(args.map(String).join(" "));
+  console.log = push;
+  console.error = push;
+  console.warn = push;
+  try {
+    const result = await update.runManagedUpdateFromCli({
+      current: "3.8.54",
+      latest: "3.8.55",
+      deps: {
+        preflight: async () => ({ kind: "ok", runtime: {}, environment: {} }),
+        launch: async () => ({}),
+        wait: async () => ({ status: "unsupported", reason: "npm-prefix-mismatch", refused: true }),
+      },
+    });
+    assert.equal(result.exitCode, 1);
+    assert.match(lines.join("\n"), /different global location/);
+  } finally {
+    Object.assign(console, orig);
+  }
+});

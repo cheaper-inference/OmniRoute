@@ -576,12 +576,7 @@ export async function acquireFileLock(dataDir, operationId, options = {}) {
 // The npm install is shared by every daemon that runs from it, whatever its DATA_DIR. Its lock
 // sits beside the package (never inside the tree an install replaces), keyed by the real path.
 function packageLockPath(packageRoot) {
-  let real = packageRoot;
-  try {
-    real = realpathSync(packageRoot);
-  } catch {
-    // the lexical path still names the same install for every caller that uses it
-  }
+  const real = canonicalPath(packageRoot);
   return join(dirname(real), `.${basename(real)}.managed-update.lock`);
 }
 
@@ -990,9 +985,39 @@ function runningInContainer(env = process.env) {
   }
 }
 
-export async function resolveGlobalNpmRoot() {
-  const { stdout } = await execFileAsync("npm", ["root", "-g"], { timeout: 15_000 });
+/**
+ * `npm root -g`. With `npmPath` and `env` it answers for the exact npm and environment that
+ * will run the install, which is what decides where a global install lands.
+ */
+export async function resolveGlobalNpmRoot({ npmPath = "npm", env } = {}) {
+  const { stdout } = await execFileAsync(npmPath, ["root", "-g"], {
+    timeout: 15_000,
+    ...(env ? { env } : {}),
+  });
   return String(stdout).trim() || null;
+}
+
+function canonicalPath(target) {
+  try {
+    return realpathSync(target);
+  } catch {
+    return resolve(target);
+  }
+}
+
+// True when the install run with this npm and environment replaces the tree the pre-flight
+// verified. The pre-flight asks npm in the caller's environment; the install runs in the
+// service's captured one, and a different NPM_CONFIG_PREFIX would put the new version in
+// another tree while the rollback only restores this one.
+async function installTargetsPackageRoot(runtime, environment) {
+  try {
+    const root = await resolveGlobalNpmRoot({ npmPath: runtime.npmPath, env: environment });
+    return (
+      Boolean(root) && canonicalPath(join(root, "omniroute")) === canonicalPath(runtime.packageRoot)
+    );
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -1160,6 +1185,9 @@ export function createDefaultDependencies({ plan, runtime, environment }) {
         packageRoot: runtime.packageRoot,
       });
       if (!disk.ok) return { kind: "refused", reason: "insufficient-disk-space" };
+      if (!(await installTargetsPackageRoot(runtime, environment))) {
+        return { kind: "refused", reason: "npm-prefix-mismatch" };
+      }
       try {
         await execFileAsync(runtime.npmPath, ["view", `omniroute@${p.targetVersion}`, "version"], {
           timeout: 60_000,

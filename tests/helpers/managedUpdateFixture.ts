@@ -92,6 +92,11 @@ export async function setup(): Promise<Env> {
 REGISTRY='${registry}'
 PKG='${packageRoot}'
 spec="$2"
+if [ "$1" = "root" ]; then
+  [ -n "$FAKE_NPM_ROOT_FAILS" ] && exit 1
+  echo "\${FAKE_NPM_GLOBAL_ROOT:-$(dirname "$PKG")}"
+  exit 0
+fi
 if [ "$1" = "view" ]; then
   v="\${spec#omniroute@}"
   [ -d "$REGISTRY/$v" ] && { echo "$v"; exit 0; }
