@@ -1659,6 +1659,6 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     passthroughModels: true,
     website: "https://jembatanai.com",
     apiHint:
-      "Get a key at https://jembatanai.com or from the Telegram bot @jembatanai_bot, then paste it here as a Bearer token. OpenAI-compatible base URL: https://freeai.jembatanai.com/v1. Subscription plans have unlimited tokens under a fair-use policy, paced at 30 requests per minute per key (25 on daily plans); metered token plans and a 2M-token trial key are also available.",
+      "Get a key at https://jembatanai.com or from the Telegram bot @jembatanai_bot, then paste it here as a Bearer token. OpenAI-compatible base URL: https://freeai.jembatanai.com/v1. Use a Token Plan or pay-per-use key here (metered, billed per token). Unlimited plan keys are for direct use from your own app or tool only and are refused through gateway or router software.",
   },
 };
