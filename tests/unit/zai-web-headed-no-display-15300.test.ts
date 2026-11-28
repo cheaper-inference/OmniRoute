@@ -22,12 +22,19 @@ describe("issue #15300 — zai-web headed launch without a display", () => {
     }
   });
   after(async () => {
-    for (const [k, v] of Object.entries(saved)) {
-      if (v === undefined) delete process.env[k];
-      else process.env[k] = v;
+    try {
+      for (const [k, v] of Object.entries(saved)) {
+        if (v === undefined) delete process.env[k];
+        else process.env[k] = v;
+      }
+    } finally {
+      // shutdownPool stops the private Xvfb and closes the browser it launched.
+      // Naming a function that does not exist left both alive, and the child's
+      // stdio handle kept this file's event loop open forever. Run it even when
+      // the restore above throws, or the leak comes back through the error path.
+      const pool = await import("../../open-sse/services/browserPool.ts");
+      await pool.shutdownPool("test-cleanup");
     }
-    const pool = await import("../../open-sse/services/browserPool.ts");
-    await (pool as { shutdownBrowserPool?: () => Promise<void> }).shutdownBrowserPool?.();
   });
 
   it("does not surface a bare 502 'browserType.launch' failure (must self-provide a display or return an actionable 503 + cooldown hint)", async () => {
