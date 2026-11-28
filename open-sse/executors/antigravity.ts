@@ -92,6 +92,7 @@ import {
   isGeminiTrailingModelTurnRejectingModel,
   stripTrailingGeminiModelTurns,
 } from "../translator/helpers/geminiTrailingModelTurn.ts";
+import { scopeGeminiThoughtSignatureNamespace } from "../services/geminiThoughtSignatureStore.ts";
 
 const MAX_RETRY_AFTER_MS = 60_000;
 const LONG_RETRY_THRESHOLD_MS = 60_000;
@@ -1227,7 +1228,8 @@ export class AntigravityExecutor extends BaseExecutor {
     headers: Record<string, string>,
     transformedBody: Record<string, unknown>,
     log?: ExecutorLog | null,
-    signal?: AbortSignal | null
+    signal?: AbortSignal | null,
+    accountId?: string | null
   ) {
     if (!response.body) {
       return Promise.resolve({ response, url, headers, transformedBody });
@@ -1244,12 +1246,17 @@ export class AntigravityExecutor extends BaseExecutor {
     const SSE_COLLECT_TIMEOUT_MS = FETCH_TIMEOUT_MS;
 
     const collect = async () => {
+      const rawNamespace = accountId && accountId !== "unknown" ? accountId : null;
       const collected: AntigravityCollectedStream = {
         textContent: "",
         finishReason: "stop",
         toolCalls: [],
         usage: null,
         remainingCredits: null,
+        pendingThoughtSignature: null,
+        signatureNamespace: rawNamespace
+          ? scopeGeminiThoughtSignatureNamespace(rawNamespace, model)
+          : null,
       };
       const partialLine = { value: "" };
       let timedOut = false;
@@ -1721,7 +1728,8 @@ export class AntigravityExecutor extends BaseExecutor {
         finalHeaders,
         transformedBody,
         log,
-        signal
+        signal,
+        accountId
       );
     }
 

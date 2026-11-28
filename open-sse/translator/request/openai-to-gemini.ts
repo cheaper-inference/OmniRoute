@@ -553,6 +553,8 @@ function openaiToGeminiBase(
           const stringifySignaturelessToolCalls = signaturelessToolCallMode === "text";
           const contextualizeSignaturelessToolResponses =
             signaturelessToolCallMode === "text" || signaturelessToolCallMode === "context";
+          const nativeFunctionCallIds = new Set<string>();
+          let hasPrecedingSignedFunctionCall = false;
 
           for (const tc of toolCalls) {
             if (tc.type !== "function") continue;
@@ -562,6 +564,13 @@ function openaiToGeminiBase(
             if (!fn) continue;
 
             const signatureForToolCall = resolvedSignatures.get(id);
+            // Upstream Gemini only attaches thoughtSignature to the first functionCall
+            // in a parallel tool-call turn; subsequent siblings in the same turn stay
+            // native without a signature or bypass sentinel (#21395).
+            const inheritsPrecedingTurnSignature =
+              !signatureForToolCall &&
+              hasPrecedingSignedFunctionCall &&
+              signaturelessToolCallMode === "context";
 
             // Non-bypass paths (standard Gemini direct, mode "text"/"context")
             // cannot send a thoughtSignature and reject signature-less native tool
@@ -569,7 +578,7 @@ function openaiToGeminiBase(
             // inert text/context (#3358). The Antigravity/CLI bypass path
             // (supportsSignatureBypass) instead emits native parts carrying the
             // skip_thought_signature_validator sentinel below.
-            if (!toolNameOptions.supportsSignatureBypass) {
+            if (!toolNameOptions.supportsSignatureBypass && !inheritsPrecedingTurnSignature) {
               if (!signatureForToolCall && contextualizeSignaturelessToolResponses) {
                 if (!toolCallIds.includes(id)) toolCallIds.push(id);
               }
@@ -593,6 +602,9 @@ function openaiToGeminiBase(
             // its signature; this dropped valid signatures for every
             // subsequent parallel tool call in the same turn.
             const embeddedThoughtSignature = signatureForToolCall;
+            if (embeddedThoughtSignature) {
+              hasPrecedingSignedFunctionCall = true;
+            }
 
             // Gemini expects the signature on the functionCall part itself.
             // If we are in a mode where missing signatures cause 400s (and we couldn't find one),
@@ -602,6 +614,7 @@ function openaiToGeminiBase(
             // are always preferred; the sentinel only fills the gap when none is available.
             const signatureBypassEnabled =
               toolNameOptions.supportsSignatureBypass &&
+              !hasPrecedingSignedFunctionCall &&
               signaturelessToolCallMode !== "text" &&
               process.env.ANTIGRAVITY_ALLOW_SIGNATURE_BYPASS !== "0";
             const finalSignature =
@@ -621,8 +634,10 @@ function openaiToGeminiBase(
             if (
               toolNameOptions.supportsSignatureBypass ||
               !contextualizeSignaturelessToolResponses ||
-              signatureForToolCall
+              signatureForToolCall ||
+              inheritsPrecedingTurnSignature
             ) {
+              nativeFunctionCallIds.add(id);
               toolCallIds.push(id);
             }
           }
@@ -662,20 +677,23 @@ function openaiToGeminiBase(
             contextualizeSignaturelessToolResponses &&
             toolCalls.some((tc) => {
               const id = tc.id as string;
-              return tc.type === "function" && !resolvedSignatures.has(id) && hasToolResponse(id);
+              return (
+                tc.type === "function" && !nativeFunctionCallIds.has(id) && hasToolResponse(id)
+              );
             });
           const hasActualResponses =
             toolCallIds.some((fid) => hasToolResponse(fid)) || hasSignaturelessTextResponses;
 
           if (hasActualResponses) {
-            const toolParts: GeminiPart[] = [];
+            const nonFunctionResponseParts: GeminiPart[] = [];
+            const nativeFunctionResponseParts: GeminiPart[] = [];
             for (const fid of toolCallIds) {
               const resp = resolveToolResponse(fid);
               if (resp === undefined) continue;
               if (
                 !toolNameOptions.supportsSignatureBypass &&
                 contextualizeSignaturelessToolResponses &&
-                !resolvedSignatures.has(fid)
+                !nativeFunctionCallIds.has(fid)
               )
                 continue;
 
@@ -698,7 +716,8 @@ function openaiToGeminiBase(
                     .map((part) => part.text)
                     .join("\n")
                 : resp;
-              toolParts.push(...media, {
+              nonFunctionResponseParts.push(...media);
+              nativeFunctionResponseParts.push({
                 functionResponse: {
                   ...(toolNameOptions.stripFunctionCallId ? {} : { id: fid }),
                   name: name,
@@ -716,24 +735,33 @@ function openaiToGeminiBase(
               // functionResponse parts missing a matching thoughtSignature.
               // In context mode the matching historical functionCall is omitted,
               // avoiding pseudo tool-call records that Gemini Flash can repeat as
-              // the visible final answer.
+              // the visible final answer. Preserve media parts alongside context text.
               for (const tc of toolCalls) {
                 const id = tc.id as string;
                 if (tc.type !== "function" || !id) continue;
                 const resp = resolveToolResponse(id);
-                if (!resolvedSignatures.has(id) && resp !== undefined) {
+                if (!nativeFunctionCallIds.has(id) && resp !== undefined) {
                   const fn = tc.function as { name?: string } | undefined;
                   const name = turnTcID2Name[id] || tcID2Name[id] || fn?.name || "unknown";
-                  toolParts.push({
+                  const converted = Array.isArray(resp) ? convertOpenAIContentToParts(resp) : [];
+                  const media = converted.filter((part) => part.inlineData || part.fileData);
+                  const resultData = media.length
+                    ? converted
+                        .filter((part) => typeof part.text === "string")
+                        .map((part) => part.text)
+                        .join("\n")
+                    : resp;
+                  nonFunctionResponseParts.push(...media, {
                     text:
                       signaturelessToolCallMode === "text"
-                        ? buildInertHistoricalToolResponseText(name, resp)
-                        : buildHistoricalToolResultContext(name, resp),
+                        ? buildInertHistoricalToolResponseText(name, resultData)
+                        : buildHistoricalToolResultContext(name, resultData),
                   });
                 }
               }
             }
 
+            const toolParts = [...nonFunctionResponseParts, ...nativeFunctionResponseParts];
             if (toolParts.length > 0) {
               result.contents.push({ role: "user", parts: toolParts });
             }
@@ -894,6 +922,7 @@ export function openaiToCloudCodeGeminiRequest(
   options: {
     signatureNamespace?: string | null;
     signaturelessToolCallMode?: "native" | "text" | "context";
+    supportsSignatureBypass?: boolean;
   } = {}
 ) {
   const request = openaiToGeminiBase(
@@ -904,7 +933,8 @@ export function openaiToCloudCodeGeminiRequest(
       stripNamespace: true,
       signatureNamespace: options.signatureNamespace,
       signaturelessToolCallMode: options.signaturelessToolCallMode,
-      supportsSignatureBypass: true,
+      supportsSignatureBypass:
+        options.supportsSignatureBypass ?? options.signaturelessToolCallMode !== "context",
     },
     { keepMixedGoogleSearchCallable: true }
   );
@@ -1057,6 +1087,7 @@ export function openaiToAntigravityRequest(model, body, stream, credentials = nu
   const isThinkingGemini =
     !isClaude &&
     (modelLower.includes("thinking") ||
+      modelLower.includes("gemini-4") ||
       modelLower.includes("gemini-3") ||
       modelLower.includes("gemini-2.5") ||
       modelLower.includes("gemini-pro"));
@@ -1066,9 +1097,13 @@ export function openaiToAntigravityRequest(model, body, stream, credentials = nu
     typeof (credentials as Record<string, unknown>)._signatureNamespace === "string"
       ? ((credentials as Record<string, unknown>)._signatureNamespace as string)
       : null;
+  const allowSignatureBypass =
+    process.env.ANTIGRAVITY_ALLOW_SIGNATURE_BYPASS === "1" ||
+    process.env.ANTIGRAVITY_ALLOW_SIGNATURE_BYPASS?.toLowerCase() === "true";
   const cloudCodeRequest = openaiToCloudCodeGeminiRequest(model, body, stream, {
     signatureNamespace,
     signaturelessToolCallMode: isThinkingGemini ? "context" : "native",
+    supportsSignatureBypass: isThinkingGemini ? allowSignatureBypass : true,
   });
 
   if (isClaude) {
