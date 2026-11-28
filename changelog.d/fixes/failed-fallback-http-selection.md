@@ -1,0 +1,1 @@
+- **fix(logging):** Attribute failed empty-content retries to the fallback's upstream HTTP attempt when it is available.

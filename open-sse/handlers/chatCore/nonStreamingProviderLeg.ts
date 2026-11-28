@@ -1220,7 +1220,7 @@ export async function runNonStreamingProviderLeg(
             const errorResult = legError(502, errMsg, new Error(errMsg));
             return {
               kind: "error",
-              upstreamHttpSelection,
+              upstreamHttpSelection: fallbackResult.upstreamHttpSelection ?? null,
               result: errorResult as ChatCoreErrorResult,
               buyerCostMicro,
               receipt,
