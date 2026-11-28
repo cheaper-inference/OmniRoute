@@ -1,0 +1,1 @@
+- **fix(sse):** wildcard alias routing now always picks the most specific matching pattern, even when an alias entry carries a stored specificity value ([#20412](https://github.com/cheaper-inference/OmniRoute/pull/20412)) — thanks @maxmad64bis
