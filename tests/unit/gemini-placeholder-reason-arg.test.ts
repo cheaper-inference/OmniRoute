@@ -7,6 +7,8 @@ import { stripGeminiPlaceholderArgs } from "../../open-sse/translator/helpers/ge
 import { geminiToClaudeResponse } from "../../open-sse/translator/response/gemini-to-claude.ts";
 import { geminiToOpenAIResponse } from "../../open-sse/translator/response/gemini-to-openai.ts";
 import { translateNonStreamingResponse } from "../../open-sse/handlers/responseTranslator.ts";
+import { parseNonStreamingSSEPayload } from "../../open-sse/handlers/chatCore/nonStreamingSse.ts";
+import { translateNonStreamingClientResponse } from "../../open-sse/handlers/chatCore/nonStreamingClientTranslate.ts";
 
 // Gemini/Antigravity tool schemas give every empty object schema a synthetic required
 // `reason` property (the upstream rejects an OBJECT with no properties, and Claude on
@@ -189,3 +191,50 @@ test("strips the synthetic reason inside array items and keeps an unchanged arra
   assert.equal(result, untouched);
   assert.equal(result.jobs, untouched.jobs);
 });
+
+// #21203 — a non-streaming client on Antigravity/Gemini gets a buffered SSE body that
+// parseSSEToGeminiResponse() already shapes as an OpenAI chat.completion, so the
+// Gemini -> OpenAI translator never sees a functionCall part to clean.
+for (const providerFormat of [FORMATS.ANTIGRAVITY, FORMATS.GEMINI]) {
+  test(`non-streaming ${providerFormat} SSE gives an OpenAI client empty arguments`, () => {
+    const openAITools = [
+      {
+        type: "function",
+        function: {
+          name: "handoff_agent",
+          parameters: {
+            type: "object",
+            properties: {},
+            required: [],
+            additionalProperties: false,
+          },
+        },
+      },
+    ];
+    const sse = `data: ${JSON.stringify({
+      response: geminiFunctionCallChunk("handoff_agent", { reason: "Executing action." }),
+    })}\n\n`;
+    const parsed = parseNonStreamingSSEPayload(sse, providerFormat, "gemini-3.1-flash-lite");
+    assert.ok(parsed, "buffered SSE must parse");
+    const clientRequestBody = { model: "gemini-3.1-flash-lite", messages: [], tools: openAITools };
+    const { response } = translateNonStreamingClientResponse({
+      responseBody: parsed.body,
+      responsePayloadFormat: parsed.format,
+      clientResponseFormat: FORMATS.OPENAI,
+      sourceFormat: FORMATS.OPENAI,
+      provider: "antigravity",
+      model: "gemini-3.1-flash-lite",
+      requestBody: clientRequestBody,
+      clientRequestBody,
+      responseToolNameMap: null,
+      requestToolIdentityMap: null,
+      reasoningCacheScope: null,
+      phase: "final",
+    } as Parameters<typeof translateNonStreamingClientResponse>[0]) as {
+      choices: Array<{ message: { tool_calls: Array<{ function: JsonRecord }> } }>;
+    };
+    const call = response.choices[0].message.tool_calls[0];
+    assert.equal(call.function.name, "handoff_agent");
+    assert.equal(call.function.arguments, "{}");
+  });
+}

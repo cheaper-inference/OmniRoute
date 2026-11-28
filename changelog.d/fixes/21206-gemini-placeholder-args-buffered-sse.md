@@ -1,0 +1,1 @@
+- **fix(sse):** Non-streaming Antigravity/Gemini responses no longer return the synthetic `reason` placeholder as the arguments of a parameter-less tool call. The buffered SSE body is already OpenAI-shaped, so its tool calls skipped the placeholder cleanup ([#21206](https://github.com/cheaper-inference/OmniRoute/pull/21206)).
