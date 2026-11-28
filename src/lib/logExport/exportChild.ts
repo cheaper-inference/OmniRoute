@@ -76,7 +76,7 @@ async function run(start: ExportChildStart) {
         ? await attachExportBodies(summaries, start.maxBodyBytes, async (id) => {
             const row = readDb
               .prepare(
-                "SELECT id, timestamp, model, status, detail_state, artifact_relpath, error_summary, has_pipeline_details FROM call_logs WHERE id = ?"
+                "SELECT id, timestamp, model, status, detail_state, artifact_relpath, artifact_sha256, error_summary, has_pipeline_details FROM call_logs WHERE id = ?"
               )
               .get(id) as Record<string, unknown> | undefined;
             if (!row) return null;
@@ -87,6 +87,7 @@ async function run(start: ExportChildStart) {
               status: Number(row.status),
               detailState: String(row.detail_state ?? "none"),
               artifactRelPath: row.artifact_relpath as string | null,
+              artifactSha256: row.artifact_sha256 as string | null,
               error: row.error_summary,
               hasPipelineDetails: Number(row.has_pipeline_details) === 1,
             };

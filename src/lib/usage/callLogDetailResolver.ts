@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { SqliteAdapter } from "../db/adapters/types";
 import { parseStoredPayload } from "./parseStoredPayload";
+import { verifyArtifactChecksum } from "./callLogArtifacts";
 
 /** Read-only surface shared by the dashboard and isolated export process. */
 export interface CallLogReadDb {
@@ -14,6 +15,8 @@ export interface CallLogDetailEntry {
   status: number;
   detailState: string;
   artifactRelPath: string | null;
+  /** Checksum stored with the row (call_logs.artifact_sha256); null = nothing to verify. */
+  artifactSha256?: string | null;
   error: unknown;
   hasPipelineDetails: boolean;
 }
@@ -108,7 +111,12 @@ async function readArtifactPayload(
   };
   if (!relPath || !baseDir) return unchanged;
   try {
-    const payload = JSON.parse(await io.readFile(path.join(baseDir, relPath))) as DetailPayload;
+    const content = await io.readFile(path.join(baseDir, relPath));
+    // A file that changed since it was written is unreadable, even when it still parses.
+    if (!verifyArtifactChecksum(content, entry.artifactSha256)) {
+      throw Object.assign(new Error("artifact checksum mismatch"), { code: "ECHECKSUM" });
+    }
+    const payload = JSON.parse(content) as DetailPayload;
     if (!payload) return unchanged;
     return {
       payload,
