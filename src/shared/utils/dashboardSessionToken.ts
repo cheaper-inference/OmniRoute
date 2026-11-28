@@ -17,6 +17,27 @@ import { SignJWT, jwtVerify, type JWTPayload } from "jose";
 export const DASHBOARD_SESSION_COOKIE = "auth_token";
 export const DASHBOARD_SESSION_CLAIM = "authenticated";
 
+/** Default dashboard session lifetime: 30 days, in seconds (Seg3 hardening bound). */
+export const DASHBOARD_SESSION_DEFAULT_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
+/** No env value may extend a session past the 30-day hardening bound. */
+const DASHBOARD_SESSION_MAX_AGE_CEILING_HOURS = 24 * 30;
+
+/**
+ * Dashboard session lifetime in seconds. `DASHBOARD_SESSION_MAX_AGE_HOURS`
+ * (integer hours) opts into a shorter session — 9router ships 24 h. Unset,
+ * blank or invalid values keep the 30-day default; values above the ceiling
+ * clamp to it, so the knob can only shorten a session. Both the JWT expiry
+ * (mintDashboardSessionToken) and every `auth_token` cookie maxAge read this,
+ * so the browser drops the cookie on the same schedule the token expires.
+ */
+export function dashboardSessionMaxAgeSeconds(): number {
+  const raw = process.env.DASHBOARD_SESSION_MAX_AGE_HOURS;
+  if (!raw) return DASHBOARD_SESSION_DEFAULT_MAX_AGE_SECONDS;
+  const hours = Number.parseInt(raw, 10);
+  if (!Number.isFinite(hours) || hours < 1) return DASHBOARD_SESSION_DEFAULT_MAX_AGE_SECONDS;
+  return Math.min(hours, DASHBOARD_SESSION_MAX_AGE_CEILING_HOURS) * 3600;
+}
+
 /** Sessions issued before this second (unix seconds) are no longer valid. Set on a password change. */
 export const SESSIONS_VALID_AFTER_SETTING = "sessionsValidAfter";
 /** Ids (`jti`) of sessions that signed out before they expired, kept until their own expiry. */
@@ -35,7 +56,7 @@ export async function mintDashboardSessionToken(secret: Uint8Array): Promise<str
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setJti(crypto.randomUUID())
-    .setExpirationTime("30d")
+    .setExpirationTime(Math.floor(Date.now() / 1000) + dashboardSessionMaxAgeSeconds())
     .sign(secret);
 }
 

@@ -662,6 +662,27 @@ test("runAuthzPipeline refreshes dashboard JWTs near expiry", async () => {
   assert.match(response.headers.get("set-cookie") || "", /auth_token=/);
 });
 
+test("runAuthzPipeline does not auto-refresh a session that DASHBOARD_SESSION_MAX_AGE_HOURS shortens", async () => {
+  await forceAuthRequired();
+  const { mintDashboardSessionToken } =
+    await import("../../../src/shared/utils/dashboardSessionToken.ts");
+  const saved = process.env.DASHBOARD_SESSION_MAX_AGE_HOURS;
+  process.env.DASHBOARD_SESSION_MAX_AGE_HOURS = "24";
+  try {
+    const token = await mintDashboardSessionToken(new TextEncoder().encode(process.env.JWT_SECRET));
+    const response = await pipeline.runAuthzPipeline(
+      request("http://localhost/dashboard", { headers: { cookie: `auth_token=${token}` } }),
+      { enforce: true }
+    );
+
+    assert.equal(response.status, 200);
+    assert.doesNotMatch(response.headers.get("set-cookie") || "", /auth_token=/);
+  } finally {
+    if (saved === undefined) delete process.env.DASHBOARD_SESSION_MAX_AGE_HOURS;
+    else process.env.DASHBOARD_SESSION_MAX_AGE_HOURS = saved;
+  }
+});
+
 test("runAuthzPipeline clears stale dashboard JWTs without error-stack noise", async () => {
   await forceAuthRequired();
   const oldSecret = new TextEncoder().encode("old-dashboard-jwt-secret");

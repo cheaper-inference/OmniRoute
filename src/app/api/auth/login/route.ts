@@ -25,6 +25,7 @@ import {
   getDashboardJwtSecret,
   mintDashboardSessionToken,
   mintMfaPendingToken,
+  dashboardSessionMaxAgeSeconds,
 } from "@/shared/utils/dashboardSessionToken";
 import { isMfaRequiredForRequest } from "@/server/auth/dashboardMfa";
 import { mfaPendingCookieOptions } from "@/server/auth/mfaRouteSupport";
@@ -268,9 +269,11 @@ export async function POST(request: NextRequest) {
         secure: useSecureCookie,
         sameSite: "lax",
         path: "/",
-        // 30 days — bound the cookie lifetime to the JWT's 30d expiry so the browser
-        // drops it on the same schedule the token stops being valid (Seg3 hardening).
-        maxAge: 60 * 60 * 24 * 30,
+        // Bound the cookie lifetime to the JWT's expiry so the browser drops it
+        // on the same schedule the token stops being valid (Seg3 hardening).
+        // Both read dashboardSessionMaxAgeSeconds: 30 d unless
+        // DASHBOARD_SESSION_MAX_AGE_HOURS shortens the session.
+        maxAge: dashboardSessionMaxAgeSeconds(),
       });
 
       logAuditEvent({
