@@ -85,6 +85,19 @@ function namesExactModel(
   );
 }
 
+const RATE_LIMIT_OVERSHOOT_RE = /\blimit:?\s*(\d+),\s*requested:?\s*(\d+)/i;
+
+/**
+ * #21049: a 413 for ONE request larger than the account's whole rate limit (Groq: "Limit 8000,
+ * Requested 36955"). Every sibling account has the same limit, so failing over or locking the
+ * model cannot help. Requested <= Limit is a used-up window that another account can serve.
+ */
+export function isRequestLargerThanRateLimit(status: number, errorText: unknown): boolean {
+  if (status !== 413) return false;
+  const match = RATE_LIMIT_OVERSHOOT_RE.exec(String(errorText ?? ""));
+  return !!match && Number(match[2]) > Number(match[1]);
+}
+
 /** Only explicit attribution to the current model can narrow a 413/504 failure. */
 export function isExplicitModelCapacityFailure(
   status: number | undefined,
