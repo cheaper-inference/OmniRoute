@@ -88,8 +88,11 @@ export function resolveChatCoreRequestFormat(opts: {
   const { clientRawRequest, body, provider, userAgent } = opts;
   const endpointPath = String(clientRawRequest?.endpoint || "");
   const sourceFormat = detectFormatFromEndpoint(body, endpointPath);
+  const isV1BetaEndpoint =
+    /\/v1beta(?:\/|$)/i.test(endpointPath) || /^v1beta(?:\/|$)/i.test(endpointPath);
   const isResponsesEndpoint =
-    /\/responses(?=\/|$)/i.test(endpointPath) || /^responses(?=\/|$)/i.test(endpointPath);
+    !isV1BetaEndpoint &&
+    (/\/responses(?=\/|$)/i.test(endpointPath) || /^responses(?=\/|$)/i.test(endpointPath));
   const nativeCodexPassthrough = shouldUseNativeCodexPassthrough({
     provider,
     sourceFormat,
