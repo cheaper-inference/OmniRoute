@@ -47,6 +47,19 @@ function stringList(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : [];
 }
 
+async function resolveModelPolicyKeySecret(
+  apiKeyId: string,
+  childReference: string | undefined,
+  getKeySecret: VisionBridgeKeyScopeDeps["getKeySecret"]
+): Promise<string | null> {
+  try {
+    if (childReference) return (await resolveRequiredApiKey())?.apiKey ?? null;
+    return await (getKeySecret ?? defaultGetKeySecret)(apiKeyId);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Resolve the Vision Bridge scope for the caller's key metadata
  * (`GuardrailContext.apiKeyInfo`). Native required-key calls also carry a
@@ -69,16 +82,9 @@ export async function resolveVisionBridgeKeyScope(
 
   const checkCreds = deps.hasUsableCredentials ?? hasUsableCredentialsForModel;
   const isAllowed = deps.isModelAllowed ?? isModelAllowedForKey;
-  let keySecret: string | null = null;
-  if (modelRestricted) {
-    try {
-      keySecret = childReference
-        ? ((await resolveRequiredApiKey())?.apiKey ?? null)
-        : await (deps.getKeySecret ?? defaultGetKeySecret)(apiKeyId);
-    } catch {
-      keySecret = null;
-    }
-  }
+  const keySecret = modelRestricted
+    ? await resolveModelPolicyKeySecret(apiKeyId, childReference, deps.getKeySecret)
+    : null;
 
   const hasUsableCredentials = async (model: string): Promise<boolean | null> => {
     // Quota-exclusive keys may only use their pool's quotaShared-* models,
