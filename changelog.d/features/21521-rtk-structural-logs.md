@@ -1,0 +1,1 @@
+- **feat(sse):** With `OMNIROUTE_RTK_STRUCTURAL_RENDERERS_ENABLED`, RTK collapses runs of identical routine `docker logs` records into one line plus an omission count, keeping diagnostics verbatim (#21521).
