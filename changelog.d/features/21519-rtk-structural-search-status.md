@@ -1,0 +1,1 @@
+- **feat(sse):** With `OMNIROUTE_RTK_STRUCTURAL_RENDERERS_ENABLED`, RTK summarizes `rg -n` / `grep -rn` / native Grep matches and `git status` porcelain v1 output, returning anything it cannot classify unchanged (#21519).
