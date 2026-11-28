@@ -943,7 +943,7 @@ async function publishCallLogDetail(prepared: PreparedCallLogRow): Promise<void>
   scheduleCallLogRotation();
 }
 
-function observeMediaCallLog(entry: { path?: string; status?: number }, metadataOnly: boolean) {
+function observeMediaCallLog(entry: { path?: string; status: number }, metadataOnly: boolean) {
   const mediaWrites = getCallLogApiKeyContext()?.mediaWrites;
   if (
     mediaWrites &&
