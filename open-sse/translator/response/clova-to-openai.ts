@@ -75,8 +75,10 @@ function mapFinishReason(reason: unknown): string {
  * Codes are 5-digit strings: `2xxxx` success, `4xxxx` client, `5xxxx` server.
  */
 function httpStatusFromClovaCode(code: unknown): number {
-  const first = String(code || "").charAt(0);
-  if (first === "4") return 400;
+  const text = String(code || "");
+  // 42900-42903 are the documented rate-limit codes (CLOVA Studio troubleshooting, 4xx).
+  if (text.startsWith("429")) return 429;
+  if (text.charAt(0) === "4") return 400;
   return 502;
 }
 
@@ -302,14 +304,10 @@ function convertTokenEvent(
   return content ? deltaChunk(state, String(content)) : null;
 }
 
-function shouldEmitResultSnapshot(
-  state: ClovaStreamState,
-  isResultEvent: boolean,
-  snapshot: unknown
-): snapshot is string {
-  return (
-    !isResultEvent && (state.chunkIndex ?? 0) === 0 && typeof snapshot === "string" && !!snapshot
-  );
+// The snapshot is the whole answer. Emit it only when no token event came first, so a
+// stream with tokens never repeats its text, and a result-only stream is not empty.
+function shouldEmitResultSnapshot(state: ClovaStreamState, snapshot: unknown): snapshot is string {
+  return (state.chunkIndex ?? 0) === 0 && typeof snapshot === "string" && !!snapshot;
 }
 
 function convertResultEvent(
@@ -329,7 +327,7 @@ function convertResultEvent(
   state.finishReason = finishReason;
 
   const snapshot = message?.content ?? result.content;
-  if (shouldEmitResultSnapshot(state, isResultEvent, snapshot)) {
+  if (shouldEmitResultSnapshot(state, snapshot)) {
     return [deltaChunk(state, snapshot), terminalChunk(state, finishReason)];
   }
   return terminalChunk(state, finishReason);

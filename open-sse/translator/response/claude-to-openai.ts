@@ -226,6 +226,17 @@ export function claudeToOpenAIResponse(chunk, state) {
     }
 
     case "content_block_stop": {
+      // A tool call without input streams no partial_json, so its arguments stay ""
+      // (invalid JSON). Close it with an empty object, like gemini-to-openai does.
+      const closingToolCall = state.toolCalls.get(chunk.index);
+      if (closingToolCall && closingToolCall.function.arguments === "") {
+        closingToolCall.function.arguments = "{}";
+        results.push(
+          createChunk(state, {
+            tool_calls: [{ index: closingToolCall.index, function: { arguments: "{}" } }],
+          })
+        );
+      }
       // #13558: flush any <think>/reasoning text still buffered by the
       // textual think-tag parser (e.g. a block that ends mid-tag, or a
       // reasoning tail with no trailing visible content) before the block
@@ -311,9 +322,12 @@ export function claudeToOpenAIResponse(chunk, state) {
         // minimum, so a 2-token "hi" can be reported as ~2008 prompt_tokens and
         // inflate downstream billing ~250x. cache_creation is still exposed
         // separately via prompt_tokens_details.cache_creation_tokens below.
+        // A delta that repeats input_tokens but omits the cache fields must keep the
+        // cache read reported by message_start, or prompt_tokens < cached_tokens.
+        const effectiveCacheReadTokens = cacheReadTokens || previousCacheReadTokens;
         const billableInputTokens =
           inputTokens > 0 || cacheReadTokens > 0 || cacheCreationTokens > 0
-            ? inputTokens + cacheReadTokens
+            ? inputTokens + effectiveCacheReadTokens
             : previousInputTokens;
         state.usage = {
           ...mergeCacheCreationFields(previousUsage, chunk.usage),
@@ -332,7 +346,6 @@ export function claudeToOpenAIResponse(chunk, state) {
         }
 
         // Store cache tokens if present (needed for prompt_tokens_details in final chunk)
-        const effectiveCacheReadTokens = cacheReadTokens || previousCacheReadTokens;
         const effectiveCacheCreationTokens = cacheCreationTokens || previousCacheCreationTokens;
         if (effectiveCacheReadTokens > 0) {
           state.usage.cache_read_input_tokens = effectiveCacheReadTokens;
@@ -358,6 +371,12 @@ export function claudeToOpenAIResponse(chunk, state) {
             results.push(createChunk(state, { content: "</think>" }));
           }
           state.pendingThinkClose = false;
+        }
+        // A refusal has no content blocks; stop_details.explanation is the only text.
+        const refusalNote =
+          chunk.delta.stop_reason === "refusal" && chunk.delta.stop_details?.explanation;
+        if (typeof refusalNote === "string" && refusalNote) {
+          results.push(createChunk(state, { content: refusalNote }));
         }
         state.finishReason = convertStopReason(chunk.delta.stop_reason);
         const finalChunk: {

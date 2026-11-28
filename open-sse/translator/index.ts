@@ -1,4 +1,5 @@
 import { FORMATS } from "./formats.ts";
+import { mapChatResponseFormatToResponsesText } from "./request/openai-responses/toResponses.ts";
 import {
   ensureToolCallIds,
   fixMissingToolResponses,
@@ -102,12 +103,13 @@ function normalizeResponsesInputItem(item) {
 // silently does not take effect. The cross-format path (openai -> openai-responses)
 // already performs the equivalent promotion in toResponses.ts; this covers the lane
 // that promotion never runs on.
-function promoteStrayReasoningEffort(body) {
+function promoteStrayReasoningEffort(body, model) {
   if (!body || typeof body !== "object") return body;
   if (body.reasoning !== undefined) return body;
   if (body.reasoning_effort === undefined) return body;
 
-  const effort = normalizeResponsesReasoningEffort(body.reasoning_effort);
+  // The model decides whether `max` survives, as on the cross-format path (toResponses.ts).
+  const effort = normalizeResponsesReasoningEffort(body.reasoning_effort, model ?? body.model);
   if (effort) {
     body.reasoning = { effort };
   }
@@ -115,10 +117,16 @@ function promoteStrayReasoningEffort(body) {
   return body;
 }
 
-function normalizeOpenAIResponsesRequest(body) {
+// The Responses shape is flat ({type, name, schema, strict}); the Chat shape nests json_schema.
+function promoteResponseFormatToText(normalized) {
+  mapChatResponseFormatToResponsesText(normalized, normalized);
+  if (normalized.text == null) normalized.text = { format: normalized.response_format };
+}
+
+function normalizeOpenAIResponsesRequest(body, model) {
   if (!body || typeof body !== "object") return body;
 
-  const normalized = promoteStrayReasoningEffort({ ...body });
+  const normalized = promoteStrayReasoningEffort({ ...body }, model);
 
   // #10165 safety net: if a chat-shaped body reached Responses normalization
   // without input, promote messages → input and map token/format fields.
@@ -139,7 +147,7 @@ function normalizeOpenAIResponsesRequest(body) {
     delete normalized.max_completion_tokens;
   }
   if (normalized.response_format != null && normalized.text == null) {
-    normalized.text = { format: normalized.response_format };
+    promoteResponseFormatToText(normalized);
     delete normalized.response_format;
   } else if (normalized.response_format != null) {
     delete normalized.response_format;
@@ -799,7 +807,7 @@ export function translateRequest(
 
   // Normalize openai-responses input shape for providers that require list input.
   if (targetFormat === FORMATS.OPENAI_RESPONSES) {
-    result = normalizeOpenAIResponsesRequest(result);
+    result = normalizeOpenAIResponsesRequest(result, model);
     // #12128: Sanitize reasoning input items for Responses targets (strip plaintext content for opaque backends)
     applyReasoningInputPolicy(result as Record<string, unknown>, "responses", {
       provider,

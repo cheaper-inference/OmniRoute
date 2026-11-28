@@ -58,7 +58,7 @@ function isCodexModel(model: unknown): boolean {
 // Chat Completions JSON `response_format` → Responses API `text.format`.
 // Merges into any existing `result.text` (e.g. verbosity) so structured-output schemas from
 // Chat clients survive the translation to the Responses/Codex upstream (#5933).
-function mapChatResponseFormatToResponsesText(body: JsonRecord, result: JsonRecord): void {
+export function mapChatResponseFormatToResponsesText(body: JsonRecord, result: JsonRecord): void {
   const responseFormat = toRecord(body.response_format);
   if (responseFormat.type === "json_object") {
     result.text = { ...toRecord(result.text), format: { type: "json_object" } };

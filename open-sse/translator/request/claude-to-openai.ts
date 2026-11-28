@@ -639,6 +639,9 @@ function convertClaudeMessage(
                 url: block.source.url,
               },
             });
+          } else {
+            // e.g. source.type "file": OpenAI Chat cannot carry it, so say so.
+            omittedTypes.push("image");
           }
           break;
 
@@ -649,12 +652,20 @@ function convertClaudeMessage(
             preserveDocumentUrls
           );
           if (documentPart) parts.push(documentPart);
+          else omittedTypes.push("document");
           break;
         }
 
-        case "thinking":
-          reasoningContent = block.thinking || block.text || "";
+        case "thinking": {
+          // Interleaved thinking: keep every block, in order; an empty block adds nothing.
+          const thought = block.thinking || block.text || "";
+          if (thought) {
+            reasoningContent = reasoningContent ? `${reasoningContent}\n${thought}` : thought;
+          } else if (reasoningContent == null) {
+            reasoningContent = "";
+          }
           break;
+        }
 
         case "redacted_thinking":
           if (reasoningContent == null) {
