@@ -4572,6 +4572,8 @@
     "jev": "Jev",
     "jevDesc": "You rank providers; TypeSafe Jev decides which of those entries run for each request. Failover among admitted targets keeps your order.",
     "jevPrivacyNote": "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model. Off until the COMBO_JEV_STRATEGY_ENABLED feature flag is on: until then Jev combos make no TypeSafe call and keep your order.",
+    "jevInstructionsLabel": "Routing instructions (optional)",
+    "jevInstructionsHint": "Tell Jev when to choose each model in this combo by capability, cost, or speed. TypeSafe receives this text for routing decisions. Leave it blank to use the default instructions.",
     "endpointBehaviorTitle": "Endpoint behavior",
     "endpointBehaviorDescription": "Configure targets and routing strategy independently for each API capability. Empty capabilities are not saved. Chat remains the legacy-compatible default.",
     "endpointTabsAria": "Combo capability",

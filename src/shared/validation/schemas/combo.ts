@@ -19,6 +19,7 @@ import {
   COMBO_NON_CHAT_STRATEGIES,
 } from "@omniroute/open-sse/config/comboEndpoints.ts";
 import { OPENAI_SERVICE_TIER_VALUES } from "@omniroute/open-sse/config/serviceTier.ts";
+import { jevInstructionsSchema } from "@omniroute/open-sse/services/combo/jevInstructions.ts";
 import { decisionRoutingConfigSchema } from "@omniroute/open-sse/services/decision/schema.ts";
 
 // ──── Combo Schemas ────
@@ -184,6 +185,7 @@ export const comboRuntimeConfigSchema = z
   .object({
     responseValidation: responseValidationSchema.optional(),
     strategy: comboStrategySchema.optional(),
+    jevInstructions: jevInstructionsSchema.optional(),
     maxRetries: z.coerce.number().int().min(0).max(10).optional(),
     retryDelayMs: z.coerce.number().int().min(0).max(60000).optional(),
     fallbackDelayMs: z.coerce.number().int().min(0).max(60000).optional(),

@@ -105,6 +105,7 @@ export async function orderByJevStrategy(
     : promptCacheOrderedTargets;
   const ask = createJevAsk({
     apiKeyAllowedConnections: deps.apiKeyAllowedConnections,
+    instructions: combo.config?.jevInstructions,
     log,
     signal,
   });

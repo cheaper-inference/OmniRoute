@@ -20,6 +20,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { buttonVariants } from "@omniroute/ui-kit/button";
+import { JEV_INSTRUCTIONS_MAX_LENGTH } from "@omniroute/open-sse/services/combo/jevInstructions.ts";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { Field } from "@omniroute/ui-kit/field";
 import { Input as KitInput } from "@omniroute/ui-kit/input";
@@ -3876,14 +3877,27 @@ function ComboFormModal({
                 ))}
               </RadioGroup>
               {strategy === "jev" && (
-                <div className="mt-2 rounded-md border border-primary/20 bg-primary/5 px-2.5 py-2">
-                  <p className="text-xs text-primary">
-                    {getI18nOrFallback(
-                      t,
-                      "jevPrivacyNote",
-                      "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model."
-                    )}
-                  </p>
+                <div className="mt-2 flex flex-col gap-2">
+                  <div className="rounded-md border border-primary/20 bg-primary/5 px-2.5 py-2">
+                    <p className="text-xs text-primary">
+                      {getI18nOrFallback(
+                        t,
+                        "jevPrivacyNote",
+                        "Order is who you trust. TypeSafe Jev chooses which of these models run for each request. The latest user message is sent to TypeSafe for that decision. Store a TypeSafe API key under Providers. Continuations with a live session pin skip Jev and stay on the pinned model."
+                      )}
+                    </p>
+                  </div>
+                  <Textarea
+                    label={t("jevInstructionsLabel")}
+                    hint={t("jevInstructionsHint")}
+                    rows={4}
+                    maxLength={JEV_INSTRUCTIONS_MAX_LENGTH}
+                    value={typeof config.jevInstructions === "string" ? config.jevInstructions : ""}
+                    onChange={(event) => {
+                      const jevInstructions = event.target.value;
+                      setConfig((previous) => ({ ...previous, jevInstructions }));
+                    }}
+                  />
                 </div>
               )}
               {!isExpertMode && (

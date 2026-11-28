@@ -9,9 +9,11 @@ import {
 import type { ComboLogger } from "./types.ts";
 import type { JevAsk } from "./jevOrdering.ts";
 import { getProviderCredentials } from "./autoStrategy.ts";
+import { jevInstructionsSchema } from "./jevInstructions.ts";
 
 export function createJevAsk(args: {
   apiKeyAllowedConnections?: string[] | null;
+  instructions?: unknown;
   log: ComboLogger;
   signal?: AbortSignal | null;
 }): JevAsk {
@@ -32,10 +34,12 @@ export function createJevAsk(args: {
         credentials && typeof (credentials as { apiKey?: unknown }).apiKey === "string"
           ? (credentials as { apiKey: string }).apiKey
           : null;
+      const instructions = jevInstructionsSchema.safeParse(args.instructions);
       const result = await evaluateSystemOneChoice({
         apiKey,
         state,
         criteria,
+        instructions: instructions.success ? instructions.data : undefined,
         signal: args.signal,
       });
       if (result.ok) {

@@ -31,6 +31,7 @@ type JevRuntimeUnitArgs = {
   body: Record<string, unknown>;
   comboName: string;
   config: Record<string, unknown>;
+  instructions?: unknown;
   settings?: Record<string, unknown> | null;
   sourceFormat?: string | null;
   /** Resolved by the caller (combo setup) so this module needs no import edge into src/. */
@@ -210,6 +211,7 @@ export async function orderJevRuntimeUnits(
     sessionPinned,
     ask: createJevAsk({
       apiKeyAllowedConnections: args.apiKeyAllowedConnections,
+      instructions: args.instructions,
       log: args.log,
       signal: args.signal,
     }),
