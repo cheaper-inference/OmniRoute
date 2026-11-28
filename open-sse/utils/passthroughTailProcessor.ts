@@ -31,6 +31,7 @@ export type PassthroughTailProcessorContext = {
   passthroughEventPrefix: EventPrefixBuffer;
   emitConvertedOutput: (output: string) => void;
   pushProviderPayload: (payload: unknown) => void;
+  noteProviderDone: () => void;
   pushClientPayload: (payload: unknown) => void;
   sanitizeUsagePayload: (payload: unknown) => boolean;
   setPassthroughResponsesId: (value: string) => void;
@@ -302,6 +303,7 @@ export function processBufferedPassthroughLine(
     eventType: context.passthroughEventPrefix.eventType(),
   });
   if (parsedPassthroughData?.done === true) {
+    context.noteProviderDone();
     return false;
   }
 

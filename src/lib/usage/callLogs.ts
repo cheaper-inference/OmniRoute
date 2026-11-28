@@ -21,6 +21,7 @@ import {
   storedCacheWriteUsage,
 } from "@omniroute/open-sse/utils/cacheWriteUsage.ts";
 import { estimateApiEquivalentCacheWrite } from "./cacheWriteEstimate";
+import { readReasoningEffort } from "./reasoningEffort";
 import { failPendingCallLogDetail, publishPendingCallLogDetail } from "../db/callLogDetails";
 import { applyNodePrefix, resolveProviderDisplay } from "./callLogDisplay";
 export { applyNodePrefix, resolveProviderDisplay } from "./callLogDisplay";
@@ -426,12 +427,26 @@ export function invalidateCallLogsColumnCache(): void {
 
 export { parseResilienceActions };
 
+function mapRequestSummary(value: string | null): unknown {
+  const summary = value ? parseStoredPayload(value) : null;
+  if (
+    !summary ||
+    typeof summary !== "object" ||
+    !Object.hasOwn(summary, "reasoningEffortAnswerObserved")
+  ) {
+    return summary;
+  }
+  const visible = { ...(summary as JsonRecord) };
+  delete visible.reasoningEffortAnswerObserved;
+  return Object.keys(visible).length > 0 ? visible : null;
+}
+
 function mapSummaryRow(row: CallLogSummaryRow) {
   const detailState = normalizeDetailState(row.detail_state);
   const provider = row.provider;
   const nodeName = row.provider_node_name ?? null;
   const nodePrefix = row.provider_node_prefix ?? null;
-  const requestSummary = row.request_summary ? parseStoredPayload(row.request_summary) : null;
+  const requestSummary = mapRequestSummary(row.request_summary);
   const upstreamHttp = parseUpstreamHttp(
     requestSummary && typeof requestSummary === "object"
       ? (requestSummary as Record<string, unknown>).upstreamHttp
@@ -664,24 +679,15 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
       ? 1
       : null;
   const reasoningDurationMs = reasoningObservation.source === "encrypted" ? streamDurationMs : null;
-  const readEffortValue = (body: unknown): string | null => {
-    if (body === null || typeof body !== "object" || Array.isArray(body)) return null;
-    const record = body as Record<string, unknown>;
-    const direct = record.reasoning_effort;
-    if (typeof direct === "string" && direct.trim().length > 0) return direct;
-    const nested = record.reasoning;
-    if (nested !== null && typeof nested === "object" && !Array.isArray(nested)) {
-      const effort = (nested as Record<string, unknown>).effort;
-      if (typeof effort === "string" && effort.trim().length > 0) return effort;
-    }
-    return null;
-  };
-  const reasoningEffortRequested =
-    reasoningObservation.source === "encrypted"
-      ? readEffortValue(entry.clientRequestBody ?? entry.requestBody)
-      : null;
-  const reasoningEffortUpstream =
-    reasoningObservation.source === "encrypted" ? readEffortValue(entry.upstreamRequestBody) : null;
+  const expandedEffortLogging =
+    !metadataOnly && !noLogEnabled && process.env.OMNIROUTE_LOG_ALL_REASONING_EFFORT === "true";
+  const recordEffort = reasoningObservation.source === "encrypted" || expandedEffortLogging;
+  const reasoningEffortRequested = recordEffort
+    ? readReasoningEffort(entry.clientRequestBody ?? entry.requestBody, expandedEffortLogging)
+    : null;
+  const reasoningEffortUpstream = recordEffort
+    ? readReasoningEffort(entry.upstreamRequestBody, expandedEffortLogging)
+    : null;
   const errorType = toStoredErrorType(
     classifyCallLogError(entry.status, entry.error, entry.provider)
   );
@@ -804,10 +810,22 @@ async function buildCallLogRow(entry: any, metadataOnly = false): Promise<Prepar
 
   const legacySummary = buildRequestSummary(logEntry.requestType, protectedRequestBody);
   const upstreamHttp = parseUpstreamHttp(entry.upstreamHttp);
+  const reasoningEffortAnswerObserved =
+    expandedEffortLogging &&
+    reasoningEncrypted !== 1 &&
+    reasoningEffortRequested?.toLowerCase() === "none" &&
+    isSuccess &&
+    !entry.error &&
+    (entry.upstreamTerminalObserved === true ||
+      (entry.upstreamTerminalObserved === undefined && entry.responseBody?._streamed !== true));
   const requestSummary = noLogEnabled
     ? null
-    : upstreamHttp
-      ? JSON.stringify({ ...(legacySummary ? JSON.parse(legacySummary) : {}), upstreamHttp })
+    : upstreamHttp || reasoningEffortAnswerObserved
+      ? JSON.stringify({
+          ...(legacySummary ? JSON.parse(legacySummary) : {}),
+          ...(upstreamHttp ? { upstreamHttp } : {}),
+          ...(reasoningEffortAnswerObserved ? { reasoningEffortAnswerObserved: true } : {}),
+        })
       : legacySummary;
   const detailExpected =
     !metadataOnly &&

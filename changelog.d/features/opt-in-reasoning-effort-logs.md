@@ -1,0 +1,1 @@
+- **feat(usage):** Allow operators to opt into recording requested and forwarded reasoning effort for calls without encrypted reasoning.

@@ -40,6 +40,7 @@ export type TranslateFlushTailContext = {
   isDuplicateSequence: (value: unknown) => boolean;
   shouldDropCommentary: (parsed: JsonRecord) => boolean;
   pushProviderPayload: (payload: unknown) => void;
+  noteProviderDone: () => void;
   emitFailureAndAbort: (controller: unknown, parsed: unknown) => boolean;
   translateAndEmit: (controller: unknown, parsed: unknown) => void;
 };
@@ -115,7 +116,9 @@ function isSkippedTailLine(parsed: unknown, context: TranslateFlushTailContext):
   }
   context.noteReasoning(parsed, context.now());
   if (context.shouldDropCommentary(record)) return true;
-  return record.done === true;
+  if (record.done !== true) return false;
+  context.noteProviderDone();
+  return true;
 }
 
 function trackTailToolTiming(record: JsonRecord, context: TranslateFlushTailContext): void {

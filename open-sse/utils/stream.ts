@@ -128,7 +128,12 @@ import { createSSEOutputSink } from "./sseOutputSink.ts";
 import { normalizeArrayContentChunk } from "./arrayContentDelta.ts";
 import { drainTranslateFlushTail } from "./translateFlushTail.ts";
 import { restoreResponsesToolNames } from "../translator/helpers/responsesToolNameRestore.ts";
-import { withBuyerCostMicro, type StreamCompletePayload } from "./streamCompletePayload.ts";
+import {
+  createUpstreamTerminalObserver,
+  isTerminalStreamPayload,
+  withBuyerCostMicro,
+  type StreamCompletePayload,
+} from "./streamCompletePayload.ts";
 import { readBuyerCostMicro, registerStreamBuyerCost } from "./buyerCostMicro.ts";
 
 function isLateOutputProbeEnabled(): boolean {
@@ -271,26 +276,6 @@ type UsageTokenRecord = Record<string, number>;
 
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
-const TERMINAL_STREAM_EVENT_TYPES = new Set([
-  "message_stop",
-  "response.completed",
-  "response.incomplete",
-  "response.failed",
-  "response.done",
-  "response.cancelled",
-  "response.canceled",
-]);
-
-/** True for a parsed upstream payload that ends its turn: `[DONE]`, a finish reason or a terminal event. */
-function isTerminalStreamPayload(payload: unknown): boolean {
-  const record = asRecord(payload);
-  if (record.done === true) return true;
-  if (typeof record.type === "string" && TERMINAL_STREAM_EVENT_TYPES.has(record.type)) return true;
-  const finished = (list: unknown, key: string) =>
-    Array.isArray(list) && list.some((entry) => asRecord(entry)[key] != null);
-  return finished(record.choices, "finish_reason") || finished(record.candidates, "finishReason");
 }
 
 /** True for a `data:` line whose payload is neither `[DONE]` nor JSON. Empty `data:` is not counted. */
@@ -983,12 +968,14 @@ export function createSSEStream(options: StreamOptions = {}) {
   const nativeClaudeUsage = createNativeClaudeUsageTracker(body);
   const nativeContent = createGeneratedContentTracker();
   const observedContentLength = () => nativeContent.getLength();
+  const upstreamTerminal = createUpstreamTerminalObserver();
   // Log metadata only: the payload (and so the client wire) is left as it was.
   const observeBuyerCostMicro = (payload: unknown) => {
     const reportedCost = readBuyerCostMicro(payload);
     if (reportedCost !== undefined) buyerCostMicro = reportedCost;
   };
   const observeProviderPayload = (payload: unknown) => {
+    upstreamTerminal.observe(payload, providerWireFormat);
     observeBuyerCostMicro(payload);
     nativeClaudeUsage.observe(payload);
     nativeContent.observe(payload);
@@ -2998,6 +2985,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 forward(controller, encoder.encode(output));
               },
               pushProviderPayload: observeProviderPayload,
+              noteProviderDone: upstreamTerminal.noteDone,
               pushClientPayload: (payload: unknown) => clientPayloadCollector.push(payload),
               sanitizeUsagePayload: usageGuard.sanitizePassthrough,
               setPassthroughResponsesId: (value: string) => {
@@ -3407,6 +3395,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 outcomeRecorded = true;
                 onComplete({
                   status: 200,
+                  upstreamTerminalObserved: upstreamTerminal.wasObserved(),
                   usage,
                   cacheEvidence: usage?.cache_evidence as StreamCompletePayload["cacheEvidence"],
                   responseBody,
@@ -3495,6 +3484,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               pushProviderPayload: (payload) => {
                 observeProviderPayload(payload);
               },
+              noteProviderDone: upstreamTerminal.noteDone,
               emitFailureAndAbort: (ctrl, parsed) =>
                 emitTranslatedFailureAndAbort(
                   ctrl as TransformStreamDefaultController<Uint8Array>,
@@ -3532,7 +3522,9 @@ export function createSSEStream(options: StreamOptions = {}) {
             return;
           if (buffer.trim()) {
             const parsed = parseSSELine(buffer.trim());
-            if (parsed && !parsed.done) {
+            if (parsed?.done) {
+              upstreamTerminal.noteDone();
+            } else if (parsed) {
               if (emitTranslatedFailureAndAbort(controller, parsed)) return;
               if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);
               observeProviderPayload(parsed);
@@ -3825,6 +3817,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               outcomeRecorded = true;
               onComplete({
                 status: 200,
+                upstreamTerminalObserved: upstreamTerminal.wasObserved(),
                 usage: accountingUsage,
                 cacheEvidence: state?.cacheEvidence,
                 responseBody,

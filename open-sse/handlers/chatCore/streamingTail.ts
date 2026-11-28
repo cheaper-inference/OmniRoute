@@ -430,6 +430,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   let streamTimingOriginOffsetMs: number | null = null; // startTime → StreamTiming start
   const onStreamComplete = ({
     status: streamStatus,
+    upstreamTerminalObserved,
     usage: streamUsage,
     buyerCostMicro,
     responseBody: streamResponseBody,
@@ -604,6 +605,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     persistAttemptLogs({
       upstreamHttpSelection,
       status: normalizedStreamStatus,
+      upstreamTerminalObserved: upstreamTerminalObserved === true,
       error: streamError || undefined,
       // A stream that ended early (499 / mid-stream failure) has no `usage`, but its call log
       // still shows the tokens already generated (estimates are flagged via `estimated`).

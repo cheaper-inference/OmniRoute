@@ -2,8 +2,8 @@
  * Bounded call_logs reader for reasoning_effort=none compliance.
  *
  * One test per gate case. Rows are inserted directly (the production writer
- * only persists effort columns on the encrypted path), and removed in
- * `finally`, so every input reaches the code through the journal it reads.
+ * stores plaintext effort only with opt-in), and removed in `finally`, so
+ * every input reaches the code through the journal it reads.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -51,7 +51,7 @@ function insertRow(row: Record<string, unknown>) {
     has_request_body: 0,
     has_response_body: 0,
     has_pipeline_details: 0,
-    request_summary: null,
+    request_summary: '{"reasoningEffortAnswerObserved":true}',
     request_type: null,
     tokens_reasoning: null,
     reasoning_chars: null,
@@ -138,6 +138,35 @@ test("none requested with reasoning applied reads not honored", () => {
     core.getDbInstance().prepare("DELETE FROM call_logs").run();
     mod.clearNoneHonoredCache();
   }
+});
+
+test("missing or untyped completion evidence does not admit plaintext rows", () => {
+  for (const request_summary of [
+    null,
+    "{invalid",
+    '{"reasoningEffortAnswerObserved":"true"}',
+    '{"reasoningEffortAnswerObserved":1}',
+  ]) {
+    insertRow({
+      requested_model: "unknown-completion",
+      reasoning_effort_requested: "none",
+      request_summary,
+    });
+  }
+  insertRow({
+    requested_model: "unknown-completion",
+    reasoning_effort_requested: "none",
+    reasoning_encrypted: 1,
+    status: 503,
+    request_summary: "{invalid",
+  });
+  assert.deepEqual(
+    mod.readNoneHonored(mod.getNoneHonoredSnapshot(undefined, FIXED_NOW), "unknown-completion"),
+    {
+      honored: null,
+      sampleSize: 1,
+    }
+  );
 });
 
 test("model without a none request in the window reads unknown", () => {
