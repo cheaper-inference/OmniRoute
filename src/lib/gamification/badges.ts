@@ -528,28 +528,7 @@ export async function evaluateBadges(
  * Idempotent — uses INSERT OR IGNORE so existing badges are not overwritten.
  */
 export async function seedBuiltinBadges(): Promise<void> {
-  const { getDbInstance } = await import("../db/core");
-  const db = getDbInstance();
-
-  const insert = db.prepare(
-    `INSERT OR IGNORE INTO badge_definitions (id, name, description, icon, category, rarity, criteria, hidden)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-  );
-
-  const insertMany = db.transaction((badges: typeof BUILTIN_BADGES) => {
-    for (const badge of badges) {
-      insert.run(
-        badge.id,
-        badge.name,
-        badge.description,
-        badge.icon,
-        badge.category,
-        badge.rarity,
-        badge.criteria,
-        badge.hidden
-      );
-    }
-  });
-
-  insertMany(BUILTIN_BADGES);
+  const { gamificationDefinitionRepositories } =
+    await import("../db/repositories/gamificationDefinitionRepositories");
+  gamificationDefinitionRepositories.legacySync.seedBadgeDefinitions(BUILTIN_BADGES);
 }

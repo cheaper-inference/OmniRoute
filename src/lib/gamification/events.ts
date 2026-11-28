@@ -195,11 +195,9 @@ async function checkAndUnlockBadge(
     }
 
     // Look up badge details from badge_definitions
-    const { getDbInstance } = await import("../db/core");
-    const badgeRow = getDbInstance()
-      .prepare("SELECT name, description, icon, rarity FROM badge_definitions WHERE id = ?")
-      .get(badgeId) as
-      { name: string; description: string | null; icon: string | null; rarity: string } | undefined;
+    const { gamificationDefinitionRepositories } =
+      await import("../db/repositories/gamificationDefinitionRepositories");
+    const badgeRow = gamificationDefinitionRepositories.legacySync.findBadgeUnlockDetails(badgeId);
 
     // Record notification for SSE toast
     const { recordBadgeUnlock } = await import("./notifications");

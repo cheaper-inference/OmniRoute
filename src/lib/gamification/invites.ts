@@ -87,34 +87,9 @@ export async function redeemInvite(
  * List invites created by an API key.
  */
 export async function listInvites(apiKeyId: string) {
-  const db = (await import("../db/core")).getDbInstance();
-
-  const rows = db
-    .prepare(
-      `SELECT id, code, server_url, max_uses, use_count, expires_at, revoked_at, created_at
-       FROM invite_tokens WHERE created_by = ? ORDER BY created_at DESC`
-    )
-    .all(apiKeyId) as Array<{
-    id: string;
-    code: string;
-    server_url: string | null;
-    max_uses: number;
-    use_count: number;
-    expires_at: string | null;
-    revoked_at: string | null;
-    created_at: string;
-  }>;
-
-  return rows.map((r) => ({
-    id: r.id,
-    code: r.code,
-    serverUrl: r.server_url,
-    maxUses: r.max_uses,
-    useCount: r.use_count,
-    expiresAt: r.expires_at,
-    revokedAt: r.revoked_at,
-    createdAt: r.created_at,
-  }));
+  const { gamificationDefinitionRepositories } =
+    await import("../db/repositories/gamificationDefinitionRepositories");
+  return gamificationDefinitionRepositories.legacySync.listInvitesByCreator(apiKeyId);
 }
 
 /**
