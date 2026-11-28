@@ -34,6 +34,7 @@ export type QoderAcpPromptOptions = {
   command?: string | null;
   signal?: AbortSignal | null;
   timeoutMs?: number;
+  useDesktopIdentity?: boolean;
 };
 
 function readPositiveInt(raw: string | undefined, fallback: number): number {
@@ -85,7 +86,12 @@ class QoderAcpProcess {
 
   constructor(
     private readonly key: string,
-    private readonly options: { token: string; configDir: string; command?: string | null },
+    private readonly options: {
+      token: string;
+      configDir: string;
+      command?: string | null;
+      useDesktopIdentity?: boolean;
+    },
     private readonly onDispose: (key: string, instance: QoderAcpProcess) => void
   ) {}
 
@@ -111,7 +117,7 @@ class QoderAcpProcess {
 
   private async spawnAndInitialize(): Promise<void> {
     const { command, useShell } = await resolveQoderCliInvocation(this.options.command);
-    const env = buildQoderCliEnv(this.options.token);
+    const env = buildQoderCliEnv(this.options.token, this.options.useDesktopIdentity);
 
     // `--tools ""` applies to every ACP session the process creates: OmniRoute only
     // wants plain LM replies, never file-system access or command execution.
@@ -286,10 +292,15 @@ class QoderAcpProcess {
 
 const processes = new Map<string, QoderAcpProcess>();
 
-function processKey(token: string, configDir: string, command?: string | null): string {
+function processKey(
+  token: string,
+  configDir: string,
+  command?: string | null,
+  useDesktopIdentity?: boolean
+): string {
   return crypto
     .createHash("sha256")
-    .update(`${token}\0${configDir}\0${command || ""}`)
+    .update(`${token}\0${configDir}\0${command || ""}\0${useDesktopIdentity ? "app" : "cli"}`)
     .digest("hex");
 }
 
@@ -297,8 +308,14 @@ async function getQoderAcpProcess(options: {
   token: string;
   configDir: string;
   command?: string | null;
+  useDesktopIdentity?: boolean;
 }): Promise<QoderAcpProcess> {
-  const key = processKey(options.token, options.configDir, options.command);
+  const key = processKey(
+    options.token,
+    options.configDir,
+    options.command,
+    options.useDesktopIdentity
+  );
   let instance = processes.get(key);
   if (!instance || instance.isDisposed || instance.isDraining) {
     instance = new QoderAcpProcess(key, options, (disposedKey, disposed) => {
@@ -485,6 +502,7 @@ export async function runQoderAcpPrompt(
       token: options.token,
       configDir: options.configDir,
       command: options.command,
+      useDesktopIdentity: options.useDesktopIdentity,
     });
   } catch (err) {
     return failure((err as Error).message);

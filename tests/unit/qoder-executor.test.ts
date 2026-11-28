@@ -116,27 +116,29 @@ test("mapQoderModelToLevel maps static models to qodercli levels", () => {
   assert.equal(mapQoderModelToLevel("qwen3-max"), "qmodel_latest");
   assert.equal(mapQoderModelToLevel("qwen3.8-max-preview"), "qmodel_preview");
   assert.equal(mapQoderModelToLevel("kimi-k3"), "kmodel_latest");
+  assert.equal(mapQoderModelToLevel("hungerg"), "hmodel");
+  assert.equal(mapQoderModelToLevel("hmodel"), "hmodel");
   assert.equal(mapQoderModelToLevel(""), null);
 });
 
-test("getStaticQoderModels exposes the current eleven-model Qoder catalog", () => {
+test("getStaticQoderModels exposes the current twelve-model Qoder catalog", () => {
   const models = getStaticQoderModels();
   const ids = models.map((model) => model.id);
   const freeCatalogIds = FREE_MODEL_BUDGETS.filter((model) => model.provider === "qoder").map(
     (model) => model.modelId
   );
 
-  assert.equal(models.length, 11);
+  assert.equal(models.length, 12);
   assert.deepEqual(
     ids,
     qoderProvider.models.map((model) => model.id)
   );
-  // smodel/cmodel (Sonus/Cantus) are static-fallback-only rows: they have no
-  // audited free-budget evidence, so they stay out of FREE_MODEL_BUDGETS. Every
-  // other registry row must keep its free-catalog twin in sync.
+  // smodel/cmodel (Sonus/Cantus) are static-fallback-only rows and hungerg has
+  // no audited free-budget evidence: all three stay out of FREE_MODEL_BUDGETS.
+  // Every other registry row must keep its free-catalog twin in sync.
   assert.deepEqual(
     freeCatalogIds,
-    ids.filter((id) => id !== "smodel" && id !== "cmodel")
+    ids.filter((id) => id !== "hungerg" && id !== "smodel" && id !== "cmodel")
   );
   assert.ok(ids.includes("qwen3.8-max-preview"));
   assert.ok(ids.includes("deepseek-v4-flash"));

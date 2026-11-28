@@ -1,0 +1,1 @@
+- Qoder's HungerG (hmodel) is now available in the static catalog and works through qodercli's desktop-specific identity. ([#21447](https://github.com/cheaper-inference/OmniRoute/pull/21447)) — thanks @Kizuno18

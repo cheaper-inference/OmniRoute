@@ -422,6 +422,12 @@ RUN apk add --no-cache fontconfig font-liberation font-opensans gtk-3 mesa mesa-
 
 ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium
 
+# Qoder PAT authentication shells out to qodercli from the web production image.
+RUN --mount=type=cache,id=s/92ca8a61-c1ba-421f-a389-d48ac7258c2d-npm-cache,target=/root/.npm \
+  npm install -g --no-audit --no-fund --allow-scripts=@qoder-ai/qodercli \
+    @qoder-ai/qodercli@1.1.63 \
+  && qodercli --version
+
 USER node
 
 FROM runner-base AS runner-cli-core
