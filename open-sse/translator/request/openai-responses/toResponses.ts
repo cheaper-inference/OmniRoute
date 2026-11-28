@@ -29,6 +29,7 @@ import {
   toString,
   clampCallId,
   imageUrlToText,
+  mergeResponsesReasoningEffort,
   normalizeVerbosity,
   normalizeResponsesReasoningEffort,
 } from "./helpers.ts";
@@ -39,7 +40,7 @@ import {
 // summary (plus the encrypted-content include that actually streams it) so a
 // downstream chat client still sees a thinking stream instead of an empty
 // summary. Mirrors the Codex executor's `ensureCodexReasoningSummary`. An
-// explicit `reasoning` object from a Responses-shaped client is preserved as-is.
+// explicit `reasoning` object keeps its own summary settings.
 const DEFAULT_RESPONSES_REASONING_SUMMARY = "auto";
 const RESPONSES_REASONING_ENCRYPTED_CONTENT_INCLUDE = "reasoning.encrypted_content";
 
@@ -614,7 +615,11 @@ export function openaiToOpenAIResponsesRequest(
   }
   let defaultedReasoningSummary = false;
   if (root.reasoning !== undefined) {
-    result.reasoning = root.reasoning;
+    result.reasoning = mergeResponsesReasoningEffort(
+      root.reasoning,
+      root.reasoning_effort,
+      model ?? root.model
+    );
   } else if (root.reasoning_effort !== undefined) {
     const effort = normalizeResponsesReasoningEffort(root.reasoning_effort, model ?? root.model);
     if (effort && effort !== "none") {

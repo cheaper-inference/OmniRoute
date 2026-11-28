@@ -79,6 +79,7 @@ export function resolveChatCoreTargetFormat(opts: {
   if (nativeXaiResponsesPassthrough || nativeOpenAICompatibleResponsesPassthrough) {
     targetFormat = FORMATS.OPENAI_RESPONSES;
   }
+  if (targetFormat === FORMATS.OPENAI_RESPONSE) targetFormat = FORMATS.OPENAI_RESPONSES;
   return { alias, targetFormat };
 }
 

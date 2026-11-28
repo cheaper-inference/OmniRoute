@@ -51,7 +51,7 @@ import {
   requiresReasoningReplay,
 } from "../services/reasoningCache.ts";
 import {
-  normalizeResponsesReasoningEffort,
+  mergeResponsesReasoningEffort,
   REASONING_SUMMARY_OPT_OUT_MARKER,
   RESPONSES_STORE_MARKER,
 } from "./request/openai-responses/helpers.ts";
@@ -88,37 +88,20 @@ function normalizeResponsesInputItem(item) {
   return item;
 }
 
-// Promote a stray top-level Chat-Completions-shaped `reasoning_effort` into the
-// Responses-shaped `reasoning:{effort}` object, in place, removing the top-level key.
-// No-op when `reasoning` is already present (an explicit Responses-shaped value always
-// wins) or when `reasoning_effort` is absent.
-//
-// This exists for the SAME-FORMAT lane (source === target === OPENAI_RESPONSES), where
-// translateRequest's hub-and-spoke translation block is skipped entirely (#7631): a
-// caller that lands a top-level `reasoning_effort` there — e.g. applyNoThinkingAlias
-// on the OpenAI path, which runs upstream of model-format resolution and cannot know
-// yet whether the target lane is Responses-native — would otherwise reach the upstream
-// with BOTH an unrecognized top-level field AND no `reasoning.effort`, so suppression
-// silently does not take effect. The cross-format path (openai -> openai-responses)
-// already performs the equivalent promotion in toResponses.ts; this covers the lane
-// that promotion never runs on.
-function promoteStrayReasoningEffort(body) {
+function normalizeOpenAIResponsesRequest(body, model: unknown) {
   if (!body || typeof body !== "object") return body;
-  if (body.reasoning !== undefined) return body;
-  if (body.reasoning_effort === undefined) return body;
 
-  const effort = normalizeResponsesReasoningEffort(body.reasoning_effort);
-  if (effort) {
-    body.reasoning = { effort };
+  const normalized = { ...body };
+  // Same-format requests skip the Chat-to-Responses converter (#7631).
+  if (Object.hasOwn(normalized, "reasoning_effort")) {
+    const reasoning = mergeResponsesReasoningEffort(
+      normalized.reasoning,
+      normalized.reasoning_effort,
+      model ?? normalized.model
+    );
+    if (reasoning !== undefined) normalized.reasoning = reasoning;
+    delete normalized.reasoning_effort;
   }
-  delete body.reasoning_effort;
-  return body;
-}
-
-function normalizeOpenAIResponsesRequest(body) {
-  if (!body || typeof body !== "object") return body;
-
-  const normalized = promoteStrayReasoningEffort({ ...body });
 
   // #10165 safety net: if a chat-shaped body reached Responses normalization
   // without input, promote messages → input and map token/format fields.
@@ -390,6 +373,9 @@ export function translateRequest(
     antigravitySessionKey?: string | null;
   }
 ) {
+  if (sourceFormat === FORMATS.OPENAI_RESPONSE) sourceFormat = FORMATS.OPENAI_RESPONSES;
+  if (targetFormat === FORMATS.OPENAI_RESPONSE) targetFormat = FORMATS.OPENAI_RESPONSES;
+
   // Only Anthropic holds message-thread state. A `thread` delta (the message-threads beta) omits
   // the earlier turns, so a translated route would answer with no history. Refuse it with the
   // code that makes Claude Code resend the full conversation. Same gate as the tool additions.
@@ -799,7 +785,7 @@ export function translateRequest(
 
   // Normalize openai-responses input shape for providers that require list input.
   if (targetFormat === FORMATS.OPENAI_RESPONSES) {
-    result = normalizeOpenAIResponsesRequest(result);
+    result = normalizeOpenAIResponsesRequest(result, model);
     // #12128: Sanitize reasoning input items for Responses targets (strip plaintext content for opaque backends)
     applyReasoningInputPolicy(result as Record<string, unknown>, "responses", {
       provider,

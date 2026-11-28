@@ -110,6 +110,19 @@ export function normalizeResponsesReasoningEffort(
   return supportsNativeMaxReasoningEffort(model, targetFormat) ? "max" : "xhigh";
 }
 
+/** Fill in a missing Responses effort while preserving caller-supplied reasoning options. */
+export function mergeResponsesReasoningEffort(
+  reasoning: unknown,
+  flatEffort: unknown,
+  model: unknown
+): unknown {
+  if (flatEffort === undefined) return reasoning;
+  const options = toRecord(reasoning);
+  if (options.effort !== undefined) return reasoning;
+  const effort = normalizeResponsesReasoningEffort(flatEffort, model);
+  return effort ? { ...options, effort } : reasoning;
+}
+
 export function shouldRequestClaudeSummarizedThinking(value: unknown): boolean {
   const summary = toString(value).toLowerCase();
   return !!summary && summary !== "off" && summary !== "none" && summary !== "disabled";
