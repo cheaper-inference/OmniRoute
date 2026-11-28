@@ -647,7 +647,14 @@ function normalizeProviderScopedModelId(providerId: string, modelId: string): st
     return providerScopedModelId;
   }
 
-  return modelId.startsWith(`${providerId}/`) ? modelId.slice(providerId.length + 1) : modelId;
+  if (modelId.startsWith(`${resolvedProvider}/`)) {
+    const unprefixedModelId = modelId.slice(resolvedProvider.length + 1);
+    if (provider?.models.some((model) => model.id === unprefixedModelId)) {
+      return unprefixedModelId;
+    }
+  }
+
+  return modelId;
 }
 
 function toProviderScopedModelId(providerId: string, modelId: string): string {
