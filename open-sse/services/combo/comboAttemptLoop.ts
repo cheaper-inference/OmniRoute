@@ -427,6 +427,7 @@ export async function dispatchWithCooldownRetry(opts: {
         deps.signal?.addEventListener("abort", onClientAbort);
 
         const task = (async () => {
+          let settledAsTerminal = false;
           try {
             const res = await executeTarget(i);
             if (anySuccess) {
@@ -444,6 +445,7 @@ export async function dispatchWithCooldownRetry(opts: {
             if (res && !anySuccess) {
               if (res.ok) {
                 anySuccess = true;
+                settledAsTerminal = true;
                 globalResolve!(res.response!);
                 for (const [idx, ac] of state.abortControllers.entries()) {
                   // Reasoned abort: a superseded sibling must be distinguishable
@@ -456,6 +458,7 @@ export async function dispatchWithCooldownRetry(opts: {
               } else if (res.response) {
                 // Fatal error, abort combo
                 anySuccess = true;
+                settledAsTerminal = true;
                 globalResolve!(res.response);
                 for (const [idx, ac] of state.abortControllers.entries()) {
                   if (idx !== i) ac.abort(new Error(COMBO_HEDGE_CANCELLED_REASON));
@@ -464,6 +467,14 @@ export async function dispatchWithCooldownRetry(opts: {
             }
           } finally {
             deps.signal?.removeEventListener("abort", onClientAbort);
+            // A target that settled without becoming the combo's answer has nothing
+            // left in flight. Drop its controller so the sweeps over abortControllers
+            // (hedge-cancel on success/fatal, safety timeout) only reach running
+            // targets: aborting a finished target's signal makes its per-attempt
+            // stream controller log a bogus "disconnect: hedge-cancelled".
+            if (!settledAsTerminal && state.abortControllers.get(i) === abortController) {
+              state.abortControllers.delete(i);
+            }
           }
         })().catch((err) => {
           const logError = deps.log.error ?? deps.log.warn;
