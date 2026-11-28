@@ -137,6 +137,7 @@ import { isOpencodeFreeTierSkipped } from "@omniroute/open-sse/services/opencode
 import { isLocalProvider } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { COOLDOWN_MS, RateLimitReason } from "@omniroute/open-sse/config/constants.ts";
 import * as oauthAuthBackoff from "./oauthAuthFailureBackoff.ts";
+import { notifyRequestAuthFailure } from "@/lib/webhooks/connectionAuthFailed";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
 import {
   honorsRuleLockScope,
@@ -3689,12 +3690,25 @@ export async function markAccountUnavailable(
         ...(oauthAuthCooldownMs === null ? { testStatus: "unavailable" } : {}),
       });
     } else {
-      await updateProviderConnection(connectionId, {
-        ...baseUpdate,
-        rateLimitedUntil: null,
-        ...(terminalStatus ? { testStatus: terminalStatus } : {}),
-      });
+      await updateProviderConnection(
+        connectionId,
+        {
+          ...baseUpdate,
+          rateLimitedUntil: null,
+          ...(terminalStatus ? { testStatus: terminalStatus } : {}),
+        },
+        { authFailure: { stage: "request", status, code: providerErrorType } }
+      );
     }
+    notifyRequestAuthFailure({
+      connection: conn,
+      connectionId,
+      provider,
+      status,
+      providerErrorType,
+      terminalStatus,
+      code: options.structuredError?.code,
+    });
 
     // T-AUTODISABLE: permanent bans disable immediately when the setting allows it.
     await maybeAutoDisableBannedAccount({

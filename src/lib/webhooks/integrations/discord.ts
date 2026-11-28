@@ -17,6 +17,7 @@ const EVENT_COLORS: Partial<Record<WebhookEvent, number>> = {
   "request.completed": 0x22c55e,
   "request.failed": 0xef4444,
   "quota.exceeded": 0xeab308,
+  "connection.auth_failed": 0xf97316,
   "test.ping": 0x8b5cf6,
 };
 
@@ -27,9 +28,11 @@ export function buildDiscordPayload(
   const desc = resolveEventDescription(event);
   const model = typeof data.model === "string" ? data.model : null;
   const error = typeof data.error === "string" ? data.error : null;
+  const account = typeof data.account === "string" && data.account.trim() ? data.account : null;
 
   const lines: string[] = [];
   if (model) lines.push(`**Model:** \`${model}\``);
+  if (account) lines.push(`**Account:** \`${account}\``);
   if (error) lines.push(`**Error:** \`${error}\``);
   if (lines.length === 0) lines.push(desc.description);
 
