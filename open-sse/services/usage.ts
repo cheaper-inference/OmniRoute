@@ -52,6 +52,8 @@ export { buildKiroUsageResult, discoverKiroProfileArn } from "./usage/kiro.ts";
 import { getAdobeFireflyUsage } from "./usage/adobeFirefly.ts";
 import { getOpenrouterUsage } from "./usage/openrouter.ts";
 import { getOpenAiCompatibleUsage } from "./usage/openaiCompatible.ts";
+import { getSensenovaUsage } from "./sensenovaQuotaFetcher.ts";
+import { isSensenovaQuotaConnection } from "./usage/sensenovaTokenPlan.ts";
 import { getLlmgatewayUsage } from "./usage/llmgateway.ts";
 import { getLyceumUsage } from "./usage/lyceum.ts";
 import { getOllamaCloudUsage } from "./opencodeOllamaUsage.ts";
@@ -145,6 +147,22 @@ export async function getUsageForProvider(
 
   if (isMoonshotOpenPlatformConnection(connection)) {
     return await getMoonshotOpenPlatformUsage(connection);
+  }
+
+  // A SenseNova custom node keeps a console session instead of a declared
+  // endpoint, so it is read by its own fetcher before the generic path below.
+  if (
+    typeof provider === "string" &&
+    (provider === "sensenova" ||
+      provider.startsWith("openai-compatible-") ||
+      provider.startsWith("anthropic-compatible-")) &&
+    isSensenovaQuotaConnection({ provider, providerSpecificData })
+  ) {
+    return await getSensenovaUsage({
+      id,
+      provider,
+      providerSpecificData,
+    });
   }
 
   // openai-/anthropic-compatible-* ids are generated per connection, so they can never

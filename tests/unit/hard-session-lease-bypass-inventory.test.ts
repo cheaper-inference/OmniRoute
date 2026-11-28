@@ -171,6 +171,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // clearAntigravityFamilyCooldown, which reads the row to drop one saved family deadline
     // after a passing quota probe: a PSD state write as well, no dispatch.
     "open-sse/services/antigravityFamilyCooldown.ts": 2,
+    // The quota fetcher re-reads the connection row before writing back a rotated
+    // token (the same shape as the family-cooldown persist above). It never picks a
+    // connection for dispatch: the caller names the connection it already holds.
+    "open-sse/services/sensenovaQuotaFetcher.ts": 1,
     // #12864: on the first REQUEST_REJECTED refusal seen by this process the
     // streak seeder reads the row's lastErrorType/lastErrorAt so a crash loop
     // cannot reset the backoff count on every boot — a state read, not dispatch.
