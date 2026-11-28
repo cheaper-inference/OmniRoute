@@ -164,6 +164,20 @@ export function getStatusPresentation(
     };
   }
 
+  if (
+    errorType === "verification_required" ||
+    errorType === "oauth_verification_required" ||
+    errorType === "age_verification_required"
+  ) {
+    return {
+      statusVariant: "warning",
+      statusLabel: providerText(t, "statusVerificationRequired", "Verification Required"),
+      errorType,
+      errorBadge,
+      errorTextClass: "text-warning",
+    };
+  }
+
   if (errorType === "banned") {
     return {
       statusVariant: "error",

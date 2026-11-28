@@ -1,3 +1,4 @@
+import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 /**
  * #11284 — Antigravity OAuth connect-time DEGRADE marking for accounts without
  * a Cloud Code projectId. Shared helper used by the OAuth route's `exchange`,
@@ -66,6 +67,32 @@ export function antigravityDegradedProjectState(
 ): AntigravityDegradedProjectState | null {
   if (!PROJECT_EXPECTED_PROVIDERS.has(provider)) return null;
   if (extractAntigravityProjectId(tokenData)) return null;
+
+  const psd = toRecord(tokenData?.providerSpecificData);
+  const verificationUrl =
+    readStoredVerificationUrl({ verificationUrl: tokenData?.verificationUrl }) ||
+    readStoredVerificationUrl(psd) ||
+    "";
+
+  if (verificationUrl) {
+    const isAge = verificationUrl.includes("age-verification");
+    const warning = isAge
+      ? "Connected, but Google requires age verification for Antigravity (https://myaccount.google.com/age-verification). " +
+        "Click the verification button in the dashboard to unlock this account."
+      : "Connected, but Google requires account verification for Antigravity. " +
+        "Click the verification button in the dashboard to unlock this account.";
+    console.warn(
+      `[oauth] ${provider}: marking connection degraded - verification required (${isAge ? "age" : "general"}) (#11284)`
+    );
+    return {
+      testStatus: "degraded",
+      errorCode: isAge ? "age_verification_required" : "verification_required",
+      lastErrorType: "oauth_verification_required",
+      lastError: warning,
+      warning,
+    };
+  }
+
   const outcome = tokenData?.projectDiscoveryOutcome;
   const resolvedOutcome =
     outcome === "discovery_failed" ? "discovery_failed" : "requires_manual_project";
