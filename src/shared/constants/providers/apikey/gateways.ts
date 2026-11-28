@@ -82,9 +82,9 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     website: "https://agentrouter.org",
     hasFree: true,
     freeNote:
-      "Daily $25 check-in credit; sign-ups with an invite code get $50 more (checked 2026-11-23).",
+      "Daily $25 check-in credit; sign-ups with an invite code get $50 more (checked 2026-11-28).",
     apiHint:
-      "Sign up at https://agentrouter.org/register. Daily $25 check-in credit; sign-ups with an invite code get $50 more (checked 2026-11-23).",
+      "Sign up at https://agentrouter.org/register. Daily $25 check-in credit; sign-ups with an invite code get $50 more (checked 2026-11-28).",
   },
   unorouter: {
     id: "unorouter",
