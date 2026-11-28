@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "today": "2026-12-01",
+  "maxAgeDays": 30,
+  "pools": [
+    {
+      "pool": "p01",
+      "providers": ["p01"],
+      "monthlyTokens": 100000,
+      "rowsWithValue": 1,
+      "rowsWithEvidence": 1,
+      "freshestCheckedAt": "2026-11-21",
+      "ageDays": 10,
+      "status": "fresh"
+    },
+    {
+      "pool": "p02",
+      "providers": ["p02"],
+      "monthlyTokens": 100000,
+      "rowsWithValue": 1,
+      "rowsWithEvidence": 1,
+      "freshestCheckedAt": "2026-11-21",
+      "ageDays": 10,
+      "status": "fresh"
+    },
+    {
+      "pool": "p03",
+      "providers": ["p03"],
+      "monthlyTokens": 100000,
+      "rowsWithValue": 1,
+      "rowsWithEvidence": 1,
+      "freshestCheckedAt": "2026-11-21",
+      "ageDays": 10,
+      "status": "fresh"
+    },
+    {
+      "pool": "p04",
+      "providers": ["p04"],
+      "monthlyTokens": 100000,
+      "rowsWithValue": 1,
+      "rowsWithEvidence": 1,
+      "freshestCheckedAt": "2026-11-21",
+      "ageDays": 10,
+      "status": "fresh"
+    },
+    {
+      "pool": "p05",
+      "providers": ["p05"],
+      "monthlyTokens": 100000,
+      "rowsWithValue": 1,
+      "rowsWithEvidence": 1,
+      "freshestCheckedAt": "2026-11-21",
+      "ageDays": 10,
+      "status": "fresh"
+    },
+    {
+      "pool": "p06",
+      "providers": ["p06"],
+      "monthlyTokens": 100000,
+      "rowsWithValue": 1,
+      "rowsWithEvidence": 1,
+      "freshestCheckedAt": "2026-11-21",
+      "ageDays": 10,
+      "status": "fresh"
+    },
+    {
+      "pool": "p07",
+      "providers": ["p07"],
+      "monthlyTokens": 100000,
+      "rowsWithValue": 1,
+      "rowsWithEvidence": 1,
+      "freshestCheckedAt": "2026-11-21",
+      "ageDays": 10,
+      "status": "fresh"
+    },
+    {
+      "pool": "p08",
+      "providers": ["p08"],
+      "monthlyTokens": 100000,
+      "rowsWithValue": 1,
+      "rowsWithEvidence": 1,
+      "freshestCheckedAt": "2026-11-21",
+      "ageDays": 10,
+      "status": "fresh"
+    },
+    {
+      "pool": "p09",
+      "providers": ["p09"],
+      "monthlyTokens": 100000,
+      "rowsWithValue": 1,
+      "rowsWithEvidence": 1,
+      "freshestCheckedAt": "2026-11-01",
+      "ageDays": 30,
+      "status": "fresh"
+    },
+    {
+      "pool": "p10",
+      "providers": ["p10"],
+      "monthlyTokens": 100000,
+      "rowsWithValue": 1,
+      "rowsWithEvidence": 1,
+      "freshestCheckedAt": "2026-10-31",
+      "ageDays": 31,
+      "status": "stale"
+    }
+  ],
+  "summary": {
+    "poolsWithValue": 10,
+    "fresh": 9,
+    "stale": 1,
+    "missing": 0,
+    "medianAgeDays": 10,
+    "tokenWeightedMedianAgeDays": 10,
+    "maxAgeDays": 31
+  },
+  "uncapped": {
+    "records": 0,
+    "medianAgeDays": null
+  }
+}

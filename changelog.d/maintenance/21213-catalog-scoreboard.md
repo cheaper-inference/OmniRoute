@@ -1,0 +1,1 @@
+- **feat(quality):** reproducible monthly accuracy scoreboard code for the free-tier catalog, with synthetic fixtures and no published sample yet ([#21213](https://github.com/cheaper-inference/OmniRoute/pull/21213))

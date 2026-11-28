@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "method": "catalog-scoreboard-v1",
+  "seed": 20261118,
+  "modelListProviders": [
+    "openrouter",
+    "routeway",
+    "bazaarlink",
+    "xkiro",
+    "nara",
+    "llm7",
+    "arcee-ai"
+  ],
+  "modelListsMethod": "All active catalog ids of these providers, checked against each provider's public model list by the daily drift probes.",
+  "targets": { "labelsCorrect": 0.9, "modelListsAlive": 0.95, "evidenceMaxAgeDays": 30 }
+}

@@ -274,6 +274,7 @@
     "quality:refresh-model-lifecycle": "node scripts/quality/refresh-model-lifecycle.mjs",
     "quality:boundary": "node scripts/quality/measure-boundary.mjs",
     "quality:catalog-drift": "node --import tsx/esm scripts/quality/catalog-drift/run.mjs",
+    "quality:catalog-scoreboard": "node --import tsx/esm scripts/quality/catalog-drift/scoreboard.mjs",
     "quality:evidence-age": "node --import tsx/esm scripts/quality/catalog-drift/evidence-age.mjs",
     "quality:launch": "node scripts/quality/launch-quality.mjs",
     "quality:gate": "npm run quality:collect && npm run quality:ratchet -- --allow-missing",
