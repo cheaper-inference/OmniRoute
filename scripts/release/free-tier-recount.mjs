@@ -3,6 +3,7 @@
 import { execFileSync } from "node:child_process";
 import { realpathSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { FACTS_SNAPSHOT_PATH, getFactAt, loadFactsSnapshot } from "./facts.mjs";
 
