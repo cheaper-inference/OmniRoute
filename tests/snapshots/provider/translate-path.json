@@ -3856,8 +3856,8 @@
       }
     },
     "url": {
-      "nonStream": "https://inference.liquid.ai/v1/chat/completions",
-      "stream": "https://inference.liquid.ai/v1/chat/completions"
+      "nonStream": "https://api.liquid.ai/openai/v1/chat/completions",
+      "stream": "https://api.liquid.ai/openai/v1/chat/completions"
     }
   },
   "literouter": {

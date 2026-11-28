@@ -1,0 +1,1 @@
+- **fix(providers):** Liquid AI uses its current API host `api.liquid.ai/openai/v1` for chat, model discovery and key validation; the old `inference.liquid.ai` host refuses current keys with 401
