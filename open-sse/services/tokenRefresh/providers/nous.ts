@@ -1,5 +1,6 @@
 import { buildFormParams, readRefreshErrorBody, type RefreshLogger } from "../shared.ts";
 import { runCommittedWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { resolvePublicCred } from "../../../utils/publicCreds.ts";
 
 /**
  * Nous Research OAuth2 refresh.
@@ -17,21 +18,23 @@ import { runCommittedWithProxyContext } from "../../../utils/proxyFetch.ts";
  * identity note (the token carries `nous_client: hermes-agent`).
  */
 const NOUS_TOKEN_URL = "https://portal.nousresearch.com/api/oauth/token";
-const NOUS_CLIENT_ID = "hermes-cli";
 
-/** Codes that mean the refresh token is dead and the user must sign in again. */
-const TERMINAL_CODES = new Set([
-  "invalid_grant",
-  "invalid_request",
-  "invalid_token",
-  "expired_token",
-]);
+/**
+ * Codes that mean the refresh token is dead and the user must sign in again.
+ * `invalid_request` is deliberately NOT here: RFC 6749 §5.2 defines it as a
+ * malformed request, not a revoked grant, and marking it terminal would let a
+ * request defect deactivate a connection whose refresh token is still valid.
+ */
+const TERMINAL_CODES = new Set(["invalid_grant", "invalid_token", "expired_token"]);
 
 export async function refreshNousToken(
   refreshToken: string,
   log: RefreshLogger,
   proxyConfig: unknown = null
 ) {
+  // Same resolved credential as the device grant, so NOUS_OAUTH_CLIENT_ID
+  // overrides both halves of the flow.
+  const clientId = resolvePublicCred("nous_id", "NOUS_OAUTH_CLIENT_ID");
   try {
     const response = await runCommittedWithProxyContext(proxyConfig, () =>
       fetch(NOUS_TOKEN_URL, {
@@ -43,7 +46,7 @@ export async function refreshNousToken(
         body: buildFormParams({
           grant_type: "refresh_token",
           refresh_token: refreshToken,
-          client_id: NOUS_CLIENT_ID,
+          client_id: clientId,
         }),
       })
     );
@@ -71,15 +74,27 @@ export async function refreshNousToken(
       return null;
     }
 
+    // The refresh token is single-use: if the response omits the replacement,
+    // the one we sent is already consumed and must not be handed back as
+    // usable. Ask for a fresh sign-in instead of failing an hour later.
+    if (!tokens.refresh_token) {
+      log?.error?.(
+        "TOKEN_REFRESH",
+        "Nous refresh returned no replacement refresh token; the consumed token cannot be reused",
+        {}
+      );
+      return { error: "unrecoverable_refresh_error", code: "missing_rotated_refresh_token" };
+    }
+
     log?.info?.("TOKEN_REFRESH", "Successfully refreshed Nous token", {
       hasNewAccessToken: true,
-      hasNewRefreshToken: !!tokens.refresh_token,
+      hasNewRefreshToken: true,
       expiresIn: tokens.expires_in,
     });
 
     return {
       accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token || refreshToken,
+      refreshToken: tokens.refresh_token,
       expiresIn: tokens.expires_in,
     };
   } catch (error) {

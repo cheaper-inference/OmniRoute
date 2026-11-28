@@ -73,3 +73,66 @@ test("nous refresh treats a 5xx without an OAuth code as transient", async () =>
     mock.restore();
   }
 });
+
+test("nous refresh does not mark invalid_request as a dead grant", async () => {
+  const mock = mockFetch(
+    async () =>
+      new Response(
+        JSON.stringify({ error: "invalid_request", error_description: "missing parameter" }),
+        {
+          status: 400,
+          headers: { "content-type": "application/json" },
+        }
+      )
+  );
+  try {
+    const result = await refreshNousToken("r1", null);
+    assert.equal(
+      result,
+      null,
+      "invalid_request must stay retryable, not deactivate the connection"
+    );
+  } finally {
+    mock.restore();
+  }
+});
+
+test("nous refresh refuses a response without the rotated refresh token", async () => {
+  const mock = mockFetch(
+    async () =>
+      new Response(JSON.stringify({ access_token: "a2", expires_in: 3599 }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      })
+  );
+  try {
+    const result = await refreshNousToken("consumed", null);
+    assert.deepEqual(result, {
+      error: "unrecoverable_refresh_error",
+      code: "missing_rotated_refresh_token",
+    });
+  } finally {
+    mock.restore();
+  }
+});
+
+test("nous refresh honours the NOUS_OAUTH_CLIENT_ID override", async () => {
+  const previous = process.env.NOUS_OAUTH_CLIENT_ID;
+  process.env.NOUS_OAUTH_CLIENT_ID = "custom-client";
+  const mock = mockFetch(
+    async () =>
+      new Response(JSON.stringify({ access_token: "a2", refresh_token: "r2", expires_in: 3599 }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      })
+  );
+  try {
+    await refreshNousToken("r1", null);
+    const body = new URLSearchParams(mock.seen?.body ?? "");
+    assert.equal(body.get("client_id"), "custom-client");
+  } finally {
+    mock.restore();
+    if (previous === undefined) delete process.env.NOUS_OAUTH_CLIENT_ID;
+    else process.env.NOUS_OAUTH_CLIENT_ID = previous;
+  }
+});
