@@ -24,6 +24,7 @@ import {
   generateAntigravityRequestId,
   getAntigravitySessionId,
 } from "@omniroute/open-sse/services/antigravityIdentity.ts";
+import { createAntigravityCliFetch } from "@omniroute/open-sse/utils/antigravityGoFetch.ts";
 
 /**
  * Get usage data for a provider connection
@@ -175,13 +176,17 @@ async function probeAntigravityCreditBalance(
       Authorization: `Bearer ${accessToken}`,
       Accept: "text/event-stream",
     };
-    applyAntigravityClientProfileHeaders(
+    const clientProfile = applyAntigravityClientProfileHeaders(
       headers,
       { connectionId: accountId, projectId, providerSpecificData },
       body
     );
+    if (clientProfile === "cli") {
+      delete headers.Accept;
+    }
+    const cliFetch = createAntigravityCliFetch(clientProfile, { provider: "antigravity" });
 
-    const res = await fetch(url, {
+    const res = await cliFetch(url, {
       method: "POST",
       headers,
       body: JSON.stringify(body),
@@ -264,9 +269,10 @@ async function getAntigravityUsage(
     let res: Response | null = null;
     let lastError: Error | null = null;
 
+    const cliFetch = createAntigravityCliFetch(clientProfile, { provider: "antigravity" });
     for (const endpoint of getAntigravityFetchAvailableModelsUrls()) {
       try {
-        res = await fetch(endpoint, {
+        res = await cliFetch(endpoint, {
           method: "POST",
           headers: getAntigravityContentHeaders(clientProfile, accessToken),
           body: JSON.stringify({}),

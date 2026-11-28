@@ -417,6 +417,23 @@ export async function main() {
         );
       }
 
+      // Best-effort: build the optional Antigravity Go crypto/tls sidecar BEFORE
+      // assembling, so the binary is copied into standalone when Go is installed.
+      try {
+        const { buildAntigravityGoTlsNative } = await import("./build-antigravity-go-tls.mjs");
+        const res = buildAntigravityGoTlsNative(projectRoot);
+        console.log(
+          res.built
+            ? "[build-next-isolated] Built Antigravity Go TLS sidecar binary"
+            : `[build-next-isolated] Antigravity Go TLS sidecar skipped: ${res.reason}`
+        );
+      } catch (goErr) {
+        console.warn(
+          "[build-next-isolated] Non-fatal error building Antigravity Go TLS sidecar:",
+          goErr?.message
+        );
+      }
+
       try {
         console.log(
           "[build-next-isolated] Assembling standalone bundle (static + public + natives + extras)..."

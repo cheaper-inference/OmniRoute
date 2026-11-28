@@ -15461,6 +15461,10 @@
       "AIHORDE_CATALOG_BACKGROUND_REFRESH_ENABLED": {
         "label": "AI Horde Image Catalog Background Refresh",
         "description": "List AI Horde image models from the last successful snapshot while the catalog refreshes in the background. AI Horde image models are absent from the list until the first refresh succeeds. Off by default."
+      },
+      "ANTIGRAVITY_GO_TLS_TRANSPORT_ENABLED": {
+        "label": "Antigravity CLI: Go crypto/tls HTTP/1.1 Transport",
+        "description": "Route Antigravity and agy cli profile outbound HTTPS requests through an optional Go net/http crypto/tls HTTP/1.1 sidecar bridge when the compiled helper binary is present. Preserves Go HTTP/1.1 TLS fingerprinting, gzip auto-negotiation, and cli-profile headers while silently falling back to standard fetch if the helper is unavailable or fails pre-response. Off by default."
       }
     }
   },

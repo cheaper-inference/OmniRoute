@@ -39,7 +39,11 @@ import { clearTestedBreakers } from "@/lib/resilience/clearTestedBreakers";
 import { shouldClearErrorStateOnValidProbe } from "@/lib/usage/providerLimits";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import * as apiKeyTestResult from "./apiKeyTestResult";
-import { classifyOAuthProbeInconclusive, OAUTH_TEST_CONFIG } from "./oauthTestConfig";
+import {
+  classifyOAuthProbeInconclusive,
+  getOAuthTestFetcher,
+  OAUTH_TEST_CONFIG,
+} from "./oauthTestConfig";
 import { isGeoBlockedError } from "@omniroute/open-sse/services/errorClassifier.ts";
 import * as retirement from "@/lib/providers/chatgptWebRetirementResponse";
 import {
@@ -509,7 +513,8 @@ export async function testOAuthConnection(
     // upstream returns 400 (auth ok) instead of 405/415.
     if (config.body && !builtProbe) fetchInit.body = config.body;
     if (builtProbe?.body) fetchInit.body = builtProbe.body;
-    const res = await fetch(url, fetchInit);
+    const testFetch = getOAuthTestFetcher(connection);
+    const res = await testFetch(url, fetchInit);
 
     // Some providers (Antigravity family) reject a stale access token with 400
     // instead of 401/403. If the token has not been refreshed yet and the
@@ -558,7 +563,7 @@ export async function testOAuthConnection(
         else if (builtProbe?.body) retryInit.body = builtProbe.body;
         let retryRes: Response;
         try {
-          retryRes = await fetch(retryUrl, retryInit);
+          retryRes = await testFetch(retryUrl, retryInit);
         } catch {
           // Network failure on the retry: the refresh itself succeeded and
           // is persisted — report it as a (recoverable) upstream error with
@@ -735,7 +740,7 @@ export async function testOAuthConnection(
         };
         if (builtProbe?.body) retryInit.body = builtProbe.body;
         else if (config.body) retryInit.body = config.body;
-        const retryRes = await fetch(url, retryInit);
+        const retryRes = await testFetch(url, retryInit);
 
         const retryInconclusiveBody =
           Array.isArray(config.inconclusiveStatuses) &&

@@ -86,6 +86,9 @@ export const APP_STAGING_ALLOWED_EXACT_PATHS: string[] = [
   // crashes with ERR_MODULE_NOT_FOUND (regressed in the published 3.8.41 tarball).
   "tls-options.mjs",
   "webdav-handler.mjs",
+  // Optional Antigravity Go crypto/tls HTTP/1.1 sidecar binary (present when built with Go).
+  "open-sse/native/antigravity-go-tls/build/antigravity-go-tls",
+  "open-sse/native/antigravity-go-tls/build/antigravity-go-tls.exe",
 ];
 
 export const APP_STAGING_ALLOWED_PATH_PREFIXES: string[] = [
@@ -199,6 +202,7 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   "scripts/build/publicOpenApi.mjs",
   "scripts/build/backendOnlyPages.mjs",
   "scripts/build/build-tproxy-native.mjs",
+  "scripts/build/build-antigravity-go-tls.mjs",
   "scripts/build/build-next-isolated.mjs",
   "scripts/i18n/generate-global-error-messages.mjs",
   "scripts/check/check-supported-node-runtime.ts",

@@ -61,6 +61,8 @@ export interface SafeOutboundFetchOptions extends RequestInit {
   pinDns?: boolean;
   /** Resolver used by the host check; tests inject a fake one. */
   dnsLookup?: DnsLookup;
+  /** Optional fetch implementation to delegate to when neither pinDns nor bypassProxyPatch applies. */
+  fetchFn?: typeof globalThis.fetch;
 }
 
 type SafeOutboundFetchPresetMap = {
@@ -439,6 +441,7 @@ export async function safeOutboundFetch(url: string | URL, options: SafeOutbound
     bypassProxyPatch = false,
     pinDns = false,
     dnsLookup,
+    fetchFn,
     signal,
     ...fetchOptions
   } = options;
@@ -489,7 +492,7 @@ export async function safeOutboundFetch(url: string | URL, options: SafeOutbound
             ? (pinnedFetchTestOverride ?? createPinnedFetch)(pinTo.address, pinTo.family)
             : bypassProxyPatch
               ? getOriginalFetch()
-              : undefined,
+              : fetchFn,
         });
 
       const response = bypassProxyPatch

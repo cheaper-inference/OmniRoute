@@ -30,7 +30,9 @@ import { sanitizeAntigravityToolPayload } from "../../config/toolCloaking.ts";
 import {
   applyAntigravityClientProfileHeaders,
   removeHeaderCaseInsensitive,
+  type AntigravityClientProfile,
 } from "../../services/antigravityClientProfile.ts";
+import { createAntigravityCliFetch } from "../../utils/antigravityGoFetch.ts";
 import * as prl from "../../utils/providerRequestLogging.ts";
 import { withAntigravityTiming, timeAntigravityFetch } from "../../services/antigravityTiming.ts";
 import * as timingLog from "@/sse/utils/logger";
@@ -198,8 +200,10 @@ export async function fetchAntigravityWithReadinessTimeout(
   init: RequestInit,
   timeoutMs = FETCH_TIMEOUT_MS,
   metadata?: HttpAttemptMetadata,
-  timing?: PhysicalSendTiming
+  timing?: PhysicalSendTiming,
+  clientProfile?: AntigravityClientProfile | null
 ): Promise<Response> {
+  const fetcher = createAntigravityCliFetch(clientProfile, { provider: metadata?.provider });
   const boundedTimeoutMs = Math.max(0, Math.floor(timeoutMs));
   if (boundedTimeoutMs <= 0) {
     return observeTimedAntigravitySend(
@@ -209,7 +213,7 @@ export async function fetchAntigravityWithReadinessTimeout(
         connectionId: null,
         endpoint: "antigravity_generate",
       },
-      () => fetch(url, init),
+      () => fetcher(url, init),
       init.signal,
       timing
     );
@@ -233,7 +237,7 @@ export async function fetchAntigravityWithReadinessTimeout(
         connectionId: null,
         endpoint: "antigravity_generate",
       },
-      () => fetch(url, { ...init, signal: combinedSignal }),
+      () => fetcher(url, { ...init, signal: combinedSignal }),
       combinedSignal,
       timing
     );
@@ -448,7 +452,8 @@ export async function sendAntigravityRequest(
       connectionId: credentials.connectionId ?? null,
       endpoint: "antigravity_generate",
     },
-    { correlationId, ordinal: physicalSendOrdinal }
+    { correlationId, ordinal: physicalSendOrdinal },
+    clientProfile
   );
 
   if (response.status === HTTP_STATUS.FORBIDDEN && finalHeaders["x-goog-user-project"]) {
@@ -477,7 +482,8 @@ export async function sendAntigravityRequest(
         endpoint: "antigravity_generate",
         retryReason: "quota_header_removed_after_403",
       },
-      { correlationId, ordinal: retryPhysicalSendOrdinal }
+      { correlationId, ordinal: retryPhysicalSendOrdinal },
+      clientProfile
     );
     finalHeaders = retryHeaders;
   }
@@ -514,7 +520,11 @@ export async function sendAntigravityRequest(
           };
           const reSerialized = serializeAntigravityRequest(provider, headers, retryBody);
           const retryHeaders = reSerialized.headers;
-          applyAntigravityClientProfileHeaders(retryHeaders, credentials, retryBody);
+          const retryClientProfile = applyAntigravityClientProfileHeaders(
+            retryHeaders,
+            credentials,
+            retryBody
+          );
 
           log.info(
             "RETRY",
@@ -542,7 +552,8 @@ export async function sendAntigravityRequest(
               connectionId: credentials.connectionId ?? null,
               endpoint: "antigravity_generate",
             },
-            { correlationId, ordinal: syncRetryPhysicalSendOrdinal }
+            { correlationId, ordinal: syncRetryPhysicalSendOrdinal },
+            retryClientProfile
           );
           finalHeaders = retryHeaders;
         }
@@ -617,7 +628,11 @@ export async function tryCreditsRetry(
   );
   const serializedCreditsRequest = serializeAntigravityRequest(provider, headers, creditsBody);
   const finalCreditsHeaders = serializedCreditsRequest.headers;
-  applyAntigravityClientProfileHeaders(finalCreditsHeaders, credentials, creditsBody);
+  const clientProfile = applyAntigravityClientProfileHeaders(
+    finalCreditsHeaders,
+    credentials,
+    creditsBody
+  );
   try {
     await prl.captureCurrentProviderBody(
       url,
@@ -645,7 +660,8 @@ export async function tryCreditsRetry(
         connectionId: credentials.connectionId ?? null,
         endpoint: "antigravity_generate",
       },
-      { correlationId, ordinal: creditsPhysicalSendOrdinal }
+      { correlationId, ordinal: creditsPhysicalSendOrdinal },
+      clientProfile
     );
     if (creditsResp.ok || creditsResp.status !== HTTP_STATUS.RATE_LIMITED) {
       log.info("AG_CREDITS", `Credits retry succeeded: ${creditsResp.status}`);
