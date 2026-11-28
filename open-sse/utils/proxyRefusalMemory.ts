@@ -116,14 +116,14 @@ const FAMILY_MARKER = /\?family=(ipv4|ipv6)$/;
 export function describeEgressForLog(key: string): string {
   const bare = key.replace(FAMILY_MARKER, "");
   const schemeEnd = bare.indexOf("://");
-  const scheme = (schemeEnd === -1 ? "http" : bare.slice(0, schemeEnd)).toLowerCase();
+  const scheme = (schemeEnd === -1 ? "http" : bare.substring(0, schemeEnd)).toLowerCase();
   const rest = schemeEnd === -1 ? bare : bare.slice(schemeEnd + 3);
   const at = rest.lastIndexOf("@");
   const hostPort = at === -1 ? rest : rest.slice(at + 1);
   const slash = hostPort.indexOf("/");
-  const authority = slash === -1 ? hostPort : hostPort.slice(0, slash);
+  const authority = slash === -1 ? hostPort : hostPort.substring(0, slash);
   const colon = authority.lastIndexOf(":");
-  const rawHost = colon === -1 ? authority : authority.slice(0, colon);
+  const rawHost = colon === -1 ? authority : authority.substring(0, colon);
   const port = colon === -1 ? "" : authority.slice(colon + 1);
   const host = stripIpv6Brackets(rawHost).toLowerCase();
   const bracketed = host.includes(":") && !host.startsWith("[") ? `[${host}]` : host;
@@ -185,7 +185,7 @@ function explicitPortOf(url: string): string | null {
   if (start === -1) return null;
   const rest = url.slice(start + 3);
   const slash = rest.indexOf("/");
-  const authority = slash === -1 ? rest : rest.slice(0, slash);
+  const authority = slash === -1 ? rest : rest.substring(0, slash);
   const colon = authority.lastIndexOf(":");
   if (colon === -1 || colon < authority.lastIndexOf("@") || colon < authority.lastIndexOf("]")) {
     return null;
@@ -281,8 +281,15 @@ function insertState(
   memory.set(id, { streak, until: nowMs + periodMs, seq: ++store.seq.value });
   if (model && kind === MODEL_SCOPED_KIND) store.modelScopedSeen = true;
   if (memory.size > MAX_ENTRIES) {
-    const oldest = memory.keys().next().value;
-    if (oldest !== undefined) memory.delete(oldest);
+    let victim = memory.keys().next().value;
+    for (const [id, state] of memory) {
+      // Drop an entry whose set-aside already ended before falling back to the oldest.
+      if (state.until <= nowMs) {
+        victim = id;
+        break;
+      }
+    }
+    if (victim !== undefined) memory.delete(victim);
   }
   return periodMs;
 }
@@ -333,7 +340,7 @@ function mergeStates(
   if (present.length <= 1) return present[0];
   const newestSeq = Math.max(...present.map((state) => state.seq));
   const inForce = present.filter((state) => state.until > nowMs);
-  if (inForce.length === 0) return present.find((state) => state.seq === newestSeq);
+  if (inForce.length === 0) return present.filter((state) => state.seq === newestSeq)[0];
   const longest = inForce.reduce((a, b) => (b.until > a.until ? b : a));
   const seq = Math.max(...inForce.map((state) => state.seq));
   return { streak: longest.streak, until: longest.until, seq };
@@ -587,7 +594,7 @@ export function proxySetAsideStatus(
   model?: string | null
 ): ProxySetAsideStatus {
   if (key === null || memory.size === 0) return { setAside: false, quotaOnly: false, endsAt: null };
-  let found = false;
+  let found: boolean = false;
   let quotaOnly = true;
   let endsAt = 0;
   for (const kind of REFUSAL_KINDS) {
@@ -666,7 +673,7 @@ export function isSelectorMemberAvoided(
 /**
  * Sequence number of the most recent set-aside event still in force for this
  * (entry, member) pair, or null when it is not set aside. Powers the
- * least-recently-set-aside fallback below: among set-aside members the
+ * least-recently-set-aside choice below: among set-aside members the
  * smallest seq is the oldest event.
  */
 export function selectorMemberSetAsideSeq(

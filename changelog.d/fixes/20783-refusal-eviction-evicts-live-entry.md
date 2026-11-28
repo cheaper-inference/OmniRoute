@@ -1,0 +1,1 @@
+- **fix(sse):** drop an expired refusal entry before the oldest one when the store is full ([#20783](https://github.com/cheaper-inference/OmniRoute/pull/20783)) — thanks @maxmad64bis
