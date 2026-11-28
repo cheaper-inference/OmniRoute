@@ -973,7 +973,8 @@
       "description": "ניהול תצורת העמידות",
       "threshold": "סף כשלים",
       "resetTimeout": "זמן איפוס באלפיות השנייה",
-      "baseCooldown": "זמן צינון בסיסי באלפיות השנייה"
+      "baseCooldown": "זמן צינון בסיסי באלפיות השנייה",
+      "p2cLatencyWeight": "משקל חביון P2C, 0 (כבוי) עד 20"
     }
   },
   "nodes": {

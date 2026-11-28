@@ -973,7 +973,8 @@
       "description": "ਰੈਜ਼ੀਲੀਅੰਸ ਸੰਰਚਨਾ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ",
       "threshold": "ਅਸਫਲਤਾ ਸੀਮਾ",
       "resetTimeout": "ਰੀਸੈੱਟ ਟਾਈਮਆਉਟ ms ਵਿੱਚ",
-      "baseCooldown": "ਬੇਸ ਕੂਲਡਾਊਨ ms ਵਿੱਚ"
+      "baseCooldown": "ਬੇਸ ਕੂਲਡਾਊਨ ms ਵਿੱਚ",
+      "p2cLatencyWeight": "P2C ਲੇਟੈਂਸੀ ਵੇਟ, 0 (ਬੰਦ) ਤੋਂ 20"
     }
   },
   "nodes": {

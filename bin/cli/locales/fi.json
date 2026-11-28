@@ -973,7 +973,8 @@
       "description": "Hallitse vikasietoisuusmäärityksiä",
       "threshold": "Vikakynnys",
       "resetTimeout": "Nollauksen aikakatkaisu millisekunteina",
-      "baseCooldown": "Perusjäähdytysaika millisekunteina"
+      "baseCooldown": "Perusjäähdytysaika millisekunteina",
+      "p2cLatencyWeight": "P2C-viivepaino, 0 (pois) - 20"
     }
   },
   "nodes": {

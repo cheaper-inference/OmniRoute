@@ -973,7 +973,8 @@
       "description": "Administrer robusthedskonfiguration",
       "threshold": "Fejltærskel",
       "resetTimeout": "Timeout for nulstilling i ms",
-      "baseCooldown": "Grundlæggende nedkølingsperiode i ms"
+      "baseCooldown": "Grundlæggende nedkølingsperiode i ms",
+      "p2cLatencyWeight": "P2C latensvægt, 0 (fra) til 20"
     }
   },
   "nodes": {

@@ -973,7 +973,8 @@
       "description": "Resilienzkonfiguration verwalten",
       "threshold": "Fehlerschwellenwert",
       "resetTimeout": "Zeitüberschreitung für Zurücksetzung in ms",
-      "baseCooldown": "Basisabklingzeit in ms"
+      "baseCooldown": "Basisabklingzeit in ms",
+      "p2cLatencyWeight": "P2C-Latenzgewichtung, 0 (aus) bis 20"
     }
   },
   "nodes": {

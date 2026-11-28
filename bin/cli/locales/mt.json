@@ -973,7 +973,8 @@
       "description": "Immaniġġja l-konfigurazzjoni tar-reżiljenza",
       "threshold": "Limitu ta' falliment",
       "resetTimeout": "Timeout ta' reset f'ms",
-      "baseCooldown": "Cooldown bażiku f'ms"
+      "baseCooldown": "Cooldown bażiku f'ms",
+      "p2cLatencyWeight": "piż tal-latency P2C, 0 (mitfi) sa 20"
     }
   },
   "nodes": {

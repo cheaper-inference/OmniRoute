@@ -973,7 +973,8 @@
       "description": "റെസിലിയൻസ് കോൺഫിഗറേഷൻ നിയന്ത്രിക്കുക",
       "threshold": "പരാജയ പരിധി",
       "resetTimeout": "റീസെറ്റ് ടൈംഔട്ട് (ms)",
-      "baseCooldown": "അടിസ്ഥാന കൂൾഡൗൺ (ms)"
+      "baseCooldown": "അടിസ്ഥാന കൂൾഡൗൺ (ms)",
+      "p2cLatencyWeight": "P2C ലേറ്റൻസി ഭാരം, 0 (ഓഫ്) മുതൽ 20 വരെ"
     }
   },
   "nodes": {

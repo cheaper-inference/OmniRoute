@@ -973,7 +973,8 @@
       "description": "レジリエンス設定を管理",
       "threshold": "失敗しきい値",
       "resetTimeout": "リセットタイムアウト（ms）",
-      "baseCooldown": "基本クールダウン時間（ms）"
+      "baseCooldown": "基本クールダウン時間（ms）",
+      "p2cLatencyWeight": "P2C レイテンシの重み、0 (オフ) ～ 20"
     }
   },
   "nodes": {

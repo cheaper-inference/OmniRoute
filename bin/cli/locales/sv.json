@@ -973,7 +973,8 @@
       "description": "Hantera resilienskonfiguration",
       "threshold": "Feltröskel",
       "resetTimeout": "Tidsgräns för återställning i ms",
-      "baseCooldown": "Grundläggande nedkylningstid i ms"
+      "baseCooldown": "Grundläggande nedkylningstid i ms",
+      "p2cLatencyWeight": "P2C latensvikt, 0 (av) till 20"
     }
   },
   "nodes": {

@@ -973,7 +973,8 @@
       "description": "Urus konfigurasi daya tahan",
       "threshold": "Ambang kegagalan",
       "resetTimeout": "Tamat masa penetapan semula dalam ms",
-      "baseCooldown": "Tempoh bertenang asas dalam ms"
+      "baseCooldown": "Tempoh bertenang asas dalam ms",
+      "p2cLatencyWeight": "Pemberat kependaman P2C, dari 0 (dimatikan) hingga 20"
     }
   },
   "nodes": {

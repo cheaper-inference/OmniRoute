@@ -973,7 +973,8 @@
       "description": "Sarrafa daidaitawar juriya",
       "threshold": "Iyakar gazawa",
       "resetTimeout": "Lokacin jira kafin sake saiti a ms",
-      "baseCooldown": "Asalin lokacin hucewa a ms"
+      "baseCooldown": "Asalin lokacin hucewa a ms",
+      "p2cLatencyWeight": "Nauyin jinkirin P2C, daga 0 (a kashe) zuwa 20"
     }
   },
   "nodes": {

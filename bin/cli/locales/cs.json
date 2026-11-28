@@ -973,7 +973,8 @@
       "description": "Spravovat konfiguraci odolnosti",
       "threshold": "Prahová hodnota selhání",
       "resetTimeout": "Časový limit resetování v ms",
-      "baseCooldown": "Základní čekací doba v ms"
+      "baseCooldown": "Základní čekací doba v ms",
+      "p2cLatencyWeight": "Váha latence P2C, 0 (vypnuto) až 20"
     }
   },
   "nodes": {

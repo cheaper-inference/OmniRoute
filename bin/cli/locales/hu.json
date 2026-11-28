@@ -973,7 +973,8 @@
       "description": "Ellenálló képességi konfiguráció kezelése",
       "threshold": "Hibaküszöb",
       "resetTimeout": "Visszaállítási időtúllépés ezredmásodpercben",
-      "baseCooldown": "Alap várakozási idő ezredmásodpercben"
+      "baseCooldown": "Alap várakozási idő ezredmásodpercben",
+      "p2cLatencyWeight": "P2C késleltetési súly, 0 (ki) és 20 között"
     }
   },
   "nodes": {

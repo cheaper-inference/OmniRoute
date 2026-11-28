@@ -973,7 +973,8 @@
       "description": "Upravljaj konfiguracijo odpornosti",
       "threshold": "Prag napak",
       "resetTimeout": "Časovna omejitev ponastavitve v ms",
-      "baseCooldown": "Osnovni čas mirovanja v ms"
+      "baseCooldown": "Osnovni čas mirovanja v ms",
+      "p2cLatencyWeight": "utež zakasnitve P2C, 0 (izklopljeno) do 20"
     }
   },
   "nodes": {

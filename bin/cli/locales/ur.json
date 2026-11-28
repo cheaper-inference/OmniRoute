@@ -973,7 +973,8 @@
       "description": "لچک پذیری کی کنفیگریشن کا نظم کریں",
       "threshold": "ناکامی کی حد",
       "resetTimeout": "ری سیٹ ٹائم آؤٹ، ms میں",
-      "baseCooldown": "بنیادی کول ڈاؤن، ms میں"
+      "baseCooldown": "بنیادی کول ڈاؤن، ms میں",
+      "p2cLatencyWeight": "P2C لیٹنسی وزن، 0 (آف) سے 20"
     }
   },
   "nodes": {

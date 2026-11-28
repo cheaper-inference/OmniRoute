@@ -973,7 +973,8 @@
       "description": "Jikwaa nhazi nkwụsi ike",
       "threshold": "Oke ọdịda",
       "resetTimeout": "Oge nchere tupu nrụgharị na ms",
-      "baseCooldown": "Oge izu ike ndabere na ms"
+      "baseCooldown": "Oge izu ike ndabere na ms",
+      "p2cLatencyWeight": "Ibu e nyere oge igbu oge nke P2C, site na 0 (agbanyụrụ) ruo 20"
     }
   },
   "nodes": {

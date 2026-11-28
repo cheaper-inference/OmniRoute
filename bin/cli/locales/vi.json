@@ -973,7 +973,8 @@
       "description": "Quản lý cấu hình phục hồi",
       "threshold": "Ngưỡng lỗi",
       "resetTimeout": "Thời gian chờ đặt lại tính bằng ms",
-      "baseCooldown": "Thời gian chờ cơ sở tính bằng ms"
+      "baseCooldown": "Thời gian chờ cơ sở tính bằng ms",
+      "p2cLatencyWeight": "trọng số độ trễ P2C, 0 (tắt) đến 20"
     }
   },
   "nodes": {

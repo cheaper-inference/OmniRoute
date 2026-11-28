@@ -973,7 +973,8 @@
       "description": "Ṣàkóso àtòpọ̀ ìfaradà",
       "threshold": "Ààlà ìkùnà",
       "resetTimeout": "Àkókò ìdádúró àtúntò ní ms",
-      "baseCooldown": "Àkókò ìsinmi ìpìlẹ̀ ní ms"
+      "baseCooldown": "Àkókò ìsinmi ìpìlẹ̀ ní ms",
+      "p2cLatencyWeight": "Ìwúwo ìdádúró P2C, láti 0 (pa) sí 20"
     }
   },
   "nodes": {

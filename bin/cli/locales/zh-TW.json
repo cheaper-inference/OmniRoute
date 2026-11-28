@@ -973,7 +973,8 @@
       "description": "管理彈性配置",
       "threshold": "失敗閾值",
       "resetTimeout": "重置超時（毫秒）",
-      "baseCooldown": "基礎冷卻時間（毫秒）"
+      "baseCooldown": "基礎冷卻時間（毫秒）",
+      "p2cLatencyWeight": "P2C 延遲權重，範圍為 0（關閉）到 20"
     }
   },
   "nodes": {

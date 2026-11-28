@@ -973,7 +973,8 @@
       "description": "Pamahalaan ang resilience config",
       "threshold": "Hangganan ng pagkabigo",
       "resetTimeout": "Timeout sa pag-reset sa ms",
-      "baseCooldown": "Batayang cooldown sa ms"
+      "baseCooldown": "Batayang cooldown sa ms",
+      "p2cLatencyWeight": "Timbang ng latency ng P2C, mula 0 (naka-off) hanggang 20"
     }
   },
   "nodes": {

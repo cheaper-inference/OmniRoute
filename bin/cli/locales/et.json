@@ -973,7 +973,8 @@
       "description": "Halda vastupidavuse seadistust",
       "threshold": "Vea lävend",
       "resetTimeout": "Lähtestamise ajalõpp millisekundites",
-      "baseCooldown": "Baasjahtumisaeg millisekundites"
+      "baseCooldown": "Baasjahtumisaeg millisekundites",
+      "p2cLatencyWeight": "P2C latentsuskaal, 0 (väljas) kuni 20"
     }
   },
   "nodes": {

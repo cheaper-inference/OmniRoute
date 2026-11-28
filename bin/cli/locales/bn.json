@@ -973,7 +973,8 @@
       "description": "স্থিতিস্থাপকতা কনফিগ পরিচালনা করুন",
       "threshold": "ব্যর্থতার সীমা",
       "resetTimeout": "রিসেট টাইমআউট, ms-এ",
-      "baseCooldown": "বেস কুলডাউন, ms-এ"
+      "baseCooldown": "বেস কুলডাউন, ms-এ",
+      "p2cLatencyWeight": "P2C লেটেন্সি ওজন, 0 (বন্ধ) থেকে 20"
     }
   },
   "nodes": {

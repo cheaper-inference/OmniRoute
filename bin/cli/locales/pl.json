@@ -973,7 +973,8 @@
       "description": "Zarządzaj konfiguracją odporności",
       "threshold": "Próg błędów",
       "resetTimeout": "Limit czasu resetowania w ms",
-      "baseCooldown": "Bazowy czas odczekania w ms"
+      "baseCooldown": "Bazowy czas odczekania w ms",
+      "p2cLatencyWeight": "waga opóźnienia P2C, 0 (wyłączone) do 20"
     }
   },
   "nodes": {

@@ -973,7 +973,8 @@
       "description": "रेज़िलिएंस कॉन्फ़िगरेशन प्रबंधित करें",
       "threshold": "विफलता सीमा",
       "resetTimeout": "रीसेट टाइमआउट (ms में)",
-      "baseCooldown": "बेस कूलडाउन (ms में)"
+      "baseCooldown": "बेस कूलडाउन (ms में)",
+      "p2cLatencyWeight": "P2C विलंबता भार, 0 (बंद) से 20"
     }
   },
   "nodes": {

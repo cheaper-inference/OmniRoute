@@ -973,7 +973,8 @@
       "description": "복원력 구성 관리",
       "threshold": "실패 임계값",
       "resetTimeout": "초기화 제한 시간(ms)",
-      "baseCooldown": "기본 쿨다운(ms)"
+      "baseCooldown": "기본 쿨다운(ms)",
+      "p2cLatencyWeight": "P2C 대기 시간 가중치, 0(해제) ~ 20"
     }
   },
   "nodes": {

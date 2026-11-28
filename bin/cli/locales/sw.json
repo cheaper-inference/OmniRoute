@@ -973,7 +973,8 @@
       "description": "Dhibiti usanidi wa ustahimilivu",
       "threshold": "Kikomo cha hitilafu",
       "resetTimeout": "Muda wa kuweka upya kwa ms",
-      "baseCooldown": "Muda msingi wa kusubiri kwa ms"
+      "baseCooldown": "Muda msingi wa kusubiri kwa ms",
+      "p2cLatencyWeight": "P2C uzani wa kusubiri, 0 (imezimwa) hadi 20"
     }
   },
   "nodes": {

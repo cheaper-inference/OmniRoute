@@ -973,7 +973,8 @@
       "description": "Gérer la configuration de résilience",
       "threshold": "Seuil d’échec",
       "resetTimeout": "Délai de réinitialisation en ms",
-      "baseCooldown": "Période de temporisation de base en ms"
+      "baseCooldown": "Période de temporisation de base en ms",
+      "p2cLatencyWeight": "Poids de la latence P2C, de 0 (désactivé) à 20"
     }
   },
   "nodes": {
