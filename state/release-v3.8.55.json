@@ -3,29 +3,35 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b80-r1",
+    "batchId": "b81",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b80-r1-a805b064c2c0",
-    "candidateSha": "a805b064c2c0d7293506f9d4dea3e81ca2457b9c",
-    "baseSha": "92832ebb30c2ff0d6fc7d548b815684153df8fe4",
-    "treeSha": "970424c1570e4b0ee034269839bc2c093390e8eb",
+    "candidateRef": "omni-queue/release-v3.8.55/b81-8c27caded3d0",
+    "candidateSha": "8c27caded3d0ad4f90a64fcee325ab1b64697901",
+    "baseSha": "a805b064c2c0d7293506f9d4dea3e81ca2457b9c",
+    "treeSha": "68684c6014491234b600da351e4de847e409bf75",
     "prs": [
       {
-        "n": 20844,
-        "head": "b3244226fbce0d0fa3440f440789646644fcb02a",
-        "title": "fix(ci): defer broad TIA selections to full unit coverage",
+        "n": 21475,
+        "head": "e42e272740735fa00088a07f127f4b5edbeabad9",
+        "title": "fix(merge-queue): retry the landing push once when the ruleset has not seen the land status yet",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-28T09:44:45Z"
+        "labeledAt": "2026-11-28T07:22:56Z"
       }
     ],
-    "stage": "landing",
-    "startedAt": "2026-11-28T15:40:36.852Z",
-    "attempts": 1,
+    "stage": "testing",
+    "startedAt": "2026-11-28T16:57:32.761Z",
+    "attempts": 0,
     "bisect": null,
-    "lane": "hotfix",
-    "landAttempts": 1
+    "lane": "hotfix"
   },
   "baseChecks": [
+    {
+      "baseSha": "a805b064c2c0d7293506f9d4dea3e81ca2457b9c",
+      "ref": "omni-queue/release-v3.8.55/b80-r1-a805b064c2c0",
+      "status": "green",
+      "startedAt": "2026-11-28T15:40:36.852Z",
+      "signatures": []
+    },
     {
       "baseSha": "92832ebb30c2ff0d6fc7d548b815684153df8fe4",
       "ref": "omni-queue/release-v3.8.55/b79-92832ebb30c2",
@@ -88,13 +94,6 @@
       "status": "green",
       "startedAt": "2026-11-27T15:49:22.856Z",
       "signatures": []
-    },
-    {
-      "baseSha": "b15b2ee6ac0f57af254be4a3cc60ba8a6cc9a523",
-      "ref": "omni-queue/release-v3.8.55/b67-b15b2ee6ac0f",
-      "status": "green",
-      "startedAt": "2026-11-27T14:40:38.176Z",
-      "signatures": []
     }
   ],
   "shadow": {
@@ -119,48 +118,15 @@
     }
   },
   "counters": {
-    "batchSeq": 80,
-    "ciRuns": 86,
-    "landedPrs": 81,
-    "landedBatches": 30,
+    "batchSeq": 81,
+    "ciRuns": 87,
+    "landedPrs": 82,
+    "landedBatches": 31,
     "redBatches": 18,
     "bisections": 6,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-25T05:05:21.727Z",
-      "type": "flaky-rerun",
-      "batchId": "b36",
-      "prs": [
-        21095
-      ],
-      "sha": "d81570b3206aa398b3c4f090ae31ee484b145056",
-      "detail": "re-running the failed jobs of b36 once (Gate / CI, Unit Tests (6/8)) before a base check",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45551097887"
-    },
-    {
-      "at": "2026-11-25T06:12:41.798Z",
-      "type": "checks-green",
-      "batchId": "b36",
-      "prs": [
-        21095
-      ],
-      "sha": "d81570b3206aa398b3c4f090ae31ee484b145056",
-      "detail": "green after re-running Gate / CI, Unit Tests (6/8) (flaky)",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45558872383"
-    },
-    {
-      "at": "2026-11-25T06:12:50.195Z",
-      "type": "would-land",
-      "batchId": "b36",
-      "prs": [
-        21095
-      ],
-      "sha": "d81570b3206aa398b3c4f090ae31ee484b145056",
-      "detail": "shadow mode: would merge-ff onto ff3e55cab2e1",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45558872383"
-    },
     {
       "at": "2026-11-25T06:13:27.032Z",
       "type": "pr-skipped-conflict",
@@ -2807,12 +2773,43 @@
       ],
       "sha": "a805b064c2c0d7293506f9d4dea3e81ca2457b9c",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46167675231"
+    },
+    {
+      "at": "2026-11-28T16:55:27.299Z",
+      "type": "land-blessed",
+      "batchId": "b80-r1",
+      "prs": [
+        20844
+      ],
+      "sha": "a805b064c2c0d7293506f9d4dea3e81ca2457b9c",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46167675231"
+    },
+    {
+      "at": "2026-11-28T16:55:30.794Z",
+      "type": "landed",
+      "batchId": "b80-r1",
+      "prs": [
+        20844
+      ],
+      "sha": "a805b064c2c0d7293506f9d4dea3e81ca2457b9c",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46167675231"
+    },
+    {
+      "at": "2026-11-28T16:57:35.730Z",
+      "type": "batch-started",
+      "batchId": "b81",
+      "prs": [
+        21475
+      ],
+      "sha": "8c27caded3d0ad4f90a64fcee325ab1b64697901",
+      "detail": "1 PR(s) on a805b064c2c0; lane hotfix",
+      "labeledAt": {
+        "21475": "2026-11-28T07:22:56Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46167675231"
     }
   ],
-  "updatedAt": "2026-11-28T16:55:23.790Z",
-  "batchWindow": 2,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-28T16:55:23.790Z"
-  }
+  "updatedAt": "2026-11-28T16:57:37.410Z",
+  "batchWindow": 2
 }
