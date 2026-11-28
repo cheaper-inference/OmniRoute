@@ -37,8 +37,12 @@ test("resolveModelAliasWithSeedFallback: falls back to DEFAULT_MODEL_ALIAS_SEED 
     const opus = await resolveModelAliasWithSeedFallback("claude-opus-4-6-thinking");
     assert.equal(opus, "agy/claude-opus-4-6-thinking");
 
-    const flash = await resolveModelAliasWithSeedFallback("gemini-3.6-flash-low");
-    assert.equal(flash, "agy/gemini-3.6-flash-low");
+    const pro = await resolveModelAliasWithSeedFallback("gemini-3.1-pro");
+    assert.equal(pro, "agy/gemini-pro-agent");
+
+    // Retired seed entry: no longer falls back to a model the provider dropped.
+    const retired = await resolveModelAliasWithSeedFallback("gemini-3.6-flash-low");
+    assert.equal(retired, "gemini-3.6-flash-low");
 
     const unknown = await resolveModelAliasWithSeedFallback("unknown-custom-model-999");
     assert.equal(unknown, "unknown-custom-model-999");
