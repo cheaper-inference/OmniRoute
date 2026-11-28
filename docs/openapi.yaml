@@ -4804,6 +4804,65 @@ paths:
         "200":
           description: Usage analytics data
 
+  /api/usage/by-combo:
+    get:
+      tags: [Usage]
+      summary: Get usage per combo
+      description: >-
+        Requests, successful requests and input/output tokens grouped by combo name, for the
+        usage block on the Home page. Calls made without a combo are ignored. The preset ranges
+        use the same start boundaries as `/api/usage/analytics`; `all` has no lower bound.
+      parameters:
+        - name: range
+          in: query
+          schema:
+            type: string
+            enum: [1d, 7d, 30d, 90d, ytd, all, custom]
+            default: 1d
+        - name: startDate
+          in: query
+          description: ISO 8601 date-time. Required when `range` is `custom`.
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          description: >-
+            ISO 8601 date-time. Required when `range` is `custom`, and must not be before
+            `startDate`.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Usage per combo, ordered by requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  range:
+                    type: string
+                  combos:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        comboName:
+                          type: string
+                        requests:
+                          type: integer
+                        successCount:
+                          type: integer
+                        inputTokens:
+                          type: integer
+                        outputTokens:
+                          type: integer
+        "400":
+          description: Invalid range or custom dates
+        "401":
+          $ref: "#/components/responses/ManagementInvalidToken"
+
   /api/usage/call-logs:
     get:
       tags: [Usage]

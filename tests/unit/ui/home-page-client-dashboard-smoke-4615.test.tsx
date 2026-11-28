@@ -151,6 +151,21 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
+it("renders its children after the Quick Start section", async () => {
+  await act(async () => {
+    root.render(
+      <HomePageClient machineId="test-machine">
+        <p data-testid="fork-widgets">fork-widgets</p>
+      </HomePageClient>
+    );
+  });
+
+  const text = container.textContent ?? "";
+  expect(text).toContain("fork-widgets");
+  expect(text.indexOf("quickStart")).toBeGreaterThanOrEqual(0);
+  expect(text.indexOf("quickStart")).toBeLessThan(text.indexOf("fork-widgets"));
+});
+
 it("renders the dashboard home client without throwing an internal server error", async () => {
   await act(async () => {
     root.render(<HomePageClient machineId="test-machine" />);

@@ -9,6 +9,7 @@ import NewsBanner from "../dashboard/NewsBanner";
 import FirstRunReadinessCard from "../dashboard/FirstRunReadinessCard";
 import HomePageHeader from "./HomePageHeader";
 import HomeSystemMetricsCards from "./HomeSystemMetricsCards";
+import { LazyHomeUsageWidgets, LazyProviderQuotaWidget } from "./LazyHomeWidgets";
 import UnpricedUsageBanner from "../dashboard/UnpricedUsageBanner";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +31,17 @@ export default async function HomePage() {
       <div className="mb-4">
         <HomeSystemMetricsCards />
       </div>
-      <HomePageClient machineId={machineId} />
+      <HomePageClient machineId={machineId}>
+        <LazyHomeUsageWidgets
+          showStats={settings.showUsageStatsOnHome !== false}
+          showHeatmap={settings.showActivityHeatmapOnHome !== false}
+          aside={
+            settings.showProviderQuotaOnHome !== false ? (
+              <LazyProviderQuotaWidget showAllQuotas fillHeight />
+            ) : undefined
+          }
+        />
+      </HomePageClient>
     </>
   );
 }
