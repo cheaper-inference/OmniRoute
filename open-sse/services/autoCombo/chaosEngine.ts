@@ -26,7 +26,13 @@
 
 import { errorResponse } from "../../utils/error.ts";
 import type { PerTargetAdmissionHook } from "../admission/types.ts";
+import {
+  estimateCandidateInputTokens,
+  filterCandidatesByBudget,
+} from "../combo/candidateBudget.ts";
+import { costKey, resolvePoolCosts } from "../combo/candidateCost.ts";
 import type { ComboLogger, HandleSingleModel } from "../combo/types.ts";
+import { parseModel } from "../model.ts";
 
 export const CHAOS_DEFAULTS = {
   /** Absolute cap on wall time for the whole panel. */
@@ -618,6 +624,30 @@ export async function handleChaosChat(opts: {
   });
 }
 
+async function filterChaosPanelByBudget(models: string[], budgetCap: number, messages: unknown) {
+  const { getPricingForModel } = await import("@/lib/db/settings/pricing");
+  const entries = models.map((modelStr) => {
+    const parsed = parseModel(modelStr);
+    return {
+      modelStr,
+      provider: parsed.provider || parsed.providerAlias || "unknown",
+      model: parsed.model || modelStr,
+    };
+  });
+  const poolCosts = await resolvePoolCosts(entries, getPricingForModel);
+  const pricedPanel = entries.map(({ modelStr, provider, model }) => ({
+    modelStr,
+    costPer1MTokens: poolCosts.get(costKey(provider, model)) ?? 1,
+  }));
+  const affordable = filterCandidatesByBudget(
+    pricedPanel,
+    budgetCap,
+    true,
+    estimateCandidateInputTokens(messages)
+  );
+  return affordable instanceof Response ? affordable : affordable.map(({ modelStr }) => modelStr);
+}
+
 /**
  * Detect + dispatch chaos mode from `handleComboChat`'s combo config, mirroring
  * the fusion-strategy short-circuit right above it. Detected via
@@ -633,12 +663,22 @@ export function dispatchChaosFromCombo(args: {
   comboModels: unknown[];
   comboName: string;
   body: Body;
+  strictBudgetCap?: number;
   handleSingleModel: HandleSingleModel;
   log: ComboLogger;
   /** #9654 Wave 2: per-target lane-aware admission probe (see HandleComboChatOptions). */
   perTargetAdmission?: PerTargetAdmissionHook | null;
 }): Promise<Response> | null {
-  const { cfg, comboModels, comboName, body, handleSingleModel, log, perTargetAdmission } = args;
+  const {
+    cfg,
+    comboModels,
+    comboName,
+    body,
+    strictBudgetCap,
+    handleSingleModel,
+    log,
+    perTargetAdmission,
+  } = args;
   if (
     !cfg.chaos ||
     typeof cfg.chaos !== "object" ||
@@ -657,18 +697,30 @@ export function dispatchChaosFromCombo(args: {
       return null;
     })
     .filter((m): m is string => Boolean(m));
-  // Enforce minPanel: if configured and pool < minPanel, degrades to single model.
-  const minPanel = chaosCfg.tuning?.minPanel ?? 1;
-  const effectiveModels = chaosModels.length >= minPanel ? chaosModels : chaosModels.slice(0, 1);
-  log.info("CHAOS", `dispatching parallel panel of ${effectiveModels.length} stable models`);
-  return handleChaosChat({
-    body,
-    models: effectiveModels,
-    handleSingleModel,
-    log,
-    comboName,
-    primaryModel: chaosCfg.judgeModel,
-    tuning: chaosCfg.tuning,
-    perTargetAdmission,
-  });
+  const dispatch = (models: string[], primaryModel = chaosCfg.judgeModel) => {
+    // Enforce minPanel: if configured and pool < minPanel, degrades to single model.
+    const minPanel = chaosCfg.tuning?.minPanel ?? 1;
+    const effectiveModels = models.length >= minPanel ? models : models.slice(0, 1);
+    log.info("CHAOS", `dispatching parallel panel of ${effectiveModels.length} stable models`);
+    return handleChaosChat({
+      body,
+      models: effectiveModels,
+      handleSingleModel,
+      log,
+      comboName,
+      primaryModel,
+      tuning: chaosCfg.tuning,
+      perTargetAdmission,
+    });
+  };
+  if (!strictBudgetCap || chaosModels.length === 0) return dispatch(chaosModels);
+  return filterChaosPanelByBudget(chaosModels, strictBudgetCap, body.messages).then(
+    (affordable) => {
+      if (affordable instanceof Response) return affordable;
+      const { judgeModel } = chaosCfg;
+      const primaryModel =
+        judgeModel && affordable.includes(judgeModel) ? judgeModel : affordable[0];
+      return dispatch(affordable, primaryModel);
+    }
+  );
 }

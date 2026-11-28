@@ -5,6 +5,7 @@ import { logAdmissionRejection } from "@/sse/handlers/admissionRejectionLog";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { resolveIncomingCorrelationId } from "@/shared/utils/correlationPreserve.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
+import { resolveRequestAutoControls } from "@omniroute/open-sse/services/autoCombo/requestControls.ts";
 import {
   handleSelfHostedCompletions,
   isSelfHostedEntryConfigured,
@@ -82,6 +83,12 @@ function ensureInitialized() {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function hasStrictChaosBudget(model: unknown, headers: Headers): boolean {
+  if (typeof model !== "string" || model.toLowerCase() !== "auto/chaos") return false;
+  const { budgetCap, budgetFallback } = resolveRequestAutoControls(headers);
+  return budgetCap !== undefined && budgetFallback === "strict";
 }
 
 // Minimal request-shape validation (Rule #7 / T06 gate). This is the hottest path in the
@@ -411,16 +418,19 @@ export async function POST(request) {
         admission.lease,
         { signal: routeDeadlineSignal }
       );
-      const streamedResponse = await withEarlyStreamKeepalive(handlerResponse, {
-        signal: routeDeadlineSignal,
-        thresholdMs: resolveKeepaliveThreshold(parsedBody?.model),
-        keepaliveFrame: OPENAI_KEEPALIVE_FRAME,
-        startupFrame: OPENAI_STARTUP_FRAME,
-        errorFrame: OPENAI_CHAT_ERROR_FRAME,
-        correlationId: reqId,
-        extraHeaders: { "X-Correlation-Id": reqId },
-        deadlineController: routeDeadlineController,
-      });
+      // Let the chaos budget check finish before committing HTTP 200 to a keepalive stream.
+      const streamedResponse = hasStrictChaosBudget(parsedBody?.model, request.headers)
+        ? await handlerResponse
+        : await withEarlyStreamKeepalive(handlerResponse, {
+            signal: routeDeadlineSignal,
+            thresholdMs: resolveKeepaliveThreshold(parsedBody?.model),
+            keepaliveFrame: OPENAI_KEEPALIVE_FRAME,
+            startupFrame: OPENAI_STARTUP_FRAME,
+            errorFrame: OPENAI_CHAT_ERROR_FRAME,
+            correlationId: reqId,
+            extraHeaders: { "X-Correlation-Id": reqId },
+            deadlineController: routeDeadlineController,
+          });
       return withCompressionHeaderEcho(
         applyFallbackHeaders(streamedResponse),
         compressionRequestHeader

@@ -19,6 +19,7 @@ import { runComboWithNoReplayLatch } from "./combo/noReplayLatch.ts";
 import { recordComboFailure } from "./combo/failureTracker.ts";
 import { buildRecoveryHint } from "./combo/pinRecovery.ts";
 import { buildTargetTimeoutRunner } from "./combo/targetTimeoutRunner.ts";
+import { resolveCandidateBudget } from "./combo/candidateBudget.ts";
 import { costKey, resolvePoolCosts } from "./combo/candidateCost.ts";
 import { getComboMetrics } from "./comboMetrics.ts";
 import { qualityScoreFor } from "./routing/index.ts";
@@ -897,8 +898,8 @@ async function handleComboChatInner({
     reasoningTokenBufferEnabled,
   } = phaseComboSetup(comboCtx);
   body = comboCtx.body;
-  const hasAccountPreferences =
-    strategy === "auto" && Object.keys(parseAutoConfig(combo, []).accountPreferences).length > 0;
+  const autoConfig = strategy === "auto" ? parseAutoConfig(combo, []) : null;
+  const hasAccountPreferences = Object.keys(autoConfig?.accountPreferences ?? {}).length > 0;
   const config = accountPreferenceAttemptConfig(setupConfig, hasAccountPreferences);
 
   // #10681: opaque per-invocation decision trace (safe routing metadata only).
@@ -986,6 +987,7 @@ async function handleComboChatInner({
     body.stream === true && isProviderSafetyStopsEnabled()
       ? createChaosHeaderBarrier(handleSingleModelWithTimeout, perTargetAdmission, signal)
       : null;
+  const chaosBudget = autoConfig && resolveCandidateBudget(autoConfig, relayOptions);
   const chaosDispatch = hasAccountPreferences
     ? null
     : dispatchChaosFromCombo({
@@ -998,6 +1000,8 @@ async function handleComboChatInner({
         ).map((target) => target.modelStr),
         comboName: combo.name,
         body,
+        strictBudgetCap:
+          chaosBudget?.budgetFallback === "strict" ? chaosBudget.budgetCap : undefined,
         handleSingleModel: chaosHeaders?.handleSingleModel ?? handleSingleModelWithTimeout,
         log,
         perTargetAdmission: chaosHeaders?.perTargetAdmission ?? perTargetAdmission,

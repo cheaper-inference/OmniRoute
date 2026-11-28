@@ -1,0 +1,1 @@
+- **fix(sse):** Apply strict per-request budgets to each `auto/chaos` panel member before dispatch and return HTTP 402 when none fit (KEA-9622).
