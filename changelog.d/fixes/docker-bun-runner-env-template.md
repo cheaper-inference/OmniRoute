@@ -1,0 +1,1 @@
+- **fix(docker):** Omit the development env template and the loose env sync script from Turbopack standalone builds while preserving the env repair route.

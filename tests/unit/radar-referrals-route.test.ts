@@ -154,7 +154,7 @@ test("GET /api/radar/referrals: flag on, authenticated, cached referrals feed =>
     tier: "live",
     payload: JSON.stringify(feed),
     signature: "test-signature",
-    // Fresh timestamp -- inside the 1h staleness window, so sync-on-read
+    // Fresh timestamp -- inside the 6h staleness window, so sync-on-read
     // does NOT overwrite this row (opt-in is false anyway, but this also
     // proves the "not stale" branch is exercised, not just "opt_out").
     fetchedAt: new Date().toISOString(),
@@ -191,7 +191,7 @@ test("GET /api/radar/referrals: stale cached referrals feed still served (sync-o
       campaigns: [],
     },
   };
-  const staleFetchedAt = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(); // 2h ago
+  const staleFetchedAt = new Date(Date.now() - 7 * 60 * 60 * 1000).toISOString(); // 7h ago
   radarDb.setRadarReferralsCache({
     generatedAt: feed.generatedAt as string,
     tier: "community",

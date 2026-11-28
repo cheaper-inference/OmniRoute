@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getCachedBodySizeSettings } from "../../lib/db/readCache";
 import { isDraining } from "../../lib/gracefulShutdown";
 import { checkBodySize, getBodySizeLimit } from "../../shared/middleware/bodySizeGuard";
+import { resolveIncomingCorrelationId } from "../../shared/utils/correlationPreserve";
 import {
   verifyDashboardSessionToken,
   mintDashboardSessionToken,
@@ -351,7 +352,12 @@ export async function runAuthzPipeline(
   requestHeaders.delete(CLIENT_IP_HEADER);
 
   requestHeaders.set(AUTHZ_HEADER_ROUTE_CLASS, classification.routeClass);
-  requestHeaders.set(AUTHZ_HEADER_REQUEST_ID, requestId);
+  // Client API handlers can use the supplied X-Request-Id as an idempotency key.
+  const clientRequestId =
+    classification.routeClass === "CLIENT_API"
+      ? resolveIncomingCorrelationId(requestHeaders.get(AUTHZ_HEADER_REQUEST_ID))
+      : null;
+  requestHeaders.set(AUTHZ_HEADER_REQUEST_ID, clientRequestId ?? requestId);
   // Stamp a trusted, non-secret locality verdict derived from the real stamped
   // peer IP AND the via-proxy marker. Route handlers (e.g. cliTokenAuth) read
   // this instead of re-deriving locality from the spoofable Host header. The
@@ -484,14 +490,31 @@ export async function runAuthzPipeline(
     }
   }
 
+  // Browser-origin check for management mutations. Dashboard sessions have run it since
+  // the CSRF hardening; anonymous callers (requireLogin=false) run it too, because nothing
+  // else stops a web page the operator visits from driving the management API: a
+  // cross-site page posting to the loopback port, or a DNS-rebinding page whose Host and
+  // Origin both carry the attacker's domain. Callers that send no Origin (CLI, curl) are
+  // unaffected. Only a session can prove same-origin with a CSRF token, so the fallback
+  // stays session-only.
+  //
+  // /api/mcp/* is the exception for anonymous callers: the MCP Origin guard above already
+  // judged their Origin (it refuses DNS rebinding and non-localhost origins, and admits
+  // localhost on any port for local tools such as the MCP Inspector, per the MCP
+  // transport spec). Applying the dashboard rule on top would break that contract.
+  const anonymousMcpRequest =
+    outcome.subject.kind === "anonymous" && isMcpOriginGuardedPath(guardedPathname);
   if (
     classification.routeClass === "MANAGEMENT" &&
-    outcome.subject.kind === "dashboard_session" &&
+    (outcome.subject.kind === "dashboard_session" ||
+      (outcome.subject.kind === "anonymous" && !anonymousMcpRequest)) &&
     isUnsafeMutationMethod(method)
   ) {
     const originVerdict = validateBrowserMutationOrigin(request);
     const csrfOriginFallback =
-      originVerdict.reason === "invalid-origin" && validateDashboardCsrfToken(request);
+      outcome.subject.kind === "dashboard_session" &&
+      originVerdict.reason === "invalid-origin" &&
+      validateDashboardCsrfToken(request);
     if (!originVerdict.ok && !csrfOriginFallback) {
       const rejection = invalidOriginResponse(requestId);
       rejection.headers.set(AUTHZ_HEADER_ROUTE_CLASS, classification.routeClass);
