@@ -21,9 +21,11 @@ and write authority. Read the diff and current freeze state, and check active
 worktree ownership. Hold any item another session is working. A request to analyze
 or prepare a list is not authority to merge or close it.
 
-Run `scripts/quality/check-skill-contract.mjs` against the actual installed skills
-root before admission. Missing or drifted modeled instructions mean HOLD; a
-template-only check does not verify the installation being used.
+Run `scripts/quality/check-skill-contract.mjs --ref origin/<base> <installed skills root>`
+before admission, after `git fetch origin <base>`. `--ref` reads the templates as the
+base has them, so a checkout that is behind cannot report drift the base does not
+have. Missing or drifted modeled instructions mean HOLD; a template-only check does
+not verify the installation being used.
 
 Show a 1–5 star table with rationale, overlaps and holds. Stars prioritize work;
 they do not waive required checks or protected-surface approval. Ask the owner
