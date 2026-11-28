@@ -1,0 +1,1 @@
+- **feat(merge-queue):** Retry refused fast-forward landings across ticks, then quarantine the affected PRs and continue with the next batch. Recompose a mismatched candidate once before pausing on a repeat.
