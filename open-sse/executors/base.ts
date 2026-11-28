@@ -162,6 +162,7 @@ import {
 } from "../services/learnedMaxTokensCaps.ts";
 import {
   applyFieldDowngradeRecovery,
+  getLearnedStrippedFields,
   reapplyStrippedFields,
 } from "./base/fieldDowngradeRecovery.ts";
 import { applyAdvisorUndecryptableRecovery } from "./base/advisorRecovery.ts";
@@ -335,6 +336,30 @@ export type ExecutorExecuteResult =
        */
       upstreamDiagnostic?: Record<string, unknown>;
     };
+/**
+ * Wait before a same-URL retry. Release the discarded response body first, and reject as
+ * soon as the client aborts so a disconnected request never sits out the whole delay.
+ */
+async function waitBeforeRetry(
+  delayMs: number,
+  signal: AbortSignal | null | undefined,
+  discarded: Response
+): Promise<void> {
+  discarded.body?.cancel().catch(() => {});
+  await new Promise<void>((resolve, reject) => {
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(signal?.reason ?? new DOMException("Aborted", "AbortError"));
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, delayMs);
+    if (signal?.aborted) return onAbort();
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
 export class BaseExecutor {
   provider: string;
   config: ProviderConfig;
@@ -902,6 +927,11 @@ export class BaseExecutor {
     const strippedFields = new Set<string>();
     // Explicit per-key tiers are policy, not optional compatibility hints.
     const forcedCodexTier = this.provider === "codex" && getApiKeyCodexServiceTier(credentials);
+    // Fields an earlier request to this provider and model learned the upstream rejects: drop
+    // them before the first send (the strip below runs on every URL). A forced tier stays.
+    for (const field of getLearnedStrippedFields(this.provider, model)) {
+      if (!(forcedCodexTier && field === "service_tier")) strippedFields.add(field);
+    }
     // thinking_budget 400 clamp-and-retry below: upstream's learned max applied to
     // later retry URLs (bounded per URL); also recorded via recordLearnedThinkingCap.
     let thinkingBudgetClampedMax: number | null = null;
@@ -1495,6 +1525,8 @@ export class BaseExecutor {
         // at this final dispatch point — the single chokepoint every Claude
         // routing mode (grouped/raw/combo) and the native passthrough share,
         // before fingerprinting and CCH signing serialize the body.
+        // The Claude Code thinking injection above can re-add a stripped field: drop it again.
+        reapplyStrippedFields(transformedBody, strippedFields);
         if (this.provider === "claude" || this.provider === "anthropic" || usesClaudeCodeProtocol) {
           finalizeClaudeBodyConstraints(transformedBody as Record<string, unknown>);
         }
@@ -1844,7 +1876,7 @@ export class BaseExecutor {
               "WAF_RETRY",
               `400 content-blocked intra-retry ${wafAttempt}/${BaseExecutor.WAF_RETRY_CONFIG.maxAttempts} on ${url} — waiting ${wafBackoff}ms`
             );
-            await new Promise((resolve) => setTimeout(resolve, wafBackoff));
+            await waitBeforeRetry(wafBackoff, signal, response);
             urlIndex--; // re-run this urlIndex on the next loop iteration
             continue;
           }
@@ -1875,7 +1907,7 @@ export class BaseExecutor {
             "RETRY",
             `429 intra-retry ${attempt}/${BaseExecutor.RETRY_CONFIG.maxAttempts} on ${url} — waiting ${waitMs}ms${hintMs !== null ? " (upstream hint)" : ""}`
           );
-          await new Promise((resolve) => setTimeout(resolve, waitMs));
+          await waitBeforeRetry(waitMs, signal, response);
           urlIndex--; // re-run this urlIndex on the next loop iteration
           continue;
         }

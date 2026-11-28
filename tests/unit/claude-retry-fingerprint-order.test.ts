@@ -2,7 +2,12 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { BaseExecutor } from "../../open-sse/executors/base.ts";
+import { __clearLearnedStrippedFieldsForTests } from "../../open-sse/executors/base/fieldDowngradeRecovery.ts";
 import { CLI_FINGERPRINTS } from "../../open-sse/config/cliFingerprints.ts";
+
+// Each test starts from an empty learned-field table: the executor remembers a field the upstream
+// rejected for the same provider and model, and both tests reuse one provider and model name.
+test.beforeEach(() => __clearLearnedStrippedFieldsForTests());
 
 class RelayExecutor extends BaseExecutor {
   constructor() {
