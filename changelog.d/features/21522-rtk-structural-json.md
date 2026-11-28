@@ -1,0 +1,1 @@
+- **feat(sse):** With `OMNIROUTE_RTK_STRUCTURAL_RENDERERS_ENABLED`, RTK strips whitespace from indented `jq` / `cat *.json` / `aws` JSON output without changing key order, duplicate keys, numbers or escapes (#21522).
