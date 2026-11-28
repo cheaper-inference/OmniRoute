@@ -1372,7 +1372,14 @@ export async function syncAllProviderLimits(
   const connectionRows = (await getProviderConnections({
     isActive: true,
   })) as unknown as ProviderConnectionLike[];
-  const connections = connectionRows.filter(isSupportedUsageConnection);
+  // The scheduled sweep leaves banned accounts alone: each poll of a banned org adds one
+  // more upstream rejection. Manual syncs and per-card reads still poll them live; a usage
+  // read never lifts the ban itself (maybeClearRecoveredQuotaState keeps terminal statuses).
+  const connections = connectionRows.filter(
+    (connection) =>
+      isSupportedUsageConnection(connection) &&
+      !(source === "scheduled" && connection.testStatus === "banned")
+  );
   const cacheEntries: PendingLimitsCacheEntry[] = [];
   const caches: Record<string, ProviderLimitsCacheEntry> = {};
   const errors: Record<string, string> = {};
