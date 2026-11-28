@@ -47,6 +47,56 @@ test("canonical partial counters take precedence over Gemini aliases", () => {
   assert.equal(result?.prompt_tokens, 4);
   assert.equal(result?.completion_tokens, 2);
 });
+for (const cachedContentTokenCount of [0, 30]) {
+  test(`Gemini partial usage keeps a measured cache read of ${cachedContentTokenCount}`, () => {
+    const result = resolvePartialStreamUsage({
+      reported: { promptTokenCount: 80, candidatesTokenCount: 9, cachedContentTokenCount },
+      contentLength: 0,
+      body,
+    });
+    assert.equal(result?.cache_read_input_tokens, cachedContentTokenCount);
+    assert.equal(result?.usage_evidence?.cacheRead.source, "reported");
+    assert.equal(result?.prompt_tokens, 80);
+    assert.equal(result?.completion_tokens, 9);
+  });
+}
+
+test("Gemini cache-only alias works alongside canonical prompt and output", () => {
+  const result = resolvePartialStreamUsage({
+    reported: { prompt_tokens: 80, completion_tokens: 9, cachedContentTokenCount: 30 },
+    contentLength: 0,
+    body,
+  });
+  assert.equal(result?.cache_read_input_tokens, 30);
+  assert.equal(result?.usage_evidence?.cacheRead.source, "reported");
+});
+
+test("a canonical zero cache read wins over a positive Gemini alias", () => {
+  const result = resolvePartialStreamUsage({
+    reported: {
+      promptTokenCount: 80,
+      candidatesTokenCount: 9,
+      prompt_tokens_details: { cached_tokens: 0 },
+      cachedContentTokenCount: 30,
+    },
+    contentLength: 0,
+    body,
+  });
+  assert.equal(result?.cache_read_input_tokens, 0);
+});
+
+for (const cachedContentTokenCount of [undefined, -1, 81, Number.POSITIVE_INFINITY, "30"]) {
+  test(`Gemini partial usage leaves invalid or absent cache read ${cachedContentTokenCount} unknown`, () => {
+    const result = resolvePartialStreamUsage({
+      reported: { prompt_tokens: 80, completion_tokens: 9, cachedContentTokenCount },
+      contentLength: 0,
+      body,
+    });
+    assert.equal(result?.cache_read_input_tokens, undefined);
+    assert.equal(result?.usage_evidence?.cacheRead.source, "unknown");
+  });
+}
+
 for (const includeDelta of [false, true]) {
   test(`Responses reasoning snapshot counted once, delta=${includeDelta}`, () => {
     const tracker = createGeneratedContentTracker();
