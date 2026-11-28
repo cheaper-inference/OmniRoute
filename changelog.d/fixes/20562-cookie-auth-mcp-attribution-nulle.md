@@ -1,0 +1,1 @@
+- **fix(mcp):** MCP calls authenticated with a dashboard session cookie now record the dashboard session as their audit caller instead of no caller ([#20562](https://github.com/cheaper-inference/OmniRoute/pull/20562)) — thanks @maxmad64bis

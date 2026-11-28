@@ -18,7 +18,11 @@
  * isolation intact: a different key → a different id → a miss; no key → undefined
  * → the anonymous (`__anon__`) bucket, which only matches unauthenticated stores.
  */
-import { getMcpHttpAuthHeadersForInternalFetch, hasMcpHttpAuthContext } from "./httpAuthContext.ts";
+import {
+  getMcpHttpAuthHeadersForInternalFetch,
+  getMcpHttpAuthSource,
+  hasMcpHttpAuthContext,
+} from "./httpAuthContext.ts";
 
 type ApiKeyLookup = (rawKey: string) => Promise<{ id?: string | number | null } | null>;
 
@@ -45,8 +49,10 @@ export async function resolvePrincipalFromHeaders(
   headers: Record<string, string>,
   lookup: ApiKeyLookup = lookupApiKeyMetadata
 ): Promise<string | undefined> {
-  // Nothing to resolve without an Authorization / x-api-key header.
-  if (!headers.Authorization && !headers["x-api-key"]) return undefined;
+  // Nothing to resolve without an API-key header.
+  if (!headers.Authorization && !headers["x-api-key"] && !headers["x-goog-api-key"]) {
+    return undefined;
+  }
   const { extractApiKey } = await import("../../src/sse/services/auth.ts");
   const rawKey = extractApiKey({ headers: new Headers(headers) }, { allowUrl: false });
   if (!rawKey) return undefined;
@@ -75,9 +81,10 @@ export async function resolveMcpCallerApiKeyId(): Promise<string | undefined> {
   const fromHeaders = await resolvePrincipalFromHeaders(getMcpHttpAuthHeadersForInternalFetch());
   if (fromHeaders !== undefined) return fromHeaders;
 
-  // 2. Fallback: env var, for stdio only. An HTTP caller whose key is not in the
-  // forwarded headers (x-goog-api-key, for one) must not become the env-key principal.
-  if (hasMcpHttpAuthContext()) return undefined;
+  // 2. A cookie-only HTTP caller is attributed to its dashboard session source.
+  // 3. Fallback: env var, for stdio only. An HTTP caller whose key does not
+  // resolve from the forwarded headers must not become the env-key principal.
+  if (hasMcpHttpAuthContext()) return getMcpHttpAuthSource();
   return resolvePrincipalFromEnv();
 }
 

@@ -1,0 +1,1 @@
+- **fix(mcp):** propagate the x-goog-api-key caller identity through MCP HTTP internal fetches and audit ([#20562](https://github.com/cheaper-inference/OmniRoute/pull/20562)) — thanks @maxmad64bis
