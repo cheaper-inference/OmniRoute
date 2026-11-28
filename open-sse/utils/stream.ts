@@ -6,6 +6,8 @@ import { mergeUsageSnapshot } from "./streamUsageMerge.ts";
 import {
   resolveStreamAccountingUsage,
   projectStreamingClientUsage,
+  updateReportedChatTotal,
+  withReportedChatTotal,
 } from "./streamAccountingUsage.ts";
 import { createGeneratedContentTracker } from "./streamGeneratedContent.ts";
 import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
@@ -988,7 +990,9 @@ export function createSSEStream(options: StreamOptions = {}) {
     const reportedCost = readBuyerCostMicro(payload);
     if (reportedCost !== undefined) buyerCostMicro = reportedCost;
   };
+  let reportedChatTotal: number | undefined;
   const observeProviderPayload = (payload: unknown) => {
+    reportedChatTotal = updateReportedChatTotal(payload, providerWireFormat, reportedChatTotal);
     observeBuyerCostMicro(payload);
     nativeClaudeUsage.observe(payload);
     nativeContent.observe(payload);
@@ -3404,31 +3408,26 @@ export function createSSEStream(options: StreamOptions = {}) {
                     passthroughAccumulatedReasoning
                   ),
                 };
+                const callLogResponseBody = withReportedChatTotal(responseBody, reportedChatTotal);
                 outcomeRecorded = true;
                 onComplete({
                   status: 200,
                   usage,
                   cacheEvidence: usage?.cache_evidence as StreamCompletePayload["cacheEvidence"],
                   responseBody,
+                  callLogResponseBody,
                   reasoningMeta: reasoningObserver.take(),
                   ...timing.completionTiming(),
-                  // #9315 switched the summary to the accumulated responseBody to avoid
-                  // stale/truncated event data — but responseBody here is synthesized in
-                  // chat-completion shape, which loses the Responses API `response` object.
-                  // Keep a Responses-shaped summary for OPENAI_RESPONSES only. responseBody
-                  // itself never carries an `object` marker (it's built purely for the
-                  // client, which doesn't need one) — the dashboard's Provider Response
-                  // panel does, so stamp `object: "chat.completion"` on a shallow copy
-                  // used only for this summary, leaving responseBody itself untouched.
-                  // getSummary(), not buildStreamSummaryFromEvents(getEvents(), ...): the
-                  // latter only sees the collector's RETAINED (possibly cap-truncated)
-                  // events, silently losing a late response.completed event on a long
-                  // reasoning-heavy stream (live incident 2026-09-04) -- see
-                  // providerPayloadCollector's own `format:` construction comment above.
+                  // #9315 replaced the summary with the accumulated responseBody. Its synthesized
+                  // Chat Completions shape requires a Responses-shaped summary for OPENAI_RESPONSES.
+                  // Set `object: "chat.completion"` on a shallow copy only for the dashboard panel.
+                  // Use getSummary() because buildStreamSummaryFromEvents(getEvents(), ...) sees
+                  // only retained events, which the cap can truncate. It missed a late
+                  // response.completed in the 2026-09-04 incident.
                   providerPayload: providerPayloadCollector.build(
                     providerWireFormat === FORMATS.OPENAI_RESPONSES
                       ? providerPayloadCollector.getSummary()
-                      : { object: "chat.completion", ...responseBody },
+                      : { object: "chat.completion", ...callLogResponseBody },
                     { includeEvents: false }
                   ),
                   // Same OPENAI_RESPONSES carve-out as providerPayload above, but keyed on
@@ -3822,12 +3821,14 @@ export function createSSEStream(options: StreamOptions = {}) {
                 _streamed: true,
                 ...summaryTextTailMarker(state?.accumulatedContent, state?.accumulatedReasoning),
               };
+              const callLogResponseBody = withReportedChatTotal(responseBody, reportedChatTotal);
               outcomeRecorded = true;
               onComplete({
                 status: 200,
                 usage: accountingUsage,
                 cacheEvidence: state?.cacheEvidence,
                 responseBody,
+                callLogResponseBody,
                 ...timing.completionTiming(),
                 reasoningMeta: reasoningObserver.take(),
                 // Same OPENAI_RESPONSES carve-out as the passthrough branch above —
@@ -3844,7 +3845,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 providerPayload: providerPayloadCollector.build(
                   targetFormat === FORMATS.OPENAI_RESPONSES
                     ? providerPayloadCollector.getSummary()
-                    : { object: "chat.completion", ...responseBody },
+                    : { object: "chat.completion", ...callLogResponseBody },
                   { includeEvents: false }
                 ),
                 // Same OPENAI_RESPONSES carve-out as providerPayload above and the

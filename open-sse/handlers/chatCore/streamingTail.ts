@@ -433,6 +433,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     usage: streamUsage,
     buyerCostMicro,
     responseBody: streamResponseBody,
+    callLogResponseBody,
     providerPayload,
     clientPayload,
     reasoningMeta: streamReasoningMeta,
@@ -609,7 +610,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       // still shows the tokens already generated (estimates are flagged via `estimated`).
       tokens: streamUsage || streamPartialUsage || {},
       buyerCostMicro,
-      responseBody: streamResponseBody ?? undefined,
+      responseBody: callLogResponseBody ?? streamResponseBody,
       providerRequest: finalBody || translatedBody,
       providerResponse: providerPayload,
       clientResponse: clientPayload ?? streamResponseBody ?? undefined,

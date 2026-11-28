@@ -1,6 +1,6 @@
 import { FORMATS } from "../translator/formats.ts";
 import { finalizeStreamingUsage } from "./finalizeStreamingUsage.ts";
-import type { UsageLike } from "./usageTracking.ts";
+import { isEstimatedUsage, type UsageLike } from "./usageTracking.ts";
 
 /** Normalize receipt aliases once so completion, partial usage and quota consumers agree. */
 export function canonicalStreamingUsage(usage: UsageLike | null | undefined): UsageLike | null {
@@ -35,6 +35,34 @@ export function resolveStreamAccountingUsage(input: StreamAccountingInput): Usag
       input.format
     )
   );
+}
+
+/** Capture the total before translation or estimation rewrites the provider receipt. */
+export function updateReportedChatTotal(
+  payload: unknown,
+  upstreamFormat: string,
+  previousTotal: number | undefined
+): number | undefined {
+  if (upstreamFormat !== FORMATS.OPENAI) return previousTotal;
+  const usage = (payload as { usage?: UsageLike } | null)?.usage;
+  if (!usage || !Object.hasOwn(usage, "total_tokens")) return previousTotal;
+  const total = usage.total_tokens;
+  if (
+    typeof total === "number" &&
+    Number.isSafeInteger(total) &&
+    total > 0 &&
+    !isEstimatedUsage(usage)
+  )
+    return total;
+  return undefined;
+}
+
+export function withReportedChatTotal<T extends { usage: { total_tokens: number } }>(
+  body: T,
+  total: number | undefined
+): T {
+  if (total === undefined) return body;
+  return { ...body, usage: { ...body.usage, total_tokens: total } };
 }
 
 /** Claude's legacy OpenAI projection excludes cache creation from prompt, unlike accounting. */

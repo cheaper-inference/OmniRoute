@@ -1,0 +1,1 @@
+- **fix(usage):** Preserve provider-reported total tokens when extracting OpenAI Chat stream usage.
