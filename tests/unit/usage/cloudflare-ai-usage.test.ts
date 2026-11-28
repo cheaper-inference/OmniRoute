@@ -21,8 +21,15 @@ type Quota = {
   remainingPercentage?: number;
   resetAt: string | null;
   unlimited: boolean;
+  unit?: string;
 };
-type UsageResult = { message?: string; plan?: string; quotas?: Record<string, Quota> };
+type UsageResult = {
+  message?: string;
+  plan?: string;
+  requests?: number;
+  resetDate?: string;
+  quotas?: Record<string, Quota>;
+};
 
 type CapturedCall = { url: string; init: RequestInit };
 
@@ -61,17 +68,8 @@ function graphqlGroups(groups: Array<{ count: number; neurons: number }>) {
   );
 }
 
-function startOfTodayUtcDate(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function nextUtcMidnightIso(): string {
-  const next = new Date();
-  next.setUTCHours(24, 0, 0, 0);
-  return next.toISOString();
-}
-
-test("sums today's neurons against the 10k/day free allocation", async () => {
+test("sums today's neurons against the 10k/day free allocation", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: new Date("2026-11-28T12:30:00Z") });
   const { restore } = withFetch(() =>
     graphqlGroups([
       { count: 7, neurons: 1200 },
@@ -87,23 +85,24 @@ test("sums today's neurons against the 10k/day free allocation", async () => {
     assert.equal(neurons.remaining, 8500);
     assert.equal(neurons.remainingPercentage, 85);
     assert.equal(neurons.unlimited, false);
-    assert.equal(neurons.resetAt, nextUtcMidnightIso());
-
-    const requests = r.quotas?.requests;
-    assert.ok(requests, "requests counter present");
-    assert.equal(requests.used, 10);
-    assert.equal(requests.unlimited, true);
-
-    assert.match(r.plan ?? "", /free tier/i);
+    assert.equal(neurons.resetAt, "2026-11-29T00:00:00.000Z");
+    assert.equal(neurons.unit, "neurons");
+    assert.deepEqual(Object.keys(r.quotas ?? {}), ["neurons"]);
+    assert.equal(r.requests, 10);
+    assert.match(r.plan ?? "", /daily free allocation/i);
   } finally {
     restore();
   }
 });
 
-test("sends a parameterized GraphQL query with the bearer token", async () => {
-  const { calls, restore } = withFetch(() => graphqlGroups([]));
+test("queries the UTC day and keeps its reset when the response arrives after midnight", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: new Date("2026-11-28T23:59:59Z") });
+  const { calls, restore } = withFetch(() => {
+    t.mock.timers.setTime(Date.parse("2026-11-29T00:00:01Z"));
+    return graphqlGroups([]);
+  });
   try {
-    await CF.getCloudflareAiUsage("cf-token", { accountId: "acc123" });
+    const r = (await CF.getCloudflareAiUsage("cf-token", { accountId: "acc123" })) as UsageResult;
     assert.equal(calls.length, 1);
     const [{ url, init }] = calls;
     assert.equal(url, "https://api.cloudflare.com/client/v4/graphql");
@@ -115,12 +114,81 @@ test("sends a parameterized GraphQL query with the bearer token", async () => {
       variables: { accountTag: string; since: string };
     };
     assert.equal(body.variables.accountTag, "acc123");
-    assert.equal(body.variables.since, startOfTodayUtcDate());
+    assert.equal(body.variables.since, "2026-11-28T00:00:00.000Z");
+    assert.match(body.query, /\$accountTag: string!/);
+    assert.match(body.query, /\$since: Time!/);
     assert.match(body.query, /aiInferenceAdaptiveGroups/);
-    assert.match(body.query, /date_geq:\s*\$since/);
+    assert.match(body.query, /datetime_geq:\s*\$since/);
+    assert.match(body.query, /\bcount\b/);
+    assert.match(body.query, /sum\s*\{\s*totalNeurons\s*\}/);
     // The account id travels only as a variable, never spliced into the query text.
     assert.ok(!body.query.includes("acc123"));
     assert.ok(init.signal, "request is bounded by an abort signal");
+    assert.equal(r.resetDate, "2026-11-29T00:00:00.000Z");
+    assert.equal(r.quotas?.neurons.resetAt, r.resetDate);
+  } finally {
+    restore();
+  }
+});
+
+test("reports zero usage for an authorized empty analytics series", async () => {
+  const { restore } = withFetch(() => graphqlGroups([]));
+  try {
+    const r = await CF.getCloudflareAiUsage("cf-token", { accountId: "acc123" });
+    assert.equal(r.quotas?.neurons.used, 0);
+    assert.equal(r.quotas?.neurons.remainingPercentage, 100);
+    assert.equal(r.requests, 0);
+  } finally {
+    restore();
+  }
+});
+
+const unavailableAnalytics = [
+  { name: "missing viewer", accounts: undefined },
+  { name: "no matching account", accounts: [] },
+  { name: "missing series", accounts: [{}] },
+  { name: "null series", accounts: [{ aiInferenceAdaptiveGroups: null }] },
+  { name: "invalid series", accounts: [{ aiInferenceAdaptiveGroups: {} }] },
+  { name: "missing count", groups: [{ sum: { totalNeurons: 0 } }] },
+  { name: "missing neuron total", groups: [{ count: 1, sum: {} }] },
+  { name: "null neuron total", groups: [{ count: 1, sum: { totalNeurons: null } }] },
+  { name: "invalid count", groups: [{ count: false, sum: { totalNeurons: 0 } }] },
+  { name: "invalid neuron total", groups: [{ count: 1, sum: { totalNeurons: "" } }] },
+  { name: "negative neuron total", groups: [{ count: 1, sum: { totalNeurons: -1 } }] },
+  {
+    name: "incomplete series with a valid row",
+    groups: [
+      { count: 1, sum: { totalNeurons: 250 } },
+      { count: 2, sum: {} },
+    ],
+  },
+];
+
+for (const { name, accounts, groups } of unavailableAnalytics) {
+  test(`reports analytics as unavailable with ${name}`, async () => {
+    const viewer = groups ? { accounts: [{ aiInferenceAdaptiveGroups: groups }] } : { accounts };
+    const { restore } = withFetch(() =>
+      Response.json({ data: name === "missing viewer" ? {} : { viewer } })
+    );
+    try {
+      const r = await CF.getCloudflareAiUsage("cf-token", { accountId: "acc123" });
+      assert.match(r.message ?? "", /analytics data unavailable/i);
+      assert.equal(r.quotas, undefined);
+    } finally {
+      restore();
+    }
+  });
+}
+
+test("keeps usage above the daily free allocation visible", async () => {
+  const { restore } = withFetch(() => graphqlGroups([{ count: 3, neurons: 15_000 }]));
+  try {
+    const r = await CF.getCloudflareAiUsage("cf-token", { accountId: "acc123" });
+    assert.equal(r.quotas?.neurons.used, 15_000);
+    assert.equal(r.quotas?.neurons.total, 10_000);
+    assert.equal(r.quotas?.neurons.remaining, 0);
+    assert.equal(r.quotas?.neurons.remainingPercentage, 0);
+    assert.equal(r.quotas?.neurons.fractionReported, false);
   } finally {
     restore();
   }
@@ -209,7 +277,11 @@ test("cloudflare-ai is registered in both usage provider lists", () => {
   assert.ok(USAGE_SUPPORTED_PROVIDERS.includes("cloudflare-ai"));
 });
 
-test("the usage dispatcher routes cloudflare-ai to the neuron fetcher", async () => {
+test("the usage dispatcher routes cloudflare-ai to the neuron fetcher", async (t) => {
+  t.after(async () => {
+    const { resetDbInstance } = await import("../../../src/lib/db/core.ts");
+    resetDbInstance();
+  });
   const { getUsageForProvider } = await import("../../../open-sse/services/usage.ts");
   const { calls, restore } = withFetch(() => graphqlGroups([{ count: 2, neurons: 400 }]));
   try {
