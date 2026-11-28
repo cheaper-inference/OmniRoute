@@ -46,6 +46,7 @@ import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 import { hasApiKeyModelRestrictions } from "./resolvedModelAccess";
 import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
 import { timingSafeCompare } from "./timingSafeCompare";
+import { requiredApiKeyUnavailable, resolveRequiredApiKey } from "./requiredApiKeyContext";
 
 // Default to no per-key request cap. API keys can still opt into explicit
 // limits via Settings/API Keys, while provider/account quota controls remain
@@ -102,6 +103,7 @@ export interface ApiKeyMetadata {
   usedBudget?: number;
   isActive?: boolean;
   isBanned?: boolean;
+  revokedAt?: string | null;
   expiresAt?: string | null;
   accessSchedule?: AccessSchedule | null;
   maxRequestsPerDay?: number | null;
@@ -516,26 +518,62 @@ export interface EnforceApiKeyPolicyOptions {
  *  test the policy for (never the key secret). */
 const PLAYGROUND_KEY_ID_HEADER = "x-omniroute-playground-key-id";
 
+type PlaygroundKeySelection =
+  | { status: "absent" }
+  | { status: "selected"; apiKey: string; apiKeyInfo: ApiKeyMetadata }
+  | { status: "rejected"; rejection: Response };
+
+function rejectPlaygroundKeySelection(
+  message = "Selected Playground API key is unavailable"
+): PlaygroundKeySelection {
+  return {
+    status: "rejected",
+    rejection: errorResponse(HTTP_STATUS.FORBIDDEN, message),
+  };
+}
+
 /**
- * Dashboard playground support. An authenticated admin session may test a
- * specific API key's policy (allowed_models, budget, …) WITHOUT putting the key
- * secret on the wire: the browser sends only the key id via
- * `x-omniroute-playground-key-id` and we resolve the secret server-side.
- *
- * Security: honored ONLY for authenticated dashboard sessions, and only as a
- * fallback when no bearer key was presented — so it can never bypass auth or
- * escalate privileges, it only applies (narrows to) the selected key's policy.
+ * A dashboard session can select an ordinary key by ID. Once the selector is
+ * used, the request requires that specific key and its current policy.
  */
-export async function resolvePlaygroundTestKey(request: Request): Promise<string | null> {
-  const keyId = request.headers.get(PLAYGROUND_KEY_ID_HEADER);
-  if (!keyId) return null;
-  if (!(await isDashboardSessionAuthenticated(request))) return null;
+async function resolvePlaygroundKeySelection(request: Request): Promise<PlaygroundKeySelection> {
+  const header = request.headers.get(PLAYGROUND_KEY_ID_HEADER);
+  if (header === null) return { status: "absent" };
+  const keyId = header.trim();
+  if (!keyId) return rejectPlaygroundKeySelection();
+  if (!(await isDashboardSessionAuthenticated(request))) {
+    return rejectPlaygroundKeySelection(
+      "Testing with a selected API key requires a signed-in dashboard session"
+    );
+  }
+
   try {
     const row = await getApiKeyById(keyId);
-    return typeof row?.key === "string" ? row.key : null;
+    const apiKey = row?.key;
+    if (typeof apiKey !== "string" || apiKey === "") return rejectPlaygroundKeySelection();
+
+    const apiKeyInfo = await getApiKeyMetadata(apiKey, { bypassCache: true });
+    if (
+      apiKeyInfo?.id !== keyId ||
+      apiKeyInfo.isActive === false ||
+      apiKeyInfo.isBanned ||
+      apiKeyInfo.revokedAt ||
+      (apiKeyInfo.expiresAt && !(Date.parse(apiKeyInfo.expiresAt) > Date.now()))
+    ) {
+      return rejectPlaygroundKeySelection();
+    }
+    return { status: "selected", apiKey, apiKeyInfo };
   } catch {
-    return null;
+    return {
+      status: "rejected",
+      rejection: errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "API key policy unavailable"),
+    };
   }
+}
+
+export async function resolvePlaygroundTestKey(request: Request): Promise<string | null> {
+  const selection = await resolvePlaygroundKeySelection(request);
+  return selection.status === "selected" ? selection.apiKey : null;
 }
 
 type PolicyContext = {
@@ -951,24 +989,40 @@ function resolveSsoApiKeySecret(request: Request): string | null {
 }
 
 /**
- * The API key the policy layer evaluates for a request. The credential that
+ * The bound API key takes precedence. Without a binding, the credential that
  * actually validated wins (a stale Bearer sent next to a valid x-api-key must
- * not hide that key's policy); then a real bearer key; then a bare
- * x-api-key/x-goog-api-key that auth accepted but extractApiKey() gates out;
- * otherwise an authenticated dashboard playground may test a specific key's
- * policy by id (resolved server-side, secret never sent).
+ * not hide that key's policy). Without a validated credential, an explicit
+ * Playground selection must resolve before applying the legacy client
+ * behavior for unvalidated credential headers.
  */
 export async function resolvePolicyApiKey(request: Request): Promise<string | null> {
+  const requiredKey = resolveRequiredApiKey();
+  if (requiredKey) return (await requiredKey)?.apiKey ?? null;
+  return (await resolveUnboundPolicyKey(request)).apiKey;
+}
+
+async function resolveUnboundPolicyKey(request: Request): Promise<{
+  apiKey: string | null;
+  apiKeyInfo?: ApiKeyMetadata;
+  rejection: Response | null;
+}> {
   // SSO first: its bearer is a JWT, not a key, and must map to the shadow key.
   const ssoSecret = resolveSsoApiKeySecret(request);
-  if (ssoSecret) return ssoSecret;
+  if (ssoSecret) return { apiKey: ssoSecret, rejection: null };
   const resolved = await resolveClientApiKey(request);
-  return (
-    (resolved.valid ? resolved.apiKey : null) ||
-    extractApiKey(request) ||
-    extractUngatedClientApiKey(request) ||
-    (await resolvePlaygroundTestKey(request))
-  );
+  if (resolved.valid) return { apiKey: resolved.apiKey, rejection: null };
+
+  const selection = await resolvePlaygroundKeySelection(request);
+  if (selection.status === "selected") {
+    return { apiKey: selection.apiKey, apiKeyInfo: selection.apiKeyInfo, rejection: null };
+  }
+  if (selection.status === "rejected") {
+    return { apiKey: null, rejection: selection.rejection };
+  }
+  return {
+    apiKey: extractApiKey(request) || extractUngatedClientApiKey(request),
+    rejection: null,
+  };
 }
 
 /**
@@ -1039,13 +1093,31 @@ async function resolveSelfLoopScopedKey(
  * to a caller's key — that caller's key. On a scope rejection the presented key
  * is kept so the result still names what the client sent.
  */
-export async function resolveEnforcedPolicyKey(
-  request: Request
-): Promise<{ apiKey: string | null; selfLoopScope: SelfLoopScope }> {
-  const presentedKey = await resolvePolicyApiKey(request);
+export async function resolveEnforcedPolicyKey(request: Request): Promise<{
+  apiKey: string | null;
+  selfLoopScope: SelfLoopScope;
+  apiKeyInfo?: ApiKeyMetadata;
+  rejection: Response | null;
+}> {
+  const requiredKey = resolveRequiredApiKey();
+  if (requiredKey) {
+    const resolved = await requiredKey;
+    return resolved
+      ? { ...resolved, selfLoopScope: NO_SELF_LOOP_SCOPE, rejection: null }
+      : { apiKey: null, selfLoopScope: NO_SELF_LOOP_SCOPE, rejection: requiredApiKeyUnavailable() };
+  }
+
+  const unbound = await resolveUnboundPolicyKey(request);
+  if (unbound.rejection || unbound.apiKeyInfo) {
+    return { ...unbound, selfLoopScope: NO_SELF_LOOP_SCOPE };
+  }
+  const presentedKey = unbound.apiKey;
   const selfLoopScope = await resolveSelfLoopScopedKey(request, presentedKey);
-  if (selfLoopScope.rejection || !selfLoopScope.key) return { apiKey: presentedKey, selfLoopScope };
-  return { apiKey: selfLoopScope.key, selfLoopScope };
+  return {
+    apiKey: selfLoopScope.key ?? presentedKey,
+    selfLoopScope,
+    rejection: selfLoopScope.rejection,
+  };
 }
 
 /**
@@ -1077,6 +1149,19 @@ async function runAccessValidators(
     if (rejection) return rejection;
   }
   return null;
+}
+
+async function runLimitValidators(
+  context: PolicyContext,
+  options?: EnforceApiKeyPolicyOptions
+): Promise<Response | null> {
+  const budgetRejection = validateBudgetUnlessDeferred(context, options);
+  if (budgetRejection) return budgetRejection;
+  const keyQuotaRejection = validateKeyQuota(context);
+  if (keyQuotaRejection) return keyQuotaRejection;
+  const tokenRejection = validateTokenLimit(context);
+  if (tokenRejection) return tokenRejection;
+  return await validateRateLimitAndThrottle(context);
 }
 
 /**
@@ -1115,20 +1200,13 @@ export async function enforceApiKeyPolicy(
   modelStr: string | null,
   options?: EnforceApiKeyPolicyOptions
 ): Promise<ApiKeyPolicyResult> {
-  const { apiKey, selfLoopScope } = await resolveEnforcedPolicyKey(request);
-  if (selfLoopScope.rejection) {
-    return { apiKey, apiKeyInfo: null, rejection: selfLoopScope.rejection };
-  }
+  const identity = await resolveEnforcedPolicyKey(request);
+  const { apiKey, selfLoopScope, rejection } = identity;
+  if (rejection || !apiKey) return { apiKey, apiKeyInfo: null, rejection };
 
-  // No API key = local/session mode, skip policy checks
-  if (!apiKey) {
-    return { apiKey: null, apiKeyInfo: null, rejection: null };
-  }
-
-  // Fetch key metadata (includes allowedModels)
-  let apiKeyInfo: ApiKeyMetadata | null = null;
+  let apiKeyInfo: ApiKeyMetadata | null;
   try {
-    apiKeyInfo = await getApiKeyMetadata(apiKey);
+    apiKeyInfo = identity.apiKeyInfo ?? (await getApiKeyMetadata(apiKey));
   } catch (error) {
     // Fail-closed: if policy backend fails, reject the request
     log.error("API_POLICY", "Failed to fetch API key metadata. Request blocked.", { error });
@@ -1166,14 +1244,8 @@ export async function enforceApiKeyPolicy(
   const accessRejection = await runAccessValidators(context, options);
   if (accessRejection) return { apiKey, apiKeyInfo, rejection: accessRejection };
 
-  const budgetRejection = validateBudgetUnlessDeferred(context, options);
-  if (budgetRejection) return { apiKey, apiKeyInfo, rejection: budgetRejection };
-  const keyQuotaRejection = validateKeyQuota(context);
-  if (keyQuotaRejection) return { apiKey, apiKeyInfo, rejection: keyQuotaRejection };
-  const tokenRejection = validateTokenLimit(context);
-  if (tokenRejection) return { apiKey, apiKeyInfo, rejection: tokenRejection };
-  const rateRejection = await validateRateLimitAndThrottle(context);
-  if (rateRejection) return { apiKey, apiKeyInfo, rejection: rateRejection };
+  const limitRejection = await runLimitValidators(context, options);
+  if (limitRejection) return { apiKey, apiKeyInfo, rejection: limitRejection };
 
   return { apiKey, apiKeyInfo, rejection: null };
 }

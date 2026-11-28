@@ -17,6 +17,7 @@ import { describeUpstreamFailure } from "@/shared/utils/upstreamError";
 import { isRequestScopedMisalignmentRefusal } from "@omniroute/open-sse/utils/providerSafety.ts";
 import { isMusePolicyRefusal } from "@omniroute/open-sse/services/musePolicyRefusal.ts";
 import { buildAllExpiredCredentials } from "./authExpiredCredentials.ts";
+import { echoableModelLockStatus } from "./modelLockUpstreamStatus.ts";
 import {
   isExpiryFirstDeadlineOrder,
   pickExpiryFirstConnection,
@@ -1625,6 +1626,16 @@ export async function getProviderCredentials(
 
       if (earliest) {
         const earliestConn = earliestCandidate?.connection;
+        // #20969: a model-only lock leaves the connection active, so connection.lastError is
+        // unset; the upstream message and status live on the lock entry. Only a billing-class
+        // upstream (400 "credit balance is too low", 402) keeps its status so the client can
+        // tell "add credit" from "wait". Any other lock (429, 401/403, 5xx, or one without
+        // metadata) stays the local 429 — a 401/403 would read as a rejected OmniRoute key.
+        const earliestModelLock =
+          allBlockedByModelCooldown && earliestConn && requestedModel
+            ? getModelLockoutInfo(provider, earliestConn.id, requestedModel)
+            : null;
+        const echoedLockStatus = echoableModelLockStatus(earliestModelLock?.errorCode);
         log.warn(
           "AUTH",
           allBlockedByModelCooldown
@@ -1655,8 +1666,13 @@ export async function getProviderCredentials(
           allRateLimited: true,
           retryAfter: earliest,
           retryAfterHuman: formatRetryAfter(earliest),
-          lastError: earliestConn?.lastError || null,
-          lastErrorCode: allBlockedByModelCooldown ? 429 : earliestConn?.errorCode || null,
+          lastError:
+            (echoedLockStatus ? earliestModelLock?.lastError : null) ||
+            earliestConn?.lastError ||
+            null,
+          lastErrorCode: allBlockedByModelCooldown
+            ? (echoedLockStatus ?? 429)
+            : earliestConn?.errorCode || null,
           cooldownScope: allBlockedByModelCooldown ? "model" : "connection",
           cooldownModel: allBlockedByModelCooldown ? requestedModel : null,
           ...copilotRejectionFlag(provider, requestedModel, connections, connectionFilterStatus),

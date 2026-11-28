@@ -17,6 +17,11 @@ import crypto from "crypto";
 import { canonicalJson } from "./skills/stableJson";
 import { LRUCache } from "./cacheLayer";
 import { getDbInstance } from "./db/core";
+import {
+  incrementSemanticCacheEntryHitCount,
+  readSemanticCacheResponse,
+  writeSemanticCacheResponse,
+} from "./db/semanticCache";
 import { toNumber } from "@/shared/utils/numeric";
 import { conversationSignatureFields } from "../../open-sse/utils/conversationSignatureFields";
 import { startSemanticCachePruneJob } from "./jobs/semanticCachePruneJob";
@@ -365,48 +370,44 @@ function normalizeConversation(conversation: unknown) {
  * @param {string} signature
  * @returns {object|null} Cached response or null
  */
-export function getCachedResponse(signature) {
+export function getCachedResponse(signature: string) {
+  const entry = getCachedResponseEntry(signature);
+  return entry ? entry.response : null;
+}
+
+export function getCachedResponseEntry(signature: string) {
   // 1. Check memory cache
   const memResult = getMemoryCache().get(signature);
   if (memResult) {
     incrementMetric("hits");
     incrementMetric("tokens_saved", memResult.tokensSaved || 0);
-    return memResult.response;
+    return memResult;
   }
 
   // 2. Check SQLite
   try {
-    const db = getDbInstance();
-    const row = db
-      .prepare(
-        "SELECT response, tokens_saved FROM semantic_cache WHERE signature = ? AND expires_at > ?"
-      )
-      .get(signature, isoNow());
+    const row = readSemanticCacheResponse(signature, isoNow());
 
     if (row) {
-      const record = asRecord(row);
-      const responsePayload = typeof record.response === "string" ? record.response : null;
+      const responsePayload = row.response;
       if (!responsePayload) {
         incrementMetric("misses");
         return null;
       }
-      const parsed = JSON.parse(responsePayload);
-      const tokensSaved = toNumber(record.tokens_saved, 0);
+      const entry = {
+        response: JSON.parse(responsePayload),
+        tokensSaved: toNumber(row.tokens_saved, 0),
+        originalCostUsd: row.original_cost_usd,
+      };
       // Promote to memory cache
       if (!exceedsEntryCap(responsePayload)) {
-        getMemoryCache().set(signature, {
-          response: parsed,
-          tokensSaved,
-        });
+        getMemoryCache().set(signature, entry);
       }
-      // Update hit count in DB
-      db.prepare("UPDATE semantic_cache SET hit_count = hit_count + 1 WHERE signature = ?").run(
-        signature
-      );
+      incrementSemanticCacheEntryHitCount(signature);
 
       incrementMetric("hits");
-      incrementMetric("tokens_saved", tokensSaved);
-      return parsed;
+      incrementMetric("tokens_saved", entry.tokensSaved);
+      return entry;
     }
   } catch {
     // DB not available — fail open
@@ -422,12 +423,7 @@ export function getCachedResponse(signature) {
  */
 export function recordSemanticCacheHit(signature: string, tokensSaved = 0): void {
   try {
-    const db = getDbInstance();
-    if (signature) {
-      db.prepare("UPDATE semantic_cache SET hit_count = hit_count + 1 WHERE signature = ?").run(
-        signature
-      );
-    }
+    if (signature) incrementSemanticCacheEntryHitCount(signature);
     incrementMetric("hits");
     if (tokensSaved > 0) {
       incrementMetric("tokens_saved", tokensSaved);
@@ -444,8 +440,16 @@ export function recordSemanticCacheHit(signature: string, tokensSaved = 0): void
  * @param {object} response - The API response to cache
  * @param {number} tokensSaved - Estimated tokens saved
  * @param {number} [ttlMs] - TTL in ms (default: 1 hour)
+ * @param {number} [originalCostUsd] - Cost reported on the original response
  */
-export function setCachedResponse(signature, model, response, tokensSaved = 0, ttlMs = 3600000) {
+export function setCachedResponse(
+  signature: string,
+  model: string,
+  response: unknown,
+  tokensSaved = 0,
+  ttlMs = 3600000,
+  originalCostUsd?: number
+) {
   if (isRefusalOrUnavailableCompletion(response)) {
     return;
   }
@@ -462,21 +466,21 @@ export function setCachedResponse(signature, model, response, tokensSaved = 0, t
   if (payloadJson !== undefined && exceedsEntryCap(payloadJson)) {
     getMemoryCache().delete(signature);
   } else {
-    getMemoryCache().set(signature, { response, tokensSaved }, ttl);
+    getMemoryCache().set(signature, { response, tokensSaved, originalCostUsd }, ttl);
   }
 
   // 2. SQLite
+  if (payloadJson === undefined) return;
   try {
-    const db = getDbInstance();
-    const id = crypto.randomUUID();
-    const promptHash = signature.slice(0, 16);
-    const now = new Date().toISOString();
-    const expiresAt = new Date(Date.now() + ttl).toISOString();
-
-    db.prepare(
-      `INSERT OR REPLACE INTO semantic_cache (id, signature, model, prompt_hash, response, tokens_saved, hit_count, created_at, expires_at)
-       VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?)`
-    ).run(id, signature, model, promptHash, JSON.stringify(response), tokensSaved, now, expiresAt);
+    writeSemanticCacheResponse({
+      signature,
+      model,
+      response: payloadJson,
+      tokensSaved,
+      originalCostUsd,
+      createdAt: isoNow(),
+      expiresAt: new Date(Date.now() + ttl).toISOString(),
+    });
   } catch {
     // DB write failed — cache still in memory
   }

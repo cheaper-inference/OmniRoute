@@ -1,8 +1,10 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { isDeepStrictEqual } from "node:util";
 
 const SOURCE_ROOTS = ["src/", "open-sse/", "electron/", "bin/"];
+const CLI_CATALOG = /^bin\/cli\/locales\/[a-zA-Z0-9-]+\.json$/;
 const TEST_PATTERNS = [/^tests\//, /(?:^|\/)__tests__\//, /\.(?:test|spec)\.[cm]?[jt]sx?$/];
 // Test files for specific source types (e.g., Python validation scripts for i18n)
 const TEST_FILE_PATTERNS = {
@@ -54,6 +56,70 @@ function isTestFile(filePath) {
   return false;
 }
 
+function readCliCatalog(objectId) {
+  const blob = execFileSync("git", ["cat-file", "blob", objectId]);
+  const source = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(blob);
+  const value = JSON.parse(source, (_key, item) => {
+    if (typeof item === "string" || (item && typeof item === "object" && !Array.isArray(item))) {
+      return item;
+    }
+    throw new SyntaxError("CLI catalogs contain objects and strings");
+  });
+  if (typeof value === "string") throw new SyntaxError("Expected a CLI catalog object");
+
+  // JSON.parse keeps only the last occurrence of a key. Scan the already-valid JSON's
+  // complete string tokens so escaped quotes, braces and colons in translations are ignored.
+  const objects = [];
+  for (const [token, literal, colon] of source.matchAll(/("(?:[^"\\]|\\[\s\S])*")\s*(:)?|[{}]/g)) {
+    if (token === "{") objects.push(new Set());
+    else if (token === "}") objects.pop();
+    else if (colon) {
+      const keys = objects.at(-1);
+      const key = JSON.parse(literal);
+      // The CLI flattens nested keys with dots. Keep ambiguous paths in test scope.
+      if (!key || key.includes(".")) throw new SyntaxError("Expected a CLI catalog key segment");
+      if (keys.has(key)) throw new SyntaxError("Duplicate CLI catalog key");
+      keys.add(key);
+    }
+  }
+  return value;
+}
+
+function hasSameCliTranslations(before, after) {
+  try {
+    return isDeepStrictEqual(readCliCatalog(before), readCliCatalog(after));
+  } catch {
+    return false;
+  }
+}
+
+function classifyCliCatalogChanges(diffRange) {
+  const fields = runGit([
+    "diff",
+    "--raw",
+    "-z",
+    "--no-abbrev",
+    "--no-renames",
+    diffRange,
+    "--",
+    "bin/cli/locales/",
+  ]).split("\0");
+  const changed = new Map();
+  for (let index = 0; index + 1 < fields.length; index += 2) {
+    const filePath = fields[index + 1];
+    if (!CLI_CATALOG.test(filePath)) continue;
+    const [beforeMode, afterMode, before, after, status] = fields[index].slice(1).split(" ");
+    const unchangedTranslations =
+      filePath !== "bin/cli/locales/en.json" &&
+      status === "M" &&
+      beforeMode === afterMode &&
+      /^(100644|100755)$/.test(beforeMode) &&
+      hasSameCliTranslations(before, after);
+    changed.set(filePath, unchangedTranslations);
+  }
+  return changed;
+}
+
 function buildReport(lines) {
   return `${lines.join("\n")}\n`;
 }
@@ -78,14 +144,9 @@ if (!baseRef) {
 }
 
 const baseTarget = process.env.GITHUB_BASE_SHA || `origin/${baseRef}`;
+const diffRange = `${baseTarget}...HEAD`;
 // NUL separators preserve whitespace, Unicode and newlines in Git paths.
-const changedFiles = runGit([
-  "diff",
-  "--name-only",
-  "-z",
-  "--diff-filter=ACMR",
-  `${baseTarget}...HEAD`,
-])
+const changedFiles = runGit(["diff", "--name-only", "-z", "--diff-filter=ACMR", diffRange])
   .split("\0")
   .filter(Boolean);
 // A rename or copy introduces a new destination too. Existing misplaced tests
@@ -96,7 +157,7 @@ const addedFiles = runGit([
   "--name-only",
   "-z",
   "--diff-filter=A",
-  `${baseTarget}...HEAD`,
+  diffRange,
 ])
   .split("\0")
   .filter(Boolean);
@@ -108,7 +169,12 @@ const misplacedNewTests = addedFiles.filter(
   (filePath) => isTestFile(filePath) && !isPlacedTest(filePath)
 );
 
-const changedSourceFiles = changedFiles.filter(isSourceFile);
+// Derived locale formatting has no runtime effect when the exact Git blobs have the same
+// translations. Additions, deletions, and other substantive locale edits still require tests.
+const cliCatalogChanges = classifyCliCatalogChanges(diffRange);
+const changedSourceFiles = [...new Set([...changedFiles, ...cliCatalogChanges.keys()])].filter(
+  (filePath) => isSourceFile(filePath) && !cliCatalogChanges.get(filePath)
+);
 const changedTestFiles = changedFiles.filter(isTestFile);
 const hasRequiredTests = changedSourceFiles.length === 0 || changedTestFiles.length > 0;
 const passesPolicy = hasRequiredTests && misplacedNewTests.length === 0;

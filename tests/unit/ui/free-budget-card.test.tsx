@@ -1,11 +1,24 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import React from "react";
+import React, { type ComponentProps } from "react";
+import { freeBudget } from "../../../src/i18n/messages/en.json";
 import {
-  FreeBudgetView,
-  relativeTimeFromNow,
+  FreeBudgetPlaceholder,
+  FreeBudgetView as BudgetView,
+  formatCuratedDate,
+  formatRelativeAge,
+  getFreeBudgetLabels,
   type FreeBudgetData,
 } from "../../../src/app/(dashboard)/dashboard/usage/components/FreeBudgetCard.tsx";
+
+const NOW = Date.parse("2026-11-20T12:00:00Z");
+const { createTranslator } = await vi.importActual<typeof import("next-intl")>("next-intl");
+const t = createTranslator({ locale: "en", messages: { freeBudget }, namespace: "freeBudget" });
+const labels = getFreeBudgetLabels(t);
+
+function FreeBudgetView(props: Omit<ComponentProps<typeof BudgetView>, "labels">) {
+  return <BudgetView {...props} labels={labels} />;
+}
 
 const data: FreeBudgetData = {
   steadyRecurringTokens: 1_940_000_000,
@@ -16,8 +29,26 @@ const data: FreeBudgetData = {
   modelCount: 530,
   poolCount: 50,
   perModel: [
-    { provider: "mistral", modelId: "mistral-large", displayName: "Mistral Large", monthlyTokens: 1_000_000_000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "mistral", tos: "caution" },
-    { provider: "kiro", modelId: "kiro", displayName: "Kiro", monthlyTokens: 25_000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "kiro", tos: "avoid" },
+    {
+      provider: "mistral",
+      modelId: "mistral-large",
+      displayName: "Mistral Large",
+      monthlyTokens: 1_000_000_000,
+      creditTokens: 0,
+      freeType: "recurring-monthly",
+      poolKey: "mistral",
+      tos: "caution",
+    },
+    {
+      provider: "kiro",
+      modelId: "kiro",
+      displayName: "Kiro",
+      monthlyTokens: 25_000,
+      creditTokens: 0,
+      freeType: "recurring-monthly",
+      poolKey: "kiro",
+      tos: "avoid",
+    },
   ],
 };
 
@@ -43,10 +74,37 @@ describe("FreeBudgetView", () => {
       poolCount: 1,
       perModel: [
         // Two models in the same pool — should produce only 1 bar segment
-        { provider: "gemini", modelId: "gemini-flash", displayName: "Gemini Flash", monthlyTokens: 1_000_000_000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "gemini-pool", tos: "ok" },
-        { provider: "gemini", modelId: "gemini-pro", displayName: "Gemini Pro", monthlyTokens: 500_000_000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "gemini-pool", tos: "ok" },
+        {
+          provider: "gemini",
+          modelId: "gemini-flash",
+          displayName: "Gemini Flash",
+          monthlyTokens: 1_000_000_000,
+          creditTokens: 0,
+          freeType: "recurring-monthly",
+          poolKey: "gemini-pool",
+          tos: "ok",
+        },
+        {
+          provider: "gemini",
+          modelId: "gemini-pro",
+          displayName: "Gemini Pro",
+          monthlyTokens: 500_000_000,
+          creditTokens: 0,
+          freeType: "recurring-monthly",
+          poolKey: "gemini-pool",
+          tos: "ok",
+        },
         // One standalone model (poolKey null)
-        { provider: "openai", modelId: "gpt-free", displayName: "GPT Free", monthlyTokens: 200_000_000, creditTokens: 0, freeType: "keyless", poolKey: null, tos: "ok" },
+        {
+          provider: "openai",
+          modelId: "gpt-free",
+          displayName: "GPT Free",
+          monthlyTokens: 200_000_000,
+          creditTokens: 0,
+          freeType: "keyless",
+          poolKey: null,
+          tos: "ok",
+        },
       ],
     };
 
@@ -79,15 +137,69 @@ const layoutData: FreeBudgetData = {
   // Server-derived: which of these providers route with nothing configured.
   noCredentialProviders: ["pollinations"],
   perModel: [
-    { provider: "mistral", modelId: "mistral-small", displayName: "Mistral Small 4", monthlyTokens: 1_000_000_000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "mistral", tos: "caution" },
-    { provider: "llm7", modelId: "llm7", displayName: "LLM7 pool", monthlyTokens: 150_000_000, creditTokens: 0, freeType: "recurring-daily", poolKey: "llm7", tos: "caution" },
-    { provider: "kiro", modelId: "kiro", displayName: "Kiro Auto", monthlyTokens: 25_000, creditTokens: 0, freeType: "recurring-monthly", poolKey: "kiro", tos: "avoid" },
-    { provider: "together", modelId: "together-signup", displayName: "Together credit", monthlyTokens: 0, creditTokens: 25_000_000, freeType: "one-time-initial", poolKey: "together-signup", tos: "caution" },
-    { provider: "kimi", modelId: "kimi-free", displayName: "Kimi Free", monthlyTokens: 50_000_000, creditTokens: 0, freeType: "keyless", poolKey: null, tos: "ok" },
+    {
+      provider: "mistral",
+      modelId: "mistral-small",
+      displayName: "Mistral Small 4",
+      monthlyTokens: 1_000_000_000,
+      creditTokens: 0,
+      freeType: "recurring-monthly",
+      poolKey: "mistral",
+      tos: "caution",
+    },
+    {
+      provider: "llm7",
+      modelId: "llm7",
+      displayName: "LLM7 pool",
+      monthlyTokens: 150_000_000,
+      creditTokens: 0,
+      freeType: "recurring-daily",
+      poolKey: "llm7",
+      tos: "caution",
+    },
+    {
+      provider: "kiro",
+      modelId: "kiro",
+      displayName: "Kiro Auto",
+      monthlyTokens: 25_000,
+      creditTokens: 0,
+      freeType: "recurring-monthly",
+      poolKey: "kiro",
+      tos: "avoid",
+    },
+    {
+      provider: "together",
+      modelId: "together-signup",
+      displayName: "Together credit",
+      monthlyTokens: 0,
+      creditTokens: 25_000_000,
+      freeType: "one-time-initial",
+      poolKey: "together-signup",
+      tos: "caution",
+    },
+    {
+      provider: "kimi",
+      modelId: "kimi-free",
+      displayName: "Kimi Free",
+      monthlyTokens: 50_000_000,
+      creditTokens: 0,
+      freeType: "keyless",
+      poolKey: null,
+      tos: "ok",
+    },
     // Real provider that routes anonymously — the "no API key" section is
     // derived from routing behaviour, so a made-up id would (correctly) count
     // as credentialed and never appear there.
-    { provider: "pollinations", modelId: "openai-fast", displayName: "Pollinations Fast", monthlyTokens: 30_000_000, creditTokens: 0, freeType: "keyless", poolKey: "pollinations", tos: "caution" },
+    {
+      provider: "pollinations",
+      modelId: "openai-fast",
+      displayName: "Pollinations Fast",
+      monthlyTokens: 30_000_000,
+      creditTokens: 0,
+      freeType: "keyless",
+      poolKey: "pollinations",
+      tos: "caution",
+    },
   ],
 };
 
@@ -116,12 +228,35 @@ describe("FreeBudgetView — layout, boost, uncapped chips", () => {
     expect(html).not.toMatch(/data-testid="catalog-freshness"/);
   });
 
-  it("renders 'updated X ago' when catalogUpdatedAt is present", () => {
+  it.each(["baseline", undefined] as const)(
+    "shows the curation date for catalog source %s",
+    (catalogSource) => {
+      const html = renderToStaticMarkup(
+        <FreeBudgetView
+          data={{ ...layoutData, catalogUpdatedAt: "2026-11-09", catalogSource }}
+          nowMs={NOW}
+        />
+      );
+      expect(html).toMatch(/data-testid="catalog-freshness"/);
+      expect(html).toContain("catalog curated Nov 9, 2026");
+      expect(html).not.toMatch(/· updated/);
+    }
+  );
+
+  it("shows the relative update age for the Radar overlay", () => {
     const html = renderToStaticMarkup(
-      <FreeBudgetView data={{ ...layoutData, catalogUpdatedAt: new Date().toISOString() }} />
+      <FreeBudgetView
+        data={{
+          ...layoutData,
+          catalogUpdatedAt: "2026-11-20T09:00:00Z",
+          catalogSource: "radar-overlay",
+        }}
+        nowMs={NOW}
+      />
     );
     expect(html).toMatch(/data-testid="catalog-freshness"/);
-    expect(html).toMatch(/updated (just now|\d+[a-z]+ ago)/);
+    expect(html).toContain("updated 3 hours ago");
+    expect(html).not.toContain("catalog curated");
   });
 });
 
@@ -145,17 +280,23 @@ describe("FreeBudgetView — filters", () => {
   });
 
   it("search filters rows by model name, model id, and provider (case-insensitive)", () => {
-    const byName = tableOf(renderToStaticMarkup(<FreeBudgetView data={layoutData} search="kimi" />));
+    const byName = tableOf(
+      renderToStaticMarkup(<FreeBudgetView data={layoutData} search="kimi" />)
+    );
     expect(byName).toMatch(/Kimi Free/);
     expect(byName).not.toMatch(/Mistral Small 4/);
 
-    const byProvider = tableOf(renderToStaticMarkup(<FreeBudgetView data={layoutData} search="LLM7" />));
+    const byProvider = tableOf(
+      renderToStaticMarkup(<FreeBudgetView data={layoutData} search="LLM7" />)
+    );
     expect(byProvider).toMatch(/LLM7 pool/);
     expect(byProvider).not.toMatch(/Kimi Free/);
   });
 
   it("providerFilter restricts the table to a single provider", () => {
-    const t = tableOf(renderToStaticMarkup(<FreeBudgetView data={layoutData} providerFilter="kimi" />));
+    const t = tableOf(
+      renderToStaticMarkup(<FreeBudgetView data={layoutData} providerFilter="kimi" />)
+    );
     expect(t).toMatch(/Kimi Free/);
     expect(t).not.toMatch(/Mistral Small 4/);
     expect(t).not.toMatch(/LLM7 pool/);
@@ -165,7 +306,9 @@ describe("FreeBudgetView — filters", () => {
     // Filters on the server-derived noCredentialProviders list, NOT on
     // freeType: "keyless" — "Kimi Free" is catalogued keyless yet is not in
     // that list, exactly the case that used to mislead users.
-    const t = tableOf(renderToStaticMarkup(<FreeBudgetView data={layoutData} keylessOnly={true} />));
+    const t = tableOf(
+      renderToStaticMarkup(<FreeBudgetView data={layoutData} keylessOnly={true} />)
+    );
     expect(t).toMatch(/Pollinations Fast/);
     expect(t).not.toMatch(/Kimi Free/);
     expect(t).not.toMatch(/Mistral Small 4/);
@@ -173,7 +316,9 @@ describe("FreeBudgetView — filters", () => {
   });
 
   it("shows an empty-state row when no model matches the current filters", () => {
-    const t = tableOf(renderToStaticMarkup(<FreeBudgetView data={layoutData} search="no-such-model-xyz" />));
+    const t = tableOf(
+      renderToStaticMarkup(<FreeBudgetView data={layoutData} search="no-such-model-xyz" />)
+    );
     expect(t).toMatch(/No models match the current filters/);
   });
 });
@@ -184,6 +329,8 @@ describe("FreeBudgetView — keyless section and badges", () => {
     expect(html).toMatch(/data-testid="keyless-section"/);
     expect(html).toMatch(/No API key required/);
     expect(html).toMatch(/pollinations/);
+    expect(html).toContain("(1 model · 1 provider)");
+    expect(html).not.toMatch(/[㐀-鿿]/);
   });
 
   it("omits the keyless section entirely when no model is keyless", () => {
@@ -197,26 +344,72 @@ describe("FreeBudgetView — keyless section and badges", () => {
 
   it("badges the keyless free-type distinctly from other free types", () => {
     const html = renderToStaticMarkup(<FreeBudgetView data={layoutData} />);
-    const badges = html.match(/data-testid="free-type-badge"[^>]*>[^<]*(?:<[^>]*>[^<]*)*<\/span>/g) ?? [];
+    const badges: string[] =
+      html.match(/data-testid="free-type-badge"[^>]*>[^<]*(?:<[^>]*>[^<]*)*<\/span>/g) ?? [];
     expect(badges.some((b) => b.includes("keyless"))).toBe(true);
     expect(badges.some((b) => b.includes("daily"))).toBe(true);
   });
 });
 
-describe("relativeTimeFromNow", () => {
-  const NOW = Date.parse("2026-07-20T12:00:00.000Z");
-
+describe("formatRelativeAge", () => {
   it("returns null for an unparsable timestamp", () => {
-    expect(relativeTimeFromNow("not-a-date", NOW)).toBeNull();
+    expect(formatRelativeAge("not-a-date", NOW, "en")).toBeNull();
   });
 
-  it("formats sub-minute deltas as 'just now'", () => {
-    expect(relativeTimeFromNow("2026-07-20T11:59:45.000Z", NOW)).toBe("just now");
+  it("formats sub-minute and future deltas as 'now'", () => {
+    expect(formatRelativeAge("2026-11-20T11:59:45Z", NOW, "en")).toBe("now");
+    expect(formatRelativeAge("2026-11-20T12:00:30Z", NOW, "en")).toBe("now");
   });
 
-  it("formats minute/hour/day deltas", () => {
-    expect(relativeTimeFromNow("2026-07-20T11:30:00.000Z", NOW)).toBe("30m ago");
-    expect(relativeTimeFromNow("2026-07-20T09:00:00.000Z", NOW)).toBe("3h ago");
-    expect(relativeTimeFromNow("2026-07-17T12:00:00.000Z", NOW)).toBe("3d ago");
+  it("formats full minutes, hours, days, months, and years", () => {
+    expect(formatRelativeAge("2026-11-20T11:30:00Z", NOW, "en")).toBe("30 minutes ago");
+    expect(formatRelativeAge("2026-11-20T09:00:00Z", NOW, "en")).toBe("3 hours ago");
+    expect(formatRelativeAge("2026-11-17T12:00:00Z", NOW, "en")).toBe("3 days ago");
+    expect(formatRelativeAge("2026-09-20T12:00:00Z", NOW, "en")).toBe("2 months ago");
+    expect(formatRelativeAge("2024-11-20T12:00:00Z", NOW, "en")).toBe("2 years ago");
+  });
+
+  it("uses the active locale for relative words", () => {
+    expect(formatRelativeAge("2026-11-19T12:00:00Z", NOW, "en")).toBe("yesterday");
+    expect(formatRelativeAge("2026-11-19T12:00:00Z", NOW, "pt-BR")).toBe("ontem");
+  });
+});
+
+describe("formatCuratedDate", () => {
+  it("formats the curation date in UTC using the active locale", () => {
+    expect(formatCuratedDate("2026-11-09T00:30:00+02:00", "en")).toBe("Nov 8, 2026");
+    expect(formatCuratedDate("2026-11-09", "pt-BR")).toBe("9 de nov. de 2026");
+  });
+
+  it("returns null for an unparsable date", () => {
+    expect(formatCuratedDate("not-a-date", "en")).toBeNull();
+  });
+});
+
+describe("FreeBudgetPlaceholder", () => {
+  const labels = {
+    loading: "Loading free tiers…",
+    loadFailed: "Couldn't load the free-tier catalog.",
+    retry: "Retry",
+  };
+
+  it("announces loading as a status", () => {
+    const html = renderToStaticMarkup(<FreeBudgetPlaceholder state="loading" labels={labels} />);
+    expect(html).toMatch(/role="status"/);
+    expect(html).toContain("Loading free tiers…");
+  });
+
+  it("shows a warning and a retry button when a callback is available", () => {
+    const html = renderToStaticMarkup(
+      <FreeBudgetPlaceholder state="error" labels={labels} onRetry={() => {}} />
+    );
+    expect(html).toContain('data-variant="warning"');
+    expect(html).toMatch(/Couldn&#x27;t load the free-tier catalog\./);
+    expect(html).toMatch(/<button[^>]*>Retry<\/button>/);
+  });
+
+  it("omits the retry action when no callback is available", () => {
+    const html = renderToStaticMarkup(<FreeBudgetPlaceholder state="error" labels={labels} />);
+    expect(html).not.toContain("Retry");
   });
 });

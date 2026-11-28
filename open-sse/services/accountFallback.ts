@@ -210,6 +210,13 @@ export type ModelLockoutEntry = {
   failureCount: number;
   lastFailureAt: number;
   resetAfterMs: number;
+  /**
+   * #20969: upstream message and status that caused the lock. A model-only lock keeps the
+   * connection active, so `connection.lastError` is never written for it — without these the
+   * all-cooling-down 429 cannot tell the client "add credit" from "wait".
+   */
+  lastError?: string;
+  errorCode?: number;
 };
 export type ModelFailureState = {
   failureCount: number;
@@ -908,6 +915,10 @@ export function lockModel(
     failureCount: metadata.failureCount ?? existing?.failureCount ?? 1,
     lastFailureAt: metadata.lastFailureAt ?? now,
     resetAfterMs: metadata.resetAfterMs ?? existing?.resetAfterMs ?? 0,
+    ...(typeof metadata.lastError === "string" && metadata.lastError.length > 0
+      ? { lastError: metadata.lastError }
+      : {}),
+    ...(typeof metadata.errorCode === "number" ? { errorCode: metadata.errorCode } : {}),
   });
 }
 
@@ -1115,14 +1126,15 @@ export function lockModelIfPerModelQuota(
   model: string | null,
   reason: string,
   cooldownMs: number,
-  connectionPassthroughModels?: boolean
+  connectionPassthroughModels?: boolean,
+  metadata: Partial<ModelLockoutEntry> = {}
 ): boolean {
   if (!hasPerModelQuota(provider, model, connectionPassthroughModels) || !model) return false;
   // Skip model-level lock if the entire provider is in circuit-breaker cooldown.
   // The provider cooldown already prevents all requests, so a model lock is redundant.
   if (isProviderInCooldown(provider)) return false;
   const lockFn = getCanonicalLockProvider(provider) === "antigravity" ? lockExactModel : lockModel;
-  lockFn(provider, connectionId, model, reason, cooldownMs);
+  lockFn(provider, connectionId, model, reason, cooldownMs, metadata);
   return true;
 }
 
@@ -1245,6 +1257,8 @@ export function getModelLockoutInfo(
     remainingMs: entry.until - Date.now(),
     lockedAt: new Date(entry.lockedAt).toISOString(),
     failureCount: entry.failureCount,
+    ...(typeof entry.lastError === "string" ? { lastError: entry.lastError } : {}),
+    ...(typeof entry.errorCode === "number" ? { errorCode: entry.errorCode } : {}),
   };
 }
 

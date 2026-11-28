@@ -187,23 +187,123 @@ export function locateManagedCoverageFloorClaims(content) {
   );
 }
 
-// --- Free-tier headline -------------------------------------------------------------------
-// The docs publish a rounded aggregate headline ("~1.4B"). Only the AGGREGATE headline is a
-// claim, via an explicit whitelist. These files also carry figures that are legitimately not the
-// headline and must never trip the gate: the theoretical ceiling ("would read ~10B; not
-// published"), the historical "previous ~1.94B", and per-model rows ("mistral … ~1.00B").
-const HEADLINE_AFTER = /^\s*(?:documented\s+)?free tokens|^\s*in (?:your|the) first month/i;
-const HEADLINE_BEFORE = /(recurring grant[^|]*\|\s*\**|signup credits[^|]*\|\s*\**|up to\s*)$/i;
+// --- Free-token figures ---------------------------------------------------------------------
+// The docs publish three token figures with different meanings (Radar v2 plan 01, owner
+// decisions D47 and D48 of 2026-11-21):
+//   headline:steady  the real figure — each shared quota counted once ("~93M real today");
+//   headline:first   the real figure plus one-time signup credits, first month only;
+//   rowSum:live      every live catalog row added up (method page only);
+//   rowSum:total     the big figure — every row added up, ended offers included, the way other
+//                    catalogs count; it is printed first and always with its label;
+//   retiredShare     the share of the big figure that comes from offers that have ended.
+// A figure is a claim only through an explicit anchor next to it. Everything else these files
+// carry is legitimately not a headline and never trips the gate: the theoretical ceiling ("would
+// read ~10B; not published"), the historical "previous ~1.94B", per-provider figures ("~30M
+// tokens/month") and per-model rows ("mistral … ~1.00B").
+//
+// Kinds are tried in order: rowSum:total before headline:steady, so the big figure written with
+// "free tokens" and its label on the next line ("~11.4B free tokens / month⏎counted the way other
+// catalogs count") is never read as the real one. Without the label it IS read as the real one,
+// which is what makes the judge reject an unlabeled big figure.
+//
+// Every space inside a multi-word anchor is `\s+` (the README wraps lines mid-sentence: "lift the
+// first⏎month to **~2.22B**"). The anchors only look at 80 characters on each side and every
+// repetition is bounded, so a hostile document stays linear (ReDoS).
+const TOKEN_FIGURE = /~(\d+(?:[.,]\d+)?)\s?([BM])\b/dg;
+const TOKEN_WINDOW = 80;
+const MARKUP = String.raw`(?:\*\*|<\/?[a-z]{1,8}\/?>|>|\s)`;
 
-export function locateHeadlineClaims(content) {
-  const claims = [];
-  for (const m of content.matchAll(/~(\d+(?:\.\d+)?)B/dg)) {
-    const after = content.slice(m.index + m[0].length, m.index + m[0].length + 80);
-    const before = content.slice(Math.max(0, m.index - 80), m.index);
-    if (!HEADLINE_AFTER.test(after) && !HEADLINE_BEFORE.test(before)) continue;
-    claims.push({ key: "headline", value: Number(m[1]), text: m[0], ...groupSpan(m) });
+const ROW_SUM_TOTAL_AFTER = [
+  {
+    via: "label",
+    pattern: new RegExp(
+      String.raw`^(?:\s*free\s+tokens(?:\s*\/\s*month|\s+a\s+month)?)?${MARKUP}{0,12}` +
+        String.raw`counted\s+the\s+way\s+other\s+catalogs\s+count`,
+      "i"
+    ),
+  },
+  { via: "short", pattern: /^\*{0,2}\s*as\s+others\s+count/i },
+  {
+    via: "method",
+    pattern: /^\*{0,2}\s*(?:summed\s+row\s+by\s+row|somad[oa]s?\s+linha\s+(?:a|por)\s+linha)/i,
+  },
+];
+const ROW_SUM_LIVE_AFTER =
+  /^\*{0,2}\s*(?:summed\s+per\s+live\s+row|somad[oa]s?\s+por\s+linha\s+viva)/i;
+const FIRST_AFTER = /^\*{0,2}\s*(?:tokens\s+)?in\s+(?:your|the)\s+first\s+month/i;
+const FIRST_BEFORE =
+  /(?:signup\s+credits[^|\n]*\|\s*\*{0,2}|up\s+to\s*\*{0,2}|First\s+month\s+with\s+signup\s+grants\s*\|\s*\*{0,2}|lift\s+the\s+first\s+month\s+to\s*\*{0,2})$/i;
+const STEADY_AFTER = new RegExp(
+  String.raw`^(?:\*\*|<\/?[a-z]{1,8}\/?>|\s){0,12}(?:recurring\s+)?(?:documented\s+)?free\s+tokens` +
+    String.raw`|^\s*Tokens\s+\/\s+Month` +
+    String.raw`|^\*{0,2}\s*real\b`,
+  "i"
+);
+const STEADY_BEFORE =
+  /(?:recurring\s+grant[^|\n]*\|\s*\*{0,2}|Recurring\s+quantified\s+grant\s*\|\s*\*{0,2}|headline\s+remains\s*\*{0,2})$/i;
+const RETIRED_SHARE =
+  /(\d{1,3}(?:[.,]\d)?)%\s+(?:from\s+offers\s+that\s+(?:no\s+longer\s+exist|have\s+ended)|from\s+retired\s+rows|de\s+ofertas\s+que\s+(?:já\s+acabaram|foram\s+encerradas))/dgi;
+
+/** Decimal places printed in `digits` ("1.62" → 2, "11,4" → 1, "93" → 0). */
+function printedDecimals(digits) {
+  const sep = digits.search(/[.,]/);
+  return sep === -1 ? 0 : digits.length - sep - 1;
+}
+
+/** Kind of the token figure at `m`, from the anchors around it; null when it is no claim. */
+function tokenFigureKind(content, m) {
+  const end = m.index + m[0].length;
+  const after = content.slice(end, end + TOKEN_WINDOW);
+  const before = content.slice(Math.max(0, m.index - TOKEN_WINDOW), m.index);
+  for (const { via, pattern } of ROW_SUM_TOTAL_AFTER) {
+    if (pattern.test(after)) return { key: "rowSum:total", via };
   }
-  return claims;
+  if (ROW_SUM_LIVE_AFTER.test(after)) return { key: "rowSum:live" };
+  if (FIRST_AFTER.test(after) || FIRST_BEFORE.test(before)) return { key: "headline:first" };
+  if (STEADY_AFTER.test(after) || STEADY_BEFORE.test(before)) return { key: "headline:steady" };
+  return null;
+}
+
+/**
+ * Every free-token claim of `content`, in document order. `value` and `tokens` are tokens
+ * (`retiredShare`: `value` is percentage points and `tokens` is NaN — it is not a token figure);
+ * `halfStep` is half a unit of the last printed digit, in the same unit as `value`; `start`/`end`
+ * span the printed digits; `via` (rowSum:total only) names the anchor that matched.
+ */
+export function locateFreeTokenClaims(content) {
+  const claims = [];
+  for (const m of content.matchAll(TOKEN_FIGURE)) {
+    const kind = tokenFigureKind(content, m);
+    if (!kind) continue;
+    const digits = m[1].replace(",", ".");
+    const unit = m[2] === "B" ? 1e9 : 1e6;
+    const tokens = Math.round(Number(digits) * unit);
+    claims.push({
+      key: kind.key,
+      value: tokens,
+      tokens,
+      halfStep: unit / (2 * 10 ** printedDecimals(m[1])),
+      text: m[0],
+      ...groupSpan(m),
+      ...(kind.via ? { via: kind.via } : {}),
+    });
+  }
+  for (const m of content.matchAll(RETIRED_SHARE)) {
+    claims.push({
+      key: "retiredShare",
+      value: Number(m[1].replace(",", ".")),
+      tokens: Number.NaN,
+      halfStep: 1 / (2 * 10 ** printedDecimals(m[1])),
+      text: `${m[1]}%`,
+      ...groupSpan(m),
+    });
+  }
+  return claims.sort((a, b) => a.start - b.start);
+}
+
+/** The headline kinds of `locateFreeTokenClaims` (value in tokens). */
+export function locateHeadlineClaims(content) {
+  return locateFreeTokenClaims(content).filter((c) => c.key.startsWith("headline:"));
 }
 
 // The eligibility-gated figure ("+~6M behind regional identity verification") is validated with

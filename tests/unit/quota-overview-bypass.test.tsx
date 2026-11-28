@@ -78,7 +78,7 @@ for (const locale of ["en", "zh-CN"])
       );
       expect(typeof messages.usage[row.key]).toBe("string");
       expect(screen.getByText(messages.usage[row.key])).toBeTruthy();
-      expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe("0");
+      expect(screen.getByRole("meter").getAttribute("aria-valuenow")).toBe("0");
       expect(screen.getAllByText(messages.usage.healthAvailable)).toHaveLength(2);
       // The capsule must agree with the tooltip: a bypass permits the account to
       // serve, it does not refill the plan window that the meter reports.

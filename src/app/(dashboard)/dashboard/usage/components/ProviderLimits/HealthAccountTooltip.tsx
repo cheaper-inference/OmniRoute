@@ -126,6 +126,7 @@ function TooltipCells({ account }: { account: DisplayAccount }) {
           </div>
           {/* Remaining quota: any visible fill is the success tone (an empty bar draws nothing). */}
           <Progress
+            semantics="meter"
             className="mt-1"
             aria-label={windowLabel(cell)}
             value={cell.percent}

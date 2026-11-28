@@ -366,3 +366,53 @@ test("trailing usage flush does not replay the finish chunk's trailing text", ()
   assert.equal(joinDeltas(events, "text_delta"), "Hello world");
   assert.equal(events.filter((event) => event.type === "message_stop").length, 1);
 });
+
+const CACHE_READ_CASES: Array<[name: string, details: Record<string, unknown>, expected?: number]> =
+  [
+    ["Chat explicit zero", { prompt_tokens_details: { cached_tokens: 0 } }, 0],
+    ["Responses detail explicit zero", { input_tokens_details: { cached_tokens: 0 } }, 0],
+    ["flat Claude-compatible explicit zero", { cache_read_input_tokens: 0 }, 0],
+    ["positive count", { prompt_tokens_details: { cached_tokens: 43264 } }, 43264],
+    ["omitted count", { prompt_tokens_details: {}, input_tokens_details: {} }],
+    [
+      "invalid counts",
+      {
+        prompt_tokens_details: { cached_tokens: -1 },
+        input_tokens_details: { cached_tokens: null },
+        cache_read_input_tokens: Infinity,
+      },
+    ],
+    [
+      "valid fallback after invalid count",
+      {
+        prompt_tokens_details: { cached_tokens: NaN },
+        input_tokens_details: { cached_tokens: 0 },
+      },
+      0,
+    ],
+  ];
+
+for (const [name, details, expected] of CACHE_READ_CASES) {
+  test(`trailing Claude usage keeps the cache-read evidence: ${name}`, () => {
+    const state = createState();
+    const events = collectEvents(
+      [
+        { choices: [{ index: 0, delta: { content: "OK" }, finish_reason: null }] },
+        { choices: [{ index: 0, delta: {}, finish_reason: "stop" }] },
+        {
+          choices: [],
+          usage: { prompt_tokens: 50000, completion_tokens: 7, ...details },
+        },
+      ],
+      state
+    );
+    const usage = {
+      input_tokens: 50000 - (expected ?? 0),
+      output_tokens: 7,
+      ...(expected === undefined ? {} : { cache_read_input_tokens: expected }),
+    };
+
+    assert.deepEqual(state.usage, usage);
+    assert.deepEqual(events.find((event) => event.type === "message_delta")?.usage, usage);
+  });
+}

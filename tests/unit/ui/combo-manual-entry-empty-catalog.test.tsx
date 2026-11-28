@@ -117,15 +117,18 @@ async function openExpertBuilder() {
   const dialog = await screen.findByRole("dialog");
   // Expert mode arrives with /api/settings; the manual entry only exists in that mode.
   await within(dialog).findByTestId("combo-manual-model-input");
-  // The picker options arrive with /api/combos/builder/options.
-  await waitFor(() =>
-    expect(
-      within(dialog)
-        .getByTestId("combo-builder-provider")
-        .querySelector('option[value="openrouter"]')
-    ).not.toBeNull()
-  );
+  // The picker options arrive with /api/combos/builder/options. Inspect the real
+  // searchable popover rather than native <option> elements under its trigger.
+  const search = await openProviderPicker(dialog);
+  await screen.findByRole("option", { name: /OpenRouter/ });
+  fireEvent.keyDown(search, { key: "Escape" });
+  await waitFor(() => expect(screen.queryByRole("listbox")).not.toBeInTheDocument());
   return dialog;
+}
+
+async function openProviderPicker(dialog: HTMLElement) {
+  fireEvent.click(within(dialog).getByTestId("combo-builder-provider"));
+  return screen.findByRole("combobox", { name: "Search", exact: true });
 }
 
 async function addManualModel(dialog: HTMLElement, value: string) {
@@ -163,9 +166,13 @@ describe("expert-mode manual model entry", { timeout: 90_000 }, () => {
 
   it("keeps the picker limited to providers that have a catalog model", async () => {
     const dialog = await openExpertBuilder();
-    const picker = within(dialog).getByTestId("combo-builder-provider");
-    expect(picker.querySelector('option[value="openrouter"]')).not.toBeNull();
-    expect(picker.querySelector('option[value="codex"]')).toBeNull();
+    await openProviderPicker(dialog);
+    const picker = within(screen.getByRole("listbox"));
+    expect(picker.getByRole("option", { name: /OpenRouter/ })).toHaveAttribute(
+      "data-value",
+      "openrouter"
+    );
+    expect(picker.queryByRole("option", { name: /Codex/ })).not.toBeInTheDocument();
   });
 
   it("still refuses a prefix that matches no configured provider", async () => {
@@ -192,7 +199,7 @@ describe("reserved automatic route names", { timeout: 90_000 }, () => {
     expect(vi.mocked(fetch).mock.calls.some(([, init]) => init?.method === "POST")).toBe(false);
   });
 
-  it("warns on a saved reserved name and enables saving after renaming", async () => {
+  async function openReservedComboEditor() {
     listedCombos = [reservedCombo];
     render(<CombosPage />);
     const card = await screen.findByTestId("combo-card-legacy-auto");
@@ -202,11 +209,38 @@ describe("reserved automatic route names", { timeout: 90_000 }, () => {
     const dialog = await screen.findByRole("dialog");
     const name = within(dialog).getByTestId("combo-name-input");
     const save = await within(dialog).findByRole("button", { name: "Save" });
+    return { dialog, name, save };
+  }
+
+  it("saves changes while keeping a legacy reserved name", async () => {
+    const { dialog, name, save } = await openReservedComboEditor();
     expect(name).toHaveValue("Auto/coding");
+    expect(save).toBeEnabled();
+    expect(name).not.toHaveAccessibleDescription(/reserved for the built-in automatic routes/i);
+
+    fireEvent.change(within(dialog).getByLabelText("Description"), {
+      target: { value: "Updated description" },
+    });
+    fireEvent.click(save);
+    await waitFor(() =>
+      expect(fetch).toHaveBeenCalledWith(
+        "/api/combos/legacy-auto",
+        expect.objectContaining({
+          method: "PUT",
+          body: expect.stringContaining('"description":"Updated description"'),
+        })
+      )
+    );
+  });
+
+  it("shows an inline error for a different reserved name and enables saving after a valid rename", async () => {
+    const { name, save } = await openReservedComboEditor();
+    fireEvent.change(name, { target: { value: " AUTO/x " } });
     expect(name).toHaveAccessibleDescription(/reserved for the built-in automatic routes/i);
     expect(save).toBeDisabled();
     fireEvent.click(save);
     expect(vi.mocked(fetch).mock.calls.some(([, init]) => init?.method === "PUT")).toBe(false);
+
     fireEvent.change(name, { target: { value: "my-auto" } });
     expect(save).toBeEnabled();
   });

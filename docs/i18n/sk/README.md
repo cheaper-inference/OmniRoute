@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Prísľub — Jeden koncový bod a 394 poskytovateľov. Automatické záložné smerovanie udrží smerovanie funkčné, kým je k dispozícii iný zdravý cieľ. Šesť pilierov: odolné záložné smerovanie naprieč 394 poskytovateľmi · až 95 % úspora tokenov pri oprávnených úlohách · $0 na začiatok so 150+ bezplatnými úrovňami a 51 opakovanými/bezkľúčovými poskytovateľmi navždy zadarmo · 39 integrácií CLI/agentov prostredníctvom jednej konfigurácie · kompatibilita s rozhraniami OpenAI, Claude, Gemini a Responses API na /v1 · produkčné ovládacie prvky vrátane ističov, TLS stealth, MCP s 110 nástrojmi, A2A, pamäte, ochranných mechanizmov, evaluácií a viac než 56 000 statických deklarácií testov v rámci viac než 7 800 sledovaných testovacích súborov."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Prísľub — Jeden koncový bod a 394 poskytovateľov. Automatické záložné smerovanie udrží smerovanie funkčné, kým je k dispozícii iný zdravý cieľ. Šesť pilierov: odolné záložné smerovanie naprieč 394 poskytovateľmi · až 95 % úspora tokenov pri oprávnených úlohách · $0 na začiatok so 150+ bezplatnými úrovňami a 40 opakovanými/bezkľúčovými poskytovateľmi navždy zadarmo · 39 integrácií CLI/agentov prostredníctvom jednej konfigurácie · kompatibilita s rozhraniami OpenAI, Claude, Gemini a Responses API na /v1 · produkčné ovládacie prvky vrátane ističov, TLS stealth, MCP s 110 nástrojmi, A2A, pamäte, ochranných mechanizmov, evaluácií a viac než 56 000 statických deklarácií testov v rámci viac než 7 800 sledovaných testovacích súborov."/>
 
 <br/>
 <br/>
@@ -703,7 +703,7 @@ histórie vášho shellu. → [CLI Integrácie](docs/guides/CLI-INTEGRATIONS.md)
 
 </div>
 
-> **394 registrovaných poskytovateľov** v rámci kanonických kolekcií pre chat, médiá, vyhľadávanie, lokálne služby, cloudových agentov a systémové služby vrátane **153 poskytovateľov s vyhľadávacími metadátami `hasFree: true`**. Register chatovacích modelov zahŕňa **239 poskytovateľov / 3 059 jedinečných dvojíc poskytovateľ–model / 1 475 nespracovaných ID modelov**; samostatný katalóg bezplatných limitov obsahuje **465 riadkov pre jednotlivé modely**, **34 opakujúcich sa fondov** a **51 opakujúcich sa alebo bezkľúčových poskytovateľov bezplatných navždy**. Zámerne ide o rozdielne menovatele; definície a výpočty s deduplikovanými fondmi nájdete v dokumentoch [Referenčná príručka poskytovateľov](docs/reference/PROVIDER_REFERENCE.md) a [Bezplatné úrovne](docs/reference/FREE_TIERS.md).
+> **394 registrovaných poskytovateľov** v rámci kanonických kolekcií pre chat, médiá, vyhľadávanie, lokálne služby, cloudových agentov a systémové služby vrátane **153 poskytovateľov s vyhľadávacími metadátami `hasFree: true`**. Register chatovacích modelov zahŕňa **239 poskytovateľov / 3 059 jedinečných dvojíc poskytovateľ–model / 1 475 nespracovaných ID modelov**; samostatný katalóg bezplatných limitov obsahuje **465 riadkov pre jednotlivé modely**, **34 opakujúcich sa fondov** a **40 opakujúcich sa alebo bezkľúčových poskytovateľov bezplatných navždy**. Zámerne ide o rozdielne menovatele; definície a výpočty s deduplikovanými fondmi nájdete v dokumentoch [Referenčná príručka poskytovateľov](docs/reference/PROVIDER_REFERENCE.md) a [Bezplatné úrovne](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 

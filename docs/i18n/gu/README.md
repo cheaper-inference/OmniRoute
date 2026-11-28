@@ -250,7 +250,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="વચન — એક એન્ડપોઇન્ટ અને 394 પ્રોવાઇડર્સ. બીજું સ્વસ્થ ટાર્ગેટ ઉપલબ્ધ હોય ત્યાં સુધી ઑટોમેટિક ફૉલબૅક રૂટિંગ ચાલુ રાખે છે. છ સ્તંભો: 394 પ્રોવાઇડર્સમાં સ્થિતિસ્થાપક ફૉલબૅક · પાત્ર વર્કલોડ્સ પર 95% સુધી ટોકન બચત · 150+ ફ્રી ટિયર્સ અને 51 આવર્તિત/કીલેસ હંમેશાં-મફત પ્રોવાઇડર્સ સાથે શરૂઆત માટે $0 · એક કૉન્ફિગ મારફતે 39 CLI/એજન્ટ ઇન્ટિગ્રેશન્સ · /v1 પર OpenAI, Claude, Gemini અને Responses API સુસંગતતા · સર્કિટ બ્રેકર્સ, TLS સ્ટેલ્થ, MCP 110 ટૂલ્સ, A2A, મેમરી, ગાર્ડરેલ્સ, ઇવેલ્સ અને 7,800+ ટ્રૅક કરેલી ટેસ્ટ ફાઇલોમાં 56,000+ સ્ટેટિક ટેસ્ટ ઘોષણાઓ સહિતના પ્રોડક્શન નિયંત્રણો."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="વચન — એક એન્ડપોઇન્ટ અને 394 પ્રોવાઇડર્સ. બીજું સ્વસ્થ ટાર્ગેટ ઉપલબ્ધ હોય ત્યાં સુધી ઑટોમેટિક ફૉલબૅક રૂટિંગ ચાલુ રાખે છે. છ સ્તંભો: 394 પ્રોવાઇડર્સમાં સ્થિતિસ્થાપક ફૉલબૅક · પાત્ર વર્કલોડ્સ પર 95% સુધી ટોકન બચત · 150+ ફ્રી ટિયર્સ અને 40 આવર્તિત/કીલેસ હંમેશાં-મફત પ્રોવાઇડર્સ સાથે શરૂઆત માટે $0 · એક કૉન્ફિગ મારફતે 39 CLI/એજન્ટ ઇન્ટિગ્રેશન્સ · /v1 પર OpenAI, Claude, Gemini અને Responses API સુસંગતતા · સર્કિટ બ્રેકર્સ, TLS સ્ટેલ્થ, MCP 110 ટૂલ્સ, A2A, મેમરી, ગાર્ડરેલ્સ, ઇવેલ્સ અને 7,800+ ટ્રૅક કરેલી ટેસ્ટ ફાઇલોમાં 56,000+ સ્ટેટિક ટેસ્ટ ઘોષણાઓ સહિતના પ્રોડક્શન નિયંત્રણો."/>
 
 <br/>
 <br/>
@@ -702,7 +702,7 @@ omniroute configure codex          # આ માટે પણ: claude opencode qw
 
 </div>
 
-> **394 નોંધાયેલા પ્રદાતાઓ** canonical chat, media, search, local, cloud-agent અને system સંગ્રહોમાં સમાવિષ્ટ છે, જેમાં **153 પ્રદાતાઓ પાસે `hasFree: true` discovery metadata છે**. Chat model registryમાં **239 પ્રદાતાઓ / 3,059 વિશિષ્ટ provider-model જોડીઓ / 1,475 raw model IDs** આવરી લેવામાં આવ્યા છે; અલગ free-budget catalogમાં **465 પ્રતિ-મૉડલ પંક્તિઓ**, **34 પુનરાવર્તિત pools** અને **51 પુનરાવર્તિત/keyless free-forever પ્રદાતાઓ** છે. આ અલગ denominators ડિઝાઇન મુજબ છે; વ્યાખ્યાઓ અને pool-deduped ગણતરીઓ [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) અને [Free Tiers](docs/reference/FREE_TIERS.md) માં ઉપલબ્ધ છે.
+> **394 નોંધાયેલા પ્રદાતાઓ** canonical chat, media, search, local, cloud-agent અને system સંગ્રહોમાં સમાવિષ્ટ છે, જેમાં **153 પ્રદાતાઓ પાસે `hasFree: true` discovery metadata છે**. Chat model registryમાં **239 પ્રદાતાઓ / 3,059 વિશિષ્ટ provider-model જોડીઓ / 1,475 raw model IDs** આવરી લેવામાં આવ્યા છે; અલગ free-budget catalogમાં **465 પ્રતિ-મૉડલ પંક્તિઓ**, **34 પુનરાવર્તિત pools** અને **40 પુનરાવર્તિત/keyless free-forever પ્રદાતાઓ** છે. આ અલગ denominators ડિઝાઇન મુજબ છે; વ્યાખ્યાઓ અને pool-deduped ગણતરીઓ [Provider Reference](docs/reference/PROVIDER_REFERENCE.md) અને [Free Tiers](docs/reference/FREE_TIERS.md) માં ઉપલબ્ધ છે.
 
 <div align="center">
 

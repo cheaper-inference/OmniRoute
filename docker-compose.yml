@@ -367,20 +367,25 @@ services:
   # the Codex CLI's own `codex app-server` over JSON-RPC/WebSocket instead of
   # replaying a session token to the API. It listens ONLY on the internal compose
   # network (ws://codex-app-server:1456), guarded by a capability token — it is
-  # NEVER published to the host / internet. The Codex CLI (baked into
-  # omniroute:base) self-manages its OpenAI OAuth via the shared ~/.codex volume,
-  # which the dashboard "Apply auth" (device-OAuth) writes and this sidecar reads.
+  # NEVER published to the host / internet. The sidecar uses the runner-cli-no-docker
+  # target, which includes the Codex CLI. The CLI self-manages its OpenAI OAuth via
+  # the shared ~/.codex volume, which the dashboard "Apply auth" (device-OAuth)
+  # writes and this sidecar reads.
   #
   # NOTE: this is the GENERIC public sidecar. An operator wanting residential /
   # UDP egress (via a TUN sidecar) runs that separately as an override; it is
   # intentionally not shipped here.
   codex-app-server:
-    image: omniroute:base
+    build:
+      context: .
+      target: runner-cli-no-docker
+      args:
+        OMNIROUTE_BASE_PATH: ${OMNIROUTE_BASE_PATH:-}
+    image: omniroute:cli-no-docker
     container_name: omniroute-codex-app-server
     restart: unless-stopped
     # Generate the WS capability token on first boot if absent, then run the
-    # app-server. entrypoint is overridden because the base image's default is the
-    # Next.js server.
+    # app-server. Override the image's default startup, which launches Next.js.
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
