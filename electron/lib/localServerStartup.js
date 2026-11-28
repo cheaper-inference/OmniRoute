@@ -23,7 +23,7 @@
  * @typedef {EmbeddedBoundEvent | EmbeddedBindFailedEvent} EmbeddedBindEvent
  * @typedef {{ kind: "ready", port: number }
  *   | { kind: "bind-error", code: string }
- *   | { kind: "failed", reason: "exit" | "startup" | "timeout" | "cancelled" }} EmbeddedStartResult
+ *   | { kind: "failed", reason: "exit" | "startup" | "timeout" | "cancelled" | "cleanup" }} EmbeddedStartResult
  */
 
 const crypto = require("crypto");
@@ -206,13 +206,15 @@ function runEmbeddedAttempt(attempt) {
     );
     if (typeof timer.unref === "function") timer.unref();
 
+    /** Resolves true once the child's exit is confirmed, false when it outlived both signals. */
     async function ensureChildGone() {
-      if (exited) return;
+      if (exited) return true;
       stopChild(child, "SIGTERM");
       await Promise.race([exitedPromise, delay(exitTimeoutMs)]);
-      if (exited) return;
+      if (exited) return true;
       stopChild(child, "SIGKILL");
       await Promise.race([exitedPromise, delay(exitTimeoutMs)]);
+      return exited;
     }
 
     /** Settle once. A non-ready result resolves only after the child is gone. */
@@ -224,8 +226,10 @@ function runEmbeddedAttempt(attempt) {
       child.removeListener("exit", onEarlyExit);
       child.removeListener("error", onError);
       signal.removeEventListener("abort", onAbort);
-      const gone = stopChildFirst ? ensureChildGone() : exitedPromise;
-      gone.then(() => resolve(result));
+      const gone = stopChildFirst ? ensureChildGone() : exitedPromise.then(() => true);
+      // A child that may still be alive must not be followed by another attempt, so the
+      // original result (often a retryable EADDRINUSE) gives way to a terminal cleanup failure.
+      gone.then((confirmed) => resolve(confirmed ? result : { kind: "failed", reason: "cleanup" }));
     }
 
     function onEarlyExit() {
@@ -301,6 +305,13 @@ function describeStartupFailure(result, requestedPort) {
     return {
       title,
       message: `OmniRoute could not listen on port ${requestedPort} (${result.code}).`,
+    };
+  }
+  if (result.kind === "failed" && result.reason === "cleanup") {
+    return {
+      title,
+      message:
+        "A previous OmniRoute server process did not exit during cleanup, so no new one was started. Quit it from your system task manager and start OmniRoute again.",
     };
   }
   const detail = result.kind === "failed" ? result.reason : "unknown";

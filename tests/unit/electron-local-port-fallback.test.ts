@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
+import http from "node:http";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
@@ -85,6 +86,8 @@ function makeHarness(opts: {
   foreignHealthy?: number[];
   exitDelayMs?: number;
   timeoutMs?: number;
+  /** The children ignore every signal and never exit. */
+  stubbornChildren?: boolean;
 }): Harness {
   const foreignHealthy = new Set(opts.foreignHealthy ?? []);
   const h: Harness = {
@@ -113,6 +116,7 @@ function makeHarness(opts: {
         },
         stopChild: (child: FakeChild, signal = "SIGTERM") => {
           child.signals.push(signal);
+          if (opts.stubbornChildren) return;
           setTimeout(() => child.die(143), opts.exitDelayMs ?? 5);
         },
         waitUntilReady: (port: number, timeoutMs: number) =>
@@ -307,6 +311,28 @@ describe("embedded server port fallback: startup flow", () => {
 
 // ─── Eligibility ─────────────────────────────────────────────────────────────────────
 
+describe("embedded server port fallback: unconfirmed child cleanup", () => {
+  it("never starts another child while the previous one is still alive", async () => {
+    const h = makeHarness({
+      stubbornChildren: true,
+      onSpawn: (child) => child.emitBindFailed("EADDRINUSE"),
+    });
+
+    const result = await h.run();
+
+    assert.deepEqual(result, { kind: "failed", reason: "cleanup" });
+    assert.deepEqual(h.attemptedPorts, [20128], "no second child while the first may be alive");
+    assert.deepEqual(h.children[0].signals, ["SIGTERM", "SIGKILL"]);
+    assert.deepEqual(h.published, []);
+  });
+
+  it("describes a cleanup failure without claiming the ports are all busy", () => {
+    const { message } = describeStartupFailure({ kind: "failed", reason: "cleanup" }, 20128);
+    assert.doesNotMatch(message, /in use by other programs/);
+    assert.match(message, /cleanup/);
+  });
+});
+
 describe("embedded server port fallback: eligibility", () => {
   const eligible = {
     env: { [FALLBACK_FLAG_ENV]: "true" } as Record<string, string>,
@@ -496,6 +522,30 @@ describe("embedded server port fallback: wiring", () => {
     );
   });
 
+  it("a second launch cannot open a window while the port search is unconfirmed", () => {
+    const main = read("electron/main.js");
+    const handler = main.match(/app\.on\("second-instance", \(\) => \{[\s\S]*?\n\}\);/);
+    assert.ok(handler, "main.js must keep a second-instance handler");
+    const body = handler![0];
+    const guard = body.indexOf("embeddedStartup && !embeddedPortConfirmed");
+    assert.ok(guard !== -1, "the handler must check the unconfirmed port search");
+    assert.ok(guard < body.indexOf("showMainWindow()"), "the guard must run before the window");
+    // The request is kept and served once the confirmed child is up.
+    assert.match(main, /secondInstanceDeferred = true/);
+    assert.match(main, /secondInstanceDeferred && !isHeadless/);
+  });
+
+  it("reports the stopped server when the confirmed child exits, never for failed attempts", () => {
+    const main = read("electron/main.js");
+    const exit = main.match(
+      /child\.on\("exit", \(code\) => \{\n {8}console\.log\(`\[Electron\] Server \(port[\s\S]*?\n {6}\}\);/
+    );
+    assert.ok(exit, "the search path must keep its own exit handler");
+    assert.match(exit![0], /nextServer === child/);
+    assert.match(exit![0], /embeddedPortConfirmed/);
+    assert.match(exit![0], /sendToRenderer\("server-status", \{ status: "stopped"/);
+  });
+
   it("the standalone wrapper reports the bind of its main listener over IPC", () => {
     const wrapper = read("scripts/dev/standalone-server-ws.mjs");
     assert.ok(wrapper.includes(EMBEDDED_BOUND_EVENT));
@@ -582,6 +632,24 @@ async function runWrapperChild(
   return { messages, code };
 }
 
+/** Polls the loopback port until it answers 200, so the test follows the child, not a timer. */
+async function waitForHttpOk(port: number, timeoutMs: number): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const ok = await new Promise<boolean>((resolve) => {
+      const req = http.get({ host: "127.0.0.1", port, path: "/" }, (res) => {
+        res.resume();
+        resolve(res.statusCode === 200);
+      });
+      req.on("error", () => resolve(false));
+      req.setTimeout(500, () => req.destroy());
+    });
+    if (ok) return;
+    await new Promise((r) => setTimeout(r, 25));
+  }
+  throw new Error(`port ${port} never answered 200`);
+}
+
 describe("embedded server port fallback: the real standalone wrapper over IPC", () => {
   const TOKEN = "0123456789abcdef-token";
 
@@ -646,7 +714,8 @@ describe("embedded server port fallback: the real standalone wrapper over IPC", 
     child.stderr?.resume();
     const exited = new Promise((resolve) => child.once("exit", resolve));
     try {
-      await new Promise((r) => setTimeout(r, 1500));
+      await waitForHttpOk(freePort, 15_000);
+      assert.equal(child.exitCode, null, "the child must still be alive once it serves");
       assert.deepEqual(messages, []);
     } finally {
       child.kill("SIGTERM");

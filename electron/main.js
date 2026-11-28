@@ -74,6 +74,12 @@ app.on("second-instance", () => {
     process.argv.includes("--cli") ||
     process.env.OMNIROUTE_HEADLESS === "true";
   if (isHeadless) return;
+  // Port search in flight: serverPort still holds the default, which a foreign program may own.
+  // Keep the request and serve it once the child's own bind is confirmed.
+  if (embeddedStartup && !embeddedPortConfirmed) {
+    secondInstanceDeferred = true;
+    return;
+  }
   showMainWindow();
 });
 
@@ -100,6 +106,7 @@ let initialStartPending = true;
 let portDiscoveryEngaged = false;
 let embeddedStartup = null;
 let embeddedPortConfirmed = false;
+let secondInstanceDeferred = false;
 
 // ── Remote Server Mode ──────────────────────────────────────
 // Lets the desktop shell attach to an already-running OmniRoute server (e.g. a
@@ -1043,7 +1050,11 @@ function startEmbeddedWithPortSearch({ nodeExecutable, serverScript, buildChildE
       child.on("error", (err) => console.error("[Electron] Failed to start server:", err));
       child.on("exit", (code) => {
         console.log(`[Electron] Server (port ${port}) exited with code:`, code);
-        if (nextServer === child) nextServer = null;
+        if (nextServer === child) {
+          nextServer = null;
+          // Only the confirmed child is the active server; a failed search attempt is silent.
+          if (embeddedPortConfirmed) sendToRenderer("server-status", { status: "stopped", port });
+        }
       });
       return child;
     },
@@ -1385,6 +1396,11 @@ app.whenReady().then(async () => {
     }
   }
 
+  // A second launch that arrived during the port search is served now that the port is known;
+  // the normal path below already shows the window unless this launch is hidden.
+  const showForDeferredSecondInstance = secondInstanceDeferred && !isHeadless && startHidden;
+  secondInstanceDeferred = false;
+
   let serverReady = true;
   if (!isDev) {
     // Probe the lightweight auth-exempt endpoint instead of aggregating full monitoring state.
@@ -1393,6 +1409,9 @@ app.whenReady().then(async () => {
 
   if (isHeadless) {
     console.log("[Electron] Headless mode active — UI window and tray icon skipped");
+  } else if (startHidden && showForDeferredSecondInstance) {
+    console.log("[Electron] Showing the window a second launch asked for during the port search");
+    showMainWindow();
   } else if (startHidden) {
     console.log("[Electron] Launched hidden in background tray without a renderer");
   } else {
