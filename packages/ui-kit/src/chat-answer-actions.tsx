@@ -1,7 +1,7 @@
 "use client";
 
-import { useId, type ComponentProps } from "react";
-import { ArrowRight, Check, MousePointer2, RotateCcw, ThumbsUp } from "lucide-react";
+import { useId, useState, type ComponentProps } from "react";
+import { ArrowRight, Check, MousePointer2, RotateCcw, ThumbsDown, ThumbsUp } from "lucide-react";
 import { Button } from "./button";
 import { resolveLabels } from "./lib/labels";
 import { cn } from "./lib/utils";
@@ -51,24 +51,40 @@ export function ChatGuideCard({ title, stepCount, onStart, actionLabel = "Guide 
 export type ChatFeedbackStatus = "idle" | "pending" | "success" | "error";
 export interface ChatFeedbackProps extends Omit<ComponentProps<"div">, "onChange"> {
   helpful?: boolean;
+  /** Confirmed Not helpful selection. Only rendered with `onNotHelpful`. */
+  notHelpful?: boolean;
   status?: ChatFeedbackStatus;
   onHelpful: (helpful: boolean) => void;
-  labels?: { helpful?: string; markedHelpful?: string; sending?: string; retry?: string; removeHelpful?: string; thanks?: string; cleared?: string; error?: string };
+  /** Adds a Not helpful button after Helpful. Without it the component renders Helpful alone. */
+  onNotHelpful?: (notHelpful: boolean) => void;
+  labels?: { helpful?: string; markedHelpful?: string; sending?: string; retry?: string; removeHelpful?: string; notHelpful?: string; markedNotHelpful?: string; removeNotHelpful?: string; thanks?: string; cleared?: string; error?: string };
 }
 
-/** Controlled feedback with a visible selection, live confirmation and recoverable error. */
-export function ChatFeedback({ helpful = false, status = "idle", onHelpful, labels = {}, className, ...props }: ChatFeedbackProps) {
+/**
+ * Controlled feedback with a visible selection, live confirmation and recoverable error.
+ * The sending, retry and confirmation states belong to the button clicked last (before any click, to
+ * Not helpful when it is the only selection, otherwise to Helpful); while pending, both are disabled.
+ */
+export function ChatFeedback({ helpful = false, notHelpful = false, status = "idle", onHelpful, onNotHelpful, labels = {}, className, ...props }: ChatFeedbackProps) {
   const messageId = useId();
-  const { helpful: helpfulLabel = "Helpful", markedHelpful = "Marked helpful", sending = "Sending feedback…", retry = "Try again", removeHelpful = "Remove helpful feedback", thanks = "Thanks for your feedback.", cleared = "Feedback cleared.", error = "Couldn’t send feedback. Please try again." } = labels;
+  const [lastClicked, setLastClicked] = useState<"helpful" | "notHelpful" | null>(null);
+  const { helpful: helpfulLabel = "Helpful", markedHelpful = "Marked helpful", sending = "Sending feedback…", retry = "Try again", removeHelpful = "Remove helpful feedback", notHelpful: notHelpfulLabel = "Not helpful", markedNotHelpful = "Marked not helpful", removeNotHelpful = "Remove not helpful feedback", thanks = "Thanks for your feedback.", cleared = "Feedback cleared.", error = "Couldn’t send feedback. Please try again." } = labels;
   const pending = status === "pending";
   const failed = status === "error";
+  const owner = onNotHelpful ? lastClicked ?? (notHelpful && !helpful ? "notHelpful" : "helpful") : "helpful";
+  const helpfulActive = owner === "helpful";
+  const notHelpfulActive = !helpfulActive;
   return <div {...props} className={cn("ci-chat-feedback", className)}>
-    <Button type="button" variant="ghost" size="sm" loading={pending} disabled={pending} aria-pressed={helpful} aria-describedby={status === "idle" ? undefined : messageId} aria-label={helpful && !pending && !failed ? `${markedHelpful}. ${removeHelpful}` : undefined} data-selected={helpful || undefined} className="ci-chat-feedback__button" onClick={() => onHelpful(!helpful)}>
-      {failed ? <RotateCcw size={15} aria-hidden="true" /> : <ThumbsUp size={15} aria-hidden="true" />}
-      {pending ? sending : failed ? retry : helpful ? markedHelpful : helpfulLabel}
+    <Button type="button" variant="ghost" size="sm" loading={pending && helpfulActive} disabled={pending} aria-pressed={helpful} aria-describedby={status === "idle" || !helpfulActive ? undefined : messageId} aria-label={helpful && !(helpfulActive && (pending || failed)) ? `${markedHelpful}. ${removeHelpful}` : undefined} data-selected={helpful || undefined} className="ci-chat-feedback__button" onClick={() => { setLastClicked("helpful"); onHelpful(!helpful); }}>
+      {failed && helpfulActive ? <RotateCcw size={15} aria-hidden="true" /> : <ThumbsUp size={15} aria-hidden="true" />}
+      {pending && helpfulActive ? sending : failed && helpfulActive ? retry : helpful ? markedHelpful : helpfulLabel}
     </Button>
+    {onNotHelpful && <Button type="button" variant="ghost" size="sm" loading={pending && notHelpfulActive} disabled={pending} aria-pressed={notHelpful} aria-describedby={status === "idle" || !notHelpfulActive ? undefined : messageId} aria-label={notHelpful && !(notHelpfulActive && (pending || failed)) ? `${markedNotHelpful}. ${removeNotHelpful}` : undefined} data-selected={notHelpful || undefined} className="ci-chat-feedback__button" onClick={() => { setLastClicked("notHelpful"); onNotHelpful(!notHelpful); }}>
+      {failed && notHelpfulActive ? <RotateCcw size={15} aria-hidden="true" /> : <ThumbsDown size={15} aria-hidden="true" />}
+      {pending && notHelpfulActive ? sending : failed && notHelpfulActive ? retry : notHelpful ? markedNotHelpful : notHelpfulLabel}
+    </Button>}
     <span id={messageId} role={failed ? "alert" : "status"} className="ci-chat-feedback__message" data-error={failed || undefined}>
-      {status === "success" && <><Check size={14} aria-hidden="true" />{helpful ? thanks : cleared}</>}
+      {status === "success" && <><Check size={14} aria-hidden="true" />{helpful || notHelpful ? thanks : cleared}</>}
       {failed && error}
     </span>
   </div>;

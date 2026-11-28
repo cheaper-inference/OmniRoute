@@ -4,16 +4,18 @@ import { Card } from "./card";
 import { Badge, type BadgeTone } from "./badge";
 import { cn } from "./lib/utils";
 
-export type NotificationCategory = "incident" | "maintenance" | "models" | "product" | "announcement";
-const surfaceColors: Record<BadgeTone, string> = { neutral: "var(--ci-color-text-muted)", success: "var(--ci-color-success)", warning: "var(--ci-color-warning)", info: "var(--ci-color-info)", danger: "var(--ci-color-danger)", accent: "var(--ci-color-accent)" };
-const categories: Record<NotificationCategory, { label: string; tone?: BadgeTone }> = {
+export type BuiltInNotificationCategory = "incident" | "maintenance" | "models" | "product" | "announcement";
+/** Any category id. The built-in ones have their own colours; others take a `tone`. */
+export type NotificationCategory = BuiltInNotificationCategory | (string & {});
+export const notificationToneColors: Record<BadgeTone, string> = { neutral: "var(--ci-color-text-muted)", success: "var(--ci-color-success)", warning: "var(--ci-color-warning)", info: "var(--ci-color-info)", danger: "var(--ci-color-danger)", accent: "var(--ci-color-accent)" };
+const categories: Record<BuiltInNotificationCategory, { label: string; tone?: BadgeTone }> = {
   incident: { label: "Incidents", tone: "warning" }, maintenance: { label: "Maintenance", tone: "info" },
   models: { label: "Models" }, product: { label: "Product" },
   announcement: { label: "Announcements" },
 };
-export function NotificationCategoryBadge({ category, icon, children, className, ...props }: Omit<ComponentProps<typeof Badge>, "tone" | "variant"> & { category: NotificationCategory }) {
-  const config = categories[category];
-  return <Badge {...props} shape="pill" className={cn(`ci-notification-category--${category}`, className)} variant="default" tone={config.tone} icon={icon}>{children ?? config.label}</Badge>;
+export function NotificationCategoryBadge({ category, tone, icon, children, className, ...props }: Omit<ComponentProps<typeof Badge>, "tone" | "variant"> & { category: NotificationCategory; tone?: BadgeTone }) {
+  const config = categories[category as BuiltInNotificationCategory] as { label: string; tone?: BadgeTone } | undefined;
+  return <Badge {...props} shape="pill" className={cn(`ci-notification-category--${category}`, className)} variant="default" tone={config ? config.tone : tone} icon={icon}>{children ?? config?.label ?? category}</Badge>;
 }
 export interface NotificationCardUpdate {
   id: string;
@@ -42,7 +44,7 @@ export interface NotificationCardProps extends Omit<ComponentProps<"div">, "titl
 }
 /** Width and column/list layout belong to the caller. No fetching or read-state side effects. */
 export function NotificationCard({ title, icon, message, badges, timestamp, dateTime, updates = [], historyLabel, historyDefaultOpen = false, action, surfaceTone, className, style, ...props }: NotificationCardProps) {
-  return <Card {...props} className={cn("ci-notification-card", surfaceTone && "ci-notification-card--tinted", className)} style={{ ...(surfaceTone ? { "--notification-card-tone": surfaceColors[surfaceTone] } : {}), ...style } as CSSProperties}>
+  return <Card {...props} className={cn("ci-notification-card", surfaceTone && "ci-notification-card--tinted", className)} style={{ ...(surfaceTone ? { "--notification-card-tone": notificationToneColors[surfaceTone] } : {}), ...style } as CSSProperties}>
     <div className="ci-notification-card__header">
       <div className="ci-notification-card__title">{icon && <span className="ci-notification-card__icon" aria-hidden="true">{icon}</span>}{title}</div>
       {badges && <div className="ci-notification-card__badges">{badges}</div>}
