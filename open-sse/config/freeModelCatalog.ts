@@ -452,6 +452,7 @@ export const FREE_QUOTA_UNIT: Record<string, FreeQuotaUnit> = {
   nara: "tokens",
   groq: "tokens",
   navy: "tokens",
+  llm7: "tokens",
   "cloudflare-ai": "neurons",
   "api-airforce": "requests",
   sambanova: "requests",
@@ -512,22 +513,78 @@ function isLiveRecurringQuotaRow(m: FreeModelBudget & { enabled?: boolean }): bo
   );
 }
 
-/** True for a retirement date inside the 12 calendar months that end at `asOf` (UTC). */
-function retiredWindow(asOf: Date): (retiredAt: string) => boolean {
-  const upper = isoDate(asOf);
+/** Exclusive lower bound for the 12-month ended-offer window (UTC). */
+function retiredCutoff(asOf: Date): string {
   const floorDate = new Date(asOf.getTime());
   floorDate.setUTCFullYear(floorDate.getUTCFullYear() - 1);
-  const lower = isoDate(floorDate);
-  return (retiredAt) => retiredAt > lower && retiredAt <= upper;
+  return isoDate(floorDate);
+}
+
+type PeakQuota = { provider: string; live: number; retired: number };
+
+const pairKey = (row: { provider: string; modelId: string }) =>
+  JSON.stringify([row.provider, row.modelId]);
+
+/**
+ * One entry per provider/model pair: its largest countable live quota and its largest ledger
+ * quota. An ended offer older than the 12-month window drops out unless the pair is live again.
+ */
+function collectPeakQuotas(
+  entries: ReadonlyArray<FreeModelBudget & { enabled?: boolean }>,
+  retired: readonly RetiredFreeRow[],
+  asOf: Date,
+  counts: (row: { provider: string }) => boolean
+): Map<string, PeakQuota> {
+  const quotas = new Map<string, PeakQuota>();
+  for (const m of entries) {
+    if (!isLiveRecurringQuotaRow(m) || !counts(m)) continue;
+    const key = pairKey(m);
+    const live = Math.max(quotas.get(key)?.live ?? 0, m.monthlyTokens);
+    quotas.set(key, { provider: m.provider, live, retired: 0 });
+  }
+  const through = isoDate(asOf);
+  const cutoff = retiredCutoff(asOf);
+  for (const r of retired) {
+    if (r.retiredAt > through || !(r.lastListedMonthlyTokens > 0) || !counts(r)) continue;
+    const key = pairKey(r);
+    const quota = quotas.get(key) ?? { provider: r.provider, live: 0, retired: 0 };
+    if (quota.live === 0 && r.retiredAt <= cutoff) continue;
+    quota.retired = Math.max(quota.retired, r.lastListedMonthlyTokens);
+    quotas.set(key, quota);
+  }
+  return quotas;
+}
+
+/** Each pair counts once, at its larger quota, in the bucket that quota came from. Live wins ties. */
+function splitPeakQuotas(quotas: Map<string, PeakQuota>): {
+  liveTokens: number;
+  retiredTokens: number;
+  byProvider: Map<string, { liveRows: number; retiredRows: number; tokens: number }>;
+} {
+  const byProvider = new Map<string, { liveRows: number; retiredRows: number; tokens: number }>();
+  let liveTokens = 0;
+  let retiredTokens = 0;
+  for (const { provider, live, retired } of quotas.values()) {
+    const fromLedger = retired > live;
+    const tokens = fromLedger ? retired : live;
+    if (fromLedger) retiredTokens += tokens;
+    else liveTokens += tokens;
+    const cur = byProvider.get(provider) ?? { liveRows: 0, retiredRows: 0, tokens: 0 };
+    cur[fromLedger ? "retiredRows" : "liveRows"] += 1;
+    cur.tokens += tokens;
+    byProvider.set(provider, cur);
+  }
+  return { liveTokens, retiredTokens, byProvider };
 }
 
 /**
  * Sums the monthly quota of every live row that grants recurring free access, with or without
  * gates and whatever its ToS verdict, WITHOUT pool dedup — the way catalogs that add every row
  * up count. Rows published in requests, credits or neurons count 0 unless `countNonTokenUnits`;
- * signup credits, boosts and `enabled: false` rows never count. Retired ledger rows count their
- * last listed quota for 12 calendar months after `retiredAt`. Never feeds routing or the real
- * figure; it is printed next to the real figure, labelled.
+ * signup credits, boosts and `enabled: false` rows never count as live. For each provider/model
+ * pair, the larger eligible quota wins and contributes its full amount to its own bucket.
+ * Live wins ties. The ledger preserves the peak of a countable live row. Other ledger rows
+ * count for 12 calendar months after `retiredAt`. Routing and the real figure use live data.
  */
 export function computeRowSumMirror(
   opts: {
@@ -543,28 +600,8 @@ export function computeRowSumMirror(
   const asOf = opts.asOf ?? new Date(`${FREE_CATALOG_CURATED_AT}T00:00:00Z`);
   const counts = unitCounter(opts.countNonTokenUnits === true);
 
-  const byProvider = new Map<string, { liveRows: number; retiredRows: number; tokens: number }>();
-  const bump = (provider: string, field: "liveRows" | "retiredRows", tokens: number) => {
-    const cur = byProvider.get(provider) ?? { liveRows: 0, retiredRows: 0, tokens: 0 };
-    cur[field] += 1;
-    cur.tokens += tokens;
-    byProvider.set(provider, cur);
-  };
-
-  let liveTokens = 0;
-  for (const m of entries) {
-    if (!isLiveRecurringQuotaRow(m) || !counts(m)) continue;
-    liveTokens += m.monthlyTokens;
-    bump(m.provider, "liveRows", m.monthlyTokens);
-  }
-
-  const inWindow = retiredWindow(asOf);
-  let retiredTokens = 0;
-  for (const r of retired) {
-    if (!inWindow(r.retiredAt) || !(r.lastListedMonthlyTokens > 0) || !counts(r)) continue;
-    retiredTokens += r.lastListedMonthlyTokens;
-    bump(r.provider, "retiredRows", r.lastListedMonthlyTokens);
-  }
+  const quotas = collectPeakQuotas(entries, retired, asOf, counts);
+  const { liveTokens, retiredTokens, byProvider } = splitPeakQuotas(quotas);
 
   const totalTokens = liveTokens + retiredTokens;
   return {

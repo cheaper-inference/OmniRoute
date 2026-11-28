@@ -2,15 +2,34 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
+import { z } from "zod";
 
 import {
   FREE_MODEL_BUDGETS,
   RETIRED_FREE_ROWS,
   RETIRED_LEDGER_SINCE,
+  grantsFreeAccess,
+  type FreeModelBudget,
+  type RetiredFreeRow,
 } from "@omniroute/open-sse/config/freeModelCatalog.ts";
 import { FREE_CATALOG_CURATED_AT } from "@omniroute/open-sse/config/freeModelCatalog.data.ts";
 
-// These invariants run on the shipped ledger in every PR: empty today, filled by the re-audit.
+const isoDay = z.iso.date();
+
+function assertLedgerRevivals(
+  entries: readonly FreeModelBudget[],
+  ledger: readonly RetiredFreeRow[]
+) {
+  for (const r of ledger) {
+    const live = entries.find((m) => m.provider === r.provider && m.modelId === r.modelId);
+    if (live && grantsFreeAccess(live.freeType)) {
+      assert.ok(
+        isoDay.safeParse(r.revivedAt).success,
+        `${r.provider}/${r.modelId} requires a valid revivedAt date`
+      );
+    }
+  }
+}
 
 test("every retired row carries a positive last quota, a date in range and evidence", () => {
   assert.match(RETIRED_LEDGER_SINCE, /^\d{4}-\d{2}-\d{2}$/);
@@ -24,17 +43,40 @@ test("every retired row carries a positive last quota, a date in range and evide
   }
 });
 
-test("a retired row is never live in the catalog", () => {
-  for (const r of RETIRED_FREE_ROWS) {
-    const live = FREE_MODEL_BUDGETS.find(
-      (m) => m.provider === r.provider && m.modelId === r.modelId
-    );
-    assert.ok(
-      !live || live.freeType === "discontinued",
-      `${r.provider}/${r.modelId} is live and retired`
-    );
-    assert.ok(!live || (live.monthlyTokens === 0 && live.creditTokens === 0));
+test("every live catalog row on the ledger carries a revival date", () => {
+  assertLedgerRevivals(FREE_MODEL_BUDGETS, RETIRED_FREE_ROWS);
+});
+
+test("the ledger invariant rejects an unmarked revival and accepts a dated one", () => {
+  const historical: RetiredFreeRow = {
+    provider: "xkiro",
+    modelId: "fixture",
+    poolKey: "xkiro-free",
+    lastListedMonthlyTokens: 150e6,
+    retiredAt: "2026-11-23",
+    reason: "id-retired",
+    evidence: "fixture",
+  };
+  const entries: FreeModelBudget[] = [
+    {
+      provider: historical.provider,
+      modelId: historical.modelId,
+      poolKey: historical.poolKey,
+      displayName: "Fixture",
+      monthlyTokens: 15e6,
+      creditTokens: 0,
+      freeType: "recurring-daily",
+      tos: "caution",
+    },
+  ];
+  for (const revivedAt of [undefined, "2026-11-31"]) {
+    assert.throws(() => assertLedgerRevivals(entries, [{ ...historical, revivedAt }]), {
+      message: "xkiro/fixture requires a valid revivedAt date",
+    });
   }
+  assert.doesNotThrow(() =>
+    assertLedgerRevivals(entries, [{ ...historical, revivedAt: "2026-11-27" }])
+  );
 });
 
 test("ledger keys are unique", () => {
