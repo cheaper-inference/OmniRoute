@@ -215,7 +215,11 @@ import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { getCircuitBreaker, isLocalStreamLifecycleError } from "../../shared/utils/circuitBreaker";
 import { maybeMarkChatAccountExhaustedFrom429 } from "../services/chatQuotaExhaustion";
 import { markQuotaHealthy } from "../../domain/quotaCache";
-import { resolveForcedConnectionForCredentialPool } from "../services/sessionAffinityPin.ts";
+import {
+  resolveForcedConnectionForCredentialPool,
+  resolveSessionAffinityTtlMs,
+  type AffinityPinSettings,
+} from "../services/sessionAffinityPin.ts";
 import { RequestTelemetry, recordTelemetry } from "../../shared/utils/requestTelemetry";
 import { generateRequestId } from "../../shared/utils/requestId";
 import { logAuditEvent } from "../../lib/compliance/index";
@@ -1233,6 +1237,7 @@ async function handleAdmittedChat(
           connectionRestrictionSources: restrictions.sources,
           requireToolCalling: requiresQoderHttpTransport(body),
           sessionKey: sessionAffinityKey,
+          affinityReadOnly: true,
           preferredConnectionIds: apiKeyInfo?.preferredConnections ?? null,
           ...(target?.allowRateLimitedConnection ? { allowRateLimitedConnections: true } : {}),
           ...(target?.connectionId ? { forcedConnectionId: target.connectionId } : {}),
@@ -1246,7 +1251,14 @@ async function handleAdmittedChat(
       // OAuth selection must happen atomically with occupancy reservation in the
       // actual dispatch. Availability preflight may finish well before a combo
       // target runs, so caching OAuth credentials here would reintroduce a race.
-      if ("authType" in creds && creds.authType !== "oauth") {
+      // The preflight also selects with affinityReadOnly, so with session affinity
+      // on it never created or refreshed the binding: dispatch must re-select so
+      // the account that actually serves the request is the one bound.
+      const affinitySettings = (settings || {}) as AffinityPinSettings;
+      const affinityBindingPending =
+        Boolean(sessionAffinityKey) &&
+        resolveSessionAffinityTtlMs(provider ?? "", {}, affinitySettings) > 0;
+      if ("authType" in creds && creds.authType !== "oauth" && !affinityBindingPending) {
         comboPreselectedCredentials.set(getComboCredentialCacheKey(modelString, target), creds);
       }
       return true;
@@ -1261,6 +1273,7 @@ async function handleAdmittedChat(
     const perRequestAutoControls = resolveRequestAutoControls(request.headers);
     const relayOptions = {
       sessionId,
+      sessionAffinityKey,
       apiKeyId: apiKeyInfo?.id ?? null,
       ...(combo.strategy === "context-relay" ? { config: relayConfig } : {}),
       ...(bypassProviderQuotaPolicy ? { bypassProviderQuotaPolicy: true } : {}),
