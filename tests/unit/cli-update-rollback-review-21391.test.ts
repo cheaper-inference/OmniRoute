@@ -13,7 +13,6 @@ const tx = await import("../../bin/cli/updateTransaction.mjs");
 const update = await import("../../bin/cli/commands/update.mjs");
 
 const OPERATION_ID = "0b8f3c1e-2d4a-4f6b-9c7d-1a2b3c4d5e6f";
-const OTHER_OPERATION_ID = "11111111-2222-4333-8444-555555555555";
 
 function makePlan(overrides: Record<string, unknown> = {}) {
   return {
@@ -106,6 +105,179 @@ test("the CLI stops on a held lock instead of running the standard install", asy
   }
 });
 
-// Keeps the compiler quiet about helpers the next threads use.
-void tmp;
-void OTHER_OPERATION_ID;
+// ---------------------------------------------------------------------------------------
+// Thread 2: the terminal verdict has to be durable, or the failure has to be visible.
+// ---------------------------------------------------------------------------------------
+
+type FakeState = { status: string; phase: string };
+
+function happyDeps(record: (state: FakeState) => Promise<void> | void) {
+  let clock = 0;
+  const calls = { discard: 0, sleeps: [] as number[] };
+  const deps = {
+    now: () => clock,
+    sleep: async (ms: number) => {
+      calls.sleeps.push(ms);
+      clock += ms;
+    },
+    record,
+    acquireLock: async () => ({ release: async () => {} }),
+    prepare: async () => ({ kind: "ok" }),
+    stopOld: async () => ({ stopped: true, pids: [4100] }),
+    snapshot: async () => ({ id: "s", path: "/snap/data", packagePath: "/snap/package" }),
+    installTarget: async () => {},
+    start: async () => ({ pid: 5200 }),
+    probe: async (e: { expectedVersion: string }) => ({
+      status: "ready" as const,
+      pid: 5200,
+      version: e.expectedVersion,
+    }),
+    stopCandidate: async () => ({ stopped: true, pids: [5200] }),
+    restorePrevious: async () => {},
+    discardSnapshot: async () => {
+      calls.discard += 1;
+    },
+  };
+  return { deps, calls };
+}
+
+const enospc = () =>
+  Object.assign(new Error("ENOSPC: no space left on device"), { code: "ENOSPC" });
+
+test("a terminal write that fails is retried within a bound and then succeeds", async () => {
+  const stored: FakeState[] = [];
+  let terminalFailures = 2;
+  const h = happyDeps(async (state) => {
+    if (state.phase === "finished" && terminalFailures-- > 0) throw enospc();
+    stored.push(state);
+  });
+  const outcome = await tx.runManagedUpdate(makePlan(), h.deps);
+  assert.equal(outcome.status, "updated");
+  assert.equal(outcome.persisted, undefined, "a durable verdict carries no warning");
+  assert.equal(stored.at(-1)?.status, "updated");
+  assert.equal(stored.at(-1)?.phase, "finished");
+});
+
+test("a terminal write that never succeeds is reported as not persisted, after a bounded number of tries", async () => {
+  let terminalAttempts = 0;
+  const stored: FakeState[] = [];
+  const h = happyDeps(async (state) => {
+    if (state.phase === "finished") {
+      terminalAttempts += 1;
+      throw enospc();
+    }
+    stored.push(state);
+  });
+  const outcome = await tx.runManagedUpdate(makePlan(), h.deps);
+  // The verdict is still the real one; what changed is that nobody can read it from the file.
+  assert.equal(outcome.status, "updated");
+  assert.equal(outcome.persisted, false);
+  assert.equal(terminalAttempts, 3);
+  assert.equal(stored.at(-1)?.status, "running", "the last durable record is the interim one");
+});
+
+test("a failed manual-recovery write keeps the recovery steps on the in-memory outcome", async () => {
+  const h = happyDeps(async (state) => {
+    if (state.phase === "finished") throw enospc();
+  });
+  h.deps.installTarget = async () => {
+    throw new Error("npm exited with 1");
+  };
+  h.deps.restorePrevious = async () => {
+    throw new Error("copy back failed");
+  };
+  const outcome = await tx.runManagedUpdate(makePlan(), h.deps);
+  assert.equal(outcome.status, "manual-recovery");
+  assert.equal(outcome.persisted, false);
+  assert.ok(outcome.recovery.steps.length > 0, "the operator can still be told what to do");
+  assert.equal(h.calls.discard, 0, "recovery data is never discarded on this path");
+});
+
+test("interim records stay best effort", async () => {
+  const stored: FakeState[] = [];
+  let first = true;
+  const h = happyDeps(async (state) => {
+    if (first) {
+      first = false;
+      stored.push(state);
+      return;
+    }
+    if (state.phase !== "finished") throw enospc();
+    stored.push(state);
+  });
+  const outcome = await tx.runManagedUpdate(makePlan(), h.deps);
+  assert.equal(outcome.status, "updated");
+  assert.equal(outcome.persisted, undefined);
+  assert.equal(stored.at(-1)?.phase, "finished");
+});
+
+test("the state store removes its partial temp file when the write fails, so a retry has room", () => {
+  const dataDir = tmp("omni-tx-state-fail-");
+  try {
+    const store = tx.createStateStore(dataDir, OPERATION_ID);
+    store.record({ operationId: OPERATION_ID, status: "running", phase: "installing" });
+    // A directory where the file belongs makes the final rename fail after the temp file exists.
+    const file = path.join(store.dir, "state.json");
+    fs.rmSync(file);
+    fs.mkdirSync(path.join(file, "keep"), { recursive: true });
+    assert.throws(() => store.record({ operationId: OPERATION_ID, status: "updated" }));
+    const leftovers = fs.readdirSync(store.dir).filter((name) => name.endsWith(".tmp"));
+    assert.deepEqual(leftovers, []);
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+});
+
+test("the coordinator exits 3 and logs the verdict when it could not be persisted", async () => {
+  const dir = tmp("omni-tx-main-");
+  try {
+    const planFile = path.join(dir, `plan-${OPERATION_ID}.json`);
+    fs.writeFileSync(
+      planFile,
+      JSON.stringify({ plan: makePlan(), runtime: { dataDir: dir, packageRoot: dir } })
+    );
+    const logged: string[] = [];
+    const run = (failTerminal: boolean) => {
+      const h = happyDeps(async (state) => {
+        if (failTerminal && state.phase === "finished") throw enospc();
+      });
+      return tx.coordinatorMain(planFile, dir, {
+        createDependencies: () => h.deps,
+        log: (line: string) => logged.push(line),
+      });
+    };
+    assert.equal(await run(false), 0);
+    assert.deepEqual(logged, []);
+    assert.equal(await run(true), 3);
+    assert.equal(logged.length, 1);
+    assert.match(logged[0], new RegExp(OPERATION_ID));
+    assert.match(logged[0], /updated/);
+    assert.match(logged[0], /could not be written/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("the CLI points at the coordinator log when the wait ends without a verdict", async () => {
+  const lines: string[] = [];
+  const orig = { log: console.log, error: console.error, warn: console.warn };
+  const push = (...args: unknown[]) => lines.push(args.map(String).join(" "));
+  console.log = push;
+  console.error = push;
+  console.warn = push;
+  try {
+    const result = await update.runManagedUpdateFromCli({
+      current: "3.8.54",
+      latest: "3.8.55",
+      deps: {
+        preflight: async () => ({ kind: "ok", runtime: {}, environment: {} }),
+        launch: async () => ({}),
+        wait: async () => ({ status: "running", phase: "verifying", timedOut: true }),
+      },
+    });
+    assert.equal(result.exitCode, 1);
+    assert.match(lines.join("\n"), /coordinator\.log/);
+  } finally {
+    Object.assign(console, orig);
+  }
+});

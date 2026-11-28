@@ -225,10 +225,11 @@ export async function runManagedUpdateFromCli({ current, latest, deps = {} }) {
     previous: current,
     target: latest,
     stateFile: `${dataDir}/managed-update/${plan.operationId}/state.json`,
+    logFile: `${dataDir}/managed-update/${plan.operationId}/coordinator.log`,
   });
 }
 
-function reportManagedOutcome(state, { previous, target, stateFile }) {
+function reportManagedOutcome(state, { previous, target, stateFile, logFile }) {
   switch (state?.status) {
     case "updated":
       printSuccess(
@@ -254,7 +255,7 @@ function reportManagedOutcome(state, { previous, target, stateFile }) {
       return { handled: true, exitCode: 1 };
     default:
       printWarning(
-        `Still waiting for the update to finish. It keeps running in the background; read its state in ${stateFile} before starting another update.`
+        `Still waiting for the update to finish. It keeps running in the background; read its state in ${stateFile}, and its log in ${logFile} (a verdict that could not be written to the state file is logged there), before starting another update.`
       );
       return { handled: true, exitCode: 1 };
   }

@@ -61,6 +61,8 @@ const execFileAsync = promisify(execFile);
  *   runningVersion: string | null,
  *   reason?: string,
  *   refused?: boolean,
+ *   persisted?: false,
+ *   recovery?: { steps: string[] },
  * }} ManagedUpdateOutcome
  *
  * @typedef {{
@@ -98,6 +100,10 @@ const OPERATION_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[
 const EXACT_VERSION_PATTERN = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 const TERMINAL_STATUSES = new Set(["updated", "rolled-back", "manual-recovery", "unsupported"]);
 const DEFAULT_POLL_MS = 1000;
+// The terminal record is the only place a reader learns the verdict, so it gets a bounded
+// retry (a full disk often frees up, or the partial temp file is gone by the next try).
+const TERMINAL_WRITE_ATTEMPTS = 3;
+const TERMINAL_WRITE_BACKOFF_MS = 250;
 
 export function isExactVersion(value) {
   return typeof value === "string" && value.length <= 64 && EXACT_VERSION_PATTERN.test(value);
@@ -143,6 +149,20 @@ function recoverySteps({ previousVersion, snapshot, port }) {
   return { steps: steps.filter(Boolean) };
 }
 
+async function persistTerminalRecord(deps, state) {
+  for (let attempt = 1; attempt <= TERMINAL_WRITE_ATTEMPTS; attempt += 1) {
+    try {
+      await deps.record({ ...state, updatedAt: new Date().toISOString() });
+      return true;
+    } catch {
+      if (attempt < TERMINAL_WRITE_ATTEMPTS) {
+        await deps.sleep(TERMINAL_WRITE_BACKOFF_MS * attempt);
+      }
+    }
+  }
+  return false;
+}
+
 /**
  * @param {ManagedUpdatePlan} plan
  * @param {ManagedUpdateDependencies} deps
@@ -176,8 +196,8 @@ export async function runManagedUpdate(plan, deps) {
     };
   }
 
-  // Later records are best effort: a full disk must not turn a recoverable failure into a
-  // second one. The in-memory outcome stays authoritative for this process.
+  // Interim records are best effort: a full disk must not turn a recoverable failure into a
+  // second one. The terminal record is not (see `finish`).
   const update = async (patch) => {
     Object.assign(state, patch);
     try {
@@ -187,18 +207,28 @@ export async function runManagedUpdate(plan, deps) {
     }
   };
 
+  // The terminal record is retried within a bound. If it still cannot be written, the outcome
+  // says so (`persisted: false`) and the coordinator reports it: the last durable record is
+  // then an interim one and no reader can see this verdict. Snapshots are discarded before this
+  // write on purpose, and only after the target or the previous install is proven ready: that
+  // frees disk for the write and loses no recovery data.
   const finish = async (status, runningVersion, reason, extra = {}) => {
-    await update({
+    Object.assign(state, {
       status,
       phase: "finished",
       runningVersion,
       reason: reason ?? undefined,
       ...extra,
     });
+    const persisted = await persistTerminalRecord(deps, state);
     /** @type {ManagedUpdateOutcome} */
     const outcome = { operationId, status, runningVersion };
     if (reason) outcome.reason = reason;
     if (extra.refused) outcome.refused = true;
+    if (!persisted) {
+      outcome.persisted = false;
+      if (extra.recovery) outcome.recovery = extra.recovery;
+    }
     return outcome;
   };
 
@@ -389,8 +419,18 @@ export function createStateStore(dataDir, operationId) {
     record(state) {
       mkdirSync(dir, { recursive: true, mode: 0o700 });
       const tmp = `${file}.${process.pid}.tmp`;
-      writeFileSync(tmp, `${JSON.stringify(state, null, 2)}\n`, { mode: 0o600 });
-      renameSync(tmp, file);
+      try {
+        writeFileSync(tmp, `${JSON.stringify(state, null, 2)}\n`, { mode: 0o600 });
+        renameSync(tmp, file);
+      } catch (err) {
+        // A half-written temp file would keep the disk full for the next attempt.
+        try {
+          rmSync(tmp, { force: true });
+        } catch {
+          // nothing more to do
+        }
+        throw err;
+      }
     },
   };
 }
@@ -1212,8 +1252,22 @@ export function resolveCoordinatorPlanPath(arg, expectedDir, deps = {}) {
   }
 }
 
-/** Returns the process exit code: 0 updated, 1 not updated, 2 refused input. */
-export async function coordinatorMain(planArg, expectedDir) {
+function describeUnpersistedOutcome(outcome) {
+  const steps = outcome.recovery?.steps?.length
+    ? ` Recovery: ${outcome.recovery.steps.join(" ")}`
+    : "";
+  return (
+    `managed-update ${outcome.operationId}: finished as ${outcome.status}` +
+    `${outcome.reason ? ` (${outcome.reason})` : ""}, but the final state could not be written` +
+    ` to state.json; its last record is still "running".${steps}`
+  );
+}
+
+/**
+ * Returns the process exit code: 0 updated, 1 not updated, 2 refused input, 3 the verdict could
+ * not be written to the state file (it is logged instead, to the coordinator log).
+ */
+export async function coordinatorMain(planArg, expectedDir, options = {}) {
   const planFile = resolveCoordinatorPlanPath(planArg, expectedDir);
   if (!planFile) return 2;
   let input;
@@ -1224,8 +1278,14 @@ export async function coordinatorMain(planArg, expectedDir) {
   }
   const { plan, runtime } = input ?? {};
   if (validatePlan(plan) || !runtime?.dataDir || !runtime?.packageRoot) return 2;
-  const deps = createDefaultDependencies({ plan, runtime, environment: { ...process.env } });
+  const createDependencies = options.createDependencies ?? createDefaultDependencies;
+  const log = options.log ?? ((line) => process.stderr.write(`${line}\n`));
+  const deps = createDependencies({ plan, runtime, environment: { ...process.env } });
   const outcome = await runManagedUpdate(plan, deps);
+  if (outcome.persisted === false) {
+    log(describeUnpersistedOutcome(outcome));
+    return 3;
+  }
   return outcome.status === "updated" ? 0 : 1;
 }
 
