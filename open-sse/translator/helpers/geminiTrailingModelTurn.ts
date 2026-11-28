@@ -11,7 +11,9 @@
  */
 export function isGeminiTrailingModelTurnRejectingModel(model: unknown): boolean {
   if (typeof model !== "string") return false;
-  const normalizedModel = model.toLowerCase();
+  // Strip a provider qualifier ("vertex/gemini-3.8-flash"): the anchored regex
+  // below would otherwise miss provider-qualified ids and skip the strip.
+  const normalizedModel = model.toLowerCase().replace(/^[a-z0-9][a-z0-9.-]*\//, "");
   if (/(?:^|-)image(?:-|$)/.test(normalizedModel)) {
     return false;
   }
