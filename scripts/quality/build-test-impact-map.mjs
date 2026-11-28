@@ -101,7 +101,7 @@ export function buildTestImpactMap(root = ROOT) {
   const testFiles = globSync(
     [
       "tests/unit/*.test.ts",
-      "tests/unit/{api,auth,authz,build,cli,cli-helper,combo,compression,correctness,cors,db,db-adapters,docs,gamification,guardrails,lib,mcp,memory,runtime,security,services,settings,shared,ui,usage}/**/*.test.ts",
+      "tests/unit/{api,auth,authz,build,chatcore,cli,cli-helper,combo,compression,correctness,cors,db,db-adapters,docs,gamification,guardrails,lib,mcp,memory,runtime,security,services,settings,shared,translator,ui,usage}/**/*.test.ts",
       "tests/unit/**/*.test.mjs",
       "tests/unit/dashboard/**/*.test.ts",
       // Quarentena serial (P0.3): também são node:test — a TIA precisa mapeá-los.
@@ -292,11 +292,10 @@ export function writeTestImpactMap(out, map) {
 }
 
 if (fileURLToPath(import.meta.url) === path.resolve(process.argv[1] || "")) {
-  const result = buildTestImpactMap();
-  const { testFileCount, ...map } = result;
+  const map = buildTestImpactMap();
   const out = path.join(ROOT, "config/quality/test-impact-map.json");
   writeTestImpactMap(out, map);
   console.log(
-    `test-impact-map: ${Object.keys(map.sources).length} source files + ${Object.keys(map.artifacts).length} artifact files mapped from ${testFileCount} test files`
+    `test-impact-map: ${Object.keys(map.sources).length} source files + ${Object.keys(map.artifacts).length} artifact files mapped from ${map.testFileCount} test files`
   );
 }

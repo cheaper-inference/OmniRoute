@@ -311,7 +311,7 @@ test("bound system key enforces current model policy and attributes native chat 
     apiKey: "synthetic-upstream-key",
     isActive: true,
   });
-  const upstream = t.mock.method(globalThis, "fetch", async () =>
+  const upstream = t.mock.fn(() =>
     Response.json({
       id: "chatcmpl-system-key",
       object: "chat.completion",
@@ -319,6 +319,18 @@ test("bound system key enforces current model policy and attributes native chat 
       choices: [{ index: 0, message: { role: "assistant", content: "ok" }, finish_reason: "stop" }],
       usage: { prompt_tokens: 3, completion_tokens: 2, total_tokens: 5 },
     })
+  );
+  const fetchMock = t.mock.method(
+    globalThis,
+    "fetch",
+    async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = input instanceof Request ? input.url : String(input);
+      const method = init?.method ?? (input instanceof Request ? input.method : "GET");
+      if (url === "https://api.openai.com/v1/chat/completions" && method === "POST") {
+        return upstream();
+      }
+      return new Response(null, { status: 404 });
+    }
   );
   const binding = { apiKeyId: key.id, resolve: keys.resolveSystemApiKey };
   const send = (content: string) =>
@@ -328,7 +340,10 @@ test("bound system key enforces current model policy and attributes native chat 
         POST(
           new Request(origin + "/api/v1/chat/completions", {
             method: "POST",
-            headers: { "content-type": "application/json" },
+            headers: {
+              "content-type": "application/json",
+              "x-correlation-id": `system-key-${content}`,
+            },
             body: JSON.stringify({ model, messages: [{ role: "user", content }], stream: false }),
           })
         ),
@@ -339,7 +354,7 @@ test("bound system key enforces current model policy and attributes native chat 
   const denied = await send("blocked");
   assert.equal(denied.status, 403);
   assert.match(await denied.text(), /model.*not allowed/i);
-  assert.equal(upstream.mock.callCount(), 0);
+  assert.equal(fetchMock.mock.callCount(), 0);
 
   await keys.updateApiKeyPermissions(key.id, { blockedModels: [], allowedModels: [model] });
   const allowed = await send("allowed");
@@ -347,6 +362,9 @@ test("bound system key enforces current model policy and attributes native chat 
   await allowed.text();
   assert.equal(upstream.mock.callCount(), 1);
   assert.equal(await waitForCallLogSaves(10_000), true);
-  const logs = await getCallLogs({ limit: 10 });
-  assert.ok(logs.some((entry) => entry.apiKeyId === key.id && entry.status === 200));
+  const logs = await getCallLogs({ correlationId: "system-key-allowed" });
+  const requests = logs.filter((entry) => entry.requestType !== "upstream_http_attempt");
+  assert.equal(requests.length, 1);
+  assert.equal(requests[0].apiKeyId, key.id);
+  assert.equal(requests[0].status, 200);
 });

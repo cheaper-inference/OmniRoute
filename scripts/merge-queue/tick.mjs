@@ -158,6 +158,7 @@
 import { mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { setTimeout as sleep } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
 import * as bisectModule from "./bisect.mjs";
 import * as checksModule from "./checks.mjs";
@@ -255,6 +256,7 @@ export class UnmanagedBaseError extends Error {}
  *   (undefined = compose.prepareRepo default "blob:none"; null = full fetch, local remotes)
  * @property {{name: string, email: string}} identity
  * @property {() => string} now               ISO clock (injected for tests)
+ * @property {(ms: number) => Promise<void>} [sleep]  landing status retry wait (injected for tests)
  * @property {(msg: string) => void} log
  * @property {string|null} runUrl
  * @property {string} repository              owner/repo (dashboard and comment links)
@@ -285,6 +287,9 @@ export const STATE_HEARTBEAT_MINUTES = 60;
  * `inFlight.landAttempts` (markLanding), saved before each blessing.
  */
 export const LANDING_ATTEMPTS_LIMIT = 3;
+
+/** Time for the newly written land status to become visible to the release ruleset. */
+export const LAND_STATUS_RETRY_DELAY_MS = 5000;
 
 /**
  * How long a red candidate whose failed jobs were re-run (inFlight.rerun) waits for the re-run
@@ -1761,13 +1766,7 @@ class Tick {
     let result;
     try {
       result = mergeFf
-        ? await this.m.land.landMergeFf({
-            git: this.landGitRepo(),
-            base: this.base,
-            candidateSha: f.candidateSha,
-            expectedBaseSha: f.baseSha,
-            prs: f.prs, // stacked PRs (alreadyContained) count as merged too
-          })
+        ? await this.landMergeFf(f)
         : await this.m.land.landSquashApi({
             gh: this.landGh,
             base: this.base,
@@ -1818,6 +1817,29 @@ class Tick {
       detail += ' (check OMNI_QUEUE_LAND_TOKEN: landing.actor is "owner")';
     }
     return this.pauseLanding(f, detail, result.merged ?? []);
+  }
+
+  async landMergeFf(f) {
+    const input = {
+      git: this.landGitRepo(),
+      base: this.base,
+      candidateSha: f.candidateSha,
+      expectedBaseSha: f.baseSha,
+      prs: f.prs, // stacked PRs (alreadyContained) count as merged too
+    };
+    const result = await this.m.land.landMergeFf(input);
+    const { statusContext } = this.config.landing;
+    if (
+      result.ok === false &&
+      result.reason === "rejected" &&
+      result.detail?.includes("GH013") &&
+      result.detail.includes(`Required status check "${statusContext}"`)
+    ) {
+      this.note(`${f.batchId}: land status ${statusContext} is not yet visible; retrying the push`);
+      await (this.deps.sleep ?? sleep)(LAND_STATUS_RETRY_DELAY_MS);
+      return this.m.land.landMergeFf(input);
+    }
+    return result;
   }
 
   /**
@@ -4754,8 +4776,9 @@ export function parseArgs(argv) {
  * voice, by the owner's login read from OMNI_QUEUE_LAND_TOKEN itself), so a third party cannot
  * pre-post a marker to mute a queue comment.
  * @param {object} env   process.env-like
- * @param {{now?: () => string, log?: (msg: string) => void, gitEnv?: object}} [overrides]
- *   tests only: injected clock, logger and extra environment for every git process
+ * @param {{now?: () => string, sleep?: (ms: number) => Promise<void>,
+ *          log?: (msg: string) => void, gitEnv?: object}} [overrides]
+ *   tests only: injected clock, wait, logger and extra environment for every git process
  * @returns {TickDeps}   throws on an invalid environment or config
  */
 export function createTickDeps(env, overrides = {}) {
@@ -4835,6 +4858,7 @@ export function createTickDeps(env, overrides = {}) {
     ...(/^https?:\/\//.test(remoteUrl) ? {} : { fetchFilter: null }),
     identity,
     now: overrides.now ?? (() => new Date().toISOString()),
+    sleep: overrides.sleep,
     log,
     runUrl: env.GITHUB_RUN_ID
       ? `${serverUrl}/${repository}/actions/runs/${env.GITHUB_RUN_ID}`

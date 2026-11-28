@@ -304,6 +304,9 @@ In live mode:
   (see [Installing the GitHub App](#installing-the-github-app)), then
   `npm run queue -- resume <base>`. The pause dropped the batch in flight; its PRs keep their
   labels and are composed again in a new batch after the resume.
+- When a `merge-ff` push is refused with `GH013` because the ruleset still expects the land status
+  just written, the tick waits five seconds and retries once. If the ruleset refuses the push again,
+  the tick withdraws the status and pauses the base with reason `error`.
 - Any other failure of the landing, without a verdict, fails the tick: the status just written is
   withdrawn and the tick ends with an error. A rate limit belongs here, not to the authentication
   case: the credential is fine. That is an error the GitHub client marked as a rate limit (a 429, or
