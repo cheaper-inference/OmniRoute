@@ -67,6 +67,20 @@ export function verifyReleaseGreenReport(report, exitCode, candidateSha, eventNa
       reason: "Exit and report disagree",
     };
   }
+  if (
+    report.checks.some(
+      (check) =>
+        ["unit", "integration", "vitest", "hosted-suites"].includes(check.id) &&
+        check.evidenceState === "INCOMPLETE"
+    )
+  ) {
+    return {
+      exit: 1,
+      verdict: "UNKNOWN",
+      evidenceState: "INCOMPLETE",
+      reason: "Hosted suite receipts are incomplete",
+    };
+  }
   return {
     exit: report.releaseGreen ? 0 : 1,
     verdict: report.releaseGreen ? "PASS" : "FAIL",

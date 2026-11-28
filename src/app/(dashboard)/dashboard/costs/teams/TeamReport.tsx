@@ -53,17 +53,11 @@ function Breakdown({
 }) {
   if (!report.byApiKey.length) return <p className="text-sm text-text-muted">{t("noUsage")}</p>;
   return (
-    <Table
-      className="text-sm"
-      containerClassName="rounded-none border-0"
-      scrollbarLabel={t("breakdown")}
-    >
+    <Table variant="plain" scrollbarLabel={t("breakdown")} scrollLabel={t("breakdown")}>
       <TableHeader>
         <TableRow>
           {["keyName", "requests", "tokens", "reportSpend"].map((key) => (
-            <TableHead key={key} className="font-medium">
-              {t(key)}
-            </TableHead>
+            <TableHead key={key}>{t(key)}</TableHead>
           ))}
         </TableRow>
       </TableHeader>
@@ -79,7 +73,7 @@ function Breakdown({
             </TableCell>
             <TableCell className="tabular-nums whitespace-nowrap">
               {money(key.estimatedListCostUsd, locale)}
-              {key.hasUnpricedUsage && (
+              {(key.hasUnpricedListUsage ?? key.hasUnpricedUsage) && (
                 <span className="block text-xs text-warning">{t("unpriced")}</span>
               )}
             </TableCell>
@@ -110,7 +104,7 @@ export default function TeamReport({
     <section className="space-y-4" aria-label={t("reportTitle")}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-semibold">{t("reportTitle")}</h2>
+          <h2>{t("reportTitle")}</h2>
           <p className="text-xs text-text-muted">{t("reportSubtitle")}</p>
         </div>
         <PeriodSelect period={period} pending={pending} onPeriod={onPeriod} t={t} />
@@ -126,7 +120,7 @@ export default function TeamReport({
           </Card>
         ))}
       </div>
-      {report.summary.hasUnpricedUsage && (
+      {(report.summary.hasUnpricedListUsage ?? report.summary.hasUnpricedUsage) && (
         <p role="status" className="text-sm text-warning">
           {t("unpricedReport")}
         </p>

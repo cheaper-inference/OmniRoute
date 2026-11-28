@@ -3,6 +3,8 @@ import { getCachedProviderConnections, getCachedProviderNodes } from "@/lib/db/r
 import { isCommonChatGptWebRetiredProviderId } from "@/shared/constants/chatgptWebRetirement";
 import { getProviderById, getProviderAlias, resolveProviderId } from "@/shared/constants/providers";
 
+export { getCachedProviderConnectionById } from "@/lib/db/readCache";
+
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)

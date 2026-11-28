@@ -1,0 +1,1 @@
+- **fix(plugin):** publish honest output limits, a single leading free marker and a warning for ignored free signals ([#20370](https://github.com/cheaper-inference/OmniRoute/pull/20370)) — thanks @maxmad64bis

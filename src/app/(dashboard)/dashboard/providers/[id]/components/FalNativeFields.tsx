@@ -10,14 +10,12 @@ export function FalSearch({ c }: Props) {
         aria-label={c.common("search")}
         value={c.query}
         onChange={(e) => c.patch({ query: e.target.value, cursor: null })}
-        className="rounded border bg-transparent p-2"
       />
       <Input
         aria-label={c.t("category")}
         placeholder={c.t("category")}
         value={c.category}
         onChange={(e) => c.patch({ category: e.target.value, cursor: null })}
-        className="rounded border bg-transparent p-2"
       />
       <Button disabled={c.busy} onClick={() => c.action(() => c.search())}>
         {c.common("search")}
@@ -36,7 +34,7 @@ export function FalEndpoint({ c }: Props) {
     <>
       <Select
         aria-label={c.t("endpoint")}
-        className="w-full rounded border bg-transparent p-2"
+        className="w-full"
         value={c.endpoint}
         onChange={(e) => select(e.target.value)}
       >
@@ -52,7 +50,7 @@ export function FalEndpoint({ c }: Props) {
           aria-label={c.t("endpoint")}
           value={c.endpoint}
           onChange={(e) => select(e.target.value)}
-          className="min-w-0 flex-1 rounded border bg-transparent p-2"
+          className="min-w-0 flex-1"
           placeholder="owner/app/subpath"
         />
         <Button disabled={c.busy || !c.endpoint} onClick={() => c.action(c.load)}>
@@ -78,7 +76,6 @@ function ScalarField({ c, name, field }: Props & { name: string; field: FalValue
       </span>
       {options ? (
         <Select
-          className="rounded border bg-transparent p-2"
           value={value === undefined ? "" : String(value)}
           onChange={(e) =>
             c.setParameter(
@@ -96,7 +93,6 @@ function ScalarField({ c, name, field }: Props & { name: string; field: FalValue
         </Select>
       ) : (
         <Input
-          className="rounded border bg-transparent p-2"
           type={field.type === "number" || field.type === "integer" ? "number" : "text"}
           value={String(value ?? "")}
           onChange={(e) => c.setParameter(name, scalarValue(e.target.value, field.type))}
@@ -158,7 +154,8 @@ export function FalInputs({ c }: Props) {
       <label className="block text-sm">
         {c.t("input")}
         <Textarea
-          className="min-h-40 w-full rounded border bg-transparent p-2 font-mono"
+          mono
+          className="min-h-40 w-full rounded border bg-transparent p-2"
           value={c.input}
           onChange={(e) => c.patch({ input: e.target.value, error: "" })}
           spellCheck={false}
@@ -174,7 +171,6 @@ export function FalExecution({ c }: Props) {
         aria-label={c.t("transport")}
         value={c.transport}
         onChange={(e) => c.patch({ transport: e.target.value })}
-        className="rounded border bg-transparent p-2"
       >
         {["queue", "direct", "stream", "realtime", "http-websocket"]
           .filter((name) => c.definition?.capabilities.transports[name])
@@ -235,7 +231,7 @@ export function FalJobs({ c }: Props) {
         placeholder={c.t("job")}
         value={c.currentJobId}
         onChange={(e) => c.setJobId(e.target.value)}
-        className="min-w-0 flex-1 rounded border bg-transparent p-2"
+        className="min-w-0 flex-1"
       />
       <Button disabled={c.busy || !c.currentJobId} onClick={() => c.action(() => c.retrieve())}>
         {c.common("refresh")}
@@ -253,7 +249,8 @@ export function FalRegistration({ c }: Props) {
       <label className="block">
         {c.t("schema")}
         <Textarea
-          className="min-h-40 w-full rounded border bg-transparent p-2 font-mono"
+          mono
+          className="min-h-40 w-full rounded border bg-transparent p-2"
           value={c.schema}
           onChange={(e) => c.patch({ schema: e.target.value })}
         />

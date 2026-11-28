@@ -65,22 +65,24 @@ self.addEventListener("fetch", (event) => {
   // stale Alt-Svc advertisement; respondWith(Response.error()) on a dead QUIC
   // socket made F5 hang until a new tab opened a fresh connection.
   // Never cache API/dashboard traffic with potentially auth-sensitive content.
-  if (!isSameOrigin || excluded || isNavigateRequest) {
+  // Only static assets are handled here: anything else (RSC/prefetch fetches
+  // such as /home?_rsc=…) goes to the browser untouched, so an aborted or
+  // failed request never becomes a rejected respondWith (KEA-9524).
+  if (!isSameOrigin || excluded || isNavigateRequest || !isStaticAsset) {
     return;
   }
 
   event.respondWith(
     (async () => {
-      if (!isStaticAsset) {
-        return fetch(event.request);
-      }
-
       if (isNextAsset) {
         try {
           const networkResponse = await fetch(event.request);
           if (networkResponse && networkResponse.status === 200) {
             const responseClone = networkResponse.clone();
-            void caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+            void caches
+              .open(CACHE_NAME)
+              .then((cache) => cache.put(event.request, responseClone))
+              .catch(() => {});
           }
           return networkResponse;
         } catch {
@@ -93,13 +95,20 @@ self.addEventListener("fetch", (event) => {
         return cachedResponse;
       }
 
-      const networkResponse = await fetch(event.request);
-      if (networkResponse && networkResponse.status === 200) {
-        const responseClone = networkResponse.clone();
-        void caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+      try {
+        const networkResponse = await fetch(event.request);
+        if (networkResponse && networkResponse.status === 200) {
+          const responseClone = networkResponse.clone();
+          void caches
+            .open(CACHE_NAME)
+            .then((cache) => cache.put(event.request, responseClone))
+            .catch(() => {});
+        }
+        return networkResponse;
+      } catch {
+        return (await caches.match(event.request)) || Response.error();
       }
-      return networkResponse;
-    })()
+    })().catch(() => Response.error())
   );
 });
 

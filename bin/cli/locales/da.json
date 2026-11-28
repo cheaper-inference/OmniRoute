@@ -12,7 +12,8 @@
     "dryRun": "[simulering] ville: {action}",
     "cancelled": "Annulleret.",
     "jsonOpt": "Output som JSON",
-    "yesOpt": "Spring bekræftelse over"
+    "yesOpt": "Spring bekræftelse over",
+    "positiveIntegerRequired": "Grænse skal være et positivt heltal."
   },
   "setup": {
     "title": "Opsætning af OmniRoute",

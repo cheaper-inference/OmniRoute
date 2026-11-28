@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Select from "@/shared/components/Select";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
@@ -206,13 +207,13 @@ function getStatusVariant(status: number) {
 
 function RouteMetric({ icon, label, value }: { icon: string; label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-border bg-surface-2 p-4">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-text-muted">
+    <Card.Section>
+      <div className="ci-eyebrow flex items-center gap-2" data-weight="medium">
         <Icon name={icon} size={16} />
         {label}
       </div>
       <div className="mt-2 text-xl font-semibold text-text-main">{value}</div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -231,7 +232,7 @@ function FactorCard({ factor }: { factor: ExplanationFactor }) {
   const weightPct = Math.round(factor.weight * 100);
 
   return (
-    <div className="rounded-lg border border-border bg-surface-2 p-4">
+    <Card.Section>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-sm font-semibold text-text-main">{factor.name}</div>
@@ -241,13 +242,17 @@ function FactorCard({ factor }: { factor: ExplanationFactor }) {
           {contributionPct}%
         </Badge>
       </div>
-      <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-2">
-        <div className="h-full rounded-full bg-primary" style={{ width: `${contributionPct}%` }} />
-      </div>
+      <Progress
+        className="mt-3"
+        aria-label={factor.name}
+        aria-valuetext={`${contributionPct}%`}
+        value={contributionPct}
+        animate={false}
+      />
       <div className="mt-2 text-xs text-text-muted">
         {t("routeWeight", { weight: weightPct })} · {factor.details}
       </div>
-    </div>
+    </Card.Section>
   );
 }
 
@@ -354,7 +359,7 @@ function WhyThisTargetCard({ replay }: { replay: DecisionReplay | undefined }) {
         </div>
 
         {recompute ? (
-          <div className="rounded-lg border border-border bg-surface-2 p-4">
+          <Card.Section>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <div className="text-sm font-semibold text-text-main">
@@ -390,7 +395,7 @@ function WhyThisTargetCard({ replay }: { replay: DecisionReplay | undefined }) {
                 value={recompute.recomputedSelectedExecutionKey || "n/a"}
               />
             </div>
-          </div>
+          </Card.Section>
         ) : (
           <div className="rounded-lg border border-warning/20 bg-warning/10 p-4 text-sm text-text-muted">
             {t("routeNoRecomputeCandidates")}
@@ -560,7 +565,7 @@ export default function RouteExplainabilityTab({
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-text-main">
+          <h2 className="ci-heading" data-size="lg">
             {analyticsText(t, "routeTraceTitle", "Route Trace View")}
           </h2>
           <p className="mt-1 max-w-3xl text-sm text-text-muted">

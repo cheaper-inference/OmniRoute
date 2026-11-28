@@ -25,20 +25,20 @@ export default definePlugin({
 });
 ```
 
-## API-viite
+## API Viite
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Tehdasfunktio, joka luo oletusarvoilla varustetun Plugin-olion.
+Tehdastoiminto, joka luo Plugin-objektin oletusasetuksilla.
 
 **Parametrit:**
 
-- `name` (merkkijono, pakollinen) — Lisäosan nimi kebab-case-muodossa
-- `priority` (numero, valinnainen, oletusarvo: 100) — Pienempi arvo suoritetaan ensin
-- `enabled` (totuusarvo, valinnainen, oletusarvo: true) — Otetaanko käyttöön käynnistyksen yhteydessä?
-- `onRequest` (funktio, valinnainen) — Suoritetaan ennen keskustelunkäsittelijää
-- `onResponse` (funktio, valinnainen) — Suoritetaan keskustelunkäsittelijän jälkeen
-- `onError` (funktio, valinnainen) — Suoritetaan käsittelijän virheen yhteydessä
+- `name` (merkkijono, pakollinen) — Pluginin nimi kebab-kotelossa
+- `priority` (numero, valinnainen, oletus: 100) — Alempi suoritetaan ensin
+- `enabled` (boolean, valinnainen, oletus: true) — Käynnistys käytössä?
+- `onRequest` (toiminto, valinnainen) — Toimii ennen keskustelunkäsittelijää
+- `onResponse` (toiminto, valinnainen) — Toimii chat-käsittelijän jälkeen
+- `onError` (toiminto, valinnainen) — Suorittaa käsittelijän virheen
 
 ### `blockRequest(response?): BlockingHookResult`
 
@@ -46,8 +46,8 @@ Estä pyyntö ja palauta valinnaisesti mukautettu vastaus.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Liitä metatietoja pyynnön kontekstiin.
+Liitä metatiedot pyyntökontekstiin.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Lisäosan konteksti (`PluginContext`)
+## Plugin Context (`PluginContext`)
 
-| Kenttä      | Tyyppi                    | Kuvaus                          |
-| ----------- | ------------------------- | ------------------------------- |
-| `requestId` | `string`                  | Pyynnön yksilöllinen tunniste   |
-| `model`     | `string`                  | Pyydetyn mallin nimi            |
-| `provider`  | `string`                  | Kohdepalveluntarjoajan tunniste |
-| `body`      | `Record<string, unknown>` | Pyynnön runko                   |
-| `headers`   | `Record<string, string>`  | Pyynnön otsakkeet               |
-| `metadata`  | `Record<string, unknown>` | Muokattavat metatiedot          |
-| `timestamp` | `number`                  | Pyynnön aikaleima               |
+| Ala          | Tyyppi                    | Kuvaus                                    |
+| ------------ | ------------------------- | ----------------------------------------- |
+| `requestId`  | `string`                  | Yksilöllinen pyynnön tunniste             |
+| `model`      | `string`                  | Pyydetty mallinimi                        |
+| `provider`   | `string`                  | Kohdetoimittaja ID                        |
+| `body`       | `Record<string, unknown>` | Pyynnön runko                             |
+| `headers`    | `Record<string, string>`  | Pyynnön otsikot (katso huomautus)         |
+| `metadata`   | `Record<string, unknown>` | Muuttuvat metatiedot                      |
+| `timestamp`  | `number`                  | Pyydä aikaleima                           |
+| `apiKeyInfo` | `object` (valinnainen)    | API -avaimen metatiedot (katso huomautus) |
+
+Konteksti ei koskaan sisällä asiakkaan tunnistetietoja: `authorization`, `x-api-key`, `proxy-authorization` ja `cookie` -otsikot poistetaan (kaikki kirjaimet), ja `apiKeyInfo` säilyttää avaimen metatiedot (kuten `id`, `name` ja `scopes`), mutta ei avaimen arvoa tai sen sormenjälkeä `src/lib/plugins/hooks.ts` `redactPluginContext()`. Tämä koskee `onRequest`, `onResponse` ja `onError`.
 
 ## Manifesti (`plugin.json`)
 
@@ -138,19 +141,18 @@ Tai ne voidaan määrittää yksinkertaisina totuusarvoina (oletusprioriteetti 1
 }
 ```
 
-## Käyttöoikeusjärjestelmä
+## Lupajärjestelmä
 
-Liitännäiset suoritetaan eristetyssä virtuaalikoneympäristössä. Ulkoisten resurssien käyttö edellyttää nimenomaisia käyttöoikeuksia:
+Pluginit ovat** ei hiekkalaatikolla** . Jokainen aktiivinen laajennus toimii erillisenä, tavallisena Node.js lapsiprosessina (`loadPlugin()` in `src/lib/plugins/loader.ts`) saman käyttöjärjestelmän käyttäjän alaisuudessa kuin OmniRoute ilman VM kontekstia eikä Node.js käyttöoikeuslippuja. Plugin koodi voi käyttää `node:fs`, `node:child_process`, `fetch` ja kaikkia muita Node.js API: se voi lukea ja kirjoittaa mitä tahansa tiedostoa, jonka OmniRoute -käyttäjä voi (mukaan lukien tietohakemisto), suorittaa ohjelmia ja päästä verkkoon.
 
-| Käyttöoikeus | Sallii                                                       |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Vain luku -välityspalvelin kohteelle `process.env`           |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+Manifestin `requires.permissions` hyväksyy `network`, `file-read`, `file-write`, `env` ja `exec`, mutta nykyään vain `env` vaikuttaa ajon aikana:
 
-Ilman käyttöoikeutta vastaavat globaalit muuttujat eivät yksinkertaisesti ole käytettävissä eristetyssä ympäristössä.
+| Lupa                                         | Vaikutus tänään                                                                                                                                                                                                                          |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Plugin-prosessi vastaanottaa myös `PORT`, `HOSTNAME`, `TZ` ja `TMPDIR`. Ilman sitä se vastaanottaa vain `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` ja `PLUGIN_NAME` (plus `SystemRoot` ja `windir` : Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Ei mitään. Ne ovat vain ilmoituksia: mitään ei estetä, kun ne puuttuvat.                                                                                                                                                                 |
+
+Laajennuksen asentaminen on kuin minkä tahansa muun ohjelman asentaminen isäntään. Asenna vain laajennuksia, joiden lähteeseen luotat.
 
 ## Määritysskeema
 
@@ -192,9 +194,9 @@ Määritysarvot tallennetaan tietokantaan, ja ne ovat käytettävissä hallintap
 | `onDeactivate`    | Liitännäinen poistettu käytöstä                                | `{ name, version, manifest }` |
 | `onUninstall`     | Liitännäisen asennus poistettu (ennen tiedostojen poistamista) | `{ name, version, manifest }` |
 
-## Esimerkit
+## Esimerkkejä
 
-### Pyyntöloki
+### Pyydä Loggeria
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Nopeusrajoitin
+### Rate Limiter
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 minuutti
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Vastauksen muunnin
+### Response Transformer
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

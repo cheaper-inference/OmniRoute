@@ -21,10 +21,10 @@ npm install -g omniroute
 ### አማራጭ B፦ Docker
 
 ```bash
-docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
+docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ```
 
-`:latest` ከታተሙት የተረጋጉ SemVer ስሪቶች ከፍተኛው ነው። git `main`ን **አይከታተልም**። ለGitOps `diegosouzapw/omniroute:X.Y.Z`ን ይወስኑ። [የምስል መለያዎች / የልቀት ቻናሎች](../guides/DOCKER_GUIDE.md#release-channels)ን ይመልከቱ።
+`:latest` ከታተሙት የተረጋጉ SemVer ስሪቶች ከፍተኛው ነው። git `main`ን **አይከታተልም**። ለGitOps `cheaperinference/omniroute:X.Y.Z`ን ይወስኑ። [የምስል መለያዎች / የልቀት ቻናሎች](../guides/DOCKER_GUIDE.md#release-channels)ን ይመልከቱ።
 
 ### አማራጭ C፦ ከምንጭ ኮድ
 

@@ -18,6 +18,8 @@ interface Step2ConfigureIntegrationProps {
   onChangeCustom: (v: CustomConfig) => void;
   t: (key: string, opts?: Record<string, unknown>) => string;
   isEditing?: boolean;
+  /** Set by a refused Next: the forms then flag their empty required fields. */
+  showRequired?: boolean;
 }
 
 export function Step2ConfigureIntegration({
@@ -32,8 +34,12 @@ export function Step2ConfigureIntegration({
   onChangeCustom,
   t,
   isEditing,
+  showRequired,
 }: Step2ConfigureIntegrationProps) {
-  if (kind === "slack") return <SlackConfigForm value={slack} onChange={onChangeSlack} t={t} />;
+  if (kind === "slack")
+    return (
+      <SlackConfigForm value={slack} onChange={onChangeSlack} t={t} showRequired={showRequired} />
+    );
   if (kind === "telegram")
     return (
       <TelegramConfigForm
@@ -41,11 +47,27 @@ export function Step2ConfigureIntegration({
         onChange={onChangeTelegram}
         t={t}
         isEditing={isEditing}
+        showRequired={showRequired}
       />
     );
   if (kind === "discord")
-    return <DiscordConfigForm value={discord} onChange={onChangeDiscord} t={t} />;
-  return <CustomConfigForm value={custom} onChange={onChangeCustom} t={t} isEditing={isEditing} />;
+    return (
+      <DiscordConfigForm
+        value={discord}
+        onChange={onChangeDiscord}
+        t={t}
+        showRequired={showRequired}
+      />
+    );
+  return (
+    <CustomConfigForm
+      value={custom}
+      onChange={onChangeCustom}
+      t={t}
+      isEditing={isEditing}
+      showRequired={showRequired}
+    />
+  );
 }
 
 export type { SlackConfig, TelegramConfig, DiscordConfig, CustomConfig };

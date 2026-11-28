@@ -606,6 +606,12 @@ export function parseQoderCliFailure(stderrText: string, stdoutText = ""): Qoder
     return { status: 504, message: combined, code: "timeout" };
   }
 
+  // Exact billing codes 110/112 first: their inner payload can carry `isQueued`,
+  // which the broad busy heuristic below would read as the 10605 throttle.
+  if (isQoderBillingBlock(combined)) {
+    return { status: 429, message: combined, code: "qoder_billing_block" };
+  }
+
   // Qoder answers a temporarily throttled account with a queued/busy envelope
   // (upstream code 10605) instead of an HTTP error. Classifying it as a generic
   // 502 upstream_error parked the connection on the long failure cooldown, so a
@@ -631,6 +637,17 @@ export function isQoderUpstreamBusy(text: string): boolean {
     normalized.includes("is busy") ||
     normalized.includes("server busy")
   );
+}
+
+// Qoder reports an account that spent its daily credit allowance with the
+// nested envelope codes 110 and 112 (same triple-nested shape as the 10605
+// queue throttle, so the inner quotes arrive escaped: \"code\":\"110\").
+// 429 lets routing fail over to another account instead of parking the
+// healthy PAT on a failure cooldown.
+const QODER_BILLING_BLOCK_CODE = /\\?"?code\\?"?\s*:\s*\\?"?(110|112)\\?"?(?![0-9])/i;
+
+export function isQoderBillingBlock(text: string): boolean {
+  return QODER_BILLING_BLOCK_CODE.test(String(text || ""));
 }
 
 /**

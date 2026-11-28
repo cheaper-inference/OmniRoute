@@ -258,14 +258,14 @@ Le filtre est appliqué uniquement aux charges utiles de résultats d’outils d
 
 ## Combinaisons de compression
 
-Les combinaisons de compression sont des profils de compression nommés qui peuvent être attribués à des combinaisons de routage :
+Les combos de compression sont appelés profils de compression qui peuvent être attribués aux combos de routage :
 
-- `compression_combos` : stocke le mode, le pipeline, la configuration RTK, la configuration linguistique et l’indicateur par défaut
-- `compression_combo_assignments` : associe une combinaison de compression à une combinaison de routage
-- l’intégration à l’exécution résout une combinaison de compression attribuée avant les substitutions génériques de combinaison
-- les données analytiques incluent `compression_combo_id` et `engine`
+- `compression_combos`: mode de stockage, pipeline, configuration RTK, configuration de langue et marqueur par défaut
+- `compression_combo_assignments`: mappe un combo de compression à un combo de routage
+- l'intégration à l'exécution résout une combinaison de compression attribuée avant les remplacements de combinaison générique
+- les analyses incluent `compression_combo_id` et `engine`
 
-Interface du tableau de bord : `Tableau de bord -> Contexte et cache -> Combinaisons de compression`.
+Surface du tableau de bord : `Dashboard -> Context & Cache -> Compression Combos`.
 
 ## Prérequis / guide de l'opérateur (CCR & session-dedup)
 
@@ -273,7 +273,7 @@ CCR (`ccr`) et `session-dedup` remplacent ou suppriment le texte et laissent un*
 
 ### Transports et points de terminaison
 
-Le serveur MCP qui expose les outils CCR peut être atteint de trois manières. La base par défaut URL est `http://localhost:20128` (`OMNIROUTE_BASE_URL`) :
+Le serveur MCP qui expose les outils CCR peut être atteint de trois manières. La base URL par défaut est `http://localhost:20128` (`OMNIROUTE_BASE_URL`) :
 
 | Transport                            | URL / commande                          | Remarques                                                                                                                                        |
 | ------------------------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -294,7 +294,7 @@ Trois gardes maintiennent le niveau durable délimité — un bloc reste en mém
 2. le runtime est un runtime cloud (pas de disque local) ;
 3. `COMPRESSION_CCR_DURABLE_STORE=false`.
 
-Ainsi, « le bloc a disparu » n'est pas une histoire de redémarrage général : un bloc sub-512 KB sur un environnement d'exécution local non cloud survit à un redémarrage via le niveau durable jusqu'à ce que son TTL soit épuisé. Voir [Référence d'environnement](../reference/ENVIRONMENT.md) pour la variable.
+Ainsi, "le bloc a disparu" n'est pas une histoire de redémarrage général : un bloc sub-512 KB sur un environnement d'exécution local non cloud survit à un redémarrage via le niveau durable jusqu'à ce que son TTL soit épuisé, à condition que son écriture durable ait réussi. Cette écriture est un effort optimal et s'exécute hors du chemin de la requête : elle est abandonnée alors que 1 000 écritures durables sont déjà en attente, une erreur d'écriture SQLite est enregistrée (`[ccr] durable persist failed`) et n'est pas réessayée, et un crash avant les exécutions d'écriture différées la perd également. Un tel bloc reste en mémoire uniquement et disparaît après un redémarrage. Voir [Référence d'environnement](../reference/ENVIRONMENT.md) pour la variable.
 
 ### Les deux marqueurs
 
@@ -303,13 +303,13 @@ Ainsi, « le bloc a disparu » n'est pas une histoire de redémarrage général 
 | `[CCR retrieve hash=<24hex> chars=N]` | Un gros bloc a été stocké avec un contenu adressé.                                                                                                                   | Appelez `omniroute_ccr_retrieve` avec le** Hachage de 24 hexadécimaux copié textuellement** pour récupérer le texte original.                                                                                                      |
 | `[dedup:ref sha=…]`                   | `session-dedup` a élidé le texte déjà envoyé lors d'un tour précédent de la même session. C'est un** retour en arrière intentionnel** , pas une perte ou une erreur. | Faire** pas** appelle n'importe quel outil et fais** pas** essayez de le "reconstruire". La première occurrence du texte est la copie canonique ; le tour en cours n'est jamais réécrit, il est dédoublé lors d'un tour ultérieur. |
 
-Le retour en arrière `[dedup:ref]` est une décision délibérée du protocole — il n'y a pas de reconstruction avant l'envoi. Traitez-le comme « ce texte exact était déjà diffusé plus tôt au cours de cette session ».
+Le retour en arrière `[dedup:ref]` est une décision délibérée du protocole — il n'y a pas de reconstruction avant l'envoi. Traitez-le comme « ce texte exact était déjà diffusé plus tôt dans cette session ».
 
 ### Pré-requis clients
 
 - **Clé (stdio) :** un appelant stdio ne porte aucune identité par requête, il s'authentifie donc avec `OMNIROUTE_API_KEY` (défini dans le `env` du serveur MCP ). Sans cela, l'appelant est anonyme et les outils qui nécessitent un principal peuvent se dégrader.
 - **`tools[]` est la condition préalable à l'injection.** L'instruction de protocole de récupération CCR (#8033) est injectée** seulement** lorsque le `tools[]` annoncé dans la requête prouve que le client peut réellement atteindre `omniroute_ccr_retrieve`. La correspondance est une correspondance de segment final délimitée par un séparateur (`__`, `.`, `/`, `:`) — jamais une sous-chaîne nue — donc un nom avec espace de noms tel que `mcp__gateway__omniroute_ccr_retrieve` compte toujours. Un `tools[]` absent ou ne correspondant pas signifie que l'instruction n'est _pas_ injectée, de par sa conception.
-- **`codemode:false` (clients OpenCode ).** OpenCode est par défaut en mode Code, qui annonce uniquement ses outils natifs au modèle et** ne fait pas** placez les outils MCP sur la liste `tools[]` native. Définissez `codemode: false` sur l'entrée du serveur MCP afin que les outils `omniroute_ccr_*` soient annoncés. C'est un** client** réglage, pas un OmniRoute. L'instruction CCR n'est pas encore injectée : OpenCode nomme un outil `<server>_<tool>`, donc un serveur appelé `omniroute` expose `omniroute_omniroute_ccr_retrieve`, et `_` n'est pas l'un des séparateurs correspondants.
+- **`codemode:false` (clients OpenCode ).** OpenCode est par défaut en mode Code, qui annonce uniquement ses outils natifs au modèle et** ne fait pas** placez les outils MCP sur la liste `tools[]` native. Définissez `codemode: false` sur l'entrée du serveur MCP afin que les outils `omniroute_ccr_*` soient annoncés. C'est un** client** réglage, pas un OmniRoute. OpenCode nomme un outil `<server>_<tool>`, donc un serveur appelé `omniroute` expose `omniroute_omniroute_ccr_retrieve`; `_` est l'un des séparateurs correspondants, donc l'instruction CCR est injectée sous ce nom lorsqu'une requête porte un marqueur CCR.
 - **Principes.** Le stockage et la récupération sont isolés par principal authentifié (par clé API ). Une clé ne voit que ses propres blocs.
 
 ### Portées par outil
@@ -329,12 +329,12 @@ Une portée manquante renvoie un** résultat d'erreur de l'outil MCP** (`isError
 
 ### Matrice client
 
-| Client            | Transport                                    | Configuration à utiliser                                                                                                                                                                                                                                        | `tools[]` annoncé ? (instruction → CCR injectée)                                                                                                                                                          |
-| ----------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Code Claude       | streamable-http                              | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                               | Oui — compatible MCP ; injecté.                                                                                                                                                                           |
-| Cursor / Cline    | `stdio`** ou** `streamable-http`             | stdio : `omniroute --mcp` avec `OMNIROUTE_API_KEY` dans `env`; ou une entrée MCP distante pointant vers `http://localhost:20128/api/mcp/stream` (voir [le Guide d'installation → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Oui, — fait la publicité des outils `omniroute_ccr_*`.                                                                                                                                                    |
-| OpenCode          | streamable-http                              | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, plus `codemode: false`                                                                                                                                                                | Outils annoncés uniquement avec `codemode: false`; l'instruction n'est toujours pas injectée, car `omniroute_omniroute_ccr_retrieve` ne correspond pas (voir [Prérequis client](#client-prerequisites) ). |
-| Compatible OpenAI | HTTP compatible OpenAI (achèvements de chat) | client de complétion de chat standard par rapport au point de terminaison compatible OpenAI                                                                                                                                                                     | **Jamais** — un appelant simple compatible OpenAI n'est jamais invité à appeler l'outil et l'instruction n'est pas injectée.                                                                              |
+| Client            | Transport                                    | Configuration à utiliser                                                                                                                                                                                                                                        | `tools[]` annoncé ? (instruction → CCR injectée)                                                                                                                 |
+| ----------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Code Claude       | streamable-http                              | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                               | Oui — compatible MCP ; injecté.                                                                                                                                  |
+| Cursor / Cline    | `stdio`** ou** `streamable-http`             | stdio : `omniroute --mcp` avec `OMNIROUTE_API_KEY` dans `env`; ou une entrée MCP distante pointant vers `http://localhost:20128/api/mcp/stream` (voir [le Guide d'installation → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Oui, — fait la publicité des outils `omniroute_ccr_*`.                                                                                                           |
+| OpenCode          | streamable-http                              | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, plus `codemode: false`                                                                                                                                                                | Outils annoncés uniquement avec `codemode: false`; puis injecté en nommant `omniroute_omniroute_ccr_retrieve` (voir [Prérequis client](#client-prerequisites) ). |
+| Compatible OpenAI | HTTP compatible OpenAI (achèvements de chat) | client de complétion de chat standard par rapport au point de terminaison compatible OpenAI                                                                                                                                                                     | **Jamais** — un appelant simple compatible OpenAI n'est jamais invité à appeler l'outil et l'instruction n'est pas injectée.                                     |
 
 ### Limites de récupération et pagination
 
@@ -354,7 +354,7 @@ L'outil de récupération s'appelle actuellement `omniroute_ccr_retrieve` (le pr
 
 ### Cycle de vie des sessions
 
-Les sessions HTTP diffusables s'arrêtent et le serveur les récupère ; la fenêtre d'inactivité est définie par `OMNIROUTE_MCP_SESSION_IDLE_MS` (par défaut 5 minutes ; référencée par un nom, pas une valeur codée en dur, donc cette page ne dérive pas lorsqu'elle change). Le symptôme d'une session inactive est un HTTP 404 avec `Unknown Mcp-Session-Id` — le remède est de se reconnecter ou de redémarrer la session,** pas** pour faire pivoter une clé, modifier une portée ou renommer un outil.
+Les sessions HTTP diffusables s'arrêtent et le serveur les récupère ; la fenêtre d'inactivité est définie par `OMNIROUTE_MCP_SESSION_IDLE_MS` (par défaut 5 minutes ; référencée par un nom, pas une valeur codée en dur, donc cette page ne dérive pas lorsqu'elle change). Le symptôme d'une session inactive est un HTTP 404 avec `Unknown Mcp-Session-Id` — le remède est de se reconnecter ou de redémarrer la session,** pas** pour faire pivoter une clé, modifier une portée ou renommer un outil.
 
 ## Surface de l’API
 

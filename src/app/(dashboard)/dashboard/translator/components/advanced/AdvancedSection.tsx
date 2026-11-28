@@ -45,13 +45,13 @@ export default function AdvancedSection({ forceOpenSlug, children }: AdvancedSec
         <div className="flex items-start gap-3">
           <Icon name="tune" size={20} className="text-warning mt-0.5" />
           <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-text-main">
+            <h3 className="ci-heading" data-size="sm">
               {tr("advancedSectionTitle", "Advanced")}
             </h3>
             <p className="text-xs text-text-muted">
               {tr(
                 "advancedSectionSubtitle",
-                "Raw JSON, pipeline e ferramentas técnicas. Tudo aqui é igual às tabs antigas — apenas reorganizado."
+                "Raw JSON, pipeline and technical tools. Everything here is the same as the old tabs — just reorganized."
               )}
             </p>
           </div>

@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { generateKeyPairSync } from "node:crypto";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omni-log-export-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -43,12 +44,20 @@ interface InsertedBatch {
   rows: InsertRow[];
 }
 
-function installFetchStub(options: { failInsert?: boolean; insertDelayMs?: number } = {}) {
+function installFetchStub(
+  options: { failInsert?: boolean; insertDelayMs?: number; schemaConflict?: boolean } = {}
+) {
   const output = path.join(TEST_DATA_DIR, "bigquery-batches.jsonl");
   fs.rmSync(output, { force: true });
+  const [, coveragePreload] = nativeCoverageArgs();
   runner.__setLogExportChildOptionsForTest({
     modulePath: path.join(import.meta.dirname, "fixtures/logExportTestDestination.ts"),
-    config: { fixtureFailInsert: options.failInsert, fixtureInsertDelayMs: options.insertDelayMs },
+    coveragePreload,
+    config: {
+      fixtureFailInsert: options.failInsert,
+      fixtureInsertDelayMs: options.insertDelayMs,
+      fixtureSchemaConflict: options.schemaConflict,
+    },
   });
   // Preserve the original tests' live collection shape; fetch now runs in a child.
   return new Proxy([] as InsertedBatch[], {
@@ -619,4 +628,15 @@ test("runDestinationExport_MissingArtifact_ExportsSummaryRatherThanFailingTheBat
   const row = batches[0].rows[0].json;
   assert.equal(row.id, "orphan");
   assert.equal(row.request_body, null);
+});
+
+test("failed conditional evidence schema repair keeps the export cursor", async () => {
+  insertCallLogs(2);
+  const destination = createBigQueryDestination();
+  const batches = installFetchStub({ schemaConflict: true });
+  const result = await runner.runDestinationExport(destination);
+  assert.equal(result.success, false);
+  assert.match(result.error ?? "", /schema changed/);
+  assert.equal(destinationsDb.getLogExportDestination(destination.id)?.cursorRowId, 0);
+  assert.equal(batches.length, 0);
 });

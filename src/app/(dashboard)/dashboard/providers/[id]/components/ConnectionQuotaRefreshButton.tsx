@@ -27,12 +27,13 @@ export default function ConnectionQuotaRefreshButton({ refreshing, state, onRefr
     <span className="inline-flex flex-wrap items-center gap-1 text-xs">
       <Button
         variant="ghost"
-        size="sm"
+        size="2xs"
+        tone="muted"
         onClick={onRefresh}
         disabled={refreshing}
         aria-busy={!!refreshing}
         title={t("quotaRefreshCurrentHint")}
-        className="h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs text-text-muted hover:text-primary disabled:cursor-wait disabled:opacity-60"
+        className="hover:text-primary aria-disabled:opacity-60"
       >
         {refreshing ? <Spinner decorative size="xs" /> : <Icon name="refresh" size={13} />}
         {t(refreshing ? "quotaRefreshing" : "quotaRefreshCurrent")}

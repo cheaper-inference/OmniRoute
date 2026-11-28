@@ -136,37 +136,22 @@ taget, endast när den är inaktiv**, med inaktivitetskontrollen och omstarten i
   minuter att landa på tmpfs och 2 minuter att ladda upp från disk.
 - VPS:en `.15` är endast för homologering — den kör aldrig CI-runners.
 
-## Värdbaserad kö (GitHub-värdbaserade körmiljöer)
+## Hosted lane (GitHub-värdade löpare)
 
-Repot tillhör organisationen `cheaper-inference`, på **Team**-planen: **60
-samtidiga värdbaserade jobb**, som delas av varje repo i organisationen, varje PR-kontroll,
-varje arbetsflöde som utlöses av en push och CodeQL:s standardkonfiguration. Siffrorna nedan uppmättes på
-**Pro**-planen (40 samtidiga värdbaserade jobb). Uppmätt 2026-10-18 under en
-sammanslagningskampanj (~10 sammanslagningar/timme på `release/v3.8.52`): **2 500 arbetsflödeskörningar skapades under
-24 timmar**, 44 pushar till grenen under 6 timmar, **106 värdbaserade jobb köades** medan PR-kontroller väntade i
-timmar och PR:er slogs samman utan dem. Nio arbetsflöden utlöstes vid varje push till grenen:
+Förvaret tillhör `cheaper-inference` organisationen, på** Team** planera:** 60 samtidiga värdjobb** , delas av varje arkiv i organisationen, varje PR -kontroll, varje push-utlöst arbetsflöde och CodeQL standardinställning. Siffrorna nedan mättes på** Pro** plan (40 samtidiga värdjobb). Uppmätt 2026-10-18 under en sammanslagningskampanj (~ 10 merges/hour på `release/v3.8.52`):** 2 500 arbetsflödeskörningar skapade på 24 timmar** , 44 knuffar till grenen på 6 timmar,** 106 värdjobb i kö** medan PR checkar väntade i timmar och PRs slogs samman utan dem. Nio arbetsflöden avfyrades vid varje push till grenen:
 
-| per push till `release/v*`                  | värdbaserade jobb | resultat under belastningstoppen                               | sedan 2026-10-18                                                          |
-| ------------------------------------------- | ----------------: | -------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `ci.yml` (fullständig matris)               |       upp till 30 | avbröts av nästa push, 24 av 24 på en dag                      | startas inte vid pushar till `release/**` (PR-körning + Release-Green)    |
-| `quality.yml`                               |                ~6 | avbröts, 23 av 23                                              | startas inte vid pushar till `release/**`                                 |
-| `Release-Green` `--quick`                   |                 0 | kördes på `omni-build`, 97 av 100 avbröts                      | `omni-release`-plats, avbryts aldrig, väntande körningar slås ihop        |
-| `Lock released branch`, `OpenSSF Scorecard` |                 2 | en köad körning per push                                       | en körning per ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)   |
-| `Release acceptance` (skuggrapport)         |                 1 | ett värdbaserat `npm ci` per push, avbröts aldrig              | oförändrat — kandidat för ett `paths:`-filter                             |
-| `Publish to Docker Hub` → `Deploy to VPS`   |                 2 | avbröts per push; amd64-delen konkurrerar på `omni-build`      | oförändrat — ägarens distributionskanal                                   |
-| CodeQL:s standardkonfiguration (`dynamic`)  |                 4 | `javascript-typescript`, `actions`, `c-cpp`, `python` per push | oförändrat — Settings → Code security; `c-cpp`/`python` skannar inget här |
+| per tryck till `release/v*`                 |    värdjobb | resultatet under stormen                                            | sedan 2026-10-18                                                                 |
+| ------------------------------------------- | ----------: | ------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `ci.yml` (full matris)                      | upp till 30 | avbryts av nästa push, 24 av 24 på en dag                           | inte startat på `release/**` push (PR kör + Release-Green)                       |
+| `quality.yml`                               |          ~6 | inställd, 23 av 23                                                  | inte startat på `release/**` knuffar                                             |
+| `Release-Green` `--quick`                   |           0 | körde på `omni-build`, avbröt 97 av 100                             | `omni-release` slot, aldrig avbruten, väntande körning kollapsar                 |
+| `Lock released branch`, `OpenSSF Scorecard` |           2 | en kökörning per tryckning                                          | en körning per ref (`tests/unit/build/hosted-lane-concurrency.test.ts`)          |
+| `Release acceptance` (skuggrapport)         |           1 | en värd `npm ci` per push, aldrig avbruten                          | oförändrad — kandidat för ett `paths:` -filter                                   |
+| `Publish to Docker Hub` → `Deploy to VPS`   |           2 | avbröts per tryckning; amd64 etapp tävlar på `omni-build`           | oförändrad — ägarens distributionskanal                                          |
+| CodeQL standardinställning (`dynamic`)      |           4 | `javascript-typescript`, `actions`, `c-cpp`, `python` per tryckning | oförändrad — Inställningar → Kodsäkerhet; `c-cpp`/`python` skannar ingenting här |
 
-`tests/unit/build/push-storm-diet.test.ts` låser push-utlösaren för enbart `main` i `ci.yml` och
-`quality.yml`. Bieffekt: Codecov tar inte längre emot en basuppladdning per release-push (steget
-är informativt och använder `continue-on-error`); täckningsgrinden i repot och PR-kommentaren
-påverkas inte.
+`tests/unit/build/push-storm-diet.test.ts` fäster `main` -only push-triggern för `ci.yml` och `quality.yml`. Bieffekt: Codecov tar inte längre emot en basuppladdning per release push (steget är informativt och `continue-on-error`); in-repo coverage gate och PR kommentaren påverkas inte.
 
-**Mer egenvärdbaserad kapacitet löser inte den värdbaserade kön.** Utvecklingsservern
-(`devbox-vm-06-dev002`, 24 vCPU / 54 GB) skulle kunna vara värd för en körmiljö, men agentsessionerna
-håller redan belastningen på 20–26, agentcontainern saknar en Docker-daemon och det är den
-värdbaserade kön som är mättad. `.113`-servern hade 71 GB ledigt och en belastning på 5–8 vid samma
-tidpunkt; dess begränsning är minnesbudgeten per lyssnare ovan (högst 6 lyssnare), inte processorn.
-De återstående möjligheterna är processrelaterade: låt kampanjens PR:er gå genom Mergify-kön
-(`label=queue`, batcher delar en enda `merge_group`-CI-körning i stället för en körning per PR plus
-en per push), minska antalet språk i CodeQL:s standardkonfiguration och filtrera
-`release-acceptance.yml` efter filerna som den läser.
+**Mer egen värd kapacitet fixar inte värdkön.** Devboxen (`devbox-vm-06-dev002`, 24 vCPU / 54 GB) skulle kunna vara värd för en löpare, men agentsessionerna håller redan sin belastning på 20–26, agentbehållaren har ingen Docker demon och den mättade banan är den värdade. `.113` lådan hade 71 GB ledig och last 5–8 i samma ögonblick; dess begränsning är minnesbudgeten per lyssnare ovan (tak 6 lyssnare), inte CPU. De återstående spakarna är process: landa kampanjen PRs genom Mergify-kön (`label=queue`, batcher delar en `merge_group` CI körning istället för en körning per PR plus en per push), trimma CodeQL -standardinställningsspråken och filtrera `release-acceptance.yml` efter filerna den läser.
+
+> **2026-11-19: Mergify-sammanslagningskön har tagits bort** (ägarens beslut). `.mergify.yml` definierar inte längre en kö och vägrar Mergify-kommandona som sammanfogar eller skriver om en pull-begäran. Release PRs slås samman för hand under repository-regeluppsättningen "Kräv gröna grindar på den aktiva releasen" (`Gate / CI` + `Gate / Quality`) tills omni-queue körs i live-läge, och genom omni-queue efter det ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Mergify-spaken ovan finns inte längre.

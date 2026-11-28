@@ -12,6 +12,8 @@ import { useTranslations } from "next-intl";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { cn } from "@/shared/utils/cn";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Notice from "@/shared/components/Notice";
+import { CardSection } from "@/shared/components/Card";
 
 const CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL;
 
@@ -322,7 +324,9 @@ export default function DroidToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-medium text-sm">{tool.name}</h3>
+              <h3 className="ci-heading" data-size="sm">
+                {tool.name}
+              </h3>
               <CliStatusBadge
                 effectiveConfigStatus={effectiveConfigStatus}
                 batchStatus={batchStatus}
@@ -349,24 +353,22 @@ export default function DroidToolCard({
           )}
 
           {!checkingDroid && droidStatus && !cliReady && (
-            <div className="flex items-center gap-3 p-4 bg-warning/10 border border-warning/30 rounded-lg">
-              <Icon name="warning" className="text-warning" />
-              <div className="flex-1">
-                <p className="font-medium text-warning">
-                  {droidStatus.installed
-                    ? t("cliNotRunnable", { tool: "Factory Droid" })
-                    : t("cliNotInstalled", { tool: "Factory Droid" })}
-                </p>
-                <p className="text-sm text-text-muted">
-                  {droidStatus.installed
-                    ? t("cliFoundFailedHealthcheck", {
-                        tool: "Factory Droid",
-                        reason: droidStatus.reason ? ` (${droidStatus.reason})` : "",
-                      })
-                    : t("installCliPrompt", { tool: "Factory Droid" })}
-                </p>
-              </div>
-            </div>
+            <Notice
+              variant="warning"
+              icon="warning"
+              title={
+                droidStatus.installed
+                  ? t("cliNotRunnable", { tool: "Factory Droid" })
+                  : t("cliNotInstalled", { tool: "Factory Droid" })
+              }
+            >
+              {droidStatus.installed
+                ? t("cliFoundFailedHealthcheck", {
+                    tool: "Factory Droid",
+                    reason: droidStatus.reason ? ` (${droidStatus.reason})` : "",
+                  })
+                : t("installCliPrompt", { tool: "Factory Droid" })}
+            </Notice>
           )}
 
           {!checkingDroid && cliReady && (
@@ -397,16 +399,16 @@ export default function DroidToolCard({
                     placeholder={t("baseUrlPlaceholder")}
                     aria-label={t("baseUrl")}
                     className="min-w-0 w-auto flex-1"
-                    inputClassName="text-xs"
+                    size="xs"
                   />
                   {customBaseUrl && customBaseUrl !== baseUrl && (
                     <Button
                       variant="ghost"
                       size="icon-sm"
+                      tone="muted"
                       onClick={() => setCustomBaseUrl("")}
                       title={t("resetToDefault")}
                       aria-label={t("resetToDefault")}
-                      className="text-text-muted hover:text-primary"
                     >
                       <Icon name="restart_alt" size={14} />
                     </Button>
@@ -425,7 +427,7 @@ export default function DroidToolCard({
                       onChange={(e) => setSelectedApiKeyId(e.target.value)}
                       aria-label={t("apiKey")}
                       className="min-w-0 w-auto flex-1"
-                      selectClassName="text-xs"
+                      nativeSize="xs"
                     >
                       {apiKeys.map((key) => (
                         <option key={key.id} value={key.id}>
@@ -486,7 +488,7 @@ export default function DroidToolCard({
                         placeholder={t("providerModelPlaceholder")}
                         aria-label={t("model")}
                         className="min-w-0 w-auto flex-1"
-                        inputClassName="text-xs"
+                        size="xs"
                       />
                       <Button
                         variant="outline"
@@ -514,12 +516,12 @@ export default function DroidToolCard({
               </div>
 
               {message && (
-                <div
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
+                <Notice
+                  variant={message.type === "success" ? "success" : "critical"}
+                  icon={message.type === "success" ? "check_circle" : "error"}
                 >
-                  <Icon name={message.type === "success" ? "check_circle" : "error"} size={14} />
-                  <span>{message.text}</span>
-                </div>
+                  {message.text}
+                </Notice>
               )}
 
               <div className="flex items-center gap-2">
@@ -563,8 +565,11 @@ export default function DroidToolCard({
               </div>
 
               {showBackups && (
-                <div className="mt-2 p-3 bg-surface border border-border rounded-lg">
-                  <h4 className="text-xs font-semibold text-text-main mb-2 flex items-center gap-1">
+                <CardSection className="mt-2">
+                  <h4
+                    className="ci-heading text-text-main mb-2 flex items-center gap-1"
+                    data-size="xs"
+                  >
                     <Icon name="history" size={14} />
                     {t("configBackups")}
                   </h4>
@@ -586,10 +591,9 @@ export default function DroidToolCard({
                           </span>
                           <Button
                             variant="secondary"
-                            size="sm"
+                            size="2xs"
                             onClick={() => handleRestoreBackup(b.id)}
                             disabled={restoringBackup === b.id}
-                            className="h-6 px-2 text-[10px]"
                           >
                             {restoringBackup === b.id ? "..." : t("restore")}
                           </Button>
@@ -597,7 +601,7 @@ export default function DroidToolCard({
                       ))}
                     </div>
                   )}
-                </div>
+                </CardSection>
               )}
             </>
           )}

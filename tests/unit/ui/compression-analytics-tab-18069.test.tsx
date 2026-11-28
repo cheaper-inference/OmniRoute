@@ -94,13 +94,16 @@ describe("CompressionAnalyticsTab at narrow widths (#18069)", () => {
     expect(track.children).toHaveLength(24);
   });
 
-  it("renders the six KPI tiles as kit Stat with their preformatted values", async () => {
+  it("renders the six KPI tiles as the compact kit Stat, which formats the raw numbers", async () => {
     await mount();
     const stats = el.querySelectorAll<HTMLElement>(".ci-stat");
     expect(stats).toHaveLength(6);
-    for (const stat of stats) expect(stat.getAttribute("data-value-format")).toBe("text");
-    expect(el.querySelector(".ci-stat-row")).not.toBeNull();
-    const values = [...stats].map((s) => s.querySelector(".ci-stat__value")?.textContent);
+    // Numbers go in raw and the kit formats them: no tile is in text mode.
+    for (const stat of stats) expect(stat.getAttribute("data-value-format")).not.toBe("text");
+    expect(el.querySelector('.ci-stat-row[data-size="sm"]')).not.toBeNull();
+    const values = [...stats].map((s) =>
+      s.querySelector(".ci-stat__value")?.textContent?.replace(/\s+/g, "")
+    );
     expect(values).toContain((304).toLocaleString());
     expect(values).toContain("42%");
     expect(values).toContain("12ms");

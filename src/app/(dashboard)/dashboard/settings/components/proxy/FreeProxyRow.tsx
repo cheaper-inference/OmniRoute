@@ -53,16 +53,14 @@ export default function FreeProxyRow({
           aria-label={t("proxyFreePoolSelectProxy", { endpoint })}
         />
       </TableCell>
-      <TableCell className="text-text-muted text-xs">{proxy.source}</TableCell>
-      <TableCell className="font-mono text-xs">{endpoint}</TableCell>
-      <TableCell className="uppercase text-xs">{proxy.type}</TableCell>
-      <TableCell className="text-xs">{proxy.countryCode || "—"}</TableCell>
-      <TableCell className={`text-xs font-semibold ${qualityColor}`}>
+      <TableCell className="text-text-muted">{proxy.source}</TableCell>
+      <TableCell className="font-mono">{endpoint}</TableCell>
+      <TableCell className="uppercase">{proxy.type}</TableCell>
+      <TableCell>{proxy.countryCode || "—"}</TableCell>
+      <TableCell className={qualityColor}>
         {proxy.qualityScore != null ? proxy.qualityScore : "—"}
       </TableCell>
-      <TableCell className="text-xs">
-        {proxy.latencyMs != null ? `${proxy.latencyMs}ms` : "—"}
-      </TableCell>
+      <TableCell>{proxy.latencyMs != null ? `${proxy.latencyMs}ms` : "—"}</TableCell>
       <TableCell>
         {proxy.inPool ? (
           <Badge variant="success" size="sm">

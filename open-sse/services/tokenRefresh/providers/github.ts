@@ -2,14 +2,14 @@
 // Extracted from open-sse/services/tokenRefresh.ts — see ../shared.ts for
 // provenance notes (ported idea from KooshaPari's PR #7338, redone on tip).
 import { PROVIDERS, OAUTH_ENDPOINTS } from "../../../config/constants.ts";
-import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { runCommittedWithProxyContext } from "../../../utils/proxyFetch.ts";
 import { buildFormParams, extractOAuthErrorCode } from "../shared.ts";
 
 /**
  * Specialized refresh for GitHub Copilot OAuth tokens
  */
 export async function refreshGitHubToken(refreshToken, log, proxyConfig: unknown = null) {
-  const response = await runWithProxyContext(proxyConfig, () =>
+  const response = await runCommittedWithProxyContext(proxyConfig, () =>
     fetch(OAUTH_ENDPOINTS.github.token, {
       method: "POST",
       headers: {

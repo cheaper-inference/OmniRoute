@@ -199,6 +199,12 @@ export function isResolvableBuiltinAutoId(modelStr: string): boolean {
   return isRecognizedBuiltinAuto(modelStr, suffix);
 }
 
+/** Whether the request ID belongs to the built-in router, regardless of case. */
+export function isBuiltInAutoRoute(model: string): boolean {
+  const id = model.toLowerCase();
+  return id === "auto" || isResolvableBuiltinAutoId(id);
+}
+
 /** The `(variant, spec)` pair `createBuiltinAutoCombo` hands to the virtual factory. */
 export type BuiltinAutoMaterialization = {
   variant: AutoVariant | undefined;

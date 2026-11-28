@@ -11,7 +11,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
 import { evaluateComplexity } from "./check-complexity.mjs";
 import { evaluateCognitiveComplexity } from "./check-cognitive-complexity.mjs";
 import {
@@ -28,6 +28,7 @@ import {
   withBaseWorktree,
 } from "./newCodeMode.mjs";
 import { runComplexityEslintOn } from "./complexityEslintReport.mjs";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const BASE_REF = baseRefArg();
 const NEW_CODE_SCOPE = {
@@ -46,7 +47,7 @@ const COGNITIVE_RULES = new Set(["sonarjs/cognitive-complexity"]);
  * and the nightly headroom job run the full walk). See newCodeMode.mjs.
  */
 function mainNewCode() {
-  const mergeBase = resolveMergeBase(BASE_REF);
+  const mergeBase = resolveMergeBase(BASE_REF, { ref: process.env.GITHUB_REF });
   const changed = listChangedFiles(mergeBase, NEW_CODE_SCOPE);
   console.log(
     `[complexity-ratchets] new-code mode: merge-base ${mergeBase.slice(0, 12)}, ${changed.length} changed file(s) in scope`
@@ -178,4 +179,4 @@ function main() {
   process.exit(failed ? 1 : 0);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (isMainModule(import.meta.url)) main();

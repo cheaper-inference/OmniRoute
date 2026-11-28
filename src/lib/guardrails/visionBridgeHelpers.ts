@@ -4,8 +4,10 @@
 import { detectMediaParts, type MediaPart } from "@omniroute/open-sse/utils/mediaParts";
 import { normalizeDataUri } from "@omniroute/open-sse/utils/imageNormalize";
 import { fetchRemoteImage } from "@/shared/network/remoteImageFetch";
+import { getGuardedDispatcher } from "@omniroute/open-sse/utils/connectGuardDispatcher";
 import { getRuntimePorts } from "@/lib/runtime/ports";
 import { resolveSelfLoopBearer } from "@/shared/middleware/chatBodyAdmission";
+import { ownListenerSelfHopToken, SELF_HOP_HEADER } from "@omniroute/open-sse/utils/selfHop";
 import { getBestVisionModel, getFallbackModels, recordLatency } from "./visionBridgeRouter";
 import { combineCredentialChecks } from "./visionBridgeKeyScope";
 import { REGISTRY } from "@omniroute/open-sse/config/providers";
@@ -300,6 +302,22 @@ export function resolveImageAsDataUri(imageUrl: string): string {
   return `data:image/png;base64,${imageUrl}`;
 }
 
+/**
+ * Send every hop of an image download through the connect-time guarded dispatcher. The
+ * public-only check resolves the name once; the socket resolves it again, so a name that is
+ * public for the check could still connect to loopback, LAN or cloud metadata. The guarded
+ * dispatcher checks the addresses of the lookup the socket actually uses and refuses a private
+ * one. Where that dispatcher is unavailable (Bun), the download fails instead of going out
+ * unguarded.
+ */
+function withPublicOnlyConnectGuard(fetchImpl: typeof fetch): typeof fetch {
+  return (async (input: RequestInfo | URL, init?: RequestInit) =>
+    fetchImpl(input, {
+      ...init,
+      dispatcher: getGuardedDispatcher("public-only"),
+    } as RequestInit)) as typeof fetch;
+}
+
 async function fetchRemoteImageAsDataUri(
   imageUrl: string,
   signal: AbortSignal,
@@ -311,13 +329,13 @@ async function fetchRemoteImageAsDataUri(
     // local-first default install), which would let a request body make the server
     // fetch loopback/LAN URLs and inline the bytes into the vision self-call.
     guard: "public-only",
-    // `pinDns` is validation-only here: with `fetchImpl` injected the library validates
-    // every DNS answer but cannot pin the connection (it never builds its own fetch).
+    // With `fetchImpl` injected the library validates every DNS answer but cannot pin the
+    // connection; the connect-time guard below closes that gap on every redirect hop.
     pinDns: true,
     signal,
     // Bypass the runtime's hooked global fetch (ProxyFetch) — a dead local
     // proxy (e.g. 127.0.0.1:8317) would otherwise break the download.
-    fetchImpl,
+    fetchImpl: withPublicOnlyConnectGuard(fetchImpl),
   });
   const mediaType = remoteImage.contentType.split(";")[0]?.trim() || "image/png";
   const dataUri = `data:${mediaType};base64,${remoteImage.buffer.toString("base64")}`;
@@ -801,10 +819,10 @@ async function callVisionModelSingle(
       // When routing through OmniRoute's own API, omit the vision-bridge
       // guardrail on the sub-request to prevent infinite recursion.
       // OmniRoute's own listener authenticates the self-loop bearer (the env key or the
-      // per-process secret, both accepted by API-key validation), which the admission
-      // bypass below also requires. Any other endpoint — api.openai.com, or another
-      // localhost server set as VISION_BRIDGE_BASE_URL — gets only the provider key and
-      // never an OmniRoute credential; with no provider key the header is omitted.
+      // per-process secret, both accepted by API-key validation). Any other endpoint —
+      // api.openai.com, or another localhost server set as VISION_BRIDGE_BASE_URL — gets
+      // only the provider key and never an OmniRoute credential; with no provider key the
+      // header is omitted.
       // A bare-id call to our own listener keeps an operator VISION_BRIDGE_API_KEY.
       const selfLoopBearer =
         isOwnOmniRouteBaseUrl(baseUrl) && (useFullModelId || !resolvedApiKey)
@@ -834,10 +852,13 @@ async function callVisionModelSingle(
         // Internal self-loop sub-request: the parent request already holds the
         // single heavyweight admission lease (`CHAT_MAX_HEAVY_IN_FLIGHT=1`), so a
         // large base64-image describe body would be rejected with 503
-        // `chat_admission_busy` before it is described. The route only honors
-        // this header when the bearer is the self-loop bearer (set above), so
-        // external clients cannot use it to bypass admission.
+        // `chat_admission_busy` before it is described. The route grants the bypass
+        // only on the per-process token, never on this header or the bearer (the env
+        // key is a key clients can hold). Production injects undici fetch, which
+        // skips proxyFetch's own-listener stamp, so the token is set here; this branch
+        // only runs for our own listener, so the token never leaves the process.
         headers["x-omniroute-admission-bypass"] = "internal";
+        headers[SELF_HOP_HEADER] = ownListenerSelfHopToken();
         // Scope the sub-request to the caller's key: the receiving chat request
         // applies that key's connection/model policy (honored only alongside the
         // self-loop bearer, so it can only narrow access).

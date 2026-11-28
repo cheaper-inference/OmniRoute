@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Card } from "@/shared/components";
 import { CHART_SERIES, getSeriesColor } from "@/shared/components/analytics/chartColors";
 import { chartTheme } from "@omniroute/ui-kit/chart-theme";
@@ -55,7 +56,7 @@ export function ProviderSpendCard({
 
   return (
     <Card className="p-5">
-      <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-4">
+      <h3 className="ci-eyebrow mb-4" data-weight="medium">
         {title}
       </h3>
       <div className="flex flex-col gap-4 md:flex-row md:items-center">
@@ -111,6 +112,7 @@ export function CostTrendCard({
   rows: UsageAnalyticsTrendRow[];
   locale: string;
 }) {
+  const tc = useTranslations("common");
   const currencyFormatter = createCurrencyFormatter(locale);
   const chartRows = rows.map((row) => ({
     id: row.date,
@@ -120,7 +122,7 @@ export function CostTrendCard({
 
   return (
     <Card className="p-5">
-      <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-4">
+      <h3 className="ci-eyebrow mb-4" data-weight="medium">
         {title}
       </h3>
       <LineChart
@@ -129,6 +131,7 @@ export function CostTrendCard({
         series={[{ key: "cost", label: title, color: CHART_SERIES.cost }]}
         valueFormatter={(value) => currencyFormatter.format(value)}
         yTickFormatter={(value) => currencyFormatter.format(value).replace(".00", "")}
+        unavailableLabel={tc("notAvailable")}
         height={220}
       />
     </Card>
@@ -153,7 +156,7 @@ export function WeeklyPatternCard({
 
   return (
     <Card className="p-5">
-      <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wide mb-4">
+      <h3 className="ci-eyebrow mb-4" data-weight="medium">
         {title}
       </h3>
       <div className="h-40">

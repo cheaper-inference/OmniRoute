@@ -62,6 +62,38 @@ test("production source → code", () => {
   assert.deepEqual(c, { code: true, docs: false, i18n: false, workflow: false, testsOnly: false });
 });
 
+test("truthful usage helpers, persistence, fixtures and UI retain the code CI lane", () => {
+  const paths = [
+    "open-sse/utils/finalizeStreamingUsage.ts",
+    "open-sse/utils/streamGeneratedContent.ts",
+    "open-sse/utils/streamUsageMerge.ts",
+    "open-sse/utils/passthroughTrailingUsage.ts",
+    "open-sse/utils/usageEstimation.ts",
+    "src/lib/usage/usageEvidence.ts",
+    "src/lib/usage/storedUsageEvidence.ts",
+    "src/lib/db/usageEvidenceAggregates.ts",
+    "src/lib/db/migrations/20261115112344_truthful_usage_evidence.sql",
+    "src/lib/db/migrations/20261115112345_daily_usage_evidence.sql",
+    "src/lib/db/settings/cacheMetrics.ts",
+    "src/lib/logExport/destinations/bigquery.ts",
+    "src/lib/usage/usageHistory.ts",
+    "src/shared/components/RequestLogTokens.tsx",
+    "src/shared/components/UsageEvidenceNotice.tsx",
+    "src/shared/utils/usageDisplay.ts",
+    "src/app/(dashboard)/dashboard/cache/page.tsx",
+    "src/app/(dashboard)/dashboard/cache/cacheUsageDisplay.ts",
+    "tests/unit/truthful-usage-evidence.test.ts",
+    "tests/unit/truthful-stream-integration.test.ts",
+    "tests/unit/truthful-usage-persistence.test.ts",
+    "tests/unit/usage-evidence-aggregates.test.ts",
+    "tests/unit/truthful-cache-metrics.test.ts",
+    "tests/unit/ui/truthful-usage-display.test.tsx",
+    "tests/unit/ui/truthful-cache-page.test.tsx",
+    "tests/fixtures/truthful-usage/synthetic.sse",
+  ];
+  for (const file of paths) assert.equal(classifyPaths([file]).code, true, file);
+});
+
 test("mixed docs + code → both flags (jobs union their filters)", () => {
   const c = classifyPaths(["docs/README.md", "src/lib/db/core.ts"]);
   assert.equal(c.docs, true);
@@ -265,6 +297,26 @@ const LEGACY_STDOUT_CASES: Array<[string[], string, string]> = [
     "docs",
   ],
   [
+    [".i18n-state.json"],
+    "code=false\ndocs=true\ni18n=false\nworkflow=false\ntestsOnly=false\n",
+    "docs",
+  ],
+  [
+    ["docs/i18n/pt-BR/docs/architecture/QUALITY_GATES.md", ".i18n-state.json"],
+    "code=false\ndocs=true\ni18n=false\nworkflow=false\ntestsOnly=false\n",
+    "docs",
+  ],
+  [
+    [".i18n-state.json", "src/lib/db/core.ts"],
+    "code=true\ndocs=true\ni18n=false\nworkflow=false\ntestsOnly=false\n",
+    "db,docs",
+  ],
+  [
+    [".i18n-state.json.bak"],
+    "code=true\ndocs=false\ni18n=false\nworkflow=false\ntestsOnly=false\n",
+    "core",
+  ],
+  [
     ["src/i18n/messages/en.json"],
     "code=false\ndocs=false\ni18n=true\nworkflow=false\ntestsOnly=false\n",
     "i18n",
@@ -292,7 +344,7 @@ const LEGACY_STDOUT_CASES: Array<[string[], string, string]> = [
 ];
 
 for (const [files, legacy, domains] of LEGACY_STDOUT_CASES) {
-  test(`regression: stdout keeps the legacy lines byte-identical, then appends domains (${files[0]})`, () => {
+  test(`classifier CLI emits the five workflow flags and domains for ${files.join(", ")}`, () => {
     const out = runCli(files);
     assert.equal(out, `${legacy}domains=${domains}\n`);
   });

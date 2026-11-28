@@ -1,0 +1,1 @@
+- **docs:** the resilience guide now says what a client sees when the gateway itself is unreachable, and the uninstall guide has a "Revert client configuration" section (dashboard Reset, manual steps, verification) ([#21252](https://github.com/cheaper-inference/OmniRoute/pull/21252))

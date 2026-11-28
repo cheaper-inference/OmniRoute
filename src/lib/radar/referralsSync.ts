@@ -54,7 +54,7 @@ const MAX_FEED_BYTES = 10 * 1024 * 1024; // 10 MB
  * meant to feel "always current", and the fixed links in particular should
  * surface quickly for a free/community user.
  */
-export const REFERRALS_STALE_MS = 60 * 60 * 1000; // 1h
+export const REFERRALS_STALE_MS = 6 * 60 * 60 * 1000; // 6h
 
 // ---------------------------------------------------------------------------
 // Types

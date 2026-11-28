@@ -6,6 +6,13 @@ import { Alert } from "@omniroute/ui-kit/alert";
 import { DataTableFooter, DataTableShell } from "@omniroute/ui-kit/data-table-shell";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@omniroute/ui-kit/pagination";
+import {
   Sheet,
   SheetBody,
   SheetContent,
@@ -24,6 +31,7 @@ import {
 import { TableLoadingState } from "@omniroute/ui-kit/table-loading";
 import { Badge, Button, EmptyState, Input, Select } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import { usePagerLabels } from "@/shared/components/Pager";
 
 type AuditEntry = {
   id: number;
@@ -150,6 +158,7 @@ export default function ComplianceTab() {
   }, [entries]);
 
   const canGoNext = offset + PAGE_SIZE < totalCount;
+  const pagerLabels = usePagerLabels();
 
   const resetFilters = () => {
     setEventType("");
@@ -179,25 +188,32 @@ export default function ComplianceTab() {
     return "info" as const;
   };
 
+  // Offset paging: the kit Previous / Next pieces, without a page list.
   const pageButtons = (
-    <div className="flex items-center gap-2">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setOffset((current) => Math.max(0, current - PAGE_SIZE))}
-        disabled={offset === 0 || loading}
-      >
-        {t("previous")}
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setOffset((current) => current + PAGE_SIZE)}
-        disabled={!canGoNext || loading}
-      >
-        {t("next")}
-      </Button>
-    </div>
+    <Pagination aria-label={pagerLabels.navigation}>
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious
+            asChild
+            label={pagerLabels.previousPage}
+            disabled={offset === 0 || loading}
+          >
+            {/* kit-exception: the kit pagination link styles its own child; asChild needs a bare button. */}
+            <button onClick={() => setOffset((current) => Math.max(0, current - PAGE_SIZE))}>
+              <span>{pagerLabels.previous}</span>
+            </button>
+          </PaginationPrevious>
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationNext asChild label={pagerLabels.nextPage} disabled={!canGoNext || loading}>
+            {/* kit-exception: the kit pagination link styles its own child; asChild needs a bare button. */}
+            <button onClick={() => setOffset((current) => current + PAGE_SIZE)}>
+              <span>{pagerLabels.next}</span>
+            </button>
+          </PaginationNext>
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
   );
 
   return (
@@ -326,7 +342,7 @@ export default function ComplianceTab() {
         ) : visibleEntries.length === 0 ? (
           <EmptyState icon="policy" title={t("noEvents")} />
         ) : (
-          <Table scrollbarLabel={t("title")} className="min-w-[1040px] text-left">
+          <Table scrollbarLabel={t("title")} scrollLabel={t("title")} className="min-w-[1040px]">
             <TableHeader>
               <TableRow>
                 <TableHead>{t("timestamp")}</TableHead>
@@ -336,7 +352,7 @@ export default function ComplianceTab() {
                 <TableHead>{t("userOrKey")}</TableHead>
                 <TableHead>{t("action")}</TableHead>
                 <TableHead>{t("result")}</TableHead>
-                <TableHead className="text-right">{t("details")}</TableHead>
+                <TableHead align="end">{t("details")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -344,7 +360,7 @@ export default function ComplianceTab() {
                 const entrySeverity = getSeverity(entry);
                 return (
                   <TableRow key={entry.id}>
-                    <TableCell className="font-mono text-xs text-text-muted">
+                    <TableCell className="font-mono text-text-muted">
                       {formatLocalDate(entry.timestamp)}
                     </TableCell>
                     <TableCell>
@@ -359,7 +375,7 @@ export default function ComplianceTab() {
                         {t(entrySeverity)}
                       </Badge>
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-text-muted">
+                    <TableCell className="font-mono text-text-muted">
                       {entry.ip_address || entry.ip || t("notAvailable")}
                     </TableCell>
                     <TableCell className="text-text-main">{entry.actor || t("system")}</TableCell>
@@ -369,7 +385,7 @@ export default function ComplianceTab() {
                     <TableCell className="text-text-muted">
                       {entry.status || t("notAvailable")}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell align="end">
                       <Button variant="outline" size="sm" onClick={() => setSelectedEntry(entry)}>
                         {t("viewDetails")}
                       </Button>

@@ -10,7 +10,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { handleInternalUsageCommandHttpRequest } from "../../src/lib/usage/internalUsageCommand";
+import {
+  handleInternalUsageCommand,
+  handleInternalUsageCommandHttpRequest,
+} from "../../src/lib/usage/internalUsageCommand";
 
 const NOW = Date.parse("2026-08-19T12:00:00.000Z");
 
@@ -32,11 +35,14 @@ function allowedDeps(overrides: Record<string, unknown> = {}) {
   return {
     now: () => NOW,
     isValidApiKey: async (apiKey: string) => apiKey === "sk-allowed",
+    // The panel key is explicitly granted the shared-account view; a plain
+    // client key (self:usage only) is covered by the tests at the bottom.
     getApiKeyMetadata: async () => ({
       id: "key-allowed",
       name: "panel key",
       allowUsageCommand: true,
       usageLimitEnabled: true,
+      scopes: ["self:usage", "self:account-quota"],
     }),
     getProviderConnections: async () => [
       { id: "conn-claude", provider: "claude", isActive: true },
@@ -223,3 +229,179 @@ test("om-usage preserves raw quota in json while text scales remaining quota by 
   assert.match(text, /Weekly/);
   assert.match(text, /20% left/);
 });
+
+// A client key with the usage command could read, through ?format=json, every
+// shared provider account: connection ids, plan, raw quota and resets. Those
+// belong to the operator, not to the key holder.
+function failingProviderCollectors() {
+  const fail = () => {
+    throw new Error("provider accounts must not be read for this key");
+  };
+  return {
+    getProviderConnections: async () => fail(),
+    getAllProviderLimitsCache: () => fail(),
+    getProviderConnectionById: async () => fail(),
+    getProviderLimitsCache: () => fail(),
+  };
+}
+
+for (const [label, scopes] of [
+  ["a plain client key (self:usage only)", ["self:usage"]],
+  ["a key whose metadata carries no scopes", undefined],
+] as const) {
+  test(`om-usage ?format=json hides the shared provider accounts from ${label}`, async () => {
+    const response = await handleInternalUsageCommandHttpRequest(
+      new Request("http://localhost/api/usage/om-usage?format=json", {
+        headers: { Authorization: "Bearer sk-allowed" },
+      }),
+      allowedDeps({
+        getApiKeyMetadata: async () => ({
+          id: "key-client",
+          name: "client key",
+          allowUsageCommand: true,
+          usageLimitEnabled: true,
+          ...(scopes ? { scopes: [...scopes] } : {}),
+        }),
+        ...failingProviderCollectors(),
+      })
+    );
+
+    assert.equal(response.status, 200);
+    const body = (await response.json()) as {
+      allowed: boolean;
+      personal: { weeklySpentUsd: number } | null;
+      provider: unknown;
+      providers: unknown[];
+    };
+    assert.equal(body.allowed, true);
+    assert.equal(body.personal?.weeklySpentUsd, 8);
+    assert.equal(body.provider, null);
+    assert.deepEqual(body.providers, []);
+    assert.doesNotMatch(JSON.stringify(body), /conn-claude|conn-codex|Claude Max|Codex Pro/);
+  });
+}
+
+test("om-usage ?format=json still shows the shared accounts to a management key", async () => {
+  const response = await handleInternalUsageCommandHttpRequest(
+    new Request("http://localhost/api/usage/om-usage?format=json", {
+      headers: { Authorization: "Bearer sk-allowed" },
+    }),
+    allowedDeps({
+      getApiKeyMetadata: async () => ({
+        id: "key-admin",
+        name: "operator key",
+        allowUsageCommand: true,
+        usageLimitEnabled: false,
+        scopes: ["manage", "self:usage"],
+      }),
+    })
+  );
+
+  assert.equal(response.status, 200);
+  const body = (await response.json()) as { providers: Array<{ provider: string }> };
+  assert.deepEqual(body.providers.map((s) => s.provider).sort(), ["claude", "codex"]);
+});
+
+// The text form (`@@om-usage`, plain GET without ?format) applies the same rule:
+// a key without `self:account-quota` and without a management scope sees only
+// its personal quota, and the shared accounts are never read for it.
+function clientKeyMetadata(
+  scopes: readonly string[] | undefined,
+  overrides: Record<string, unknown> = {}
+) {
+  return {
+    id: "key-client",
+    name: "client key",
+    allowUsageCommand: true,
+    usageLimitEnabled: true,
+    ...(scopes ? { scopes: [...scopes] } : {}),
+    ...overrides,
+  };
+}
+
+for (const [label, scopes] of [
+  ["a plain client key (self:usage only)", ["self:usage"]],
+  ["a key whose metadata carries no scopes", undefined],
+] as const) {
+  test(`om-usage text hides the shared provider accounts from ${label}`, async () => {
+    const response = await handleInternalUsageCommandHttpRequest(
+      new Request("http://localhost/api/usage/om-usage", {
+        headers: { Authorization: "Bearer sk-allowed" },
+      }),
+      allowedDeps({
+        getApiKeyMetadata: async () => clientKeyMetadata(scopes),
+        ...failingProviderCollectors(),
+      })
+    );
+
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get("content-type") ?? "", /text\/plain/);
+    const text = await response.text();
+    assert.match(text, /^Personal quota\n/);
+    assert.doesNotMatch(text, /Provider quota/);
+  });
+
+  test(`@@om-usage in chat hides the shared provider accounts from ${label}`, async () => {
+    const response = await handleInternalUsageCommand(
+      new Request("http://localhost/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: "Bearer sk-allowed" },
+      }),
+      { model: "claude-opus-4-8", messages: [{ role: "user", content: "@@om-usage" }] },
+      allowedDeps({
+        getApiKeyMetadata: async () => clientKeyMetadata(scopes),
+        ...failingProviderCollectors(),
+      })
+    );
+
+    assert.ok(response, "command should be handled locally");
+    assert.equal(response.status, 200);
+    const body = (await response.json()) as {
+      choices: Array<{ message: { content: string } }>;
+    };
+    const text = body.choices[0].message.content;
+    assert.match(text, /^Personal quota\n/);
+    assert.doesNotMatch(text, /Provider quota/);
+  });
+}
+
+test("om-usage text without personal limits or shared access reads no provider account", async () => {
+  const response = await handleInternalUsageCommandHttpRequest(
+    new Request("http://localhost/api/usage/om-usage", {
+      headers: { Authorization: "Bearer sk-allowed" },
+    }),
+    allowedDeps({
+      getApiKeyMetadata: async () =>
+        clientKeyMetadata(["self:usage"], { usageLimitEnabled: false }),
+      getApiKeyUsageLimitStatus: async () => {
+        throw new Error("usage limit lookup must not run without per-key limits");
+      },
+      ...failingProviderCollectors(),
+    })
+  );
+
+  assert.equal(response.status, 200);
+  const text = await response.text();
+  assert.equal(text, "Personal quota\nNo personal usage limits configured for this API key.");
+});
+
+for (const [label, scopes] of [
+  ["a key granted self:account-quota", ["self:usage", "self:account-quota"]],
+  ["a management key", ["manage"]],
+] as const) {
+  test(`om-usage text still shows the provider quota to ${label}`, async () => {
+    const response = await handleInternalUsageCommandHttpRequest(
+      new Request("http://localhost/api/usage/om-usage", {
+        headers: { Authorization: "Bearer sk-allowed" },
+      }),
+      allowedDeps({
+        getApiKeyMetadata: async () => clientKeyMetadata(scopes),
+      })
+    );
+
+    assert.equal(response.status, 200);
+    const text = await response.text();
+    assert.match(text, /Personal quota/);
+    assert.match(text, /Provider quota\nSession\n/);
+  });
+}

@@ -66,7 +66,7 @@ See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.y
 
 # OmniRoute — Monitoring & Health
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/cheaper-inference/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ## System health
 
@@ -81,7 +81,7 @@ Unauthenticated quick check:
 
 ```bash
 curl $OMNIROUTE_URL/api/health
-# → {"ok":true}
+# → {"status":"ok","timestamp":"..."}
 ```
 
 ## Provider circuit breakers
@@ -100,7 +100,7 @@ Response includes `circuitBreakers` array with per-provider state and `resetAt` 
 ## Per-provider metrics (p50/p95/p99)
 
 ```bash
-curl $OMNIROUTE_URL/api/providers/metrics \
+curl $OMNIROUTE_URL/api/provider-metrics \
   -H "Authorization: Bearer $OMNIROUTE_KEY"
 ```
 
@@ -130,7 +130,7 @@ omniroute_db_health_check       → diagnose + auto-repair database drift
 ## Quota check
 
 ```bash
-curl $OMNIROUTE_URL/api/quota \
+curl $OMNIROUTE_URL/api/usage/quota \
   -H "Authorization: Bearer $OMNIROUTE_KEY"
 ```
 
@@ -138,24 +138,23 @@ Returns used/total tokens and requests per provider/account, with `resetAt` time
 
 ## Budget guard (spend limit)
 
-Set a session spending limit that degrades or blocks requests when hit:
+Set a per-key spending limit (REST):
 
 ```bash
-curl -X POST $OMNIROUTE_URL/api/budget/guard \
+curl -X POST $OMNIROUTE_URL/api/usage/budget \
   -H "Authorization: Bearer $OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "limitUsd": 5.00,
-    "action": "degrade",
-    "degradeTo": "openai/gpt-4o-mini"
+    "apiKeyId": "<key id>",
+    "dailyLimitUsd": 5.00,
+    "warningThreshold": 0.8
   }'
 ```
 
-`action` options:
+Other fields: `weeklyLimitUsd`, `monthlyLimitUsd`, `resetInterval`. A limit of `0` means no limit.
 
-- `degrade` — switch to a cheaper model when limit is hit
-- `block` — return 429 when limit is hit
-- `alert` — continue but add `X-Budget-Warning` header
+Set a session limit through MCP: `omniroute_set_budget_guard` with
+`maxCost`, `action` (`degrade`, `block`, `alert`) and optional `degradeToTier` (`cheap`, `free`).
 
 ## MCP audit log
 

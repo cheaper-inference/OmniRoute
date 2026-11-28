@@ -1,4 +1,5 @@
 "use client";
+import { formatUsageCounter } from "@/shared/utils/usageDisplay";
 
 import { classifyHttpLog, parseUpstreamHttp } from "@/shared/utils/upstreamHttp";
 import { sortRelatedLogs } from "./requestLoggerGroups";
@@ -21,6 +22,7 @@ import {
   buildPipelinePayloadSections,
   hasConversationTurns,
   isBodySizeLimitOmission,
+  useTransientFlag,
 } from "@/shared/components/RequestLoggerDetail.sections";
 import { getResilienceBadges } from "@/shared/components/requestLoggerResilience";
 import { cn } from "@/shared/utils/cn";
@@ -182,28 +184,6 @@ export function parseStreamIntoSegments(joined: string): StreamSegment[] {
   return segments;
 }
 
-// A "copied" flag that resets itself after a short delay. The reset timer is cleared on unmount:
-// left running, it fired after the component (and, in tests, jsdom) was gone (#19329).
-function useTransientFlag(resetMs = 2000) {
-  const [active, setActive] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(
-    () => () => {
-      if (timerRef.current !== null) clearTimeout(timerRef.current);
-    },
-    []
-  );
-  const trigger = () => {
-    setActive(true);
-    if (timerRef.current !== null) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      timerRef.current = null;
-      setActive(false);
-    }, resetMs);
-  };
-  return [active, trigger] as const;
-}
-
 function StreamSection({ title, sectionId, json, onCopy }) {
   const t = useTranslations("requestLogger.detail");
   const [copied, flashCopied] = useTransientFlag();
@@ -271,9 +251,7 @@ function StreamSection({ title, sectionId, json, onCopy }) {
     <div>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
-          <h3 className="text-[11px] text-text-muted uppercase tracking-wider font-semibold">
-            {title}
-          </h3>
+          <h3 className="text-2xs text-text-muted uppercase">{title}</h3>
           <Button
             variant="ghost"
             size="icon-sm"
@@ -419,6 +397,7 @@ export function RequestLoggerDetailPanel({
   // #13130: the grid's TTFT column label doubles as the detail-tile label
   // (the key already ships in every locale under requestLogger.columns).
   const tColumns = useTranslations("requestLogger.columns");
+  const tEvidence = useTranslations("common.usageEvidence");
   const locale = useLocale();
   const [selectedTab, setSelectedTab] = useState<DetailTab>(initialTab);
   const timingLog = { ...log, ...detail };
@@ -561,6 +540,7 @@ export function RequestLoggerDetailPanel({
       : detail?.detailState === "corrupt"
         ? t("payloadCorrupt")
         : null;
+  const evidence = detail?.usageEvidence ?? log.usageEvidence;
   const tokenStats = {
     totalIn: detail?.tokens?.in ?? log.tokens?.in ?? null,
     totalOut: detail?.tokens?.out ?? log.tokens?.out ?? null,
@@ -570,8 +550,6 @@ export function RequestLoggerDetailPanel({
     reasoningChars: detail?.reasoningChars ?? log.reasoningChars,
     compressed: detail?.tokens?.compressed ?? log.tokens?.compressed,
   };
-
-  const formatTokenValue = (value) => (value != null ? value.toLocaleString() : t("notAvailable"));
 
   const cacheSource = detail?.cacheSource || log.cacheSource || "upstream";
   const cacheSourceLabel = cacheSource === "semantic" ? t("semanticCache") : t("upstreamCache");
@@ -638,7 +616,7 @@ export function RequestLoggerDetailPanel({
                 </Badge>
               )}
               {hasStatusDiscrepancy && (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-bg-subtle border border-border text-text-muted">
+                <span className="text-3xs font-semibold px-2 py-0.5 rounded bg-bg-subtle border border-border text-text-muted">
                   {t("upstreamStatus", { status: providerStatus })}
                 </span>
               )}
@@ -650,7 +628,7 @@ export function RequestLoggerDetailPanel({
               {log.method && <span className="font-semibold text-lg">{log.method}</span>}
             </div>
             {hasStatusDiscrepancy && (
-              <span className="text-[10px] text-warning font-medium mt-0.5">
+              <span className="text-3xs text-warning font-medium mt-0.5">
                 {t("statusDiscrepancy", { status: log.status, provider: providerStatus })}
               </span>
             )}
@@ -659,13 +637,13 @@ export function RequestLoggerDetailPanel({
             {log.path}
           </span>
           {log.id && (
-            <span className="min-w-0 break-all text-[10px] text-text-muted/50 font-mono self-center ml-2 px-1.5 py-0.5 rounded bg-bg-subtle border border-border/40 select-all">
+            <span className="min-w-0 break-all text-3xs text-text-muted/50 font-mono self-center ml-2 px-1.5 py-0.5 rounded bg-bg-subtle border border-border/40 select-all">
               {log.id}
             </span>
           )}
           {log.correlationId && (
             <span
-              className="min-w-0 break-all text-[10px] text-text-muted/50 font-mono self-center ml-2 px-1.5 py-0.5 rounded bg-bg-subtle border border-border/40 select-all"
+              className="min-w-0 break-all text-3xs text-text-muted/50 font-mono self-center ml-2 px-1.5 py-0.5 rounded bg-bg-subtle border border-border/40 select-all"
               title={t("correlationId")}
             >
               {t("correlationIdValue", { id: log.correlationId })}
@@ -739,19 +717,19 @@ export function RequestLoggerDetailPanel({
         {timingLog.active ? (
           <div className="flex flex-wrap gap-4 p-4 bg-bg-subtle rounded-xl border border-border">
             <div className="min-w-[140px] flex-1">
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("startedAt")}
               </div>
               <div className="text-sm font-medium">{formatDate(startMs)}</div>
             </div>
             <div className="min-w-[100px] flex-1">
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("duration")}
               </div>
               <div className="text-sm font-medium">{formatDuration(timingLog.duration)}</div>
             </div>
             <div className="min-w-[100px] flex-1">
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("addedWait")}
               </div>
               <div className="text-sm font-medium">
@@ -761,24 +739,24 @@ export function RequestLoggerDetailPanel({
               </div>
             </div>
             <div className="min-w-[140px] flex-1">
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("model")}
               </div>
               <div className="text-sm font-medium text-primary font-mono">{log.model}</div>
             </div>
             <div className="min-w-[120px] flex-1">
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("provider")}
               </div>
               <span
-                className="inline-block px-2.5 py-1 rounded text-[10px] font-semibold uppercase"
+                className="inline-block px-2.5 py-1 rounded text-3xs font-semibold uppercase"
                 style={{ backgroundColor: providerColor.bg, color: providerColor.text }}
               >
                 {providerLabel}
               </span>
             </div>
             <div className="min-w-[120px] flex-1">
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("account")}
               </div>
               <div className="text-sm font-medium">{accountLabel}</div>
@@ -790,19 +768,19 @@ export function RequestLoggerDetailPanel({
             data-testid="request-log-metadata-grid"
           >
             <div>
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("startedAt")}
               </div>
               <div className="text-sm font-medium">{formatDate(startMs)}</div>
             </div>
             <div>
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("endedAt")}
               </div>
               <div className="text-sm font-medium">{formatDate(endMs)}</div>
             </div>
             <div>
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("duration")}
               </div>
               <div className="text-sm font-medium">{formatDuration(timingLog.duration)}</div>
@@ -810,7 +788,7 @@ export function RequestLoggerDetailPanel({
             {typeof log.ttft === "number" && log.ttft > 0 && (
               <div>
                 <div
-                  className="text-[10px] text-text-muted uppercase tracking-wider mb-1"
+                  className="text-3xs text-text-muted uppercase tracking-wider mb-1"
                   title={`${tColumns("ttft")}: time to first forwarded stream token; generation ran for ${formatDuration(Math.max(0, (log.duration || 0) - log.ttft))} (#13130)`}
                 >
                   {tColumns("ttft")}
@@ -819,18 +797,28 @@ export function RequestLoggerDetailPanel({
               </div>
             )}
             <div>
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("input")}
               </div>
               <div className="flex flex-wrap items-center gap-1.5" data-testid="token-group-input">
                 <span className="px-2 py-0.5 rounded bg-primary/20 text-primary text-xs font-semibold">
-                  {t("totalIn", { value: formatTokenValue(tokenStats.totalIn) })}
+                  {t("totalIn", {
+                    value: formatUsageCounter(tokenStats.totalIn, evidence?.input, tEvidence),
+                  })}
                 </span>
                 <span className="px-2 py-0.5 rounded bg-info/20 text-info text-xs font-semibold">
-                  {t("cacheRead", { value: formatTokenValue(tokenStats.cacheRead) })}
+                  {t("cacheRead", {
+                    value: formatUsageCounter(tokenStats.cacheRead, evidence?.cacheRead, tEvidence),
+                  })}
                 </span>
                 <span className="px-2 py-0.5 rounded bg-warning/20 text-warning text-xs font-semibold">
-                  {t("cacheWrite", { value: formatTokenValue(tokenStats.cacheWrite) })}
+                  {t("cacheWrite", {
+                    value: formatUsageCounter(
+                      tokenStats.cacheWrite,
+                      evidence?.cacheCreation,
+                      tEvidence
+                    ),
+                  })}
                 </span>
                 {tokenStats.compressed != null &&
                   tokenStats.compressed > 0 &&
@@ -842,7 +830,7 @@ export function RequestLoggerDetailPanel({
                         ? Math.max(0, Math.min(100, Math.round((saved / fromTokens) * 100)))
                         : 100;
                     return (
-                      <span className="px-2 py-0.5 rounded bg-chart-3/20 text-chart-3 text-xs font-semibold">
+                      <span className="px-2 py-0.5 rounded bg-chart-3/20 text-chart-3-ink text-xs font-semibold">
                         {t("compressed", {
                           from: fromTokens.toLocaleString(),
                           to: Math.max(0, tokenStats.totalIn).toLocaleString(),
@@ -854,26 +842,28 @@ export function RequestLoggerDetailPanel({
               </div>
             </div>
             <div>
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("output")}
               </div>
               <div className="flex flex-wrap items-center gap-1.5" data-testid="token-group-output">
                 <span className="px-2 py-0.5 rounded bg-success/20 text-success text-xs font-semibold">
-                  {t("totalOut", { value: formatTokenValue(tokenStats.totalOut) })}
+                  {t("totalOut", {
+                    value: formatUsageCounter(tokenStats.totalOut, evidence?.output, tEvidence),
+                  })}
                 </span>
-                <span className="px-2 py-0.5 rounded bg-chart-3/20 text-chart-3 text-xs font-semibold">
+                <span className="px-2 py-0.5 rounded bg-chart-3/20 text-chart-3-ink text-xs font-semibold">
                   {t("reasoning", { value: formatReasoningStat(tokenStats, t) })}
                 </span>
               </div>
             </div>
             <div>
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("model")}
               </div>
               <div className="text-sm font-medium text-primary font-mono">{log.model}</div>
             </div>
             <div>
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("requestedModel")}
               </div>
               <div
@@ -888,33 +878,33 @@ export function RequestLoggerDetailPanel({
               </div>
             </div>
             <div>
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("provider")}
               </div>
               <span
-                className="inline-block px-2.5 py-1 rounded text-[10px] font-semibold uppercase"
+                className="inline-block px-2.5 py-1 rounded text-3xs font-semibold uppercase"
                 style={{ backgroundColor: providerColor.bg, color: providerColor.text }}
               >
                 {providerLabel}
               </span>
             </div>
             <div>
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("requestProtocol")}
               </div>
               <span
-                className="inline-block px-2.5 py-1 rounded text-[10px] font-semibold uppercase"
+                className="inline-block px-2.5 py-1 rounded text-3xs font-semibold uppercase"
                 style={{ backgroundColor: protocol.bg, color: protocol.text }}
               >
                 {protocol.label}
               </span>
             </div>
             <div>
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("cacheSource")}
               </div>
               <span
-                className={`inline-block px-2.5 py-1 rounded text-[10px] font-semibold border ${cacheSourceClassName}`}
+                className={`inline-block px-2.5 py-1 rounded text-3xs font-semibold border ${cacheSourceClassName}`}
               >
                 {cacheSourceLabel}
               </span>
@@ -930,23 +920,23 @@ export function RequestLoggerDetailPanel({
             />
             {(detail?.modelPinned || log.modelPinned) && (
               <div>
-                <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+                <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                   {t("modelPinning")}
                 </div>
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-semibold bg-chart-3/15 text-chart-3 border border-chart-3/25">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-3xs font-semibold bg-chart-3/15 text-chart-3-ink border border-chart-3/25">
                   <Icon name="push_pin" size={12} />
                   {t("activeModelPinning")}
                 </span>
               </div>
             )}
             <div>
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("account")}
               </div>
               <div className="text-sm font-medium">{accountLabel}</div>
               {codexAccountRotation && (
                 <div
-                  className="mt-1 text-[10px] text-warning font-mono"
+                  className="mt-1 text-3xs text-warning font-mono"
                   title={`${codexAccountRotation.initialConnectionId} -> ${codexAccountRotation.finalConnectionId}`}
                 >
                   {t("rotated", {
@@ -957,7 +947,7 @@ export function RequestLoggerDetailPanel({
               )}
             </div>
             <div>
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("apiKey")}
               </div>
               <div
@@ -977,11 +967,11 @@ export function RequestLoggerDetailPanel({
               </div>
             </div>
             <div>
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {t("combo")}
               </div>
               {detail?.comboName || log.comboName ? (
-                <span className="inline-block px-2.5 py-1 rounded-full text-[10px] font-semibold bg-chart-3/20 text-chart-3 border border-chart-3/30">
+                <span className="inline-block px-2.5 py-1 rounded-full text-3xs font-semibold bg-chart-3/20 text-chart-3-ink border border-chart-3/30">
                   {detail?.comboName || log.comboName}
                 </span>
               ) : (
@@ -989,7 +979,7 @@ export function RequestLoggerDetailPanel({
               )}
             </div>
             <div>
-              <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
+              <div className="text-3xs text-text-muted uppercase tracking-wider mb-1">
                 {tColumns("conversation")}
               </div>
               {detail?.sessionTag || log.sessionTag ? (
@@ -1011,7 +1001,7 @@ export function RequestLoggerDetailPanel({
         {(detail?.error || log.error) && (
           <div className="p-4 rounded-xl bg-error/10 border border-error/30">
             <div className="flex items-center justify-between mb-1">
-              <div className="text-[10px] text-error uppercase tracking-wider font-semibold">
+              <div className="text-3xs text-error uppercase tracking-wider font-semibold">
                 {t("error")}
               </div>
               {isCombo503 && !cleared && (
@@ -1020,14 +1010,14 @@ export function RequestLoggerDetailPanel({
                   size="sm"
                   onClick={handleUnblockAll}
                   disabled={unblockAllBusy}
-                  className="h-7 min-h-7 px-2.5 text-[10px]"
+                  className="h-7 min-h-7 px-2.5 text-3xs"
                 >
                   <Icon name="lock_open" size={12} />
                   {unblockAllBusy ? "..." : t("unblockAll")}
                 </Button>
               )}
               {isCombo503 && cleared && (
-                <span className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-lg bg-success/10 border border-success/30 text-success">
+                <span className="flex items-center gap-1 px-2.5 py-1 text-3xs font-medium rounded-lg bg-success/10 border border-success/30 text-success">
                   <Icon name="check" size={10} />
                   {t("cleared")}
                 </span>
@@ -1038,14 +1028,14 @@ export function RequestLoggerDetailPanel({
                   size="sm"
                   onClick={handleUnblockModel}
                   disabled={unblocking}
-                  className="h-7 min-h-7 px-2.5 text-[10px]"
+                  className="h-7 min-h-7 px-2.5 text-3xs"
                 >
                   <Icon name="lock_open" size={12} />
                   {unblocking ? "..." : t("unblock")}
                 </Button>
               )}
               {isModelCooldown && cleared && (
-                <span className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium rounded-lg bg-success/10 border border-success/30 text-success">
+                <span className="flex items-center gap-1 px-2.5 py-1 text-3xs font-medium rounded-lg bg-success/10 border border-success/30 text-success">
                   <Icon name="check" size={10} />
                   {t("cleared")}
                 </span>
@@ -1060,7 +1050,7 @@ export function RequestLoggerDetailPanel({
         {/* Related Requests (same correlation ID) */}
         {relatedLogs.length > 1 && (
           <div className="p-4 rounded-xl bg-bg-subtle border border-border">
-            <div className="text-[10px] text-text-muted uppercase tracking-wider mb-2 font-semibold">
+            <div className="text-3xs text-text-muted uppercase tracking-wider mb-2 font-semibold">
               {t("relatedRequests", { count: relatedLogs.length })}
             </div>
             <div className="flex flex-col gap-1">
@@ -1076,7 +1066,7 @@ export function RequestLoggerDetailPanel({
                     disabled={isCurrent}
                     aria-current={isCurrent ? "true" : undefined}
                     className={cn(
-                      "h-auto w-full flex-wrap justify-start gap-2 whitespace-normal px-2 py-1.5 text-left text-xs font-normal",
+                      "h-auto w-full flex-wrap justify-start gap-2 whitespace-normal px-2 py-1.5 text-left text-xs",
                       isCurrent && "border border-primary/30 bg-primary/10 disabled:opacity-100"
                     )}
                   >
@@ -1089,7 +1079,7 @@ export function RequestLoggerDetailPanel({
                             ? "error"
                             : httpStatusTone(r.status)
                       }
-                      className="min-w-[28px] justify-center text-[9px] font-semibold"
+                      className="min-w-[28px] justify-center text-3xs font-semibold"
                     >
                       {classifyHttpLog(r) === "transport_error"
                         ? t("transportError")
@@ -1099,14 +1089,14 @@ export function RequestLoggerDetailPanel({
                     </Badge>
                     <span className="break-all font-mono text-text-muted">{r.id}</span>
                     <span className="text-text-muted">{r.model}</span>
-                    <span className="text-text-muted text-[10px]">
+                    <span className="text-text-muted text-3xs">
                       {Number.isFinite(startMs)
                         ? new Date(startMs).toLocaleTimeString(locale, { hour12: false })
                         : "—"}
                     </span>
                     <span className="text-text-muted ml-auto">{formatDuration(r.duration)}</span>
                     {isCurrent && (
-                      <span className="text-[9px] text-primary font-semibold ml-1">
+                      <span className="text-3xs text-primary font-semibold ml-1">
                         {t("current")}
                       </span>
                     )}
@@ -1119,7 +1109,7 @@ export function RequestLoggerDetailPanel({
 
         {detailIssue && (
           <div className="p-4 rounded-xl bg-warning/10 border border-warning/30">
-            <div className="text-[10px] text-warning uppercase tracking-wider mb-1 font-semibold">
+            <div className="text-3xs text-warning uppercase tracking-wider mb-1 font-semibold">
               {t("detailStatus")}
             </div>
             <div className="text-sm text-warning">{detailIssue}</div>

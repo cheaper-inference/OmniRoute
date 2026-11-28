@@ -38,13 +38,7 @@ export function RequestStreamingList({
         {sameContextKey && (
           <div className="shrink-0 flex items-center gap-2 border-b border-border bg-info-bg px-2 py-1 font-mono text-xs text-info">
             <span>{t("filteringContext", { context: sameContextKey.slice(0, 6) })}</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              icon="close"
-              className="h-auto min-h-0 px-1 py-0 text-xs"
-              onClick={onClearContextFilter}
-            >
+            <Button variant="ghost" size="2xs" icon="close" onClick={onClearContextFilter}>
               {t("clearContextFilter")}
             </Button>
           </div>
@@ -69,13 +63,7 @@ export function RequestStreamingList({
       {sameContextKey && (
         <div className="shrink-0 flex items-center gap-2 border-b border-border bg-info-bg px-2 py-1 font-mono text-xs text-info">
           <span>{t("filteringContext", { context: sameContextKey.slice(0, 6) })}</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            icon="close"
-            className="h-auto min-h-0 px-1 py-0 text-xs"
-            onClick={onClearContextFilter}
-          >
+          <Button variant="ghost" size="2xs" icon="close" onClick={onClearContextFilter}>
             {t("clearContextFilter")}
           </Button>
         </div>

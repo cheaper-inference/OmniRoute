@@ -579,6 +579,12 @@ export function applyEnrichment(
     typeof context.rawModelId === "string" && context.rawModelId.length > 0
       ? context.rawModelId
       : "";
+  // An entry with no name (pricing or free-tier data only) names the model from
+  // its id. Without a raw id from the caller (the /api/combos pass) that is the
+  // model's own id, else the builder gets nothing and renders `combo - `.
+  const hasEnrichmentName =
+    typeof enrichment.name === "string" && enrichment.name.trim().length > 0;
+  const nameSourceId = rawModelId || (hasEnrichmentName ? "" : model.id);
   let providerDisplayName = enrichment.providerDisplayName;
   if (
     (!providerDisplayName || providerDisplayName.trim().length === 0) &&
@@ -588,7 +594,7 @@ export function applyEnrichment(
     providerDisplayName = rawModelId.slice(0, rawModelId.indexOf("/"));
   }
   const built = buildModelDisplayName({
-    rawId: rawModelId,
+    rawId: nameSourceId,
     enrichmentName: enrichment.name,
     providerAlias: enrichment.providerAlias,
     providerDisplayName,

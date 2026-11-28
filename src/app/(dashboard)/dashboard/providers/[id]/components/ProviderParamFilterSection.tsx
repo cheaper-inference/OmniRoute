@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import { Skeleton } from "@omniroute/ui-kit/skeleton";
 import { Button, Card, Checkbox, Input } from "@/shared/components";
 
@@ -210,12 +211,10 @@ function ParamFilterSectionSkeleton() {
 function ParamFilterSectionHeader({ t }: { t: (key: string) => string }) {
   return (
     <>
-      <h2 className="text-base font-semibold text-text-main mb-1">
-        {t("paramFiltersSectionTitle")}
-      </h2>
+      <h2 className="text-base text-text-main mb-1">{t("paramFiltersSectionTitle")}</h2>
       <p className="text-xs text-text-muted mb-4 leading-relaxed">
         {t.rich("paramFiltersSectionHint", {
-          code: (chunks) => <code className="text-xs bg-bg-subtle px-1 rounded">{chunks}</code>,
+          code: (chunks) => <InlineCode>{chunks}</InlineCode>,
         })}
       </p>
     </>

@@ -97,11 +97,11 @@ repeating Node's SQLite warning each cron run; other warning types remain visibl
 
 Destination modules must be importable without Next.js/server-only dependencies. The existing
 BigQuery implementation already meets that contract. Access-token caches last only for the child
-run, not across runs. Node is the supported runtime (`package.json` engines), but README's Bun
-installation section and `Dockerfile.bun` also advertise a production compatibility path using
-`bun:sqlite` (`src/lib/db/core.ts` / adapters). Under Bun, exports therefore retain the previous
+run, not across runs. Node is the supported runtime (`package.json` engines). A best-effort,
+unsupported Bun compatibility path exists (`bun:sqlite` in `src/lib/db/core.ts` / adapters, and
+`Dockerfile.bun`), so exports must not break under it. Under Bun, exports retain the previous
 in-process path and emit a one-time warning: child heap/timeout isolation is unavailable. Use
-Node for event-loop and OOM isolation; Bun is not treated as dev-only here.
+Node for event-loop and OOM isolation.
 
 When `includeBodies` is enabled, prefer a minute-level cadence such as
 `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` rather than accumulating an hourly payload backlog.
@@ -201,17 +201,19 @@ the returned field descriptors, so a new destination needs no UI change.
 
 Config keys (`type: "bigquery"`):
 
-| Key                  | Notes                                                             |
-| -------------------- | ----------------------------------------------------------------- |
-| `projectId`          | GCP project holding the dataset                                   |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                   |
-| `tableId`            | `[A-Za-z0-9_]+`                                                   |
-| `location`           | Only used when the dataset has to be created (default `EU`)       |
-| `serviceAccountJson` | Service-account key. Secret: encrypted at rest, never returned    |
-| `autoCreate`         | Create the dataset and table on the first export (default `true`) |
+| Key                  | Notes                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------ |
+| `projectId`          | GCP project holding the dataset                                                                  |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                  |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                  |
+| `location`           | Only used when the dataset has to be created (default `EU`)                                      |
+| `serviceAccountJson` | Service-account key. Secret: encrypted at rest, never returned                                   |
+| `autoCreate`         | Create missing dataset/table; conditionally add nullable usage-evidence columns (default `true`) |
 
 The service account needs `bigquery.tables.updateData` on the target table, plus
 `bigquery.datasets.create` / `bigquery.tables.create` when `autoCreate` is on.
+Updating an existing table to add the two nullable usage-evidence fields also requires
+`bigquery.tables.update`. A missing permission fails the export without advancing its cursor.
 
 A configured batch is a **cursor** unit, not an HTTP one: `send()` chunks it into insertAll
 calls of at most 500 rows, so a large `batch_size` cannot trip BigQuery's 10 MB request cap.
@@ -461,8 +463,9 @@ The shared `ttftMs` addition also adds a nullable `ttft_ms` column to the BigQue
 and new-table schema: its schema test requires every canonical record field to have a
 column. Existing tables keep exporting unchanged: `prepare()` reads the table schema and
 omits only `ttft_ms` when that column is absent. Add the nullable INT64 column to get TTFT
-on the next run, or use a new table. No PATCH, automatic schema alteration or additional
-permissions are required; all other row fields retain strict schema checking.
+on the next run, or use a new table. The optional TTFT column does not trigger a schema update. Usage-evidence columns
+follow the conditional, opt-in compatibility flow below; other row fields retain strict
+schema checking.
 
 ---
 
@@ -499,3 +502,18 @@ Two rules for a new destination:
   call log, which re-sends rows the destination may already hold. On BigQuery the per-row
   `insertId` absorbs that only inside BigQuery's own de-duplication window, so prefer disabling
   a destination over deleting it.
+
+### Usage-evidence schema compatibility
+
+New BigQuery tables include nullable `usage_evidence` (STRING containing JSON) and
+`usage_estimated` (BOOL). With `autoCreate` enabled, an existing table can receive
+only these missing nullable columns. The exporter preserves the full existing
+schema, including field metadata, and submits a conditional PATCH using the
+returned etag. A concurrent schema change fails the export instead of overwriting
+it; the next run reads the table again.
+
+With `autoCreate` disabled, add these columns yourself before exporting records
+with usage evidence. Missing schema/etag metadata or a failed update also prevents
+evidence-bearing inserts. The export cursor does not advance on that failure and
+evidence is never silently dropped. Local log retention still applies while an
+export is blocked, so resolve the failure before retained source rows expire.

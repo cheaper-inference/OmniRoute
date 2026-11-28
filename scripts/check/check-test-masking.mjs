@@ -12,7 +12,8 @@
 //   3. Tautologias extras: expect(true).toBe(true), assert.equal(1,1), assert.ok(true).
 import fs from "node:fs";
 import { execFileSync } from "node:child_process";
-import { pathToFileURL } from "node:url";
+
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const TEST_RE = /\.(test|spec)\.(ts|tsx)$/;
 // Production TypeScript sources (excludes test files, handled separately via TEST_RE).
@@ -39,6 +40,89 @@ export function countSkips(src) {
   const modifiers = (src.match(/\.\s*(?:skip|todo|only)\s*\(/g) || []).length;
   const skipOpt = (src.match(/\{\s*skip\s*:\s*true\s*\}/g) || []).length;
   return modifiers + skipOpt;
+}
+
+/**
+ * Skips condicionais por modo de gate (plano 2026-11-13, "derivados só na release"). Cada helper
+ * abaixo deixa um teste afirmar tudo em modo release e, num PR de feature, pular só o que o
+ * refresh da release reescreve. Nenhum é `.skip(` nem `{ skip: true }`, então countSkips() não
+ * os vê; este contador existe para o gate listar o efeito numa linha própria em vez de responder
+ * só "OK". Aprovado pelo dono em 2026-11-14 como report-only (não reprova).
+ */
+export const MODE_SKIP_HELPERS = Object.freeze([
+  {
+    name: "releaseOnlyUnlessTouched",
+    call: true,
+    effect: "artefato gerado comparado em modo release; num PR só quando o PR o edita",
+  },
+  {
+    name: "localeParityOptions",
+    call: true,
+    effect: "paridade de chaves entre idiomas afirmada só em modo release",
+  },
+  {
+    name: "localeParityIsReleaseOnly",
+    call: false,
+    effect: "chave ausente num idioma julgada só em modo release",
+  },
+  {
+    name: "placeholderParityDeferred",
+    call: true,
+    effect: "placeholder de valor inglês que o PR reescreveu fica para o refresh da release",
+  },
+  {
+    name: "announceMirrorPlan",
+    call: true,
+    effect: "espelhos docs/i18n afirmados num PR só quando estão em dia",
+  },
+]);
+
+// Unit tests of the helpers themselves call them without skipping anything.
+const MODE_SKIP_HELPER_SELF_TESTS = new Set([
+  "tests/unit/locale-parity-mode.test.ts",
+  "tests/unit/mirror-freshness-helper.test.ts",
+  "tests/unit/derived-artifact-scope.test.ts",
+]);
+
+function stripImportStatements(src) {
+  return src.replace(/^\s*import\s[^;]*?\sfrom\s*["'][^"']+["'];?/gms, "");
+}
+
+/** Uses per helper in `src`, imports excluded: `{ releaseOnlyUnlessTouched: 2, … }`. */
+export function countModeConditionalSkipsByHelper(src) {
+  const body = stripImportStatements(src);
+  const out = {};
+  for (const h of MODE_SKIP_HELPERS) {
+    const re = h.call ? new RegExp(`\\b${h.name}\\s*\\(`, "g") : new RegExp(`\\b${h.name}\\b`, "g");
+    const n = (body.match(re) || []).length;
+    if (n) out[h.name] = n;
+  }
+  return out;
+}
+
+export function countModeConditionalSkips(src) {
+  return Object.values(countModeConditionalSkipsByHelper(src)).reduce((a, b) => a + b, 0);
+}
+
+/**
+ * Linhas de relatório (REPORT-ONLY) para aumento líquido de skips condicionais por modo.
+ * Cada entrada: { file, baseModeSkips?, headModeSkips?, headModeHelpers? } (default 0 / []).
+ */
+export function evaluateModeConditionalSkips(perFile) {
+  const effects = new Map(MODE_SKIP_HELPERS.map((h) => [h.name, h.effect]));
+  const lines = [];
+  for (const f of perFile) {
+    // The gate's own self-tests quote the helper names as fixture text.
+    if (isSelfTestFixtureFile(f.file) || MODE_SKIP_HELPER_SELF_TESTS.has(f.file)) continue;
+    const delta = (f.headModeSkips ?? 0) - (f.baseModeSkips ?? 0);
+    if (delta <= 0) continue;
+    const helpers = (f.headModeHelpers ?? []).map((name) => `${name} — ${effects.get(name)}`);
+    lines.push(
+      `${f.file}: ${delta} novo(s) skip(s) condicional(is) por modo de gate` +
+        (helpers.length ? ` (${helpers.join("; ")})` : "")
+    );
+  }
+  return lines;
 }
 
 /**
@@ -569,6 +653,9 @@ function main() {
       headSkips: countSkips(headSrc),
       baseExtTaut: countExtendedTautologies(baseSrc),
       headExtTaut: countExtendedTautologies(headSrc),
+      baseModeSkips: countModeConditionalSkips(baseSrc),
+      headModeSkips: countModeConditionalSkips(headSrc),
+      headModeHelpers: Object.keys(countModeConditionalSkipsByHelper(headSrc)),
     });
   }
 
@@ -620,6 +707,9 @@ function main() {
       headSkips: countSkips(headSrc),
       baseExtTaut: countExtendedTautologies(baseSrc),
       headExtTaut: countExtendedTautologies(headSrc),
+      baseModeSkips: countModeConditionalSkips(baseSrc),
+      headModeSkips: countModeConditionalSkips(headSrc),
+      headModeHelpers: Object.keys(countModeConditionalSkipsByHelper(headSrc)),
     });
   }
 
@@ -680,6 +770,18 @@ function main() {
     );
   }
 
+  // Report-only: skips condicionais por modo de gate não reprovam (a decisão de bloqueá-los é
+  // do dono), mas nunca ficam escondidos atrás de um "OK" simples.
+  const modeSkipLines = evaluateModeConditionalSkips(perFile);
+  if (modeSkipLines.length) {
+    console.warn(
+      `[test-masking] (report-only) ${modeSkipLines.length} teste(s) ganharam skip condicional por modo de gate:\n` +
+        modeSkipLines.map((f) => "  ⚠ " + f).join("\n") +
+        `\n  → em modo release cada um afirma tudo, como antes (plano 2026-11-13, aprovado pelo dono ` +
+        `em 2026-11-14). Report-only — não falha o gate.`
+    );
+  }
+
   const deletedFlags = evaluateDeletedFiles(
     [...deletedTests, ...relocatedOutOfTest],
     deletionAllowlist
@@ -701,4 +803,4 @@ function main() {
   );
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (isMainModule(import.meta.url)) main();

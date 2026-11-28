@@ -1,7 +1,10 @@
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
+import { resolvePullRequestComparison } from "./pullRequestComparison.mjs";
+import { resolveCandidateBase } from "../merge-queue/candidate-base.mjs";
 
 const SHA = /^[0-9a-f]{40}$/;
+const QUEUE_CANDIDATE_REF = /^refs\/heads\/omni-queue\//;
 
 /** Pin both sides before reading a spec. Event failures never fall back to a moving ref. */
 export function resolveOpenapiBaseline({
@@ -29,14 +32,25 @@ export function resolveOpenapiBaseline({
     }
     const event = JSON.parse(readFileSync(env.GITHUB_EVENT_PATH, "utf8"));
     if (eventName === "pull_request") {
-      requestedBase = event.pull_request?.base?.sha;
+      const comparison = resolvePullRequestComparison({ pr: event.pull_request, cwd, env });
+      return { ...comparison, source: eventName };
     } else if (eventName === "merge_group") {
       requestedBase = event.merge_group?.base_sha;
       if (event.merge_group?.head_sha !== candidateSha)
         throw new Error("Merge-group head mismatch");
     } else if (eventName === "push") {
-      requestedBase = event.before;
       if (event.after !== candidateSha) throw new Error("Push head mismatch");
+      // An omni-queue candidate is always a push that CREATES its ref, so `before` is all
+      // zeros. The candidate names its own base, as immutable as an event commit: the
+      // Omni-Queue-Base trailer of its top commit (a base-check candidate is its own base).
+      // resolveCandidateBase fails closed when the ref does not name the commit.
+      requestedBase = QUEUE_CANDIDATE_REF.test(env.GITHUB_REF ?? "")
+        ? resolveCandidateBase({
+            message: git("log", "-1", "--format=%B", candidateSha),
+            headSha: candidateSha,
+            ref: env.GITHUB_REF,
+          }).baseSha
+        : event.before;
     } else if (["schedule", "workflow_dispatch"].includes(eventName)) {
       // No PR diff exists. Observe the selected commit's own change, pinned to its first parent.
       requestedBase = git("rev-parse", "--verify", `${candidateSha}^1`);
@@ -52,12 +66,8 @@ export function resolveOpenapiBaseline({
     if (!requestedBase) throw new Error("Missing local base reference");
   }
   const baseTipSha = git("rev-parse", "--verify", "--end-of-options", `${requestedBase}^{commit}`);
-  // A PR head may predate the event's base tip. Compare their shared ancestry;
-  // a synthetic merge includes the base, so merge-base returns that pinned base.
-  const baseSha =
-    !eventName || eventName === "pull_request"
-      ? git("merge-base", baseTipSha, candidateSha)
-      : baseTipSha;
+  // Local branch checks retain merge-base semantics. Event comparisons are pinned.
+  const baseSha = !eventName ? git("merge-base", baseTipSha, candidateSha) : baseTipSha;
   if (!SHA.test(baseSha)) throw new Error("No unambiguous comparison base");
   return { baseSha, baseTipSha, candidateSha, source };
 }

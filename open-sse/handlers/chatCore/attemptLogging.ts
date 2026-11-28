@@ -31,6 +31,7 @@ import { redactVideoTranscriptFieldsForLog } from "@/lib/guardrails/videoBridgeS
 import { FORMATS } from "../../translator/formats.ts";
 import { takeEarlyKeepaliveBytes } from "../../utils/earlyKeepaliveByteBuffer.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
+import { readBuyerCostMicro } from "../../utils/buyerCostMicro.ts";
 import { isEstimatedUsage } from "../../utils/usageTracking.ts";
 import { cloneBoundedChatLogPayload, truncateForLog } from "./logTruncation.ts";
 import { attachLogMeta } from "./cacheUsageMeta.ts";
@@ -39,6 +40,7 @@ import {
   readUpstreamDispatchedAt,
   queueWaitMsFromDispatch,
 } from "../../utils/proxyFetch.ts";
+import { discardSessionTurnAttempt } from "./sessionTurnAttempts.ts";
 import { clientSessionIdFromRawRequest } from "./clientSessionId.ts";
 
 const OMITTED_VIDEO_TRANSCRIPT_REQUEST = { _omniroute_omitted: "video-transcript" };
@@ -258,6 +260,7 @@ export function extractResponsesId(sourceFormat: unknown, clientResponse: unknow
 }
 
 export type PersistAttemptLogsArgs = {
+  buyerCostMicro?: number | null;
   upstreamHttpSelection?: HttpAttemptSelection | null;
   status: number;
   tokens?: unknown;
@@ -302,6 +305,8 @@ export type PersistAttemptLogsContext = {
   pendingRequestId: unknown;
   pendingRequestGeneration?: string;
   clientRawRequest: { endpoint?: string; headers?: unknown; body?: unknown } | null | undefined;
+  /** This attempt's agent context; identifies the attempt whose session turn a failure drops. */
+  agentContext?: object | null;
   requestedModel: unknown;
   credentials: { connectionId?: string } | null | undefined;
   startTime: number;
@@ -521,6 +526,8 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     videoBridgeLogRedaction,
     videoContentRemoved,
   } = ctx;
+  // A non-200 outcome means the client did not get this attempt's reply.
+  if (status !== 200) discardSessionTurnAttempt(clientRawRequest?.body, ctx.agentContext);
   const initialConnectionId = toConnectionId(connectionId);
   const finalConnectionId = toConnectionId(credentials?.connectionId) || initialConnectionId;
   const accountRotationMeta = buildAccountRotationMeta(
@@ -731,6 +738,10 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     videoContentRemoved: videoContentRemoved || false,
     addedWaitMs: addedWait?.ms ?? null,
     queueWaitMs: queueWaitMsFromDispatch(upstreamDispatchedAt, startTime),
+    buyerCostMicro:
+      args.buyerCostMicro === undefined
+        ? readBuyerCostMicro(args.providerResponse)
+        : args.buyerCostMicro,
     addedWaitCause: addedWait?.cause ?? null,
   }).catch(() => {});
 

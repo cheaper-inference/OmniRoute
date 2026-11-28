@@ -37,21 +37,23 @@ flowchart LR
 
 `main` nije grana za svakodnevnu integraciju. PR-ovi otvoreni prema `main` obično zahtijevaju promjenu ciljane grane prije spajanja.
 
-## Zamrzavanje izdanja (paralelni ciklusi)
+## Pusti zamrzavanje (paralelni ciklusi)
 
-Kada se izdanje usklađuje, otvara se marker issue sa oznakom `release-freeze`. To **ne zaustavlja razvoj**:
+Kada se izdanje usaglašava, otvara se problem markera označen `release-freeze`. To** ne zaustavlja razvoj** :
 
-- Zamrznuta `release/vX.Y.Z` pripada kapetanu izdanja za tu isporuku.
-- Sljedeći ciklus `release/vX+1` se kreira iz zamrznutog vrha kako bi saradnici mogli nastaviti sa radom.
-- Otvoreni PR-ovi koji i dalje ciljaju zamrznutu granu trebaju biti **preusmjereni** na aktivnu (najvišu) `release/v*` granu.
+- Zamrznuti `release/vX.Y.Z` pripada kapetanu koji je otpustio taj brod.
+- `release/vX+1` sljedećeg ciklusa se isječe od smrznutog vrha tako da saradnici nastavljaju s radom.
+- Otvoreni PRs koji još uvijek ciljaju zamrznutu granu bi trebao biti** retargeted** na aktivnu (najvišu) `release/v*` granu.
 
-Provjerite da li postoji otvoreno zamrzavanje prije nego što pretpostavite da je grana koju želite spojiva:
+Provjerite postoji li otvoreno zamrzavanje prije nego pretpostavite da je grana koju želite spojiva:
 
 ```bash
 gh issue list --repo diegosouzapw/OmniRoute --label release-freeze --state open
 ```
 
-Mehanika spajanja (vlasnik `queue` oznaka → Mergify) je dokumentovana u [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+Mehanika spajanja (vlasnik `queue` label → Mergify) je dokumentirana u [MERGE_TRAIN.md](./MERGE_TRAIN.md).
+
+> **2026-11-19: Red spajanja Mergeify je povučen** (odluka vlasnika). `.mergify.yml` više ne definira red i odbija naredbe za spajanje koje spajaju ili prepisuju zahtjev za povlačenjem. Izdanja PRs se spajaju ručno pod skupom pravila spremišta "Zahtijevajte zelene kapije na aktivnom izdanju" (`Gate / CI` + `Gate / Quality`) dok se omni-red ne pokrene u živom modu, a nakon toga kroz omni-red ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ). Oznaka `queue` više ništa ne spaja.
 
 ## Zašto i grana i oznaka (tag)?
 

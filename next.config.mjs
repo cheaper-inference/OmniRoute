@@ -24,7 +24,7 @@ const projectRoot = dirname(fileURLToPath(import.meta.url));
 const scriptSrc =
   process.env.NODE_ENV === "development"
     ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://static.cloudflareinsights.com"
-    : "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://static.cloudflareinsights.com";
+    : "script-src 'self' 'unsafe-inline' blob: https://static.cloudflareinsights.com";
 const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -273,6 +273,9 @@ const nextConfig = {
     // and break standalone copies when broad NFT tracing pulls the whole repository into memory.
     // Using "**/*" ensures the exclusion applies across all app and API routes, not just "/".
     "**/*": [
+      // The env repair route bundles its helpers. npm packaging copies the template separately.
+      "./.env.example",
+      "./scripts/dev/sync-env.mjs",
       "**/.git/**",
       "**/.eslintcache",
       "**/_tasks/**",

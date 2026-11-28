@@ -11,6 +11,7 @@ import { rollupUsageHistoryBeforeDate } from "@/lib/usage/aggregateHistory";
 import { purgeCallLogArtifactDirectory } from "@/lib/usage/callLogArtifacts";
 
 import { DATA_DIR, DB_BACKUPS_DIR, getDbInstance } from "./core";
+import { deleteAgentSessionMessagesBefore } from "./agentSessionMessages";
 import { removeStaleSnapshotTemps } from "./backupRetention";
 import { getUserDatabaseSettings } from "./databaseSettings";
 import { maintainSqlitePlannerStats } from "./sqlitePlannerStats";
@@ -34,6 +35,8 @@ import {
 import { ensureCompressionRunTelemetryTable } from "./compressionRunTelemetry";
 import { WINDOW_MS } from "@/lib/quota/dimensions";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { getBudgetWindow } from "@/domain/costRules";
+import { loadAllBudgets } from "./domainState";
 import {
   pruneDbBackupsOutsideMigrationWindow,
   resolveReusedPreMigrationSha,
@@ -119,6 +122,30 @@ export async function cleanupCallLogs(): Promise<CleanupResult> {
   return result;
 }
 
+/** First day (YYYY-MM-DD) kept by usage_history retention; older rows are removed. */
+function usageHistoryCutoffDay(retentionDays: number): string {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+  return cutoffDate.toISOString().split("T")[0];
+}
+
+/**
+ * Clean up old agent_session_messages with the same day boundary as usage_history.
+ */
+export async function cleanupAgentSessionMessages(): Promise<CleanupResult> {
+  const db = getDbInstance();
+  const cutoffDay = usageHistoryCutoffDay(getRetentionSettings().usageHistory);
+
+  const result: CleanupResult = { deleted: 0, errors: 0 };
+  try {
+    result.deleted = deleteAgentSessionMessagesBefore(db, cutoffDay);
+  } catch (err) {
+    result.errors++;
+    console.error("[Cleanup] Error cleaning agent_session_messages:", err);
+  }
+  return result;
+}
+
 /**
  * Clean up old usage_history based on retention settings.
  */
@@ -126,10 +153,7 @@ export async function cleanupUsageHistory(): Promise<CleanupResult> {
   const retention = getRetentionSettings();
 
   const retentionDays = retention.usageHistory;
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
-  const cutoffISO = cutoffDate.toISOString();
-  const cutoffDateStr = cutoffISO.split("T")[0];
+  const cutoffDateStr = usageHistoryCutoffDay(retentionDays);
 
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
@@ -138,24 +162,43 @@ export async function cleanupUsageHistory(): Promise<CleanupResult> {
   // uses the exact same day boundary as the DELETE below, so every deleted row
   // is guaranteed to have been aggregated first.
   //
+  // One UTC day per pass: the rollup reads and prices every token-shape group before
+  // its cutoff at once, so a long backlog in one pass is one huge array and one huge
+  // Promise.all. Per day, a pass holds one day of groups.
+  // shortcut: pricing inside one day is still unbounded; cap it in aggregateHistory.ts.
+  //
   // rollupUsageHistoryBeforeDate catches its own errors and reports them via the
   // returned result, so we inspect that rather than relying on a thrown exception.
   // If the rollup failed, abort the DELETE to avoid permanently losing raw usage data
   // that was never aggregated.
-  const rollupResult = await rollupUsageHistoryBeforeDate(cutoffDateStr);
-  if (rollupResult.errors > 0) {
-    console.error(
-      "[Cleanup] Aborting usage_history deletion because the pre-delete rollup failed."
-    );
-    result.errors += rollupResult.errors;
-    return result;
-  }
-
   try {
-    // Same day boundary as the rollup above. One whole day per statement,
-    // not fixed-size batches: the rollup overwrites a day's summary from the
-    // raw rows left, so an interrupted run must never leave part of a day.
-    await deleteWholeDaysBefore("usage_history", "timestamp", cutoffDateStr, result);
+    const oldest = getDbInstance().prepare(
+      "SELECT MIN(timestamp) AS t FROM usage_history WHERE timestamp < ?"
+    );
+    for (;;) {
+      const t = (oldest.get(cutoffDateStr) as { t?: unknown } | undefined)?.t;
+      if (typeof t !== "string") break;
+      const dayStart = Date.parse(`${t.slice(0, 10)}T00:00:00Z`);
+      // A value that does not start with a date cannot be split by day: take all of it.
+      const nextDay = Number.isFinite(dayStart)
+        ? new Date(dayStart + 86_400_000).toISOString().slice(0, 10)
+        : cutoffDateStr;
+      const passBefore = nextDay < cutoffDateStr ? nextDay : cutoffDateStr;
+
+      const rollupResult = await rollupUsageHistoryBeforeDate(passBefore);
+      if (rollupResult.errors > 0) {
+        console.error(
+          "[Cleanup] Aborting usage_history deletion because the pre-delete rollup failed."
+        );
+        result.errors += rollupResult.errors;
+        return result;
+      }
+
+      // Same day boundary as the rollup above. One whole day per statement,
+      // not fixed-size batches: the rollup overwrites a day's summary from the
+      // raw rows left, so an interrupted run must never leave part of a day.
+      await deleteWholeDaysBefore("usage_history", "timestamp", passBefore, result);
+    }
 
     console.log(
       `[Cleanup] Deleted ${result.deleted} usage_history older than ${retentionDays} days`
@@ -370,11 +413,19 @@ export async function cleanupDomainCostHistory(): Promise<CleanupResult> {
   const retention = getRetentionSettings();
 
   const retentionDays = retention.domainCostHistory;
-  const cutoffEpoch = Date.now() - retentionDays * 86_400_000;
+  let cutoffEpoch = Date.now() - retentionDays * 86_400_000;
 
   const result: CleanupResult = { deleted: 0, errors: 0 };
 
   try {
+    // Budgets sum this table from the start of their current window. Never delete
+    // inside a window: a 31-day month outlives the 30-day default.
+    // shortcut: one floor for all keys, so keys without a budget keep rows up to
+    // one window longer; split the DELETE per key if that ever matters.
+    for (const budget of Object.values(loadAllBudgets())) {
+      const { periodStartAt } = getBudgetWindow(budget.resetInterval, budget.resetTime);
+      cutoffEpoch = Math.min(cutoffEpoch, periodStartAt);
+    }
     await deleteFromTableBeforeInBatches(
       { table: "domain_cost_history", column: "timestamp", cutoff: "epochMs" },
       new Date(cutoffEpoch).toISOString(),
@@ -514,20 +565,33 @@ export async function cleanupCcrBlocks(): Promise<CleanupResult> {
  * Delete closed quota-share buckets. The sliding window reads only the current and the
  * previous bucket, so a row not updated for two of the longest windows (monthly) is dead
  * for every window. No retention setting: the cutoff follows the window table.
+ *
+ * The percent attribution book (quota_percent_ledger and its token counters) ages out with
+ * the same cutoff. A book is not rewritten while the account bar does not move, so the cutoff
+ * must exceed the longest plan window; two monthly windows does.
  */
 export async function cleanupQuotaConsumption(): Promise<CleanupResult> {
   const result: CleanupResult = { deleted: 0, errors: 0 };
+  const cutoffIso = new Date(Date.now() - 2 * WINDOW_MS.monthly).toISOString();
 
   try {
-    await deleteFromTableBeforeInBatches(
-      { table: "quota_consumption", column: "updated_at", cutoff: "epochMs" },
-      new Date(Date.now() - 2 * WINDOW_MS.monthly).toISOString(),
-      { progress: result }
+    for (const table of [
+      "quota_consumption",
+      "quota_percent_ledger",
+      "quota_percent_ledger_tokens",
+    ]) {
+      await deleteFromTableBeforeInBatches(
+        { table, column: "updated_at", cutoff: "epochMs" },
+        cutoffIso,
+        { progress: result }
+      );
+    }
+    console.log(
+      `[Cleanup] Deleted ${result.deleted} closed quota_consumption buckets and idle percent ledger rows`
     );
-    console.log(`[Cleanup] Deleted ${result.deleted} closed quota_consumption buckets`);
   } catch (err: unknown) {
     console.error(
-      `[Cleanup] Error cleaning quota_consumption (${result.deleted} rows deleted):`,
+      `[Cleanup] Error cleaning quota_consumption and percent ledger (${result.deleted} rows deleted):`,
       err
     );
     result.errors++;
@@ -738,6 +802,7 @@ export async function runAutoCleanup(): Promise<{
     quotaSnapshots: await cleanupQuotaSnapshots(),
     callLogs: await cleanupCallLogs(),
     usageHistory: await cleanupUsageHistory(),
+    agentSessionMessages: await cleanupAgentSessionMessages(),
     compressionAnalytics: await cleanupCompressionAnalytics(),
     compressionEngineBreakdown: await cleanupCompressionEngineBreakdown(),
     mcpAudit: await cleanupMcpAudit(),
@@ -749,6 +814,7 @@ export async function runAutoCleanup(): Promise<{
     xpAuditLog: await cleanupXpAuditLog(),
     compressionRunTelemetry: await cleanupCompressionRunTelemetry(),
     proxyLogs: await cleanupProxyLogs(),
+    ...(await cleanupLeaseAndResetHistory()),
     ccrBlocks: await cleanupCcrBlocks(),
     quotaConsumption: await cleanupQuotaConsumption(),
     conversationTurnNodes: await cleanupConversationTurnNodes(),
@@ -868,6 +934,8 @@ const RESET_USAGE_HISTORY_PERIOD_MS: Record<TimedResetUsageHistoryPeriod, number
 
 export interface ResetUsageHistoryResult extends CleanupResult {
   deletedUsageHistory: number;
+  deletedAgentSessionMessages: number;
+  deletedAgentSessions: number;
   deletedDailySummary: number;
   deletedDailyTeamSummary: number;
   deletedHourlySummary: number;
@@ -881,6 +949,9 @@ export interface ResetUsageHistoryResult extends CleanupResult {
   deletedCompressionRunTelemetry: number;
   deletedRoutingDecisions: number;
   deletedQuotaConsumption: number;
+  /** Percent attribution books and their token counters (quota share on percent plans). */
+  deletedQuotaPercentLedger: number;
+  deletedQuotaPercentLedgerTokens: number;
   /**
    * Always 0. `token_ledger` is the transfer record behind token balances and
    * idempotency keys, not usage analytics, so a usage reset never deletes it.
@@ -910,9 +981,19 @@ function isResetUsageHistoryPeriod(period: string): period is ResetUsageHistoryP
  *   Throws on an invalid period.
  */
 const RESET_TARGETS: Array<
-  DeleteByPeriodTarget & { resultKey: keyof ResetUsageHistoryResult; allOnly?: boolean }
+  DeleteByPeriodTarget & {
+    resultKey: keyof ResetUsageHistoryResult;
+    allOnly?: boolean;
+    keptWhileBooked?: boolean;
+  }
 > = [
   { table: "usage_history", column: "timestamp", cutoff: "iso", resultKey: "deletedUsageHistory" },
+  {
+    table: "agent_session_messages",
+    column: "timestamp",
+    cutoff: "iso",
+    resultKey: "deletedAgentSessionMessages",
+  },
   {
     table: "daily_usage_summary",
     column: "date",
@@ -976,6 +1057,19 @@ const RESET_TARGETS: Array<
     resultKey: "deletedQuotaConsumption",
   },
   {
+    table: "quota_percent_ledger",
+    column: "updated_at",
+    cutoff: "epochMs",
+    resultKey: "deletedQuotaPercentLedger",
+  },
+  {
+    table: "quota_percent_ledger_tokens",
+    column: "updated_at",
+    cutoff: "epochMs",
+    resultKey: "deletedQuotaPercentLedgerTokens",
+    keptWhileBooked: true,
+  },
+  {
     table: "conversation_turn_nodes",
     column: "last_seen_at",
     cutoff: "iso",
@@ -989,7 +1083,39 @@ const RESET_TARGETS: Array<
     resultKey: "deletedAgenticConversations",
     allOnly: true,
   },
+  // Session rows hold running totals (requests, tokens, cost) plus the project path and branch
+  // of the traffic. A timed reset cannot subtract the deleted rows from those totals, so only
+  // "all" removes them. There is no retention pass either: like daily_usage_summary, the totals
+  // are meant to outlive the raw usage_history rows.
+  {
+    table: "agent_sessions",
+    column: "last_seen_at",
+    cutoff: "iso",
+    resultKey: "deletedAgentSessions",
+    allOnly: true,
+  },
 ];
+
+/**
+ * Deletes the per-key token counters written before the cutoff, except those of a pool
+ * connection that still has a book. A kept book marks each key against its counter, so the
+ * counter stays with it. The reset runs this after the books, so it sees what is left.
+ */
+function deleteUnbookedPercentCountersBefore(cutoffIso: string): number {
+  // One migration creates both tables, so the counters never exist without the books.
+  if (!tableExists("quota_percent_ledger_tokens")) return 0;
+  return getDbInstance()
+    .prepare(
+      `DELETE FROM quota_percent_ledger_tokens
+       WHERE updated_at < ?
+         AND NOT EXISTS (
+           SELECT 1 FROM quota_percent_ledger book
+           WHERE book.pool_id = quota_percent_ledger_tokens.pool_id
+             AND book.connection_id = quota_percent_ledger_tokens.connection_id
+         )`
+    )
+    .run(new Date(cutoffIso).getTime()).changes;
+}
 
 export async function resetUsageHistory(period: string): Promise<ResetUsageHistoryResult> {
   if (!isResetUsageHistoryPeriod(period)) {
@@ -1001,6 +1127,8 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
   const result: ResetUsageHistoryResult = {
     deleted: 0,
     deletedUsageHistory: 0,
+    deletedAgentSessionMessages: 0,
+    deletedAgentSessions: 0,
     deletedDailySummary: 0,
     deletedDailyTeamSummary: 0,
     deletedHourlySummary: 0,
@@ -1014,6 +1142,8 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
     deletedCompressionRunTelemetry: 0,
     deletedRoutingDecisions: 0,
     deletedQuotaConsumption: 0,
+    deletedQuotaPercentLedger: 0,
+    deletedQuotaPercentLedgerTokens: 0,
     deletedTokenLedger: 0,
     deletedConversationTurnNodes: 0,
     deletedAgenticConversations: 0,
@@ -1036,7 +1166,9 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
       artifactsToDelete = collectCallLogArtifactsBefore(cutoffIso);
       for (const target of RESET_TARGETS) {
         if (target.allOnly) continue;
-        (result[target.resultKey] as number) = deleteFromTableBefore(target, cutoffIso);
+        (result[target.resultKey] as number) = target.keptWhileBooked
+          ? deleteUnbookedPercentCountersBefore(cutoffIso)
+          : deleteFromTableBefore(target, cutoffIso);
       }
     });
 
@@ -1094,6 +1226,40 @@ export async function cleanupProxyLogs(): Promise<CleanupResult> {
   }
 
   return result;
+}
+
+/**
+ * Prune lease and provider-reset history older than the call-log retention window.
+ * `ended_at` is NULL while a lease is ACTIVE, so `ended_at < cutoff` never matches a
+ * live lease. A quota window is history once its reset time is past the cutoff.
+ * shortcut: no retention setting of their own; add one if operators ask for it.
+ */
+export async function cleanupLeaseAndResetHistory(): Promise<{
+  exclusiveConnectionLeases: CleanupResult;
+  providerQuotaResetEvents: CleanupResult;
+}> {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - getRetentionSettings().callLogs);
+  const cutoffISO = cutoffDate.toISOString();
+  const targets = [
+    ["exclusiveConnectionLeases", "exclusive_connection_leases", "ended_at"],
+    ["providerQuotaResetEvents", "provider_quota_reset_events", "window_resets_at"],
+  ] as const;
+  const out = {} as Record<(typeof targets)[number][0], CleanupResult>;
+  for (const [key, table, column] of targets) {
+    const result: CleanupResult = { deleted: 0, errors: 0 };
+    try {
+      await deleteFromTableBeforeInBatches({ table, column, cutoff: "iso" }, cutoffISO, {
+        progress: result,
+      });
+      console.log(`[Cleanup] Deleted ${result.deleted} ${table} older than the retention window`);
+    } catch (err: unknown) {
+      console.error(`[Cleanup] Error cleaning ${table}:`, err);
+      result.errors++;
+    }
+    out[key] = result;
+  }
+  return out;
 }
 
 // Post-cleanup space reclamation lives in its own module (#12821, kept out of

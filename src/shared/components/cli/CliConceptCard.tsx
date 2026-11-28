@@ -40,9 +40,7 @@ export default function CliConceptCard({ currentType }: CliConceptCardProps) {
             )}
           </div>
           <p className="text-sm text-text-muted">{t(`concept.${currentType}.phrase`)}</p>
-          <p className="text-[11px] text-text-muted font-mono">
-            {t(`concept.${currentType}.flow`)}
-          </p>
+          <p className="text-xs text-text-muted font-mono">{t(`concept.${currentType}.flow`)}</p>
         </div>
 
         {/* Other types as chips */}

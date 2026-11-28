@@ -17,7 +17,8 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { isMainModule } from "../lib/is-main-module.mjs";
 import {
   baseRefArg,
   listChangedFiles,
@@ -358,7 +359,7 @@ function runKnip(cwd = ROOT) {
  * an advisory (the release reconciliation re-freezes it). See newCodeMode.mjs.
  */
 function mainNewCode(baselineValue) {
-  const mergeBase = resolveMergeBase(BASE_REF);
+  const mergeBase = resolveMergeBase(BASE_REF, { ref: process.env.GITHUB_REF });
   const changed = listChangedFiles(mergeBase, {
     dirs: ["src", "open-sse", "electron", "bin", "scripts"],
     exts: [".ts", ".tsx", ".js", ".mjs"],
@@ -445,4 +446,4 @@ function main() {
   process.exitCode = DEAD_CODE_EXIT.OK;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (isMainModule(import.meta.url)) main();

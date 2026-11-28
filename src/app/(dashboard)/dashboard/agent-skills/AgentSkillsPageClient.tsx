@@ -228,7 +228,7 @@ export function AgentSkillsPageClient(): JSX.Element {
         {/* Coverage */}
         <div>
           <div className="mb-2 flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">
+            <span className="ci-eyebrow" data-weight="medium">
               {t("coverageLabel")}
             </span>
             {showGenerateButton && (
@@ -274,14 +274,13 @@ export function AgentSkillsPageClient(): JSX.Element {
               key={cat}
               variant="outline"
               size="sm"
+              tone={filter === cat ? undefined : "muted"}
               aria-pressed={filter === cat}
               onClick={() => setFilter(cat)}
               data-testid={`filter-${cat}`}
               className={cn(
                 "text-xs",
-                filter === cat
-                  ? "bg-primary/10 text-primary border-primary/30"
-                  : "text-text-muted hover:text-text-main"
+                filter === cat && "bg-primary/10 text-primary border-primary/30"
               )}
             >
               {cat === "all"

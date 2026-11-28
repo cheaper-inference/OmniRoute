@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 const FIXTURE = fileURLToPath(
   new URL("../fixtures/adapta-web-stream-error-boundary.fixture.ts", import.meta.url)
@@ -42,12 +43,16 @@ function runIsolatedFixture(testRoot: string): Promise<FixtureResult> {
   delete childEnv.NODE_TEST_CONTEXT;
 
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ["--import", "tsx/esm", "--test", FIXTURE], {
-      cwd: REPO_ROOT,
-      env: childEnv,
-      stdio: ["ignore", "pipe", "pipe"],
-      timeout: 90_000,
-    });
+    const child = spawn(
+      process.execPath,
+      [...nativeCoverageArgs(), "--import", "tsx/esm", "--test", FIXTURE],
+      {
+        cwd: REPO_ROOT,
+        env: childEnv,
+        stdio: ["ignore", "pipe", "pipe"],
+        timeout: 90_000,
+      }
+    );
     let stdout = "";
     let stderr = "";
     child.stdout.setEncoding("utf8").on("data", (chunk: string) => {
