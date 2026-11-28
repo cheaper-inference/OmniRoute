@@ -1,5 +1,10 @@
-import { getDbInstance } from "./core";
+import type {
+  ModelContextOverride,
+  ModelContextOverrideRepository,
+  ModelContextOverrideSource,
+} from "@/domain/persistence/modelOverrideRepositories";
 import { invalidateDbCache } from "./readCache";
+import { modelOverrideRepositories } from "./repositories/modelOverrideRepositories";
 
 /**
  * Feature 5004 — self-correcting context-window overrides.
@@ -13,48 +18,22 @@ import { invalidateDbCache } from "./readCache";
  * Cacheless on purpose: the read path already touches the DB (synced capabilities),
  * and a single indexed PK lookup is negligible — this avoids any cache-staleness
  * hazard with `resetDbInstance()` in tests.
+ *
+ * Persistence lives behind ModelContextOverrideRepository. The exports below stay
+ * synchronous (SQLite-only legacy access) because capability resolution reads them
+ * on the request hot path; this facade owns the model-catalog cache invalidation.
  */
 
-export type ModelContextOverrideSource = "manual" | "auto:discovery";
+export type {
+  ModelContextOverride,
+  ModelContextOverrideSource,
+} from "@/domain/persistence/modelOverrideRepositories";
 
-export interface ModelContextOverride {
-  provider: string;
-  modelId: string;
-  realContext: number;
-  source: ModelContextOverrideSource;
-  refreshedAt: string;
-}
+const legacy = modelOverrideRepositories.legacySync.contexts;
 
-interface OverrideRow {
-  provider: string;
-  model_id: string;
-  real_context: number;
-  source: string;
-  refreshed_at: string;
-}
-
-function isPositiveInteger(value: unknown): value is number {
-  return typeof value === "number" && Number.isInteger(value) && value > 0;
-}
-
-function normalizeKey(
-  provider: unknown,
-  modelId: unknown
-): { provider: string; modelId: string } | null {
-  const p = typeof provider === "string" ? provider.trim() : "";
-  const m = typeof modelId === "string" ? modelId.trim() : "";
-  if (!p || !m) return null;
-  return { provider: p, modelId: m };
-}
-
-function toOverride(row: OverrideRow): ModelContextOverride {
-  return {
-    provider: row.provider,
-    modelId: row.model_id,
-    realContext: row.real_context,
-    source: row.source === "auto:discovery" ? "auto:discovery" : "manual",
-    refreshedAt: row.refreshed_at,
-  };
+/** Async persistence contract; it never invalidates caches on its own. */
+export function getModelContextOverrideRepository(): ModelContextOverrideRepository {
+  return modelOverrideRepositories.contexts;
 }
 
 /** Full override record for (provider, modelId), or null. Never throws. */
@@ -62,20 +41,7 @@ export function getModelContextOverrideRecord(
   provider: string | null | undefined,
   modelId: string | null | undefined
 ): ModelContextOverride | null {
-  const key = normalizeKey(provider, modelId);
-  if (!key) return null;
-  try {
-    const row = getDbInstance()
-      .prepare(
-        "SELECT provider, model_id, real_context, source, refreshed_at " +
-          "FROM model_context_overrides WHERE provider = ? AND model_id = ?"
-      )
-      .get(key.provider, key.modelId) as OverrideRow | undefined;
-    return row ? toOverride(row) : null;
-  } catch {
-    // Table may not exist yet (pre-migration) — fall through to the catalog.
-    return null;
-  }
+  return legacy.find(provider, modelId);
 }
 
 /** Nested provider → model → context map used by build-local snapshots. */
@@ -88,9 +54,10 @@ export function getModelContextOverride(
   bulkContextOverrides?: NestedContextOverrideMap | null
 ): number | null {
   if (bulkContextOverrides) {
-    const key = normalizeKey(provider, modelId);
-    if (!key) return null;
-    return bulkContextOverrides.get(key.provider)?.get(key.modelId) ?? null;
+    const p = typeof provider === "string" ? provider.trim() : "";
+    const m = typeof modelId === "string" ? modelId.trim() : "";
+    if (!p || !m) return null;
+    return bulkContextOverrides.get(p)?.get(m) ?? null;
   }
   const record = getModelContextOverrideRecord(provider, modelId);
   return record ? record.realContext : null;
@@ -116,17 +83,7 @@ export function setModelContextOverride(
   source: ModelContextOverrideSource = "manual",
   options: ModelContextOverrideWriteOptions = {}
 ): boolean {
-  const key = normalizeKey(provider, modelId);
-  if (!key || !isPositiveInteger(realContext)) return false;
-  const normalizedSource: ModelContextOverrideSource =
-    source === "auto:discovery" ? "auto:discovery" : "manual";
-  getDbInstance()
-    .prepare(
-      "INSERT OR REPLACE INTO model_context_overrides " +
-        "(provider, model_id, real_context, source, refreshed_at) " +
-        "VALUES (?, ?, ?, ?, datetime('now'))"
-    )
-    .run(key.provider, key.modelId, realContext, normalizedSource);
+  if (!legacy.set(provider, modelId, realContext, source)) return false;
   if (options.invalidate !== false) invalidateDbCache("model-capabilities");
   return true;
 }
@@ -137,26 +94,12 @@ export function removeModelContextOverride(
   modelId: string,
   options: ModelContextOverrideWriteOptions = {}
 ): boolean {
-  const key = normalizeKey(provider, modelId);
-  if (!key) return false;
-  const info = getDbInstance()
-    .prepare("DELETE FROM model_context_overrides WHERE provider = ? AND model_id = ?")
-    .run(key.provider, key.modelId);
-  if (info.changes > 0 && options.invalidate !== false) invalidateDbCache("model-capabilities");
-  return info.changes > 0;
+  const removed = legacy.remove(provider, modelId);
+  if (removed && options.invalidate !== false) invalidateDbCache("model-capabilities");
+  return removed;
 }
 
 /** All overrides, newest refresh first. Never throws. */
 export function listModelContextOverrides(): ModelContextOverride[] {
-  try {
-    const rows = getDbInstance()
-      .prepare(
-        "SELECT provider, model_id, real_context, source, refreshed_at " +
-          "FROM model_context_overrides ORDER BY refreshed_at DESC"
-      )
-      .all() as OverrideRow[];
-    return rows.map(toOverride);
-  } catch {
-    return [];
-  }
+  return legacy.list();
 }
