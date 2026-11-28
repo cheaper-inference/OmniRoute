@@ -19,8 +19,15 @@ const {
   geminiDomReplyExpression,
   isGeminiSignedOutInPage,
 } = await import("../../open-sse/executors/gemini-web/domReply.ts");
-const { selectGeminiModel, findMenuOptionInPage, GEMINI_WEB_MODE_MENU_BUTTON } =
-  await import("../../open-sse/executors/gemini-web/modeSelection.ts");
+const {
+  selectGeminiModel,
+  findMenuOptionInPage,
+  GEMINI_WEB_MODE_MENU_BUTTON,
+  GEMINI_WEB_MODEL_MODES,
+  isGeminiMenuModeReplaced,
+} = await import("../../open-sse/executors/gemini-web/modeSelection.ts");
+const { resolveResponseTimeoutMs } =
+  await import("../../open-sse/executors/gemini-web/browserErrors.ts");
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -370,11 +377,6 @@ test("a late, unreadable StreamGenerate body cannot replace the DOM answer", asy
 
 // ── Review items (#21119): 3.1 Pro from the menu, signed-out heuristic ───────
 
-const { GEMINI_WEB_MODEL_MODES } =
-  await import("../../open-sse/executors/gemini-web/modeSelection.ts");
-const { resolveResponseTimeoutMs } =
-  await import("../../open-sse/executors/gemini-web/browserErrors.ts");
-
 // The #21116 reporter's menu: Hydrogen is the active mode and there is no "3.1 Pro" option.
 const REPORTER_MENU = {
   "4 Hydrogen": { testId: "bard-mode-option-h", checked: true },
@@ -547,9 +549,6 @@ test("executor: a session that is only visibly signed out inside the menu answer
 });
 
 // ── Review round 2 (#21119) ──────────────────────────────────────────────────
-
-const { isGeminiMenuModeReplaced } =
-  await import("../../open-sse/executors/gemini-web/modeSelection.ts");
 
 const streamGenerateBody = (text: string) => {
   const inner = new Array(80).fill(null);
