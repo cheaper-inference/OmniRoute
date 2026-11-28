@@ -107,6 +107,7 @@ const CODEX_NATIVE_RESPONSES_MODELS = new Set(["gpt-5.5"]);
 type TrafficType = "production" | "shadow";
 
 type ExecuteChatWithBreakerOptions = {
+  trustedComboLiveTest?: boolean;
   trafficType?: TrafficType;
   [key: string]: any;
 };
@@ -454,6 +455,7 @@ export function checkResourcePressureBeforeProviderWork(): ResourcePressureGuard
 // Resolved failures are accounted by callers; acquired probes settle inside execute()'s fence.
 const chatPathOwnsBreakerAccounting = () => "ignore" as const;
 export async function executeChatWithBreaker({
+  trustedComboLiveTest = false,
   bypassCircuitBreaker,
   breaker,
   body,
@@ -579,6 +581,7 @@ export async function executeChatWithBreaker({
             requestUpstreamStartTimeoutMs,
             forcedConnectionId,
             allowedConnections,
+            trustedComboLiveTest,
             skipResourcePressureGuard: true,
             onCredentialsRefreshed: async (newCreds: any) => {
               await updateProviderCredentials(credentials.connectionId, {

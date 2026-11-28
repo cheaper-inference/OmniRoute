@@ -487,6 +487,7 @@ async function handleChatCoreInner({
   correlationId = null,
   conversationId = null,
   modelPinned = false,
+  trustedComboLiveTest = false,
   skipResourcePressureGuard = false,
   reasoningTransportFallback = "drop",
   managedLease = null,
@@ -2739,6 +2740,7 @@ async function handleChatCoreInner({
 
   const toolDisclosure = resolveToolDisclosureConfig(settings);
   const executeProviderRequestDeps = {
+    trustedComboLiveTest,
     agentGoalPolicy,
     assertManagedLeaseFence,
     buildUpstreamHeadersForExecute,

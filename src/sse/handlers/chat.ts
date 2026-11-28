@@ -2435,6 +2435,7 @@ async function handleSingleModelChat(
       try {
         execution = await dispatchChatWithAffinityEviction(
           {
+            trustedComboLiveTest: forceLiveComboTest,
             bypassCircuitBreaker: forceLiveComboTest || hasForcedConnection,
             breaker,
             body: requestBody,

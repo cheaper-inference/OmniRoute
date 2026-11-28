@@ -1,11 +1,40 @@
-import { isKimiCoding } from "../kimiConcurrency.ts";
-import { createKimiQueueTurn, type KimiQueueTurn } from "./kimiQueueTurn.ts";
 import {
   buildAccountSemaphoreKey,
   getAccountSemaphoreFullReason,
   waitForAccountSlot,
 } from "../accountSemaphore.ts";
+import { isKimiCoding } from "../kimiConcurrency.ts";
+import { readConnectionForCooldownGate } from "../providerConnectionPool.ts";
 import type { AttemptLoopState } from "./attemptLoopTypes.ts";
+import { hasFutureRateLimitUntil } from "./comboPredicates.ts";
+import { createKimiQueueTurn, type KimiQueueTurn } from "./kimiQueueTurn.ts";
+import { resolvePersistedRetryCooldown } from "./persistedConnectionCooldown.ts";
+
+/** A queued send has to recheck the actual selected row, including both names of the Kimi pool. */
+export async function canDispatchKimiConnection(
+  id: string,
+  model: string,
+  trustedLiveCheck: boolean
+): Promise<boolean> {
+  const row = await readConnectionForCooldownGate(id, true).catch(() => null);
+  if (!row || row.isActive !== true || !isKimiCoding(row.provider)) return false;
+  const eligibility = await resolvePersistedRetryCooldown(
+    { connectionId: id, modelStr: model },
+    async () => row,
+    true
+  );
+  if (!eligibility.skipReason) return true;
+  if (!trustedLiveCheck) return false;
+  // The dashboard can check a known transient cooldown or a legacy status-only cooldown.
+  if (eligibility.cooldown) return true;
+  return (
+    row.testStatus === "rate_limited" &&
+    !row.lastErrorType &&
+    !row.lastError &&
+    (row.errorCode == null || Number(row.errorCode) === 429) &&
+    hasFutureRateLimitUntil(row.rateLimitedUntil)
+  );
+}
 
 export function isUnqueueableAccount(provider: string, id: string, cap: number): boolean {
   const reason = getAccountSemaphoreFullReason(provider, id, cap);

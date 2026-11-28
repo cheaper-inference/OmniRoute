@@ -12,6 +12,8 @@ const { acquire, buildAccountSemaphoreKey, getStats, markBlocked, resetAll } =
   await import("../../open-sse/services/accountSemaphore.ts");
 const { handleComboChat } = await import("../../open-sse/services/combo.ts");
 const { checkFallbackError } = await import("../../open-sse/services/accountFallback.ts");
+const { resolvePersistedRetryCooldown } =
+  await import("../../open-sse/services/combo/persistedConnectionCooldown.ts");
 
 test.after(() => resetAll());
 process.once("exit", () => {
@@ -83,6 +85,24 @@ test("a provider-identified Kimi concurrency 403 preserves the retry hint", () =
     { reason: result.reason, cooldownMs: result.cooldownMs, terminal: !!result.permanent },
     { reason: "concurrency_limited", cooldownMs: 2000, terminal: false }
   );
+});
+
+test("Kimi contention expires at its own deadline without reopening a quota hold", async () => {
+  const target = { modelStr: model, connectionId: "elapsed-contention" };
+  const row = {
+    provider,
+    isActive: true,
+    testStatus: "rate_limited",
+    lastErrorType: "concurrency_limited",
+    errorCode: 429,
+    rateLimitedUntil: new Date(Date.now() - 1_000).toISOString(),
+  };
+  const read = (overrides: Partial<typeof row>) =>
+    resolvePersistedRetryCooldown(target, async () => ({ ...row, ...overrides }), true);
+  assert.equal((await read({})).skipReason, null);
+  assert.ok((await read({ lastErrorType: "quota_exhausted" })).skipReason);
+  assert.ok((await read({ errorCode: 403 })).skipReason);
+  assert.ok((await read({ provider: "other-provider" })).skipReason);
 });
 
 async function waitUntil(check: () => boolean) {

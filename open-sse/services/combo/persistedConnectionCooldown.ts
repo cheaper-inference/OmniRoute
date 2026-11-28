@@ -1,4 +1,6 @@
 import { cooldownUntilMs } from "../accountFallback.ts";
+import { CONCURRENCY_LIMITED_REASON } from "../accountFallback/concurrencyLimit429.ts";
+import { isKimiCoding } from "../kimiConcurrency.ts";
 import {
   getPersistedConnectionCooldownSkipReason,
   normalizeConnectionStatus,
@@ -61,9 +63,12 @@ function transientRetryCooldownReason(connection: Record<string, unknown>): stri
   const status = normalizeConnectionStatus(connection.testStatus);
   const reason = connection.lastErrorType;
   if (!RETRY_RECOVERABLE_STATUSES.has(status)) return null;
-  if (typeof reason !== "string" || !isTransientComboCooldownReason(reason)) return null;
-  if (NON_RETRYABLE_ERROR_CODES.has(Number(connection.errorCode))) return null;
-  return reason;
+  const statusCode = Number(connection.errorCode);
+  if (typeof reason !== "string" || NON_RETRYABLE_ERROR_CODES.has(statusCode)) return null;
+  if (isKimiCoding(connection.provider) && reason === CONCURRENCY_LIMITED_REASON) {
+    return statusCode === 429 ? reason : null;
+  }
+  return isTransientComboCooldownReason(reason) ? reason : null;
 }
 
 /** An explicit, representable cooldown deadline in epoch ms, or null. */

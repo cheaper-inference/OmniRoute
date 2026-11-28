@@ -8,8 +8,7 @@ import type {
  * through deps.
  */
 import { markEmptyTurnExecution, inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
-import { readConnectionForCooldownGate } from "../../services/providerConnectionPool.ts";
-import { resolvePersistedRetryCooldown } from "../../services/combo/persistedConnectionCooldown.ts";
+import { canDispatchKimiConnection } from "../../services/combo/kimiLocalQueue.ts";
 import { noteUpstreamDispatch } from "../../utils/proxyFetch.ts";
 
 import type { BaseExecutor } from "../../executors/base.ts";
@@ -126,6 +125,7 @@ type ChatLog =
   | undefined;
 
 export type ExecuteProviderRequestDeps = {
+  trustedComboLiveTest?: boolean;
   agentGoalPolicy: AgentGoalPolicy;
   assertManagedLeaseFence: (attemptConnectionId: string | null | undefined) => void;
   buildUpstreamHeadersForExecute: (modelToCall: string) => Record<string, string>;
@@ -384,17 +384,12 @@ export async function executeProviderRequest(
               deadline: startedAt + (maxWaitMs || 30_000),
               maxQueueSize: resilienceSettings.requestQueue.maxQueueDepth || 20,
               onDispatch: noteUpstreamDispatch,
-              canDispatch: async () => {
-                const eligibility = await resolvePersistedRetryCooldown(
-                  { connectionId: attemptConnectionId, modelStr: modelToCall },
-                  async (id) => {
-                    const row = await readConnectionForCooldownGate(id, true);
-                    return isKimiCoding(row?.provider) ? row : null;
-                  },
-                  true
-                );
-                return !eligibility.skipReason;
-              },
+              canDispatch: () =>
+                canDispatchKimiConnection(
+                  attemptConnectionId,
+                  modelToCall,
+                  deps.trustedComboLiveTest === true
+                ),
             };
           };
           const gateStartedAt = Date.now();
