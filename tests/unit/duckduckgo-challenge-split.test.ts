@@ -5,6 +5,10 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import vm from "node:vm";
 
+// These tests drive the in-process challenge solver and the HTTP path, which need the
+// explicit opt-in (open-sse/executors/duckduckgo-web/solverGate.ts).
+process.env.OMNIROUTE_DDG_UNSAFE_NODE_SOLVER = "1";
+
 // Split-guard for the duckduckgo-web challenge-solver extraction.
 // The anti-abuse challenge solver + FE signals live in duckduckgo-web/challenge.ts
 // (pure of module state; the vm sandbox + 5s timeout are preserved). Host imports back.

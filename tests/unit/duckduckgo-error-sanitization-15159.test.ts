@@ -8,6 +8,9 @@ import { Socket } from "node:net";
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-ddg-errors-15159-"));
 process.env.DATA_DIR = dataDir;
 process.env.OMNIROUTE_PLUGINS_DIR = path.join(dataDir, "plugins");
+// These tests drive the in-process challenge solver and the HTTP path, which need the
+// explicit opt-in (open-sse/executors/duckduckgo-web/solverGate.ts).
+process.env.OMNIROUTE_DDG_UNSAFE_NODE_SOLVER = "1";
 const originalConnect = Socket.prototype.connect;
 let socketAttempts = 0;
 Socket.prototype.connect = function (): Socket {

@@ -1,5 +1,6 @@
 import { registerNoAuthReadiness } from "@omniroute/open-sse/services/autoCombo/noAuthReadiness.ts";
 import { BROWSER_BACKED_NOAUTH_PROVIDER_IDS } from "@omniroute/open-sse/services/autoCombo/emulatedNoAuthAllowlist.ts";
+import { canSolveDuckDuckGoChallenge } from "@omniroute/open-sse/executors/duckduckgo-web/solverGate.ts";
 import {
   hasPlaywrightChromium,
   resolveChromiumOverride,
@@ -23,6 +24,8 @@ import { peekDevinAgenticAuthStatus } from "./devinAgenticAuthStatus";
  * cached verdict that hides them from /v1/models (#18753). Providers it does not check
  * (codex-app-server) stay fail-open, because the CLI may run elsewhere. Browser
  * runtime availability (#19385) is checked at boot and read from memory per request.
+ * duckduckgo-web also needs a challenge solver it may use: the browser pool, or the
+ * in-process one the operator opted into (open-sse/executors/duckduckgo-web/solverGate.ts).
  */
 export async function registerNoAuthAutoRoutingReadiness(): Promise<void> {
   registerNoAuthReadiness(
@@ -42,6 +45,10 @@ export async function registerNoAuthAutoRoutingReadiness(): Promise<void> {
           ? resolveCloudflareChromiumOverride()
           : resolveChromiumOverride();
       const available = await hasPlaywrightChromium(executablePath);
+      if (providerId === "duckduckgo-web") {
+        registerNoAuthReadiness(providerId, () => available && canSolveDuckDuckGoChallenge());
+        return;
+      }
       registerNoAuthReadiness(providerId, () => available);
     })
   );

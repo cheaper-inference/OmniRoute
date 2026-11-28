@@ -3,6 +3,11 @@ import { generateKeyPairSync, randomUUID } from "node:crypto";
 import vm from "node:vm";
 import { solveDuckDuckGoChallenge, makeDuckDuckGoFeSignals } from "./duckduckgo-web/challenge.ts";
 import {
+  DDG_SOLVER_UNAVAILABLE_MESSAGE,
+  isDuckDuckGoBrowserBackedEnabled,
+  isDuckDuckGoNodeSolverEnabled,
+} from "./duckduckgo-web/solverGate.ts";
+import {
   DUCKDUCKGO_DEFAULT_MODEL,
   DUCKDUCKGO_MODEL_ALIASES,
   FE_VERSION_PATTERN,
@@ -124,10 +129,7 @@ const SEEDED_COOKIES: ReadonlyArray<readonly [string, string]> = [
 const MODEL_IDS_CACHE_TTL_MS = 10 * 60 * 1000;
 
 function shouldUseBrowserBacked(): boolean {
-  const flag = process.env.WEB_COOKIE_USE_BROWSER;
-  if (flag === "1" || flag === "true" || flag === "on") return true;
-  const poolFlag = process.env.OMNIROUTE_BROWSER_POOL;
-  return poolFlag === "on" || poolFlag === "1" || poolFlag === "true";
+  return isDuckDuckGoBrowserBackedEnabled();
 }
 
 interface DuckDuckGoVqdHeaders {
@@ -521,6 +523,13 @@ export class DuckDuckGoWebExecutor extends BaseExecutor {
       }
       // status 0 means no response captured (selector/navigation error).
       return errorResponse(502, "Browser-backed chat captured no upstream response");
+    }
+
+    // Without the browser pool the only solver left is the in-process node:vm one, which
+    // does not isolate the upstream challenge program from the server. Refuse before any
+    // upstream call unless the operator opted in.
+    if (!isDuckDuckGoNodeSolverEnabled()) {
+      return errorResponse(503, DDG_SOLVER_UNAVAILABLE_MESSAGE);
     }
 
     // Acquire session from pool for fingerprint rotation

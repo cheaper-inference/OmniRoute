@@ -227,7 +227,11 @@ test("#19385 boot registers Cloudflare readiness for the configured Chromium exe
   fs.writeFileSync(chromiumPath, "test executable", { mode: 0o700 });
   const original = process.env.CLOUDFLARE_PLAYGROUND_CHROME_PATH;
   const originalGeneric = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+  const originalPool = process.env.OMNIROUTE_BROWSER_POOL;
+  const originalNodeSolver = process.env.OMNIROUTE_DDG_UNSAFE_NODE_SOLVER;
   try {
+    delete process.env.OMNIROUTE_BROWSER_POOL;
+    delete process.env.OMNIROUTE_DDG_UNSAFE_NODE_SOLVER;
     process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH = chromiumPath;
     process.env.CLOUDFLARE_PLAYGROUND_CHROME_PATH = missingPath;
     await readinessBoot.registerNoAuthAutoRoutingReadiness();
@@ -241,8 +245,21 @@ test("#19385 boot registers Cloudflare readiness for the configured Chromium exe
     await readinessBoot.registerNoAuthAutoRoutingReadiness();
     const pool = await poolProviders();
     assert.ok(pool.includes("cloudflare-playground"));
-    assert.ok(pool.includes("duckduckgo-web"));
+    // A local Chromium alone does not admit DuckDuckGo: it also needs a challenge solver
+    // it may use, the browser pool or the opted-in in-process one.
+    assert.equal(pool.includes("duckduckgo-web"), false);
+
+    process.env.OMNIROUTE_BROWSER_POOL = "on";
+    assert.ok((await poolProviders()).includes("duckduckgo-web"));
+
+    delete process.env.OMNIROUTE_BROWSER_POOL;
+    process.env.OMNIROUTE_DDG_UNSAFE_NODE_SOLVER = "1";
+    assert.ok((await poolProviders()).includes("duckduckgo-web"));
   } finally {
+    if (originalPool === undefined) delete process.env.OMNIROUTE_BROWSER_POOL;
+    else process.env.OMNIROUTE_BROWSER_POOL = originalPool;
+    if (originalNodeSolver === undefined) delete process.env.OMNIROUTE_DDG_UNSAFE_NODE_SOLVER;
+    else process.env.OMNIROUTE_DDG_UNSAFE_NODE_SOLVER = originalNodeSolver;
     if (original === undefined) delete process.env.CLOUDFLARE_PLAYGROUND_CHROME_PATH;
     else process.env.CLOUDFLARE_PLAYGROUND_CHROME_PATH = original;
     if (originalGeneric === undefined) delete process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
