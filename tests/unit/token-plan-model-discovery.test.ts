@@ -13,30 +13,29 @@ function envelope(ids: unknown[]) {
   };
 }
 
-test("Token Plan discovery uses regional public gateways without forwarding credentials", () => {
-  for (const provider of ["qwen-cloud-token-plan", "bailian-coding-plan"]) {
-    for (const region of ["global-sg", "china-beijing"]) {
-      const request = buildTokenPlanCatalogRequest(provider, {
-        region,
-        apiKey: "secret-key",
-        cookie: "secret-cookie",
-        baseUrl: "http://127.0.0.1/private",
-      });
-      const expectedHost =
-        region === "china-beijing"
-          ? "cs-data.qianwenai.com"
-          : provider === "bailian-coding-plan"
-            ? "bailian-singapore-cs.alibabacloud.com"
-            : "cs-data.qwencloud.com";
-      assert.equal(new URL(request.url).hostname, expectedHost);
-      assert.equal(request.init.method, "POST");
-      assert.equal(JSON.stringify(request).includes("secret"), false);
-      const data = JSON.parse(new URLSearchParams(request.init.body).get("params")!).Data;
-      assert.equal(data.edition, "PERSONAL");
-    }
+test("Token Plan discovery uses regional public gateways for bailian-coding-plan without forwarding credentials", () => {
+  for (const region of ["global-sg", "china-beijing"]) {
+    const request = buildTokenPlanCatalogRequest("bailian-coding-plan", {
+      region,
+      apiKey: "secret-key",
+      cookie: "secret-cookie",
+      baseUrl: "http://127.0.0.1/private",
+    });
+    const expectedHost =
+      region === "china-beijing"
+        ? "cs-data.qianwenai.com"
+        : "bailian-singapore-cs.alibabacloud.com";
+    assert.equal(new URL(request.url).hostname, expectedHost);
+    assert.equal(request.init.method, "POST");
+    assert.equal(JSON.stringify(request).includes("secret"), false);
+    const data = JSON.parse(new URLSearchParams(request.init.body).get("params")!).Data;
+    assert.equal(data.edition, "PERSONAL");
   }
+  assert.equal(isTokenPlanCatalogProvider("bailian-coding-plan"), true);
+  assert.equal(isTokenPlanCatalogProvider("qwen-cloud-token-plan"), false);
   assert.equal(isTokenPlanCatalogProvider("qwen-cloud"), false);
   assert.equal(isTokenPlanCatalogProvider("alibaba"), false);
+  assert.throws(() => buildTokenPlanCatalogRequest("qwen-cloud-token-plan"));
   assert.throws(() => buildTokenPlanCatalogRequest("alibaba"));
 });
 

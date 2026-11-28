@@ -226,6 +226,12 @@ const QWEN_CLOUD_TEXT_MODELS_CONFIG: ProviderModelsConfigEntry = {
   parseResponse: parseQwenCloudTextModels,
 };
 
+const QWEN_CLOUD_TOKEN_PLAN_MODELS_CONFIG: ProviderModelsConfigEntry = {
+  ...DASHSCOPE_TEXT_MODELS_CONFIG,
+  url: "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1/models",
+  parseResponse: parseDashscopeTextModels,
+};
+
 function getKimiThinkingType(model: any): "only" | "both" | "no" | undefined {
   return model.supports_thinking_type === "only" ||
     model.supports_thinking_type === "both" ||
@@ -665,6 +671,7 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
     parseResponse: (data) => normalizeOpenAiLikeModelsResponse(data, "huggingface"),
   },
   "qwen-cloud": QWEN_CLOUD_TEXT_MODELS_CONFIG,
+  "qwen-cloud-token-plan": QWEN_CLOUD_TOKEN_PLAN_MODELS_CONFIG,
   antigravity: {
     url: getAntigravityModelsDiscoveryUrls()[0],
     method: "POST",
