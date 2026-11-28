@@ -233,7 +233,7 @@ export default function ProviderLimits({
   showFilters = true,
   autoRefreshInterval = 0,
 }: ProviderLimitsProps) {
-  const clockNow = useQuotaClock();
+  const { now: clockNow, refresh: refreshClock } = useQuotaClock();
   const t = useTranslations("usage");
   const tr = useCallback(
     (key: string, fallback: string, values?: UsageTranslationValues) =>
@@ -495,10 +495,11 @@ export default function ProviderLimits({
 
   const refreshProvider = useCallback(
     async (connectionId: string, provider: string) => {
+      refreshClock();
       await fetchQuota(connectionId, provider, { force: true });
       await Promise.all([fetchConnections(), refreshAvailability()]);
     },
-    [fetchQuota, fetchConnections, refreshAvailability]
+    [fetchQuota, fetchConnections, refreshAvailability, refreshClock]
   );
 
   const refreshingAllRef = useRef(false);
@@ -507,6 +508,7 @@ export default function ProviderLimits({
       if (automatic && !canRequestLive()) return;
       if (refreshingAllRef.current) return;
       refreshingAllRef.current = true;
+      refreshClock();
       const now = Date.now();
       lastRefreshAllAtRef.current = now;
       setAutoRefreshClock(now);
@@ -530,7 +532,7 @@ export default function ProviderLimits({
         setRefreshingAll(false);
       }
     },
-    [applyCachedQuotaState, fetchConnections, refreshAvailability, canRequestLive]
+    [applyCachedQuotaState, fetchConnections, refreshAvailability, canRequestLive, refreshClock]
   );
 
   useEffect(() => {
