@@ -36,6 +36,8 @@ export const claude_webProvider: RegistryEntry = {
     { id: "claude-sonnet-5", name: "Claude Sonnet 5 (web)", toolCalling: false },
     { id: "claude-sonnet-5-5", name: "Claude Sonnet 5.5 (web)", toolCalling: false },
     { id: "claude-sonnet-4-6", name: "Claude Sonnet 4.6 (web)", toolCalling: false },
+    // Live check 2026-11-24: claude.ai answers claude-haiku-5-5 for a Pro chat organization.
+    { id: "claude-haiku-5-5", name: "Claude Haiku 5.5 (web)", toolCalling: false },
     {
       id: "claude-haiku-4-5-20251001",
       name: "Claude Haiku 4.5 (web)",

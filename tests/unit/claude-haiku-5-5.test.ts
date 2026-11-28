@@ -79,9 +79,11 @@ test("Claude Haiku 5.5 is priced at the documented length-tiered rate", () => {
   assert.equal(defaults.cc[MODEL_ID].long_context?.threshold, 100_000);
 });
 
-test("Claude Haiku 5.5 is not exposed on claude-web (not a confirmed claude.ai model)", () => {
+// Contract changed: claude.ai accepts `claude-haiku-5-5` for a chat organization (live check
+// 2026-11-24: HTTP 200 through claude-web once the chat organization is used), so it is listed.
+test("Claude Haiku 5.5 is exposed on claude-web", () => {
   const ids = new Set(getModelsByProviderId("claude-web").map((entry) => entry.id));
-  assert.equal(ids.has(MODEL_ID), false);
+  assert.equal(ids.has(MODEL_ID), true);
 });
 
 test("Claude Haiku 5.5 is registered on first-party and cloud providers", () => {
