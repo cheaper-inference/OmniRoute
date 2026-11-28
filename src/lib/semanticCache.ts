@@ -23,6 +23,7 @@ import {
   writeSemanticCacheResponse,
 } from "./db/semanticCache";
 import { toNumber } from "@/shared/utils/numeric";
+import { isSemanticCacheProviderKeyEnabled } from "@/shared/utils/featureFlags";
 import { conversationSignatureFields } from "../../open-sse/utils/conversationSignatureFields";
 import { startSemanticCachePruneJob } from "./jobs/semanticCachePruneJob";
 import { isCompleteToolCallArguments } from "../../open-sse/handlers/sseParser/truncation";
@@ -304,7 +305,8 @@ export function generateSignature(
   temperature = 0,
   topP = 1,
   apiKeyId?: string,
-  constraints?: SignatureConstraints | null
+  constraints?: SignatureConstraints | null,
+  provider?: string | null
 ) {
   // JSON round-trip retains JSON.stringify omission/default semantics before sorting
   // nested object keys. Versioning prevents reads of older incomplete signatures.
@@ -322,6 +324,8 @@ export function generateSignature(
         response_format: constraints?.responseFormat ?? constraints?.response_format,
         text_format: constraints?.text_format,
         ...pickGenerationParams(constraints),
+        // Opt-in: two provider nodes can serve one model id, so the answering provider joins the key.
+        provider: (provider && isSemanticCacheProviderKeyEnabled() ? provider : null) || undefined,
       })
     )
   );

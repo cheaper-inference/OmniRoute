@@ -31,4 +31,15 @@ export const EXTRA_FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
+  {
+    key: "SEMANTIC_CACHE_PROVIDER_KEY_ENABLED",
+    label: "Semantic Cache: Provider In Key",
+    description:
+      "Add the answering provider to the default semantic cache key, so two providers that serve one model id no longer share an entry. Off by default: the key has no provider and existing entries stay valid.",
+    descriptionI18nKey: "featureFlags.definitions.SEMANTIC_CACHE_PROVIDER_KEY_ENABLED.description",
+    type: "boolean",
+    defaultValue: "false",
+    category: "runtime",
+    requiresRestart: false,
+  },
 ];

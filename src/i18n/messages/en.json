@@ -15461,6 +15461,9 @@
       "AIHORDE_CATALOG_BACKGROUND_REFRESH_ENABLED": {
         "label": "AI Horde Image Catalog Background Refresh",
         "description": "List AI Horde image models from the last successful snapshot while the catalog refreshes in the background. AI Horde image models are absent from the list until the first refresh succeeds. Off by default."
+      },
+      "SEMANTIC_CACHE_PROVIDER_KEY_ENABLED": {
+        "description": "Add the answering provider to the default semantic cache key, so two providers that serve one model id no longer share an entry. Off by default: the key has no provider and existing entries stay valid."
       }
     }
   },
