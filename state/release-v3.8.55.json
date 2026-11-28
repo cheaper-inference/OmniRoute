@@ -3,36 +3,27 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b77",
+    "batchId": "b78",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b77-cb4234d6abca",
-    "candidateSha": "cb4234d6abca7d3335c732ccd39e4bf27b908059",
-    "baseSha": "5c36ba1c90a680b715e65dff8d8ea2f9699edcf6",
-    "treeSha": "b098f1d1f85241d9e1bf974bce9c08d3fd15fa54",
+    "candidateRef": "omni-queue/release-v3.8.55/b78-116040d50b6d",
+    "candidateSha": "116040d50b6d20a79908f159ebb0a7001ed51e5f",
+    "baseSha": "cb4234d6abca7d3335c732ccd39e4bf27b908059",
+    "treeSha": "dfc7e861cb5f0aa8a1a8b4146bd63c3c4515c215",
     "prs": [
       {
-        "n": 21418,
-        "head": "0a417e4f79cb19e120d03cfbfdec7c82828ecc7b",
-        "title": "fix(docker): keep the env template and sync script out of standalone builds",
+        "n": 21415,
+        "head": "3cbf4062dee9869b7b23d72ba6cc7cbae0545e0e",
+        "title": "feat(cli): warn when deploy k8s disables the API key with an Ingress enabled",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-27T13:19:15Z"
+        "labeledAt": "2026-11-27T13:20:27Z"
       }
     ],
-    "stage": "landing",
-    "startedAt": "2026-11-28T11:16:18.043Z",
+    "stage": "testing",
+    "startedAt": "2026-11-28T12:30:00.877Z",
     "attempts": 0,
     "bisect": {
       "rootBatchId": "b75",
       "segments": [
-        [
-          {
-            "n": 21418,
-            "head": "0a417e4f79cb19e120d03cfbfdec7c82828ecc7b",
-            "title": "fix(docker): keep the env template and sync script out of standalone builds",
-            "author": "diegosouzapw",
-            "labeledAt": "2026-11-27T13:19:15Z"
-          }
-        ],
         [
           {
             "n": 21415,
@@ -60,13 +51,21 @@
         ]
       ],
       "culprits": [],
-      "landed": [],
-      "steps": 1,
+      "landed": [
+        21418
+      ],
+      "steps": 2,
       "hang": false
-    },
-    "landAttempts": 1
+    }
   },
   "baseChecks": [
+    {
+      "baseSha": "cb4234d6abca7d3335c732ccd39e4bf27b908059",
+      "ref": "omni-queue/release-v3.8.55/b77-cb4234d6abca",
+      "status": "green",
+      "startedAt": "2026-11-28T11:16:18.043Z",
+      "signatures": []
+    },
     {
       "baseSha": "5c36ba1c90a680b715e65dff8d8ea2f9699edcf6",
       "ref": "omni-queue/release-v3.8.55/b74-5c36ba1c90a6",
@@ -129,13 +128,6 @@
       "status": "green",
       "startedAt": "2026-11-27T07:45:21.965Z",
       "signatures": []
-    },
-    {
-      "baseSha": "943e080319ac78c399eb6ee12f1532533ed3cf95",
-      "ref": "omni-queue/release-v3.8.55/b62-943e080319ac",
-      "status": "green",
-      "startedAt": "2026-11-27T06:27:59.297Z",
-      "signatures": []
     }
   ],
   "shadow": {
@@ -160,50 +152,15 @@
     }
   },
   "counters": {
-    "batchSeq": 77,
-    "ciRuns": 82,
-    "landedPrs": 77,
-    "landedBatches": 27,
+    "batchSeq": 78,
+    "ciRuns": 83,
+    "landedPrs": 78,
+    "landedBatches": 28,
     "redBatches": 17,
     "bisections": 6,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-24T20:38:39.990Z",
-      "type": "batch-started",
-      "batchId": "b32",
-      "prs": [
-        21142
-      ],
-      "sha": "0cfbb0e6ab7e96a1ffb35d191255dac609c38b73",
-      "detail": "1 PR(s) on 0d4443c4d406; window 5",
-      "labeledAt": {
-        "21142": "2026-11-24T18:59:29Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45482808475"
-    },
-    {
-      "at": "2026-11-24T21:53:30.938Z",
-      "type": "checks-green",
-      "batchId": "b32",
-      "prs": [
-        21142
-      ],
-      "sha": "0cfbb0e6ab7e96a1ffb35d191255dac609c38b73",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45495530004"
-    },
-    {
-      "at": "2026-11-24T21:53:39.973Z",
-      "type": "would-land",
-      "batchId": "b32",
-      "prs": [
-        21142
-      ],
-      "sha": "0cfbb0e6ab7e96a1ffb35d191255dac609c38b73",
-      "detail": "shadow mode: would merge-ff onto 0d4443c4d406",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45495530004"
-    },
     {
       "at": "2026-11-24T21:54:03.684Z",
       "type": "batch-started",
@@ -2855,12 +2812,43 @@
       ],
       "sha": "cb4234d6abca7d3335c732ccd39e4bf27b908059",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46144890975"
+    },
+    {
+      "at": "2026-11-28T12:29:45.473Z",
+      "type": "land-blessed",
+      "batchId": "b77",
+      "prs": [
+        21418
+      ],
+      "sha": "cb4234d6abca7d3335c732ccd39e4bf27b908059",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46144890975"
+    },
+    {
+      "at": "2026-11-28T12:29:48.689Z",
+      "type": "landed",
+      "batchId": "b77",
+      "prs": [
+        21418
+      ],
+      "sha": "cb4234d6abca7d3335c732ccd39e4bf27b908059",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46144890975"
+    },
+    {
+      "at": "2026-11-28T12:30:04.272Z",
+      "type": "batch-started",
+      "batchId": "b78",
+      "prs": [
+        21415
+      ],
+      "sha": "116040d50b6d20a79908f159ebb0a7001ed51e5f",
+      "detail": "bisect of b75: 1 PR(s) on cb4234d6abca",
+      "labeledAt": {
+        "21415": "2026-11-27T13:20:27Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46144890975"
     }
   ],
-  "updatedAt": "2026-11-28T12:29:42.644Z",
-  "batchWindow": 2,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-28T12:29:42.644Z"
-  }
+  "updatedAt": "2026-11-28T12:31:39.461Z",
+  "batchWindow": 2
 }
