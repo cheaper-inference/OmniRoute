@@ -4,8 +4,8 @@
 // the data file with a regex (that silently skipped every row carrying an extra field). Same kit
 // look as the README diagrams: the Editions palette and the text roles from
 // scripts/docs/readme-diagram-theme.mjs; scripts/docs/readme-outline.mjs draws the Switzer roles as
-// vector outlines and keeps the code roles as text on the embedded mono subset. No page embeds this
-// file today; the README draws the provider-level sibling, docs/diagrams/free-tier-budget.svg.
+// vector outlines and keeps the code roles as text on the embedded mono subset. The README draws
+// the provider-level sibling, docs/diagrams/free-tier-budget.svg.
 // Here each row is the largest model of its pool, under the name the catalog gives that model.
 // Run from the repo root (a shared-module or catalog change means regenerating this file too;
 // tests/unit/gen-budget-card-svg.test.ts fails until you do):
@@ -16,15 +16,19 @@
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import {
-  computeFreeModelTotals,
+  computePublicFreeHeadline,
+  FREE_MODEL_BUDGETS,
+  freeTypesInBucket,
   isCountingGated,
   isSocialGated,
 } from "../../open-sse/config/freeModelCatalog.ts";
+import { computeFreeCatalogCounts } from "../../open-sse/config/freeModelCatalog.counts.ts";
+import { membershipFromProviderConstants } from "../../tests/unit/_helpers/providerAccessMembership.ts";
 import { svgOpen, gridDefs, esc } from "../docs/readme-diagram-theme.mjs";
 import { outlineSvg } from "../docs/readme-outline.mjs";
 
 const W = 1200;
-const STEADY_TYPES = new Set(["recurring-daily", "recurring-monthly", "keyless"]);
+const STEADY_TYPES = freeTypesInBucket("steady-monthly");
 const fmt = (n) =>
   n >= 1e9
     ? (n / 1e9).toFixed(2) + "B"
@@ -41,13 +45,18 @@ const cleanName = (r) =>
 // Gated rows (identity, payment or social) are absent from the real figure, so the card skips them.
 const isGatedRow = (r) => isCountingGated(r) || isSocialGated(r);
 
-/** @param {ReturnType<typeof computeFreeModelTotals>} [t] totals to draw; defaults to the live catalog */
-export function buildBudgetCardModel(t = computeFreeModelTotals()) {
+/** @param {{ perModel?: Parameters<typeof computePublicFreeHeadline>[0]["entries"] }} [input] catalog rows to draw */
+export function buildBudgetCardModel({ perModel = FREE_MODEL_BUDGETS } = {}) {
+  const t = computePublicFreeHeadline({ entries: perModel });
+  const { publishedQuotaPools, freeModels } = computeFreeCatalogCounts({
+    entries: perModel,
+    membershipOf: membershipFromProviderConstants,
+  });
   // One bar segment per steady pool (largest member), gated rows excluded like the headline.
   const poolMap = new Map();
   for (const r of t.perModel) {
     if (!STEADY_TYPES.has(r.freeType) || isGatedRow(r)) continue;
-    const k = r.poolKey || `${r.provider}:${r.modelId}`;
+    const k = r.poolKey || r;
     const cur = poolMap.get(k);
     if (!cur || r.monthlyTokens > cur.monthlyTokens) poolMap.set(k, r);
   }
@@ -57,18 +66,20 @@ export function buildBudgetCardModel(t = computeFreeModelTotals()) {
   const steady = t.steadyRecurringTokens;
   const firstMonth = t.firstMonthRealisticTokens;
   const gated = t.gatedRecurringTokens;
+  const showFirstMonth = firstMonth !== steady;
 
   const otMap = new Map();
   for (const r of t.perModel) {
     // Gated rows are excluded here too — they are absent from firstMonthRealisticTokens.
     if (r.freeType !== "one-time-initial" || r.creditTokens <= 0 || isGatedRow(r)) continue;
-    const k = r.poolKey || r.provider;
+    const k = r.poolKey || r;
     otMap.set(k, { provider: r.provider, v: Math.max(otMap.get(k)?.v || 0, r.creditTokens) });
   }
   const oneTime = [...otMap.values()].sort((a, b) => b.v - a.v);
   const oneTimeSum = oneTime.reduce((s, r) => s + r.v, 0);
-  const avoidProviders = new Set(t.perModel.filter((r) => r.tos === "avoid").map((r) => r.provider))
-    .size;
+  const avoidProviders = new Set(
+    perModel.filter((r) => r.enabled !== false && r.tos === "avoid").map((r) => r.provider)
+  ).size;
   const uncapped = t.uncappedProviders;
 
   const grid = pools.slice(0, 28);
@@ -76,16 +87,24 @@ export function buildBudgetCardModel(t = computeFreeModelTotals()) {
 
   const copy = {
     title: ["Monthly free-token budget"],
-    meta: [`${pools.length} free pools · ${t.modelCount} models · one endpoint`],
-    statLabels: ["Steady / month", "First month (+ signup credits)", "ToS-flagged (you decide)"],
-    statValues: [`~${fmt(steady)}`, `~${fmt(firstMonth)}`, `${avoidProviders} providers`],
+    meta: [`${publishedQuotaPools} free pools · ${freeModels} models · one endpoint`],
+    statLabels: [
+      "Steady / month",
+      ...(showFirstMonth ? ["First month (+ signup credits)"] : []),
+      "ToS-flagged (you decide)",
+    ],
+    statValues: [
+      `~${fmt(steady)}`,
+      ...(showFirstMonth ? [`~${fmt(firstMonth)}`] : []),
+      `${avoidProviders} providers`,
+    ],
     caption: [
       "Each segment = one free pool · widths floored so every provider shows · honest numbers in the grid.",
     ],
     poolNames: grid.map((r) => `${cleanName(r)} `),
     poolValues: grid.map((r) => fmt(r.monthlyTokens)),
-    credits: [`+ First month: one-time signup credits (~${fmt(oneTimeSum)})`],
-    chips: strip.map((r) => `${r.provider} ${fmt(r.v)}`),
+    credits: showFirstMonth ? [`+ First month: one-time signup credits (~${fmt(oneTimeSum)})`] : [],
+    chips: showFirstMonth ? strip.map((r) => `${r.provider} ${fmt(r.v)}`) : [],
     note: [
       "Pool-deduped, honest counting — no inflated rate-limit ceilings. Some terms suggest personal-use only; we flag them so you decide.",
       `+ ${uncapped.length} permanently-free, no-cap providers (e.g. ${uncapped.slice(0, 3).join(", ")}) · OpenRouter $10 → +${fmt(t.boostMonthlyTokens)}/mo.`,
@@ -100,13 +119,17 @@ export function buildBudgetCardModel(t = computeFreeModelTotals()) {
   };
 
   const title =
-    `OmniRoute monthly free-token budget: about ${fmt(steady)} tokens a month steady, about ${fmt(firstMonth)} in the first month with signup credits, ` +
-    `from ${pools.length} free pools across ${t.modelCount} catalog models behind one endpoint. ${avoidProviders} providers are ToS-flagged so you decide.`;
+    `OmniRoute monthly free-token budget: about ${fmt(steady)} tokens a month steady` +
+    (showFirstMonth ? `, about ${fmt(firstMonth)} in the first month with signup credits` : "") +
+    `, from ${publishedQuotaPools} free pools across ${freeModels} models behind one endpoint. ${avoidProviders} providers are ToS-flagged so you decide.`;
   const desc =
     `Stacked bar with one segment per free pool, a grid of the ${grid.length} largest pools with their monthly tokens, ` +
-    `${strip.length} one-time signup credit chips totalling about ${fmt(oneTimeSum)}, and notes on uncapped and identity-gated quota, which stay out of the headline.`;
+    (showFirstMonth
+      ? `${strip.length} one-time signup credit chips totalling about ${fmt(oneTimeSum)}, `
+      : "") +
+    "and notes on uncapped and identity-gated quota, which stay out of the headline.";
 
-  return { copy, title, desc, grid, steady };
+  return { copy, title, desc, grid, steady, showFirstMonth };
 }
 
 export function buildBudgetCardCopy() {
@@ -125,8 +148,9 @@ const chipWidth = (label) => Math.round(16 + label.length * 6.6);
 const BAR = { x: 60, y: 224, w: 1080, h: 18, min: 7 };
 const GRID = { cols: 4, colW: 270, x: 66, y: 298, rowH: 30 };
 
-export async function renderBudgetCard() {
-  const { copy: C, title, desc, grid, steady } = buildBudgetCardModel();
+/** @param {Parameters<typeof buildBudgetCardModel>[0]} [input] catalog rows to draw */
+export async function renderBudgetCard(input) {
+  const { copy: C, title, desc, grid, steady, showFirstMonth } = buildBudgetCardModel(input);
 
   const n = grid.length;
   const extra = BAR.w - BAR.min * n - (n - 1);
@@ -147,37 +171,45 @@ export async function renderBudgetCard() {
     );
   });
 
+  const statGap = 24;
+  const statWidth = (BAR.w - (C.statLabels.length - 1) * statGap) / C.statLabels.length;
+  const statFills = ["var(--ink)", ...(showFirstMonth ? ["var(--ok)"] : []), "var(--warn)"];
   const stats = C.statLabels.map((label, i) => {
-    const x = 60 + i * 368;
-    const fill = ["var(--ink)", "var(--ok)", "var(--warn)"][i];
+    const x = BAR.x + i * (statWidth + statGap);
+    const fill = statFills[i];
     return (
-      `  <rect x="${x}" y="100" width="344" height="100" rx="12" class="surface" stroke-width="1"/>\n` +
+      `  <rect x="${x}" y="100" width="${statWidth}" height="100" rx="12" class="surface" stroke-width="1"/>\n` +
       `  <text x="${x + 24}" y="130" class="cell" style="fill:var(--muted)">${esc(label)}</text>\n` +
       `  <text x="${x + 24}" y="178" class="bc-stat" style="fill:${fill}">${esc(C.statValues[i])}</text>`
     );
   });
 
   // Below the grid the height follows the data: chips wrap, the gated note appears only with quota.
-  let y = GRID.y + Math.ceil(n / GRID.cols) * GRID.rowH + 2;
-  const ruleY = y;
-  y += 34;
-  const creditsY = y;
-  y += 14;
-  const chips = [];
-  let cx = 60;
-  for (const label of C.chips) {
-    const w = chipWidth(label);
-    if (cx + w > W - 60) {
-      cx = 60;
-      y += 30;
+  const ruleY = GRID.y + Math.ceil(n / GRID.cols) * GRID.rowH + 2;
+  let y = ruleY + 24;
+  let credits = "";
+  if (showFirstMonth) {
+    const creditsY = ruleY + 34;
+    y = creditsY + 14;
+    const chips = [];
+    let cx = 60;
+    for (const label of C.chips) {
+      const w = chipWidth(label);
+      if (cx + w > W - 60) {
+        cx = 60;
+        y += 30;
+      }
+      chips.push(
+        `    <rect x="${cx}" y="${y}" width="${w}" height="22" rx="11" class="ok-bg stroke-ok" stroke-width="1"/>\n` +
+          `    <text x="${cx + w / 2}" y="${y + 15}" text-anchor="middle" class="mono-sm" style="fill:var(--ok)">${esc(label)}</text>`
+      );
+      cx += w + 10;
     }
-    chips.push(
-      `    <rect x="${cx}" y="${y}" width="${w}" height="22" rx="11" class="ok-bg stroke-ok" stroke-width="1"/>\n` +
-        `    <text x="${cx + w / 2}" y="${y + 15}" text-anchor="middle" class="mono-sm" style="fill:var(--ok)">${esc(label)}</text>`
-    );
-    cx += w + 10;
+    credits =
+      `  <text x="60" y="${creditsY}" class="h4" style="fill:var(--ok)">${esc(C.credits[0])}</text>\n` +
+      `  <g>\n${chips.join("\n")}\n  </g>\n`;
+    y += 44;
   }
-  y += 44;
   const noteY = y;
   const noteLines = [...C.note, ...C.gatedNote];
   const noteH = 22 + noteLines.length * 22;
@@ -217,9 +249,7 @@ export async function renderBudgetCard() {
     // per-pool grid
     `  <g>\n${gridRows.join("\n")}\n  </g>\n` +
     `  <line x1="60" y1="${ruleY}" x2="1140" y2="${ruleY}" class="rule"/>\n` +
-    // first-month signup credits
-    `  <text x="60" y="${creditsY}" class="h4" style="fill:var(--ok)">${esc(C.credits[0])}</text>\n` +
-    `  <g>\n${chips.join("\n")}\n  </g>\n` +
+    credits +
     // notes
     `  <rect x="60" y="${noteY}" width="1080" height="${noteH}" rx="12" class="surface" stroke-width="1"/>\n` +
     `${noteText.join("\n")}\n` +
