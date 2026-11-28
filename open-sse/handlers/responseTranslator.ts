@@ -5,7 +5,7 @@ import {
 } from "../translator/helpers/toolCallShim.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { cacheCreationFields } from "../utils/cacheWriteUsage.ts";
-import { usableTokenCounter } from "../utils/usageEvidence.ts";
+import { readChatCacheReadCounter } from "../translator/helpers/chatCacheRead.ts";
 import {
   buildGeminiThoughtSignatureKey,
   storeGeminiThoughtSignature,
@@ -830,12 +830,6 @@ function parseToolUseInput(
   return JSON.parse(applyToolCallShimToBuffer(name, JSON.stringify(parsed), schema));
 }
 
-// Keep accepting positive numeric strings from the legacy Chat cache fields,
-// but don't treat a numeric string zero as an explicitly reported counter.
-function legacyPositiveCacheRead(value: unknown): unknown {
-  return typeof value === "string" ? toFiniteNumber(value) || undefined : value;
-}
-
 /**
  * Helper to convert an OpenAI chat.completion JSON object to Claude format for non-streaming.
  *
@@ -952,13 +946,7 @@ function convertOpenAINonStreamingToClaude(
   const outputTokens = toFiniteNumber(usageSrc.completion_tokens, 0);
 
   const promptDetails = toRecord(usageSrc.prompt_tokens_details);
-  const inputDetails = toRecord(usageSrc.input_tokens_details);
-  const reportedCacheReadTokens = [
-    legacyPositiveCacheRead(promptDetails.cached_tokens),
-    legacyPositiveCacheRead(usageSrc.cached_tokens),
-    inputDetails.cached_tokens,
-    usageSrc.cache_read_input_tokens,
-  ].find(usableTokenCounter);
+  const reportedCacheReadTokens = readChatCacheReadCounter(usageSrc);
   const cachedTokens = Math.max(0, Math.min(promptTokens, reportedCacheReadTokens ?? 0));
   // Same rule as openai-to-claude.ts trackUsageFromChunk: a cache write reported outside the
   // prompt (cache_creation_in_prompt === false) is not part of prompt_tokens, so it is neither

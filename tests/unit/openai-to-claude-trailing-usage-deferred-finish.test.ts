@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { translateNonStreamingResponse } from "../../open-sse/handlers/responseTranslator.ts";
+import { FORMATS } from "../../open-sse/translator/formats.ts";
 import { openaiToClaudeResponse } from "../../open-sse/translator/response/openai-to-claude.ts";
 
 type ClaudeUsage = {
@@ -372,6 +374,29 @@ const CACHE_READ_CASES: Array<[name: string, details: Record<string, unknown>, e
     ["Chat explicit zero", { prompt_tokens_details: { cached_tokens: 0 } }, 0],
     ["Responses detail explicit zero", { input_tokens_details: { cached_tokens: 0 } }, 0],
     ["flat Claude-compatible explicit zero", { cache_read_input_tokens: 0 }, 0],
+    ["flat legacy zero", { cached_tokens: 0 }, 0],
+    ["flat legacy positive numeric string", { cached_tokens: "20" }, 20],
+    [
+      "flat legacy zero before positive Claude count",
+      { cached_tokens: 0, cache_read_input_tokens: 20 },
+      0,
+    ],
+    [
+      "flat legacy positive before Responses detail",
+      { cached_tokens: 20, input_tokens_details: { cached_tokens: 7 } },
+      20,
+    ],
+    [
+      "Chat detail zero before a positive flat counter",
+      { prompt_tokens_details: { cached_tokens: 0 }, cached_tokens: 20 },
+      0,
+    ],
+    ["legacy numeric-string zero is not measured", { cached_tokens: "0" }],
+    [
+      "legacy numeric-string zero falls through",
+      { cached_tokens: "0", cache_read_input_tokens: 20 },
+      20,
+    ],
     ["positive count", { prompt_tokens_details: { cached_tokens: 43264 } }, 43264],
     ["omitted count", { prompt_tokens_details: {}, input_tokens_details: {} }],
     [
@@ -412,7 +437,67 @@ for (const [name, details, expected] of CACHE_READ_CASES) {
       ...(expected === undefined ? {} : { cache_read_input_tokens: expected }),
     };
 
-    assert.deepEqual(state.usage, usage);
-    assert.deepEqual(events.find((event) => event.type === "message_delta")?.usage, usage);
+    const response = translateNonStreamingResponse(
+      {
+        choices: [{ message: { role: "assistant", content: "OK" }, finish_reason: "stop" }],
+        usage: { prompt_tokens: 50000, completion_tokens: 7, ...details },
+      },
+      FORMATS.OPENAI,
+      FORMATS.CLAUDE
+    );
+    assert.deepEqual(response.usage, usage, "JSON");
+    assert.deepEqual(state.usage, usage, "SSE state");
+    assert.deepEqual(
+      events.find((event) => event.type === "message_delta")?.usage,
+      usage,
+      "SSE wire"
+    );
   });
 }
+
+test("later stream chunks without a usage block do not erase a reported zero", () => {
+  const state = createState();
+  const events = collectEvents(
+    [
+      {
+        choices: [{ index: 0, delta: { content: "OK" }, finish_reason: null }],
+        usage: {
+          prompt_tokens: 100,
+          completion_tokens: 7,
+          cached_tokens: 0,
+          cache_read_input_tokens: 20,
+        },
+      },
+      { choices: [{ index: 0, delta: {}, finish_reason: "stop" }] },
+      null,
+    ],
+    state
+  );
+  assert.deepEqual(events.find((event) => event.type === "message_delta")?.usage, {
+    input_tokens: 100,
+    output_tokens: 7,
+    cache_read_input_tokens: 0,
+  });
+});
+
+test("shared cache-read evidence preserves wire-specific clamping", () => {
+  const usage = { prompt_tokens: 100, completion_tokens: 7, cached_tokens: 101 };
+  const state = createState();
+  collectEvents([{ choices: [], usage }], state);
+  assert.deepEqual(state.usage, {
+    input_tokens: 0,
+    output_tokens: 7,
+    cache_read_input_tokens: 101,
+  });
+
+  const response = translateNonStreamingResponse(
+    { choices: [{ message: { content: "OK" }, finish_reason: "stop" }], usage },
+    FORMATS.OPENAI,
+    FORMATS.CLAUDE
+  );
+  assert.deepEqual(response.usage, {
+    input_tokens: 0,
+    output_tokens: 7,
+    cache_read_input_tokens: 100,
+  });
+});

@@ -1,0 +1,1 @@
+- **Claude Messages:** Streamed replies now select the same reported Chat Completions cache-read counter as JSON replies, including explicit zero and legacy flat counts.
