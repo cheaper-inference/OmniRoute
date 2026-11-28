@@ -87,3 +87,43 @@ export function credentialCooldownResponse(
     credentials.retryAfterHuman
   );
 }
+
+/** Preserve expired credentials and exhausted balances as distinct client-facing results. */
+export function terminalCredentialResponse(
+  credentials: {
+    expiredStatus?: string;
+    expiredCount?: number;
+    closedReason?: "disabled" | "blocked";
+  },
+  provider: string
+) {
+  if (credentials.closedReason) {
+    const reason =
+      credentials.closedReason === "disabled"
+        ? "All eligible connections are switched off in the gateway."
+        : "All eligible connections are unavailable. The gateway has recorded a connection health block.";
+    return errorResponse(
+      HTTP_STATUS.SERVICE_UNAVAILABLE,
+      "[" + provider + "] " + reason + " Check connection status in the dashboard.",
+      {
+        code: "provider_unavailable",
+      }
+    );
+  }
+  const status = credentials.expiredStatus || "expired";
+  const count = credentials.expiredCount || 1;
+  const reason =
+    status === "credits_exhausted"
+      ? "credits exhausted"
+      : status === "banned"
+        ? "banned by upstream"
+        : "authentication expired";
+  const message = `[${provider}] All ${count} connection(s) ${reason} — please reconnect in the dashboard`;
+  log.warn("CHAT", message);
+  // #12441: credits_exhausted is quota, not invalid credentials. Combo
+  // dispatch treats 401 as AUTH_LEVEL skip (#8133). Surface 402 so quota
+  // exhaustion follows the #1731 path instead of "authentication expired".
+  const httpStatus =
+    status === "credits_exhausted" ? HTTP_STATUS.PAYMENT_REQUIRED : HTTP_STATUS.UNAUTHORIZED;
+  return errorResponse(httpStatus, message);
+}

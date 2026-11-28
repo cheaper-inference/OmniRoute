@@ -16,7 +16,7 @@ import { isPerAccountCatalogProvider } from "./perAccountCatalogFilter.ts";
 import { describeUpstreamFailure } from "@/shared/utils/upstreamError";
 import { isRequestScopedMisalignmentRefusal } from "@omniroute/open-sse/utils/providerSafety.ts";
 import { isMusePolicyRefusal } from "@omniroute/open-sse/services/musePolicyRefusal.ts";
-import { buildAllExpiredCredentials } from "./authExpiredCredentials.ts";
+import { buildAllExpiredCredentials, buildClosedKimiPool } from "./authExpiredCredentials.ts";
 import { echoableModelLockStatus } from "./modelLockUpstreamStatus.ts";
 import {
   isExpiryFirstDeadlineOrder,
@@ -1305,6 +1305,11 @@ export async function getProviderCredentials(
       allConnections = filterCodexPlanEligible(provider, allConnections, requestedModel);
       log.debug("AUTH", `${provider} | all connections (incl inactive): ${allConnections.length}`);
       if (allConnections.length > 0) {
+        const closed = buildClosedKimiPool(resolvedId, allConnections);
+        if (closed) {
+          invalidateManagedLease(options, "CONNECTION_INELIGIBLE");
+          return closed;
+        }
         const earliest = getEarliestRateLimitedUntil(allConnections);
         if (earliest) {
           log.warn(
@@ -1326,12 +1331,7 @@ export async function getProviderCredentials(
           );
         });
 
-        // If every existing connection is in a terminal state (expired/banned/
-        // credits_exhausted), surface that as a re-auth signal instead of the
-        // generic "No credentials" 400. The classic case is AWS SSO/Kiro
-        // refresh tokens hitting their 90-day TTL: all connections flip to
-        // is_active=0 with testStatus=banned|expired, and without this branch
-        // the dashboard sees a misleading "bad_request" code.
+        // Disabled terminal rows can still report expired credentials or exhausted credits.
         const terminalConnections = allConnections.filter(isTerminalConnectionStatus);
         if (terminalConnections.length === allConnections.length) {
           invalidateManagedLease(options, "AUTHORIZATION_CHANGED");
@@ -1692,7 +1692,10 @@ export async function getProviderCredentials(
       // #7611: isActive terminal rows never hit the inactive allExpired branch.
       const terminalConnections = connections.filter(isTerminalConnectionStatus);
       if (terminalConnections.length === connections.length) {
-        return buildAllExpiredCredentials(terminalConnections);
+        return (
+          buildClosedKimiPool(resolvedId, terminalConnections) ??
+          buildAllExpiredCredentials(terminalConnections)
+        );
       }
       invalidateManagedLease(options, "CONNECTION_INELIGIBLE");
       log.warn("AUTH", `${provider} | all ${connections.length} accounts unavailable`);

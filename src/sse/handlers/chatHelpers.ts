@@ -1,5 +1,5 @@
 import { inheritLocalProcessPressureResponse } from "@omniroute/open-sse/utils/localPressureResponse.ts";
-import { credentialCooldownResponse } from "./credentialCooldownResponse";
+import { credentialCooldownResponse, terminalCredentialResponse } from "./credentialCooldownResponse";
 import {
   getModelInfo,
   getComboForModel,
@@ -394,7 +394,7 @@ export function comboTargetCredentialProviderId(
 
 export async function checkPipelineGates(
   provider: string,
-  model: string,
+  _model: string,
   options: {
     ignoreCircuitBreaker?: boolean;
     ignoreModelCooldown?: boolean;
@@ -503,7 +503,6 @@ export async function executeChatWithBreaker({
   // forwarded to handleChatCore, which notes it under the attempt store.
   previousResponseResumed = undefined,
 }: ExecuteChatWithBreakerOptions): Promise<ExecuteChatWithBreakerResult> {
-  let tlsFingerprintUsed = false;
   const normalizedTrafficType: TrafficType =
     typeof trafficType === "string" && trafficType.trim().toLowerCase() === "shadow"
       ? "shadow"
@@ -863,30 +862,7 @@ export function handleNoCredentials(
     });
     return errorResponse(lastStatus, lastError);
   }
-  if (credentials?.allExpired) {
-    // Every connection for this provider is in a terminal state (expired,
-    // banned, or credits_exhausted). Surface expired/banned as 401 with a
-    // re-auth hint instead of the generic 400 "No credentials", so
-    // dashboards/CLIs can distinguish "never configured" from "needs to
-    // reconnect". credits_exhausted is quota (HTTP 402), not invalid
-    // credentials — see #12441.
-    const status = credentials.expiredStatus || "expired";
-    const count = credentials.expiredCount || 1;
-    const reason =
-      status === "credits_exhausted"
-        ? "credits exhausted"
-        : status === "banned"
-          ? "banned by upstream"
-          : "authentication expired";
-    const message = `[${provider}] All ${count} connection(s) ${reason} — please reconnect in the dashboard`;
-    log.warn("CHAT", message);
-    // #12441: credits_exhausted is quota, not invalid credentials. Combo
-    // dispatch treats 401 as AUTH_LEVEL skip (#8133). Surface 402 so quota
-    // exhaustion follows the #1731 path instead of "authentication expired".
-    const httpStatus =
-      status === "credits_exhausted" ? HTTP_STATUS.PAYMENT_REQUIRED : HTTP_STATUS.UNAUTHORIZED;
-    return errorResponse(httpStatus, message);
-  }
+  if (credentials?.allExpired) return terminalCredentialResponse(credentials, provider);
   if (credentials?.blockedByKeyPolicy) {
     // #15889: the effective restriction is not necessarily an API-key policy.
     const count = credentials.blockedCount || 1;
