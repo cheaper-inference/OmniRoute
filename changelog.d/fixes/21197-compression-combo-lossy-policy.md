@@ -1,0 +1,1 @@
+- **fix(compression):** a named or routing-assigned compression combo now passes through the same lossy-request policy as the seeded default combo, so a bare `lite` step no longer truncates every earlier tool result from turn 3 of a long session ([#21083](https://github.com/cheaper-inference/OmniRoute/issues/21083))
