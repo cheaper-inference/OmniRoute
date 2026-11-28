@@ -74,6 +74,7 @@ export async function GET(request: Request) {
   // Clear state cookie
   cookieStore.set("oidc_state", "", {
     httpOnly: true,
+    secure: process.env.AUTH_COOKIE_SECURE === "true" || schemeEarly === "https",
     sameSite: "lax",
     path: "/",
     maxAge: 0,
@@ -283,12 +284,14 @@ export async function GET(request: Request) {
   // Single-use PKCE material: clear it once the session is minted.
   store.set("oidc_pkce_verifier", "", {
     httpOnly: true,
+    secure: useSecureCookie,
     sameSite: "lax",
     path: "/",
     maxAge: 0,
   });
   store.set("oidc_nonce", "", {
     httpOnly: true,
+    secure: useSecureCookie,
     sameSite: "lax",
     path: "/",
     maxAge: 0,
