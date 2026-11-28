@@ -1768,6 +1768,29 @@
       "stream": "https://crof.ai/v1/chat/completions"
     }
   },
+  "crowllm": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://crowllm.com/v1/chat/completions",
+      "stream": "https://crowllm.com/v1/chat/completions"
+    }
+  },
   "cursor": {
     "format": "cursor",
     "headers": {

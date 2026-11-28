@@ -101,6 +101,22 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     website: "https://unorouter.ai",
     apiHint: "Create an API key at https://unorouter.ai, then paste it here as a Bearer token.",
   },
+  crowllm: {
+    id: "crowllm",
+    serviceKinds: ["llm"],
+    alias: "crowllm",
+    name: "CrowLLM",
+    icon: "crowllm",
+    color: "#F59E0B",
+    textIcon: "CL",
+    passthroughModels: true,
+    hasFree: true,
+    freeNote:
+      "Free-account ids carry a :free suffix; the public /api/pricing feed marks which bill at zero (31 of 38 today) and the shelf rotates. No card at signup. Per-account RPM/RPD is unpublished — 429 on cap.",
+    website: "https://crowllm.com",
+    apiHint:
+      "Create an API key at https://crowllm.com/sign-up, then paste it here as a Bearer token.",
+  },
   "command-code": {
     id: "command-code",
     serviceKinds: ["llm"],

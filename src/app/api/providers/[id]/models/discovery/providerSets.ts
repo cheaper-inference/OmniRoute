@@ -46,6 +46,7 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   "sambanova",
   "orcarouter",
   "unorouter",
+  "crowllm",
   "uncloseai",
   "opencode-go",
   "baseten",

@@ -11,6 +11,7 @@ const { APIKEY_PROVIDERS } = await import("../../src/shared/constants/providers/
 const providers = [
   ["zylo-api", "zylo", "https://api.zyloai.net/v1/chat/completions"],
   ["unorouter", "unorouter", "https://api.unorouter.com/v1/chat/completions"],
+  ["crowllm", "crowllm", "https://crowllm.com/v1/chat/completions"],
   ["poolside", "poolside", "https://inference.poolside.ai/v1/chat/completions"],
   ["fastrouter", "fastrouter", "https://api.fastrouter.ai/api/v1/chat/completions"],
   ["anyapi", "anyapi", "https://api.anyapi.ai/v1/chat/completions"],

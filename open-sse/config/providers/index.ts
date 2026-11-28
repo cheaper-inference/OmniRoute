@@ -1,5 +1,6 @@
 import type { RegistryEntry } from "./shared.ts";
 import { unorouterProvider } from "./registry/unorouter/index.ts";
+import { crowllmProvider } from "./registry/crowllm/index.ts";
 
 import { aimlapiProvider } from "./registry/aimlapi/index.ts";
 import { byteplusProvider } from "./registry/byteplus/index.ts";
@@ -561,6 +562,7 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   "muse-code": muse_codeProvider,
   "zylo-api": zyloApiProvider,
   unorouter: unorouterProvider,
+  crowllm: crowllmProvider,
   "naga-ac": naga_acProvider,
   chatanywhere: chatanywhereProvider,
   poolside: poolsideProvider,
