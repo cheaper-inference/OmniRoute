@@ -22,6 +22,91 @@ export function isResponseStatusRetryable(status: number | undefined | null): bo
   return TRANSIENT_BACKEND_STATUS_CODES.has(status);
 }
 
+// Network/timeout signals carried by a thrown `code`, `cause.code` or error name.
+// Kept local to this module: the sibling token-refresh classifier treats AbortError
+// as transient, which would contradict the immediate propagation required here.
+const RETRYABLE_THROWN_ERROR_CODES: ReadonlySet<string> = new Set([
+  "ETIMEDOUT",
+  "ECONNREFUSED",
+  "ECONNRESET",
+  "ECONNABORTED",
+  "EPIPE",
+  "EHOSTUNREACH",
+  "ENETUNREACH",
+  "ENOTCONN",
+  "ENOTFOUND",
+  "EAI_AGAIN",
+  "ERR_NETWORK",
+  "ERR_SOCKET",
+  "ERR_CONNECTION",
+  "UND_ERR_CONNECT_TIMEOUT",
+  "UND_ERR_SOCKET",
+]);
+
+const NON_RETRYABLE_ERROR_NAMES: ReadonlySet<string> = new Set([
+  "TypeError",
+  "SyntaxError",
+  "ReferenceError",
+  "RangeError",
+  "URIError",
+]);
+
+// Transport-specific phrases only. A bare `network` or `terminated` token would also
+// match a TypeError such as "Cannot read properties of undefined (reading 'network')",
+// classifying a programming error as retryable before the name-based check below.
+const NETWORK_MESSAGE_PATTERN =
+  /fetch failed|socket hang up|socket terminated|connection terminated|network (?:error|failure|timeout|unreachable|down)/i;
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  return typeof value === "object" && value !== null
+    ? (value as Record<string, unknown>)
+    : undefined;
+}
+
+function readString(source: Record<string, unknown> | undefined, key: string): string {
+  if (!source) return "";
+  const value = source[key];
+  return typeof value === "string" ? value : "";
+}
+
+function carriesNetworkSignal(
+  record: Record<string, unknown> | undefined,
+  name: string,
+): boolean {
+  const cause = asRecord(record?.cause);
+  const code = readString(record, "code");
+  const causeCode = readString(cause, "code");
+  const message = readString(record, "message");
+  const causeMessage = readString(cause, "message");
+  return (
+    RETRYABLE_THROWN_ERROR_CODES.has(code) ||
+    RETRYABLE_THROWN_ERROR_CODES.has(causeCode) ||
+    name === "TimeoutError" ||
+    name === "BodyTimeoutError" ||
+    NETWORK_MESSAGE_PATTERN.test(message) ||
+    NETWORK_MESSAGE_PATTERN.test(causeMessage)
+  );
+}
+
+/**
+ * Classify an error thrown by the retried action. Cancellation and known
+ * programming errors surface at once; transport/timeout signals are retried.
+ * Anything undecidable stays retryable (fail-open) so an opaque transport error
+ * is not mistaken for a permanent one — undici, for example, rejects with a
+ * bare `TypeError: fetch failed` whose cause carries the real network code.
+ */
+export function isRetryableThrownError(error: unknown): boolean {
+  if (error == null) return true;
+
+  const record = asRecord(error);
+  const name = readString(record, "name");
+  if (name === "AbortError") return false;
+  if (carriesNetworkSignal(record, name)) return true;
+  if (NON_RETRYABLE_ERROR_NAMES.has(name)) return false;
+  // Fail-open: no readable code or cause — keep the historical retry behaviour.
+  return true;
+}
+
 export interface TransientRetryOptions {
   maxAttempts?: number;
   baseMs?: number;
@@ -104,6 +189,9 @@ export async function runWithTransientBackendRetry<T extends ResponseLike>(
       prev = delayMs;
     } catch (error) {
       if (signal?.aborted) {
+        throw error;
+      }
+      if (!isRetryableThrownError(error)) {
         throw error;
       }
       if (attempt >= maxAttempts) throw error;
