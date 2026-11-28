@@ -19,7 +19,11 @@ import { isCompressionWorkerEligible } from "../../../open-sse/services/compress
 import { closeCompressionWorkerPoolForTests } from "../../../open-sse/services/compression/compressionWorkerPool.ts";
 import { applyLossyRequestPolicy } from "../../../open-sse/services/compression/lossyRequestPolicy.ts";
 import { RTK_STRUCTURAL_RENDERERS_FLAG } from "../../../open-sse/services/compression/engines/rtk/structuralFlag.ts";
-import type { CompressionConfig } from "../../../open-sse/services/compression/types.ts";
+import { tryStructuralRender } from "../../../open-sse/services/compression/engines/rtk/renderers/structural.ts";
+import {
+  DEFAULT_RTK_CONFIG,
+  type CompressionConfig,
+} from "../../../open-sse/services/compression/types.ts";
 
 const FIXTURES = path.join(import.meta.dirname, "fixtures", "rtk", "structural");
 const fixture = (name: string) => fs.readFileSync(path.join(FIXTURES, name), "utf8");
@@ -82,37 +86,91 @@ function run(text: string, command: string | null = "git diff", options: RunOpti
   };
 }
 
-/** The facts a faithful summary of a unified diff must keep, read from the input itself. */
-function diffFacts(diff: string) {
-  const fileHeaders: string[] = [];
-  const hunkHeaders: string[] = [];
-  const changedLines: string[] = [];
-  const stats: string[] = [];
-  let adds = 0;
-  let dels = 0;
-  let open = false;
-  const flush = () => {
-    if (open && (adds > 0 || dels > 0)) stats.push(`+${adds} -${dels}`);
-    adds = 0;
-    dels = 0;
-  };
-  for (const line of diff.split("\n")) {
-    if (line.startsWith("diff --git ")) {
-      flush();
-      open = true;
-      fileHeaders.push(line);
-    } else if (line.startsWith("@@ ")) hunkHeaders.push(line);
-    else if (/^(?:--- |\+\+\+ )(?:a\/|b\/|\/dev\/null)/.test(line)) continue;
-    else if (line.startsWith("+")) {
-      adds++;
-      changedLines.push(line);
-    } else if (line.startsWith("-")) {
-      dels++;
-      changedLines.push(line);
+interface FileFacts {
+  header: string;
+  hunkHeaders: string[];
+  /** Changed lines, and the no-newline markers that follow them, in input order. */
+  changed: string[];
+  adds: number;
+  dels: number;
+}
+
+const HUNK_COUNTS_RE = /^@@ -\d+(?:,(\d+))? \+\d+(?:,(\d+))? @@/;
+
+/**
+ * The facts a faithful summary of a unified diff must keep, read from the input itself. Lines are
+ * classified by their place in a hunk (the declared counts decide where it ends), so a changed
+ * line that looks like a path header (`+++ b/x`) still counts as a change.
+ */
+function diffFacts(diff: string): FileFacts[] {
+  const files: FileFacts[] = [];
+  let oldLeft = 0;
+  let newLeft = 0;
+  let afterChange = false;
+  for (const raw of diff.split("\n")) {
+    const file = files[files.length - 1];
+    if (raw.startsWith("\\")) {
+      if (afterChange) file.changed.push(raw);
+    } else if (oldLeft > 0 || newLeft > 0) {
+      afterChange = raw.startsWith("+") || raw.startsWith("-");
+      if (raw.startsWith("+")) {
+        file.adds++;
+        newLeft--;
+        file.changed.push(raw);
+      } else if (raw.startsWith("-")) {
+        file.dels++;
+        oldLeft--;
+        file.changed.push(raw);
+      } else {
+        oldLeft--;
+        newLeft--;
+      }
+    } else if (raw.startsWith("diff --git ")) {
+      files.push({ header: raw, hunkHeaders: [], changed: [], adds: 0, dels: 0 });
+    } else if (raw.startsWith("@@ ")) {
+      const counts = HUNK_COUNTS_RE.exec(raw);
+      assert.ok(counts, raw);
+      oldLeft = Number(counts[1] ?? 1);
+      newLeft = Number(counts[2] ?? 1);
+      afterChange = false;
+      file.hunkHeaders.push(raw);
     }
   }
-  flush();
-  return { fileHeaders, hunkHeaders, changedLines, stats };
+  return files;
+}
+
+/** The same facts read back from a summary: stat lines carry the counts, context is gone. */
+function summaryFacts(summary: string): Array<FileFacts & { stats: string[] }> {
+  const files: Array<FileFacts & { stats: string[] }> = [];
+  for (const line of summary.split("\n")) {
+    if (line.startsWith("diff --git ")) {
+      files.push({ header: line, hunkHeaders: [], changed: [], adds: 0, dels: 0, stats: [] });
+      continue;
+    }
+    const file = files[files.length - 1];
+    const stat = /^# (\+\d+ -\d+)$/.exec(line);
+    if (stat) file.stats.push(stat[1]);
+    else if (line.startsWith("@@ ")) file.hunkHeaders.push(line);
+    else if (file.hunkHeaders.length > 0) file.changed.push(line);
+  }
+  return files;
+}
+
+/** Every file, hunk header and changed line of `diff` is in `summary`, in order, in its own file. */
+function assertSummaryKeepsEveryChange(summary: string, diff: string): void {
+  const expected = diffFacts(diff);
+  const actual = summaryFacts(summary);
+  assert.deepEqual(
+    actual.map((file) => file.header),
+    expected.map((file) => file.header)
+  );
+  expected.forEach((file, index) => {
+    const got = actual[index];
+    assert.deepEqual(got.hunkHeaders, file.hunkHeaders, `hunk headers of ${file.header}`);
+    assert.deepEqual(got.changed, file.changed, `changed lines of ${file.header}`);
+    const stats = file.hunkHeaders.length > 0 ? [`+${file.adds} -${file.dels}`] : [];
+    assert.deepEqual(got.stats, stats, `counts of ${file.header}`);
+  });
 }
 
 function syntheticAddedFile(lines: number, lineText: (index: number) => string): string {
@@ -135,6 +193,16 @@ function setFlagResolver(resolver: unknown): void {
   if (resolver === undefined) delete store[FLAG_RESOLVER_KEY];
   else store[FLAG_RESOLVER_KEY] = resolver;
 }
+/** Install a resolver that answers `value` and counts only lookups of the structural flag. */
+function countFlagLookups(value: boolean): { count: number } {
+  const lookups = { count: 0 };
+  setFlagResolver((key: string) => {
+    if (key !== RTK_STRUCTURAL_RENDERERS_FLAG) return false;
+    lookups.count++;
+    return value;
+  });
+  return lookups;
+}
 const originalResolver = (globalThis as Record<symbol, unknown>)[FLAG_RESOLVER_KEY];
 const originalDataDir = process.env.DATA_DIR;
 
@@ -152,16 +220,9 @@ describe("structural unified diff", () => {
     const facts = diffFacts(MULTI_DIFF);
     assert.ok(out.techniques.includes(STRUCTURAL_TECHNIQUE), out.techniques.join(","));
     assert.ok(tokens(out.text) < tokens(MULTI_DIFF));
-    assert.equal(facts.fileHeaders.length, 7);
-    assert.equal(facts.hunkHeaders.length, 8);
-    for (const line of [
-      ...facts.fileHeaders,
-      ...facts.hunkHeaders,
-      ...facts.changedLines,
-      ...facts.stats,
-    ]) {
-      assert.ok(out.text.includes(line), line);
-    }
+    assert.equal(facts.length, 7);
+    assert.equal(facts.flatMap((file) => file.hunkHeaders).length, 8);
+    assertSummaryKeepsEveryChange(out.text, MULTI_DIFF);
     // significant file metadata survives: creation, removal, rename and mode change
     for (const line of [
       "new file mode 100644",
@@ -182,10 +243,49 @@ describe("structural unified diff", () => {
 
   it("counts +N -M per file from the whole input", () => {
     const out = run(MULTI_DIFF);
+    const sections = out.text.split(/^(?=diff --git )/m);
+    const sectionOf = (file: string) => sections.find((s) => s.startsWith(`diff --git a/${file}`));
     // math.ts: 3 hunks of the fixture add 4 lines and remove 3
-    assert.ok(out.text.includes("+4 -3"), out.text);
+    const math = sectionOf("src/util/math.ts");
+    assert.ok(math, out.text);
+    assert.equal(math.match(/^# \+\d+ -\d+$/gm)?.join("|"), "# +4 -3");
     // legacy.ts is a whole-file removal
-    assert.match(out.text, /\+0 -3\d\b/);
+    const legacy = sectionOf("src/svc/legacy.ts");
+    assert.ok(legacy, out.text);
+    assert.match(legacy.match(/^# \+\d+ -\d+$/gm)?.join("|") ?? "", /^# \+0 -3\d$/);
+  });
+
+  it("keeps duplicate and header-shaped changes in their own hunk and file", () => {
+    const repeated = [" alpha", "-return 1;", "+return 2;", " omega"];
+    const tricky = [
+      "diff --git a/one.txt b/one.txt",
+      "index 1111111..2222222 100644",
+      "--- a/one.txt",
+      "+++ b/one.txt",
+      "@@ -1,3 +1,3 @@",
+      ...repeated,
+      "@@ -10,4 +10,4 @@",
+      " beta",
+      "--- a/example",
+      "+++ b/example",
+      "-return 1;",
+      "+return 2;",
+      " gamma",
+      "diff --git a/two.txt b/two.txt",
+      "index 3333333..4444444 100644",
+      "--- a/two.txt",
+      "+++ b/two.txt",
+      "@@ -1,3 +1,3 @@",
+      ...repeated,
+      "",
+    ].join("\n");
+    const out = run(tricky);
+    assert.ok(out.techniques.includes(STRUCTURAL_TECHNIQUE), out.text);
+    assertSummaryKeepsEveryChange(out.text, tricky);
+    const [one, two] = summaryFacts(out.text);
+    assert.deepEqual(one.stats, ["+3 -3"]);
+    assert.deepEqual(two.stats, ["+1 -1"]);
+    assert.ok(one.changed.includes("+++ b/example") && one.changed.includes("--- a/example"));
   });
 
   it("recognises a diff by its signature when the tool call carries no command", () => {
@@ -198,8 +298,7 @@ describe("structural unified diff", () => {
     const crlf = MULTI_DIFF.replace(/\n/g, "\r\n");
     const out = run(crlf);
     assert.ok(out.techniques.includes(STRUCTURAL_TECHNIQUE));
-    for (const line of diffFacts(MULTI_DIFF).changedLines)
-      assert.ok(out.text.includes(`${line}\r`));
+    assertSummaryKeepsEveryChange(out.text, crlf);
   });
 
   it("keeps the no-newline marker that belongs to a changed line", () => {
@@ -254,6 +353,108 @@ describe("structural unified diff", () => {
     const flagOn = run(stat, "git diff --stat");
     const flagOff = run(stat, "git diff --stat", { flag: false });
     assert.equal(flagOn.text, flagOff.text);
+  });
+});
+
+describe("structural unified diff: refuses what it cannot prove complete", () => {
+  const SECTION_HEAD = [
+    "diff --git a/a.txt b/a.txt",
+    "index 1111111..2222222 100644",
+    "--- a/a.txt",
+    "+++ b/a.txt",
+  ];
+  const withTail = (...tail: string[]) => `${[...SECTION_HEAD, ...tail].join("\n")}\n`;
+  const keptWhole = (text: string, label: string) => {
+    const out = run(text);
+    assert.equal(out.text, text, label);
+    assert.ok(!out.techniques.includes(STRUCTURAL_TECHNIQUE), label);
+  };
+
+  it("accepts only the exact no-newline marker inside a hunk", () => {
+    const cases: Record<string, string> = {
+      "diagnostic after context": withTail(
+        "@@ -1,2 +1,2 @@",
+        "-old",
+        "+new",
+        " keep",
+        "\\ upstream read failed"
+      ),
+      "diagnostic after a change": withTail(
+        "@@ -1,1 +1,1 @@",
+        "-old",
+        "+new",
+        "\\ output truncated"
+      ),
+      "diagnostic after the counts reach zero": withTail(
+        "@@ -1,1 +1,1 @@",
+        "-old",
+        "\\ No newline at end of file",
+        "+new",
+        "\\ No newline at end of file",
+        "\\ trailing diagnostic"
+      ),
+      "marker with a suffix": withTail(
+        "@@ -1,1 +1,1 @@",
+        "-old",
+        "+new",
+        "\\ No newline at end of file!"
+      ),
+      "marker with another case": withTail(
+        "@@ -1,1 +1,1 @@",
+        "-old",
+        "+new",
+        "\\ no newline at end of file"
+      ),
+    };
+    for (const [label, text] of Object.entries(cases)) keptWhole(text, label);
+    // the exact marker still works, with a CRLF line ending too
+    const valid = withTail("@@ -1,1 +1,1 @@", "-old", "+new", "\\ No newline at end of file");
+    assert.ok(run(valid).techniques.includes(STRUCTURAL_TECHNIQUE));
+    assert.ok(run(valid.replace(/\n/g, "\r\n")).techniques.includes(STRUCTURAL_TECHNIQUE));
+  });
+
+  it("refuses a file section that ends before its hunks", () => {
+    const cut: Record<string, string[]> = {
+      "path pair without a hunk": ["diff --git a/b.ts b/b.ts", "--- a/b.ts", "+++ b/b.ts"],
+      "blob id and path pair without a hunk": [
+        "diff --git a/b.ts b/b.ts",
+        "index 1111111..2222222 100644",
+        "--- a/b.ts",
+        "+++ b/b.ts",
+      ],
+      "header and blob id only": ["diff --git a/b.ts b/b.ts", "index 1111111..2222222 100644"],
+      "bare header": ["diff --git a/b.ts b/b.ts"],
+      "rename without its target": [
+        "diff --git a/b.ts b/c.ts",
+        "similarity index 100%",
+        "rename from b.ts",
+      ],
+      "old mode without the new mode": ["diff --git a/b.ts b/b.ts", "old mode 100644"],
+      "copy without its target": [
+        "diff --git a/b.ts b/c.ts",
+        "similarity index 100%",
+        "copy from b.ts",
+      ],
+    };
+    for (const [label, lines] of Object.entries(cut)) {
+      keptWhole(`${MULTI_DIFF}${lines.join("\n")}\n`, `after a complete diff: ${label}`);
+      keptWhole(`${lines.join("\n")}\n`, `alone: ${label}`);
+    }
+  });
+
+  it("still accepts hunkless changes that are complete", () => {
+    const complete = [
+      ["diff --git a/e.txt b/e.txt", "new file mode 100644", "index 0000000..e69de29"],
+      ["diff --git a/e.txt b/e.txt", "deleted file mode 100644", "index e69de29..0000000"],
+      ["diff --git a/o.ts b/n.ts", "similarity index 100%", "rename from o.ts", "rename to n.ts"],
+      ["diff --git a/o.ts b/n.ts", "similarity index 100%", "copy from o.ts", "copy to n.ts"],
+      ["diff --git a/x.sh b/x.sh", "old mode 100644", "new mode 100755"],
+    ];
+    const out = run(`${MULTI_DIFF}${complete.flat().join("\n")}\n`);
+    assert.ok(out.techniques.includes(STRUCTURAL_TECHNIQUE), out.techniques.join(","));
+    for (const line of complete.flat().filter((l) => !l.startsWith("index "))) {
+      assert.ok(out.text.includes(line), line);
+    }
   });
 });
 
@@ -342,12 +543,64 @@ describe("structural dispatch gates", () => {
       loadRtkFilters({ refresh: true });
       const out = run(MULTI_DIFF);
       assert.ok(!out.techniques.includes(STRUCTURAL_TECHNIQUE), out.techniques.join(","));
-      assert.equal(
-        out.text,
-        processRtkText(MULTI_DIFF, { command: "git diff", config: { ...ON } }).text
+      const legacy = processRtkText(MULTI_DIFF, { command: "git diff", config: { ...ON } });
+      assert.equal(out.text, legacy.text);
+      // the custom filter, not a built-in one, produced that output
+      assert.ok(
+        legacy.rulesApplied.some((rule) => rule.includes("my-diff-filter")),
+        legacy.rulesApplied.join(",")
+      );
+      assert.ok(
+        out.rules.some((rule) => rule.includes("my-diff-filter")),
+        out.rules.join(",")
       );
     } finally {
       fs.rmSync(dataDir, { recursive: true, force: true });
+    }
+  });
+
+  it("an inherited object-prototype name is not a native tool route", () => {
+    const config = { ...DEFAULT_RTK_CONFIG, ...ON };
+    for (const toolName of ["__proto__", "constructor"]) {
+      const options = {
+        skipFilters: true,
+        toolName,
+        toolResult: true,
+        rtkStructuralRenderersEnabled: true,
+      };
+      assert.deepEqual(tryStructuralRender(MULTI_DIFF, config, options), { kind: "legacy" });
+      const huge = syntheticAddedFile(9000, (i) => `line ${i}`);
+      assert.deepEqual(tryStructuralRender(huge, config, options), { kind: "legacy" });
+      const viaText = processRtkText(MULTI_DIFF, { ...options, config: ON });
+      assert.ok(!viaText.techniquesUsed.includes(STRUCTURAL_TECHNIQUE), toolName);
+    }
+  });
+
+  it("a malformed renderers allowlist is normalised instead of throwing", () => {
+    for (const renderers of [{ length: 1 }, "git-diff", 7, null]) {
+      const out = run(MULTI_DIFF, "git diff", { config: { renderers } });
+      assert.ok(out.techniques.includes(STRUCTURAL_TECHNIQUE), JSON.stringify(renderers));
+    }
+    // non-string entries are dropped and a valid allowlist still applies
+    const mixed = run(MULTI_DIFF, "git diff", { config: { renderers: ["git-status", 5] } });
+    assert.ok(!mixed.techniques.includes(STRUCTURAL_TECHNIQUE));
+    const valid = run(MULTI_DIFF, "git diff", { config: { renderers: ["git-diff", 5] } });
+    assert.ok(valid.techniques.includes(STRUCTURAL_TECHNIQUE));
+    // the legacy renderer path reads the same normalised value
+    const legacy = run(MULTI_DIFF, "git diff", {
+      flag: false,
+      config: { renderers: { length: 1 } },
+    });
+    assert.ok(legacy.techniques.includes("rtk-render:git-diff"));
+  });
+
+  it("applies the same line budget as the legacy path when maxLinesPerResult is 0", () => {
+    // The legacy path clamps the line budget to at least one line (effectiveMaxLines), so a
+    // zero must not lift the cap on the structural summary only.
+    for (const maxLinesPerResult of [0, 1]) {
+      const out = run(MULTI_DIFF, "git diff", { config: { maxLinesPerResult } });
+      assert.equal(out.text, MULTI_DIFF, `maxLinesPerResult=${maxLinesPerResult}`);
+      assert.ok(!out.techniques.includes(STRUCTURAL_TECHNIQUE));
     }
   });
 
@@ -406,6 +659,34 @@ describe("structural analysis budget", () => {
     const on = run(wide);
     assert.equal(on.text, run(wide, "git diff", { flag: false }).text);
     assert.ok(on.rules.includes("rtk:structural:over-budget"));
+  });
+
+  it("measures the 16 KiB line ceiling in bytes, not only characters", () => {
+    // 10,000 CJK characters are 30,000 UTF-8 bytes on a single line.
+    const wide = syntheticAddedFile(5, (i) => (i === 2 ? "\u4e2d".repeat(10_000) : `line ${i}`));
+    assert.ok(wide.length < 512 * 1024);
+    const on = run(wide);
+    assert.equal(on.text, run(wide, "git diff", { flag: false }).text);
+    assert.ok(!on.techniques.includes(STRUCTURAL_TECHNIQUE));
+    assert.ok(on.rules.includes("rtk:structural:over-budget"), on.rules.join(","));
+  });
+
+  it("an ASCII line right at the 16 KiB ceiling stays eligible", () => {
+    const edge = [
+      "diff --git a/w.txt b/w.txt",
+      "index 1111111..2222222 100644",
+      "--- a/w.txt",
+      "+++ b/w.txt",
+      "@@ -1,3 +1,3 @@",
+      ` ${"x".repeat(16 * 1024 - 1)}`,
+      "-old",
+      "+new",
+      " tail",
+      "",
+    ].join("\n");
+    const on = run(edge);
+    assert.ok(on.techniques.includes(STRUCTURAL_TECHNIQUE), on.rules.join(","));
+    assert.ok(!on.rules.includes("rtk:structural:over-budget"));
   });
 
   it("a summary that cannot fit the RTK line limit keeps the whole input", () => {
@@ -470,23 +751,31 @@ describe("structural flag capture", () => {
     );
   });
 
-  it("resolves the flag once at the entry point and honours an explicit value", () => {
-    setFlagResolver((key: string) => key === RTK_STRUCTURAL_RENDERERS_FLAG);
+  it("resolves the flag once at the entry point and honours an explicit value", async () => {
+    const lookups = countFlagLookups(true);
     const resolved = applyCompression(bodyOf(), "rtk", { config });
     assert.ok(toolText(resolved).includes("+4 -3"));
+    assert.equal(lookups.count, 1, "one lookup for an implicit sync request");
+    lookups.count = 0;
+    const remote = await applyCompressionAsync(bodyOf(), "rtk", { config });
+    assert.ok(toolText(remote).includes("+4 -3"));
+    assert.equal(lookups.count, 1, "one lookup for an implicit async request");
+    lookups.count = 0;
     const explicitOff = applyCompression(bodyOf(), "rtk", {
       config,
       rtkStructuralRenderersEnabled: false,
     });
     assert.ok(!toolText(explicitOff).includes("+4 -3"));
+    const explicitOn = await applyCompressionAsync(bodyOf(), "rtk", {
+      config,
+      rtkStructuralRenderersEnabled: true,
+    });
+    assert.ok(toolText(explicitOn).includes("+4 -3"));
+    assert.equal(lookups.count, 0, "an explicit decision is never looked up");
   });
 
   it("never consults the flag resolver unless an RTK step has enableRenderers on", async () => {
-    let calls = 0;
-    setFlagResolver(() => {
-      calls++;
-      return true;
-    });
+    const lookups = countFlagLookups(true);
     const off = { enabled: true, applyToToolResults: true, enableRenderers: false };
     const cases: Array<[string, Record<string, unknown>]> = [
       ["rtk, renderers off", { rtkConfig: off }],
@@ -499,7 +788,7 @@ describe("structural flag capture", () => {
       const remote = await applyCompressionAsync(bodyOf(), "rtk", { config: cfg });
       assert.ok(!toolText(sync).includes("+4 -3"), label);
       assert.ok(!toolText(remote).includes("+4 -3"), label);
-      assert.equal(calls, 0, label);
+      assert.equal(lookups.count, 0, label);
     }
     for (const pipeline of [[{ engine: "rtk" }], undefined]) {
       const stacked = {
@@ -511,7 +800,7 @@ describe("structural flag capture", () => {
       } as unknown as CompressionConfig;
       applyCompression(bodyOf(), "stacked", { config: stacked });
       await applyCompressionAsync(bodyOf(), "stacked", { config: stacked });
-      assert.equal(calls, 0, "stacked, renderers off");
+      assert.equal(lookups.count, 0, "stacked, renderers off");
     }
     // a step that turns the renderers on by itself is enough to ask for the flag
     const stepOn = {
@@ -521,11 +810,11 @@ describe("structural flag capture", () => {
       rtkConfig: off,
     } as unknown as CompressionConfig;
     const result = applyCompression(bodyOf(), "stacked", { config: stepOn });
-    assert.ok(calls >= 1);
+    assert.equal(lookups.count, 1, "one lookup for a step that turns the renderers on");
     assert.ok(toolText(result).includes("+4 -3"));
-    calls = 0;
+    lookups.count = 0;
     applyCompression(bodyOf(), "rtk", { config });
-    assert.ok(calls >= 1, "rtk with renderers on asks for the flag");
+    assert.equal(lookups.count, 1, "rtk with renderers on asks for the flag exactly once");
   });
 
   it("a resolver that throws fails closed", () => {
@@ -566,23 +855,46 @@ describe("structural flag capture", () => {
       config: workerConfig,
       rtkStructuralRenderersEnabled: true,
     });
+    // Start from a fresh pool so the spy sees the listeners of the worker that serves this job.
+    await closeCompressionWorkerPoolForTests();
     let posted = 0;
+    const replies: string[] = [];
     const originalPostMessage = Worker.prototype.postMessage;
+    const originalOn = Worker.prototype.on;
     Worker.prototype.postMessage = function (this: Worker, ...args) {
       posted++;
       return originalPostMessage.apply(this, args);
     };
+    Worker.prototype.on = function (
+      this: Worker,
+      event: string,
+      listener: (...args: unknown[]) => void
+    ) {
+      if (event !== "message") return originalOn.call(this, event, listener);
+      return originalOn.call(this, event, (message: { type?: string }) => {
+        replies.push(String(message?.type));
+        listener(message);
+      });
+    } as typeof Worker.prototype.on;
     try {
       // The resolver exists only in this thread: the worker gets the decision in its job.
-      setFlagResolver((key: string) => key === RTK_STRUCTURAL_RENDERERS_FLAG);
+      const lookups = countFlagLookups(true);
       const remoteOn = await applyCompressionAsync(bodyOf(), "rtk", { config: workerConfig });
       assert.ok(posted >= 1, "must run in a worker thread");
+      // A dispatch alone proves nothing: the in-process retry would produce the same text.
+      assert.ok(replies.includes("result"), `worker replies: ${replies.join(",")}`);
+      assert.ok(!replies.includes("error"), `worker replies: ${replies.join(",")}`);
+      assert.equal(lookups.count, 1);
       assert.equal(toolText(remoteOn), toolText(local));
+      assert.ok(toolText(remoteOn).includes("+4 -3"));
+      replies.length = 0;
       setFlagResolver(() => false);
       const remoteOff = await applyCompressionAsync(bodyOf(), "rtk", { config: workerConfig });
+      assert.ok(replies.includes("result"), `worker replies: ${replies.join(",")}`);
       assert.ok(!toolText(remoteOff).includes("+4 -3"));
     } finally {
       Worker.prototype.postMessage = originalPostMessage;
+      Worker.prototype.on = originalOn;
     }
   });
 

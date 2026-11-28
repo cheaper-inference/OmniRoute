@@ -189,8 +189,9 @@ computed from the whole input, and drops blob ids and unchanged context. Dispatc
   diffs, conflict markers, binary sections (`Binary files … differ`, `GIT binary patch`), hunks
   whose declared line counts do not match, truncated sections or trailing text. The same applies
   when the summary exceeds `maxLinesPerResult` / `maxCharsPerResult` (after the intensity scaling of
-  `effectiveMaxLines`) or is not smaller in tokens.
-- Analysis ceiling: input over 512 KiB, 8,192 lines or 16 KiB on one line skips the parser and uses
+  `effectiveMaxLines`, which never goes below one line, so a `maxLinesPerResult` of `0` is a
+  one-line budget here exactly as on the legacy path) or is not smaller in tokens.
+- Analysis ceiling: input over 512 KiB, 8,192 lines or 16 KiB (UTF-8 bytes) on one line skips the parser and uses
   the legacy RTK; the rule `rtk:structural:over-budget` is recorded so the incidence can be measured.
 - A project or global filter that matches the command, any explicitly enabled filter, or the matched
   filter being explicitly disabled keeps the legacy path. The `rtkConfig.renderers` allowlist is
