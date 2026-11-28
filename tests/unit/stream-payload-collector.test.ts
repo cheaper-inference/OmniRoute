@@ -99,6 +99,56 @@ function toolCallEvent(delta: Record<string, unknown>, finishReason?: string) {
   };
 }
 
+for (const entry of [
+  { label: "delayed name", first: undefined, later: "lookup", expected: "lookup" },
+  { label: "literal unknown name", first: "unknown", later: "lookup", expected: "unknown" },
+  { label: "missing name", first: undefined, later: undefined, expected: "unknown" },
+]) {
+  test(`tool-call summaries preserve ${entry.label}`, () => {
+    const events = [
+      toolCallEvent({
+        tool_calls: [
+          { index: 0, id: "call_a", function: { name: entry.first, arguments: '{"x":' } },
+        ],
+      }),
+      toolCallEvent({
+        tool_calls: [{ index: 0, function: { name: entry.later, arguments: "1}" } }],
+      }),
+    ];
+    const live = collector.createStructuredSSECollector({ format: "openai" });
+    for (const event of events) live.push(event.data);
+    for (const summary of [
+      collector.buildStreamSummaryFromEvents(events, "openai"),
+      live.getSummary(),
+    ] as ToolCallSummary[]) {
+      const calls = summary.choices[0].message.tool_calls;
+      assert.equal(calls.length, 1);
+      assert.equal(calls[0].function.name, entry.expected);
+      assert.equal(calls[0].function.arguments, '{"x":1}');
+    }
+  });
+}
+
+test("reading a tool-call summary before its name arrives leaves accumulation open", () => {
+  const live = collector.createStructuredSSECollector({ format: "openai" });
+  live.push(
+    toolCallEvent({
+      tool_calls: [{ index: 0, id: "call_a", function: { arguments: '{"x":' } }],
+    }).data
+  );
+  const before = live.getSummary() as ToolCallSummary;
+  assert.equal(before.choices[0].message.tool_calls[0].function.name, "unknown");
+  live.push(
+    toolCallEvent({
+      tool_calls: [{ index: 0, function: { name: "lookup", arguments: "1}" } }],
+    }).data
+  );
+  const after = live.getSummary() as ToolCallSummary;
+  assert.equal(after.choices[0].message.tool_calls[0].function.name, "lookup");
+  assert.equal(after.choices[0].message.tool_calls[0].function.arguments, '{"x":1}');
+  assert.equal(before.choices[0].message.tool_calls[0].function.name, "unknown");
+});
+
 test("buildStreamSummaryFromEvents merges tool_call deltas when every chunk carries `index` (happy path)", () => {
   const events = [
     toolCallEvent({
