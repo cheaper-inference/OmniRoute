@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import { Input as KitInput } from "@omniroute/ui-kit/input";
 import { Button, Card, Select } from "@/shared/components";
 
@@ -264,7 +265,7 @@ export default function ProviderCcAliasSection({ providerId }: ProviderCcAliasSe
 
   return (
     <Card padding="sm" className="p-5">
-      <h2 className="text-base font-semibold text-text-main mb-1">
+      <h2 className="text-base text-text-main mb-1">
         {providerText(t, "ccAliasSectionTitle", "Expose in Claude Code (claude/…)")}
       </h2>
       <p className="text-xs text-text-muted mb-4 leading-relaxed">
@@ -325,9 +326,7 @@ function ModelOverrideList({
       </span>
       {entries.map(([modelId, value]) => (
         <div key={modelId} className="flex items-center justify-between gap-3">
-          <code className="rounded bg-sidebar px-1.5 py-0.5 font-mono text-xs text-text-muted truncate">
-            {modelId}
-          </code>
+          <InlineCode className="text-text-muted truncate">{modelId}</InlineCode>
           <TriStateSelect
             t={t}
             value={value}

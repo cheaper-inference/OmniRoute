@@ -4,7 +4,7 @@ import Icon from "@/shared/components/Icon";
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { Card, Toggle, Input } from "@/shared/components";
+import { Card, Toggle, Input, IconChip } from "@/shared/components";
 
 function isValidUrl(value: string): boolean {
   try {
@@ -85,11 +85,13 @@ export function CliproxyConnectionPanel() {
   return (
     <Card padding="md">
       <div className="flex items-center gap-3 mb-4">
-        <div className="size-8 rounded-lg flex items-center justify-center border border-border bg-bg-subtle text-text-main">
-          <Icon name="swap_horiz" size={20} />
-        </div>
+        <IconChip size="sm">
+          <Icon name="swap_horiz" />
+        </IconChip>
         <div>
-          <h3 className="font-medium text-sm">{t("fallbackRouting")}</h3>
+          <h3 className="ci-heading" data-size="sm">
+            {t("fallbackRouting")}
+          </h3>
           <p className="text-xs text-text-muted">{t("fallbackRoutingDescription")}</p>
         </div>
       </div>

@@ -1,0 +1,1 @@
+- **fix(dashboard):** The remaining quota bars (provider limits mini bars, the account tooltip, Antigravity windows, the Kilo Pass bands, the per-key cost bars and the member split on the quota page) are announced as meters, the role for a measurement inside a known range. They were announced as progress bars.

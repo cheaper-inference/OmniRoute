@@ -1,0 +1,57 @@
+{
+  "argv": [
+    "-c",
+    "/work"
+  ],
+  "cleanup": {
+    "removeTempDir": true,
+    "revokeSession": true
+  },
+  "env": {
+    "set": {
+      "CRUSH_CACHE_DIR": "${TMP}/cache",
+      "CRUSH_DATA_DIR": "${STATE}/data",
+      "CRUSH_DISABLE_METRICS": "1",
+      "CRUSH_DISABLE_PROVIDER_AUTO_UPDATE": "1",
+      "CRUSH_GLOBAL_DATA": "${STATE}/gdata",
+      "OMNIROUTE_API_KEY": "${TOKEN}",
+      "OMNIROUTE_BASE_URL": "http://127.0.0.1:20128"
+    },
+    "unset": [
+      "CRUSH_CLIENT_SERVER"
+    ]
+  },
+  "modelList": {
+    "injected": 4,
+    "strategy": "inject",
+    "viewHash": "99ac62b3453bcaf223236b5c6c2f2cc2ecb9839d8068edd5a5c1e4d1198814d6"
+  },
+  "needsTempDir": true,
+  "notes": [
+    "Crush reads the injected crush.json from ${STATE}/data (highest priority, per project dir).",
+    "Your own Crush providers, MCP servers and crushrc stay merged in."
+  ],
+  "planVersion": 1,
+  "postExitChecks": [],
+  "preflight": [],
+  "secretSites": [
+    {
+      "key": "OMNIROUTE_API_KEY",
+      "kind": "env"
+    }
+  ],
+  "teardown": [],
+  "tempFiles": [
+    {
+      "contents": "{\n  \"models\": {\n    \"large\": {\n      \"model\": \"anthropic/claude-sonnet-4-6\",\n      \"provider\": \"omniroute\"\n    },\n    \"small\": {\n      \"model\": \"anthropic/claude-sonnet-4-6\",\n      \"provider\": \"omniroute\"\n    }\n  },\n  \"options\": {\n    \"disable_metrics\": true,\n    \"disable_provider_auto_update\": true\n  },\n  \"providers\": {\n    \"omniroute\": {\n      \"api_key\": \"$OMNIROUTE_API_KEY\",\n      \"base_url\": \"$OMNIROUTE_BASE_URL/v1\",\n      \"discover_models\": true,\n      \"models\": [\n        {\n          \"can_reason\": true,\n          \"context_window\": 200000,\n          \"default_max_tokens\": 64000,\n          \"id\": \"anthropic/claude-sonnet-4-6\",\n          \"name\": \"Claude Sonnet 4.6\",\n          \"supports_attachments\": true\n        },\n        {\n          \"can_reason\": true,\n          \"context_window\": 400000,\n          \"default_max_tokens\": 128000,\n          \"id\": \"openai/gpt-5.2\",\n          \"name\": \"GPT-5.2\"\n        },\n        {\n          \"context_window\": 32768,\n          \"default_max_tokens\": 8192,\n          \"id\": \"small/ctx-32k\",\n          \"name\": \"Small 32k\"\n        },\n        {\n          \"context_window\": 128000,\n          \"default_max_tokens\": 16384,\n          \"id\": \"fastest\",\n          \"name\": \"Combo fastest\"\n        }\n      ],\n      \"name\": \"OmniRoute\",\n      \"type\": \"completions\"\n    }\n  }\n}\n",
+      "format": "json",
+      "mode": 384,
+      "path": "data/crush.json",
+      "root": "state"
+    }
+  ],
+  "tool": "crush",
+  "warnings": [
+    "--cwd changes the project Crush works in; the injected config still applies."
+  ]
+}

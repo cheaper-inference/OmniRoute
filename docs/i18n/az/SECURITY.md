@@ -4,13 +4,13 @@
 
 ---
 
-## Zəifliklərin Bildirilməsi
+## Zəifliklərin Hesabatı
 
-OmniRoute-da təhlükəsizlik zəifliyi aşkar etsəniz, lütfən, onu məsuliyyətli şəkildə bildirin:
+OmniRoute-da təhlükəsizlik açığı aşkar etsəniz, lütfən, məsuliyyətlə xəbər verin:
 
-1. İctimai GitHub problemi **AÇMAYIN**
-2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) xidmətindən istifadə edin
-3. Bunları daxil edin: təsvir, təkrarlama addımları və potensial təsir
+1. **DO NOT** ictimai GitHub məsələsini açın
+2. [GitHub Təhlükəsizlik Məsləhətlərindən](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) istifadə edin
+3. Daxil edin: təsvir, reproduksiya addımları və potensial təsir
 
 ## Cavab Müddəti
 
@@ -29,14 +29,14 @@ OmniRoute-da təhlükəsizlik zəifliyi aşkar etsəniz, lütfən, onu məsuliyy
 | 3.7.x   | ✅ Təhlükəsizlik                                           |
 | < 3.7.0 | ❌ Dəstəklənmir                                            |
 
-## LTS dəstək müddəti (v3.9.x)
+## LTS dəstək pəncərəsi (v3.9.x)
 
-3.8.59-dan sonrakı versiya **3.9.0**-dır və bu versiya `stable/v3` budağında uzunmüddətli dəstək xəttini açır (baxın: [`ROADMAP.md`](ROADMAP.md) → "Mərhələ 3 — v3.9.0 LTS").
+3.8.59-dan sonra növbəti versiyadır** 3.9.0** , `stable/v3` filialında uzunmüddətli dəstək xəttini açır (bax: [`ROADMAP.md`](ROADMAP.md) → "Mərhələ 3 — v3.9.0 LTS").
 
-- **`stable/v3` nələri qəbul edir:** xəta düzəlişləri, təhlükəsizlik yamaqları və provayder yeniləmələri. Yeni funksiyalar v4 kanalına daxil edilir; LTS xəttində sabitlik prioritetdir. `npm install omniroute` (`latest` dist-teqi) bütün v4 dövrü ərzində v3-də qalır.
-- **Dəstək müddəti:** `stable/v3` **3.9.0 buraxılışından sonra 12 ay ərzində və ya v4.0.0 `latest` kimi dərc edildikdən sonrakı 90 gün ərzində — bunlardan hansı daha gec başa çatarsa, həmin tarixədək təhlükəsizlik düzəlişləri və kritik reqressiya düzəlişləri** alır. Nəticədə müəyyən edilən bitmə tarixi 3.9.0 buraxılış qeydlərində və buraxılış həyata keçirildikdə [`ROADMAP.md`](ROADMAP.md) faylında qeyd olunur.
-- **LTS xəttində zəifliyin bildirilməsi:** digər versiyalarda olduğu kimi eyni kanaldan — məxfi [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) vasitəsilə bildirilməli, heç vaxt açıq məsələ yaradılmamalıdır. Hansı versiyanı sınaqdan keçirdiyinizi qeyd edin (məsələn, `3.9.2`); düzəlişlər `stable/v3` budağına daxil edilir və v4-ə ötürülür.
-- **LTS buraxılışı zamanı təhlükəsizlik baza səviyyəsi:** skanerin ölçülmüş vəziyyəti, marşrut qoruyucusu və açıq etimadnamələrə dair sübutlar [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) faylında qeydə alınır.
+- **`stable/v3` nə alır:** səhv düzəlişləri, təhlükəsizlik yamaları və provayder yeniləmələri. Yeni funksiyalar v4 kanalına keçir; LTS xətti ilk növbədə sabitlikdir. `npm install omniroute` ( `latest` dist-teq) bütün v4 dövrü ərzində v3-də qalır.
+- **Pəncərə müddəti:** `stable/v3` alır** 3.9.0 kəsilməsindən sonra 12 ay və ya v4.0.0 `latest` — olaraq dərc edildikdən sonra 90 günə qədər təhlükəsizlik düzəlişləri və kritik reqressiyalar hansı daha sonra olarsa** . Nəticə bitmə tarixi 3.9.0 buraxılış qeydlərində və kəsilmə baş verdikdə [`ROADMAP.md`](ROADMAP.md) ilə qeyd olunur.
+- **LTS xəttində zəifliyin bildirilməsi:** hər hansı digər versiya ilə eyni kanal — özəl [GitHub Təhlükəsizlik Məsləhətçisi](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), heç vaxt ictimai məsələ deyil. Hansı versiyanı sınadığınızı deyin (məsələn, `3.9.2`); `stable/v3` -də enişi düzəldir və v4-ə ötürülür.
+- **LTS kəsilməsində təhlükəsizlik bazası:** ölçülmüş skaner vəziyyəti, marşrut-mühafizə və ictimai-etimadnamə sübutları [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) -də qeyd olunur.
 
 ---
 
@@ -200,7 +200,7 @@ docker run -d \
   -e JWT_SECRET="$(openssl rand -base64 48)" \
   -e API_KEY_SECRET="$(openssl rand -hex 32)" \
   -e STORAGE_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ---

@@ -1,0 +1,1 @@
+- **fix(authz):** with login turned off (`requireLogin=false`), anonymous management mutations now pass the same browser-origin check as dashboard sessions, so a cross-site or DNS-rebinding web page can no longer drive the management API; clients that send no `Origin` (CLI, curl) are unaffected.

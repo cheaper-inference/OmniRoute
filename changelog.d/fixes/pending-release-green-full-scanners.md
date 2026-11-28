@@ -1,0 +1,1 @@
+- **fix(ci):** Provision pinned gitleaks, osv-scanner and oasdiff for complete Release-Green observations of release and main, using the immutable workflow revision. Push observations retain only actionlint and zizmor, and installation failures remain incomplete evidence.

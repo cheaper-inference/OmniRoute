@@ -12,7 +12,8 @@
 //   3. Tautologias extras: expect(true).toBe(true), assert.equal(1,1), assert.ok(true).
 import fs from "node:fs";
 import { execFileSync } from "node:child_process";
-import { pathToFileURL } from "node:url";
+
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const TEST_RE = /\.(test|spec)\.(ts|tsx)$/;
 // Production TypeScript sources (excludes test files, handled separately via TEST_RE).
@@ -802,4 +803,4 @@ function main() {
   );
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (isMainModule(import.meta.url)) main();

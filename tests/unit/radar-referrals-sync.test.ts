@@ -151,21 +151,25 @@ test("shouldSyncReferralsOnRead: unparseable fetchedAt => stale", () => {
   assert.equal(referralsSync.shouldSyncReferralsOnRead("garbage", Date.now()), true);
 });
 
-test("shouldSyncReferralsOnRead: fresh (< 1h) => not stale", () => {
+test("referrals staleness window is six hours", () => {
+  assert.equal(referralsSync.REFERRALS_STALE_MS, 21_600_000);
+});
+
+test("shouldSyncReferralsOnRead: fresh (< 6h) => not stale", () => {
   const now = Date.parse("2026-08-07T12:00:00.000Z");
-  const fetchedAt = new Date(now - 30 * 60 * 1000).toISOString(); // 30m ago
+  const fetchedAt = new Date(now - 5 * 60 * 60 * 1000).toISOString(); // 5h ago
   assert.equal(referralsSync.shouldSyncReferralsOnRead(fetchedAt, now), false);
 });
 
 test("shouldSyncReferralsOnRead: exactly at the boundary => stale", () => {
   const now = Date.parse("2026-08-07T12:00:00.000Z");
-  const fetchedAt = new Date(now - 60 * 60 * 1000).toISOString(); // exactly 1h ago
+  const fetchedAt = new Date(now - 6 * 60 * 60 * 1000).toISOString(); // exactly 6h ago
   assert.equal(referralsSync.shouldSyncReferralsOnRead(fetchedAt, now), true);
 });
 
-test("shouldSyncReferralsOnRead: old (> 1h) => stale", () => {
+test("shouldSyncReferralsOnRead: old (> 6h) => stale", () => {
   const now = Date.parse("2026-08-07T12:00:00.000Z");
-  const fetchedAt = new Date(now - 2 * 60 * 60 * 1000).toISOString(); // 2h ago
+  const fetchedAt = new Date(now - 7 * 60 * 60 * 1000).toISOString(); // 7h ago
   assert.equal(referralsSync.shouldSyncReferralsOnRead(fetchedAt, now), true);
 });
 

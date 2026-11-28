@@ -55,12 +55,12 @@ function SearchResultRenderer(data: unknown, fallbackTitle: (number: number) => 
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[11px] text-primary hover:underline truncate block"
+                className="text-2xs text-primary hover:underline truncate block"
               >
                 {url}
               </a>
             )}
-            {snippet && <p className="text-[11px] text-text-muted mt-0.5">{snippet}</p>}
+            {snippet && <p className="text-xs text-text-muted mt-0.5">{snippet}</p>}
           </div>
         );
       })}

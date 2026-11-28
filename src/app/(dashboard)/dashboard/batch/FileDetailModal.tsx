@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
+import EmptyState from "@/shared/components/EmptyState";
+
 import { Spinner } from "@/shared/components/Loading";
 import { Button } from "@/shared/components";
 import Badge from "@/shared/components/Badge";
 import Modal from "@/shared/components/Modal";
+import Card from "@/shared/components/Card";
 
 type FileTranslator = ReturnType<typeof useTranslations>;
 
@@ -148,11 +151,11 @@ export default function FileDetailModal({
         <p className="text-xs text-text-muted font-mono">{file.id}</p>
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="icon-2xs"
+          tone="muted"
           onClick={() => {
             navigator.clipboard.writeText(file.id);
           }}
-          className="size-6 text-text-muted hover:text-text-main"
           title={t("batchFileDetailCopyId")}
           aria-label={t("batchFileDetailCopyId")}
         >
@@ -161,21 +164,21 @@ export default function FileDetailModal({
       </div>
 
       {/* Metadata */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-bg-alt border border-border">
+      <Card.Section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="flex flex-col gap-0.5">
-          <span className="text-[10px] uppercase tracking-wider font-medium text-text-muted">
+          <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
             {t("batchFilesSizeColumn")}
           </span>
           <span className="text-sm text-text-main">{formatBytes(file.bytes)}</span>
         </div>
         <div className="flex flex-col gap-0.5">
-          <span className="text-[10px] uppercase tracking-wider font-medium text-text-muted">
+          <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
             {t("batchFilesPurpose")}
           </span>
           <span className="text-sm text-text-main">{file.purpose}</span>
         </div>
         <div className="flex flex-col gap-0.5">
-          <span className="text-[10px] uppercase tracking-wider font-medium text-text-muted">
+          <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
             {t("batchDetailCreated")}
           </span>
           <span className="text-sm text-text-main">
@@ -183,19 +186,19 @@ export default function FileDetailModal({
           </span>
         </div>
         <div className="flex flex-col gap-0.5">
-          <span className="text-[10px] uppercase tracking-wider font-medium text-text-muted">
+          <span className="ci-eyebrow" data-size="3xs" data-weight="medium">
             {t("batchFilesExpires")}
           </span>
           <span className="text-sm text-text-main">
             {expiresAtTs ? relativeExpiration(expiresAtTs, t) : t("batchFilesNeverExpires")}
           </span>
         </div>
-      </div>
+      </Card.Section>
 
       {/* Related batches */}
       {relatedBatches.length > 0 && (
         <div>
-          <h3 className="text-[11px] uppercase tracking-wider font-medium text-text-muted mb-2">
+          <h3 className="ci-eyebrow mb-2" data-size="2xs" data-weight="medium">
             {t("batchFileUsedByCount", { count: relatedBatches.length })}
           </h3>
           <div className="space-y-1.5">
@@ -230,7 +233,7 @@ export default function FileDetailModal({
       {/* Contents */}
       <div className="flex-1 flex flex-col min-h-[300px]">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
+          <h3 className="ci-eyebrow" data-weight="medium">
             {t("batchFilePreview")}
           </h3>
           {contents && (
@@ -252,7 +255,7 @@ export default function FileDetailModal({
             </div>
           ) : contents ? (
             <div className="h-full flex flex-col">
-              <pre className="flex-1 overflow-auto text-[11px] bg-bg rounded-lg p-4 border border-border text-text-muted font-mono leading-relaxed">
+              <pre className="flex-1 overflow-auto text-2xs bg-bg rounded-lg p-4 border border-border text-text-muted font-mono leading-relaxed">
                 {displayedLines.join("\n")}
               </pre>
               {isTruncated && (
@@ -263,10 +266,12 @@ export default function FileDetailModal({
               )}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full py-12 rounded-lg border border-dashed border-border text-text-muted">
-              <Icon name="find_in_page" size={40} className="mb-2 opacity-20" />
-              <p className="text-sm">{t("batchFileDetailFailedToLoad")}</p>
-            </div>
+            <EmptyState
+              icon="find_in_page"
+              border="dashed"
+              title={t("batchFileDetailFailedToLoad")}
+              className="h-full"
+            />
           )}
         </div>
       </div>

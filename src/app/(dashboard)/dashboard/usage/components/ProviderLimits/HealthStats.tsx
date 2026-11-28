@@ -31,7 +31,7 @@ export default function HealthStats({
             data-stat={kind}
             aria-pressed={value === kind}
             onClick={() => onChange(kind)}
-            className="block h-auto min-h-0 min-w-0 rounded-lg px-3 py-2.5 text-start font-normal"
+            className="block h-auto min-h-0 min-w-0 rounded-lg px-3 py-2.5 text-start"
             style={{
               borderColor: value === kind ? color : "var(--color-border)",
               background:
@@ -40,14 +40,14 @@ export default function HealthStats({
                   : "var(--color-surface)",
             }}
           >
-            <span className="text-[11px] font-semibold text-text-muted">
+            <span className="text-2xs font-semibold text-text-muted">
               {kind === "all" ? t("statTotal") : all(DISPLAY_LABELS[kind])}
             </span>
             <div className="text-2xl font-semibold tabular-nums" style={{ color }}>
               {format.number(counts[kind])}
             </div>
             {kind === "ok" && (
-              <div className="text-[11px] text-text-muted">
+              <div className="text-2xs text-text-muted">
                 {t("healthIncluded", { count: counts.partial })}
               </div>
             )}

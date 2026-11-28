@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 const REPO_ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const FIXTURE = fileURLToPath(
@@ -46,11 +47,15 @@ function runFixture(testRoot: string): Promise<ChildResult> {
   if (process.env.PATH) childEnv.PATH = process.env.PATH;
 
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ["--import", "tsx/esm", FIXTURE], {
-      cwd: REPO_ROOT,
-      env: childEnv,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
+    const child = spawn(
+      process.execPath,
+      [...nativeCoverageArgs(), "--import", "tsx/esm", FIXTURE],
+      {
+        cwd: REPO_ROOT,
+        env: childEnv,
+        stdio: ["ignore", "pipe", "pipe"],
+      }
+    );
     let stdout = "";
     let stderr = "";
     child.stdout.setEncoding("utf8").on("data", (chunk) => (stdout += chunk));

@@ -7,7 +7,6 @@ lastUpdated: 2026-09-01
 # Radar Free-Model Catalog
 
 > **Source of truth:** `src/lib/radar/`, `src/lib/db/radar.ts`, `src/app/api/radar/`
-> **Last updated:** 2026-09-01 — v3.8.51
 > **Hosted-service evidence boundary:** server-side rules described here were verified on
 > 2026-09-01 against the intentionally private Radar server at exact revision
 > `main@dce70f004364912f3f144cdb69f4cbcde16093ed`. That implementation is not distributed in
@@ -127,6 +126,10 @@ When both are on, the sync path is:
    [Security model](#security-model)). Radar has exactly four server-side network paths:
    `syncRadar()` for the catalog, `syncRadarReferrals()` for referrals, and
    `syncRadarOffers()` / `syncRadarIntel()` for supporter-only offers and Intel.
+
+The catalog check runs every 24 hours. When the verified feed still carries the
+cached version and tier, sync keeps the cached payload, renews `fetchedAt`, and the
+next check comes 24 hours later instead of on the next hourly tick.
 
 The **supporter key** is an optional Bearer token (`radar_settings.supporter_key`)
 that lets the feed service decide which tier to serve (see
@@ -496,6 +499,8 @@ optional `provider`, `familyId`, and `enabledOnly` filters are evaluated after o
 display name, `familyId`, quota, capabilities, enabled state, origin, and `disabledBy`; setup URLs,
 steps, connections, e-mail addresses, keys, and referral data are never returned. This tool is
 read-only and never invokes `/api/radar/sync`.
+When the cached feed predates the installed catalog, `meta.olderThanRelease` is `true` and
+the tool returns models from the installed catalog with local overrides and tombstones applied.
 
 ### Provenance markers
 
@@ -670,7 +675,7 @@ Two triggers keep the referrals cache warm, both independent of the catalog's ow
 24h cadence:
 
 - **Sync-on-read** — `GET /api/radar/referrals` itself calls `syncRadarReferrals()`
-  inline whenever the cache is missing or older than `REFERRALS_STALE_MS` (1h,
+  inline whenever the cache is missing or at least `REFERRALS_STALE_MS` old (6h,
   `shouldSyncReferralsOnRead()`), before serving the response. This is what makes fixed
   links "always current" for the very next dashboard load, without waiting on any
   background timer.

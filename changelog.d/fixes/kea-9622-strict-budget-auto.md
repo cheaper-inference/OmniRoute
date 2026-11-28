@@ -1,0 +1,1 @@
+- **fix(sse):** Auto routing checks strict per-request budgets before model selection, returning HTTP 402 without contacting a provider when every candidate exceeds the estimated budget (KEA-9622).

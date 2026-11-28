@@ -28,6 +28,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { isMainModule } from "../lib/is-main-module.mjs";
 
 const ROOT = process.cwd();
 const SNAPSHOT_PATH = path.join(ROOT, "config/quality/model-lifecycle.json");
@@ -193,7 +194,7 @@ async function main() {
   );
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (isMainModule(import.meta.url)) {
   main().catch((err) => {
     console.error(`[model-lifecycle] ERROR — ${err?.message ?? err}`);
     process.exit(1);

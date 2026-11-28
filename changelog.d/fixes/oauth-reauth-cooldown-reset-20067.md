@@ -1,0 +1,1 @@
+- Preserve active rate limit cooldowns and error evidence in `buildOAuthTokenUpdate()` during OAuth reauthorization while clearing stale errors and resetting backoff for unconstrained connections, preventing premature dispatch into active 429 windows and stranded cooldown states upon early quota resets (#20067).

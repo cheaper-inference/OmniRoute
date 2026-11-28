@@ -4,593 +4,627 @@
 
 ---
 
-> **Àpèjúwe onílà kan fún gbogbo àkójọpọ̀ fáìlì àti fáìlì gbòǹgbò.**
-> Ìgbà ìkẹyìn tí a ṣàfikún un: 2026-06-28 — OmniRoute v3.8.40
+> **Kini o ngbe nibo: gbogbo itopase itọsọna ipele-oke ati faili gbongbo, pẹlu idi laini kan.** Imudojuiwọn to kẹhin: 2026-11-13 (OmniRoute v3.8.54)
 >
-> Lo àwòrán atọ́nà yìí láti ṣe ìrìnàjò inú codebase náà ní kíákíá. Fún àlàyé jíjinlẹ̀, tẹ̀lé àwọn ìjápọ̀ sí àwọn ìwé àkọsílẹ̀ pàtó.
+> Lo maapu yii lati wa ọna rẹ ni ayika codebase, lẹhinna tẹle awọn ọna asopọ si awọn iwe aṣẹ iyasọtọ. Awọn iṣiro faili ni a wọn pẹlu `git ls-files` ni ọjọ ti o wa loke. Wọn yipada pẹlu fere gbogbo itusilẹ, nitorina tọju wọn bi awọn aṣẹ ti titobi.
 
-## Igi ìpele-òkè
+## Oke-ipele igi
 
 ```
 OmniRoute/
-├── src/                  # Ìṣàfilọ́lẹ̀ Next.js 16 (UI + àwọn ipa ọ̀nà API + libs + domain + server)
-├── open-sse/             # Àyè iṣẹ́ ẹ̀rọ streaming (handlers, executors, translator, MCP server)
-├── packages/            # Àwọn àyè iṣẹ́ npm: ui-kit (Keak CI UI Kit tí a fi sínú rẹ̀) àti browser-pool
-├── electron/             # Àpò ìṣàfilọ́lẹ̀ desktop (Electron 41 + electron-builder 26.10)
-├── bin/                  # Ojú-ọ̀nà ìwọlé CLI àti àwọn olùṣàkóso àṣẹ
-├── scripts/              # Àwọn script fún build, àyẹ̀wò, ìmúdọ́gba, àti iṣẹ́ ẹ̀ẹ̀kan
-├── docs/                 # Ìwé àkọsílẹ̀ gbogbogbò (ibí ni o wà)
-├── tests/                # Gbogbo àwọn àkójọpọ̀ test (unit, integration, e2e, protocol clients)
-├── public/               # Àwọn ohun ìní static ti Next.js, manifest PWA, service worker, àwọn icon
-├── config/               # Config static + ipò quality-gate (i18n, payloadRules, quality/)
-├── images/               # Àwọn ohun ìní àwòrán fún marketing / README
-├── @omniroute/           # Àwọn package alábàáṣiṣẹ́ tí a lè ṣe àtẹ̀jáde (opencode-plugin, opencode-provider)
-├── skills/               # Àwọn àkójọpọ̀ ọgbọ́n CLI/agent (cli-* + omni-* + config-codex-cli)
-├── examples/             # Àwọn plugin àpẹẹrẹ + olùbẹ̀rẹ̀ omniroute-cmd-hello
-├── contrib/              # Àwọn àfikún láti ọwọ́ àwùjọ (podman/)
-├── .source/              # Config orísun Fumadocs (source.config.mjs + server/browser/dynamic)
-├── .github/              # Àwọn workflow GitHub Actions + àwọn template issue + template PR
-├── .husky/               # Àwọn hook Git (pre-commit, pre-push)
-├── .claude/              # Àwọn àṣẹ slash Claude Code (tí a fi mọ́ project)
-├── .agents/              # Àwọn workflow + skills fún Codex / generic agent (àwòṣe .claude/)
-├── .vscode/              # Àwọn ààtò àyè iṣẹ́ VS Code
-├── _ideia/               # Àwọn àkọsílẹ̀ ètò (àìlélànà; a kò fi ránṣẹ́)
-├── _mono_repo/           # Àwọn subproject ìtàn-àtijọ́ (cloud, site, vscode-extension)
-├── _references/          # Àwọn clone ìtọ́kasí kíkà-nìkan láti àwọn iṣẹ́ OSS tó jọmọ́
-├── _tasks/               # Àwọn fáìlì ìtọ́pinpin iṣẹ́ fún release kọ̀ọ̀kan (àìlélànà)
-├── .build/ .worktrees/ dist/   # Àyè ìgbà díẹ̀ fún build agbègbè / git-worktree / àbájáde build (gitignored)
-├── .issues/              # Cache issue agbègbè (gitignored)
-├── .playwright-mcp/      # Àwọn artifact test Playwright MCP
-├── coverage/             # Àbájáde coverage c8 (gitignored)
-├── logs/                 # Àwọn log àsìkò ìṣiṣẹ́ (gitignored)
-├── node_modules/         # Àwọn dependency (gitignored)
-├── package/              # Àyè ìpèsè npm pack (artifact build)
-├── .next/                # Àbájáde build Next.js (gitignored)
-└── (àwọn fáìlì gbòǹgbò — wo ìsàlẹ̀)
+├── src/              # Next.js 16 app: dashboard, /api and /v1 routes, server libs, domain, i18n
+├── open-sse/         # Streaming engine workspace (@omniroute/open-sse): handlers, executors, translator, services, MCP server
+├── packages/         # npm workspaces: ui-kit (vendored Keak CI UI Kit) and browser-pool
+├── @omniroute/       # Separately published npm packages (OpenCode plugins and provider)
+├── bin/              # Published `omniroute` CLI, MCP/bridge entry points, self-host ops scripts (*.sh)
+├── electron/         # Desktop app (Electron main/preload + helpers + icons)
+├── public/           # Static assets served by Next.js (provider logos, PWA icons, sw.js, openapi.yaml copy)
+├── skills/           # Agent Skills (SKILL.md) served by /api/agent-skills, MCP and A2A
+├── tests/            # All test suites: unit, integration, e2e, homolog, fixtures, snapshots
+├── scripts/          # Build, quality gates, i18n, release, ops, perf and one-off scripts (allow-listed subfolders)
+├── config/           # Versioned config: i18n, payload rules, CLI manifest, quality-gate baselines, release inventories
+├── changelog.d/      # Per-PR changelog fragments, aggregated into CHANGELOG.md at release time
+├── docs/             # Public documentation (served at /docs via Fumadocs) + translated mirrors in docs/i18n/
+├── examples/         # Example plugins and quickstart clients
+├── deploy/           # Kubernetes deployment: Helm chart + Kustomize base/overlays
+├── docker/           # Auxiliary container images (not the main image, which is the root Dockerfile)
+├── contrib/          # Community recipes: Podman quadlets, VPS compose, Windows launchers, session-sync note
+├── .github/          # GitHub Actions workflows, composite actions, issue/PR templates, CODEOWNERS, labels
+├── .husky/           # Tracked git hooks: commit-msg, pre-commit, pre-push
+├── .vale/            # Vale prose-lint vocabulary (styles/Vocab/OmniRoute/accept.txt)
+├── .vscode/          # Shared VS Code workspace settings (settings.json)
+└── (root files — see below)
+```
+
+Agbegbe, ti ipilẹṣẹ tabi awọn ipa ọna ikọkọ (gbogbo awọn ti a kọ silẹ, ko ṣe adehun, ko ṣe apejuwe siwaju):
+
+```
+node_modules/            # npm dependencies
+.build/                  # Next.js build output (default distDir .build/next, see next.config.mjs)
+dist/                    # npm staging directory assembled by scripts/build/prepublish.ts
+.source/                 # fumadocs-mdx output that feeds the /docs viewer
+.husky/_/                # Husky runtime generated on install (core.hooksPath target)
+coverage/ logs/ test-results/ playwright-report/   # coverage, runtime logs, Playwright output
+.env                     # local secrets generated from .env.example
+_*/                      # private local-only folders (anchored /_* ignore); never tracked
+.claude/ .agents/        # local AI-assistant state and skills; never tracked
 ```
 
 ---
 
-## Àwọn fáìlì gbòǹgbò
+## Awọn faili gbongbo
 
-| Fáìlì                                       | Ìdí                                                                                           |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| **README.md**                               | Ojú-ìbalẹ̀ ìpolówó + ìbẹ̀rẹ̀ kíákíá + àtẹ ìfiwéra àwọn àbùdá (tún wo `llm.txt`)                  |
-| **CHANGELOG.md**                            | Àkọsílẹ̀ àwọn ìyípadà fún ìtújáde kọ̀ọ̀kan (tí ọgbọ́n `/version-bump-cc` ń ṣẹ̀dá láìfọwọ́ṣe)        |
-| **LICENSE**                                 | Ọ̀rọ̀ ìwé-àṣẹ MIT                                                                               |
-| **CLAUDE.md**                               | Àwọn òfin iṣẹ́-àkànṣe fún àwọn aṣojú Claude Code (àwọn òfin líle, àṣà, àwọn ìṣẹ̀lẹ̀)             |
-| **AGENTS.md**                               | Kanna bí CLAUDE.md ṣùgbọ́n fún àwọn aṣojú AI tí kì í ṣe Claude (Codex, Cursor, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ) |
-| **GEMINI.md**                               | Àwọn òfin ṣókí fún àwọn aṣojú tó dá lórí Gemini (apá kan nínú CLAUDE.md)                      |
-| **CONTRIBUTING.md**                         | Ìtọ́sọ́nà olùkópa: ìṣètò, àwọn commit àṣà, ìdánwò, ìṣàn PR                                      |
-| **SECURITY.md**                             | Ìlànà jíjíṣẹ́ ìròyìn àléébù, àwọn ẹ̀yà tí a ń ṣe àtìlẹ́yìn fún, àwòṣe ewu                        |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — àwọn ìfojúsọ́nà fún ìwà láwùjọ                                          |
-| **llm.txt**                                 | Ojú-ìbalẹ̀ ọ̀rọ̀-lásán tí a mú kí ó dára fún àwọn crawler LLM (SEO fún àwọn olùrànlọ́wọ́ AI)       |
-| **package.json**                            | Àfihàn npm, àwọn script, àwọn dependency, àwọn engine, ibodè ìborí c8                         |
-| **package-lock.json**                       | Igi dependency tí a ti dì mọ́                                                                  |
-| **tsconfig.json**                           | Ìṣètò TypeScript gbòǹgbò                                                                      |
-| **tsconfig.typecheck-core.json**            | Ìṣètò àyẹ̀wò irú fún kókó `src/`                                                               |
-| **tsconfig.typecheck-noimplicit-core.json** | Àyẹ̀wò irú tó muna (`noImplicitAny`)                                                           |
-| **tsconfig.tsbuildinfo**                    | Kaṣe ìkọ́lé TS aláfikún (gitignored)                                                           |
-| **next.config.mjs**                         | Ìṣètò ìkọ́lé Next.js 16 (àbájáde standalone)                                                   |
-| **next-env.d.ts**                           | Àwọn irú env tí Next.js ṣẹ̀dá láìfọwọ́ṣe                                                        |
-| **eslint.config.mjs**                       | Ìṣètò pẹlẹbẹ ESLint (àwọn òfin fún agbègbè iṣẹ́-àkànṣe kọ̀ọ̀kan)                                 |
-| **prettier.config.mjs**                     | Àwọn òfin ìṣàkóso ìrísí Prettier                                                              |
-| **postcss.config.mjs**                      | Ìṣètò PostCSS fún ọ̀nà-ìṣiṣẹ́ Tailwind/CSS                                                      |
-| **playwright.config.ts**                    | Ìṣètò ìdánwò E2E Playwright                                                                   |
-| **vitest.config.ts**                        | Ìṣètò Vitest (àkójọpọ̀ ìdánwò àìyẹsẹ̀)                                                          |
-| **vitest.mcp.config.ts**                    | Ìṣètò Vitest fún olupin MCP / autoCombo / àwọn àkójọpọ̀ kaṣe                                   |
-| **sonar-project.properties**                | Ìṣètò SonarQube/SonarCloud (dídára kóòdù)                                                     |
-| **Dockerfile**                              | Ìkọ́lé Docker alápele-púpọ̀ (builder → runner-base → runner-cli)                                |
-| **docker-compose.yml**                      | Compose ìdàgbàsókè pẹ̀lú àwọn prófáìlì 4 (base, cli, host, cliproxyapi) + sidecar redis        |
-| **docker-compose.prod.yml**                 | Compose iṣelọpọ (port 20130, redis, àwọn volume olórúkọ)                                      |
-| **.dockerignore**                           | Àwọn fáìlì tí a yọ kúrò nínú àyíká Docker                                                     |
-| **fly.toml**                                | Ìṣètò ìmúṣiṣẹ́ Fly.io (agbègbè `sin`, port 20128, volume /data)                                |
-| **.env.example**                            | Àdàkọ fáìlì env (tí a ń da kọ sí `.env` láìfọwọ́ṣe nígbà ìfisórí àkọ́kọ́)                        |
-| **.gitignore**                              | Àwọn àpẹẹrẹ tí Git yóò kọjá sílẹ̀                                                              |
-| **.npmignore**                              | Àkójọ àwọn ohun tí a yọ kúrò nígbà ìtẹ̀jáde npm                                                |
-| **.npmrc**                                  | Ìṣètò npm (registry, ìlànà lockfile)                                                          |
-| **.node-version**                           | Ẹ̀yà Node tí a dì mọ́ (tí àwọn irinṣẹ́ tó bá nvm mu ń lò)                                        |
-| **.nvmrc**                                  | Ẹ̀yà Node tí a dì mọ́ fún nvm                                                                   |
-| **eslint.complexity.config.mjs**            | Ìṣètò ESLint fún ratchet ìdíjú (`scripts/check/check-complexity.mjs --config`)                |
-| **eslint.sonarjs.config.mjs**               | Ìṣètò ESLint fún àwọn òfin SonarJS (ìdíjú ìrònú / àtúnsí)                                     |
-| **source.config.ts**                        | Ìṣètò orísun Fumadocs `defineDocs` (tó ń pèsè fún `.source/`)                                 |
-| **knip.json**                               | Ìṣètò Knip — àwọn fáìlì/exports/deps tí a kò lò (tó ń pèsè fún ibodè dead-code)               |
-| **stryker.conf.json**                       | Ìṣètò ìdánwò mutation Stryker                                                                 |
-| **.size-limit.json**                        | Àtòjọ ètò ìṣúná bundle size-limit                                                             |
-| **promptfooconfig.yaml**                    | Àtòjọ ètò ìṣàyẹ̀wò promptfoo                                                                   |
-| **.gitleaks.toml**                          | Àkójọpọ̀ òfin ìṣàyẹ̀wò àṣírí gitleaks                                                           |
-| **.zizmor.yml**                             | Àtòjọ ètò àyẹ̀wò-ààbò GitHub-Actions zizmor                                                    |
-| **socket.yml**                              | Àtòjọ ètò ààbò pq-chain Socket.dev                                                            |
-| **news.json**                               | Ìṣàn ìkéde v2 tí a mú bá agbègbè mu; ohun ìfilọ́lẹ̀ Radar wà láìṣiṣẹ́ nígbà tí a fi ránṣẹ́        |
-| **flake.nix** / **flake.lock**              | Ìtumọ̀ dev-shell Nix + fáìlì ìdìmọ́                                                             |
-| **.env**                                    | Àwọn àṣírí agbègbè (git kò tọpinpin wọn — a dá wọn láti `.env.example`)                       |
+Gbogbo awọn faili ti a tọpa ni gbongbo ibi ipamọ (`git ls-files | grep -v /`), ti a ṣe akojọpọ nipasẹ iṣẹ.
 
-> **Tí a gbé kúrò ní root nínú v3.8.26 (láti dín ìdàrúdàpọ̀ kù):**
->
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, àti `quality-metrics.json` tí a ń dá sílẹ̀ (git kò tọpinpin rẹ̀). Wo [`## config/`](#config--static-configs--quality-gate-state).
+### Iwe ise agbese
+
+| Faili                    | Idi                                                                           |
+| ------------------------ | ----------------------------------------------------------------------------- |
+| `README.md`              | Oju-iwe ibalẹ: Akopọ ẹya, ibẹrẹ iyara, awọn ọna fifi sori ẹrọ                 |
+| `CHANGELOG.md`           | Iyipada iwe-itusilẹ kọọkan (awọn ajẹkù lati `changelog.d/` ti ṣe pọ sinu ibi) |
+| `ROADMAP.md`             | Gbangba opopona                                                               |
+| `LICENSE`                | MIT -ašẹ                                                                      |
+| `THIRD_PARTY_NOTICES.md` | Awọn akiyesi fun koodu ẹni-kẹta ti o ṣajọpọ (fun apẹẹrẹ awọn abuda wreq-js)   |
+| `CONTRIBUTING.md`        | Itọsọna olùkópa: iṣeto, awọn adehun aṣa, matrix idanwo, ṣiṣan PR              |
+| `SECURITY.md`            | Ilana ijabọ ipalara                                                           |
+| `CODE_OF_CONDUCT.md`     | Awọn ireti ihuwasi agbegbe                                                    |
+| `llm.txt`                | Akopọ ise agbese ọrọ pẹtẹlẹ fun LLM crawlers ati awọn oluranlọwọ              |
+
+### AI-iranlọwọ awọn ilana
+
+| Faili       | Idi                                                                                           |
+| ----------- | --------------------------------------------------------------------------------------------- |
+| `AGENTS.md` | Orisun otitọ nikan fun gbogbo oluranlọwọ AI : awọn apejọ, awọn ẹnubode didara, Awọn ofin Lile |
+| `CLAUDE.md` | Claude Code – deltas kan pato; agbewọle `AGENTS.md`                                           |
+| `GEMINI.md` | Gemini-pato deltas; ojuami pada si `AGENTS.md`                                                |
+
+Awọn itọsọna itẹle tun wa lẹgbẹẹ koodu ti wọn ṣapejuwe: `open-sse/services/AGENTS.md` ati `src/lib/db/AGENTS.md`.
+
+### Iṣakojọpọ farahan ati Node toolchain
+
+| Faili                      | Idi                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------ |
+| `package.json`             | npm farahan: awọn iwe afọwọkọ, awọn igbẹkẹle, `engines`, `workspaces`, `files` ti a tẹjade |
+| `package-lock.json`        | Igi igbẹkẹle titiipa                                                                       |
+| `pnpm-workspace.yaml`      | pnpm ààyè iṣẹ́ (`packages/*`, `open-sse`) àti àtòjọ ọ̀nà ìkọ́ oníbílẹ̀                         |
+| `.npmrc` / `.npmignore`    | npm atunto ati ki o gbejade awọn imukuro                                                   |
+| `.node-version` / `.nvmrc` | Awọn pinni ẹya Node fun awọn alakoso ẹya                                                   |
+| `flake.nix` / `flake.lock` | Nix dev ikarahun ati titiipa rẹ                                                            |
+| `Makefile`                 | awọn ọna abuja `make` ti o ṣe aṣoju si awọn iwe afọwọkọ npm                                |
+
+### TypeScript, Next.js ati awọn docs kọ
+
+| Faili                                     | Idi                                                                           |
+| ----------------------------------------- | ----------------------------------------------------------------------------- |
+| `tsconfig.json`                           | Tunto TypeScript ipilẹ ati awọn inagijẹ ọna (`@/*`, `@omniroute/open-sse`)    |
+| `tsconfig.typecheck-core.json`            | `npm run typecheck:core` bibẹ                                                 |
+| `tsconfig.typecheck-noimplicit-core.json` | `npm run typecheck:noimplicit:core` (muna `noImplicitAny`) bibẹ               |
+| `tsconfig.typecheck-api.json`             | Bibẹ pẹlẹbẹ titẹ titẹ ọna-ọna API (`scripts/check/check-api-typecheck.mjs`)   |
+| `tsconfig.typecheck-dashboard.json`       | Bibẹ pẹtẹẹsì Dasibodu (`npm run check:dashboard-typecheck`)                   |
+| `tsconfig.build.json`                     | Ayẹwo iṣelọpọ (`npm run typecheck:build`, `check:build-typecheck`)            |
+| `tsconfig.mitm.json`                      | MITM kọ konfigi lo nipa `scripts/build/buildMitm.mjs`                         |
+| `next.config.mjs`                         | atunto Next.js 16 (igbejade adashe, awọn aliases-profaili)                    |
+| `source.config.ts`                        | Fumadocs `defineDocs` atunto: eyiti awọn apakan `docs/` ṣe akopọ sinu `/docs` |
+| `postcss.config.mjs`                      | PostCSS / Tailwind opo gigun ti epo                                           |
+
+### Lint ati kika
+
+| Faili                                     | Idi                                                                                                  |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `eslint.config.mjs`                       | Eto alapin ESLint akọkọ (`npm run lint`, pẹlu `config/quality/eslint-suppressions.json`)             |
+| `eslint.complexity-ratchets.config.mjs`   | Iṣeto imurasilẹ ti a lo nipasẹ idiju ati awọn ratchets-iṣojuuwọn ninu ESLint kọja ọkan               |
+| `eslint.complexity.config.mjs`            | Iṣeto ni imurasilẹ pẹlu `complexity` + `max-lines-per-function` mojuto nikan (lo nipasẹ awọn idanwo) |
+| `prettier.config.mjs` / `.prettierignore` | Prettier ofin ati awọn imukuro                                                                       |
+| `.editorconfig`                           | Awọn aṣiṣe olootu (iṣafihan aaye 2)                                                                  |
+| `.markdownlint.json`                      | Isamisi imọran (`npm run lint:md`)                                                                   |
+| `.vale.ini`                               | Advisory prose lint (`npm run lint:prose`), fokabulari ni `.vale/`                                   |
+
+### Idanwo, igbelewọn ati agbegbe
+
+| Faili                         | Idi                                                                                              |
+| ----------------------------- | ------------------------------------------------------------------------------------------------ |
+| `vitest.config.ts`            | jsdom Vitest suite: `npm run test:vitest:ui` (dasibodu `.tsx`, ìkọ, memory/skills igbeyewo)      |
+| `vitest.mcp.config.ts`        | Node Vitest suite: `npm run test:vitest` (MCP, autoCombo, konbo, API `.spec.ts`)                 |
+| `vitest.quarantine.config.ts` | Ṣiṣe awọn faili ti a ya sọtọ ti a ṣe akojọ si ni `config/quality/vitest-exclusions.json`         |
+| `vitest.e2e-live.config.ts`   | Vitest suites olupin laaye (`tests/e2e/ecosystem.test.ts`, `tests/e2e/protocol-clients.test.ts`) |
+| `playwright.config.ts`        | Playwright E2E (`tests/e2e/**/*.spec.ts`, `npm run test:e2e`)                                    |
+| `stryker.conf.mjs`            | Idanwo iyipada Stryker (`npm run test:mutation`; ṣe iṣiro `tap.testFiles` lati `mutate`)         |
+| `stryker.disablebail.mjs`     | Stryker iyatọ laisi beeli, fun idanwo-apọju wiwọn                                                |
+| `promptfooconfig.yaml`        | Quickfoo LLM-aabo suite                                                                          |
+| `codecov.yml`                 | Codecov alemo-idaabobo eto                                                                       |
+
+### Docker ati imuṣiṣẹ
+
+| Faili                             | Idi                                                                                  |
+| --------------------------------- | ------------------------------------------------------------------------------------ |
+| `Dockerfile`                      | Aworan ipele-pupọ (`builder` → `runner-base` → `runner-web` / `runner-cli*`)         |
+| `Dockerfile.bun`                  | Aworan yiyan lori akoko asiko Bun (ti a ṣe nipasẹ `docker-publish.yml`)              |
+| `docker-compose.yml`              | Ipilẹṣẹ aiyipada pẹlu awọn profaili (ipilẹ, wẹẹbu, cli, ogun, iranti, cliproxyapi,…) |
+| `docker-compose.prod.yml`         | Apẹẹrẹ igbejade ti o yatọ ni ibudo 20130                                             |
+| `docker-compose.selfhost.yml`     | Olutọju ara ẹni loopback pipaṣẹ kan (awọn orisii pẹlu `.env.selfhost.example`)       |
+| `docker-compose.ollama-local.yml` | Docker OmniRoute sọrọ si agbalejo-abinibi Ollama                                     |
+| `.dockerignore`                   | awọn iyọkuro ọrọ-ọrọ Docker                                                          |
+| `fly.toml`                        | Iṣeto ohun elo Fly.io (ibudo 20128, iwọn didun `/data` )                             |
+
+### Aabo, pq ipese ati awọn bot ibi ipamọ
+
+| Faili                                        | Idi                                                                                 |
+| -------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `.gitleaks.toml`                             | gitleaks ìkọkọ-wíwo ofin ati allowlists                                             |
+| `.trivyignore`                               | Awọn idinku eewu ti o gba fun ọlọjẹ aworan eiyan                                    |
+| `.zizmor.yml`                                | zizmor GitHub Awọn iṣẹ aabo-ayẹwo atunto                                            |
+| `socket.yml`                                 | Socket.dev app atunto (ona kọju; kii ṣe ẹnu-ọna CI )                                |
+| `sonar-project.properties`                   | SonarQube/SonarCloud agbese konfigi                                                 |
+| `knip.json`                                  | Knip atunto files/exports/deps ti ko lo (awọn kikọ sii `npm run check:dead-code`)   |
+| `.size-limit.json`                           | Awọn isuna-iwọn lapapo                                                              |
+| `.mergify.yml`                               | Ṣe atunto idapọ-ti isinyi                                                           |
+| `.coderabbit.yaml`                           | CodeRabbit atunwo atunto                                                            |
+| `.cbmignore`                                 | Foju atokọ fun atọka koodu codebase-memory-mcp                                      |
+| `.gitignore` / `.gitattributes` / `.mailmap` | Foju awọn ofin, awọn ipari ila LF fun awọn iwe afọwọkọ, awọn idamọ onkọwe alamọdaju |
+
+### Awọn awoṣe ayika, ipinle ati awọn kikọ sii
+
+| Faili                       | Idi                                                                            |
+| --------------------------- | ------------------------------------------------------------------------------ |
+| `.env.example`              | Awoṣe daakọ si `.env` lori fifi sori ẹrọ akọkọ; itọkasi akojọ ti awọn env vars |
+| `.env.selfhost.example`     | Awoṣe fun `docker-compose.selfhost.yml`                                        |
+| `.env.homolog.example`      | Àdàkọ fún olùsáré isokan (`npm run homolog`)                                   |
+| `.env.devin-bridge.example` | Apẹẹrẹ faili env fun iṣeto afara Devin                                         |
+| `.i18n-state.json`          | Ipinlẹ itumọ afikun (awọn hashes orisun fun doc ati agbegbe)                   |
+| `news.json`                 | Ifunni ikede ti agbegbe (schema v2) ti a ka nipasẹ dasibodu                    |
 
 ---
 
 ## `src/` — Next.js ohun elo
 
+Nipa 4,550 tọpa awọn faili. Ona inagijẹ `@/*` → `src/*`.
+
 ```
 src/
-├── app/                 # App Router (pages + API routes + status pages + landing)
-├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
-├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
-├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
-├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
-├── i18n/                # next-intl config + per-locale message JSON (67 locales)
-├── middleware/          # Next.js middleware (request enrichment, locale detection)
-├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
-│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Model adapter glue (legacy shim)
-├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
-├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Legacy in-memory store (being phased out for src/lib/db)
-├── types/               # Shared TS type files
-├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
-├── instrumentation-node.ts  # Node-only instrumentation
-└── proxy.ts             # HTTP-proxy entry shim
+├── app/                  # App Router: pages, layouts and route handlers (file-convention loaded)
+│   ├── (dashboard)/      # Route group for the dashboard: dashboard/<section>/ pages + home widgets
+│   ├── api/              # HTTP routes: v1/ (OpenAI-compatible), v1beta/ (Gemini-style), management routes
+│   ├── docs/             # Embedded docs viewer (lib/openapi.generated.ts is generated)
+│   ├── a2a/ .well-known/ # A2A JSON-RPC entry point and Agent Card discovery
+│   ├── healthz/ livez/ readyz/ status/   # Health probes and status page
+│   ├── landing/ login/ auth/ authorize/ callback/ connect/   # Public, auth and OAuth pages
+│   ├── miniapp/          # Telegram Mini App page
+│   └── 400/ … 503/       # Static HTTP error pages
+├── lib/                  # Server-side libraries and domain modules (largest folder)
+├── shared/               # Code shared by server and client: components, constants, validation, utils
+├── sse/                  # Next.js side of the SSE pipeline: handlers/ (chat*), services/ (auth, leases, quotas)
+├── mitm/                 # MITM / TPROXY capture: cert/, dns/, handlers/, targets/, inspector/, tproxy/ (C addon)
+├── server/               # Server-only: authz/ (route guard pipeline), auth/, cors/, origin/, ws/
+├── domain/               # Policy engine, fallback, cost rules, lockout, quota cache, assessment/
+├── i18n/                 # next-intl: messages/ (67 locales), global-error-messages/ (generated), routeNamespaces.generated.json
+├── store/                # Zustand client stores (theme, notifications, …)
+├── hooks/                # Client hooks (live dashboard, compression preview, breaker health)
+├── types/                # Ambient and shared type declarations
+├── models/               # Compatibility barrel re-exporting db functions
+├── middleware/           # promptInjectionGuard.ts (facade over the guardrail system)
+├── scripts/              # backfillAggregation.ts (`npm run backfill-aggregation`)
+├── proxy.ts              # Next.js 16 proxy: headless gate + authz pipeline for dashboard, /api and /v1-style paths
+├── instrumentation.ts    # Next.js instrumentation hook (delegates Node-only work)
+└── instrumentation-node.ts   # Node-only startup work
 ```
 
-### `src/app/` — App olulana (Next.js 16)
+### `src/app/` — App olulana
 
-| Ona                                                                          | Idi                                                                                                                                                                                                                                                                                                                  |
-| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | OpenAI-compat API gbangba (awọn ọna-ọna ~ 25: iwiregbe, awọn ipari, awọn ifibọ, awọn faili, awọn ipele, ohun, awọn aworan, awọn fidio, orin, ipo, awọn iwọntunwọnsi, wiwa, ws, awọn aṣoju, awọn akọọlẹ, awọn olupese, ati bẹbẹ lọ)                                                                                   |
-| `app/api/v1beta/`                                                            | Gemini-ara API endpoints                                                                                                                                                                                                                                                                                             |
-| `app/api/playground/`                                                        | Awọn ipa ọna Studio aaye ibi isereile: `improve-prompt/` (POST — LLM atunkọ tọ), `presets/` ( akojọ GET / POST ṣẹda), `presets/[id]/` (GET / PUT / DELETE) — wo `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                               |
-| `app/api/` (non-v1)                                                          | awọn ipa ọna Management/admin (awọn ilana ~ 60: awọn olupese, awọn akojọpọ, awọn eto, mcp, a2a, evals, iranti, awọn ọgbọn, webhooks, ibamu, resilience, monitoring, tunnels, cli-tools, bbl)                                                                                                                         |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 ipa-ọna (Iṣakoso olupin, oluranlowo state/DNS/mappings, fori, cert, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. Wo `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                      |
-| `app/api/tools/traffic-inspector/`                                           | Oluyewo ijabọ REST + WS API — 16 + ipa-ọna (awọn ibeere, awọn akoko, awọn agbalejo, awọn ọna imudani, okeere, ws). LOCAL_ONLY + SPAWN_CAPABLE. Wo `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                         |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 aaye titẹsi (`POST /a2a`)                                                                                                                                                                                                                                                                           |
-| `app/.well-known/agent.json/`                                                | A2A Kaadi Aṣoju (ṣawari)                                                                                                                                                                                                                                                                                             |
-| `app/(dashboard)/dashboard/`                                                 | Awọn oju-iwe Dasibodu UI (awọn apakan 50 +, awọn faili ~ 118 page.tsx : awọn olupese, awọn akojọpọ, awọn eto, iranti, awọn ọgbọn, awọn oju opo wẹẹbu, evals, ayewo, ipele, kaṣe, awọn idiyele, ilera, eto, iṣẹ ṣiṣe, ati bẹbẹ lọ)                                                                                    |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Awọn Irinṣẹ Wa Studio UI (awọn taabu 3: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — wo `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                   |
-| `app/(dashboard)/dashboard/memory/`                                          | Studio Studio (ètò 21): `page.tsx` (3-tab ikarahun), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge dasibodu oju-iwe — kaadi olupin, awọn kaadi aṣoju 9, oluṣeto iṣeto, aworan aworan awoṣe, atokọ fori. i18n PT-BR + EN. Wo `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                               |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Oju-iwe dasibodu Oluyewo ijabọ — DevTools pipin, awọn taabu alaye 7, awọn iyipada ipo gbigba 4, agbohunsilẹ igba, awọ ipo. i18n PT-BR + EN. Wo `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                               |
-| `app/(dashboard)/dashboard/activity/`                                        | Oju-iwe ifunni iṣẹ ṣiṣe (Ẹgbẹ B): `page.tsx` (olupin) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md`                                                                                                               |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Oju-iwe Pipin Quota (Ẹgbẹ B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                            |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Oju-iwe atunto eto olupese (Ẹgbẹ B): `page.tsx` + `ProviderPlanConfigClient.tsx` — awọn iwọn ipin fun ifasilẹ asopọ                                                                                                                                                                                                  |
-| `app/docs/`                                                                  | Oluwo iwe ti a fi sinu (itumọ `docs/*.md`)                                                                                                                                                                                                                                                                           |
-| `app/landing/`                                                               | Oju-iwe ibalẹ tita                                                                                                                                                                                                                                                                                                   |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | Awọn oju-iwe ti o ni ibatan                                                                                                                                                                                                                                                                                          |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP aṣiṣe ojúewé                                                                                                                                                                                                                                                                                                    |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status                                                                                                                                                                                                                                                                                                        |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Ifilelẹ gbongbo, ile, ifihan PWA, CSS agbaye                                                                                                                                                                                                                                                                         |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Awọn aala aṣiṣe                                                                                                                                                                                                                                                                                                      |
+| Ona                                                                 | Idi                                                                                                                                                                                                            |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                       | OpenAI-ibaramu API ti gbogbo eniyan: iwiregbe, awọn ipari, awọn idahun, awọn ifiranṣẹ, awọn ifibọ, awọn aworan, ohun, awọn fidio, orin, ipo, awọn iwọntunwọnsi, wiwa, awọn faili, awọn ipele, ws, awọn awoṣe,… |
+| `app/api/v1beta/`                                                   | Gemini-ara endpoints                                                                                                                                                                                           |
+| `app/api/` (awọn folda miiran)                                      | Awọn ipa ọna iṣakoso ati abojuto: awọn olupese, awọn akojọpọ, awọn eto, awọn bọtini, lilo, awọn akọọlẹ, mcp, a2a, acp, iranti, awọn ọgbọn, evals, webhooks, awọn tunnels, awọn afikun, radar, awọn irinṣẹ,…    |
+| `app/api/tools/agent-bridge/`                                       | AgentBridge REST API — wo [AGENTBRIDGE.md](../frameworks/AGENTBRIDGE.md)                                                                                                                                       |
+| `app/api/tools/traffic-inspector/`                                  | Oluyewo ijabọ REST API — wo [TRAFFIC_INSPECTOR.md](../frameworks/TRAFFIC_INSPECTOR.md)                                                                                                                         |
+| `app/(dashboard)/dashboard/`                                        | Fọọmu kan fun apakan dasibodu (awọn olupese, awọn akojọpọ, awọn akọọlẹ, lilo, awọn idiyele, kaṣe, funmorawon, iranti, ibi-iṣere, awọn irinṣẹ wiwa, awọn eto, awọn irinṣẹ,…)                                    |
+| `app/(dashboard)/home/`                                             | Iboju ile ati awọn ẹrọ ailorukọ rẹ                                                                                                                                                                             |
+| `app/docs/`                                                         | Oluwo Docs ti n ṣe awọn apakan Fumadocs ti a ṣe akojọ si ni `source.config.ts`                                                                                                                                 |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`          | Ifilelẹ gbongbo, titẹsi gbongbo (awọn àtúnjúwe), iṣafihan PWA, CSS agbaye                                                                                                                                      |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx` | Awọn aala aṣiṣe ati awọn ifẹhinti                                                                                                                                                                              |
 
-### `src/lib/` — Core ikawe (awọn modulu ~ 50)
+awọn ọna API tẹle `Route → CORS → Zod validation → optional auth → policy → handler`; wo [ARCHITECTURE.md](ARCHITECTURE.md) ati [API_REFERENCE.md](../reference/API_REFERENCE.md).
 
-| Modulu                                   | Idi                                                                                                                                                                                                                                                                                                                     |
-| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | oluṣakoso iṣẹ ilana ilana A2A, awọn ọgbọn (5), ṣiṣanwọle                                                                                                                                                                                                                                                                |
-| `acp/`                                   | CLI Iforukọsilẹ Aṣoju (awari CLI agbegbe — wo `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                               |
-| `api/`                                   | Awọn oluranlọwọ API pinpin (`requireManagementAuth`, afọwọsi)                                                                                                                                                                                                                                                           |
-| `auth/`                                  | Ikoni, ọrọigbaniwọle hashing, àmi afọwọsi                                                                                                                                                                                                                                                                               |
-| `batches/`                               | OpenAI Batches API handlers                                                                                                                                                                                                                                                                                             |
-| `catalog/`                               | Katalogi olupese Zod afọwọsi + agbara ipinnu                                                                                                                                                                                                                                                                            |
-| `cloudAgent/`                            | Awọn aṣoju Awọsanma (Codex Cloud, Devin, Jules) — wo `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                   |
-| `combos/`                                | Ipinnu Konbo + atunbere awọn oluranlọwọ                                                                                                                                                                                                                                                                                 |
-| `audit/`                                 | Awọn oluranlọwọ ifunni iṣẹ ṣiṣe: `highLevelActions.ts` (akojọ laaye + `isHighLevelAction()`), `activityIcons.ts` (igbese → icon/verb maapu), `timeline.ts` (groupByDay/relativeTime) — wo `docs/architecture/MONITORING_SECTIONS.md`                                                                                    |
-| `compliance/`                            | Ayẹwo log + olupese se ayewo — wo `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                         |
-| `compression/`                           | Lẹ pọ engine funmorawon (awọn ẹrọ n gbe ni `open-sse/services/compression/`)                                                                                                                                                                                                                                            |
-| `config/`                                | Awọn oluranlọwọ atunto akoko asiko                                                                                                                                                                                                                                                                                      |
-| `db/`                                    | 120 + domain DB modules + 168 awọn ijira (nigbagbogbo lọ nipasẹ ibi fun SQLite)                                                                                                                                                                                                                                         |
-| `quota/`                                 | Quota Sharing Engine: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore interface), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — see `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | Onibara katalogi awoṣe-ọfẹ Rada: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md`                                                                                                                                                |
-| `display/`                               | awọn oluranlọwọ kika UI (iye owo, idaduro, ati bẹbẹ lọ)                                                                                                                                                                                                                                                                 |
-| `embeddings/`                            | Awọn oluranlọwọ iṣẹ ifibọ                                                                                                                                                                                                                                                                                               |
-| `env/`                                   | Env ayípadà parsing + afọwọsi                                                                                                                                                                                                                                                                                           |
-| `evals/`                                 | Ilana Eval (suites, Isare, asiko isise) — wo `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                 |
-| `guardrails/`                            | PII masker, abẹrẹ kiakia, afara iran — wo `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                                 |
-| `jobs/`                                  | Awọn iṣẹ abẹlẹ (cron-like)                                                                                                                                                                                                                                                                                              |
-| `memory/`                                | Iranti ibaraẹnisọrọ (SQLite FTS5 + sqlite-vec arabara RRF + Qdrant ipele 2) — wo `docs/frameworks/MEMORY.md`                                                                                                                                                                                                            |
-| `memory/embedding/`                      | Layer ifibọ orisun pupọ: `index.ts` (olupinu), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (ètò 21)                                                                                                                                                                                  |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-agbara + arabara RRF (FTS5 + fekito, k = 60). Ọlẹ-init, degrades gracefully nigbati sqlite-vec ko si. (eto 21)                                                                                                                                                                    |
-| `memory/reindex.ts`                      | `runReindexBatch()` — ṣe ilana awọn iranti pẹlu `needs_reindex=1` ni abẹlẹ; ti a npe ni nipa `POST /api/memory/reindex` ati ọlẹ-backfill ona. (eto 21)                                                                                                                                                                  |
-| `monitoring/`                            | Awọn sọwedowo ilera, itujade metiriki                                                                                                                                                                                                                                                                                   |
-| `oauth/`                                 | OAuth/import nṣàn fun awọn modulu olupese 22 (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, traaueth, qodi-coding, kiro, openhost, qoder zed)                                                    |
-| `plugins/`                               | Iforukọsilẹ ohun itanna                                                                                                                                                                                                                                                                                                 |
-| `promptCache/`                           | Awọn aaye fifọ kaṣe kiakia ni ara-ara eniyan                                                                                                                                                                                                                                                                            |
-| `skills/`                                | Ilana ogbon (ti a ṣe sinu + ọjà + SkillsSH) — wo `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                            |
-| `playground/`                            | Studio gbagede ibi isereile pín awọn oluranlọwọ: `codeExport.ts` ( monomono curl/Python/TS ), `promptImprover.ts` (meta-prompt Akole), `streamMetrics.ts` (pure TTFT/TPS), `types.ts` (tabili idiyele) — wo `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                      |
-| `webhookDispatcher.ts`                   | HMAC webhook ifijiṣẹ — wo `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                 |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Awọn alakoso oju eefin — wo `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                 |
-| `cloudSync.ts`, `initCloudSync.ts`       | Iyanu awọsanma amuṣiṣẹpọ ti ipinle                                                                                                                                                                                                                                                                                      |
-| `localDb.ts`                             | Tun agba okeere si ilẹ okeere fun awọn modulu db (ko si oye — tun-ṣe okeere nikan)                                                                                                                                                                                                                                      |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | Beere caching + idempotency                                                                                                                                                                                                                                                                                             |
-| (~ 30 awọn faili ipele oke diẹ sii)      | Awọn oluranlọwọ pataki (logEnv, modelsDevSync, piiSanitizer, ati bẹbẹ lọ)                                                                                                                                                                                                                                               |
+### `src/lib/` — server ikawe
 
-### Aaye data `src/lib/db/` — (awọn modulu 147 + 208 awọn iṣikiri)
+O fẹrẹ to awọn folda 90 pẹlu nipa awọn modulu ipele oke 90. Awọn ẹgbẹ akọkọ:
 
-| Subdir                    | Idi                                                                                                                                                                                                            |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | `getDbInstance()` singleton pẹlu WAL akọọlẹ                                                                                                                                                                    |
-| `db/migrations/`          | Awọn faili SQL ti ikede (idempotent, idunadura). `073_memory_vec.sql` ṣe afikun ọwọn `memory_vec_meta` + `needs_reindex` (ètò 21).                                                                             |
-| `db/playgroundPresets.ts` | module CRUD fun awọn tito tẹlẹ ile-iṣere ibi isereile (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                           |
-| `db/memoryVec.ts`         | CRUD fun `memory_vec_meta` (active_dim, ifibọ_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, ati be be lo (ètò 21)                                                 |
-| `db/<domain>.ts`          | Module kan fun agbegbe kan: awọn olupese, awọn akojọpọ, apiKeys, awọn olumulo, awọn akoko, lilo, iwe iṣayẹwo, webhooks, awọn ọgbọn, awọn titẹ sii iranti, cloud_agent_tasks, evals* \* , reasoning_cache, etc. |
+| Agbegbe                     | Awọn folda / awọn faili                                                                                             | Jin besomi                                                                                                                                     |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Aaye data                   | awọn modulu agbegbe `db/` —, `migrations/`, `adapters/`, `repositories/`, `migrationRunner/`                        | [`src/lib/db/AGENTS.md`](../../src/lib/db/AGENTS.md), [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md)                                            |
+| Lilo, ipin ati inawo        | `usage/`, `quota/`, `spend/`                                                                                        | [QUOTA_SHARE.md](../routing/QUOTA_SHARE.md), [COST_TRACKING.md](../guides/COST_TRACKING.md)                                                    |
+| Awọn olupese ati awọn awoṣe | `providers/`, `providerModels/`, `modelValidation/`, `catalog/`, `radar/`, `freeProxyProviders/`                    | [RADAR.md](../frameworks/RADAR.md), [MODEL-VALIDATION.md](../guides/MODEL-VALIDATION.md)                                                       |
+| OAuth ati awọn iwe-ẹri      | `oauth/` (awọn olupese/, awọn iṣẹ/, awọn ohun elo/), `zed-oauth/`, `copilot/`, `cursor/`, `credentialHealth/`       | `resolvePublicCred()` (doc oniṣẹ, ko ṣe iranṣẹ ni gbangba)                                                                                     |
+| Ailewu ati isejoba          | `guardrails/`, `compliance/`, `pii/`, `security/`                                                                   | [GUARDRAILS.md](../security/GUARDRAILS.md), [COMPLIANCE.md](../security/COMPLIANCE.md)                                                         |
+| Awọn ẹya ara ẹrọ aṣoju      | `a2a/`, `acp/`, `cloudAgent/`, `memory/`, `skills/`, `agentSkills/`                                                 | [AGENT_PROTOCOLS_GUIDE.md](../frameworks/AGENT_PROTOCOLS_GUIDE.md), [MEMORY.md](../frameworks/MEMORY.md), [SKILLS.md](../frameworks/SKILLS.md) |
+| Awọn afikun ati awọn iṣẹ    | `plugins/`, `services/` (awọn fifi sori ẹrọ iṣẹ ati alabojuto)                                                      | [PLUGINS.md](../frameworks/PLUGINS.md), [EMBEDDED-SERVICES.md](../frameworks/EMBEDDED-SERVICES.md)                                             |
+| Ipa ọna ati resilience      | `combos/`, `routing/`, `resilience/`, `reasoningRouting/`, `promptCache/`                                           | [RESILIENCE_GUIDE.md](RESILIENCE_GUIDE.md)                                                                                                     |
+| Awọn aṣoju ati nẹtiwọki     | `proxyHealth/`, `proxySubscription/`, `proxyRelay/`, `proxyEvents/`, awọn modulu oju eefin                          | [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md), [TUNNELS_GUIDE.md](../ops/TUNNELS_GUIDE.md)                                                           |
+| Awọn iṣẹ ati siseto         | `jobs/`, `jobRegistry/`, `warmupScheduler/`                                                                         |                                                                                                                                                |
+| Observability ati okeere    | `monitoring/`, `logExport/`, `webhooks/`, `audit/`, `events/`                                                       | [LOG-EXPORT.md](../frameworks/LOG-EXPORT.md), [WEBHOOKS.md](../frameworks/WEBHOOKS.md)                                                         |
+| CLI ati IDE iṣọpọ           | `cliTools/`, `cli-helper/`, `vscode/`, `inspector/`, `versionManager/`                                              | [CLI-TOOLS.md](../reference/CLI-TOOLS.md), [VSCODE-COPILOT.md](../guides/VSCODE-COPILOT.md)                                                    |
+| Awọn orisun ọrọ-ọrọ         | `localCorpus/`, `notion/`, `obsidian/`                                                                              | [LOCAL_CORPUS_CONTEXT.md](../frameworks/LOCAL_CORPUS_CONTEXT.md)                                                                               |
+| Awọn ẹya ara ẹrọ miiran     | `evals/`, `playground/`, `gamification/`, `telegram/`, `conductor/`, `batches/`, `deploy/`, `transfer/`, `sync/`, … | [EVALS.md](../frameworks/EVALS.md), [PLAYGROUND_STUDIO.md](../frameworks/PLAYGROUND_STUDIO.md)                                                 |
 
-### `src/domain/`
+Awọn modulu ipele oke ti o yẹ lati mọ:
 
-| Modulu                 | Idi                                            |
-| ---------------------- | ---------------------------------------------- |
-| `policy.ts`            | engine imulo                                   |
-| `fallbackPolicy.ts`    | Fallback igi ipinnu                            |
-| `costRules.ts`         | Awọn ofin iṣiro iye owo                        |
-| `lockoutPolicy.ts`     | Model/connection titiipa imulo                 |
-| `tagRouter.ts`         | afisona orisun-Tag                             |
-| `comboResolver.ts`     | Ipinnu konbo (ti a lo nipasẹ ẹrọ konbo)        |
-| `modelAvailability.ts` | Ṣayẹwo wiwa wiwa fun awoṣe                     |
-| `assessment/`          | Iṣayẹwo awoṣe (Ipele 1 ti RFC-AUTO-ASSESSMENT) |
+| Faili                                                          | Idi                                                            |
+| -------------------------------------------------------------- | -------------------------------------------------------------- |
+| `cacheLayer.ts`, `idempotencyLayer.ts`, `semanticCache.ts`     | Idahun caching ati idempotency                                 |
+| `webhookDispatcher.ts`                                         | HMAC-fọwọsi webhook ifijiṣẹ                                    |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts`, `tailscaleTunnel.ts` | Awọn alakoso oju eefin                                         |
+| `tokenHealthCheck*.ts`, `tokenRefreshCircuit.ts`               | Awọn sọwedowo ilera ijẹrisi abẹlẹ ati iyika isọdọtun           |
+| `streamingPiiTransform.ts`, `streamingCredentialTransform.ts`  | Sanitizers esi idahun                                          |
+| `gracefulShutdown.ts`, `serverLifecycle.ts`                    | Ilana igbesi aye                                               |
+| `*.stub.ts`                                                    | Kọ-profaili stubs paarọ sinu nipa inagijẹ ni `next.config.mjs` |
 
-### `src/server/`
+### `src/lib/db/` — database
 
-| Modulu   | Idi                                                                                   |
-| -------- | ------------------------------------------------------------------------------------- |
-| `authz/` | Opopona aṣẹ: `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | CORS iṣeto ni                                                                         |
-| `auth/`  | Igba middleware                                                                       |
+| Ona                   | Idi                                                                                                                          |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`          | `getDbInstance()` singleton (irohin WAL )                                                                                    |
+| `db/migrations/`      | Nọmba, awọn iṣiwa `.sql` ti o lagbara (awọn faili 236 ni akoko kikọ; nọmba awọn oluso `check-migration-numbering.mjs` )      |
+| `db/migrationRunner/` | Isare ijira                                                                                                                  |
+| `db/adapters/`        | awọn oluyipada awakọ SQLite (better-sqlite3, node: sqlite, bun: sqlite, sql.js)                                              |
+| `db/repositories/`    | awọn imuse ibi ipamọ SQLite (combos, awọn tito tẹlẹ ibi-iṣere, atunto ipa-ọna)                                               |
+| `db/<domain>.ts`      | Nipa awọn modulu agbegbe 175 (awọn olupese, awọn akojọpọ, apiKeys, awọn eto, lilo,…) — nigbagbogbo gbe awọn wọnyi wọle taara |
 
-### `src/shared/`
+### `src/domain/`, `src/server/`, `src/shared/`
 
-| Modulu                           | Idi                                                                                                 |
-| -------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `components/`                    | Dasibodu paati API: awọn oluyipada lori `packages/ui-kit` — wo `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: aami awọn orukọ ti a lo nipasẹ awọn iboju → Lucide irinše (`<Icon>`)                    |
-| `constants/providers.ts`         | **381 olupese** pẹlu afọwọsi Zod (orisun otitọ)                                                     |
-| `constants/cliTools.ts`          | Iforukọsilẹ irinṣẹ CLI ita                                                                          |
-| `constants/routingStrategies.ts` | **20 afisona ogbon** pẹlu ayo                                                                       |
-| `constants/publicApiRoutes.ts`   | Awọn ipa-ọna ti o nilo Olutọju (la iṣakoso) auth                                                    |
-| `constants/upstreamHeaders.ts`   | Akokọ akọsori fun awọn ibeere oke                                                                   |
-| `validation/schemas.ts`          | ~ 80 Zod schemas (orisun kan ti otitọ fun awọn adehun API )                                         |
-| `validation/helpers.ts`          | awọn oluranlọwọ afọwọsi Zod (`validateBody`, ati bẹbẹ lọ)                                           |
-| `types/`                         | Pipin TS orisi                                                                                      |
-| `contracts/`                     | Awọn adehun API ti gbogbo eniyan (ti o jẹ nipasẹ `files:` ni `package.json`)                        |
-| `utils/circuitBreaker.ts`        | Olupese fifọ Circuit (wo `docs/architecture/RESILIENCE_GUIDE.md`)                                   |
-| `utils/apiAuth.ts`               | afọwọsi bọtini API, iṣayẹwo iwọn                                                                    |
-| `utils/fetchTimeout.ts`          | awọn wrappers Timeout/abort fun agbejade oke                                                        |
-| `utils/releaseNotes.ts`          | Atọka ikede v2/legacy ti o wa ni pipade, isọdi ati idasile ID                                       |
+| Ona                                                            | Idi                                                                                                                                             |
+| -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `domain/policyEngine.ts`                                       | engine imulo                                                                                                                                    |
+| `domain/fallbackPolicy.ts`, `lockoutPolicy.ts`, `costRules.ts` | Awọn ipinnu ifẹhinti, eto imulo titiipa, awọn ofin idiyele                                                                                      |
+| `domain/quotaCache*.ts`, `quotaSnapshot*.ts`                   | Kaṣe ipin ati itẹramọṣẹ fọtoyiya                                                                                                                |
+| `domain/assessment/`                                           | Iṣayẹwo awoṣe (oluyẹwo, olutọpa, alara-ara ẹni)                                                                                                 |
+| `server/authz/`                                                | Opopona aṣẹ ati oluso ipa ọna (`routeGuard.ts`) — wo [AUTHZ_GUIDE.md](AUTHZ_GUIDE.md), [ROUTE_GUARD_TIERS.md](../security/ROUTE_GUARD_TIERS.md) |
+| `server/origin/`, `server/cors/`                               | ipinnu orisun Public/MCP/WS ati CORS — wo [CORS.md](../security/CORS.md)                                                                        |
+| `server/ws/`                                                   | Live Dasibodu WebSocket olupin                                                                                                                  |
+| `shared/components/`                                           | Awọn paati Dasibodu ati awọn oluyipada lori `packages/ui-kit` — wo [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)                                         |
+| `shared/constants/`                                            | Katalogi Olupese (`providers.ts`), awọn ilana ipa-ọna, awọn irinṣẹ CLI, maapu aami, atokọ agbesori oke,…                                        |
+| `shared/validation/`                                           | Zod schemas ati afọwọsi awọn oluranlọwọ                                                                                                         |
+| `shared/utils/`                                                | Fifọ Circuit, afọwọsi bọtini API, awọn akoko ti o ti mu jade, awọn asia ẹya,…                                                                   |
+| `shared/middleware/`, `network/`, `services/`, `hooks/`        | Wiregbe gbigba middleware, awọn oluranlọwọ netiwọki, awọn iṣẹ alabara, awọn kio React                                                           |
 
 ---
 
-## `open-sse/` — Àyè Iṣẹ́ Ẹ́ńjìnnì Ṣíṣàn
+## `open-sse/` — engine sisanwọle aaye iṣẹ
 
-Àyè iṣẹ́ npm ọ̀tọ̀ (`@omniroute/open-sse`). Ó ń bójú tó ṣíṣe àwọn ìbéèrè àti ìmúṣẹ olùpèsè.
+npm aaye iṣẹ `@omniroute/open-sse` (nipa awọn faili tọpinpin 2,390). O ṣe sisẹ ibeere ati ipaniyan olupese. Akopọ: [OPEN_SSE_ARCHITECTURE.md](../frameworks/OPEN_SSE_ARCHITECTURE.md).
 
 ```
 open-sse/
-├── handlers/            # Fáìlì 16 (olùṣàkóso 12 + olùrànlọ́wọ́ 4): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ.
-├── executors/           # Module executor 150 (àwọn class tó ń fa BaseExecutor gùn + àwọn olùrànlọ́wọ́ fún olùpèsè kọ̀ọ̀kan)
-├── translator/          # Àwọn olùyípadà fọ́ọ̀mù (ìbéèrè 9, èsì 9, olùrànlọ́wọ́ 9)
-├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~80+ module iṣẹ́ (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ.)
-├── mcp-server/          # Server MCP (irinṣẹ́ 110, ọ̀nà ìbánisọ̀rọ̀ 3, ààlà àṣẹ 33)
-├── config/              # Àwọn ìforúkọsílẹ̀ olùpèsè/model, àtúnṣe header, àwọn orúkọ mìíràn fún model
-├── utils/               # Client TLS, proxy fetch/dispatcher, àwọn olùrànlọ́wọ́ nẹ́tíwọ́ọ̀kì
-├── index.ts             # Ojú-ọ̀nà ìwọlé àyè iṣẹ́
-├── package.json         # Manifest àyè iṣẹ́
-├── tsconfig.json        # Àtúnṣe TS àyè iṣẹ́
-└── types.d.ts           # Àwọn ìkéde type àyè iṣẹ́
+├── handlers/       # Request handlers: chatCore.ts + chatCore/, responses, embeddings, audio, imageGeneration/,
+│                   #   videoGeneration/, search/, fal/, mediaGeneration/, sseParser/, responseSanitizer/, …
+├── executors/      # Provider-specific HTTP dispatch, registered in executors/registry.ts; base/ holds shared recovery helpers
+├── translator/     # Format conversion: request/, response/, helpers/, image/, registry.ts, bootstrap.ts
+├── transformer/    # responsesTransformer.ts (Responses API ↔ Chat Completions TransformStream)
+├── services/       # Combo routing, rate limits, fallback, caching, usage, token refresh, compression (see below)
+├── config/         # Provider registry (config/providers/registry/<id>/), constants, model/media registries
+├── mcp-server/     # MCP server: tools/, schemas/, toolSearch/, transports, audit, scopes, __tests__/
+├── utils/          # Stream, error, TLS, proxy-fetch and logging utilities
+├── vendor/         # codex-chatgpt-web/ — vendored adapter (provenance in vendor.json)
+├── lib/            # DeepSeek proof-of-work worker and hash
+├── shared/         # zedAuth.ts
+├── index.ts        # Workspace entry
+└── package.json · tsconfig.json · types.d.ts
 ```
+
+### `open-sse/services/`
+
+| Ona                                                                                            | Idi                                                                                                                                                             |
+| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `combo.ts` + `combo/`                                                                          | Konbo afisona ogbon — wo [AUTO-COMBO.md](../routing/AUTO-COMBO.md)                                                                                              |
+| `autoCombo/`                                                                                   | Ifimaaki Konbo laifọwọyi ati awọn akopọ ipo                                                                                                                     |
+| `accountFallback.ts` + `accountFallback/`                                                      | Iduroṣinṣin asopọ ati titiipa awoṣe — wo [RESILIENCE_GUIDE.md](RESILIENCE_GUIDE.md)                                                                             |
+| `rateLimitManager.ts` + `rateLimitManager/`                                                    | Titọpa iye-oṣuwọn ati ṣiṣayẹwo akọsori                                                                                                                          |
+| `compression/`                                                                                 | Awọn ẹrọ funmorawon (`engines/`), awọn akopọ ofin (`rules/`), `eval/`, `harness/`, `riskGate/` — wo [COMPRESSION_GUIDE.md](../compression/COMPRESSION_GUIDE.md) |
+| `tokenRefresh/`, `usage/`, `cache/`, `admission/`, `sessionPool/`, `codexAccount/`, `routing/` | Isọdọtun ami, iṣiro lilo, caching, awọn ọna gbigba, awọn adagun igba, awọn akọọlẹ Codex, awọn oluranlọwọ ipa-ọna                                                |
+| `__tests__/`                                                                                   | Awọn suites Vitest ti o wa papọ (ti a kojọ nipasẹ awọn atunto Vitest )                                                                                          |
+| `AGENTS.md`                                                                                    | Itọsọna aṣoju fun folda yii                                                                                                                                     |
+
+Àpẹẹrẹ: module `X.ts` nla kan lẹgbẹẹ folda `X/` tumọ si pe module naa ti pin si awọn faili kekere (`handlers/chatCore.ts` + `handlers/chatCore/`, `services/combo.ts` + `services/combo/`).
 
 ### `open-sse/mcp-server/`
 
-| Ọ̀nà                         | Ète                                                                           |
-| --------------------------- | ----------------------------------------------------------------------------- |
-| `server.ts`                 | Ìgbésí-ayé server MCP (stdio + àwọn ọ̀nà ìbánisọ̀rọ̀ HTTP)                       |
-| `httpTransport.ts`          | Àwọn ọ̀nà ìbánisọ̀rọ̀ HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)  |
-| `audit.ts`                  | Ìkọ àyẹ̀wò sínú tábìlì `mcp_tool_audit`                                        |
-| `scopeEnforcement.ts`       | Ìfọwọ́sí ààlà àṣẹ fún irinṣẹ́ kọ̀ọ̀kan                                            |
-| `runtimeHeartbeat.ts`       | Ìlù-ọkàn ìlera sí `DATA_DIR/runtime/mcp-heartbeat.json`                       |
-| `descriptionCompressor.ts`  | Dín metadata àpèjúwe irinṣẹ́ kù láti fi ààyè àkóónú pamọ́                       |
-| `schemas/tools.ts`          | Àwọn ìtumọ̀ irinṣẹ́ ìpìlẹ̀ 36 + àwọn ààlà àṣẹ                                    |
-| `tools/advancedTools.ts`    | Àwọn ìmúṣẹ irinṣẹ́ onípele-gíga                                                |
-| `tools/memoryTools.ts`      | Irinṣẹ́ ìrántí 3 (ṣàwárí/ṣàfikún/pa rẹ́)                                        |
-| `tools/skillTools.ts`       | Irinṣẹ́ ọgbọ́n 4 (ṣe àkójọ/mú ṣiṣẹ́/ṣe/àwọn ìmúṣẹ)                               |
-| `tools/compressionTools.ts` | Irinṣẹ́ ìdínkù 5                                                               |
-| `README.md`                 | README abẹ́nú fún server MCP (tí a so pọ̀ láti `docs/frameworks/MCP-SERVER.md`) |
+| Ona                   | Idi                                                                                             |
+| --------------------- | ----------------------------------------------------------------------------------------------- |
+| `server.ts`           | MCP server lifecycle                                                                            |
+| `httpTransport.ts`    | Awọn gbigbe HTTP ati SSE ṣiṣan                                                                  |
+| `scopeEnforcement.ts` | Awọn sọwedowo iwọn-ọpa kọọkan                                                                   |
+| `audit.ts`            | Ipe irinṣẹ-ipe iṣayẹwo gedu                                                                     |
+| `schemas/`            | Awọn asọye irinṣẹ ati awọn iwọn                                                                 |
+| `tools/`              | Awọn imuṣẹ irinṣẹ (iranti, awọn ọgbọn, funmorawon,…)                                            |
+| `toolSearch/`         | Wiwa irinṣẹ                                                                                     |
+| `README.md`           | Awọn akọsilẹ faaji ti inu; ni kikun katalogi wa ni [MCP-SERVER.md](../frameworks/MCP-SERVER.md) |
 
 ---
 
-## `packages/` — Àwọn Àyè Iṣẹ́
+## `packages/` — npm workspaces
 
-| Ọ̀nà                      | Ète                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/ui-kit/`       | `@omniroute/ui-kit` — ẹ̀dà àwòrán-ìpamọ́ Keak CI UI Kit tí a kó sínú iṣẹ́ náà (`private`, `UNLICENSED`), tí a ń lò gẹ́gẹ́ bí source (kò sí build). `UPSTREAM.md` ń dì commit upstream mú, ó sì ń ṣàkọsílẹ̀ àṣẹ ìwé-àṣẹ; `PATCHES.md` ń ṣe àkójọ àwọn patch agbègbè (kò sí èyíkéyìí); `src/` jẹ́ mímúṣiṣẹ́pọ̀ nípasẹ̀ `scripts/dev/sync-ui-kit.sh` nìkan, `npm run check:ui-kit-snapshot` sì ń dáàbò bò ó. Wo `docs/architecture/DESIGN_SYSTEM.md` |
-| `packages/browser-pool/` | `@omniroute/browser-pool` — iṣẹ́ browser pool àṣàyàn (ìfọ̀rọ̀wérọ̀ tó dá lórí CloakBrowser àti Playwright)                                                                                                                                                                                                                                                                                                                                  |
+| Ona                      | Idi                                                                                                                                                                                                                                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui-kit/`       | `@omniroute/ui-kit`: aworan ti o taja ti Keak CI UI Kit, ti o jẹ orisun. `UPSTREAM.md` pinni ifarabalẹ oke, `PATCHES.md` ṣe atokọ awọn abulẹ agbegbe. `src/` jẹ mimuṣiṣẹpọ nipasẹ `scripts/dev/sync-ui-kit.sh` nikan ati aabo nipasẹ `npm run check:ui-kit-snapshot`. Wo [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) |
+| `packages/browser-pool/` | `@omniroute/browser-pool`: awọn atọkun-awakiri-pool ati imuse (`packages/browser-pool/src/index.ts`, `packages/browser-pool/src/interfaces.ts`). Akojọ si ni `workspaces`; adagun ẹrọ aṣawakiri akoko asiko ti a lo nipasẹ ẹnu-ọna ti ngbe ni `open-sse/services/`                                            |
 
----
+## `@omniroute/` — ti a tẹjade lọtọ
 
-## `electron/` — Àwọ̀ Ìsopọ̀ Ojú-iṣẹ́
+Iwọnyi kii ṣe awọn aaye iṣẹ npm. Kọọkan ni o ni awọn oniwe-ara `package.json` ati lockfile; awọn ọkọ folda ninu `omniroute` tarball (`files: ["@omniroute/"]`).
 
-| Fáìlì            | Ìdí tí a fi ń lò ó                                                                                |
-| ---------------- | ------------------------------------------------------------------------------------------------- |
-| `main.js`        | Ìlànà àkọ́kọ́ Electron (BrowserWindow, olupin Next.js tí a fi sínú rẹ̀, àtẹ, ìmúdójúìwọ̀n aládàáṣiṣẹ́) |
-| `preload.js`     | Afárá IPC (contextBridge → `window.omniroute`)                                                    |
-| `package.json`   | Àtòjọ electron-builder + Electron 41 + àwọn ìgbẹ́kẹ̀lé electron-builder 26.10                       |
-| `assets/`        | Àwọn àmì app (Windows .ico, macOS .icns, Linux .png)                                              |
-| `dist-electron/` | Àbájáde ìkọ́lé (git kò ka a sí)                                                                    |
-| `types.d.ts`     | Àwọn ìkéde irú fún afárá renderer                                                                 |
-| `README.md`      | README Electron inú ilé (tún wo `docs/guides/ELECTRON_GUIDE.md`)                                  |
+| Ona                              | Idi                                                                                                                              |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `@omniroute/opencode-plugin/`    | OpenCode itanna (awari awoṣe, `/connect` auth); lo nipa `omniroute setup-opencode` — wo [OPENCODE.md](../frameworks/OPENCODE.md) |
+| `@omniroute/opencode-plugin-v2/` | OpenCode fun v2 Ileri API — wo [OPENCODE-V2-PLUGIN.md](../guides/OPENCODE-V2-PLUGIN.md)                                          |
+| `@omniroute/opencode-provider/`  | monomono atunto aimi; samisi deprecated ni awọn oniwe-ara `package.json` ni ojurere ti `opencode-plugin`                         |
 
 ---
 
-## `bin/` — CLI
+## `bin/` — CLI ati ops awọn iwe afọwọkọ
 
-| Fáìlì                                                                                                       | Ìdí tí a fi ń lò ó                                                                                                                         |
-| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `omniroute.mjs`                                                                                             | Ibi ìwọlé CLI àkọ́kọ́ — `omniroute serve`, `omniroute setup`, `omniroute doctor`, `omniroute providers`, `omniroute combos`, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ. |
-| `reset-password.mjs`                                                                                        | CLI aládàáṣe fún títún ọ̀rọ̀ aṣínà ṣe                                                                                                        |
-| `cli/commands/setup.mjs`                                                                                    | Olùdarí ìṣètò alábánisọ̀rọ̀ + aláìbánisọ̀rọ̀                                                                                                   |
-| `cli/commands/doctor.mjs`                                                                                   | Àyẹ̀wò ìlera ètò (àyẹ̀wò 8+)                                                                                                                 |
-| `cli/commands/providers.mjs`                                                                                | Àtòjọ/ìdánwò/ìmúdájú olupèsè                                                                                                               |
-| `cli/{args,data-dir,encryption,io,provider-catalog,provider-store,provider-test,settings-store,sqlite}.mjs` | Àwọn módùlù olùrànlọ́wọ́ CLI                                                                                                                 |
-| `cli/tray/tray.ts`                                                                                          | Ìsopọ̀ àtẹ ètò (orí gbogbo pèpéle: NotifyIcon lórí Windows, systray2 lórí macOS/Linux)                                                      |
-| `cli/tray/tray.ps1`                                                                                         | Ẹ̀yìn-iṣẹ́ PowerShell NotifyIcon (Windows, kò sí fáìlì binary tuntun)                                                                        |
-| `cli/tray/autostart.ts`                                                                                     | Ìbẹ̀rẹ̀ aládàáṣiṣẹ́ orí gbogbo pèpéle (LaunchAgent / .desktop / registry)                                                                     |
-| `cli/runtime/sqliteRuntime.mjs`                                                                             | Ẹ̀wọ̀n ìpinnu awakọ̀ SQLite onígbésẹ̀ márùn-ún (tí a kó pọ̀ → àkókò-ṣiṣe → ìfi-sórí-ẹ̀rọ ọ̀lẹ → node:sqlite → sql.js)                             |
-| `cli/runtime/magicBytes.mjs`                                                                                | Ìmúdájú magic-byte binary (ELF / Mach-O / Mach-O fat / PE)                                                                                 |
-| `cli/runtime/index.mjs`                                                                                     | `warmUpRuntimes()` — ń yanjú àwọn awakọ̀ ṣáájú ní postinstall / ìbẹ̀rẹ̀ àkọ́kọ́                                                                 |
-| `nodeRuntimeSupport.mjs`                                                                                    | Ṣàyẹ̀wò ẹ̀yà Node.js tí a ṣe àtìlẹ́yìn fún nígbà ìfisórí ẹrọ                                                                                  |
+| Ona                                                                         | Idi                                                                                                             |
+| --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `omniroute.mjs`                                                             | Akọsilẹ CLI akọkọ (`omniroute serve`, `setup`, `doctor`, `providers`, `combo`,…)                                |
+| `reset-password.mjs`                                                        | `omniroute-reset-password` alakomeji                                                                            |
+| `mcp-server.mjs`                                                            | MCP stdio titẹsi ojuami                                                                                         |
+| `antigravity-bridge.mjs`, `chatgpt-web-codex-mcp.mjs`                       | Afara iranlọwọ / awọn aaye titẹsi MCP                                                                           |
+| `aliasResolver.mjs`, `aliasResolverHook.mjs`                                | ESM yanju kio ti o maapu awọn aliases ọna tsconfig fun awọn fifi sori ẹrọ agbaye                                |
+| `nodeRuntimeSupport.mjs`                                                    | Ṣe atilẹyin ẹya Node.js ayẹwo                                                                                   |
+| `snapshot-data.sh`, `restore-data.sh`, `restore-policies.sh`, `rollback.sh` | Awọn iwe afọwọkọ isẹlẹ-igbalejo ti ara ẹni (pin `_ops-common.sh`)                                               |
+| `cold-start-bench.sh`                                                       | Tutu-ibere ala — wo [PERF_BASELINE.md](../ops/PERF_BASELINE.md)                                                 |
+| `cli/commands/`                                                             | Ẹya kan fun pipaṣẹ CLI (nipa 100, pẹlu awọn iṣọpọ `setup-*` )                                                   |
+| `cli/api-commands/`                                                         | Ti ipilẹṣẹ lati `docs/openapi.yaml` nipasẹ `npm run build:cli-api` — ma ṣe ṣatunkọ                              |
+| `cli/locales/`                                                              | Awọn atokọ ifiranṣẹ CLI (awọn agbegbe 67)                                                                       |
+| `cli/tui/`, `cli/tui-components/`                                           | ebute UI                                                                                                        |
+| `cli/tray/`                                                                 | Atẹ eto ati autostart (Windows PowerShell backend, systray lori macOS/Linux)                                    |
+| `cli/runtime/`                                                              | Ipinnu asiko asiko ti abinibi (`sqliteRuntime.mjs`, `magicBytes.mjs`), alabojuto ilana                          |
+| `cli/*.mjs`                                                                 | Awọn oluranlọwọ pinpin (args, alabara API, dir data, fifi ẹnọ kọ nkan, ile itaja olupese, ile itaja awọn eto,…) |
+| `cli/README.md`, `cli/CONVENTIONS.md`                                       | CLI internals ati awọn apejọ                                                                                    |
 
----
+Wo [CLI-TOOLS.md](../reference/CLI-TOOLS.md) ati [CLI-COMPANION.md](../guides/CLI-COMPANION.md).
 
-## `skills/` — Àwọn Ìmọ̀ Aṣojú Gbogbogbò
+## `electron/` — tabili app
 
-| Fáìlì                        | Ìdí                                                                               |
-| ---------------------------- | --------------------------------------------------------------------------------- |
-| `skills/omniroute*/SKILL.md` | Àwọn àfihàn ìmọ̀ 10 fún àwọn aṣojú AI ìta (Claude Desktop, ChatGPT, Cursor, Cline) |
+| Ona                                                        | Idi                                                                                   |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `main.js`                                                  | Ilana akọkọ Electron (window, olupin ti a fi sii, atẹ, awọn imudojuiwọn)              |
+| `preload.js`                                               | IPC Afara fara si renderer                                                            |
+| `lib/`                                                     | Aye igbesi aye Ferese, imurasilẹ olupin, oluṣọ ilera, awọn ayanfẹ olupin latọna jijin |
+| `remoteServerPrompt*.js`, `assets/remoteServerPrompt.html` | Ferese itọka olupin latọna jijin                                                      |
+| `processTree.js`, `sqlite-inspection.js`                   | Ṣiṣe afọmọ-ilana ọmọde ati awọn oluranlọwọ ayewo SQLite                               |
+| `package.json` / `package-lock.json`                       | atunto elekitironi ati awọn igbẹkẹle Electron                                         |
+| `assets/`                                                  | App ati awọn aami atẹ (`.ico`, `.icns`, `.png`)                                       |
+| `README.md`                                                | Awọn akọsilẹ inu — wo [ELECTRON_GUIDE.md](../guides/ELECTRON_GUIDE.md)                |
 
----
+## `public/` — aimi ìní
 
-## `scripts/` — Àwọn Skripti Kíkó & Àyẹ̀wò
+| Ona                                         | Idi                                                                                                                            |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `providers/`                                | Awọn aami olupese ti kojọpọ nipasẹ id (`/providers/<id>.svg`); provenance ni `config/quality/provider-assets-provenance.jsonl` |
+| `favicon.*`, `apple-touch-icon.*`, `icon-*` | Aṣàwákiri ati awọn aami PWA                                                                                                    |
+| `sw.js`                                     | Osise iṣẹ — wo [PWA_GUIDE.md](../guides/PWA_GUIDE.md)                                                                          |
+| `openapi.yaml`                              | Ẹda `docs/openapi.yaml` ti ipilẹṣẹ nipasẹ `npm run gen:public-openapi`                                                         |
+| `images/`, `sponsors/`, `deyin.svg`         | Awọn aworan atọka ipele, asia onigbowo, iṣẹ ọna README                                                                         |
 
-| Skripti                             | Ìdí                                                                                   |
-| ----------------------------------- | ------------------------------------------------------------------------------------- |
-| `run-next.mjs`                      | Olùṣiṣẹ́ ìdàgbàsókè/ìbẹ̀rẹ̀ pẹ̀lú ìkójọpọ̀ env                                             |
-| `build-next-isolated.mjs`           | Kíkó adádúró (Next.js 16 standalone)                                                  |
-| `prepublish.ts`                     | Ìmúrasílẹ̀ package ṣáájú `npm pack`                                                    |
-| `postinstall.mjs`                   | Ṣíṣẹ̀dá `.env` láìfọwọ́ṣe láti `.env.example` nígbà ìfibọ̀ àkọ́kọ́                         |
-| `sync-env.mjs`                      | Ṣíṣe ìmúdójúìwọ̀n àwọn kọ́kọ́rọ́ `.env` pẹ̀lú `.env.example`                               |
-| `check-cycles.mjs`                  | Ṣàwárí àwọn ìgbẹ́kẹ̀lé tó ń yípo                                                        |
-| `check-route-validation.mjs`        | Ṣàrídájú pé gbogbo àwọn ipa-ọ̀nà API ní ìfọwọ́sí Zod                                    |
-| `check-t11-any-budget.mjs`          | Fipá mú ìwọ̀n `any` tó ṣe kedere fún fáìlì kọ̀ọ̀kan                                      |
-| `check-docs-sync.mjs`               | Ṣàrídájú ìmúdójúìwọ̀n ẹ̀yà docs (pre-commit tó wà tẹ́lẹ̀)                                 |
-| **`check-env-doc-sync.mjs`**        | TUNTUN: ṣe àgbéléwọ̀n àwọn env vars inú kóòdù pẹ̀lú `.env.example` àti `ENVIRONMENT.md` |
-| **`check-docs-counts-sync.mjs`**    | TUNTUN: ṣàrídájú pé iye àwọn executors, strategies, OAuth, àti A2A skills bá docs mu  |
-| **`check-deprecated-versions.mjs`** | TUNTUN: ṣàmì sí àwọn ẹ̀yà/ọjọ́ tí ó ti pẹ́ nínú docs                                     |
-| `check-supported-node-runtime.ts`   | Ṣàrídájú pé ẹ̀yà Node lọ́wọ́lọ́wọ́ jẹ́ èyí tí a ṣe àtìlẹ́yìn fún                             |
-| `check-pr-test-policy.mjs`          | Fipá mú òfin “àwọn ìdánwò jẹ́ dandan” lórí àwọn àyípadà kóòdù production               |
-| **`gen-provider-reference.ts`**     | TUNTUN: ṣe ìpilẹ̀ṣẹ̀ `docs/reference/PROVIDER_REFERENCE.md` láìfọwọ́ṣe láti inú catalog  |
-| `i18n/generate-multilang.mjs`       | Túmọ̀ àwọn ọ̀rọ̀ UI + docs nípasẹ̀ Google Translate                                       |
-| `i18n_autotranslate.py`             | Ìlànà ìtumọ̀ docs tó dá lórí LLM                                                       |
-| `validate_translation.py`           | Ìfọwọ́sí ìtumọ̀ fún locale kọ̀ọ̀kan                                                       |
-| `check_translations.py`             | Àyẹ̀wò kọ́kọ́rọ́ i18n ní ẹ̀gbẹ́ kóòdù                                                       |
-| `run-playwright-tests.mjs`          | Olùṣiṣẹ́ ìdánwò Playwright E2E                                                         |
-| `run-protocol-clients-tests.mjs`    | Olùṣiṣẹ́ ìdánwò MCP/A2A E2E                                                            |
-| `run-ecosystem-tests.mjs`           | Àwọn ìdánwò ecosystem (ìṣọ̀kan provider)                                               |
-| `test-report-summary.mjs`           | Ṣe ìpilẹ̀ṣẹ̀ àkótán coverage ní markdown                                                |
-| `smoke-electron-packaged.mjs`       | Ṣe smoke-test fún kíkó Electron tí a ti package                                       |
-| `native-binary-compat.mjs`          | Ṣàrídájú pé àwọn native deps (`better-sqlite3`) bá Node ti Electron mu                |
-| `validate-pack-artifact.ts`         | Ṣàrídájú àbájáde npm pack                                                             |
-| `responses-ws-proxy.mjs`            | Afárá WebSocket fún Codex Responses API                                               |
-| `v1-ws-bridge.mjs`                  | Afárá WebSocket fún endpoint `/api/v1/ws`                                             |
-| `standalone-server-ws.mjs`          | Olùṣiṣẹ́ server WS adádúró                                                             |
-| `system-info.mjs`                   | Tẹ̀ ìsọfúnni system/runtime jáde fún àtìlẹ́yìn                                          |
-| `healthcheck.mjs`                   | Àyẹ̀wò ìlera ẹ̀ẹ̀kan ṣoṣo (tí Docker HEALTHCHECK ń lò)                                   |
-| `uninstall.mjs`                     | Skripti ìyọkúrò tó mọ́                                                                 |
-| `dev/sync-ui-kit.sh`                | Da `src/` CI UI Kit kọ ní commit tí a dè mọ́ sínú `packages/ui-kit/src`                |
-| `check/check-ui-kit-snapshot.mjs`   | Ẹnubodè pre-commit: `packages/ui-kit/src` bá commit upstream tí a dè mọ́ mu            |
-| `dev/gen-icon-map.mjs`              | `npm run gen:icon-map` — àwọn orúkọ icon tí a ń lò tí `ICON_MAP` kò ṣe map            |
-| `dev/codemod-material-icons.mjs`    | Tún àwọn span Material Symbols gangan kọ sí `<Icon>` (irinṣẹ́ migration)               |
+## `skills/` — Agent ogbon
+
+46 ogbon, ọkan folda kọọkan pẹlu kan `SKILL.md` (`cli-*`, `omni-*`, `config-codex-cli`, `ponytail`), plus `skills/README.md`. `src/lib/agentSkills/catalog.ts` n ka wọn ni akoko ṣiṣe ati ṣiṣafihan wọn nipasẹ `/api/agent-skills`, MCP ati A2A. Pupọ awọn ifihan jẹ ipilẹṣẹ nipasẹ `src/lib/agentSkills/generator.ts` (`scripts/skills/generate-agent-skills.mjs`; sọwedowo `npm run check:agent-skills-sync` fun fiseete). Wo [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md).
 
 ---
 
-## `docs/` — Iwe Awujọ (awọn faili gbongbo 7 + 17 subdirs)
+## `scripts/` — kọ, ibode ati tooling
 
-### Awọn itọsọna ipele oke
+Nipa 435 tọpa awọn faili. Awọn iwe afọwọkọ titun lọ sinu ọkan ninu awọn folda ti o gba laaye nipasẹ `AGENTS.md`; koodu ọkan-pipa lọ ni `scripts/ad-hoc/`.
 
-| Dókítà                      | Idi                                                                                             |
-| --------------------------- | ----------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Awọn faaji ipele ti o ga, maapu eto subsystem, dasibodu dada                                    |
-| `CODEBASE_DOCUMENTATION.md` | Itọkasi imọ-ẹrọ: awọn ilana, awọn modulu, awọn apejọ                                            |
-| `FEATURES.md`               | Matrix ẹya-ara pẹlu awọn ifojusi v3.8                                                           |
-| `USER_GUIDE.md`             | Itọsọna olumulo ipari (iṣagbekalẹ, awọn awoṣe, combos, CLIs, ohun, ati bẹbẹ lọ)                 |
-| `API_REFERENCE.md`          | itọkasi opin API pẹlu awoṣe auth                                                                |
-| `openapi.yaml`              | OpenAPI 3.0 pato (awọn ọna 121)                                                                 |
-| `SETUP_GUIDE.md`            | Awọn ọna fifi sori ẹrọ (npm, npx, Docker, Electron, Termux, orisun)                             |
-| `ENVIRONMENT.md`            | Gbogbo env vars (~ 800 ti o ni akọsilẹ, ~ 3,050 laini `.env.example`)                           |
-| `TROUBLESHOOTING.md`        | Awọn aṣiṣe ti o wọpọ + v3.8.0 mọ oran                                                           |
-| `RELEASE_CHECKLIST.md`      | Ṣiṣan itusilẹ ni kikun (awọn ọgbọn, husky, awọn adehun aṣa, ran lọ)                             |
-| `COVERAGE_PLAN.md`          | Awọn ibi-afẹde agbegbe ati ipo lọwọlọwọ                                                         |
-| `FREE_TIERS.md`             | Awọn olupese ipele ọfẹ (48 + + 11 OAuth ọfẹ)                                                    |
-| `CLI-TOOLS.md`              | Awọn akojọpọ CLI ita + Ti abẹnu OmniRoute CLI                                                   |
-| `I18N.md`                   | i18n faaji, fifi a ede, 67 locales                                                              |
-| `UNINSTALL.md`              | Nu aifi si awọn igbesẹ                                                                          |
-| `PROVIDER_REFERENCE.md`     | **Ti ipilẹṣẹ laifọwọyi** katalogi ti awọn olupese 381 (regen: `npm run gen:provider-reference`) |
+```
+scripts/
+├── check-permissions.sh   # Container ENTRYPOINT (copied to /app by the Dockerfile)
+├── postinstall.mjs        # Native-runtime warm-up run after scripts/build/postinstall.mjs
+├── start-ws-server.mjs    # Starts the live-dashboard WebSocket server as a separate process
+├── build/                 # Build, standalone assembly, npm pack/publish, postinstall, MITM, Electron prep
+├── check/                 # Quality gates behind most `npm run check:*` scripts; lib/ holds shared helpers
+├── quality/               # Ratchets, gate manifest, impact map, mutation tooling, release acceptance
+├── ci/                    # Steps invoked only by workflows (Docker publish, Release-Green, scanners)
+├── dev/                   # Dev runners (run-next, Playwright/protocol/ecosystem runners) and runtime helpers shipped in the package
+├── docs/                  # README SVG/diagram generators, OpenAPI module, provider reference, wiki sync
+├── i18n/                  # UI and docs translation pipeline, coverage checks, glossary/, lib/
+├── release/               # Changelog aggregation, contributors, merge train, LTS cut, publish verification
+├── ops/                   # Canary deploy, OpenCode free relay, runner janitor, allowlist sync
+├── perf/                  # Benchmarks and one-off performance A/B scripts
+├── cli/                   # CLI tooling (API-command generator, SSO, CLI smoke tests, media MCP)
+├── homolog/               # Homologation against a running instance + promptfoo config generation
+├── features/              # Feature-triage engine and its lib/
+├── router-eval/           # Offline router evaluation (`npm run eval:router*`)
+├── compression/           # Compression benchmark (`npm run bench:compression`, runs on Bun)
+├── compression-eval/      # Compression quality evaluation (`npm run eval:compression`)
+├── devin-bridge/          # Shell entry points for the Devin bridge (build, launch, tests)
+├── docker/                # Base-path patching for the standalone server inside containers
+├── integrations/          # MarkItDown MCP launchers — see docs/integrations/MARKITDOWN_MCP.md
+├── launchers/             # Double-click launchers and desktop-shortcut creators (Windows/macOS/Linux)
+├── packs/                 # Optional-pack manifest and installer (shipped in the npm package)
+├── test/                  # Live smoke scripts (combo-live, OpenCode/ChatGPT Web)
+├── sre/                   # On-call rotation, log redaction, TCP close analyzer
+├── vps/                   # Start/stop the release runner
+├── skills/                # Agent Skills generator CLI
+├── research/              # Free-tier budget card SVG generator
+└── ad-hoc/                # One-shot diagnostics and migrations
+```
 
-### Subsystem jin-dives
+Awọn aaye titẹ sii ti a lo nigbagbogbo:
 
-| Dókítà                                       | Idi                                                                             |
-| -------------------------------------------- | ------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                              | olupin MCP : awọn irinṣẹ 110, awọn gbigbe 3, awọn aaye 33, awọn aaye ipari REST |
-| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, 6 ogbon, REST oluranlọwọ, oluranlowo kaadi                  |
-| `AGENT_PROTOCOLS_GUIDE.md`                   | Itọsọna iṣọkan: A2A vs ACP vs Awọn aṣoju awọsanma                               |
-| `CLOUD_AGENT.md`                             | Codex awọsanma / Devin / Jules orchestration                                    |
-| `SKILLS.md`                                  | Ilana ogbon (ti a ṣe sinu + ọjà + SkillsSH + apoti iyanrin)                     |
-| `RADAR.md`                                   | Awoṣe katalogi awoṣe ọfẹ Radar (`RADAR_ENABLED`, pipa nipasẹ aiyipada)          |
-| `MEMORY.md`                                  | Eto iranti (SQLite FTS5 + Qdrant)                                               |
-| `EVALS.md`                                   | Ilana Eval (suites, runs, rubrics)                                              |
-| `GUARDRAILS.md`                              | PII masker, abẹrẹ kiakia, afara iran                                            |
-| `COMPLIANCE.md`                              | Akọsilẹ ayẹwo, idaduro, noLog kuro                                              |
-| `WEBHOOKS.md`                                | HMAC-fọwọsi webhook ifijiṣẹ                                                     |
-| `REASONING_REPLAY.md`                        | Kaṣe arabara memory/SQLite fun `reasoning_content`                              |
-| `AUTHZ_GUIDE.md`                             | Opopona aṣẹ (`classify` → `policies` → `enforce`)                               |
-| `RESILIENCE_GUIDE.md`                        | Circuit fifọ + cooldown + awoṣe titiipa                                         |
-| `docs/security/STEALTH_GUIDE.md` (git nikan) | TLS itẹka (JA3/JA4), Claude Code CCH, MITM ijẹrisi                              |
-| `AUTO-COMBO.md`                              | Enjini Konbo Aifọwọyi (igbelewọn ifosiwewe 16, awọn idii ipo 6, ile-iṣẹ foju)   |
+| Iwe afọwọkọ                                                         | Idi                                                                                                   |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `dev/run-next.mjs`                                                  | `npm run dev` / `npm start` olusare                                                                   |
+| `build/build-next-isolated.mjs`                                     | `npm run build` (kikọ Next.js adaduro)                                                                |
+| `build/prepublish.ts`                                               | `npm run build:cli`: kojọpọ npm `dist/`                                                               |
+| `build/postinstall.mjs`                                             | npm `postinstall` ìkọ                                                                                 |
+| `build/publicOpenApi.mjs`                                           | `npm run gen:public-openapi`                                                                          |
+| `docs/gen-provider-reference.ts`                                    | `npm run gen:provider-reference` (ṣe atunbi PROVIDER_REFERENCE.md)                                    |
+| `docs/gen-openapi-module.mjs`                                       | `prebuild:docs` (n ṣe ipilẹṣẹ `src/app/docs/lib/openapi.generated.ts`)                                |
+| `i18n/run-translation.mjs`                                          | `npm run i18n:run` (awọn digi docs)                                                                   |
+| `i18n/generate-route-namespaces.mjs`                                | `npm run gen:i18n-routes`                                                                             |
+| `release/aggregate-changelog.mjs`                                   | Pa awọn ajẹkù `changelog.d/` sinu `CHANGELOG.md`                                                      |
+| `check/check-fabricated-docs.mjs`                                   | `npm run check:fabricated-docs` (ẹnu-ọna deede doc)                                                   |
+| `check/check-tracked-artifacts.mjs`                                 | `npm run check:tracked-artifacts` (awọn bulọọki tọpinpin awọn ọna `_*` root)                          |
+| `quality/check-quality-ratchet.mjs`                                 | `npm run quality:ratchet` (metiriki ratchet lodi si `config/quality/`)                                |
+| `dev/run-playwright-tests.mjs`                                      | `npm run test:e2e`                                                                                    |
+| `dev/run-protocol-clients-tests.mjs`, `dev/run-ecosystem-tests.mjs` | `npm run test:protocols:e2e`, `npm run test:ecosystem`                                                |
+| `dev/new-worktree.sh`                                               | Ṣẹda ohun ti o ya sọtọ idagbasoke worktree — wo [WORKTREE_ISOLATION.md](../ops/WORKTREE_ISOLATION.md) |
+| `dev/sync-ui-kit.sh`                                                | Ṣe amuṣiṣẹpọ `packages/ui-kit/src` si ipinnu oke ti a pin                                             |
 
-### Funmorawon
+Oja ẹnu-ọna ati awọn ilana: [QUALITY_GATES.md](QUALITY_GATES.md).
 
-| Dókítà                          | Idi                                      |
-| ------------------------------- | ---------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Akopọ ti awọn ipo funmorawon + roadmap   |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK enjini, iforukọsilẹ adehun |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman ofin pack JSON schema            |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Iṣakojọpọ akopọ ofin fun ede-ede         |
-| `RTK_COMPRESSION.md`            | opo gigun ti epo alaye RTK (awọn asẹ 56) |
+## `config/` — ti ikede ti ikede ati ipo ẹnu-bode
 
-### Ifiranṣẹ
+| Ona                                      | Idi                                                                                                                  |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `i18n.json` / `i18n-schema.json`         | Awọn agbegbe atilẹyin (orisun ti kika agbegbe) ati ero wọn                                                           |
+| `payloadRules.json`                      | Awọn ofin isanwo oke (`open-sse/services/payloadRules.ts`)                                                           |
+| `cli-tools-manifest.json`                | Ifihan ti awọn irinṣẹ CLI ti o le ṣepọ (`bin/cli/cli-manifest.mjs`)                                                  |
+| `alibaba-free-tier-allowlist.json`       | Alibaba free-ipele awoṣe allowlist                                                                                   |
+| `ci/toolchain.json`                      | CI toolchain awọn ẹya                                                                                                |
+| `quality/quality-baseline.json`          | Ipilẹ ratchet olona-metiriki (agbegbe, awọn ikilọ, ẹda-iwe,…)                                                        |
+| `quality/*-baseline.json`                | Awọn ipilẹ ti o tutunini fun awọn ẹnu-ọna kọọkan (idiju, iṣiṣẹpọ, iwọn faili, awọn ege titẹ tẹẹrẹ, iṣawari idanwo,…) |
+| `quality/*-allowlist.json`               | Awọn atokọ ẹnu-ọna (awọn igbẹkẹle, awọn iwe-aṣẹ, ikasi AI, awọn idanwo arakunrin-igbagbe,…)                          |
+| `quality/eslint-suppressions.json`       | Awọn ipanu ESLint tio tutunini ti a lo nipasẹ `npm run lint`                                                         |
+| `quality/gate-manifest.json`             | Ifihan ẹnu-ọna ti a ṣayẹwo nipasẹ `scripts/quality/gate-manifest.mjs`                                                |
+| `quality/vitest-exclusions.json`         | Oja iyasọtọ fun `vitest.quarantine.config.ts`                                                                        |
+| `quality/skill-templates/`               | Awọn awoṣe SKILL.md Canonical ti ṣayẹwo nipasẹ `scripts/quality/check-skill-contract.mjs`                            |
+| `quality/release-acceptance.schema.json` | Itusilẹ-gbigba ẹri ero — wo [QUALITY_EVIDENCE_CONTRACT.md](QUALITY_EVIDENCE_CONTRACT.md)                             |
+| `release/`                               | Changelog reconciliations ati awọn wreq-js abinibi farahan, iwe-ašẹ oja ati awọn akiyesi                             |
 
-| Dókítà                       | Idi                                                                 |
-| ---------------------------- | ------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker kọ, awọn profaili (base/cli/host/cliproxyapi), Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | Gbogboogbo VM/VPS imuṣiṣẹ (Ubuntu/Debian + nginx + systemd)         |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Ifilọlẹ Fly.io (Lọwọlọwọ Kannada-nikan)                             |
-| `TERMUX_GUIDE.md`            | Android headless nipasẹ Termux                                      |
-| `PWA_GUIDE.md`               | Onitẹsiwaju Web App fi sori ẹrọ + iṣẹ Osise                         |
-| `ELECTRON_GUIDE.md`          | Desktop app build + sign + distribute                               |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                              |
-| `PROXY_GUIDE.md`             | 4-ipele ti o njade lo aṣoju + 1aṣoju ọjà                            |
+## `changelog.d/` — changelog ajẹkù
 
-### Awọn iwe-ilana
-
-| Subdir                | Idi                                                                                                                                                                                      |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Awọn itumọ doc ti agbegbe (awọn agbegbe 41)                                                                                                                                              |
-| `docs/screenshots/`   | Awọn ohun-ini aworan fun awọn itọsọna                                                                                                                                                    |
-| `_tasks/superpowers/` | Plans/specs lati awọn alagbara superpowers (`writing-plans`/`brainstorming`) + iwadi — sọtọ, lọtọ-version repo, gitignored nipa akọkọ igi. Wo CLAUDE.md → "Igbero & Awọn Iṣẹ iṣe Iwadi". |
-
----
-
-## `tests/` — Àkójọpọ̀ Àwọn Ìdánwò
-
-| Ìtọ́sọ́nà abẹ́                          | Irú                                       | Olùṣiṣẹ́                                 |
-| ------------------------------------ | ----------------------------------------- | --------------------------------------- |
-| `tests/unit/`                        | Àwọn ìdánwò ẹyọ (~4,800 fáìlì, ó yára jù) | Olùṣiṣẹ́ ìdánwò abinibi Node             |
-| `tests/integration/`                 | Àwọn ìdánwò ìṣọ̀kan ọ̀pọ̀-module + DB        | Olùṣiṣẹ́ ìdánwò abinibi Node (ìbáramu 1) |
-| `tests/e2e/`                         | UI + ìṣàn-iṣẹ́ E2E                         | Playwright                              |
-| `tests/e2e/protocol-clients.test.ts` | MCP + A2A E2E pẹ̀lú client gidi            | Àwọn client protocol àdáni              |
-| `tests/e2e/ecosystem.test.ts`        | Ìṣọ̀kan provider (tí ń lo nẹ́tíwọ́ọ̀kì)       | Olùṣiṣẹ́ ìdánwò abinibi Node             |
+PR ṣafikun ajẹkù kan dipo ṣiṣatunṣe `CHANGELOG.md`: `features/`, `fixes/` tabi `maintenance/`, ti a npè ni `<PR-number>-<slug>.md`. Ni akoko idasilẹ `scripts/release/aggregate-changelog.mjs` yoo pa wọn pọ si `CHANGELOG.md` o si pa wọn rẹ; `npm run check:changelog-integrity` fọwọsi wọn. Awọn alaye ni `changelog.d/README.md`.
 
 ---
 
-## `public/` — Àwọn Ohun Èlò Aimi
+## `docs/` — àkọsílẹ iwe
 
-| Ọ̀nà                 | Ète                                                                 |
-| ------------------- | ------------------------------------------------------------------- |
-| `public/` (gbòǹgbò) | Favicons, robots.txt, manifest, service worker, àwọn àwòrán ìpolówó |
-| `public/providers/` | Àmì provider PNG/SVG (tí a ń lò nínú dashboard)                     |
+Awọn apakan ti a ṣe akojọ si ni `source.config.ts` ṣajọ sinu aaye `/docs` (pẹlu awọn oju-iwe aabo oniṣẹ-nikan ti a yọkuro); `docs/meta.json` ṣeto aṣẹ legbe. Bẹrẹ ni [README.md](../README.md).
 
----
+| Ona                | Awọn akoonu                                                                                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `getting-started/` | Ibẹrẹ iyara, agbalejo ara ẹni, awọn olupese, awọn ipele ọfẹ, Konbo Aifọwọyi ati awọn itọsọna kuki wẹẹbu                                                       |
+| `guides/`          | Oluṣeto ati awọn itọsọna idagbasoke: iṣeto, Docker, Electron, PWA, Termux, CLIs, i18n, laasigbotitusita, itọsọna olumulo                                      |
+| `architecture/`    | Itọkasi koodu ipilẹ, awọn ilana atunṣe, authz, resilience, awọn ẹnubode didara, eto apẹrẹ, maapu yii                                                          |
+| `reference/`       | itọkasi API, awọn oniyipada ayika, awọn asia ẹya, awọn irinṣẹ CLI, awọn ipele ọfẹ, itọkasi olupese ti ipilẹṣẹ, awọn olupese kuro                              |
+| `frameworks/`      | MCP, A2A, ACP, ogbon, iranti, afikun, awọsanma òjíṣẹ, webhooks, evals, log okeere, Rada, Ibi isereile, ...                                                    |
+| `routing/`         | Konbo-laifọwọyi, ero replay/routing, ipin ipin, akaba ṣiṣe alabapin, idiyele odo ti o muna,…                                                                  |
+| `security/`        | Awọn ọna opopona, imototo aṣiṣe, CORS, SSO, eto imulo egress, awọn ipele-iṣọ ọna, pq ipese,…                                                                  |
+| `compression/`     | Itọsọna funmorawon, awọn ẹrọ, RTK, ọna kika ofin, awọn akopọ ede, ṣiṣatunṣe ọrọ-ọrọ                                                                           |
+| `ops/`             | Sisan itusilẹ, ẹka, ọkọ oju irin dapọ, imuṣiṣẹ (VM, Fly.io, Kubernetes), ibi ipamọ data, awọn aṣoju, awọn igi iṣẹ, Awọn alaye Awọn ofin Lile                  |
+| `providers/`       | Awọn itọsọna Olupese (Kọọdu Claude, ChatGPT Web, Cursor, GitHub Copilot,…)                                                                                    |
+| `comparison/`      | OmniRoute akawe pẹlu yiyan                                                                                                                                    |
+| `integrations/`    | Awọn akọsilẹ Integration (fal.ai abinibi, MarkItDown MCP); ko ṣe akojọpọ sinu `/docs`                                                                         |
+| `openapi.yaml`     | orisun OpenAPI ; awọn ifunni `src/app/docs/lib/openapi.generated.ts`, `public/openapi.yaml` ati `bin/cli/api-commands/`                                       |
+| `diagrams/`        | Awọn orisun Mermaid (`.mmd`), ti a ṣe SVGs (`exported/`) ati README SVGs lati `scripts/docs/gen-readme-*`                                                     |
+| `assets/`          | Ede-flag SVGs ati awọn ohun-ini README miiran                                                                                                                 |
+| `screenshots/`     | Awọn sikirinisoti ti a lo nipasẹ README ati awọn itọsọna                                                                                                      |
+| `i18n/`            | Awọn digi ti a tumọ: folda kan fun agbegbe (66) pẹlu awọn docs root ati ipin `docs/` kan; ti a ṣe nipasẹ `npm run i18n:run` — wo [I18N.md](../guides/I18N.md) |
+| oke-ipele `*.md`   | `README.md` (itọka doc), `DEVELOPER-ENVIRONMENT.md` ati awọn akọsilẹ adaduro diẹ                                                                              |
 
-## `config/` — Àwọn Àtúnṣe Aimi + Ipò Ẹnu-ọ̀nà Didára
-
-Àwọn àdàkọ àtúnṣe tí a pín jáde pẹ̀lú àwọn ìpìlẹ̀ ẹnu-ọ̀nà didára tí a commit
-(a gbé wọn láti gbòǹgbò ibi ìfipamọ́ síbí ní v3.8.26 láti jẹ́ kí gbòǹgbò náà fẹ́ẹrẹ̀).
-
-| Ọ̀nà                                           | Ète                                                                                |
-| --------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `config/i18n.json`                            | Àkójọ locale + metadata (orisun àṣẹ fún iye locale 42)                             |
-| `config/i18n-schema.json`                     | Schema JSON tí ń fìdí ìpéye `i18n.json` múlẹ̀                                       |
-| `config/payloadRules.json`                    | Àwọn òfin ìmọ́tótó payload upstream                                                 |
-| `config/quality/quality-baseline.json`        | Ìpìlẹ̀ ratchet oníwọ̀n-púpọ̀ (`scripts/quality/check-quality-ratchet.mjs`)            |
-| `config/quality/complexity-baseline.json`     | Ìpìlẹ̀ complexity ESLint tí a dì (`check-complexity.mjs`)                           |
-| `config/quality/duplication-baseline.json`    | Ìpìlẹ̀ duplication jscpd tí a dì (`check-duplication.mjs`)                          |
-| `config/quality/file-size-baseline.json`      | Ìpìlẹ̀ ìwọ̀n fáìlì kọ̀ọ̀kan tí a dì (`check-file-size.mjs`)                            |
-| `config/quality/test-discovery-baseline.json` | Ìpìlẹ̀ ìdánwò aláìní-ìsopọ̀ tí a dì (`check-test-discovery.mjs`)                     |
-| `config/quality/dependency-allowlist.json`    | Àkójọ àwọn dependency tí a fọwọ́sí (`check-deps.mjs`)                               |
-| `config/quality/.license-allowlist.json`      | Àkójọ àwọn ìwé-àṣẹ SPDX tí a fàyè gbà (`check-licenses.mjs`)                       |
-| `config/quality/quality-metrics.json`         | Àwọn metric tí a kójọ fún ìgbà díẹ̀ (tí `collect-metrics.mjs` ṣẹ̀dá; **gitignored**) |
-
----
-
-## `.github/` — Ìṣepọ̀ GitHub
-
-| Ọ̀nà                                | Ète                                                               |
-| ---------------------------------- | ----------------------------------------------------------------- |
-| `.github/workflows/`               | Àwọn ìṣàn iṣẹ́ CI/CD GitHub Actions (lint, ìdánwò, ìbora, ìtújáde) |
-| `.github/ISSUE_TEMPLATE/`          | Àwọn àdàkọ ìṣòro fún àbùkù/ẹ̀ya tuntun                             |
-| `.github/pull_request_template.md` | Àdàkọ PR                                                          |
-| `.github/dependabot.yml`           | Ìṣètò ìmúdójúìwọ̀n àwọn ohun tí iṣẹ́ gbára lé                       |
+Awọn aaye titẹsi bọtini: [ARCHITECTURE.md](ARCHITECTURE.md), [CODEBASE_DOCUMENTATION.md](CODEBASE_DOCUMENTATION.md), [MODIFICATION_SCENARIOS.md](MODIFICATION_SCENARIOS.md), [ENVIRONMENT.md](../reference/ENVIRONMENT.md), [PROVIDER_REFERENCE.md](../reference/PROVIDER_REFERENCE.md) (ti ipilẹṣẹ nipasẹ `npm run gen:provider-reference`).
 
 ---
 
-## `.husky/` — Àwọn Ìkọ̀ Git
+## `tests/` — igbeyewo suites
 
-| Fáìlì        | Ète                                                                                |
-| ------------ | ---------------------------------------------------------------------------------- |
-| `pre-commit` | Ó ń ṣiṣẹ́ `lint-staged + check-docs-sync + check:any-budget:t11`                    |
-| `pre-push`   | Ó ti di aláìṣiṣẹ́ lọ́wọ́lọ́wọ́ (a ti sọ ọ́ di àlàyé). Ṣiṣe `npm run test:unit` pẹ̀lú ọwọ́. |
-| `_/`         | Àwọn ẹ̀ka inú Husky                                                                 |
+Nipa 9,670 tọpa awọn faili. Awọn faili idanwo wa nibi, kii ṣe ni gbongbo ise agbese. Awọn imukuro: awọn folda `__tests__/` ti o wa papọ ni `src/` ati `open-sse/` ti awọn atunto Vitest gba.
 
----
+| Ona                                                    | Awọn akoonu                                                                                                                                                                                | Isare                                                                                   |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `tests/unit/`                                          | Awọn idanwo ipin (ju awọn faili 9,000 lọ): ọpọlọpọ ni ipele oke, pẹlu awọn folda agbegbe (`ui/`, `compression/`, `build/`, `guardrails/`, `db/`, `cli/`, `api/`, `dashboard/`, `combo/`,…) | Olusare idanwo ipade (`npm run test:unit`); `*.tsx` nipasẹ `test:vitest:ui`             |
+| `tests/unit/serial/`                                   | Awọn idanwo ifarabalẹ Sipiyu nṣiṣẹ pẹlu concurrency 1                                                                                                                                      | `npm run test:unit:serial`                                                              |
+| `tests/unit/autoCombo/`, `tests/unit/api/**/*.spec.ts` | Vitest suites inu igi kuro                                                                                                                                                                 | `npm run test:vitest`                                                                   |
+| `tests/integration/`                                   | Multi-module ati awọn idanwo iṣọpọ DB ; `combo-matrix/`, `combo-live/`, `services/`                                                                                                        | `npm run test:integration`, `test:combo:matrix`, `test:combo:live`, `test:services:int` |
+| `tests/e2e/`                                           | Playwright `*.spec.ts` + ifiwe suites `ecosystem.test.ts`, `protocol-clients.test.ts`                                                                                                      | `npm run test:e2e`, `test:ecosystem`, `test:protocols:e2e`                              |
+| `tests/boundary/`                                      | `*.live.test.ts` lodi si apẹẹrẹ ti nṣiṣẹ                                                                                                                                                   | `npm run test:boundary:live`                                                            |
+| `tests/homolog/`                                       | Awọn suites homologation (`api/`, `ui/` pẹlu atunto Playwright tirẹ)                                                                                                                       | `npm run homolog` — wo [HOMOLOGATION.md](../ops/HOMOLOGATION.md)                        |
+| `tests/load/`                                          | Gbe ati ki o rẹ awọn iwe afọwọkọ (k6)                                                                                                                                                      | Aṣalẹ resilience bisesenlo                                                              |
+| `tests/_setup/`                                        | `--import` / awọn faili iṣeto (dir data ti o ya sọtọ, ẹṣọ egress, Vitest UI polyfills)                                                                                                     | Ti kojọpọ nipasẹ awọn asare                                                             |
+| `tests/_helpers/`, `tests/helpers/`                    | Awọn oluranlọwọ idanwo pinpin (awọn aworan iwo goolu, igba iṣakoso,…)                                                                                                                      | Ṣe akowọle nipasẹ awọn idanwo                                                           |
+| `tests/fixtures/`                                      | Awọn alaye imuduro ati awọn imuduro ilana ọmọ                                                                                                                                              | Ṣe akowọle nipasẹ awọn idanwo                                                           |
+| `tests/snapshots/`                                     | Awọn faili goolu fun `tests/helpers/goldenSnapshot.ts`                                                                                                                                     | Ṣe akowọle nipasẹ awọn idanwo                                                           |
+| `tests/manual/`                                        | awọn faili `.http` fun awọn ipe REST afọwọṣe                                                                                                                                               | Afowoyi                                                                                 |
+| `tests/security/`                                      | Awọn iwe afọwọkọ ikarahun aabo                                                                                                                                                             | Afọwọṣe / kuro-igbeyewo amuse                                                           |
+| `tests/types/`                                         | Iru-ipele guide amuse                                                                                                                                                                      | —                                                                                       |
 
-## `.claude/` — Àwọn Àṣẹ Slash Claude Code
-
-| Fáìlì                                               | Ète                                                          |
-| --------------------------------------------------- | ------------------------------------------------------------ |
-| `commands/version-bump-cc.md`                       | `/version-bump-cc` — gbé ẹ̀yà sókè + àkọsílẹ̀-àyípadà aládàáṣe |
-| `commands/generate-release-cc.md`                   | `/generate-release-cc` — gbogbo ìṣàn iṣẹ́ ìtújáde             |
-| `commands/deploy-vps-{local,akamai,both}-cc.md`     | Ṣàgbékalẹ̀ sí VPS                                             |
-| `commands/capture-release-evidences-cc.md`          | Gba àwọn ẹ̀ya tuntun sílẹ̀ pẹ̀lú aṣàwákiri gẹ́gẹ́ bí WebP         |
-| `commands/review-{prs,discussions}-cc.md`           | Ṣàyẹ̀wò kí o sì to àwọn PR/ìjíròrò GitHub                     |
-| `commands/{review-issues,implement-features}-cc.md` | Àwọn ìṣàn iṣẹ́ ìṣòro                                          |
-| `settings.local.json`                               | Àwọn ìṣètò Claude Code fún iṣẹ́-àkànṣe kọ̀ọ̀kan                 |
-
----
-
-## `.agents/` — Àwọn Ìṣàn Iṣẹ́ Agent Gbogbogbòò (Codex / Cursor / abbl.)
-
-| Ọ̀nà                      | Ète                                                     |
-| ------------------------ | ------------------------------------------------------- |
-| `workflows/*-ag.md`      | Àwọn ìtumọ̀ ìṣàn iṣẹ́ 11 (àwòrán ẹ̀dà `.claude/commands/`) |
-| `skills/<name>/SKILL.md` | Àwọn ìtumọ̀ ọgbọ́n 9 pẹ̀lú Àwọn Àkọsílẹ̀ Ìmúṣẹ Codex        |
-
-> **Àkíyèsí:** Àwọn ìṣàn iṣẹ́ àti àwọn àṣẹ jẹ́ ọ̀kan náà ní báìtì-kí-báìtì lọ́wọ́lọ́wọ́. Bí `.agents/` bá jẹ́ fún àyíká ìṣiṣẹ́ agent mìíràn (Codex), àwọn ẹ̀yà náà gbọ́dọ̀ yàtọ̀ ní ọ̀nà tó ní ìtumọ̀.
+Matrix kikun: `CONTRIBUTING.md` → "Awọn idanwo Ṣiṣe" ati [COVERAGE_PLAN.md](../ops/COVERAGE_PLAN.md).
 
 ---
 
-## `_ideia/`, `_mono_repo/`, `_references/`, `_tasks/` — Ní Ita Igi
+## `deploy/` — Kubernetes
 
-Àwọn àpò-ọ̀nà wọ̀nyí tí àmì abẹ́là bẹ̀rẹ̀ orúkọ wọn ń pa àkóónú tí a kò pín kiri mọ́:
+| Ona                                                | Idi                                                                                                |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `deploy/helm/omniroute/`                           | Atọka Helm (`Chart.yaml`, `values.yaml`, awọn awoṣe fun imuṣiṣẹ, iṣẹ, ingress, PVC, asiri, atunto) |
+| `deploy/kubernetes/base/`                          | Ṣe ipilẹ ipilẹ (aaye orukọ, imuṣiṣẹ, iṣẹ, PVC, configmap, `secret.example.yaml`)                   |
+| `deploy/kubernetes/overlays/k3s/`, `overlays/k8s/` | Awọn agbekọja-pato iṣupọ (iwọle, kilasi ibi ipamọ, awọn orisun, awọn iwadii)                       |
 
-- **`_ideia/`** — àwọn àkọsílẹ̀ àpẹrẹ (àwọn ẹ̀ka defer / notfit / viable)
-- **`_mono_repo/`** — àwọn iṣẹ́-àkànṣe abẹ́-iṣẹ́ ìtàn (omnirouteCloud, omnirouteSite, vscode-extension)
-- **`_references/`** — àwọn ẹ̀dà kíkà-nìkan ti àwọn iṣẹ́ OSS tó ní í ṣe pẹ̀lú rẹ̀ (LiteLLM, 9router, ClawRouter, CLIProxyAPI, modelrelay, new-api, abbl.) fún ìtọ́kasí àgbélébùú nígbà ìdàgbàsókè
-- **`_tasks/`** — àwọn fáìlì ìtọ́pa iṣẹ́ fún ìtújáde kọ̀ọ̀kan (àìfẹsẹ̀múlẹ̀)
+Wo [KUBERNETES_DEPLOYMENT_GUIDE.md](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
-A kò fi wọ́n sínú àbájáde `npm pack`. Wo `.npmignore`.
+## `docker/` — awọn aworan iranlọwọ
+
+| Ona                                 | Idi                                                                                                                             |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `docker/chatgpt-web-codex-browser/` | Aworan ẹrọ aṣawakiri ti ko ni ori pẹlu aṣoju CDP fun oluṣakoso wẹẹbu ChatGPT — wo [CHATGPT_WEB.md](../providers/CHATGPT_WEB.md) |
+| `docker/devin-bridge/`              | aworan afara Devin, ṣajọ faili, ẹgan ati oluso nẹtiwọki                                                                         |
+| `docker/vnc-browser/`               | Chromium pẹlu VNC fun awọn akoko aṣawakiri alabaṣepọ                                                                            |
+
+Aworan akọkọ ni root `Dockerfile`; wo [DOCKER_GUIDE.md](../guides/DOCKER_GUIDE.md).
+
+## awọn ilana agbegbe `contrib/` — (kii ṣe atilẹyin ni ifowosi)
+
+| Ona                     | Idi                                                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `contrib/podman/`       | Podman quadlets (apoti, iwọn didun, nẹtiwọki, Redis)                                                                     |
+| `contrib/vps/`          | VPS `compose.yaml` + `.env.example`                                                                                      |
+| `contrib/windows/`      | awọn ifilọlẹ `.bat` fun ṣiṣe lati ibi isanwo Windows kan                                                                 |
+| `contrib/session-sync/` | README fun igba-kẹta amuṣiṣẹpọ aṣawakiri aṣawakiri — wo [SESSION-SYNC-EXTENSION.md](../guides/SESSION-SYNC-EXTENSION.md) |
+
+## `examples/`
+
+| Ona                             | Idi                                                                      |
+| ------------------------------- | ------------------------------------------------------------------------ |
+| `examples/omniroute-cmd-hello/` | Pọọku pipaṣẹ itanna — wo [PLUGINS.md](../frameworks/PLUGINS.md)          |
+| `examples/plugins/`             | Awọn afikun apẹẹrẹ: langfuse, ìbéèrè-logger, akori-oluṣakoso, asia kaabo |
+| `examples/quickstart/`          | Awọn snippets alabara: curl, Node.js (axios), PHP, Python                |
 
 ---
 
-## Àwọn Ohun Tí A Ṣẹ̀dá / Tí Git Kò Kà Sí
+## `.github/` — GitHub iṣọpọ
 
-| Ibi                    | Ìdí                                |
-| ---------------------- | ---------------------------------- |
-| `node_modules/`        | Àwọn ohun tí npm gbára lé          |
-| `.next/`               | Àbájáde ìkọ́lé Next.js              |
-| `coverage/`            | Àwọn ìròyìn àyẹ̀wò c8               |
-| `logs/`                | Àwọn àkọsílẹ̀ àsìkò ìṣiṣẹ́           |
-| `package/`             | Agbègbè ìmúrasílẹ̀ npm pack         |
-| `.playwright-mcp/`     | Àwọn àbájáde ìdánwò Playwright MCP |
-| `.issues/`             | Àpamọ́ ìṣòro abẹ́lẹ̀                  |
-| `tsconfig.tsbuildinfo` | Àpamọ́ àfikún TS                    |
+| Ona                                                          | Idi                                                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.github/workflows/`                                         | CI (`ci.yml`, `quality.yml`, `build.yml`), awọn iwoye aabo (`codeql.yml`, `semgrep.yml`, `scorecard.yml`, `dast-smoke.yml`), awọn suites `nightly-*.yml` ti a ṣeto, titẹjade (`npm-publish.yml`, `docker-publish.yml`, `electron-release.yml`), itusilẹ ati awọn ṣiṣan iṣẹ ṣiṣe itọju |
+| `.github/actions/npm-ci-retry/`                              | Iṣe akojọpọ: `npm ci` pẹlu kaṣe ati tun gbiyanju                                                                                                                                                                                                                                      |
+| `.github/actions/prepare-unit-storage/`                      | Iṣe akojọpọ: ṣe ominira aaye disk olusare, lẹhinna fi awọn igbẹkẹle sori ẹrọ                                                                                                                                                                                                          |
+| `.github/ISSUE_TEMPLATE/`                                    | Kokoro, ẹya-ara ati idanwo-ipin awọn fọọmu oro                                                                                                                                                                                                                                        |
+| `.github/pull_request_template.md`, `PULL_REQUEST_TEMPLATE/` | Àdàkọ PR aiyipada pẹlu awọn iyatọ bugfix/feature                                                                                                                                                                                                                                      |
+| `.github/CODEOWNERS`, `FUNDING.yml`, `dependabot.yml`        | Awọn oniwun koodu, awọn ọna asopọ onigbowo, awọn imudojuiwọn igbẹkẹle                                                                                                                                                                                                                 |
+| `.github/labels.yml`                                         | Awọn itumọ aami ti a lo nipasẹ `npm run labels:sync`                                                                                                                                                                                                                                  |
+| `.github/copilot-instructions.md`                            | GitHub Copilot awọn ilana (dada oluranlowo-itọnisọna)                                                                                                                                                                                                                                 |
+
+CI map ise: [QUALITY_GATES.md](QUALITY_GATES.md).
+
+## `.husky/` — git ìkọ
+
+| Faili        | Idi                                                                                                                                                   |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pre-commit` | Ṣiṣayẹwo idanimọ Git, lint-ipele, ifihan ẹnu-ọna, amuṣiṣẹpọ docs, eyikeyi-isuna, iru-iwọn ratchet, tọpa-awọn ohun-ọṣọ ati awọn sọwedowo aworan ui-kit |
+| `commit-msg` | `scripts/check/check-ai-attribution.mjs` lori ifọrọranṣẹ naa                                                                                          |
+| `pre-push`   | Imọlẹ imomose: ayẹwo mimọ PATH/npm ti o jade 0                                                                                                        |
+
+Akoko asiko kio ni `.husky/_/` ti wa ni ipilẹṣẹ lori fifi sori ẹrọ ati pe ko tọpinpin.
 
 ---
 
-## Àwọn ìmọ̀ràn ìlọ kiri
+## Awọn imọran lilọ kiri
 
-- **Olùkópa tuntun?** Ka `CONTRIBUTING.md` → `CLAUDE.md` → `docs/architecture/ARCHITECTURE.md` → `docs/architecture/CODEBASE_DOCUMENTATION.md`.
-- **Ṣé o ń ṣàfikún olùpèsè?** Tẹ̀lé `docs/architecture/ARCHITECTURE.md § Adding a New Provider` + ṣàyẹ̀wò rẹ̀ pẹ̀lú `docs/reference/PROVIDER_REFERENCE.md`.
-- **Ṣé o ń ṣàfikún ọ̀nà?** `docs/architecture/ARCHITECTURE.md § Adding a New API Route` + `src/shared/validation/schemas.ts`.
-- **Ṣé o ń ṣàfikún irinṣẹ́ MCP?** `docs/frameworks/MCP-SERVER.md § Adding a Tool`.
-- **Ṣé o ń ṣàfikún ọgbọ́n A2A?** `docs/frameworks/A2A-SERVER.md § Adding a New Skill`.
-- **Ṣé o ń ṣiṣẹ́ ní abẹ́lẹ̀?** `docs/guides/SETUP_GUIDE.md`.
-- **Ṣé o ń gbé e sí ayé ìṣiṣẹ́?** `docs/guides/DOCKER_GUIDE.md` / `docs/ops/VM_DEPLOYMENT_GUIDE.md` / `docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md`.
-- **Ṣé o ń ṣe ìtújáde?** `docs/ops/RELEASE_CHECKLIST.md` (àti ọgbọ́n Claude Code `/generate-release-cc`).
+- **Oluranlọwọ tuntun?** `CONTRIBUTING.md` → `AGENTS.md` → [ARCHITECTURE.md](ARCHITECTURE.md) → [CODEBASE_DOCUMENTATION.md](CODEBASE_DOCUMENTATION.md).
+- **Yiyipada nkan ti o wọpọ** (olupese, ipa ọna, module DB, MCP ọpa, A2A olorijori)? Tẹle [MODIFICATION_SCENARIOS.md](MODIFICATION_SCENARIOS.md).
+- **Ṣe afikun olupese kan bi?** Ṣayẹwo [REMOVED_PROVIDERS.md](../reference/REMOVED_PROVIDERS.md) ni akọkọ, lẹhinna sọja-ṣayẹwo [PROVIDER_REFERENCE.md](../reference/PROVIDER_REFERENCE.md).
+- **Nṣiṣẹ ni agbegbe?** [SETUP_GUIDE.md](../guides/SETUP_GUIDE.md).
+- **Nfiranṣẹ bi?** [DOCKER_GUIDE.md](../guides/DOCKER_GUIDE.md), [SELF_HOST_GUIDE.md](../getting-started/SELF_HOST_GUIDE.md), [VM_DEPLOYMENT_GUIDE.md](../ops/VM_DEPLOYMENT_GUIDE.md), [FLY_IO_DEPLOYMENT_GUIDE.md](../ops/FLY_IO_DEPLOYMENT_GUIDE.md), [KUBERNETES_DEPLOYMENT_GUIDE.md](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+- **Itusilẹ bi?** [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md).
+- **Ibode didara kan kuna?** [QUALITY_GATES.md](QUALITY_GATES.md) ati [QUALITY_GATE_PLAYBOOK.md](../ops/QUALITY_GATE_PLAYBOOK.md).

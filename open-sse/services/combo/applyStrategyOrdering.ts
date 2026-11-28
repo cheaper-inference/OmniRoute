@@ -245,14 +245,12 @@ async function orderByQuotaWeighted(
 
 async function orderByQuotaShare(
   orderedTargets: ResolvedComboTarget[],
-  { combo, body, log }: ApplyStrategyOrderingDeps
+  { combo, log }: ApplyStrategyOrderingDeps
 ): Promise<ApplyStrategyOrderingResult> {
   // Internal quota-share combos (qtSd/): delegate to the dedicated module (DRR +
   // P2C in-flight + per-model bucket gating + per-connection concurrency gating).
-  const qsModel =
-    typeof body?.model === "string" ? body.model : (orderedTargets[0]?.modelStr ?? "");
   const qsMaxConcurrent = await resolveMaxConcurrentByConnection(orderedTargets);
-  const qsSelection = selectQuotaShareTarget(orderedTargets, combo.name, qsModel, Date.now(), {
+  const qsSelection = selectQuotaShareTarget(orderedTargets, combo.name, Date.now(), {
     maxConcurrentByConnection: qsMaxConcurrent,
   });
   const nextTargets = qsSelection.orderedTargets;

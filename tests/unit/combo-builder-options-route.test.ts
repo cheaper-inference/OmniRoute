@@ -239,27 +239,34 @@ test("combo builder options route aggregates providers, connections, models and 
   );
 });
 
-test("combo builder options route includes no-auth provider (uncloseai) even without provider_connections rows", async () => {
-  // No connections seeded — uncloseai has noAuth: true and never gets a provider_connections row.
+test("combo builder options route includes no-auth provider (cloudflare-playground) even without provider_connections rows", async () => {
+  // No connections seeded — cloudflare-playground has noAuth: true and never gets a provider_connections row.
   const response = await route.GET();
   const body = (await response.json()) as any;
 
   assert.equal(response.status, 200);
   assert.ok(Array.isArray(body.providers), "providers should be an array");
 
-  const noAuth = body.providers.find((p: any) => p.providerId === "uncloseai");
-  assert.ok(noAuth, "uncloseai should appear in combo builder options even without connections");
-  assert.equal(noAuth.connectionCount, 0, "uncloseai should have 0 connections");
-  assert.equal(noAuth.activeConnectionCount, 0, "uncloseai should have 0 active connections");
-  assert.ok(noAuth.models.length > 0, "uncloseai should expose its built-in models");
+  const noAuth = body.providers.find((p: any) => p.providerId === "cloudflare-playground");
+  assert.ok(
+    noAuth,
+    "cloudflare-playground should appear in combo builder options even without connections"
+  );
+  assert.equal(noAuth.connectionCount, 0, "cloudflare-playground should have 0 connections");
+  assert.equal(
+    noAuth.activeConnectionCount,
+    0,
+    "cloudflare-playground should have 0 active connections"
+  );
+  assert.ok(noAuth.models.length > 0, "cloudflare-playground should expose its built-in models");
   // Spot-check a known built-in model from providerRegistry.ts
   assert.ok(
-    noAuth.models.some((m: any) => m.id === "turboderp/Qwen3.8-27B-exl3"),
-    "the built-in model should be among uncloseai models"
+    noAuth.models.some((m: any) => m.id === "zai-org/glm-5.2"),
+    "the built-in model should be among cloudflare-playground models"
   );
-  // #2901: no-auth providers route under their alias ("unc/"), not their id.
-  assert.equal(noAuth.models[0].qualifiedModel.startsWith("unc/"), true);
-  assert.equal(noAuth.source, "system", "uncloseai should have source=system");
+  // #2901: no-auth providers route under their alias ("cfp/"), not their id.
+  assert.equal(noAuth.models[0].qualifiedModel.startsWith("cfp/"), true);
+  assert.equal(noAuth.source, "system", "cloudflare-playground should have source=system");
 });
 
 test("combo builder options route exposes compatible provider nodes with node metadata", async () => {

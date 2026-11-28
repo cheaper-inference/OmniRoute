@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState, type ReactNode } from "react";
+import { useId, useMemo, useState, type ReactNode } from "react";
+import { useSharedHoverCard, type SharedHoverCardState } from "@omniroute/ui-kit/hover-card";
 import { useNow } from "next-intl";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
@@ -20,7 +21,7 @@ import {
   DISPLAY_LABELS,
   type DisplayAccount,
 } from "./availabilityDisplay";
-import HealthAccountTooltip from "./HealthAccountTooltip";
+import HealthAccountTooltip, { HealthAccountCardContent } from "./HealthAccountTooltip";
 import { useHealthText } from "./useHealthText";
 import { useProviderOrder } from "./useProviderOrder";
 import { useLegendVisibility } from "./useLegendVisibility";
@@ -28,28 +29,35 @@ import { SortableProviderRow, ProviderSortContext } from "./ProviderRowSort";
 import { CAPSULE_CLASS, capsuleStyle, CapsuleWater } from "./HealthCapsule";
 import { HealthBanner, HealthLegend, HealthCounts } from "./HealthOverviewChrome";
 
+/** The hover-card value of a capsule: its connection and, inside a pool, the pool. */
+function capsuleValue(connectionId: string, pool?: string) {
+  return JSON.stringify([connectionId, pool ?? null]);
+}
+function parseCapsuleValue(value: string): { id: string; pool?: string } {
+  const [id, pool] = JSON.parse(value) as [string, string | null];
+  return { id, pool: pool ?? undefined };
+}
+
 function OverviewCapsules({
   list,
   selected,
-  preview,
+  card,
   id,
   label,
   poolLabel,
   primary,
   all,
   setSelected,
-  setPreview,
 }: {
   list: DisplayAccount[];
   selected: string | null;
-  preview: { id: string; pool?: string } | null;
+  card: SharedHoverCardState;
   id: string;
   label: (connection: HealthConnection) => string;
   poolLabel: (id: string) => string;
   primary: (account: HealthAccount) => string;
   all: (key: string) => string;
   setSelected: (id: string | null) => void;
-  setPreview: (value: { id: string; pool?: string; anchor: HTMLElement } | null) => void;
 }) {
   return (
     <div className="flex min-w-0 flex-wrap gap-x-[4px] gap-y-[6px]">
@@ -65,29 +73,10 @@ function OverviewCapsules({
             data-kind={account.kind}
             data-account={account.connection.id}
             aria-label={`${label(account.connection)}${account.poolId ? ` · ${poolLabel(account.poolId)}` : ""} · ${all(DISPLAY_LABELS[account.kind])} · ${primary(account)}`}
-            aria-describedby={
-              preview?.id === account.connection.id && preview?.pool === account.poolId
-                ? `${id}-preview`
-                : undefined
-            }
             aria-expanded={expanded}
             aria-controls={expanded ? `${id}-details` : undefined}
-            onMouseEnter={(event) =>
-              setPreview({
-                id: account.connection.id,
-                pool: account.poolId,
-                anchor: event.currentTarget,
-              })
-            }
-            onMouseLeave={() => setPreview(null)}
-            onFocus={(event) =>
-              setPreview({
-                id: account.connection.id,
-                pool: account.poolId,
-                anchor: event.currentTarget,
-              })
-            }
-            onBlur={() => setPreview(null)}
+            // One card for every capsule: pointer rest or keyboard focus opens it (kit hook).
+            {...card.getTriggerProps(capsuleValue(account.connection.id, account.poolId))}
             onClick={() => setSelected(expanded ? null : account.connection.id)}
             className={`${CAPSULE_CLASS} cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary hover:brightness-110 ${visualKind === "empty" ? "border border-dashed border-text-muted" : ""}`}
             style={capsuleStyle(visualKind)}
@@ -125,7 +114,9 @@ function OverviewGroupHeader({
               : DISPLAY_COLORS[worst?.kind || "empty"],
         }}
       />
-      <h3 className="break-words text-sm font-semibold">{label}</h3>
+      <h3 className="ci-heading break-words" data-size="sm">
+        {label}
+      </h3>
       <span className="text-xs text-text-muted">{t("accountsCount", { count })}</span>
       <HealthCounts accounts={accounts} />
     </>
@@ -167,7 +158,7 @@ function OverviewGroup({
   group,
   now,
   selected,
-  preview,
+  card,
   id,
   providerLabels,
   t,
@@ -176,12 +167,11 @@ function OverviewGroup({
   primary,
   all,
   setSelected,
-  setPreview,
 }: {
   group: { provider: string; accounts: HealthAccount[] };
   now: number;
   selected: string | null;
-  preview: { id: string; pool?: string } | null;
+  card: SharedHoverCardState;
   id: string;
   providerLabels: Record<string, string>;
   t: (key: string, values?: Record<string, unknown>) => string;
@@ -190,7 +180,6 @@ function OverviewGroup({
   primary: (account: HealthAccount) => string;
   all: (key: string) => string;
   setSelected: (id: string | null) => void;
-  setPreview: (value: { id: string; pool?: string; anchor: HTMLElement } | null) => void;
 }) {
   const list = group.accounts.map((account) => displayAccount(account, now));
   const ids = [...new Set(group.accounts.flatMap(poolIds))].sort();
@@ -203,14 +192,13 @@ function OverviewGroup({
     <OverviewCapsules
       list={items}
       selected={selected}
-      preview={preview}
+      card={card}
       id={id}
       label={label}
       poolLabel={poolLabel}
       primary={primary}
       all={all}
       setSelected={setSelected}
-      setPreview={setPreview}
     />
   );
   return (
@@ -262,7 +250,7 @@ function OverviewHeader({
   return (
     <>
       <div className="flex flex-wrap items-center gap-[10px] border-b border-border px-[18px] py-[14px]">
-        <h2 className="text-[15px] font-semibold">{t("healthTitle")}</h2>
+        <h2 className="text-[15px]">{t("healthTitle")}</h2>
         <span className="min-w-0 text-xs text-text-muted">
           {t("healthAccountHint")} ·{" "}
           {t("healthRuntimeObserved", { time: relative(oldest("runtimeObservedAt")) })} ·{" "}
@@ -305,7 +293,7 @@ function OverviewGroups({
   reorder,
   now,
   selected,
-  preview,
+  card,
   id,
   t,
   poolLabel,
@@ -313,7 +301,6 @@ function OverviewGroups({
   primary,
   all,
   setSelected,
-  setPreview,
 }: {
   groups: Array<{ provider: string; accounts: HealthAccount[] }>;
   order: string[];
@@ -321,7 +308,7 @@ function OverviewGroups({
   reorder: (visible: string[]) => void;
   now: number;
   selected: string | null;
-  preview: { id: string; pool?: string } | null;
+  card: SharedHoverCardState;
   id: string;
   t: (key: string, values?: Record<string, unknown>) => string;
   poolLabel: (id: string) => string;
@@ -329,7 +316,6 @@ function OverviewGroups({
   primary: (account: HealthAccount) => string;
   all: (key: string) => string;
   setSelected: (id: string | null) => void;
-  setPreview: (value: { id: string; pool?: string; anchor: HTMLElement } | null) => void;
 }) {
   return (
     <ProviderSortContext ids={order} labels={providerLabels} onReorder={reorder}>
@@ -339,7 +325,7 @@ function OverviewGroups({
           group={group}
           now={now}
           selected={selected}
-          preview={preview}
+          card={card}
           id={id}
           providerLabels={providerLabels}
           t={t}
@@ -348,17 +334,15 @@ function OverviewGroups({
           primary={primary}
           all={all}
           setSelected={setSelected}
-          setPreview={setPreview}
         />
       ))}
     </ProviderSortContext>
   );
 }
 function OverviewDetails({
-  currentPreview,
+  rows,
   selectedAccount,
-  previewAccount,
-  preview,
+  card,
   id,
   now,
   label,
@@ -366,10 +350,9 @@ function OverviewDetails({
   renderCard,
   t,
 }: {
-  currentPreview: DisplayAccount | undefined;
+  rows: HealthAccount[];
   selectedAccount: HealthAccount | undefined;
-  previewAccount: HealthAccount | undefined;
-  preview: { id: string; pool?: string; anchor: HTMLElement } | null;
+  card: SharedHoverCardState;
   id: string;
   now: number;
   label: (connection: HealthConnection) => string;
@@ -379,24 +362,30 @@ function OverviewDetails({
 }) {
   return (
     <>
-      {currentPreview && (
-        <HealthAccountTooltip
-          id={`${id}-preview`}
-          account={currentPreview}
-          label={`${label(currentPreview.connection)}${preview?.pool ? ` · ${poolLabel(preview.pool)}` : ""}`}
-          anchor={preview!.anchor}
-          otherPools={
-            preview?.pool
-              ? poolIds(previewAccount!)
-                  .filter((pool) => pool !== preview.pool)
-                  .map((pool) => displayPool(previewAccount!, pool, now))
-              : undefined
-          }
-        />
-      )}
+      <HealthAccountTooltip card={card}>
+        {(value) => {
+          const { id: connectionId, pool } = parseCapsuleValue(value);
+          // The account can leave the list (a filter) while its card is still closing.
+          const account = rows.find((row) => row.connection.id === connectionId);
+          if (!account) return null;
+          return (
+            <HealthAccountCardContent
+              account={pool ? displayPool(account, pool, now) : displayAccount(account, now)}
+              label={`${label(account.connection)}${pool ? ` · ${poolLabel(pool)}` : ""}`}
+              otherPools={
+                pool
+                  ? poolIds(account)
+                      .filter((other) => other !== pool)
+                      .map((other) => displayPool(account, other, now))
+                  : undefined
+              }
+            />
+          );
+        }}
+      </HealthAccountTooltip>
       {selectedAccount && (
         <div id={`${id}-details`} className="max-w-2xl space-y-2">
-          <h4 className="text-sm font-medium text-text-main">
+          <h4 className="ci-heading" data-size="sm">
             {label(selectedAccount.connection)} · {t("columnDetails")}
           </h4>
           {renderCard(selectedAccount.connection)}
@@ -412,9 +401,7 @@ function useOverviewProjection(
   accounts: Record<string, HealthAccount> | undefined,
   now: number,
   selected: string | null,
-  setSelected: (id: string | null) => void,
-  preview: { id: string; pool?: string; anchor: HTMLElement } | null,
-  setPreview: (value: { id: string; pool?: string; anchor: HTMLElement } | null) => void
+  setSelected: (id: string | null) => void
 ) {
   const rows = useMemo(
     () =>
@@ -444,21 +431,7 @@ function useOverviewProjection(
   }));
   const display = rows.map((account) => displayAccount(account, now));
   const selectedAccount = rows.find((account) => account.connection.id === selected);
-  const previewAccount = preview && rows.find((account) => account.connection.id === preview.id);
-  const currentPreview =
-    previewAccount &&
-    (preview.pool
-      ? displayPool(previewAccount, preview.pool, now)
-      : displayAccount(previewAccount, now));
   if (selected && !selectedAccount) setSelected(null);
-  if (preview && !currentPreview) setPreview(null);
-  useEffect(() => {
-    const escape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setPreview(null);
-    };
-    document.addEventListener("keydown", escape);
-    return () => document.removeEventListener("keydown", escape);
-  }, [setPreview]);
   return {
     rows,
     order,
@@ -468,8 +441,6 @@ function useOverviewProjection(
     groups,
     display,
     selectedAccount,
-    previewAccount,
-    currentPreview,
   };
 }
 
@@ -490,16 +461,14 @@ type OverviewContentProps = {
   reorder: (visible: string[]) => void;
   now: number;
   selected: string | null;
-  preview: { id: string; pool?: string; anchor: HTMLElement } | null;
+  card: SharedHoverCardState;
   poolLabel: (id: string) => string;
   label: (connection: HealthConnection) => string;
   primary: (account: HealthAccount) => string;
   all: (key: string) => string;
   setSelected: (id: string | null) => void;
-  setPreview: (value: { id: string; pool?: string; anchor: HTMLElement } | null) => void;
-  currentPreview: DisplayAccount | undefined;
+  rows: HealthAccount[];
   selectedAccount: HealthAccount | undefined;
-  previewAccount: HealthAccount | undefined;
   renderCard: (connection: HealthConnection) => ReactNode;
 };
 function OverviewContent({
@@ -519,16 +488,14 @@ function OverviewContent({
   reorder,
   now,
   selected,
-  preview,
+  card,
   poolLabel,
   label,
   primary,
   all,
   setSelected,
-  setPreview,
-  currentPreview,
+  rows,
   selectedAccount,
-  previewAccount,
   renderCard,
 }: OverviewContentProps) {
   return (
@@ -553,7 +520,7 @@ function OverviewContent({
           reorder={reorder}
           now={now}
           selected={selected}
-          preview={preview}
+          card={card}
           id={id}
           t={t}
           poolLabel={poolLabel}
@@ -561,14 +528,12 @@ function OverviewContent({
           primary={primary}
           all={all}
           setSelected={setSelected}
-          setPreview={setPreview}
         />
       </div>
       <OverviewDetails
-        currentPreview={currentPreview}
+        rows={rows}
         selectedAccount={selectedAccount}
-        previewAccount={previewAccount}
-        preview={preview}
+        card={card}
         id={id}
         now={now}
         label={label}
@@ -612,30 +577,17 @@ export default function QuotaHealthOverview({
   const { legendHidden, toggleLegend } = useLegendVisibility();
   const now = useNow({ updateInterval: 1000 }).getTime();
   const [selected, setSelected] = useState<string | null>(null);
-  const [preview, setPreview] = useState<{ id: string; pool?: string; anchor: HTMLElement } | null>(
-    null
-  );
+  // One hover card for every capsule (up to hundreds): the kit hook owns the hover intent.
+  const card = useSharedHoverCard();
   const projection = useOverviewProjection(
     connections,
     quotaData,
     accounts,
     now,
     selected,
-    setSelected,
-    preview,
-    setPreview
+    setSelected
   );
-  const {
-    order,
-    custom,
-    reset,
-    reorder,
-    groups,
-    display,
-    selectedAccount,
-    previewAccount,
-    currentPreview,
-  } = projection;
+  const { order, custom, reset, reorder, groups, display, selectedAccount } = projection;
   const label = (c: HealthConnection) =>
     pickDisplayValue([c.name, c.displayName, c.email], emailsVisible, c.provider) || c.id;
   return (
@@ -656,16 +608,14 @@ export default function QuotaHealthOverview({
       reorder={reorder}
       now={now}
       selected={selected}
-      preview={preview}
+      card={card}
       poolLabel={poolLabel}
       label={label}
       primary={primary}
       all={all}
       setSelected={setSelected}
-      setPreview={setPreview}
-      currentPreview={currentPreview}
+      rows={projection.rows}
       selectedAccount={selectedAccount}
-      previewAccount={previewAccount}
       renderCard={renderCard}
     />
   );

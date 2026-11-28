@@ -20,6 +20,7 @@ const CLI = path.join(REPO_ROOT, "bin/omniroute.mjs");
 
 /** ESC — startup notices are colorized, so any escape on stdout is a leak. */
 const ESC = "\u001b";
+const KEYLESS_INGRESS_WARNING = /warning: \/v1\/\* will be accessible without an API key/;
 
 interface CliResult {
   stdout: string;
@@ -52,8 +53,9 @@ function parseDocs(stdout: string): Doc[] {
 }
 
 test("stdout carries only manifests, so the output can be piped to kubectl", async () => {
-  const { stdout, code } = await runCli(["deploy", "k8s", "--target", "local"]);
+  const { stdout, stderr, code } = await runCli(["deploy", "k8s", "--target", "local"]);
   assert.equal(code, 0);
+  assert.doesNotMatch(stderr, KEYLESS_INGRESS_WARNING);
 
   // The real failure mode: startup notices on stdout make this throw with
   // "control characters are not allowed".
@@ -83,7 +85,7 @@ test("a vps target without a host fails with a usable hint", async () => {
 });
 
 test("a vps target with a host renders TLS and requires an API key", async () => {
-  const { stdout, code } = await runCli([
+  const { stdout, stderr, code } = await runCli([
     "deploy",
     "k8s",
     "--target",
@@ -92,6 +94,7 @@ test("a vps target with a host renders TLS and requires an API key", async () =>
     "llms.example.com",
   ]);
   assert.equal(code, 0);
+  assert.doesNotMatch(stderr, KEYLESS_INGRESS_WARNING);
   const docs = parseDocs(stdout);
 
   const ingress = docs.find((d) => d.kind === "Ingress");
@@ -116,6 +119,45 @@ test("--no-ingress drops the Ingress instead of failing on a missing host", asyn
   const { stdout, code } = await runCli(["deploy", "k8s", "--target", "vps", "--no-ingress"]);
   assert.equal(code, 0);
   assert.ok(!parseDocs(stdout).some((d) => d.kind === "Ingress"));
+});
+
+for (const target of ["local", "vps"]) {
+  test(`${target} warns on stderr when --no-require-api-key leaves the Ingress enabled`, async () => {
+    const args = ["deploy", "k8s", "--target", target, "--no-require-api-key"];
+    if (target === "vps") args.push("--host", "llms.example.com");
+    const { stdout, stderr, code } = await runCli(args);
+    assert.equal(code, 0);
+    const docs = parseDocs(stdout);
+    assert.ok(docs.some((d) => d.kind === "Ingress"));
+    assert.equal(docs.find((d) => d.kind === "ConfigMap")?.data?.REQUIRE_API_KEY, "false");
+    assert.match(stderr, KEYLESS_INGRESS_WARNING);
+    assert.match(stderr, /anyone who can reach the Ingress/);
+    assert.match(stderr, /remove --no-require-api-key or use --no-ingress/);
+    assert.doesNotMatch(stdout, KEYLESS_INGRESS_WARNING);
+  });
+}
+
+test("--no-ingress with --no-require-api-key renders without a warning", async () => {
+  const { stdout, stderr, code } = await runCli([
+    "deploy",
+    "k8s",
+    "--no-ingress",
+    "--no-require-api-key",
+  ]);
+  assert.equal(code, 0);
+  assert.doesNotMatch(stderr, KEYLESS_INGRESS_WARNING);
+  const docs = parseDocs(stdout);
+  assert.ok(!docs.some((d) => d.kind === "Ingress"));
+  assert.equal(docs.find((d) => d.kind === "ConfigMap")?.data?.REQUIRE_API_KEY, "false");
+});
+
+test("--require-api-key with an Ingress renders without a warning", async () => {
+  const { stdout, stderr, code } = await runCli(["deploy", "k8s", "--require-api-key"]);
+  assert.equal(code, 0);
+  assert.doesNotMatch(stderr, KEYLESS_INGRESS_WARNING);
+  const docs = parseDocs(stdout);
+  assert.ok(docs.some((d) => d.kind === "Ingress"));
+  assert.equal(docs.find((d) => d.kind === "ConfigMap")?.data?.REQUIRE_API_KEY, "true");
 });
 
 test("an invalid target is rejected", async () => {
@@ -168,9 +210,17 @@ test("a hostile --server value is rejected before it is rendered into a command"
 });
 
 test("--json emits the resolved spec instead of YAML", async () => {
-  const { stdout, code } = await runCli(["deploy", "k8s", "--target", "local", "--json"]);
+  const { stdout, stderr, code } = await runCli([
+    "deploy",
+    "k8s",
+    "--target",
+    "local",
+    "--json",
+    "--no-require-api-key",
+  ]);
   assert.equal(code, 0);
   const spec = JSON.parse(stdout) as { target: string; namespace: string };
   assert.equal(spec.target, "local");
   assert.equal(spec.namespace, "omniroute");
+  assert.match(stderr, KEYLESS_INGRESS_WARNING);
 });

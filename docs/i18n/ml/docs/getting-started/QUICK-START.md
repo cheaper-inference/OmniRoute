@@ -21,10 +21,10 @@ npm install -g omniroute
 ### ഓപ്ഷൻ B: Docker
 
 ```bash
-docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
+docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ```
 
-`:latest` എന്നത് **പ്രസിദ്ധീകരിച്ചിട്ടുള്ളതിൽ** ഏറ്റവും ഉയർന്ന സ്ഥിരതയുള്ള SemVer ആണ്. ഇത് git `main`-നെ പിന്തുടരുന്നില്ല. GitOps-നായി `diegosouzapw/omniroute:X.Y.Z` പിൻ ചെയ്യുക. [ഇമേജ് ടാഗുകൾ / റിലീസ് ചാനലുകൾ](../guides/DOCKER_GUIDE.md#release-channels) കാണുക.
+`:latest` എന്നത് **പ്രസിദ്ധീകരിച്ചിട്ടുള്ളതിൽ** ഏറ്റവും ഉയർന്ന സ്ഥിരതയുള്ള SemVer ആണ്. ഇത് git `main`-നെ പിന്തുടരുന്നില്ല. GitOps-നായി `cheaperinference/omniroute:X.Y.Z` പിൻ ചെയ്യുക. [ഇമേജ് ടാഗുകൾ / റിലീസ് ചാനലുകൾ](../guides/DOCKER_GUIDE.md#release-channels) കാണുക.
 
 ### ഓപ്ഷൻ C: സോഴ്സിൽ നിന്ന്
 

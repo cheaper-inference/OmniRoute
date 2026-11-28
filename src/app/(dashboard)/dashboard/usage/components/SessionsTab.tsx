@@ -10,6 +10,9 @@ import {
   type RecentSessionForDashboard,
 } from "@/lib/sessionObservability";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
+
+import Badge from "@/shared/components/Badge";
 import { Card } from "@/shared/components";
 import {
   Table,
@@ -79,11 +82,13 @@ export default function SessionsTab() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-info/10 text-info">
+        <IconChip tone="info">
           <Icon name="fingerprint" size={20} />
-        </div>
+        </IconChip>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold">{t("activeSessions")}</h3>
+          <h3 className="ci-heading" data-size="lg">
+            {t("activeSessions")}
+          </h3>
           <p className="text-sm text-text-muted">{t("sessionsTrackedHint")}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -106,25 +111,13 @@ export default function SessionsTab() {
           <p className="text-xs mt-1">{t("sessionsHint")}</p>
         </div>
       ) : (
-        <Table
-          className="text-sm"
-          containerClassName="rounded-none border-0"
-          scrollbarLabel={t("session")}
-        >
+        <Table variant="plain" scrollbarLabel={t("session")} scrollLabel={t("session")}>
           <TableHeader>
             <TableRow>
-              <TableHead className="text-left py-2 px-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
-                {t("session")}
-              </TableHead>
-              <TableHead className="text-left py-2 px-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
-                {t("age")}
-              </TableHead>
-              <TableHead className="text-right py-2 px-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
-                {t("requests")}
-              </TableHead>
-              <TableHead className="text-left py-2 px-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
-                {t("connection")}
-              </TableHead>
+              <TableHead>{t("session")}</TableHead>
+              <TableHead>{t("age")}</TableHead>
+              <TableHead numeric>{t("requests")}</TableHead>
+              <TableHead>{t("connection")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -132,7 +125,7 @@ export default function SessionsTab() {
               const leaseBacked = isLeaseBackedSession(s);
               return (
                 <TableRow key={s.sessionId}>
-                  <TableCell className="py-2.5 px-3">
+                  <TableCell>
                     <div className="flex items-center gap-2">
                       <span
                         className="font-mono text-xs px-2 py-1 rounded bg-surface/40 text-text-muted"
@@ -141,19 +134,19 @@ export default function SessionsTab() {
                         {s.sessionId.slice(0, 12)}…
                       </span>
                       {leaseBacked && s.active && (
-                        <span className="text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded-full border text-success border-success/30 bg-success/10">
+                        <Badge size="sm" variant="success">
                           {tCommon("active")}
-                        </span>
+                        </Badge>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="py-2.5 px-3 text-text-muted tabular-nums">
+                  <TableCell className="text-text-muted tabular-nums">
                     {formatAge(s.ageMs)}
                   </TableCell>
-                  <TableCell className="py-2.5 px-3 text-right">
+                  <TableCell numeric>
                     <span className="font-semibold tabular-nums">{s.requestCount}</span>
                   </TableCell>
-                  <TableCell className="py-2.5 px-3">
+                  <TableCell>
                     {s.connectionId ? (
                       <span className="text-xs font-mono text-info" title={s.connectionId}>
                         {(leaseBacked && s.connectionName) || s.connectionId.slice(0, 10)}

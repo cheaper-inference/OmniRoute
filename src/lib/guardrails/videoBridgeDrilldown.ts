@@ -1,7 +1,5 @@
 import { createHash } from "node:crypto";
 
-import sharp from "sharp";
-
 import { JPEG_FRAME_DATA_URI_PREFIX } from "./videoBridgeFrameContract";
 import { resolveVideoFocusWindow, type VideoFocusWindow } from "./videoBridgeRuntime";
 
@@ -220,6 +218,10 @@ async function normalizeJpegWithSharp(
   ) {
     validationFailure("Invalid drill-down JPEG frame signature");
   }
+  // Loaded here, not at module load: the startup hook imports this module through the
+  // guardrails, and a runtime without a usable sharp binary must still boot (#21183).
+  // Outside the try, so a load failure is not reported as an invalid frame.
+  const { default: sharp } = await import("sharp");
   try {
     const image = sharp(data, {
       failOn: "warning",

@@ -1,7 +1,7 @@
 ---
 title: "🚀 Self-Host Guide — OmniRoute (零月费自托管 / zero-fee self-host)"
 version: 3.8.52
-lastUpdated: 2026-10-05
+lastUpdated: 2026-11-24
 ---
 
 # 🚀 Self-Host Guide — OmniRoute
@@ -18,7 +18,7 @@ lastUpdated: 2026-10-05
 
 ```bash
 mkdir omniroute && cd omniroute
-BASE=https://raw.githubusercontent.com/diegosouzapw/OmniRoute/v3.8.51
+BASE=https://raw.githubusercontent.com/cheaper-inference/OmniRoute/v3.8.51
 curl -fsSLO "$BASE/docker-compose.selfhost.yml"
 curl -fsSLO "$BASE/.env.selfhost.example"
 cp .env.selfhost.example .env      # then edit the 2 lines marked "EDIT ME"
@@ -56,7 +56,7 @@ When you outgrow it, graduate to the full
 - Docker Engine 24+ (or Docker Desktop 4.30+) with the Compose v2 plugin.
 - ~2 GB RAM free (see [Sizing](#sizing-the-container)).
 - A provider API key from any supported provider (OpenAI, Anthropic, Google,
-  or one of the [150+ free tiers](./FREE-TIERS-GUIDE.md)).
+  or one of the [50 providers with free access](./FREE-TIERS-GUIDE.md)).
 
 No build toolchain, no Node, no git clone required: you download two files
 (the compose file and the env template, Step 1) and the image is pulled.
@@ -70,7 +70,7 @@ release tag, and create your `.env` from the template:
 
 ```bash
 mkdir omniroute && cd omniroute
-BASE=https://raw.githubusercontent.com/diegosouzapw/OmniRoute/v3.8.51
+BASE=https://raw.githubusercontent.com/cheaper-inference/OmniRoute/v3.8.51
 curl -fsSLO "$BASE/docker-compose.selfhost.yml"
 curl -fsSLO "$BASE/.env.selfhost.example"
 cp .env.selfhost.example .env
@@ -117,7 +117,7 @@ you need to change them.
 docker compose -f docker-compose.selfhost.yml up -d
 ```
 
-Pulls `diegosouzapw/omniroute:latest` (multi-arch AMD64 + ARM64, ~250 MB) and
+Pulls `cheaperinference/omniroute:latest` (multi-arch AMD64 + ARM64, ~250 MB) and
 `redis:8.6.5-alpine`, starts both, and waits for Redis to be healthy before
 the app boots.
 
@@ -168,8 +168,8 @@ http://127.0.0.1:20128/v1
 ```
 
 For provider choice, see the
-[Free Tiers Guide](./FREE-TIERS-GUIDE.md) — OmniRoute aggregates 150+ free
-tiers into one endpoint, so you can run `model: "auto"` to pick the best free
+[Free Tiers Guide](./FREE-TIERS-GUIDE.md) — OmniRoute puts 50 providers with free access
+behind one endpoint, so you can run `model: "auto"` to pick the best free
 option per request.
 
 ---
@@ -180,7 +180,7 @@ The image pins `OMNIROUTE_MEMORY_MB=1024`. That is enough for the dashboard
 and light chat. **Coding agents** (`POST /v1/responses` from Claude Code,
 Codex, Grok, …) retain multiple large context graphs during compression and
 can abort V8 at ~12 GiB old-space under two overlapping long contexts
-([#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849)).
+([#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849)).
 
 `.env.selfhost.example` defaults to `OMNIROUTE_MEMORY_MB=2048` — a safe floor
 for a single user running coding agents. Raise it if you fan out many models
@@ -216,7 +216,7 @@ because it bundles the exact runtime the image was tested with.
 From source (development only — not a deploy path):
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute
 npm install
 npm run build && npm start
@@ -408,6 +408,6 @@ For the full supply-chain / image / dependency audit dimension, see
 
 - [Docker Guide](../guides/DOCKER_GUIDE.md) — profiles, Caddy HTTPS, tunnels, image tags
 - [Quick Start](./QUICK-START.md) — 3-minute path for first-time users
-- [Free Tiers Guide](./FREE-TIERS-GUIDE.md) — 150+ free provider tiers
+- [Free Tiers Guide](./FREE-TIERS-GUIDE.md) — 50 providers with free access
 - [Providers Guide](./PROVIDERS-GUIDE.md) — connecting and configuring providers
 - [Troubleshooting](../guides/TROUBLESHOOTING.md) — deeper issue resolution

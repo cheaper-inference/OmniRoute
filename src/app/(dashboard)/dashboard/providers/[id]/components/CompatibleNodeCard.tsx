@@ -1,10 +1,8 @@
 "use client";
 
-import Icon from "@/shared/components/Icon";
-
 // Phase 1t.2 extraction — Issue #3501
 import { useRouter } from "next/navigation";
-import { Card, Button } from "@/shared/components";
+import { Card, Button, Notice } from "@/shared/components";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { getApiLabel, getApiPath } from "../providerPageHelpers";
 import type { ProviderMessageTranslator } from "../providerPageHelpers";
@@ -60,7 +58,7 @@ export default function CompatibleNodeCard({
             />
           )}
           <div>
-            <h2 className="text-lg font-semibold">
+            <h2 className="text-lg">
               {isCcCompatible
                 ? t("ccCompatibleDetailsTitle")
                 : isAnthropicCompatible
@@ -121,12 +119,9 @@ export default function CompatibleNodeCard({
         </div>
       </div>
       {isCcCompatible && (
-        <div className="mb-4 rounded-lg border border-warning/25 bg-warning/10 px-3 py-2 text-sm text-text-muted">
-          <div className="flex items-start gap-2">
-            <Icon name="warning" size={18} className="mt-0.5 text-warning" />
-            <p>{t("ccCompatibleValidationHint")}</p>
-          </div>
-        </div>
+        <Notice variant="warning" icon="warning" className="mb-4">
+          {t("ccCompatibleValidationHint")}
+        </Notice>
       )}
       {confirmDialog}
     </Card>

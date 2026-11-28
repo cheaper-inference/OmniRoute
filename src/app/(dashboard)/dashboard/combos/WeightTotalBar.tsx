@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 
 type ModelEntry = {
   weight?: number;
@@ -11,8 +12,10 @@ type WeightTotalBarProps = {
   models: ModelEntry[];
 };
 
-// Data colours (one per target) come from the kit chart palette (--ci-chart-1..5).
+// Data colours (one per target) come from the kit chart palette (--ci-chart-1..5): the class
+// paints the legend dot, the variable paints the same target's part of the bar.
 const WEIGHT_COLORS = ["bg-chart-1", "bg-chart-2", "bg-chart-3", "bg-chart-4", "bg-chart-5"];
+const WEIGHT_COLOR_VARS = WEIGHT_COLORS.map((_, i) => `var(--color-chart-${i + 1})`);
 
 /**
  * #6147 — effective routing share of a weighted target.
@@ -35,25 +38,24 @@ export default function WeightTotalBar({ models }: WeightTotalBarProps) {
 
   return (
     <div className="mt-1.5">
-      {/* Visual bar */}
-      <div className="h-1.5 rounded-full bg-bg-subtle overflow-hidden flex">
-        {models.map((m, i) => {
-          if (!m.weight) return null;
-          return (
-            <div
-              key={i}
-              className={`${WEIGHT_COLORS[i % WEIGHT_COLORS.length]} transition-all duration-300`}
-              style={{ width: `${Math.min(m.weight, 100)}%` }}
-            />
-          );
-        })}
-      </div>
+      {/* Visual bar: one segment per weighted target; the spoken value is the weight total. */}
+      <Progress
+        size="sm"
+        animate={false}
+        max={100}
+        aria-label={t("weightPercent")}
+        aria-valuetext={`${total}%`}
+        segments={models.map((m, i) => ({
+          value: Math.min(Math.max(m.weight || 0, 0), 100),
+          color: WEIGHT_COLOR_VARS[i % WEIGHT_COLOR_VARS.length],
+        }))}
+      />
       <div className="flex items-center justify-between mt-0.5">
         <div className="flex gap-1">
           {models.map(
             (m, i) =>
               m.weight > 0 && (
-                <span key={i} className="flex items-center gap-0.5 text-[9px] text-text-muted">
+                <span key={i} className="flex items-center gap-0.5 text-3xs text-text-muted">
                   <span
                     className={`inline-block w-1.5 h-1.5 rounded-full ${WEIGHT_COLORS[i % WEIGHT_COLORS.length]}`}
                   />
@@ -70,7 +72,7 @@ export default function WeightTotalBar({ models }: WeightTotalBarProps) {
           )}
         </div>
         <span
-          className={`text-[10px] font-medium ${
+          className={`text-3xs font-medium ${
             isValid ? "text-success" : total > 100 ? "text-error" : "text-warning"
           }`}
         >

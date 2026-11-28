@@ -1,0 +1,1 @@
+- fix(scripts): gate scripts in `scripts/check/` reached through a symlinked path now run instead of silently exiting 0, via a shared realpath-based `isMainModule` helper (#20617)

@@ -9,6 +9,7 @@ import Modal from "@/shared/components/Modal";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useBatchActions } from "./components/useBatchActions";
 import { batchStatusTone } from "./components/batchStatusTone";
+import ProgressBarBicolor from "./components/ProgressBarBicolor";
 
 type BatchTranslator = ReturnType<typeof useTranslations>;
 
@@ -130,7 +131,7 @@ function StatusBadge({ batch, t }: { batch: BatchRecord; t: BatchTranslator }) {
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-[11px] uppercase tracking-wider font-medium text-text-muted">
+      <span className="ci-eyebrow" data-size="2xs" data-weight="medium">
         {label}
       </span>
       <span className="text-sm text-text-main font-mono break-all">{value}</span>
@@ -300,11 +301,11 @@ export default function BatchDetailModal({
         <p className="text-xs text-text-muted font-mono">{batch.id}</p>
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="icon-2xs"
+          tone="muted"
           onClick={() => {
             navigator.clipboard.writeText(batch.id);
           }}
-          className="size-6 text-text-muted hover:text-text-main"
           title={t("batchDetailCopyId")}
           aria-label={t("batchDetailCopyId")}
         >
@@ -315,7 +316,7 @@ export default function BatchDetailModal({
       {/* Status + meta */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <div className="flex flex-col gap-0.5">
-          <span className="text-[11px] uppercase tracking-wider font-medium text-text-muted">
+          <span className="ci-eyebrow" data-size="2xs" data-weight="medium">
             {t("status")}
           </span>
           <StatusBadge batch={batch} t={t} />
@@ -333,17 +334,14 @@ export default function BatchDetailModal({
       {total > 0 && (
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-text-muted uppercase tracking-wider font-medium">
+            <span className="ci-eyebrow" data-weight="medium">
               {t("batchProgress")}
             </span>
             <span className="text-text-muted">
               {completed} / {total} ({pct}%)
             </span>
           </div>
-          <div className="h-2 rounded-full bg-bg-alt overflow-hidden flex">
-            <div className="h-full bg-success transition-all" style={{ width: `${donePct}%` }} />
-            <div className="h-full bg-error transition-all" style={{ width: `${failedPct}%` }} />
-          </div>
+          <ProgressBarBicolor total={total} completed={completed} failed={failed} />
           <div className="flex gap-4 text-xs text-text-muted">
             <span>{t("batchCompletedCount", { count: completed })}</span>
             {failed > 0 && <span>{t("batchFailedCount", { count: failed })}</span>}
@@ -354,7 +352,7 @@ export default function BatchDetailModal({
 
       {/* Timestamps */}
       <div>
-        <h3 className="text-[11px] uppercase tracking-wider font-medium text-text-muted mb-3">
+        <h3 className="ci-eyebrow mb-3" data-size="2xs" data-weight="medium">
           {t("batchTimeline")}
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
@@ -372,7 +370,7 @@ export default function BatchDetailModal({
             .filter((t) => t.ts)
             .map(({ label, ts }) => (
               <div key={label} className="flex flex-col gap-0.5">
-                <span className="text-[10px] uppercase tracking-wider text-text-muted">
+                <span className="ci-eyebrow" data-size="3xs">
                   {label}
                 </span>
                 <span className="text-xs font-mono text-text-main">{formatTs(ts)}</span>
@@ -383,7 +381,7 @@ export default function BatchDetailModal({
 
       {/* Files */}
       <div>
-        <h3 className="text-[11px] uppercase tracking-wider font-medium text-text-muted mb-3">
+        <h3 className="ci-eyebrow mb-3" data-size="2xs" data-weight="medium">
           Files
         </h3>
         <div className="space-y-2">
@@ -448,7 +446,7 @@ export default function BatchDetailModal({
       {/* Usage */}
       {batch.usage && (
         <div>
-          <h3 className="text-[11px] uppercase tracking-wider font-medium text-text-muted mb-3">
+          <h3 className="ci-eyebrow mb-3" data-size="2xs" data-weight="medium">
             {t("batchTokenUsage")}
           </h3>
           <pre className="p-3 rounded-lg bg-bg-alt border border-border text-xs font-mono text-text-main overflow-x-auto">
@@ -460,7 +458,7 @@ export default function BatchDetailModal({
       {/* Errors */}
       {batch.errors && (
         <div>
-          <h3 className="text-[11px] uppercase tracking-wider font-medium text-error mb-3">
+          <h3 className="ci-eyebrow text-error mb-3" data-size="2xs" data-weight="medium">
             {t("errors")}
           </h3>
           <pre className="p-3 rounded-lg bg-error/10 border border-error/20 text-xs font-mono text-error overflow-x-auto">
@@ -472,7 +470,7 @@ export default function BatchDetailModal({
       {/* Metadata */}
       {batch.metadata && Object.keys(batch.metadata).length > 0 && (
         <div>
-          <h3 className="text-[11px] uppercase tracking-wider font-medium text-text-muted mb-3">
+          <h3 className="ci-eyebrow mb-3" data-size="2xs" data-weight="medium">
             {t("batchMetadata")}
           </h3>
           <div className="space-y-1">

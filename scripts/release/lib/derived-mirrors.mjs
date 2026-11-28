@@ -12,12 +12,12 @@
 //     mirror's source_hash/target_hash; an already drifted source is left to the i18n wave, and
 //     section_hashes are never touched.
 //
-// Mirrors translate the prose around a number but keep the digits, so a number moves to a
-// mirror only when that is provably the same claim. The rule is deliberately conservative:
+// Mirrors translate the prose around a number but can keep the same literal (including token
+// units and percentages). The rule is deliberately conservative:
 // every occurrence of the old literal in the source must be one the plan rewrites, and the
 // mirror must carry exactly as many occurrences as the source did. Anything else (an extra
 // "393" in the mirror, a mirror that dropped the sentence, two different targets for one old
-// value, a non-numeric change) is returned as `manual` and the mirror is left untouched for
+// value, an unsupported literal) is returned as `manual` and the mirror is left untouched for
 // that value — refreshing a translation by guesswork would certify text nobody checked.
 
 import crypto from "node:crypto";
@@ -27,6 +27,7 @@ import { findVersionClaims, rewriteVersionClaims } from "../bump-version-claims.
 
 export const SEMVER_RE = /^\d+\.\d+\.\d+$/;
 const NUMBER_RE = /^\d+(?:[.,]\d+)?$/;
+const FREE_TOKEN_LITERAL_RE = /^(?:~\d+(?:[.,]\d+)?\s?[BM]|\d{1,3}(?:[.,]\d)?%)$/;
 
 export const sha256 = (text) => crypto.createHash("sha256").update(text).digest("hex");
 
@@ -47,13 +48,14 @@ const isDigit = (ch) => ch !== undefined && ch >= "0" && ch <= "9";
 const isWordish = (ch) => ch !== undefined && /[0-9A-Za-z_]/.test(ch);
 
 /**
- * PURE. Start offsets of `literal` (a plain number such as "393" or "1.62") where it stands as a
- * whole number: not glued to a letter/digit before it, not the tail of "3.8.54" or "1,393", and
- * not the head of a longer number ("3930", "393.5"). A unit letter after it ("1.62B") is fine.
+ * PURE. Start offsets of the whole `literal`, such as "393", "4.56", "~93M" or "98.6%".
+ * A bare number can be followed by a unit letter. A token literal already includes its unit,
+ * so "~93M" must end at a word boundary.
  */
 export function findNumberOccurrences(text, literal) {
   const out = [];
   if (!literal) return out;
+  const hasTokenUnit = literal.startsWith("~");
   let at = text.indexOf(literal);
   while (at !== -1) {
     const before = text[at - 1];
@@ -63,6 +65,7 @@ export function findNumberOccurrences(text, literal) {
     const glueAfter =
       isDigit(after) ||
       after === "_" ||
+      (hasTokenUnit && isWordish(after)) ||
       ((after === "." || after === ",") && isDigit(text[at + literal.length + 1]));
     if (!glueBefore && !glueAfter) out.push(at);
     at = text.indexOf(literal, at + 1);
@@ -86,6 +89,9 @@ export const asciiDigits = (text) =>
  * extractors cover some mirrors directly, e.g. the README mirrors' database row). `mirrorText`
  * then holds the plan's result, and each such change counts as one occurrence of the matching
  * source change already carried — so the remaining occurrences are carried, not double-counted.
+ * An explicit matching claimId lets independently located mirror edits prove completion even
+ * when the source also has unrelated historical values with the same digits. Numeric equality
+ * alone never supplies that proof; partial or duplicate claim evidence remains manual.
  *
  * @param {{ sourceBefore: string, changes: Array<{label:string, from:string, to:string}>, mirrorText: string, alreadyApplied?: Array<{from:string, to:string}> }} args
  * @returns {{ content: string, replaced: number, manual: Array<{ label: string, detail: string }> }}
@@ -98,20 +104,40 @@ export function propagateChangesToMirror({
 }) {
   const manual = [];
   const covered = new Map(); // "from→to" (ASCII digits) → occurrences the plan already rewrote
+  const coveredClaims = new Map();
+  const claimKey = (id, from, to) => JSON.stringify([id, asciiDigits(from), asciiDigits(to)]);
   for (const c of alreadyApplied) {
     const key = `${asciiDigits(c.from)}\u2192${asciiDigits(c.to)}`;
     covered.set(key, (covered.get(key) ?? 0) + 1);
+    if (typeof c.claimId === "string" && c.claimId) {
+      const claim = claimKey(c.claimId, c.from, c.to);
+      coveredClaims.set(claim, (coveredClaims.get(claim) ?? 0) + 1);
+    }
   }
   const groups = new Map();
   for (const c of changes) {
     const from = String(c.from);
     const to = String(c.to);
     if (from === to) continue;
-    if (!groups.has(from)) groups.set(from, { from, tos: new Set(), labels: new Set(), n: 0 });
+    if (!groups.has(from))
+      groups.set(from, {
+        from,
+        tos: new Set(),
+        labels: new Set(),
+        n: 0,
+        claims: new Map(),
+        unbound: false,
+      });
     const g = groups.get(from);
     g.tos.add(to);
     g.labels.add(c.label);
     g.n++;
+    if (typeof c.claimId === "string" && c.claimId) {
+      const key = claimKey(c.claimId, from, to);
+      g.claims.set(key, (g.claims.get(key) ?? 0) + 1);
+    } else {
+      g.unbound = true;
+    }
   }
 
   const spans = []; // { start, end, to }
@@ -141,16 +167,31 @@ export function propagateChangesToMirror({
       versionPass = { from: g.from, to, n: inMirror };
       continue;
     }
-    if (!NUMBER_RE.test(g.from)) {
+    const freeTokenLiteral = FREE_TOKEN_LITERAL_RE.test(g.from) && FREE_TOKEN_LITERAL_RE.test(to);
+    if (!NUMBER_RE.test(g.from) && !freeTokenLiteral) {
       manual.push({
         label,
-        detail: `"${g.from}" → "${to}" is not a plain number — not carried to the mirror`,
+        detail: `"${g.from}" → "${to}" is not a supported numeric literal — not carried to the mirror`,
       });
       continue;
     }
     const inSource = findNumberOccurrences(sourceBefore, g.from);
     const inMirror = findNumberOccurrences(mirrorText, g.from);
     const done = covered.get(`${g.from}\u2192${to}`) ?? 0;
+    // These edits already passed the same typed claim locator in the source and
+    // mirror. Nothing remains to relay; leave every other occurrence untouched.
+    const claimComplete =
+      !g.unbound &&
+      g.claims.size > 0 &&
+      [...g.claims].every(([key, count]) => coveredClaims.get(key) === count);
+    if (claimComplete) continue;
+    if (done > 0 && g.claims.size > 0) {
+      manual.push({
+        label,
+        detail: `"${g.from}" → "${to}": mirror claim evidence is partial or inconsistent — not carried`,
+      });
+      continue;
+    }
     if (inSource.length !== g.n || inMirror.length + done !== inSource.length) {
       manual.push({
         label,

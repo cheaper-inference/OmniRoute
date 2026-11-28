@@ -1,0 +1,19 @@
+{
+  "data": [
+    {
+      "code": "free",
+      "token_cap_daily": 7000000,
+      "rpm_limit": 15,
+      "models": [
+        "agnes-2.0-flash",
+        "agnes-2.5-flash",
+        "laguna-s-2.1",
+        "minimax-m3-free",
+        "mistral-large",
+        "mistral-medium-3-5",
+        "qwen3.8-27b",
+        "stepfun-3.7-flash"
+      ]
+    }
+  ]
+}

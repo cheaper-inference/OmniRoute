@@ -14,6 +14,7 @@ beforeAll(() => {
 });
 
 vi.mock("next-intl", () => ({
+  useLocale: () => "en",
   useTranslations: () => (key: string) => key,
 }));
 
@@ -37,7 +38,7 @@ const summary = {
   noCredentialProviders: [],
 };
 
-describe("FreeBudgetCard — eligibility-gated line", () => {
+describe("FreeBudgetCard", () => {
   beforeAll(() => {
     (
       globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -84,4 +85,31 @@ describe("FreeBudgetCard — eligibility-gated line", () => {
     await act(async () => {});
     expect(el.textContent).not.toContain("gated");
   });
+
+  it.each(["HTTP", "network"] as const)(
+    "replaces the loading status with a warning after a failure (%s)",
+    async (failure) => {
+      const request = Promise.withResolvers<Response>();
+      vi.stubGlobal("fetch", vi.fn().mockReturnValue(request.promise));
+      const el = document.createElement("div");
+      const root = createRoot(el);
+
+      try {
+        await act(async () => {
+          root.render(<FreeBudgetCard />);
+        });
+        expect(el.querySelector('[role="status"]')?.textContent).toBe("loading");
+
+        await act(async () => {
+          if (failure === "HTTP") request.resolve(new Response(null, { status: 503 }));
+          else request.reject(new Error("Request failed"));
+        });
+        const warning = el.querySelector('[data-variant="warning"]');
+        expect(warning?.textContent).toBe("loadFailed");
+        expect(warning?.querySelector("button")).toBeNull();
+      } finally {
+        await act(async () => root.unmount());
+      }
+    }
+  );
 });

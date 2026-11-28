@@ -142,6 +142,22 @@ export function isGlmFamilyModel(modelId: string, displayName = ""): boolean {
   return glmFamilyPattern.test(modelId) || glmFamilyPattern.test(displayName);
 }
 
+const ANTIGRAVITY_PROVIDER_IDS = new Set(["antigravity", "agy"]);
+const ANTIGRAVITY_TIER_SUFFIX_PATTERN = /-(?:low|medium|high)$/i;
+
+export function isAntigravityTierSuffixedModel(
+  provider: string | null | undefined,
+  modelId: string
+): boolean {
+  const normalizedProvider = (provider ?? "").trim().toLowerCase();
+  const normalizedModel = modelId.trim();
+  if (!normalizedModel) return false;
+  const isAntigravityProvider =
+    ANTIGRAVITY_PROVIDER_IDS.has(normalizedProvider) ||
+    (!normalizedProvider && /^(?:antigravity|agy)\//i.test(normalizedModel));
+  return isAntigravityProvider && ANTIGRAVITY_TIER_SUFFIX_PATTERN.test(normalizedModel);
+}
+
 function toQualifiedId(
   providerAlias: string | null,
   provider: string | null,
@@ -488,6 +504,9 @@ export function enrichCatalogModelEntry<T extends JsonRecord>(
     getAuthoritativeContextWindow(metadata.model) ??
     getAuthoritativeContextWindow(model);
   const specialtySurface = isNonChatCatalogSurface(entry.type);
+  // An image id such as `gpt-6.1-sol-image` starts with its chat sibling's id, so the resolver
+  // matched the chat spec. An image row keeps none of the chat-derived capabilities or limits.
+  const imageSurface = entry.type === "image";
   const capabilitySnapshot = snapshot?.capabilityResolutionSnapshot ?? null;
   const persistedContextWindow = getResolvedModelContextOverride(
     { provider, model },
@@ -513,16 +532,21 @@ export function enrichCatalogModelEntry<T extends JsonRecord>(
         ? declaredEffortTiers
         : sourceDeclaresThinking
           ? undefined
-          : // #10963: GLM-family models never inherit generic OpenAI tiers — an
-            // explicit empty list is authoritative unless a provider-declared
-            // contract exists (handled by declaredEffortTiers above).
-            isGlmFamilyModel(metadata.model, metadata.displayName)
-            ? []
-            : extendCodexGpt56EffortValues(
-                metadata.provider,
-                metadata.model,
-                CANONICAL_EFFORT_VALUES
-              );
+          : // Antigravity tier-suffixed IDs encode a fixed thinking tier in the model
+            // name and drop client-supplied reasoning_effort, so do not synthesize
+            // generic OpenAI effort_tiers when no explicit/provider tiers exist.
+            isAntigravityTierSuffixedModel(metadata.provider, metadata.model)
+            ? undefined
+            : // #10963: GLM-family models never inherit generic OpenAI tiers — an
+              // explicit empty list is authoritative unless a provider-declared
+              // contract exists (handled by declaredEffortTiers above).
+              isGlmFamilyModel(metadata.model, metadata.displayName)
+              ? []
+              : extendCodexGpt56EffortValues(
+                  metadata.provider,
+                  metadata.model,
+                  CANONICAL_EFFORT_VALUES
+                );
   const capabilityFields = {
     ...(typeof metadata.capabilities.vision === "boolean"
       ? { vision: metadata.capabilities.vision }
@@ -568,7 +592,7 @@ export function enrichCatalogModelEntry<T extends JsonRecord>(
 
   nextEntry.capabilities = {
     ...existingCapabilities,
-    ...capabilityFields,
+    ...(imageSurface ? { tool_calling: false, reasoning: false } : capabilityFields),
     ...(metadata.modalities.input.length > 0
       ? {
           audio_input: metadata.modalities.input.includes("audio"),
@@ -648,6 +672,7 @@ export function enrichCatalogModelEntry<T extends JsonRecord>(
   if (persistedOutputLimit !== null) {
     nextEntry.max_output_tokens = persistedOutputLimit;
   } else if (
+    !imageSurface &&
     // #16579: these OpenCode Go imports can carry a stale generic 32K output
     // ceiling. For the three upstream-verified models use the resolved model
     // metadata instead, which still honors a synced limit if one is present.
@@ -664,6 +689,7 @@ export function enrichCatalogModelEntry<T extends JsonRecord>(
   }
 
   if (
+    !imageSurface &&
     typeof metadata.limits.maxInputTokens === "number" &&
     (typeof nextEntry.max_input_tokens !== "number" ||
       authoritativeContextWindow !== null ||

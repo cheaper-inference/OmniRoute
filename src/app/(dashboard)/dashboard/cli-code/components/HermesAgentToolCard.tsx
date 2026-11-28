@@ -4,8 +4,11 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
 import { Card, Button, ModelSelectModal } from "@/shared/components";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import { cn } from "@/shared/utils/cn";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Badge from "@/shared/components/Badge";
+import Notice from "@/shared/components/Notice";
 
 interface Role {
   id: string;
@@ -357,11 +360,11 @@ export default function HermesAgentToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-medium text-sm flex items-center gap-2">
+              <h3 className="ci-heading flex items-center gap-2" data-size="sm">
                 {tool?.name || "Hermes Agent"}
                 {firstSetupAt && (
                   <span
-                    className="text-[10px] text-text-muted flex items-center gap-0.5 font-normal"
+                    className="text-3xs text-text-muted flex items-center gap-0.5 font-normal"
                     title={t("hermesFirstSetupTitle", {
                       date: new Date(firstSetupAt).toLocaleDateString(),
                     })}
@@ -372,12 +375,12 @@ export default function HermesAgentToolCard({
                 )}
               </h3>
               {(Object.keys(displayRoles).length > 0 || Object.keys(selections).length > 0) && (
-                <span className="text-[10px] px-1.5 py-px rounded bg-success/10 text-success">
+                <Badge variant="success" size="sm">
                   {t("hermesConfiguredRoles", {
                     configured: configuredRolesCount,
                     total: HERMES_ROLES.length,
                   })}
-                </span>
+                </Badge>
               )}
             </div>
             <p className="text-xs text-text-muted truncate">{t("toolDescriptions.hermes-agent")}</p>
@@ -417,9 +420,8 @@ export default function HermesAgentToolCard({
                   <Button
                     key={modelValue}
                     variant="outline"
-                    size="sm"
+                    size="2xs"
                     onClick={() => applyToAll(modelValue)}
-                    className="h-6 px-2 text-xs font-normal"
                     title={t("hermesApplyModelToAll", { model: modelValue })}
                   >
                     {modelValue}
@@ -475,7 +477,7 @@ export default function HermesAgentToolCard({
                   {/* Left: role label + subtitle (now has room so long descriptions stay on one line) */}
                   <div className="min-w-0 pr-3">
                     <div className="font-medium text-sm text-text-main">{t(role.labelKey)}</div>
-                    <div className="text-[10px] leading-tight text-text-muted">
+                    <div className="text-xs leading-tight text-text-muted">
                       {t(role.descriptionKey)}
                     </div>
                   </div>
@@ -483,27 +485,22 @@ export default function HermesAgentToolCard({
                   {/* Right cluster: model name + status badge + actions (pushed to the right) */}
                   <div className="flex items-center gap-2 shrink-0">
                     {displayedModel ? (
-                      <code
-                        className="px-1.5 py-0.5 rounded bg-bg-subtle font-mono text-text-main text-[10px] max-w-[200px] truncate"
-                        title={displayedModel}
-                      >
+                      <InlineCode className="max-w-[200px] truncate" title={displayedModel}>
                         {displayedModel}
-                      </code>
+                      </InlineCode>
                     ) : (
-                      <span className="text-text-muted text-[10px]">—</span>
+                      <span className="text-text-muted text-xs">—</span>
                     )}
 
                     {badge && (
-                      <div
-                        className={`text-[10px] px-1.5 py-px rounded shrink-0 ${
-                          badge.outsideOmniRoute
-                            ? "bg-warning/10 text-warning"
-                            : "bg-success/10 text-success"
-                        }`}
+                      <Badge
+                        variant={badge.outsideOmniRoute ? "warning" : "success"}
+                        size="sm"
+                        className="shrink-0"
                       >
                         {badge.label}
                         {badge.pending ? " *" : ""}
-                      </div>
+                      </Badge>
                     )}
 
                     <Button
@@ -540,10 +537,9 @@ export default function HermesAgentToolCard({
 
           {/* Message (standard colored info bar like other cards) */}
           {message && (
-            <div className="flex items-center gap-2 px-2 py-1.5 rounded text-xs bg-success/10 text-success">
-              <Icon name="check_circle" size={14} />
-              <span>{message}</span>
-            </div>
+            <Notice variant="success" icon="check_circle">
+              {message}
+            </Notice>
           )}
 
           {/* Action row — primary Apply + right spacer for future actions */}
@@ -588,7 +584,7 @@ export default function HermesAgentToolCard({
           {/* Inline YAML preview — toggled by the Preview button, styled like other config previews on the CLI tools page */}
           {previewYaml && (
             <div className="mt-2">
-              <div className="text-[10px] font-medium text-text-muted mb-1.5 flex items-center gap-1.5">
+              <div className="text-3xs font-medium text-text-muted mb-1.5 flex items-center gap-1.5">
                 <span>{t("hermesPreviewPath")}</span>
               </div>
               <pre className="p-4 bg-bg-subtle rounded-lg border border-border overflow-auto max-h-80 text-xs">

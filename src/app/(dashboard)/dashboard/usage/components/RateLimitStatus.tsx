@@ -4,6 +4,9 @@ import { useTranslations } from "next-intl";
 
 import { useState, useEffect, useCallback } from "react";
 import Icon from "@/shared/components/Icon";
+import IconChip from "@/shared/components/IconChip";
+
+import Badge from "@/shared/components/Badge";
 import { Card } from "@/shared/components";
 
 export default function RateLimitStatus() {
@@ -41,17 +44,17 @@ export default function RateLimitStatus() {
       {/* {t("modelLockouts")} */}
       <Card>
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-warning/10 text-warning">
+          <IconChip tone="warning">
             <Icon name="lock_clock" size={20} />
-          </div>
+          </IconChip>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold">{t("modelLockouts")}</h3>
+            <h3 className="ci-heading" data-size="lg">
+              {t("modelLockouts")}
+            </h3>
             <p className="text-sm text-text-muted">{t("lockoutsAutoRefreshHint")}</p>
           </div>
           {data.lockouts.length > 0 && (
-            <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-warning/10 text-warning border border-warning/20">
-              {t("lockedCount", { count: data.lockouts.length })}
-            </span>
+            <Badge variant="warning">{t("lockedCount", { count: data.lockouts.length })}</Badge>
           )}
         </div>
 

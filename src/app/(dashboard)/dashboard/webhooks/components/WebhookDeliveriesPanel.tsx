@@ -65,7 +65,13 @@ export function WebhookDeliveriesPanel({ webhookId, t }: WebhookDeliveriesPanelP
   }
 
   return (
-    <Table className="text-left text-xs" scrollbarLabel={t("deliveries.title")}>
+    // The webhook card's border is the frame around this table (#19620).
+    <Table
+      variant="plain"
+      density="compact"
+      scrollbarLabel={t("deliveries.title")}
+      scrollLabel={t("deliveries.title")}
+    >
       <TableHeader>
         <TableRow>
           <TableHead>{t("deliveries.status")}</TableHead>

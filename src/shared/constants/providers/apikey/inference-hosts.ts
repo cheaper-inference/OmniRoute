@@ -59,9 +59,9 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     textIcon: "PS",
     passthroughModels: true,
     website: "https://poolside.ai",
-    hasFree: true,
+    hasFree: false,
     freeNote:
-      "Preview ending: direct Poolside Platform inference shuts down on 2026-10-31. Laguna S 2.1 and XS 2.1 are free during Preview; no public numeric quota is published.",
+      "Preview ended: direct Poolside Platform inference was announced to shut down on 2026-10-31, so there is no free API access here (checked 2026-11-23).",
     apiHint:
       "Direct Poolside Platform inference shuts down on 2026-10-31; see https://platform.poolside.ai/ for the announcement and self-hosting option. Existing keys use https://inference.poolside.ai/v1.",
   },
@@ -116,7 +116,8 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     textIcon: "NB",
     website: "https://nebius.com",
     hasFree: true,
-    freeNote: "~$1 trial credits on signup for API testing",
+    freeNote:
+      "Onboarding requires a bank card for billing; free credits come through promo codes (checked 2026-11-23).",
   },
   nube: {
     id: "nube",
@@ -167,7 +168,11 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     icon: "cloud",
     color: "#2EE6A6",
     textIcon: "PC",
+    passthroughModels: true,
     website: "https://paraloncloud.com",
+    authHint: "Create an API key (prlc_…) in the ParalonCloud console, then paste it here.",
+    apiHint:
+      "OpenAI-compatible base URL: https://paraloncloud.com/v1. Prepaid credits, priced per token. The catalog follows the GPUs online on the network; check the live model list before selecting one.",
     notice: {
       apiKeyUrl: "https://paraloncloud.com/console",
     },
@@ -181,7 +186,9 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     color: "#58A6FF",
     textIcon: "OC",
     website: "https://ollama.com/settings/keys",
-    hasFree: true,
+    hasFree: false,
+    freeNote:
+      "No free plan: cloud models are pay per token or covered by paid plans (checked 2026-11-23).",
   },
   huggingface: {
     id: "huggingface",
@@ -192,8 +199,9 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     color: "#FFD21E",
     textIcon: "HF",
     website: "https://huggingface.co",
-    hasFree: true,
-    freeNote: "Free Inference API for thousands of models (Whisper, VITS, SDXL…)",
+    hasFree: false,
+    freeNote:
+      "Free accounts must buy credits or upgrade to PRO to use Inference Providers (checked 2026-11-23).",
   },
   deepinfra: {
     id: "deepinfra",
@@ -383,7 +391,8 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     textIcon: "PB",
     website: "https://predibase.com",
     hasFree: false,
-    freeNote: "$25 free trial credits (30-day validity)",
+    freeNote:
+      "Product discontinued; predibase.com now redirects to another product (checked 2026-11-23).",
     subscriptionRisk: true,
     riskNoticeVariant: "deprecated",
     deprecated: true,

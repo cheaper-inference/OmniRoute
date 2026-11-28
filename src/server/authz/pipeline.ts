@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getCachedBodySizeSettings } from "../../lib/db/readCache";
 import { isDraining } from "../../lib/gracefulShutdown";
 import { checkBodySize, getBodySizeLimit } from "../../shared/middleware/bodySizeGuard";
+import { resolveIncomingCorrelationId } from "../../shared/utils/correlationPreserve";
 import {
   verifyDashboardSessionToken,
   mintDashboardSessionToken,
@@ -22,6 +23,7 @@ import {
 import { validateBrowserMutationOrigin } from "../origin/publicOrigin";
 import { classifyRoute } from "./classify";
 import { validateDashboardCsrfToken } from "./csrf";
+import { isLoopbackRequest, isPrivateLanRequest } from "./peerContext";
 import {
   classifyStampedPeerLocality,
   resolveStampedPeer,
@@ -36,6 +38,7 @@ import {
   AUTHZ_HEADER_AUTH_KIND,
   AUTHZ_HEADER_AUTH_LABEL,
   AUTHZ_HEADER_AUTH_SCOPES,
+  AUTHZ_HEADER_DASHBOARD_LOCAL_ACCESS,
   AUTHZ_HEADER_PEER_LOCALITY,
   AUTHZ_HEADER_REQUEST_ID,
   AUTHZ_HEADER_ROUTE_CLASS,
@@ -47,6 +50,7 @@ import {
   CLIENT_IP_HEADER,
   AUTHZ_HEADER_TRUSTED_CLIENT_IP,
 } from "./headers";
+import { isLocalOnlyPath } from "./routeGuard";
 import type { AuthSubject, RouteClass, RouteClassification } from "./types";
 import type { AuthOutcome, RoutePolicy } from "./context";
 
@@ -258,6 +262,14 @@ async function getBodySizeSettings(): Promise<Record<string, unknown> | undefine
   }
 }
 
+/**
+ * Paths whose bodies are capped before any handler parses them: every `/api/*` route (the `/v1`
+ * aliases normalize into it) plus the `/a2a` JSON-RPC endpoint, which keeps its own path (#19832).
+ */
+function isBodySizeGuardedPath(pathname: string): boolean {
+  return pathname.startsWith("/api/") || pathname === "/a2a" || pathname.startsWith("/a2a/");
+}
+
 export async function runAuthzPipeline(
   request: NextRequest,
   options: AuthzPipelineOptions = {}
@@ -315,7 +327,7 @@ export async function runAuthzPipeline(
     return response;
   }
 
-  if (guardedPathname.startsWith("/api/") && method !== "GET" && method !== "OPTIONS") {
+  if (isBodySizeGuardedPath(guardedPathname) && method !== "GET" && method !== "OPTIONS") {
     const bodySizeSettings = await getBodySizeSettings();
     const bodySizeRejection = checkBodySize(
       request,
@@ -340,7 +352,12 @@ export async function runAuthzPipeline(
   requestHeaders.delete(CLIENT_IP_HEADER);
 
   requestHeaders.set(AUTHZ_HEADER_ROUTE_CLASS, classification.routeClass);
-  requestHeaders.set(AUTHZ_HEADER_REQUEST_ID, requestId);
+  // Client API handlers can use the supplied X-Request-Id as an idempotency key.
+  const clientRequestId =
+    classification.routeClass === "CLIENT_API"
+      ? resolveIncomingCorrelationId(requestHeaders.get(AUTHZ_HEADER_REQUEST_ID))
+      : null;
+  requestHeaders.set(AUTHZ_HEADER_REQUEST_ID, clientRequestId ?? requestId);
   // Stamp a trusted, non-secret locality verdict derived from the real stamped
   // peer IP AND the via-proxy marker. Route handlers (e.g. cliTokenAuth) read
   // this instead of re-deriving locality from the spoofable Host header. The
@@ -435,7 +452,8 @@ export async function runAuthzPipeline(
   }
 
   const policy = POLICIES[classification.routeClass];
-  const outcome = await policy.evaluate({ request, classification, requestId });
+  const context = { request, classification, requestId };
+  const outcome = await policy.evaluate(context);
 
   if (!outcome.allow) {
     if (managementDashboardRoute) {
@@ -472,14 +490,31 @@ export async function runAuthzPipeline(
     }
   }
 
+  // Browser-origin check for management mutations. Dashboard sessions have run it since
+  // the CSRF hardening; anonymous callers (requireLogin=false) run it too, because nothing
+  // else stops a web page the operator visits from driving the management API: a
+  // cross-site page posting to the loopback port, or a DNS-rebinding page whose Host and
+  // Origin both carry the attacker's domain. Callers that send no Origin (CLI, curl) are
+  // unaffected. Only a session can prove same-origin with a CSRF token, so the fallback
+  // stays session-only.
+  //
+  // /api/mcp/* is the exception for anonymous callers: the MCP Origin guard above already
+  // judged their Origin (it refuses DNS rebinding and non-localhost origins, and admits
+  // localhost on any port for local tools such as the MCP Inspector, per the MCP
+  // transport spec). Applying the dashboard rule on top would break that contract.
+  const anonymousMcpRequest =
+    outcome.subject.kind === "anonymous" && isMcpOriginGuardedPath(guardedPathname);
   if (
     classification.routeClass === "MANAGEMENT" &&
-    outcome.subject.kind === "dashboard_session" &&
+    (outcome.subject.kind === "dashboard_session" ||
+      (outcome.subject.kind === "anonymous" && !anonymousMcpRequest)) &&
     isUnsafeMutationMethod(method)
   ) {
     const originVerdict = validateBrowserMutationOrigin(request);
     const csrfOriginFallback =
-      originVerdict.reason === "invalid-origin" && validateDashboardCsrfToken(request);
+      outcome.subject.kind === "dashboard_session" &&
+      originVerdict.reason === "invalid-origin" &&
+      validateDashboardCsrfToken(request);
     if (!originVerdict.ok && !csrfOriginFallback) {
       const rejection = invalidOriginResponse(requestId);
       rejection.headers.set(AUTHZ_HEADER_ROUTE_CLASS, classification.routeClass);
@@ -488,6 +523,13 @@ export async function runAuthzPipeline(
     }
   }
 
+  // The dashboard prefix also contains LOCAL_ONLY embedded-service proxy handlers
+  // that never render the layout. Keep the layout verdict out of those requests.
+  if (isDashboardPath(guardedPathname) && !isLocalOnlyPath(guardedPathname, method)) {
+    // Match the LOCAL_ONLY policy while the original request's trusted stamps are available.
+    const isLocal = isLoopbackRequest(context) || isPrivateLanRequest(context);
+    requestHeaders.set(AUTHZ_HEADER_DASHBOARD_LOCAL_ACCESS, isLocal ? "local" : "remote");
+  }
   stampSubject(requestHeaders, outcome.subject);
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });

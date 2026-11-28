@@ -15,6 +15,7 @@ import {
 import { TableLoadingState } from "@omniroute/ui-kit/table-loading";
 import { Badge, Button, Card, EmptyState, Input, Select } from "@/shared/components";
 import Icon from "@/shared/components/Icon";
+import Pager from "@/shared/components/Pager";
 
 type McpAuditEntry = {
   id: number;
@@ -154,9 +155,7 @@ export default function McpAuditTab() {
             <Card key={item.label} padding="none" className="px-4 py-3">
               <div className="mb-1 flex items-center gap-2">
                 <Icon name={item.icon} size={14} className="text-text-muted" />
-                <span className="text-xs uppercase tracking-wider text-text-muted">
-                  {item.label}
-                </span>
+                <span className="ci-eyebrow">{item.label}</span>
               </div>
               <p
                 className={
@@ -216,24 +215,13 @@ export default function McpAuditTab() {
         pagination={
           <DataTableFooter
             pagination={
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setOffset((current) => Math.max(0, current - MCP_PAGE_SIZE))}
-                  disabled={offset === 0 || loading}
-                >
-                  {t("previous")}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setOffset((current) => current + MCP_PAGE_SIZE)}
-                  disabled={offset + MCP_PAGE_SIZE >= data.total || loading}
-                >
-                  {t("next")}
-                </Button>
-              </div>
+              <Pager
+                variant="summary"
+                page={Math.floor(offset / MCP_PAGE_SIZE) + 1}
+                pageCount={Math.max(1, Math.ceil(data.total / MCP_PAGE_SIZE))}
+                onPageChange={(page) => setOffset((page - 1) * MCP_PAGE_SIZE)}
+                disabled={loading}
+              />
             }
           />
         }
@@ -243,7 +231,11 @@ export default function McpAuditTab() {
         ) : data.entries.length === 0 ? (
           <EmptyState icon="terminal" title={t("noMcpEvents")} />
         ) : (
-          <Table scrollbarLabel={t("mcpAudit")} className="min-w-[860px] text-left">
+          <Table
+            scrollbarLabel={t("mcpAudit")}
+            scrollLabel={t("mcpAudit")}
+            className="min-w-[860px]"
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("timestamp")}</TableHead>
@@ -257,22 +249,20 @@ export default function McpAuditTab() {
             <TableBody>
               {data.entries.map((entry) => (
                 <TableRow key={entry.id}>
-                  <TableCell className="font-mono text-xs text-text-muted">
+                  <TableCell className="font-mono text-text-muted">
                     {new Date(entry.createdAt).toLocaleString()}
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-text-main">
-                    {entry.toolName}
-                  </TableCell>
+                  <TableCell className="font-mono text-text-main">{entry.toolName}</TableCell>
                   <TableCell className="text-text-muted">{entry.durationMs}ms</TableCell>
                   <TableCell>
                     <Badge size="sm" variant={entry.success ? "success" : "error"}>
                       {entry.success ? t("success") : entry.errorCode || t("failure")}
                     </Badge>
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-text-muted">
+                  <TableCell className="font-mono text-text-muted">
                     {entry.apiKeyId || t("notAvailable")}
                   </TableCell>
-                  <TableCell className="max-w-[280px] truncate text-xs text-text-muted">
+                  <TableCell className="max-w-[280px] truncate text-text-muted">
                     {entry.outputSummary || t("notAvailable")}
                   </TableCell>
                 </TableRow>

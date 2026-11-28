@@ -1,7 +1,7 @@
 /**
  * `omniroute deploy` — Kubernetes manifests and cluster provisioning commands.
  *
- * Both subcommands only WRITE TO STDOUT. Nothing here touches a cluster, runs
+ * Both subcommands write their artifacts to stdout. Nothing here touches a cluster, runs
  * kubectl, or connects to a server: provisioning a cluster is a privileged
  * host-level operation, and doing it from a long-running proxy would mean
  * shipping an SSH client and holding a private key. You pipe the output where
@@ -123,6 +123,13 @@ export async function runManifestsCommand(opts) {
       process.stderr.write("\nhint: pass --host <hostname>, or --no-ingress to skip it.\n");
     }
     process.exit(2);
+  }
+
+  if (parsed.data.ingress.enabled === true && parsed.data.config.requireApiKey === false) {
+    process.stderr.write(
+      "warning: /v1/* will be accessible without an API key to anyone who can reach the Ingress. " +
+        "To avoid this, remove --no-require-api-key or use --no-ingress.\n"
+    );
   }
 
   if (opts.json) {
