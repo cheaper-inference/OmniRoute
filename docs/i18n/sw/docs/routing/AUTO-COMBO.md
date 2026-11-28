@@ -502,6 +502,7 @@ Combo zilizohifadhiwa zenye `strategy: "auto"` zinaweza kuweka `config.routerStr
 - `lkgp` — mtoa huduma wa mwisho anayejulikana kuwa mzuri kwanza
 - `nadir` — huuliza API ya maamuzi ya [Nadir](https://getnadir.com) ni modeli ipi katika mkusanyiko ambayo
   kidokezo kinahitaji; ni ya kuchagua kujiunga, na ikishindwa hurudi kwenye `rules`
+- `decision` — uliza kiamua kilichosanidiwa (TypeSafe System One, uamuzi wako mwenyewe URL, au mojawapo ya vielelezo vya kuchana) ni kielelezo gani kwenye dimbwi kinacholingana na ombi; nyuma ya bendera `COMBO_DECISION_ROUTER_ENABLED` chaguo-msingi, kushindwa-kufungua kwa `rules`
 
 ### Mikakati ya router kwa undani
 
@@ -727,6 +728,60 @@ na ya kiwango cha juu), ambapo matumizi ya modeli ya kiwango cha juu kila wakati
 
 ---
 
+#### 7. `decision` — kiamuazi kinachoweza kuunganishwa huchagua kielelezo
+
+`decision` anauliza a** mwamuzi** ni kielelezo gani kwenye bwawa kinacholingana na ombi, kisha kupunguza kidimbwi kwa kielelezo hicho na kuruhusu `rules` kuchagua muunganisho (idadi, afya na gharama bado kuchagua akaunti). Kiamuzi kimewekwa katika kizuizi cha uamuzi cha mchanganyiko — `config.decision` wakati visu vya kipanga njia hukaa juu ya `config` (kile dashibodi inaandika), au `config.auto.decision` karibu na `config.auto.routerStrategy`:
+
+| `decider`     | Nani anajibu                                                                                                                          | Mahitaji                                            |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), mfano chaguo-msingi `jev-latest`                                   | muunganisho `typesafe` au kitufe cha env            |
+| `http`        | mwamuzi wako mwenyewe katika `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) au `"openai-chat"` (kukamilika kwa mazungumzo) | `baseUrl` + `model`; ufunguo wa hiari               |
+| `combo-model` | moja ya miundo ya watoa huduma wako, inayoitwa katika mchakato kama hakimu wa muunganisho                                             | `model` kama `provider/model` (hakuna mchanganyiko) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Sehemu (imeidhinishwa na schema kali ya kuokoa na tena kwa wakati wa ombi):
+
+- `decider` — `systemone`, `http` au `combo-model`.
+- `model` — TypeSafe kielelezo, kielelezo cha uamuzi katika URL yako , au `provider/model` ya simu ya modeli ya mchanganyiko (hadi herufi 200).
+- `baseUrl` — `http` pekee: `http(s)` URL hadi herufi 500, bila vitambulisho, hoja au kipande. URL inayoelekeza kwenye OmniRoute hii ( loopback + `PORT`) inakataliwa.
+- `wire` — `http` pekee: `systemone` (chaguo-msingi) au `openai-chat`.
+- `connectionId` — muunganisho uliohifadhiwa ambao ufunguo wake unatumika (tu ndani ya viunganisho vinavyoruhusiwa vya ufunguo API ). Bila hivyo, `systemone` inasoma muunganisho `typesafe` na kila mwamuzi wa mtandao hurudi kwa `OMNIROUTE_DECISION_API_KEY`. Hakuna uga `apiKey` : ufunguo hauhifadhiwi kamwe kwenye mchanganyiko.
+- `timeoutMs` — nambari kamili, 100–5000, chaguomsingi 2000.
+- `minConfidence` — 0-1; jibu la kutojiamini hurejea kwa `rules` (mwamuzi anayeripoti kutokuwa na imani ni 0).
+- `descriptions` — hadi maingizo 50 (ufunguo hadi 300, maandishi hadi herufi 1000), yaliyowekwa na kitambulisho cha mfano au `provider/model`; maingizo ambayo hayajawekwa hupata maelezo ya kiwango cha gharama.
+
+**Bendera.** `COMBO_DECISION_ROUTER_ENABLED` (chaguo-msingi `false`) humfungulia kila anayeamua. Wakati imezimwa, mseto wa `decision` hausomi kitambulisho, haupigi simu na njia na `rules`; logi inasema `fallback (disabled)`. Ufunguo uliohifadhiwa pekee hauwashi kamwe. Mchanganyiko bila kizuizi cha uamuzi hauathiriwi hata kidogo.
+
+**Nini huacha sanduku.** Maandishi ya ujumbe wa mwisho wa mtumiaji pekee (hadi herufi 8000; chat/Claude `messages` au Majibu `input`) na menyu ya vitambulisho vya muundo na maelezo yao. Usiwahi kuombwa na mfumo, Majibu `instructions`, zana, historia, vichwa au data ya akaunti. Simu za mtandao hupitia mlinzi wa nje wa mtoaji bila majaribio tena, hakuna uelekezaji kwingine na kikomo cha majibu KB 64. Simu `combo-model` sio ya kutiririsha, haina zana, `temperature: 0`, na bajeti ya ishara 256; uamuzi ulioanzishwa ndani ya simu ya uamuzi unakataliwa.
+
+**Tabia ya kushindwa** ni kushindwa-wazi: kushindwa kutatuliwa kwa uamuzi wa `rules`, na sababu `recursion` `decision(<decider>): fallback (<reason>)`, na `<reason>` moja ya `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `low_confidence` `no_user_text` `single_option` Baada ya muda kuisha, hitilafu HTTP au hitilafu ya mtandao sehemu ya mwisho inarukwa kwa sekunde 30. Chaguo lililofanikiwa husoma `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Hakuna URL, ufunguo, sehemu ya papo hapo au sehemu ya juu inayofikia logi.
+
+Kijenzi cha kuchana kinaonyesha sehemu hizi wakati mkakati wa kipanga njia ni `decision`, pamoja na maelezo yaliyotolewa kama vishika nafasi na a.** Uamuzi wa mtihani** kitufe ambacho huita `POST /api/combos/decision-preview` mara moja na mipangilio ambayo haijahifadhiwa (bendera sawa).
+
+**Wakati wa kutumia** : trafiki ya matatizo mseto ambapo unataka kiwango kichukuliwe kwa kila ombi na kiainishaji unachochagua, si na Nadir haswa.
+
+**Lakabu** : `decision` (hakuna lakabu)
+
+---
+
 ### Mikakati maalum ya kipanga njia
 
 Unaweza kusajili utekelezaji wako mwenyewe wa `RouterStrategy` kupitia API ya umma:
@@ -780,6 +835,7 @@ Kisha uitumie:
 | SLO kali                     | `sla-aware` | Huchuja kulingana na vikomo vya p95/hitilafu/gharama |
 | Gumzo la zamu nyingi         | `lkgp`      | Uthabiti wa kipindi                                  |
 | Ugumu mchanganyiko           | `nadir`     | Huchagua daraja la modeli kwa kila kidokezo          |
+| Kiainishaji mwenyewe         | `decision`  | Mwamuzi wako anachagua mfano                         |
 
 Sehemu zinazozingatia SLA:
 

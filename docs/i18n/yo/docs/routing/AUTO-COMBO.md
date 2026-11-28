@@ -522,6 +522,7 @@ curl -X POST http://localhost:20128/api/combos \
 - `lkgp` — provider rere tí a mọ̀ gbẹ̀yìn ni àkọ́kọ́
 - `nadir` — béèrè lọ́wọ́ API ìpinnu [Nadir](https://getnadir.com) irú model inú àkójọpọ̀ tí
   prompt náà nílò; a gbọ́dọ̀ kọ́kọ́ yàn án, ó sì máa padà sí `rules` bí ó bá kùnà
+- `decision` — beere oluṣeto atunto (TypeSafe System Ọkan, ipinnu tirẹ URL, tabi ọkan ninu awọn awoṣe ti ara konbo) eyiti awoṣe ninu adagun ti baamu ibeere naa; sile awọn aiyipada-pa `COMBO_DECISION_ROUTER_ENABLED` flag, kuna-ṣi si `rules`
 
 ### Àlàyé kíkún nípa àwọn ọ̀nà router
 
@@ -747,6 +748,60 @@ kan àti model frontier kan), níbi tí lílo frontier ní gbogbo ìgbà ti jẹ
 
 ---
 
+#### 7. `decision` — pluggable decider iyan awoṣe
+
+`decision` béèrè a** olupinnu** Awoṣe wo ni adagun-odo ti o baamu ibeere naa, lẹhinna dín adagun-odo naa si awoṣe yẹn ki o jẹ ki `rules` mu asopọ naa (ipin, ilera ati idiyele tun yan akọọlẹ naa). A ṣeto olupinnu ni ipinnu konbo Àkọsílẹ — `config.decision` nigbati awọn bọtini olulana joko ni oke `config` (ohun ti dasibodu kọ), tabi `config.auto.decision` lẹgbẹẹ `config.auto.routerStrategy`:
+
+| `decider`     | Tani o dahun                                                                                                  | Awọn nilo                                 |
+| ------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `systemone`   | TypeSafe System Ọkan (`POST https://api.typesafe.ai/v1/systemone`), awoṣe aiyipada `jev-latest`               | asopọ `typesafe` tabi bọtini env          |
+| `http`        | ipinnu tirẹ ni `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) tabi `"openai-chat"` (iwiregbe pari) | `baseUrl` + `model`; bọtini iyan          |
+| `combo-model` | ọkan ninu awọn awoṣe olupese rẹ, ti a pe ni ilana bii adajọ idapọ                                             | `model` bi `provider/model` (ko si konbo) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Awọn aaye (ti a fọwọsi nipasẹ ero ti o muna lori fifipamọ ati lẹẹkansi ni akoko ibeere):
+
+- `decider` — `systemone`, `http` tabi `combo-model`.
+- `model` — TypeSafe awoṣe, awoṣe ipinnu ni URL rẹ, tabi `provider/model` ti ipe akojọpọ-awoṣe (to awọn kikọ 200).
+- `baseUrl` — `http` nikan: `http(s)` URL kan to awọn ohun kikọ 500, laisi awọn iwe-ẹri, ibeere tabi ajẹkù. URL kan ti n tọka si OmniRoute yii (loopback + `PORT`) kọ.
+- `wire` — `http` nikan: `systemone` (aiyipada) tabi `openai-chat`.
+- `connectionId` — asopọ ti o fipamọ ti bọtini rẹ ti wa ni lilo (nikan inu awọn asopọ ti a gba laaye bọtini API ). Laisi rẹ, `systemone` ka asopọ `typesafe` kan ati pe gbogbo olupinnu nẹtiwọọki ṣubu pada si `OMNIROUTE_DECISION_API_KEY`. Ko si aaye `apiKey` : bọtini kan ko ni ipamọ rara ni akojọpọ.
+- nomba `timeoutMs` —, 100-5000, aiyipada 2000.
+- `minConfidence` — 0–1; Idahun igbẹkẹle kekere kan ṣubu si `rules` (olupinnu ti o ṣe ijabọ ko si igbẹkẹle ka bi 0).
+- `descriptions` — to awọn titẹ sii 50 (bọtini to 300, ọrọ to awọn ohun kikọ 1000), ti a tẹ nipasẹ id tabi `provider/model` awoṣe; awọn titẹ sii ti a ko ṣeto gba ijuwe ipo idiyele ti ipilẹṣẹ.
+
+**Flag.** `COMBO_DECISION_ROUTER_ENABLED` (aiyipada `false`) ibode gbogbo ipinnu. Lakoko ti o wa ni pipa, konbo `decision` ko ka iwe-ẹri, ko ṣe ipe ati awọn ipa-ọna pẹlu `rules`; àpótí náà sọ `fallback (disabled)`. Bọtini ti o fipamọ nikan ko tan-an. Combos laisi ipinnu ipinnu ko ni ipa rara.
+
+**Kini o fi apoti silẹ.** Nikan ọrọ ti ifiranṣẹ olumulo to kẹhin (to awọn ohun kikọ 8000; chat/Claude `messages` tabi Awọn idahun `input`) ati akojọ awọn ids awoṣe pẹlu awọn apejuwe wọn. Ma ṣe tọ eto naa, Awọn idahun `instructions`, awọn irinṣẹ, itan-akọọlẹ, awọn akọle tabi data akọọlẹ. Awọn ipe nẹtiwọọki lọ nipasẹ oluso ti njade ti olupese laisi awọn atunwi, ko si awọn atunto ati fila esi 64 KB kan. Ipe `combo-model` kii ṣe ṣiṣanwọle, laisi ọpa, `temperature: 0`, pẹlu isuna 256-ami; ipinnu ti o bẹrẹ inu ipe ipinnu ti kọ.
+
+**Iwa iwa** ti wa ni kuna `recursion` `not_configured` `invalid_response` `cooldown` ikuna pinnu `no_user_text` ipinnu `rules`, `missing_credential` `timeout` `low_confidence` `http_error` `decision(<decider>): fallback (<reason>)` `refused` `out_of_menu` `<reason>` `network_error` `single_option` `disabled` Lẹhin akoko ipari, aṣiṣe HTTP tabi aṣiṣe nẹtiwọọki aaye ipari jẹ foo fun awọn iṣẹju 30. Aṣeyọri yiyan ka `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Ko si URL, bọtini, kiakia tabi ara oke ti o de akọọlẹ naa.
+
+Akole konbo fihan awọn aaye wọnyi nigbati ilana olulana jẹ `decision`, pẹlu awọn apejuwe ti ipilẹṣẹ bi awọn oniduro ati a** Idanwo ipinnu** Bọtini ti o pe `POST /api/combos/decision-preview` ni ẹẹkan pẹlu awọn eto ti a ko fipamọ (asia kanna).
+
+**Nigbati lati lo** : ijabọ-iṣoro-iṣoro ni ibi ti o fẹ ki ipele ti gbe fun ibeere nipasẹ olutọpa ti o yan, kii ṣe nipasẹ Nadir pataki.
+
+**Inagijẹ** : `decision` (ko si inagijẹ)
+
+---
+
 ### Àwọn ọgbọ́n router àdáni
 
 O lè forúkọsílẹ̀ ìmúṣẹ `RouterStrategy` tirẹ nípasẹ̀ API gbogbo ènìyàn:
@@ -800,6 +855,7 @@ Lẹ́yìn náà, lò ó:
 | Àwọn SLO tó muna      | `sla-aware` | Ó ń ṣe àlẹ̀mọ́ nípasẹ̀ àwọn ààlà p95/àṣìṣe/ìnáwó |
 | Ìfọ̀rọ̀wérọ̀ ọlọ́pọ̀-ìpele | `lkgp`      | Dídúró mọ́ olùpèsè kan jálẹ̀ sáà                |
 | Ìṣòro onírúurú        | `nadir`     | Ó yan ìpele awoṣe fún ìbéèrè kọ̀ọ̀kan           |
+| Ti ara classifier     | `decision`  | Olupinnu rẹ yan awoṣe                         |
 
 Àwọn ààyè tó mọ SLA sí:
 

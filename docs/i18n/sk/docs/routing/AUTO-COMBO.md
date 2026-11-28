@@ -501,6 +501,7 @@ Trvalo uložené kombá so `strategy: "auto"` môžu nastaviť `config.routerStr
 - `lkgp` — najskôr naposledy známy funkčný poskytovateľ
 - `nadir` — opýta sa rozhodovacieho API služby [Nadir](https://getnadir.com), ktorý model z množiny
   potrebuje daný prompt; vyžaduje výslovné zapnutie a pri zlyhaní prejde na `rules`
+- `decision` — opýtajte sa nakonfigurovaného rozhodcu (TypeSafe System One, vaše vlastné rozhodnutie URL alebo jeden z vlastných modelov komba), ktorý model v skupine vyhovuje požiadavke; za predvolene vypnutým príznakom `COMBO_DECISION_ROUTER_ENABLED`, pri zlyhaní otvoreného na `rules`
 
 ### Podrobnosti o stratégiách smerovača
 
@@ -726,6 +727,60 @@ a špičkový model), keď chcete znížiť náklady spôsobené neustálym pou�
 
 ---
 
+#### 7. `decision` — zásuvný rozhodca vyberie model
+
+`decision` pýta a** rozhodovateľ** ktorý model v skupine vyhovuje požiadavke, potom zúži skupinu na tento model a nechá `rules` vybrať spojenie (kvóta, zdravie a náklady si stále vyberú účet). Rozhodujúci prvok sa nastavuje v rozhodovacom bloku komba — `config.decision` keď sú gombíky smerovača umiestnené v hornej časti `config` (to, čo píše palubná doska), alebo `config.auto.decision` vedľa `config.auto.routerStrategy`:
+
+| `decider`     | Kto odpovedá                                                                                                                   | Potreby                                       |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), predvolený model `jev-latest`                               | pripojenie `typesafe` alebo kľúč env          |
+| `http`        | váš vlastný rozhodovateľ na `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) alebo `"openai-chat"` (dokončenia chatu) | `baseUrl` + `model`; kľúč voliteľný           |
+| `combo-model` | jeden z modelov vášho poskytovateľa, ktorý sa v procese nazýva ako sudca fúzie                                                 | `model` ako `provider/model` (bez kombinácie) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Polia (overené prísnou schémou pri ukladaní a znova v čase vyžiadania):
+
+- `decider` — `systemone`, `http` alebo `combo-model`.
+- `model` — TypeSafe model, rozhodovací model vo vašom URL alebo `provider/model` volania kombinovaného modelu (až 200 znakov).
+- `baseUrl` — len `http` : `http(s)` URL do 500 znakov, bez poverení, dotazu alebo fragmentu. URL smerujúce na toto OmniRoute (spätná slučka + `PORT`) je odmietnuté.
+- `wire` — len `http` : `systemone` (predvolené) alebo `openai-chat`.
+- `connectionId` — uložené spojenie, ktorého kľúč sa používa (iba v rámci povolených spojení volajúceho kľúča API ). Bez toho `systemone` načíta spojenie `typesafe` a každý sieťový rozhodca sa vráti k `OMNIROUTE_DECISION_API_KEY`. Neexistuje žiadne pole `apiKey` : kľúč nie je nikdy uložený v kombinácii.
+- `timeoutMs` — celé číslo, 100–5000, predvolená hodnota je 2000.
+- `minConfidence` — 0–1; odpoveď s nižšou istotou padá späť na `rules` (rozhodujúci, ktorý uvádza nedôveru, sa počíta ako 0).
+- `descriptions` — až 50 záznamov (kľúč do 300, text do 1 000 znakov), zadaných podľa ID modelu alebo `provider/model`; nenastavené položky získajú vygenerovaný popis cenovej kategórie.
+
+**Vlajka.** `COMBO_DECISION_ROUTER_ENABLED` (predvolené `false`) ohraničuje každého rozhodcu. Kým je vypnuté, `decision` combo nečíta žiadne poverenia, neuskutočňuje žiadne volanie a smeruje pomocou `rules`; log hovorí `fallback (disabled)`. Samotný uložený kľúč ho nikdy nezapne. Kombá bez rozhodovacieho bloku nie sú vôbec ovplyvnené.
+
+**Čo opustí krabicu.** Iba text poslednej správy používateľa (do 8000 znakov; chat/Claude `messages` alebo Responses `input`) a ponuka ID modelov s ich popismi. Nikdy nie systémová výzva, odpovede `instructions`, nástroje, história, hlavičky alebo údaje o účte. Sieťové hovory prechádzajú cez odchádzajúce stráže poskytovateľa bez opakovania, bez presmerovaní a s limitom odozvy 64 KB. Volanie `combo-model` nie je streamované, bez nástrojov, `temperature: 0` s rozpočtom 256 tokenov; rozhodnutie začaté v rámci výzvy na rozhodnutie je odmietnuté.
+
+**Zlyhanie** je otvorené pri zlyhaní: akékoľvek zlyhanie sa vyrieši podľa rozhodnutia `rules` a dôvod znie `decision(<decider>): fallback (<reason>)`, pričom `<reason>` je jedno z `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` alebo `no_user_text`. Po uplynutí časového limitu, chybe HTTP alebo chybe siete sa koncový bod na 30 s preskočí. Úspešný výber číta `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Žiadny URL, kľúč, výzva alebo upstream telo nedosiahne protokol.
+
+Zostavovač kombo zobrazuje tieto polia, keď je stratégia smerovača `decision`, s vygenerovanými popismi ako zástupnými symbolmi a** Rozhodnutie o teste** tlačidlo, ktoré raz zavolá `POST /api/combos/decision-preview` s neuloženými nastaveniami (rovnaký príznak).
+
+**Kedy použiť** : premávka so zmiešanou obtiažnosťou, kde chcete, aby úroveň na žiadosť vybral klasifikátor, ktorý si vyberiete, nie konkrétne Nadir.
+
+**Alias** : `decision` (bez aliasu)
+
+---
+
 ### Vlastné stratégie smerovača
 
 Prostredníctvom verejného API môžete zaregistrovať vlastnú implementáciu `RouterStrategy`:
@@ -779,6 +834,7 @@ Potom ju použite:
 | Prísne SLO              | `sla-aware` | Filtruje podľa limitov p95/chybovosti/nákladov     |
 | Viackolový čet          | `lkgp`      | Zachovanie konzistencie relácie                    |
 | Rôzna náročnosť         | `nadir`     | Vyberie úroveň modelu pre každý prompt             |
+| Vlastný klasifikátor    | `decision`  | Váš rozhodca vyberie model                         |
 
 Polia pre SLA-aware:
 

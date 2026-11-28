@@ -503,6 +503,7 @@ curl -X POST http://localhost:20128/api/combos \
 - `lkgp` — 마지막으로 정상 상태였던 공급자를 우선합니다.
 - `nadir` — 풀에서 프롬프트에 필요한 모델을 [Nadir](https://getnadir.com)의 의사 결정 API에
   질의합니다. 옵트인 방식이며, 실패 시 `rules`로 개방형 장애 처리를 수행합니다.
+- `decision` — 구성된 결정자(TypeSafe System One, 자체 결정 URL 또는 콤보 자체 모델 중 하나)에게 풀의 어떤 모델이 요청에 맞는지 물어봅니다. 기본 꺼진 `COMBO_DECISION_ROUTER_ENABLED` 플래그 뒤, `rules` 에 대한 페일오픈
 
 ### 라우터 전략 상세
 
@@ -727,6 +728,60 @@ Nadir 대시보드에 기록됩니다. 전체 설정 및 확인 방법:
 
 ---
 
+#### 7. `decision` — 플러그형 결정자가 모델을 선택합니다.
+
+`decision` 묻는다** 결정자** 풀의 어떤 모델이 요청에 맞는지, 그 모델로 풀의 범위를 좁히고 `rules` 연결을 선택하도록 합니다(할당량, 상태 및 비용은 여전히 계정을 선택합니다). 결정자는 라우터 손잡이가 `config` (대시보드가 작성하는 것)의 상단에 있거나 `config.auto.routerStrategy` 옆에 `config.auto.decision` 있을 때 콤보의 결정 블록 — `config.decision` 에 설정됩니다.
+
+| `decider`     | 누가 대답합니까?                                                                                                | 요구 사항                                   |
+| ------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `systemone`   | TypeSafe System One(`POST https://api.typesafe.ai/v1/systemone`), 기본 모델 `jev-latest`                        | `typesafe` 연결 또는 env 키                 |
+| `http`        | `baseUrl` 에서 자신만의 결정자: `wire: "systemone"` (`{baseUrl}/v1/systemone`) 또는 `"openai-chat"` (채팅 완료) | `baseUrl` + `model`; 선택적인 키            |
+| `combo-model` | 융합 판사와 같은 프로세스에서 호출되는 제공자 모델 중 하나                                                      | `model` `provider/model` 로 사용(콤보 없음) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+필드(저장 시 및 요청 시 다시 엄격한 스키마로 검증됨):
+
+- `decider` — `systemone`, `http` 또는 `combo-model`.
+- `model` — TypeSafe 모델, URL 의 결정 모델 또는 콤보 모델 호출의 `provider/model` (최대 200자).
+- `baseUrl` — `http` 전용: 자격 증명, 쿼리 또는 조각 없이 `http(s)` URL 최대 500자입니다. 이 OmniRoute (루프백 + `PORT`)를 가리키는 URL 거부됩니다.
+- `wire` — `http` 전용: `systemone` (기본값) 또는 `openai-chat`.
+- `connectionId` — 키가 사용되는 저장된 연결입니다(호출 API 키의 허용된 연결 내에서만). 이것이 없으면 `systemone` `typesafe` 연결을 읽고 모든 네트워크 결정자는 `OMNIROUTE_DECISION_API_KEY` 로 대체됩니다. `apiKey` 필드가 없습니다. 키는 콤보에 저장되지 않습니다.
+- `timeoutMs` — 정수, 100–5000, 기본값은 2000입니다.
+- `minConfidence` — 0–1; 신뢰도가 낮은 답변은 `rules` 로 돌아갑니다(신뢰도가 없다고 보고하는 결정자는 0으로 계산됩니다).
+- `descriptions` — 최대 50개 항목(키는 최대 300개, 텍스트는 최대 1000자), 모델 ID 또는 `provider/model` 로 키 지정; 설정되지 않은 항목은 생성된 비용 순위 설명을 얻습니다.
+
+**깃발.** `COMBO_DECISION_ROUTER_ENABLED` (기본값 `false`)는 모든 결정자를 게이트합니다. 꺼져 있는 동안 `decision` 콤보는 자격 증명을 읽지 않고 호출도 하지 않으며 `rules` 로 라우팅합니다. 로그에 `fallback (disabled)` 라고 나와 있습니다. 저장된 키만으로는 절대로 켜지지 않습니다. 결정 블록이 없는 콤보는 전혀 영향을 받지 않습니다.
+
+**상자를 떠나는 것.** 마지막 사용자 메시지의 텍스트(최대 8000자, chat/Claude `messages` 또는 응답 `input`)와 해당 설명이 포함된 모델 ID 메뉴만 있습니다. 시스템 프롬프트, 응답 `instructions`, 도구, 기록, 헤더 또는 계정 데이터를 사용하지 마세요. 네트워크 통화는 재시도, 리디렉션 및 64 KB 응답 제한 없이 공급자 아웃바운드 가드를 통과합니다. `combo-model` 호출은 스트리밍이 아니며, 도구가 필요 없으며, `temperature: 0` 예산이 256개입니다. 결정 호출 내에서 시작된 결정은 거부됩니다.
+
+**실패 행동** 페일오픈(fail-open): 모든 실패는 `rules` 결정으로 해결되고 이유는 `decision(<decider>): fallback (<reason>)` 로 읽혀지며, `<reason>` 는 `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` 또는 `no_user_text` 하나입니다. 시간 초과, HTTP 오류 또는 네트워크 오류가 발생하면 30초 동안 엔드포인트를 건너뜁니다. 성공적인 선택은 `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)` 읽습니다. URL, 키, 프롬프트 또는 업스트림 본문이 로그에 도달하지 않습니다.
+
+콤보 빌더는 라우터 전략이 `decision` 일 때 생성된 설명을 자리 표시자로 표시하고** 테스트 결정** 저장되지 않은 설정(동일 플래그)으로 `POST /api/combos/decision-preview` 한 번 호출하는 버튼입니다.
+
+**언제 사용하나요?** : 특별히 Nadir이 아닌 선택한 분류자가 요청별로 계층을 선택하려는 혼합 난이도 트래픽입니다.
+
+**별명** : `decision` (별칭 없음)
+
+---
+
 ### 사용자 정의 라우터 전략
 
 공개 API를 통해 자체 `RouterStrategy` 구현을 등록할 수 있습니다.
@@ -780,6 +835,7 @@ registerStrategy("my-custom", new MyCustomStrategy());
 | 엄격한 SLO         | `sla-aware` | p95/오류/비용 임계값을 기준으로 필터링 |
 | 멀티턴 채팅        | `lkgp`      | 세션 고정성                            |
 | 다양한 난이도      | `nadir`     | 프롬프트별로 모델 티어를 선택          |
+| 자체 분류기        | `decision`  | 결정자가 모델을 선택합니다.            |
 
 SLA 인식 필드:
 

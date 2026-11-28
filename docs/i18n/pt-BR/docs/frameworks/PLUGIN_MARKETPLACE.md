@@ -88,18 +88,19 @@ alternativa.
 
 Todos os endpoints requerem autenticação de gerenciamento (`requireManagementAuth`)** e** são somente loopback — `/api/plugins` e `/api/plugins/` estão listados em `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Ponto final                      | Método | Descrição                                                         |
-| -------------------------------- | ------ | ----------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Listar plugins instalados (filtro `?status=` opcional)            |
-| `/api/plugins`                   | POST   | Instale um plugin do diretório de fontes do plugin                |
-| `/api/plugins/scan`              | POST   | Digitalize o diretório de plugins e registre novos plugins        |
-| `/api/plugins/marketplace`       | GET    | Listar entradas do catálogo do marketplace                        |
-| `/api/plugins/[name]`            | GET    | Obtenha detalhes do plugin instalado                              |
-| `/api/plugins/[name]`            | DELETE | Desinstalar um plugin                                             |
-| `/api/plugins/[name]/activate`   | POST   | Ativar (carregar ganchos de registro + )                          |
-| `/api/plugins/[name]/deactivate` | POST   | Desativar (disparar `onDeactivate`, cancelar registro de ganchos) |
-| `/api/plugins/[name]/config`     | GET    | Obtenha o esquema de configuração + da configuração do plugin     |
-| `/api/plugins/[name]/config`     | PUT    | Atualizar configuração do plugin (validado em relação ao esquema) |
+| Ponto final                        | Método | Descrição                                                         |
+| ---------------------------------- | ------ | ----------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Listar plugins instalados (filtro `?status=` opcional)            |
+| `/api/plugins`                     | POST   | Instale um plugin do diretório de fontes do plugin                |
+| `/api/plugins/scan`                | POST   | Digitalize o diretório de plugins e registre novos plugins        |
+| `/api/plugins/marketplace`         | GET    | Listar entradas do catálogo do marketplace                        |
+| `/api/plugins/marketplace/install` | POST   | Instale um plugin de mercado por nome                             |
+| `/api/plugins/[name]`              | GET    | Obtenha detalhes do plugin instalado                              |
+| `/api/plugins/[name]`              | DELETE | Desinstalar um plugin                                             |
+| `/api/plugins/[name]/activate`     | POST   | Ativar (carregar ganchos de registro + )                          |
+| `/api/plugins/[name]/deactivate`   | POST   | Desativar (disparar `onDeactivate`, cancelar registro de ganchos) |
+| `/api/plugins/[name]/config`       | GET    | Obtenha o esquema de configuração + da configuração do plugin     |
+| `/api/plugins/[name]/config`       | PUT    | Atualizar configuração do plugin (validado em relação ao esquema) |
 
 O filtro `GET /api/plugins` `status` aceita um dos `installed` / `active` / `inactive` / `error`. Um valor inválido retorna `400`.
 
@@ -121,7 +122,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 O `path` deve ser um** absoluto** caminho para um diretório** dentro do diretório de fontes do plugin** : `plugin-sources` próximo à raiz do plugin, então `~/.omniroute/plugin-sources/` por padrão, ou `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` quando essa variável estiver definida (`getPluginSourcesDir()` em `src/lib/plugins/installSource.ts`). Copie ou clone o plugin primeiro. A instalação é recusada com `400` quando o caminho contém `..` ou um byte nulo, está fora desse diretório, é resolvido fora dele por meio de um link simbólico, contém um link simbólico cujo destino está fora dele ou quando o diretório não existe. O diretório de origem deve conter um `plugin.json` válido (ou ser pai de um). Em caso de sucesso, a resposta é `201` com a linha do plugin instalado.
 
-Ao contrário de outras rotas de plug-in, esta requer a credencial de gerenciamento (uma sessão de painel ou uma chave API com escopo de gerenciamento) mesmo quando o login está desabilitado (`requireLogin=false`): a instalação do código nunca é uma ação anônima.
+Ao contrário de outras rotas de plug-in, esta requer a credencial de gerenciamento (uma sessão de painel ou uma chave API com escopo de gerenciamento) mesmo quando o login está desabilitado (`requireLogin=false`): a instalação do código nunca é uma ação anônima. O mesmo se aplica ao `POST /api/plugins/marketplace/install` (corpo `{ "name": "<plugin>" }`).
 
 ### Navegue pelo mercado
 
@@ -139,7 +140,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` valida cada valor fornecido em relação ao `configSchema` do plugin (declarado no manifesto): os campos `number` honram `min`/`max`, os campos `select` devem corresponder ao `enum` declarado. Chaves não presentes no esquema são permitidas.
+`PUT .../config` valida o corpo em relação ao `configSchema` do plugin (declarado no manifesto) com `validatePluginConfig()` de `src/lib/plugins/manifest.ts`: cada chave deve ser declarada no esquema, os valores devem corresponder ao tipo declarado, os campos `number` honram `min`/`max` e os campos `select` devem corresponder ao declarado `enum`. Qualquer violação retorna `400` e nada é armazenado. Um plugin que não declara nenhum `configSchema` não possui chaves configuráveis, portanto a solicitação é recusada com `400` ("O plugin não declara nenhuma chave configurável").
 
 ## Configuração
 
@@ -225,7 +226,7 @@ Um URL que falha em qualquer uma das camadas não anula a solicitação. — o m
 
 ### Isolamento de execução de plugin
 
-> **Os plug-ins não estão em sandbox.** O filho é um processo Node.js comum executado como usuário OmniRoute, sem contexto VM e sem sinalizadores de permissão Node.js, portanto, o código do plug-in pode ler e gravar qualquer arquivo que o usuário possa, executar programas e acessar a rede. `requires.permissions` apenas decide quais variáveis de ambiente o filho recebe; as outras permissões não são aplicadas. Instale apenas plug-ins em que você confia. O limite do processo abaixo contém travamentos e travamentos; não é um limite de segurança.
+> **Por padrão, os plugins executam sem sandbox.** O processo filho do Node.js roda com o mesmo usuário do OmniRoute, sem contexto de VM nem flags de permissão do Node.js. O código do plugin pode ler e gravar qualquer arquivo acessível a esse usuário, executar programas e acessar a rede. `requires.permissions` define apenas quais variáveis de ambiente o processo filho recebe. As demais permissões ficam sem aplicação. A flag opcional `PLUGIN_PERMISSION_MODEL_ENABLED`, desativada por padrão, executa cada plugin com o modelo de permissões do Node.js a partir das permissões declaradas. A permissão `network` fica fora desse controle porque o Node.js não restringe a rede. Consulte [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#sistema-de-permiss%C3%A3o). Instale apenas plugins de confiança. O isolamento em processos contém falhas e travamentos, mas não constitui uma barreira de segurança.
 
 - **Isolamento de processo** — `loadPlugin()` (`src/lib/plugins/loader.ts`) gera cada plugin em um processo filho Node.js separado e se comunica por meio de IPC. As chamadas de gancho têm um tempo limite com escalação `SIGTERM` → `SIGKILL`.
 - **Lista de permissões de ambiente** — o filho recebe apenas um conjunto de variáveis de ambiente permitidas; o conjunto mais amplo só é concedido quando o manifesto solicita a permissão `env`.

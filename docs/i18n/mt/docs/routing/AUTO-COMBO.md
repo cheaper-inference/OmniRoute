@@ -494,6 +494,7 @@ Combos persistenti bi `strategy: "auto"` jistgħu jissettjaw `config.routerStrat
 - `lkgp` — l-aħħar fornitur magħruf li kien tajjeb l-ewwel
 - `nadir` — jistaqsi lill-API tad-deċiżjonijiet ta’ [Nadir](https://getnadir.com) liema mudell fil-pool
   jeħtieġ il-prompt; jeħtieġ attivazzjoni espliċita, u f’każ ta’ ħsara jmur lura għal `rules`
+- `decision` — staqsi decider konfigurat (TypeSafe System One, id-deċiżjoni tiegħek stess URL, jew wieħed mill-mudelli tal-combo stess) liema mudell fil-pool jaqbel mat-talba; wara l-bandiera default-off `COMBO_DECISION_ROUTER_ENABLED`, fail-open għal `rules`
 
 ### L-istrateġiji tar-router fid-dettall
 
@@ -720,6 +721,60 @@ u mudell tal-ogħla livell), fejn trid tnaqqas l-ispiża li tiġi mill-użu kost
 
 ---
 
+#### 7. `decision` — pluggable decider jiġbor il-mudell
+
+`decision` jistaqsi a** deċiżjoni** liema mudell fil-pool jaqbel mat-talba, imbagħad iddejjaq il-pool għal dak il-mudell u ħalli `rules` jagħżel il-konnessjoni (kwota, saħħa u spiża xorta jagħżlu l-kont). Id-deċiżur huwa ssettjat fil-blokk tad-deċiżjoni tal-combo — `config.decision` meta l-pumi tar-router joqogħdu fin-naħa ta’ fuq ta’ `config` (dak li jikteb id-dashboard), jew `config.auto.decision` ħdejn `config.auto.routerStrategy`:
+
+| `decider`     | Min iwieġeb                                                                                                                             | Bżonnijiet                                    |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), mudell default `jev-latest`                                          | konnessjoni `typesafe` jew iċ-ċavetta env     |
+| `http`        | id-decider tiegħek stess fi `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) jew `"openai-chat"` (kompletazzjonijiet taċ-chat) | `baseUrl` + `model`; ċavetta fakultattiva     |
+| `combo-model` | wieħed mill-mudelli tal-fornitur tiegħek, imsejjaħ fil-proċess bħall-imħallef tal-fużjoni                                               | `model` bħala `provider/model` (l-ebda kombo) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Oqsma (validati minn skema stretta meta tissejvja u għal darb'oħra fil-ħin tat-talba):
+
+- `decider` — `systemone`, `http` jew `combo-model`.
+- `model` — TypeSafe model, il-mudell tad-deċiżjoni URL tiegħek, jew iż- `provider/model` ta' sejħa ta' mudell combo (sa 200 karattru).
+- `baseUrl` — `http` biss: `http(s)` URL sa 500 karattru, mingħajr kredenzjali, mistoqsija jew framment. A URL li tipponta lejn dan OmniRoute (loopback + `PORT`) hija rrifjutata.
+- `wire` — `http` biss: `systemone` (default) jew `openai-chat`.
+- `connectionId` — il-konnessjoni maħżuna li ċ-ċavetta tagħha tintuża (biss ġewwa l-konnessjonijiet permessi taċ-ċavetta API li ssejjaħ). Mingħajrha, `systemone` jaqra konnessjoni `typesafe` u kull decider tan-netwerk jaqa' lura għal `OMNIROUTE_DECISION_API_KEY`. M'hemm l-ebda qasam `apiKey` : ċavetta qatt ma tinħażen f'combo.
+- `timeoutMs` — integer, 100–5000, default 2000.
+- `minConfidence` — 0–1; tweġiba b'kunfidenza aktar baxxa taqa' lura għal `rules` (deċiżur li jirrapporta l-ebda kunfidenza jgħodd bħala 0).
+- `descriptions` — sa 50 daħla (ċavetta sa 300, test sa 1000 karattru), imdaħħla b'id tal-mudell jew `provider/model`; entrati mhux stabbiliti jiksbu deskrizzjoni ġenerata tal-grad tal-ispiża.
+
+**Bandiera.** `COMBO_DECISION_ROUTER_ENABLED` (default `false`) gates every decider. Waqt li tkun mitfija, `decision` combo ma taqra l-ebda kredenzjali, ma tagħmel l-ebda sejħa u rotta `rules`; il-log jghid `fallback (disabled)`. Ċavetta maħżuna waħedha qatt ma tixgħelha. Combos mingħajr blokk ta 'deċiżjoni ma huma affettwati xejn.
+
+**Dak li jħalli l-kaxxa.** It-test tal-aħħar messaġġ tal-utent biss (sa 8000 karattru; chat/Claude `messages` jew Responses `input`) u l-menu tal-mudell ids bid-deskrizzjonijiet tagħhom. Qatt is-sistema fil-pront, Rispons `instructions`, għodod, storja, headers jew data tal-kont. Is-sejħiet tan-netwerk jgħaddu mill-gwardja 'l barra tal-fornitur mingħajr ebda prova mill-ġdid, l-ebda direzzjoni mill-ġdid u limitu ta' rispons ta '64 KB. Is-sejħa `combo-model` mhix streaming, mingħajr għodda, `temperature: 0`, b'baġit ta' 256 token; deċiżjoni mibdija fi ħdan sejħa għal deċiżjoni tiġi rrifjutata.
+
+**Imġieba ta 'falliment** huwa fail-open: kwalunkwe nuqqas jirrisolvi għad-deċiżjoni `rules`, u r-raġuni taqra `decision(<decider>): fallback (<reason>)`, `<reason>` waħda minn `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` or `no_user_text`. Wara timeout, żball HTTP jew żball tan-netwerk l-endpoint jinqabeż għal 30 s. A pick suċċess jaqra `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. L-ebda URL, ċavetta, pront jew korp upstream ma jilħaq il-log.
+
+Il-combo builder juri dawn l-oqsma meta l-istrateġija tar-router hija `decision`, bid-deskrizzjonijiet iġġenerati bħala placeholders u** Deċiżjoni tat-test** buttuna li ssejjaħ `POST /api/combos/decision-preview` darba bis-settings mhux salvati (l-istess bandiera).
+
+**Meta tuża** : traffiku b'diffikultà mħallta fejn trid li l-livell jintgħażel għal kull talba minn klassifikatur li tagħżel, mhux minn Nadir speċifikament.
+
+**Alias** : `decision` (l-ebda alias)
+
+---
+
 ### Strateġiji personalizzati tar-router
 
 Tista’ tirreġistra l-implimentazzjoni tiegħek ta’ `RouterStrategy` permezz tal-API pubblika:
@@ -773,6 +828,7 @@ Imbagħad użaha:
 | SLOs stretti               | `sla-aware` | Tiffiltra skont il-limiti ta’ p95/żbalji/spejjeż |
 | Taħdita b’diversi skambji  | `lkgp`      | Żżomm l-istess fornitur matul is-sessjoni        |
 | Diffikultà mħallta         | `nadir`     | Tagħżel il-livell tal-mudell għal kull prompt    |
+| Klassifikatur stess        | `decision`  | Id-deċiżjoni tiegħek jagħżel il-mudell           |
 
 Oqsma konxji tal-SLA:
 

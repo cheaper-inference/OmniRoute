@@ -521,6 +521,7 @@ Trajno shranjene kombinacije s `strategy: "auto"` lahko nastavijo `config.router
 - `lkgp` — najprej zadnji znani delujoči ponudnik
 - `nadir` — vpraša odločitveni API storitve [Nadir](https://getnadir.com), kateri model iz nabora
   potrebuje poziv; zahteva izrecno vključitev, ob napaki pa preklopi na `rules`
+- `decision` — vprašajte konfiguriranega odločevalca (TypeSafe System One, vaša lastna odločitev URL ali eden od lastnih modelov kombinacije), kateri model v skupini ustreza zahtevi; za privzeto izklopljeno zastavico `COMBO_DECISION_ROUTER_ENABLED`, neuspešno odpiranje `rules`
 
 ### Podrobnosti strategij usmerjevalnika
 
@@ -746,6 +747,60 @@ srednji in najzmogljivejši model), kadar želite zmanjšati stroške, ki jih po
 
 ---
 
+#### 7. `decision` — vtični odločevalec izbere model
+
+`decision` sprašuje a** odločevalec** kateri model v skupini ustreza zahtevi, nato zoži skupino na ta model in pusti `rules` da izbere povezavo (kvota, zdravje in stroški še vedno izberejo račun). Odločalnik je nastavljen v odločitvenem bloku kombinacije — `config.decision`, ko so gumbi usmerjevalnika na vrhu `config` (kar piše na nadzorni plošči) ali `config.auto.decision` poleg `config.auto.routerStrategy`:
+
+| `decider`     | Kdo odgovarja                                                                                                               | Potrebe                                         |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), privzeti model `jev-latest`                              | povezava `typesafe` ali ključ env               |
+| `http`        | vaš lastni odločalec pri `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) ali `"openai-chat"` (zaključki klepetov) | `baseUrl` + `model`; ključ neobvezen            |
+| `combo-model` | enega od modelov vašega ponudnika, vpoklicanega v postopek, kot je fuzijski sodnik                                          | `model` kot `provider/model` (brez kombinacije) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Polja (preverjena s strogo shemo ob shranjevanju in znova ob času zahteve):
+
+- `decider` — `systemone`, `http` ali `combo-model`.
+- `model` — TypeSafe model, odločitveni model na vašem URL ali `provider/model` klica kombiniranega modela (do 200 znakov).
+- `baseUrl` — samo `http` : `http(s)` URL do 500 znakov, brez poverilnic, poizvedbe ali fragmenta. URL ki kaže na ta OmniRoute (povratna zanka + `PORT`), je zavrnjen.
+- `wire` — samo `http` : `systemone` (privzeto) ali `openai-chat`.
+- `connectionId` — shranjena povezava, katere ključ je uporabljen (samo znotraj dovoljenih povezav klicnega ključa API ). Brez tega `systemone` prebere povezavo `typesafe` in vsak odločevalnik omrežja se vrne na `OMNIROUTE_DECISION_API_KEY`. Polja `apiKey` ni: ključ ni nikoli shranjen v kombinaciji.
+- `timeoutMs` — celo število, 100–5000, privzeto 2000.
+- `minConfidence` — 0–1; odgovor z nižjo stopnjo zaupanja se vrne k `rules` (odločevalec, ki poroča o nezaupanju, šteje kot 0).
+- `descriptions` — do 50 vnosov (ključ do 300, besedilo do 1000 znakov), ključno z ID modela ali `provider/model`; nenastavljeni vnosi dobijo ustvarjen opis stroškovnega ranga.
+
+**Zastava.** `COMBO_DECISION_ROUTER_ENABLED` (privzeto `false`) zapre vsak odločevalec. Medtem ko je izklopljena, kombinacija `decision` ne bere poverilnic, ne kliče in usmerja z `rules`; v dnevniku piše `fallback (disabled)`. Samo shranjen ključ ga nikoli ne vklopi. Na kombinacije brez odločitvenega bloka to sploh ne vpliva.
+
+**Kaj zapusti škatlo.** Samo besedilo zadnjega uporabniškega sporočila (do 8000 znakov; chat/Claude `messages` ali Odgovori `input`) in meni id modelov z njihovimi opisi. Nikoli sistemski poziv, odzivi `instructions`, orodja, zgodovina, glave ali podatki o računu. Omrežni klici gredo skozi izhodno zaščito ponudnika brez ponovnih poskusov, brez preusmeritev in omejitvijo odziva 64 KB. Klic `combo-model` je nepretočen, brez orodja, `temperature: 0`, s proračunom 256 žetonov; odločitev, ki se začne znotraj odločitvenega klica, je zavrnjena.
+
+**Neuspešno vedenje** je fail-open: vsaka napaka se razreši z odločitvijo `rules`, razlog pa se glasi `decision(<decider>): fallback (<reason>)`, pri čemer je `<reason>` eden od `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` ali `no_user_text`. Po časovni omejitvi, napaki HTTP ali napaki omrežja se končna točka preskoči za 30 s. Uspešen izbor se glasi `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Noben URL, ključ, poziv ali navzgornje telo ne doseže dnevnika.
+
+Graditelj kombinacij prikaže ta polja, ko je strategija usmerjevalnika `decision`, z ustvarjenimi opisi kot ogradami in** Testna odločitev** gumb, ki enkrat pokliče `POST /api/combos/decision-preview` z neshranjenimi nastavitvami (ista zastavica).
+
+**Kdaj uporabiti** : promet z mešano težavnostjo, kjer želite, da raven na zahtevo izbere klasifikator, ki ga izberete, ne posebej Nadir.
+
+**vzdevek** : `decision` (brez vzdevka)
+
+---
+
 ### Strategije usmerjevalnika po meri
 
 Prek javnega API-ja lahko registrirate lastno implementacijo `RouterStrategy`:
@@ -799,6 +854,7 @@ Nato jo uporabite:
 | Strogi SLO-ji            | `sla-aware` | Filtrira glede na pragove p95/napak/stroškov |
 | Večkrožni klepet         | `lkgp`      | Vezanost na sejo                             |
 | Mešana zahtevnost        | `nadir`     | Za vsak poziv izbere ustrezno raven modela   |
+| Lastni klasifikator      | `decision`  | Vaš odločevalec izbere model                 |
 
 Polja, povezana s SLA:
 

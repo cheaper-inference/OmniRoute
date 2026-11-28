@@ -525,6 +525,7 @@ Beständiga kombinationer med `strategy: "auto"` kan ange `config.routerStrategy
 - `lkgp` – senast kända fungerande leverantör först
 - `nadir` – frågar besluts-API:t från [Nadir](https://getnadir.com) vilken modell i poolen som
   prompten behöver; kräver aktivt val och faller vid fel tillbaka till `rules`
+- `decision` — fråga en konfigurerad avgörare (TypeSafe System One, ditt eget beslut URL, eller en av kombons egna modeller) vilken modell i poolen som passar förfrågan; bakom standard-off `COMBO_DECISION_ROUTER_ENABLED` flaggan, fail-open till `rules`
 
 ### Dirigeringsstrategier i detalj
 
@@ -750,6 +751,60 @@ mellanstor och en avancerad modell), när du vill minska kostnaden för att allt
 
 ---
 
+#### 7. `decision` — pluggbar avgörande väljer modellen
+
+`decision` frågar a** avgörande** vilken modell i poolen som passar förfrågan, begränsar sedan poolen till den modellen och låter `rules` välja anslutningen (kvot, hälsa och kostnad fortfarande välja konto). Beslutaren ställs in i kombons beslutsblock — `config.decision` när routerknapparna sitter högst upp på `config` (vad instrumentpanelen skriver), eller `config.auto.decision` bredvid `config.auto.routerStrategy`:
+
+| `decider`     | Vem svarar                                                                                                                  | Behov                                            |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), standardmodell `jev-latest`                              | en `typesafe` anslutning eller env-nyckeln       |
+| `http`        | din egen bestämmer på `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) eller `"openai-chat"` (chatkompletteringar) | `baseUrl` + `model`; nyckel valfri               |
+| `combo-model` | en av dina leverantörsmodeller, kallad i processen som fusionsdomaren                                                       | `model` som `provider/model` (ingen kombination) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Fält (validerade av ett strikt schema vid spara och igen vid begäran):
+
+- `decider` — `systemone`, `http` eller `combo-model`.
+- `model` — TypeSafe modellen, beslutsmodellen på din URL eller `provider/model` för ett kombinationsmodellanrop (upp till 200 tecken).
+- `baseUrl` — endast `http` : en `http(s)` URL upp till 500 tecken, utan referenser, fråga eller fragment. En URL som pekar på denna OmniRoute (loopback + `PORT`) nekas.
+- `wire` — endast `http` : `systemone` (standard) eller `openai-chat`.
+- `connectionId` — den lagrade anslutningen vars nyckel används (endast inom den anropande API nyckelns tillåtna anslutningar). Utan den läser `systemone` en `typesafe` -anslutning och varje nätverksbestämmare faller tillbaka till `OMNIROUTE_DECISION_API_KEY`. Det finns inget `apiKey` -fält: en nyckel lagras aldrig i en kombination.
+- `timeoutMs` — heltal, 100–5000, standard 2000.
+- `minConfidence` — 0–1; ett svar med lägre konfidens faller tillbaka till `rules` (en avgörande som rapporterar osäkerhet räknas som 0).
+- `descriptions` — upp till 50 poster (nyckel upp till 300, text upp till 1000 tecken), knappade av modell-id eller `provider/model`; oaktiverade poster får en genererad kostnadsrankningsbeskrivning.
+
+**Flagga.** `COMBO_DECISION_ROUTER_ENABLED` (standard `false`) grindar varje avgörande. När den är avstängd läser en `decision` kombination inga referenser, ringer inga samtal och dirigerar med `rules`; loggen säger `fallback (disabled)`. En lagrad nyckel slår aldrig på den. Kombinationer utan beslutsblock påverkas inte alls.
+
+**Det som lämnar lådan.** Endast texten i det senaste användarmeddelandet (upp till 8000 tecken; chat/Claude `messages` eller Responses `input`) och menyn med modell-ID med deras beskrivningar. Aldrig systemuppmaningen, svar `instructions`, verktyg, historik, rubriker eller kontodata. Nätverkssamtal går genom leverantörens utgående bevakning utan omförsök, inga omdirigeringar och ett svarstak på 64 KB. `combo-model` -anropet är icke-strömmande, verktygsfritt, `temperature: 0`, med en budget på 256 token; ett beslut som påbörjats i ett beslutssamtal avslås.
+
+**Misslyckande beteende** är fail-open: alla fel löser sig till `rules` -beslutet, och orsaken är `decision(<decider>): fallback (<reason>)`, med `<reason>` en av `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` eller `no_user_text`. Efter en timeout, HTTP fel eller nätverksfel hoppas slutpunkten över i 30 s. Ett framgångsrikt val läser `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Ingen URL, nyckel, prompt eller uppströms kropp når loggen.
+
+Kombinationsbyggaren visar dessa fält när routerstrategin är `decision`, med de genererade beskrivningarna som platshållare och en** Testbeslut** knapp som anropar `POST /api/combos/decision-preview` en gång med de osparade inställningarna (samma flagga).
+
+**När ska användas** : trafik med blandad svårighetsgrad där du vill att nivån ska väljas per begäran av en klassificerare du väljer, inte av Nadir specifikt.
+
+**Alias** : `decision` (inget alias)
+
+---
+
 ### Anpassade dirigeringsstrategier
 
 Du kan registrera din egen implementation av `RouterStrategy` via det publika API:et:
@@ -803,6 +858,7 @@ Använd den sedan:
 | Strikta SLO:er        | `sla-aware` | Filtrerar efter tröskelvärden för p95/fel/kostnad |
 | Fleromgångschatt      | `lkgp`      | Sessionsbundenhet                                 |
 | Varierande svårighet  | `nadir`     | Väljer modellnivå för varje prompt                |
+| Egen klassificerare   | `decision`  | Din beslutare väljer modellen                     |
 
 SLA-medvetna fält:
 

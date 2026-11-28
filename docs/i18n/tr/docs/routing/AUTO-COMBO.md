@@ -538,6 +538,7 @@ Kalıcı `strategy: "auto"` combo'ları, `config.routerStrategy` (veya eski
 - `lkgp` — önce bilinen son iyi sağlayıcı
 - `nadir` — istemin havuzdaki hangi modele ihtiyaç duyduğunu [Nadir](https://getnadir.com)'in karar API'sine sorar;
   etkinleştirme isteğe bağlıdır, başarısızlık durumunda `rules` stratejisine açık şekilde geri döner
+- `decision` — yapılandırılmış bir karar vericiye (TypeSafe System One, kendi kararınız URL veya kombinasyonun kendi modellerinden biri) havuzdaki hangi modelin isteğe uygun olduğunu sorun; varsayılan kapalı `COMBO_DECISION_ROUTER_ENABLED` bayrağının arkasında, `rules` arıza açma
 
 ### Yönlendirici stratejilerinin ayrıntıları
 
@@ -762,6 +763,60 @@ ve öncü bir model) karışık zorluktaki trafikte, her zaman öncü modeli kul
 
 ---
 
+#### 7. `decision` — takılabilir karar verici modeli seçer
+
+`decision` soruyor** karar verici** havuzdaki hangi model isteğe uyuyor, ardından havuzu o modele göre daraltıyor ve `rules` bağlantıyı seçmesine izin veriyor (kota, sağlık ve maliyet yine de hesabı seçiyor). Karar verici, yönlendirici düğmeleri `config` (kontrol panelinin yazdığı şey) tepesine oturduğunda veya `config.auto.decision` `config.auto.routerStrategy` yanında olduğunda, kombinasyonun karar bloğu — `config.decision` ayarlanır:
+
+| `decider`     | Kim cevap verir                                                                                                       | İhtiyaçlar                                  |
+| ------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), varsayılan model `jev-latest`                      | bir `typesafe` bağlantısı veya env anahtarı |
+| `http`        | `baseUrl` kendi kararınız: `wire: "systemone"` (`{baseUrl}/v1/systemone`) veya `"openai-chat"` (sohbet tamamlamaları) | `baseUrl` + `model`; anahtar isteğe bağlı   |
+| `combo-model` | Füzyon yargıcı gibi süreçte çağrılan sağlayıcı modellerinizden biri                                                   | `model` olarak `provider/model` (kombo yok) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Alanlar (kaydetme sırasında ve istek anında tekrar katı bir şema ile doğrulanır):
+
+- `decider` — `systemone`, `http` veya `combo-model`.
+- `model` — TypeSafe modeli, URL karar modeli veya birleşik model çağrısının `provider/model` (en fazla 200 karakter).
+- yalnızca `baseUrl` — `http` : kimlik bilgileri, sorgu veya parça olmadan en fazla 500 karakterden oluşan bir `http(s)` URL. Bu OmniRoute (geri döngü + `PORT`) işaret eden bir URL reddedilir.
+- yalnızca `wire` — `http` : `systemone` (varsayılan) veya `openai-chat`.
+- `connectionId` — anahtarı kullanılan kayıtlı bağlantı (yalnızca çağıran API anahtarının izin verilen bağlantılarında). Bu olmadan, `systemone` bir `typesafe` bağlantısını okur ve her ağ karar vericisi `OMNIROUTE_DECISION_API_KEY` geri döner. `apiKey` alanı yoktur: bir anahtar asla bir kombinasyonda saklanmaz.
+- `timeoutMs` — tamsayı, 100–5000, varsayılan 2000.
+- `minConfidence` — 0–1; daha düşük güvenirliğe sahip bir yanıt `rules` düşer (güven olmadığını bildiren bir karar verici 0 olarak sayılır).
+- `descriptions` — model kimliği veya `provider/model` ile anahtarlanmış en fazla 50 giriş (en fazla 300 anahtar, en fazla 1000 karakter metin); ayarlanmamış girişler, oluşturulmuş bir maliyet sıralaması açıklaması alır.
+
+**Bayrak.** `COMBO_DECISION_ROUTER_ENABLED` (varsayılan `false`) her karar vericiyi kapatır. Kapalıyken `decision` birleşimi hiçbir kimlik bilgisi okumaz, çağrı yapmaz ve `rules` ile yönlendirme yapar; günlük `fallback (disabled)` diyor. Saklanan bir anahtar tek başına onu asla açmaz. Karar bloğu olmayan kombinasyonlar hiçbir şekilde etkilenmez.
+
+**Kutudan çıkan şey.** Yalnızca son kullanıcı mesajının metni (en fazla 8000 karakter; chat/Claude `messages` veya Yanıtlar `input`) ve açıklamalarıyla birlikte model kimlikleri menüsü. Hiçbir zaman sistem istemi, Yanıtlar `instructions`, araçlar, geçmiş, başlıklar veya hesap verileri. Ağ çağrıları, yeniden deneme, yönlendirme olmadan ve 64 KB yanıt sınırı olmadan sağlayıcının giden korumasından geçer. `combo-model` çağrısı akış dışıdır, araç gerektirmez, `temperature: 0` olup 256 jetonluk bir bütçeye sahiptir; Karar çağrısı içerisinde başlatılan karar reddedilir.
+
+**Başarısızlık davranışı** arıza-açıktır: herhangi bir arıza `rules` kararıyla çözümlenir ve nedeni `decision(<decider>): fallback (<reason>)` olarak okunur ve `<reason>` şunlardan biridir: `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` or `no_user_text`. Bir zaman aşımı, HTTP hatası veya ağ hatasından sonra uç nokta 30 saniye boyunca atlanır. Başarılı bir seçim `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)` okur. Günlüğe hiçbir URL, anahtar, bilgi istemi veya yukarı akış gövdesi ulaşmıyor.
+
+Birleşik oluşturucu, yönlendirici stratejisi `decision` olduğunda bu alanları, oluşturulan açıklamalar yer tutucular ve bir** Test kararı** kaydedilmemiş ayarlarla (aynı işaret) `POST /api/combos/decision-preview` bir kez çağıran düğme.
+
+**Ne zaman kullanılmalı** : Katmanın, özellikle Nadir tarafından değil, seçtiğiniz bir sınıflandırıcı tarafından istek başına seçilmesini istediğiniz karışık zorluktaki trafik.
+
+**Takma ad** : `decision` (takma ad yok)
+
+---
+
 ### Özel yönlendirici stratejileri
 
 Genel API aracılığıyla kendi `RouterStrategy` uygulamanızı kaydedebilirsiniz:
@@ -807,14 +862,15 @@ Ardından bunu kullanın:
 
 ### Yönlendirici stratejisi seçim kılavuzu
 
-| Kullanım durumu   | Strateji    | Neden                                      |
-| ----------------- | ----------- | ------------------------------------------ |
-| Dengeli iş yükü   | `rules`     | Varsayılan — tüm faktörleri dikkate alır   |
-| Maliyeti azaltma  | `cost`      | Her zaman en ucuz olanı seçer              |
-| Gecikmeyi azaltma | `latency`   | En hızlı ve güvenilir sağlayıcıyı seçer    |
-| Katı SLO'lar      | `sla-aware` | p95/hata/maliyet eşiklerine göre filtreler |
-| Çok turlu sohbet  | `lkgp`      | Oturum bağlılığı                           |
-| Değişken zorluk   | `nadir`     | Her istem için model katmanını seçer       |
+| Kullanım durumu      | Strateji    | Neden                                      |
+| -------------------- | ----------- | ------------------------------------------ |
+| Dengeli iş yükü      | `rules`     | Varsayılan — tüm faktörleri dikkate alır   |
+| Maliyeti azaltma     | `cost`      | Her zaman en ucuz olanı seçer              |
+| Gecikmeyi azaltma    | `latency`   | En hızlı ve güvenilir sağlayıcıyı seçer    |
+| Katı SLO'lar         | `sla-aware` | p95/hata/maliyet eşiklerine göre filtreler |
+| Çok turlu sohbet     | `lkgp`      | Oturum bağlılığı                           |
+| Değişken zorluk      | `nadir`     | Her istem için model katmanını seçer       |
+| Kendi sınıflandırıcı | `decision`  | Karar vereniniz modeli seçer               |
 
 SLA uyumlu alanlar:
 

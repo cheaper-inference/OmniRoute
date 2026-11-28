@@ -85,18 +85,19 @@ seznam.
 
 Vse končne točke zahtevajo avtorizacijo upravljanja (`requireManagementAuth`)** in** sta samo povratna zanka — `/api/plugins` in `/api/plugins/` sta navedena v `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Končna točka                     | Metoda | Opis                                                        |
-| -------------------------------- | ------ | ----------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Seznam nameščenih vtičnikov (izbirni filter `?status=` )    |
-| `/api/plugins`                   | POST   | Namestite vtičnik iz izvornega imenika vtičnikov            |
-| `/api/plugins/scan`              | POST   | Preglejte imenik vtičnikov in registrirajte nove vtičnike   |
-| `/api/plugins/marketplace`       | GET    | Seznam vnosov v katalog tržnice                             |
-| `/api/plugins/[name]`            | GET    | Pridobite podrobnosti nameščenega vtičnika                  |
-| `/api/plugins/[name]`            | DELETE | Odstranite vtičnik                                          |
-| `/api/plugins/[name]/activate`   | POST   | Aktiviraj (naloži kljuke registra + )                       |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktiviraj (proži `onDeactivate`, odjavi kljuke)           |
-| `/api/plugins/[name]/config`     | GET    | Pridobite konfiguracijsko + za konfiguracijo vtičnika       |
-| `/api/plugins/[name]/config`     | PUT    | Posodobi konfiguracijo vtičnika (preverjeno glede na shemo) |
+| Končna točka                       | Metoda | Opis                                                        |
+| ---------------------------------- | ------ | ----------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Seznam nameščenih vtičnikov (izbirni filter `?status=` )    |
+| `/api/plugins`                     | POST   | Namestite vtičnik iz izvornega imenika vtičnikov            |
+| `/api/plugins/scan`                | POST   | Preglejte imenik vtičnikov in registrirajte nove vtičnike   |
+| `/api/plugins/marketplace`         | GET    | Seznam vnosov v katalog tržnice                             |
+| `/api/plugins/marketplace/install` | POST   | Namestite tržni vtičnik po imenu                            |
+| `/api/plugins/[name]`              | GET    | Pridobite podrobnosti nameščenega vtičnika                  |
+| `/api/plugins/[name]`              | DELETE | Odstranite vtičnik                                          |
+| `/api/plugins/[name]/activate`     | POST   | Aktiviraj (naloži kljuke registra + )                       |
+| `/api/plugins/[name]/deactivate`   | POST   | Deaktiviraj (proži `onDeactivate`, odjavi kljuke)           |
+| `/api/plugins/[name]/config`       | GET    | Pridobite konfiguracijsko + za konfiguracijo vtičnika       |
+| `/api/plugins/[name]/config`       | PUT    | Posodobi konfiguracijo vtičnika (preverjeno glede na shemo) |
 
 Filter `GET /api/plugins` `status` sprejme enega od `installed` / `active` / `inactive` / `error`. Neveljavna vrednost vrne `400`.
 
@@ -118,7 +119,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` mora biti** absolutno** pot do imenika** znotraj imenika virov vtičnika** : `plugin-sources` poleg korena vtičnika, torej `~/.omniroute/plugin-sources/` privzeto ali `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` ko je ta spremenljivka nastavljena (`getPluginSourcesDir()` v `src/lib/plugins/installSource.ts`). Tam najprej kopirajte ali klonirajte vtičnik. Namestitev je z `400` zavrnjena, če pot vsebuje `..` ali ničelni bajt, leži zunaj tega imenika, se razreši zunaj njega prek simbolne povezave, vsebuje simbolno povezavo, katere cilj je zunaj njega, ali ko imenik ne obstaja. Izvorni imenik mora vsebovati veljaven `plugin.json` (ali biti nadrejeni enemu). Ob uspehu je odgovor `201` z nameščeno vrstico vtičnika.
 
-Za razliko od drugih poti vtičnika ta zahteva poverilnico za upravljanje (sejo nadzorne plošče ali ključ API z obsegom upravljanja), tudi če je prijava onemogočena (`requireLogin=false`): namestitev kode ni nikoli anonimno dejanje.
+Za razliko od drugih poti vtičnika ta zahteva poverilnico za upravljanje (sejo nadzorne plošče ali ključ API z obsegom upravljanja), tudi če je prijava onemogočena (`requireLogin=false`): namestitev kode ni nikoli anonimno dejanje. Enako velja za `POST /api/plugins/marketplace/install` (telo `{ "name": "<plugin>" }`).
 
 ### Pobrskajte po tržnici
 
@@ -136,7 +137,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` preveri vsako podano vrednost glede na `configSchema` vtičnika (deklarirano v manifestu): polja `number` upoštevajo `min`/`max`, polja `select` se morajo ujemati z deklariranim `enum`. Ključi, ki niso prisotni v shemi, so dovoljeni skozi.
+`PUT .../config` potrdi telo glede na `configSchema` vtičnika (deklarirano v manifestu) z `validatePluginConfig()` iz `src/lib/plugins/manifest.ts`: vsak ključ mora biti deklariran v shemi, vrednosti se morajo ujemati z deklariranim tipom, polja `number` upoštevajo `min`/`max` in polja `select` se morajo ujemati z deklariranim `enum`. Vsaka kršitev vrne `400` in nič ni shranjeno. Vtičnik, ki ne deklarira `configSchema` nima nastavljivih ključev, zato je zahteva zavrnjena z `400` (»Vtičnik ne deklarira nobenih nastavljivih ključev«).
 
 ## Konfiguracija
 
@@ -217,7 +218,7 @@ URL ki ne uspe na kateri koli plasti, ne prekine zahteve — tržnica se tiho vr
 
 ### Izolacija izvajanja vtičnika
 
-> **Vtičniki niso v peskovniku.** Otrok je navaden proces Node.js ki se izvaja kot uporabnik OmniRoute, brez konteksta VM in zastavic za dovoljenje Node.js, tako da lahko koda vtičnika bere in piše katero koli datoteko, ki jo lahko uporabnik, izvaja programe in doseže omrežje. `requires.permissions` samo odloči, katere spremenljivke okolja otrok prejme; druga dovoljenja niso uveljavljena. Namestite samo vtičnike, ki jim zaupate. Spodnja meja procesa vsebuje zrušitve in zastoje; to ni varnostna meja.
+> **Vtičniki privzeto niso v peskovniku.** Otrok je navaden proces Node.js ki se izvaja kot uporabnik OmniRoute, brez konteksta VM in zastavic za dovoljenje Node.js, tako da lahko koda vtičnika bere in piše katero koli datoteko, ki jo lahko uporabnik, izvaja programe in doseže omrežje. `requires.permissions` samo odloči, katere spremenljivke okolja otrok prejme; druga dovoljenja niso uveljavljena. Zastavica funkcije opt-in `PLUGIN_PERMISSION_MODEL_ENABLED` (privzeto izklopljena) zažene vsak vtičnik pod modelom dovoljenj Node.js, zgrajenim iz teh dovoljenj, razen `network`, ki ga Node.js ne more omejiti (glejte [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#sistem-dovoljenj) ). Namestite samo vtičnike, ki jim zaupate. Spodnja meja procesa vsebuje zrušitve in zastoje; to ni varnostna meja.
 
 - **Izolacija procesa** — `loadPlugin()` (`src/lib/plugins/loader.ts`) sproži vsak vtičnik v ločenem podrejenem procesu Node.js in komunicira prek IPC. Klici na kljukico imajo časovno omejitev z `SIGTERM` → `SIGKILL` stopnjevanjem.
 - **Env dovoljeni seznam** — otrok prejme samo niz dovoljenih spremenljivk okolja; širši nabor je odobren le, ko manifest zahteva dovoljenje `env`.

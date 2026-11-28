@@ -83,18 +83,19 @@ Dashboard (/dashboard/plugins)
 
 すべてのエンドポイントには管理認証 (`requireManagementAuth`) が必要です**そして**ループバック専用の— `/api/plugins`および`/api/plugins/`は`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) にリストされています。
 
-| 終点                             | 方法   | 説明                                                                                |
-| -------------------------------- | ------ | ----------------------------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | インストールされているプラグインを一覧表示します (オプションの`?status=`フィルター) |
-| `/api/plugins`                   | POST   | プラグインのソース ディレクトリからプラグインをインストールする                     |
-| `/api/plugins/scan`              | POST   | プラグイン ディレクトリをスキャンし、新しいプラグインを登録します                   |
-| `/api/plugins/marketplace`       | GET    | マーケットプレイスのカタログ エントリを一覧表示する                                 |
-| `/api/plugins/[name]`            | GET    | インストールされているプラグインの詳細を取得する                                    |
-| `/api/plugins/[name]`            | DELETE | プラグインをアンインストールする                                                    |
-| `/api/plugins/[name]/activate`   | POST   | アクティブ化 ( +レジスターフックのロード)                                           |
-| `/api/plugins/[name]/deactivate` | POST   | 非アクティブ化 ( `onDeactivate`を起動、フックの登録を解除)                          |
-| `/api/plugins/[name]/config`     | GET    | プラグイン構成+構成スキーマを取得する                                               |
-| `/api/plugins/[name]/config`     | PUT    | プラグイン構成を更新します (スキーマに対して検証済み)                               |
+| 終点                               | 方法   | 説明                                                                                |
+| ---------------------------------- | ------ | ----------------------------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | インストールされているプラグインを一覧表示します (オプションの`?status=`フィルター) |
+| `/api/plugins`                     | POST   | プラグインのソース ディレクトリからプラグインをインストールする                     |
+| `/api/plugins/scan`                | POST   | プラグイン ディレクトリをスキャンし、新しいプラグインを登録します                   |
+| `/api/plugins/marketplace`         | GET    | マーケットプレイスのカタログ エントリを一覧表示する                                 |
+| `/api/plugins/marketplace/install` | POST   | マーケットプレイスプラグインを名前でインストールします                              |
+| `/api/plugins/[name]`              | GET    | インストールされているプラグインの詳細を取得する                                    |
+| `/api/plugins/[name]`              | DELETE | プラグインをアンインストールする                                                    |
+| `/api/plugins/[name]/activate`     | POST   | アクティブ化 ( +レジスターフックのロード)                                           |
+| `/api/plugins/[name]/deactivate`   | POST   | 非アクティブ化 ( `onDeactivate`を起動、フックの登録を解除)                          |
+| `/api/plugins/[name]/config`       | GET    | プラグイン構成+構成スキーマを取得する                                               |
+| `/api/plugins/[name]/config`       | PUT    | プラグイン構成を更新します (スキーマに対して検証済み)                               |
 
 `GET /api/plugins` `status`フィルターは、 `installed` / `active` / `inactive` / `error`のいずれかを受け入れます。無効な値は`400`を返します。
 
@@ -116,7 +117,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 The `path` must be an **absolute** path to a directory **inside the plugin sources directory**: `plugin-sources` next to the plugin root, so `~/.omniroute/plugin-sources/` by default, or `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` when that variable is set (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Copy or clone the plugin there first. The install is refused with `400` when the path contains `..` or a null byte, lies outside that directory, resolves outside it through a symlink, contains a symlink whose target is outside it, or when the directory does not exist. The source directory must contain a valid `plugin.json` (or be a parent of one). On success the response is `201` with the installed plugin row.
 
-他のプラグイン ルートとは異なり、このルートでは、ログインが無効になっている場合でも (`requireLogin=false`)、管理資格情報 (ダッシュボード セッションまたは管理スコープのAPIキー) が必要です。コードのインストールは決して匿名のアクションではありません。
+他のプラグイン ルートとは異なり、このルートでは、ログインが無効になっている場合でも (`requireLogin=false`)、管理資格情報 (ダッシュボード セッションまたは管理スコープのAPIキー) が必要です。コードのインストールは決して匿名のアクションではありません。 `POST /api/plugins/marketplace/install` (本体`{ "name": "<plugin>" }`) にも同じことが当てはまります。
 
 ### マーケットプレイスを閲覧する
 
@@ -134,7 +135,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` validates each provided value against the plugin's `configSchema` (declared in the manifest): `number` fields honor `min`/`max`, `select` fields must match the declared `enum`. Keys not present in the schema are allowed through.
+`PUT .../config` `src/lib/plugins/manifest.ts`の`validatePluginConfig()`を使用して、プラグインの`configSchema` (マニフェストで宣言されている) に対して本体を検証します。すべてのキーはスキーマで宣言する必要があり、値は宣言された型と一致する必要があり、 `number`フィールドは`min`/`max`を尊重し、 `select`フィールドは宣言された`enum`と一致する必要があります。違反があると`400`が返され、何も保存されません。 no `configSchema`を宣言するプラグインには構成可能なキーがないため、リクエストは`400`で拒否されます (「プラグインは構成可能なキーを宣言していません」)。
 
 ## 設定
 
@@ -213,7 +214,7 @@ SSRF ガードにより失敗した場合や、不正なレスポンスが返さ
 
 ### プラグイン実行の分離
 
-> **プラグインはサンドボックス化されていません。**子プロセスは、 OmniRouteユーザーとして実行される通常のNode.jsプロセスであり、 VMコンテキストやNode.js権限フラグはありません。そのため、プラグイン コードは、ユーザーが実行できる任意のファイルの読み取りと書き込み、プログラムの実行、ネットワークへのアクセスが可能です。 `requires.permissions` 、子がどの環境変数を受け取るかを決定するだけです。他の権限は強制されません。信頼できるプラグインのみをインストールしてください。以下のプロセス境界にはクラッシュとハングが含まれています。それはセキュリティ境界ではありません。
+> **プラグインはデフォルトではサンドボックス化されていません。**子プロセスは、 OmniRouteユーザーとして実行される通常のNode.jsプロセスであり、 VMコンテキストやNode.js権限フラグはありません。そのため、プラグイン コードは、ユーザーが実行できる任意のファイルの読み取りと書き込み、プログラムの実行、ネットワークへのアクセスが可能です。 `requires.permissions` 、子がどの環境変数を受け取るかを決定するだけです。他の権限は強制されません。オプトイン`PLUGIN_PERMISSION_MODEL_ENABLED`機能フラグ (デフォルトではオフ) は、 Node.js制限できない`network`除き、これらの権限から構築されたNode.js権限モデルの下で各プラグインを実行します ( [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#%E8%A8%B1%E5%8F%AF%E5%88%B6%E5%BA%A6)を参照)。信頼できるプラグインのみをインストールしてください。以下のプロセス境界にはクラッシュとハングが含まれています。それはセキュリティ境界ではありません。
 
 - **プロセスの分離**— `loadPlugin()` (`src/lib/plugins/loader.ts`) は、個別のNode.js子プロセスで各プラグインを生成し、 IPC経由で通信します。フック呼び出しには、 `SIGTERM` → `SIGKILL`エスカレーションでタイムアウトが発生します。
 - **環境許可リスト**—子は、許可リストに登録された環境変数セットのみを受け取ります。より広範なセットは、マニフェストが`env`権限を要求した場合にのみ付与されます。

@@ -524,6 +524,7 @@ Combinațiile persistente cu `strategy: "auto"` pot seta `config.routerStrategy`
 - `lkgp` — mai întâi, ultimul furnizor cunoscut ca fiind funcțional
 - `nadir` — solicită API-ului de decizie [Nadir](https://getnadir.com) să stabilească modelul din grup de care are
   nevoie promptul; necesită activare explicită și revine la `rules` în caz de eroare
+- `decision` — întrebați un decident configurat (TypeSafe System One, propria decizie URL, sau unul dintre modelele proprii ale combo-ului) care model din grup se potrivește cererii; în spatele steagului `COMBO_DECISION_ROUTER_ENABLED` dezactivat implicit, deschiderea eșuată la `rules`
 
 ### Strategiile routerului în detaliu
 
@@ -749,6 +750,60 @@ mediu și unul de frontieră), când doriți să reduceți costul utilizării pe
 
 ---
 
+#### 7. `decision` — pluggable decider alege modelul
+
+`decision` întreabă a** decident** care model din pool se potrivește cererii, apoi restrânge pool-ul la acel model și îl lasă `rules` să aleagă conexiunea (cota, sănătatea și costul să aleagă în continuare contul). Decizia este setată în blocul de decizie al combo-ului — `config.decision` când butoanele routerului se află în partea de sus a `config` (ce scrie tabloul de bord) sau `config.auto.decision` lângă `config.auto.routerStrategy`:
+
+| `decider`     | Cine raspunde                                                                                                                | Nevoi                                    |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), model implicit `jev-latest`                               | o conexiune `typesafe` sau tasta env     |
+| `http`        | propriul dvs. decident la `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) sau `"openai-chat"` (finalizări de chat) | `baseUrl` + `model`; cheie opțională     |
+| `combo-model` | unul dintre modelele dvs. de furnizor, numit în proces ca judecătorul de fuziune                                             | `model` ca `provider/model` (fără combo) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Câmpuri (validate printr-o schemă strictă la salvare și din nou la momentul solicitării):
+
+- `decider` — `systemone`, `http` sau `combo-model`.
+- `model` — TypeSafe model, modelul de decizie la URL dvs. sau `provider/model` al unui apel de model combo (până la 200 de caractere).
+- Numai `baseUrl` — `http` : un `http(s)` URL de până la 500 de caractere, fără acreditări, interogare sau fragment. Un URL care indică acest OmniRoute (loopback + `PORT`) este refuzat.
+- numai `wire` — `http` : `systemone` (implicit) sau `openai-chat`.
+- `connectionId` — conexiunea stocată a cărei cheie este utilizată (numai în interiorul conexiunilor permise ale cheii API apelante). Fără el, `systemone` citește o conexiune `typesafe` și fiecare decident de rețea revine la `OMNIROUTE_DECISION_API_KEY`. Nu există câmp `apiKey` : o cheie nu este niciodată stocată într-un combo.
+- `timeoutMs` — întreg, 100–5000, implicit 2000.
+- `minConfidence` — 0–1; un răspuns cu încredere mai mică revine la `rules` (un decident care raportează lipsa de încredere contează ca 0).
+- `descriptions` — până la 50 de intrări (cheie până la 300, text până la 1000 de caractere), tastate după id-ul modelului sau `provider/model`; intrările nesetate primesc o descriere generată de rang de cost.
+
+**Pavilion.** `COMBO_DECISION_ROUTER_ENABLED` (implicit `false`) pornește fiecare decident. În timp ce este dezactivat, un combo `decision` nu citește nicio acreditare, nu efectuează apeluri și rutează cu `rules`; jurnalul spune `fallback (disabled)`. O cheie stocată singură nu o pornește niciodată. Combo-urile fără bloc de decizie nu sunt afectate deloc.
+
+**Ce părăsește cutia.** Doar textul ultimului mesaj utilizator (până la 8000 de caractere; chat/Claude `messages` sau Responses `input`) și meniul de ID-uri de model cu descrierile acestora. Niciodată mesajul de sistem, răspunsurile `instructions`, instrumentele, istoricul, anteturile sau datele contului. Apelurile în rețea trec prin gardul de ieșire al furnizorului fără reîncercări, fără redirecționări și cu un plafon de răspuns de 64 KB. Apelul `combo-model` este non-streaming, fără instrumente, `temperature: 0`, cu un buget de 256 de jetoane; o decizie începută în cadrul unui apel de decizie este refuzată.
+
+**Comportament de eșec** este fail-open: orice eșec se rezolvă la decizia `rules`, iar motivul este `decision(<decider>): fallback (<reason>)`, cu `<reason>` unul dintre `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion` sau `low_confidence`, `single_option` `no_user_text` După un timeout, o eroare HTTP sau o eroare de rețea, punctul final este omis timp de 30 de secunde. O alegere reușită citește `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Niciun URL, cheie, prompt sau corp din amonte nu ajunge în jurnal.
+
+Generatorul de combinații arată aceste câmpuri când strategia routerului este `decision`, cu descrierile generate ca substituenți și un** Decizia de testare** butonul care apelează `POST /api/combos/decision-preview` o dată cu setările nesalvate (același steag).
+
+**Când să utilizați** : trafic cu dificultăți mixte în care doriți ca nivelul selectat la cerere de către un clasificator pe care îl alegeți, nu de către Nadir în mod specific.
+
+**Alias** : `decision` (fără alias)
+
+---
+
 ### Strategii personalizate de rutare
 
 Puteți înregistra propria implementare `RouterStrategy` prin intermediul API-ului public:
@@ -802,6 +857,7 @@ Apoi utilizați-o:
 | SLO-uri stricte             | `sla-aware` | Filtrează după pragurile p95/eroare/cost      |
 | Chat cu mai multe schimburi | `lkgp`      | Persistența sesiunii                          |
 | Dificultate variabilă       | `nadir`     | Alege nivelul modelului pentru fiecare prompt |
+| Clasificator propriu        | `decision`  | Decidentul tău alege modelul                  |
 
 Câmpuri pentru strategia compatibilă cu SLA:
 

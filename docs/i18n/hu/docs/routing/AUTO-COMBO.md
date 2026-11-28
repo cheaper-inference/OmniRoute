@@ -529,6 +529,7 @@ A tartósan tárolt, `strategy: "auto"` beállítású kombóknál a `config.rou
 - `lkgp` — először a legutóbb ismerten jól működő szolgáltató
 - `nadir` — megkérdezi a [Nadir](https://getnadir.com) döntési API-ját, hogy a készlet melyik modelljére van szüksége az
   utasításnak; külön engedélyezendő, hiba esetén a `rules` stratégiára tér át
+- `decision` — kérdezzen meg egy konfigurált döntéshozót (TypeSafe System One, saját döntés URL, vagy a kombinált saját modellek egyike), hogy a készlet melyik modellje felel meg a kérésnek; az alapértelmezett kikapcsolt `COMBO_DECISION_ROUTER_ENABLED` jelző mögött, a fail-open a `rules` re
 
 ### Az útválasztási stratégiák részletesen
 
@@ -754,6 +755,60 @@ a Nadir hozta meg a döntést.
 
 ---
 
+#### 7. `decision` — csatlakoztatható döntéshozó kiválasztja a modellt
+
+`decision` kérdi a** döntõ** a készlet melyik modellje felel meg a kérésnek, majd leszűkíti a készletet arra a modellre, és hagyja, hogy `rules` válassza ki a kapcsolatot (a kvóta, az állapot és a költség továbbra is kiválasztja a fiókot). A döntést a kombináció — `config.decision` döntési blokkjában állítjuk be, amikor az útválasztó gombjai `config` (amit a műszerfal ír) tetején, vagy `config.auto.decision` `config.auto.routerStrategy` mellett:
+
+| `decider`     | Aki válaszol                                                                                                                | Igények                                     |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), alapértelmezett `jev-latest` modell                      | egy `typesafe` kapcsolat vagy az env kulcs  |
+| `http`        | a saját döntésed a `baseUrl` nál: `wire: "systemone"` (`{baseUrl}/v1/systemone`) vagy `"openai-chat"` (csevegés befejezése) | `baseUrl` + `model`; kulcs választható      |
+| `combo-model` | az egyik szolgáltatói modell, amelyet folyamatban hívnak, mint a fúziós bíró                                                | `model` mint `provider/model` (nincs kombó) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Mezők (szigorú séma ellenőrzi mentéskor és kéréskor újra):
+
+- `decider` — `systemone`, `http` vagy `combo-model`.
+- `model` — TypeSafe modell, a URL döntési modellje vagy egy kombinált modellhívás `provider/model` (legfeljebb 200 karakter).
+- `baseUrl` — csak `http` : legfeljebb 500 karakter hosszúságú `http(s)` URL, hitelesítő adatok, lekérdezés vagy töredék nélkül. Az erre a OmniRoute -re mutató URL (loopback + `PORT`) elutasítva.
+- `wire` — csak `http` : `systemone` (alapértelmezett) vagy `openai-chat`.
+- `connectionId` — a tárolt kapcsolat, amelynek kulcsát használjuk (csak a hívó API billentyű engedélyezett kapcsolatain belül). Enélkül `systemone` beolvassa a `typesafe` kapcsolatot, és minden hálózati döntéshozó visszaesik `OMNIROUTE_DECISION_API_KEY`-re. Nincs `apiKey` mező: a kulcs soha nem tárolódik kombóban.
+- `timeoutMs` — integer, 100–5000, alapértelmezett 2000.
+- `minConfidence` — 0–1; az alacsonyabb megbízhatóságú válasz `rules` esik vissza (az a döntés, amelyik nem megbízható, 0-nak számít).
+- `descriptions` — legfeljebb 50 bejegyzés (legfeljebb 300 kulcs, szöveg legfeljebb 1000 karakter), modellazonosítóval vagy `provider/model`-vel; Az unset bejegyzések generált költségrangsor leírást kapnak.
+
+**Zászló.** `COMBO_DECISION_ROUTER_ENABLED` (alapértelmezett `false`) minden döntéshozó kaput biztosít. Amíg ki van kapcsolva, a `decision` kombó nem olvas hitelesítő adatokat, nem kezdeményez hívást és `rules` vel irányít; a naplóban az áll, hogy `fallback (disabled)`. Egy tárolt kulcs önmagában soha nem kapcsolja be. A döntési blokk nélküli kombinációkat ez egyáltalán nem érinti.
+
+**Mi hagyja el a dobozt.** Csak az utolsó felhasználói üzenet szövege (legfeljebb 8000 karakter; chat/Claude `messages` vagy Responses `input`) és a modellazonosítók menüje a leírásukkal együtt. Soha nem a rendszer kéri, válaszok `instructions`, eszközök, előzmények, fejlécek vagy fiókadatok. A hálózati hívások a szolgáltató kimenő védőjén keresztül mennek át, nincs újrapróbálkozás, nincs átirányítás és 64 KB válaszkorlát. A `combo-model` hívás nem streaming, eszközmentes, `temperature: 0`, 256 token költségvetéssel; a döntési felhíváson belül megkezdett döntést elutasítják.
+
+**Sikertelen viselkedés** hibamentes: minden hiba a `rules` döntésre oldódik fel, az ok pedig `decision(<decider>): fallback (<reason>)`, `<reason>` esetén pedig `network_error` `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `recursion`, `low_confidence` vagy `single_option` `no_user_text` Időtúllépés, HTTP hiba vagy hálózati hiba után a végpont 30 másodpercig kihagyásra kerül. A sikeres választás `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)` olvas. Nem éri el a naplót URL, kulcs, prompt vagy upstream test.
+
+A kombinált építő megjeleníti ezeket a mezőket, ha az útválasztó stratégia `decision`, a generált leírásokkal helyőrzőként és** Teszt döntés** gomb, amely egyszer meghívja `POST /api/combos/decision-preview` a nem mentett beállításokkal (ugyanaz a jelző).
+
+**Mikor kell használni** : vegyes nehézségű forgalom, ahol azt szeretné, hogy a szintet kérésenként az Ön által választott osztályozó határozza meg, nem pedig kifejezetten Nadir.
+
+**Álnév** : `decision` (nincs álnév)
+
+---
+
 ### Egyéni útválasztási stratégiák
 
 A nyilvános API-n keresztül saját `RouterStrategy`-megvalósítást regisztrálhat:
@@ -807,6 +862,7 @@ Ezután használja a következőképpen:
 | Szigorú SLO-k              | `sla-aware` | A p95-/hiba-/költségküszöbök alapján szűr         |
 | Többfordulós csevegés      | `lkgp`      | Munkamenethez kötöttség                           |
 | Vegyes nehézség            | `nadir`     | Kérésenként választja ki a modell szintjét        |
+| Saját osztályozó           | `decision`  | A modellt a döntéshozó választja ki               |
 
 SLA-tudatos mezők:
 

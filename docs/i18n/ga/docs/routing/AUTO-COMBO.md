@@ -478,6 +478,7 @@ Is féidir le teaglamaí marthanacha `strategy: "auto"` `config.routerStrategy` 
 - `lkgp` — an soláthraí maith deireanach is eol ar dtús
 - `nadir` — iarr ar API cinnteoireachta [Nadir](https://getnadir.com) cén tsamhail sa linn atá de dhíth ar an
   leid; rogha an úsáideora, agus má theipeann air, filleann sé go hoscailte ar `rules`
+- `decision` — iarr ar chinnteoir cumraithe (TypeSafe System One, do chinneadh féin URL, nó ceann de mhúnlaí an teaglama féin) cén samhail sa chomhthiomsú a oireann don iarratas; taobh thiar den bhratach `COMBO_DECISION_ROUTER_ENABLED` réamhshocraithe, teip-oscailte do `rules`
 
 ### Straitéisí an ródaire go mion
 
@@ -703,6 +704,60 @@ agus samhail cheannródaíoch), nuair is mian leat an costas a bhaineann leis an
 
 ---
 
+#### 7. `decision` — roghnóir pluggable a roghnaíonn an tsamhail
+
+iarrann `decision` a** cinnteoir** cén samhail sa chomhthiomsú a oireann don iarratas, ansin caolaíonn an linn go dtí an múnla sin agus ligeann do `rules` an nasc a phiocadh (cuóta, sláinte agus costas fós an cuntas a roghnú). Tá an cinneadh socraithe i mbloc cinneadh an teaglama — `config.decision` nuair a shuíonn na snaidhmeanna ródaire ag barr `config` (an rud a scríobhann an painéal), nó `config.auto.decision` in aice le `config.auto.routerStrategy`:
+
+| `decider`     | Cé a fhreagraíonn                                                                                                       | Riachtanais                                |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), samhail réamhshocraithe `jev-latest`                 | nasc `typesafe` nó an eochair env          |
+| `http`        | do chinneadh féin ag `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) nó `"openai-chat"` (comhrá críochnaithe) | `baseUrl` + `model`; eochair roghnach      |
+| `combo-model` | ceann de do mhúnlaí soláthraithe, ar a dtugtar sa phróiseas mar an breitheamh comhleá                                   | `model` as `provider/model` (gan teaglama) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Réimsí (arna bhailíochtú ag scéimre dhian ar shábháil agus arís ag am iarratais):
+
+- `decider` — `systemone`, `http` nó `combo-model`.
+- samhail `model` — TypeSafe, an tsamhail chinnidh ar do URL, nó an `provider/model` de ghlao samhail teaglama (suas le 200 carachtar).
+- `baseUrl` — `http` amháin: `http(s)` URL suas le 500 carachtar, gan dintiúir, gan cheist ná blúire. Diúltaítear pointe URL ag an OmniRoute seo (loopback + `PORT`).
+- `wire` — `http` amháin: `systemone` (réamhshocraithe) nó `openai-chat`.
+- `connectionId` — an nasc stóráilte a n-úsáidtear a eochair (taobh istigh de naisc cheadaithe an eochair API amháin). Gan é, léann `systemone` nasc `typesafe` agus titeann gach cinneadh líonra ar ais go `OMNIROUTE_DECISION_API_KEY`. Níl aon réimse `apiKey` ann: ní stóráiltear eochair i teaglama riamh.
+- slánuimhir `timeoutMs` —, 100–5000, réamhshocraithe 2000.
+- `minConfidence` — 0–1; titeann freagra ísealmhuiníne siar go `rules` (is ionann cinneadh a thuairiscíonn nach bhfuil aon mhuinín ar bith agus 0).
+- `descriptions` — suas le 50 iontráil (eochair suas le 300, téacs suas le 1000 carachtar), eochair id samhail nó `provider/model`; faigheann iontrálacha neamhshonraithe cur síos ginte costas-ranga.
+
+**Bratach.** geataí `COMBO_DECISION_ROUTER_ENABLED` (default `false`) gach cinneadh. Cé go bhfuil sé as, ní léann teaglama `decision` aon dintiúir, ní dhéanann sé aon ghlaoch agus bealaí le `rules`; deir an loga `fallback (disabled)`. Ní chuireann eochair stóráilte amháin ar siúl riamh í. Ní chuirtear isteach ar combos gan bloc cinntí ar chor ar bith.
+
+**Cad a fhágann an bosca.** Níl ann ach téacs na teachtaireachta deiridh ón úsáideoir (suas le 8000 carachtar; chat/Claude `messages` nó Freagraí `input`) agus roghchlár na n-aitheantas samhlacha lena gcur síos. Ná leid an chórais riamh, Freagraí `instructions`, uirlisí, stair, ceanntásca nó sonraí cuntais. Téann glaonna líonra trí gharda amach an tsoláthraí gan aon atriail, gan aon atreoruithe agus caipín freagartha 64 KB. Tá an glao `combo-model` neamhshruthaithe, saor ó uirlisí, `temperature: 0`, le buiséad 256-chomhartha; diúltaítear cinneadh a thosaigh laistigh de ghlao cinnidh.
+
+**Iompar teipe** Tá teip-oscailte: réitíonn aon teip leis an gcinneadh `rules`, agus léann an chúis `decision(<decider>): fallback (<reason>)`, le `<reason>` ar cheann de `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` nó `no_user_text`. Tar éis teorainn ama, earráid HTTP nó earráid líonra déantar an críochphointe a scipeáil ar feadh 30 s. Léann rogha rathúil `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Ní shroicheann aon chomhlacht URL, eochair, pras nó réamhtheachtacha an logáil.
+
+Taispeánann an tógálaí teaglama na réimsí seo nuair is `decision` straitéis an ródaire , leis na tuairiscí ginte mar áitshealbhóirí agus a** Cinneadh tástála** cnaipe a ghlaonn `POST /api/combos/decision-preview` uair amháin leis na socruithe gan sábháil (an bhratach chéanna).
+
+**Cathain a úsáid** : trácht le deacracht mheasctha nuair is mian leat an tsraith a roghnaíonn an t-aicmitheoir a roghnaíonn tú de réir an iarratais, ní ag Nadir go sonrach.
+
+**Ailias** : `decision` (gan ailias)
+
+---
+
 ### Straitéisí saincheaptha ródaire
 
 Is féidir leat do chur chun feidhme féin de `RouterStrategy` a chlárú tríd an API poiblí:
@@ -756,6 +811,7 @@ Ansin bain úsáid aisti:
 | SLOanna dochta            | `sla-aware` | Scagtar de réir tairseacha p95/earráide/costais |
 | Comhrá ilseal             | `lkgp`      | Seasmhacht seisiúin                             |
 | Deacracht mheasctha       | `nadir`     | Roghnaítear sraith na samhla do gach leid       |
+| Aicmitheoir Féin          | `decision`  | Roghnaíonn do chinnitheoir an tsamhail          |
 
 Réimsí atá feasach ar SLA:
 

@@ -529,6 +529,7 @@ Persistente combo's met `strategy: "auto"` kunnen `config.routerStrategy` (of he
 - `lkgp` — eerst de laatst bekende werkende provider
 - `nadir` — vraagt de beslissings-API van [Nadir](https://getnadir.com) welk model in de pool nodig is voor de
   prompt; opt-in, valt bij fouten terug op `rules`
+- `decision` — vraag een geconfigureerde beslisser (TypeSafe System One, uw eigen beslissing URL of een van de eigen modellen van de combo) welk model in de pool bij het verzoek past; achter de standaard-off `COMBO_DECISION_ROUTER_ENABLED` vlag, fail-open naar `rules`
 
 ### Routerstrategieën in detail
 
@@ -754,6 +755,60 @@ en een grensverleggend model), wanneer je de kosten van het altijd gebruiken van
 
 ---
 
+#### 7. `decision` — plug-in beslisser kiest het model
+
+`decision` vraagt a** beslisser** welk model in de pool bij het verzoek past, beperkt vervolgens de pool tot dat model en laat `rules` de verbinding kiezen (quota, gezondheid en kosten kiezen nog steeds het account). De beslisser wordt ingesteld in het beslissingsblok — `config.decision` van de combo wanneer de routerknoppen bovenaan `config` zitten (wat het dashboard schrijft), of `config.auto.decision` naast `config.auto.routerStrategy`:
+
+| `decider`     | Wie antwoordt                                                                                                           | Behoeften                                   |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `systemone`   | TypeSafe System One (`POST https://api.typesafe.ai/v1/systemone`), standaardmodel `jev-latest`                          | een `typesafe` verbinding of de env-sleutel |
+| `http`        | uw eigen beslisser bij `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) of `"openai-chat"` (chat-aanvullingen) | `baseUrl` + `model`; sleutel optioneel      |
+| `combo-model` | een van uw providermodellen, ingeschakeld als de fusierechter                                                           | `model` als `provider/model` (geen combo)   |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Velden (gevalideerd door een strikt schema bij opslaan en opnieuw op verzoek):
+
+- `decider` — `systemone`, `http` of `combo-model`.
+- `model` — TypeSafe model, het beslissingsmodel op uw URL, of de `provider/model` van een combo-modelaanroep (maximaal 200 tekens).
+- `baseUrl` — alleen `http` : een `http(s)` URL van maximaal 500 tekens, zonder inloggegevens, query of fragment. Een URL die naar deze OmniRoute (loopback + `PORT`) wijst, wordt geweigerd.
+- `wire` — alleen `http` : `systemone` (standaard) of `openai-chat`.
+- `connectionId` — de opgeslagen verbinding waarvan de sleutel wordt gebruikt (alleen binnen de toegestane verbindingen van de aanroepende API sleutel). Zonder dit leest `systemone` een `typesafe` -verbinding en valt elke netwerkbeslisser terug naar `OMNIROUTE_DECISION_API_KEY`. Er is geen `apiKey` veld: een sleutel wordt nooit in een combo opgeslagen.
+- `timeoutMs` — geheel getal, 100–5000, standaard 2000.
+- `minConfidence` — 0–1; een antwoord met minder vertrouwen valt terug op `rules` (een beslisser die geen vertrouwen rapporteert, telt als 0).
+- `descriptions` — maximaal 50 vermeldingen (sleutel tot 300, tekst tot 1000 tekens), ingetoetst op model-ID of `provider/model`; niet-ingestelde vermeldingen krijgen een gegenereerde kostenrangschikkingsbeschrijving.
+
+**Vlag.** `COMBO_DECISION_ROUTER_ENABLED` (standaard `false`) poort elke beslisser. Terwijl het uit staat, leest een `decision` combo geen referentie, voert geen oproep uit en routeert met `rules`; het logboek zegt `fallback (disabled)`. Een opgeslagen sleutel alleen zet hem nooit aan. Combo's zonder beslissingsblok worden helemaal niet beïnvloed.
+
+**Wat verlaat de doos.** Alleen de tekst van het laatste gebruikersbericht (maximaal 8000 tekens; chat/Claude `messages` of Responses `input`) en het menu met model-ID's met hun beschrijvingen. Nooit de systeemprompt, Reacties `instructions`, tools, geschiedenis, headers of accountgegevens. Netwerkoproepen gaan via de uitgaande bewaker van de provider zonder nieuwe pogingen, geen omleidingen en een responslimiet van 64 KB. De `combo-model` aanroep is niet-streaming, zonder gereedschap, `temperature: 0`, met een budget van 256 token; een beslissing die binnen een beslissingsoproep is gestart, wordt geweigerd.
+
+**Mislukkingsgedrag** is fail-open: elke fout wordt opgelost volgens de `rules` -beslissing, en de reden luidt `decision(<decider>): fallback (<reason>)`, met `<reason>` een van `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` of `no_user_text`. Na een time-out, HTTP fout of netwerkfout wordt het eindpunt gedurende 30 seconden overgeslagen. Een succesvolle keuze luidt `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Geen enkele URL, sleutel-, prompt- of stroomopwaartse instantie bereikt het logboek.
+
+De combobouwer toont deze velden wanneer de routerstrategie `decision` is, met de gegenereerde beschrijvingen als tijdelijke aanduidingen en a** Testbeslissing** knop die `POST /api/combos/decision-preview` één keer aanroept met de niet-opgeslagen instellingen (dezelfde vlag).
+
+**Wanneer te gebruiken** : verkeer met gemengde moeilijkheidsgraad waarbij u wilt dat het niveau per verzoek wordt gekozen door een classificatie die u kiest, niet specifiek door Nadir.
+
+**Alias** : `decision` (geen alias)
+
+---
+
 ### Aangepaste routerstrategieën
 
 Je kunt je eigen `RouterStrategy`-implementatie registreren via de openbare API:
@@ -807,6 +862,7 @@ Gebruik deze vervolgens:
 | Strikte SLO's             | `sla-aware` | Filtert op drempels voor p95/fouten/kosten   |
 | Chat met meerdere beurten | `lkgp`      | Sessiegebondenheid                           |
 | Gemengde moeilijkheid     | `nadir`     | Kiest per prompt het juiste modelniveau      |
+| Eigen classificatie       | `decision`  | Uw beslisser kiest het model                 |
 
 SLA-bewuste velden:
 

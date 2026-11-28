@@ -88,18 +88,19 @@ jurnalga yozadi va boshlangʻich roʻyxatga qaytadi.
 
 Barcha so'nggi nuqtalar boshqaruv autentsiyasini talab qiladi (`requireManagementAuth`)** va** — `/api/plugins` va `/api/plugins/` `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) da keltirilgan.
 
-| Yakuniy nuqta                    | Usul   | Tavsif                                                                 |
-| -------------------------------- | ------ | ---------------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | O'rnatilgan plaginlar ro'yxati (ixtiyoriy `?status=` filtri)           |
-| `/api/plugins`                   | POST   | Plagin manbalari katalogidan plaginni o'rnating                        |
-| `/api/plugins/scan`              | POST   | Plagin katalogini skanerlang va yangi plaginlarni ro'yxatdan o'tkazing |
-| `/api/plugins/marketplace`       | GET    | Bozor katalogidagi yozuvlarni ro'yxatlash                              |
-| `/api/plugins/[name]`            | GET    | O'rnatilgan plagin tafsilotlarini oling                                |
-| `/api/plugins/[name]`            | DELETE | Plaginni o'chirib tashlang                                             |
-| `/api/plugins/[name]/activate`   | POST   | Faollashtirish ( + registrlari ilgaklarini yuklash)                    |
-| `/api/plugins/[name]/deactivate` | POST   | O'chirish (o'chirish `onDeactivate`, ilgaklarni ro'yxatdan o'chirish)  |
-| `/api/plugins/[name]/config`     | GET    | Plagin konfiguratsiyasi + konfiguratsiya sxemasini oling               |
-| `/api/plugins/[name]/config`     | PUT    | Plagin konfiguratsiyasini yangilash (sxemaga muvofiq tasdiqlangan)     |
+| Yakuniy nuqta                      | Usul   | Tavsif                                                                 |
+| ---------------------------------- | ------ | ---------------------------------------------------------------------- |
+| `/api/plugins`                     | GET    | O'rnatilgan plaginlar ro'yxati (ixtiyoriy `?status=` filtri)           |
+| `/api/plugins`                     | POST   | Plagin manbalari katalogidan plaginni o'rnating                        |
+| `/api/plugins/scan`                | POST   | Plagin katalogini skanerlang va yangi plaginlarni ro'yxatdan o'tkazing |
+| `/api/plugins/marketplace`         | GET    | Bozor katalogidagi yozuvlarni ro'yxatlash                              |
+| `/api/plugins/marketplace/install` | POST   | Bozor plaginini nomi bilan o'rnating                                   |
+| `/api/plugins/[name]`              | GET    | O'rnatilgan plagin tafsilotlarini oling                                |
+| `/api/plugins/[name]`              | DELETE | Plaginni o'chirib tashlang                                             |
+| `/api/plugins/[name]/activate`     | POST   | Faollashtirish ( + registrlari ilgaklarini yuklash)                    |
+| `/api/plugins/[name]/deactivate`   | POST   | O'chirish (o'chirish `onDeactivate`, ilgaklarni ro'yxatdan o'chirish)  |
+| `/api/plugins/[name]/config`       | GET    | Plagin konfiguratsiyasi + konfiguratsiya sxemasini oling               |
+| `/api/plugins/[name]/config`       | PUT    | Plagin konfiguratsiyasini yangilash (sxemaga muvofiq tasdiqlangan)     |
 
 `GET /api/plugins` `status` filtri `installed` / `active` / `inactive` / `error` dan birini qabul qiladi. Yaroqsiz qiymat `400` qaytaradi.
 
@@ -121,7 +122,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` an bo'lishi kerak** mutlaq** katalogga yo'l** plagin manbalari katalogida** : plagin ildizi yonida `plugin-sources`, shuning uchun sukut bo'yicha `~/.omniroute/plugin-sources/` yoki bu o'zgaruvchi o'rnatilganda `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` ( `src/lib/plugins/installSource.ts` da `getPluginSourcesDir()` ). Avval u erda plaginni nusxalash yoki klonlash. Agar yo'lda `..` yoki null bayt bo'lsa, ushbu katalogdan tashqarida bo'lsa, uning tashqarisida symlink orqali hal qilinsa, maqsadi undan tashqarida bo'lgan simli havola bo'lsa yoki katalog mavjud bo'lmasa, o'rnatish `400` bilan rad etiladi. Manba katalogida to'g'ri `plugin.json` bo'lishi kerak (yoki uning ota-onasi bo'lishi kerak). Muvaffaqiyatli javob o'rnatilgan plagin qatori bilan `201` bo'ladi.
 
-Boshqa plagin marshrutlaridan farqli o'laroq, bu tizimga kirish o'chirilgan bo'lsa ham (`requireLogin=false`) boshqaruv hisob ma'lumotlarini (boshqaruv paneli seansi yoki boshqarish miqyosidagi API kaliti) talab qiladi: kodni o'rnatish hech qachon anonim harakat emas.
+Boshqa plagin marshrutlaridan farqli o'laroq, bu tizimga kirish o'chirilgan bo'lsa ham (`requireLogin=false`) boshqaruv hisob ma'lumotlarini (boshqaruv paneli seansi yoki boshqarish miqyosidagi API kaliti) talab qiladi: kodni o'rnatish hech qachon anonim harakat emas. Xuddi shu narsa `POST /api/plugins/marketplace/install` (tana `{ "name": "<plugin>" }`) uchun ham amal qiladi.
 
 ### Bozorni ko'rib chiqing
 
@@ -139,7 +140,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` har bir taqdim etilgan qiymatni plagin `configSchema` (manifestda e'lon qilingan) bilan tasdiqlaydi: `number` maydonlari `min`/`max` hurmati, `select` maydonlari e'lon qilingan `enum` bilan mos kelishi kerak. Sxemada mavjud bo'lmagan kalitlarga ruxsat beriladi.
+`PUT .../config` `validatePluginConfig()` dan `src/lib/plugins/manifest.ts` bilan plaginning `configSchema` (manifestda e'lon qilingan) bilan tanani tasdiqlaydi: har bir kalit sxemada e'lon qilinishi kerak, qiymatlar e'lon qilingan turga mos kelishi kerak, `number` maydonlari `min`/`max` ga mos kelishi va `select` maydonlari e'lon `enum` mos kelishi kerak. Har qanday buzilish `400` qaytaradi va hech narsa saqlanmaydi. `configSchema` yo'q deb e'lon qiladigan plaginda sozlanadigan kalitlar yo'q, shuning uchun so'rov `400` bilan rad etiladi ("Plugin hech qanday sozlanishi kalitlarni e'lon qilmaydi").
 
 ## Konfiguratsiya
 
@@ -220,7 +221,7 @@ Ikkala qatlamda ham muvaffaqiyatsiz bo'lgan URL so'rovni bekor qilmaydi — bozo
 
 ### Plaginni bajarish izolyatsiyasi
 
-> **Plaginlar sinov muhitiga kiritilmagan.** Bola OmniRoute foydalanuvchisi sifatida ishlaydigan oddiy Node.js jarayoni bo'lib, VM konteksti va Node.js ruxsati bayroqlari yo'q, shuning uchun plagin kodi foydalanuvchi har qanday faylni o'qishi va yozishi, dasturlarni ishga tushirishi va tarmoqqa kirishi mumkin. `requires.permissions` faqat bolaning qaysi muhit o'zgaruvchilarini olishini hal qiladi; boshqa ruxsatlar bajarilmaydi. Faqat o'zingiz ishonadigan plaginlarni o'rnating. Quyidagi jarayon chegarasida buzilishlar va osilib qolishlar mavjud; bu xavfsizlik chegarasi emas.
+> **Plaginlar sukut bo'yicha sinov muhitiga kiritilmagan.** Bola OmniRoute foydalanuvchisi sifatida ishlaydigan oddiy Node.js jarayoni bo'lib, VM konteksti va Node.js ruxsati bayroqlari yo'q, shuning uchun plagin kodi foydalanuvchi har qanday faylni o'qishi va yozishi, dasturlarni ishga tushirishi va tarmoqqa kirishi mumkin. `requires.permissions` faqat bolaning qaysi muhit o'zgaruvchilarini olishini hal qiladi; boshqa ruxsatlar bajarilmaydi. Qo'shilgan `PLUGIN_PERMISSION_MODEL_ENABLED` funksiyasi bayrog'i (sukut bo'yicha o'chirilgan) har bir plaginni ushbu ruxsatlardan tuzilgan Node.js ruxsat modeli ostida ishga tushiradi, Node.js cheklay olmaydigan `network` dan tashqari ( [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#ruxsat-tizimi) qarang). Faqat o'zingiz ishonadigan plaginlarni o'rnating. Quyidagi jarayon chegarasida buzilishlar va osilib qolishlar mavjud; bu xavfsizlik chegarasi emas.
 
 - **Jarayonni izolyatsiya qilish** — `loadPlugin()` (`src/lib/plugins/loader.ts`) har bir plaginni alohida Node.js bola jarayonida hosil qiladi va IPC orqali muloqot qiladi. Hook qo'ng'iroqlari `SIGTERM` → `SIGKILL` eskalatsiyasi bilan vaqt tugashiga ega.
 - **Env ruxsat etilgan ro'yxat** — bola faqat ruxsat etilgan ro'yxatdagi muhit o'zgaruvchilari to'plamini oladi; kengroq to'plam faqat manifest `env` ruxsatini so'raganda beriladi.

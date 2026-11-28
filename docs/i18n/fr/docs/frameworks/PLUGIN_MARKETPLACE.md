@@ -88,18 +88,19 @@ journalise un avertissement et se rabat sur la liste initiale.
 
 Tous les points de terminaison nécessitent une authentification de gestion (`requireManagementAuth`)** et** sont des bouclage uniquement — `/api/plugins` et `/api/plugins/` sont répertoriés dans `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Point de terminaison             | Méthode | Description                                                             |
-| -------------------------------- | ------- | ----------------------------------------------------------------------- |
-| `/api/plugins`                   | GET     | Liste des plugins installés (filtre `?status=` en option)               |
-| `/api/plugins`                   | POST    | Installer un plugin depuis le répertoire des sources du plugin          |
-| `/api/plugins/scan`              | POST    | Scannez le répertoire des plugins et enregistrez de nouveaux plugins    |
-| `/api/plugins/marketplace`       | GET     | Répertorier les entrées du catalogue Marketplace                        |
-| `/api/plugins/[name]`            | GET     | Obtenir les détails du plugin installé                                  |
-| `/api/plugins/[name]`            | DELETE  | Désinstaller un plugin                                                  |
-| `/api/plugins/[name]/activate`   | POST    | Activer (charger les hooks de registre + )                              |
-| `/api/plugins/[name]/deactivate` | POST    | Désactiver (fire `onDeactivate`, désenregistrer les hooks)              |
-| `/api/plugins/[name]/config`     | GET     | Obtenir la configuration du plugin, le schéma de configuration +        |
-| `/api/plugins/[name]/config`     | PUT     | Mettre à jour la configuration du plugin (validé par rapport au schéma) |
+| Point de terminaison               | Méthode | Description                                                             |
+| ---------------------------------- | ------- | ----------------------------------------------------------------------- |
+| `/api/plugins`                     | GET     | Liste des plugins installés (filtre `?status=` en option)               |
+| `/api/plugins`                     | POST    | Installer un plugin depuis le répertoire des sources du plugin          |
+| `/api/plugins/scan`                | POST    | Scannez le répertoire des plugins et enregistrez de nouveaux plugins    |
+| `/api/plugins/marketplace`         | GET     | Répertorier les entrées du catalogue Marketplace                        |
+| `/api/plugins/marketplace/install` | POST    | Installer un plugin Marketplace par son nom                             |
+| `/api/plugins/[name]`              | GET     | Obtenir les détails du plugin installé                                  |
+| `/api/plugins/[name]`              | DELETE  | Désinstaller un plugin                                                  |
+| `/api/plugins/[name]/activate`     | POST    | Activer (charger les hooks de registre + )                              |
+| `/api/plugins/[name]/deactivate`   | POST    | Désactiver (fire `onDeactivate`, désenregistrer les hooks)              |
+| `/api/plugins/[name]/config`       | GET     | Obtenir la configuration du plugin, le schéma de configuration +        |
+| `/api/plugins/[name]/config`       | PUT     | Mettre à jour la configuration du plugin (validé par rapport au schéma) |
 
 Le filtre `GET /api/plugins` `status` accepte l'un des `installed` / `active` / `inactive` / `error`. Une valeur non valide renvoie `400`.
 
@@ -121,7 +122,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 Le `path` doit être un** absolu** chemin d'accès à un répertoire** dans le répertoire des sources du plugin** : `plugin-sources` à côté de la racine du plugin, donc `~/.omniroute/plugin-sources/` par défaut, ou `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` lorsque cette variable est définie (`getPluginSourcesDir()` dans `src/lib/plugins/installSource.ts`). Copiez ou clonez d'abord le plugin ici. L'installation est refusée avec `400` lorsque le chemin contient `..` ou un octet nul, se trouve en dehors de ce répertoire, se résout en dehors de celui-ci via un lien symbolique, contient un lien symbolique dont la cible est en dehors de lui, ou lorsque le répertoire n'existe pas. Le répertoire source doit contenir un `plugin.json` valide (ou en être le parent). En cas de succès, la réponse est `201` avec la ligne du plugin installé.
 
-Contrairement aux autres routes de plugin, celle-ci nécessite les informations d'identification de gestion (une session de tableau de bord ou une clé API de portée de gestion) même lorsque la connexion est désactivée (`requireLogin=false`) : l'installation de code n'est jamais une action anonyme.
+Contrairement aux autres routes de plugin, celle-ci nécessite les informations d'identification de gestion (une session de tableau de bord ou une clé API de portée de gestion) même lorsque la connexion est désactivée (`requireLogin=false`) : l'installation de code n'est jamais une action anonyme. La même chose s'applique à `POST /api/plugins/marketplace/install` (corps `{ "name": "<plugin>" }`).
 
 ### Parcourez le marché
 
@@ -139,7 +140,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` valide chaque valeur fournie par rapport au `configSchema` du plugin (déclaré dans le manifeste) : les champs `number` honorent `min`/`max`, les champs `select` doivent correspondre au `enum` déclaré. Les clés non présentes dans le schéma sont autorisées.
+`PUT .../config` valide le corps par rapport au `configSchema` du plugin (déclaré dans le manifeste) avec `validatePluginConfig()` de `src/lib/plugins/manifest.ts`: chaque clé doit être déclarée dans le schéma, les valeurs doivent correspondre au type déclaré, les champs `number` honorent `min`/`max` et les champs `select` doivent correspondre au `enum` déclaré. Toute violation renvoie `400` et rien n'est stocké. Un plugin qui déclare no `configSchema` n'a pas de clés configurables, donc la requête est refusée avec `400` ("Le plugin ne déclare aucune clé configurable").
 
 ## Configuration
 
@@ -219,7 +220,7 @@ Un URL qui échoue à l'une ou l'autre couche n'abandonne pas la demande — le 
 
 ### Isolation de l'exécution du plugin
 
-> **Les plugins ne sont pas mis en sandbox.** L'enfant est un processus Node.js ordinaire exécuté en tant qu'utilisateur OmniRoute, sans contexte VM ni indicateur d'autorisation Node.js, de sorte que le code du plugin peut lire et écrire n'importe quel fichier que l'utilisateur peut, exécuter des programmes et accéder au réseau. `requires.permissions` décide uniquement des variables d'environnement que l'enfant reçoit ; les autres autorisations ne sont pas appliquées. Installez uniquement les plugins auxquels vous faites confiance. La limite de processus ci-dessous contient des plantages et des blocages ; ce n'est pas une frontière de sécurité.
+> **Les plugins ne sont pas mis en sandbox par défaut.** L'enfant est un processus Node.js ordinaire exécuté en tant qu'utilisateur OmniRoute, sans contexte VM ni indicateur d'autorisation Node.js, de sorte que le code du plugin peut lire et écrire n'importe quel fichier que l'utilisateur peut, exécuter des programmes et accéder au réseau. `requires.permissions` décide uniquement des variables d'environnement que l'enfant reçoit ; les autres autorisations ne sont pas appliquées. L'indicateur de fonctionnalité opt-in `PLUGIN_PERMISSION_MODEL_ENABLED` (désactivé par défaut) exécute chaque plugin sous le modèle d'autorisation Node.js construit à partir de ces autorisations, à l'exception `network`, que Node.js ne peut pas restreindre (voir [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#syst%C3%A8me-dautorisation) ). Installez uniquement les plugins auxquels vous faites confiance. La limite de processus ci-dessous contient des plantages et des blocages ; ce n'est pas une frontière de sécurité.
 
 - **Isolement des processus** — `loadPlugin()` (`src/lib/plugins/loader.ts`) génère chaque plugin dans un processus enfant Node.js distinct et communique via IPC. Les appels Hook ont un délai d'attente avec une escalade `SIGTERM` → `SIGKILL`.
 - **Liste d'autorisation d'environnement** — l'enfant ne reçoit qu'un ensemble de variables d'environnement sur liste autorisée ; l'ensemble plus large n'est accordé que lorsque le manifeste demande l'autorisation `env`.

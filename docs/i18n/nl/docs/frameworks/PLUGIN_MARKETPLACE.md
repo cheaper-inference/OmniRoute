@@ -82,18 +82,19 @@ inhoud retourneert, registreert `listMarketplacePlugins()` een waarschuwing en v
 
 Voor alle eindpunten is beheerauthenticatie vereist (`requireManagementAuth`)** En** zijn alleen loopback — `/api/plugins` en `/api/plugins/` worden vermeld in `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Eindpunt                         | Methode | Beschrijving                                                    |
-| -------------------------------- | ------- | --------------------------------------------------------------- |
-| `/api/plugins`                   | GET     | Lijst met geïnstalleerde plug-ins (optioneel `?status=` filter) |
-| `/api/plugins`                   | POST    | Installeer een plug-in vanuit de map met plug-inbronnen         |
-| `/api/plugins/scan`              | POST    | Scan de map met plug-ins en registreer nieuwe plug-ins          |
-| `/api/plugins/marketplace`       | GET     | Lijst met marktplaatscatalogusitems                             |
-| `/api/plugins/[name]`            | GET     | Ontvang geïnstalleerde plug-indetails                           |
-| `/api/plugins/[name]`            | DELETE  | Een plug-in verwijderen                                         |
-| `/api/plugins/[name]/activate`   | POST    | Activeren ( + registerhaken laden)                              |
-| `/api/plugins/[name]/deactivate` | POST    | Deactiveren ( `onDeactivate` afvuren, hooks afmelden)           |
-| `/api/plugins/[name]/config`     | GET     | Haal plug-inconfiguratie + -configuratieschema op               |
-| `/api/plugins/[name]/config`     | PUT     | Update plug-inconfiguratie (gevalideerd volgens schema)         |
+| Eindpunt                           | Methode | Beschrijving                                                    |
+| ---------------------------------- | ------- | --------------------------------------------------------------- |
+| `/api/plugins`                     | GET     | Lijst met geïnstalleerde plug-ins (optioneel `?status=` filter) |
+| `/api/plugins`                     | POST    | Installeer een plug-in vanuit de map met plug-inbronnen         |
+| `/api/plugins/scan`                | POST    | Scan de map met plug-ins en registreer nieuwe plug-ins          |
+| `/api/plugins/marketplace`         | GET     | Lijst met marktplaatscatalogusitems                             |
+| `/api/plugins/marketplace/install` | POST    | Installeer een marktplaatsplug-in op naam                       |
+| `/api/plugins/[name]`              | GET     | Ontvang geïnstalleerde plug-indetails                           |
+| `/api/plugins/[name]`              | DELETE  | Een plug-in verwijderen                                         |
+| `/api/plugins/[name]/activate`     | POST    | Activeren ( + registerhaken laden)                              |
+| `/api/plugins/[name]/deactivate`   | POST    | Deactiveren ( `onDeactivate` afvuren, hooks afmelden)           |
+| `/api/plugins/[name]/config`       | GET     | Haal plug-inconfiguratie + -configuratieschema op               |
+| `/api/plugins/[name]/config`       | PUT     | Update plug-inconfiguratie (gevalideerd volgens schema)         |
 
 Het `GET /api/plugins` `status` filter accepteert een van `installed` / `active` / `inactive` / `error`. Een ongeldige waarde retourneert `400`.
 
@@ -115,7 +116,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 De `path` moet een zijn** absoluut** pad naar een map** in de map met plug-inbronnen** : `plugin-sources` naast de root van de plug-in, dus standaard `~/.omniroute/plugin-sources/`, of `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` als die variabele is ingesteld (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Kopieer of kloon eerst de plug-in daar. De installatie wordt geweigerd met `400` als het pad `..` of een null-byte bevat, buiten die map ligt, daarbuiten wordt omgezet via een symlink, een symlink bevat waarvan het doel daarbuiten ligt, of als de map niet bestaat. De bronmap moet een geldige `plugin.json` bevatten (of een ouder ervan zijn). Bij succes is het antwoord `201` met de geïnstalleerde plug-inrij.
 
-In tegenstelling tot de andere plug-inroutes vereist deze de beheerreferentie (een dashboardsessie of een API -sleutel met beheerbereik), zelfs als inloggen is uitgeschakeld (`requireLogin=false`): het installeren van code is nooit een anonieme actie.
+In tegenstelling tot de andere plug-inroutes vereist deze de beheerreferentie (een dashboardsessie of een API -sleutel met beheerbereik), zelfs als inloggen is uitgeschakeld (`requireLogin=false`): het installeren van code is nooit een anonieme actie. Hetzelfde geldt voor `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`).
 
 ### Blader door de marktplaats
 
@@ -133,7 +134,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` valideert elke opgegeven waarde tegen de `configSchema` van de plug-in (gedeclareerd in het manifest): `number` velden respecteren `min`/`max`, `select` -velden moeten overeenkomen met de gedeclareerde `enum`. Sleutels die niet in het schema aanwezig zijn, worden toegelaten.
+`PUT .../config` valideert de body tegen de `configSchema` van de plug-in (gedeclareerd in het manifest) met `validatePluginConfig()` van `src/lib/plugins/manifest.ts`: elke sleutel moet worden gedeclareerd in het schema, waarden moeten overeenkomen met het gedeclareerde type, `number` -velden respecteren `min`/`max` en `select` -velden moeten overeenkomen met de gedeclareerde `enum`. Elke overtreding retourneert `400` en er wordt niets opgeslagen. Een plug-in die geen `configSchema` declareert, heeft geen configureerbare sleutels, dus het verzoek wordt geweigerd met `400` ("Plug-in declareert geen configureerbare sleutels").
 
 ## Configuratie
 
@@ -213,7 +214,7 @@ Een URL die een van beide lagen faalt, breekt het verzoek niet af — De marktpl
 
 ### Isolatie van plug-inuitvoering
 
-> **Plug-ins zijn niet in een sandbox geplaatst.** Het kind is een gewoon Node.js proces dat wordt uitgevoerd als de OmniRoute gebruiker, zonder VM context en zonder Node.js toestemmingsvlaggen, dus de plug-incode kan elk bestand lezen en schrijven dat de gebruiker kan, programma's uitvoeren en het netwerk bereiken. `requires.permissions` beslist alleen welke omgevingsvariabelen het kind krijgt; de overige machtigingen worden niet afgedwongen. Installeer alleen plug-ins die u vertrouwt. De onderstaande procesgrens bevat crashes en vastlopen; het is geen veiligheidsgrens.
+> **Plug-ins worden standaard niet in een sandbox geplaatst.** Het kind is een gewoon Node.js proces dat wordt uitgevoerd als de OmniRoute gebruiker, zonder VM context en zonder Node.js toestemmingsvlaggen, dus de plug-incode kan elk bestand lezen en schrijven dat de gebruiker kan, programma's uitvoeren en het netwerk bereiken. `requires.permissions` beslist alleen welke omgevingsvariabelen het kind krijgt; de overige machtigingen worden niet afgedwongen. De opt-in `PLUGIN_PERMISSION_MODEL_ENABLED` -functievlag (standaard uitgeschakeld) voert elke plug-in uit onder het Node.js -machtigingsmodel dat is opgebouwd op basis van die machtigingen, behalve `network`, die Node.js niet kan beperken (zie [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#toestemmingssysteem) ). Installeer alleen plug-ins die u vertrouwt. De onderstaande procesgrens bevat crashes en vastlopen; het is geen veiligheidsgrens.
 
 - **Procesisolatie** — `loadPlugin()` (`src/lib/plugins/loader.ts`) brengt elke plug-in voort in een apart Node.js onderliggend proces en communiceert via IPC. Hook-oproepen hebben een time-out met `SIGTERM` → `SIGKILL` escalatie.
 - **Env-toelatingslijst** — het kind ontvangt alleen een reeks omgevingsvariabelen die op de toelatingslijst staan; de bredere set wordt alleen verleend als het manifest de `env` toestemming vraagt.

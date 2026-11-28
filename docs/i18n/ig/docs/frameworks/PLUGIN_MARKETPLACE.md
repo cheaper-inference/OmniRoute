@@ -82,18 +82,19 @@ a na-amaghị, `listMarketplacePlugins()` na-edekọ ịdọ aka ná ntị ma la
 
 Ebe njedebe niile chọrọ nyocha njikwa (`requireManagementAuth`)** na** bụ loopback-naanị — `/api/plugins` na `/api/plugins/` ka edepụtara na `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Ebe njedebe                      | Usoro  | Nkọwa                                                      |
-| -------------------------------- | ------ | ---------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Ndepụta plugins arụnyere (nyocha `?status=` nhọrọ)         |
-| `/api/plugins`                   | POST   | Wụnye ngwa mgbakwunye sitere na ndekọ aha ngwa mgbakwunye  |
-| `/api/plugins/scan`              | POST   | Nyochaa ndekọ ihe mgbakwunye wee debanye aha plugins ọhụrụ |
-| `/api/plugins/marketplace`       | GET    | Depụta ndenye katalọgụ ahịa                                |
-| `/api/plugins/[name]`            | GET    | Nweta nkọwa ngwa mgbakwunye arụnyere                       |
-| `/api/plugins/[name]`            | DELETE | Wepu ngwa mgbakwunye                                       |
-| `/api/plugins/[name]/activate`   | POST   | Gbanyụọ (ịkwado ndebanye aha + )                           |
-| `/api/plugins/[name]/deactivate` | POST   | Gbanyụọ (ọkụ `onDeactivate`, nko na-edebanye aha)          |
-| `/api/plugins/[name]/config`     | GET    | Nweta ngwa mgbakwunye config + config schema               |
-| `/api/plugins/[name]/config`     | PUT    | Melite nhazi ngwa mgbakwunye (nke kwadoro megide schema)   |
+| Ebe njedebe                        | Usoro  | Nkọwa                                                      |
+| ---------------------------------- | ------ | ---------------------------------------------------------- |
+| `/api/plugins`                     | GET    | Ndepụta plugins arụnyere (nyocha `?status=` nhọrọ)         |
+| `/api/plugins`                     | POST   | Wụnye ngwa mgbakwunye sitere na ndekọ aha ngwa mgbakwunye  |
+| `/api/plugins/scan`                | POST   | Nyochaa ndekọ ihe mgbakwunye wee debanye aha plugins ọhụrụ |
+| `/api/plugins/marketplace`         | GET    | Depụta ndenye katalọgụ ahịa                                |
+| `/api/plugins/marketplace/install` | POST   | Wụnye ngwa mgbakwunye ahịa n'aha                           |
+| `/api/plugins/[name]`              | GET    | Nweta nkọwa ngwa mgbakwunye arụnyere                       |
+| `/api/plugins/[name]`              | DELETE | Wepu ngwa mgbakwunye                                       |
+| `/api/plugins/[name]/activate`     | POST   | Gbanyụọ (ịkwado ndebanye aha + )                           |
+| `/api/plugins/[name]/deactivate`   | POST   | Gbanyụọ (ọkụ `onDeactivate`, nko na-edebanye aha)          |
+| `/api/plugins/[name]/config`       | GET    | Nweta ngwa mgbakwunye config + config schema               |
+| `/api/plugins/[name]/config`       | PUT    | Melite nhazi ngwa mgbakwunye (nke kwadoro megide schema)   |
 
 Ihe nzacha `GET /api/plugins` `status` na-anabata otu n'ime `installed` / `active` / `inactive` / `error`. Uru ezighi ezi na-eweghachi `400`.
 
@@ -115,7 +116,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 `path` ga-abụrịrị otu** zuru oke** ụzọ na ndekọ** n'ime plugin isi mmalite ndekọ** : `plugin-sources` na-esote mgbọrọgwụ ngwa mgbakwunye, yabụ `~/.omniroute/plugin-sources/` na ndabara, ma ọ bụ `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` mgbe edobere mgbanwe ahụ (`getPluginSourcesDir()` na `src/lib/plugins/installSource.ts`). Detuo ma ọ bụ mechie ngwa mgbakwunye ahụ nke mbụ. Ajụrụ ihe nrụnye na `400` mgbe ụzọ ahụ nwere `..` ma ọ bụ byte efu, dina n'èzí ndekọ ahụ, kpebie na mpụga ya site na symlink, nwere symlink nke ebumnuche ya dị na mpụga ya, ma ọ bụ mgbe ndekọ ahụ adịghị. Akwụkwọ ndekọ aha ga-enwerịrị `plugin.json` ziri ezi (ma ọ bụ bụrụ nne na nna nke otu). Na ịga nke ọma nzaghachi bụ `201` na ahịrị plugin arụnyere.
 
-N'adịghị ka ụzọ ngwa mgbakwunye ndị ọzọ, nke a chọrọ nzere njikwa (nnọkọ dashboard ma ọ bụ igodo API jikwaa) ọbụlagodi mgbe nbanye nwere nkwarụ (`requireLogin=false`): itinye koodu abụghị ihe a na-amaghị ama.
+N'adịghị ka ụzọ ngwa mgbakwunye ndị ọzọ, nke a chọrọ nzere njikwa (nnọkọ dashboard ma ọ bụ igodo API jikwaa) ọbụlagodi mgbe nbanye nwere nkwarụ (`requireLogin=false`): itinye koodu abụghị ihe a na-amaghị ama. Otu a na-emetụta `POST /api/plugins/marketplace/install` (anụ ahụ `{ "name": "<plugin>" }`).
 
 ### Chọgharịa n'ahịa
 
@@ -133,7 +134,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` kwadoro uru ọ bụla enyere megide `configSchema` nke ngwa mgbakwunye (kwuru na ngosipụta): ubi `number` na-asọpụrụ `min`/`max`, mpaghara `select` ga-adabarịrị `enum` ekwuputara. A na-ahapụ igodo adịghị na schema.
+`PUT .../config` na-akwado ahụ megide `configSchema` ngwa mgbakwunye (kpọpụtara na ngosipụta) yana `validatePluginConfig()` sitere na `src/lib/plugins/manifest.ts`: a ga-ekwupụta igodo ọ bụla na atụmatụ ahụ, ụkpụrụ ga-adakọrịrị ụdị ekwuputara, mpaghara `number` sọpụrụ `min`/`max`, na mpaghara `select` ga-adabarịrị na `enum` ekwuputara. Mmebi ọ bụla na-alaghachi `400` na ọ nweghị ihe echekwara. Ngwa mgbakwunye na-ekwupụta na ọ nweghị `configSchema` enweghị igodo nhazi, ya mere a jụrụ arịrịọ a na `400` ("ngwa mgbakwunye anaghị ekwupụta igodo nhazi ọ bụla").
 
 ## Nhazi
 
@@ -213,7 +214,7 @@ URL nke na-ada n'ụdị ọ bụla anaghị ewepụ arịrịọ — ebe a na-e
 
 ### Mwepu ngwa mgbakwunye
 
-> **A naghị etinye ihe nrụnye n'ájá.** Nwatakịrị bụ usoro Node.js nkịtị na-agba ọsọ dị ka onye ọrụ OmniRoute, na-enweghị ọnọdụ VM na enweghị ọkọlọtọ ikike Node.js, yabụ ngwa mgbakwunye koodu nwere ike ịgụ ma dee faịlụ ọ bụla onye ọrụ nwere ike, mee mmemme wee rute netwọkụ. `requires.permissions` na-ekpebi naanị ụdị mgbanwe gburugburu ebe nwa na-enweta; A naghị etinye ikike ndị ọzọ. Wụnye naanị plugins ị tụkwasịrị obi. Oke usoro dị n'okpuru nwere mkpọka na kpọgidere; ọ bughi ókè-ala nche.
+> **Ejighi ndabara tinye ihe mgbakwunye.** Nwatakịrị bụ usoro Node.js nkịtị na-agba ọsọ dị ka onye ọrụ OmniRoute, na-enweghị ọnọdụ VM na enweghị ọkọlọtọ ikike Node.js, yabụ ngwa mgbakwunye koodu nwere ike ịgụ ma dee faịlụ ọ bụla onye ọrụ nwere ike, mee mmemme wee rute netwọkụ. `requires.permissions` na-ekpebi naanị ụdị mgbanwe gburugburu ebe nwa na-enweta; A naghị etinye ikike ndị ọzọ. Ọkọlọtọ Nwepu-na `PLUGIN_PERMISSION_MODEL_ENABLED` (gbanyụọ na ndabara) na-agba ngwa mgbakwunye ọ bụla n'okpuru ụdị ikike Node.js wuru site na ikike ndị ahụ, ewezuga `network`, nke Node.js enweghị ike igbochi (lee [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#sistem%E1%BB%A5-ikike) ). Wụnye naanị plugins ị tụkwasịrị obi. Oke usoro dị n'okpuru nwere mkpọka na kpọgidere; ọ bughi ókè-ala nche.
 
 - **Kewapụ usoro** — `loadPlugin()` (`src/lib/plugins/loader.ts`) na-ewepụta ngwa mgbakwunye ọ bụla na usoro Node.js nwa dị iche ma na-ekwurịta okwu n'elu IPC. Oku nko nwere oge nkwụsị na mmụba `SIGTERM` → `SIGKILL`.
 - **Ndepụta ikike Env** — nwa ahụ na-enweta naanị ndenye aha aha nke mgbanwe gburugburu ebe obibi; A na-enye ntọala sara mbara naanị mgbe ihe ngosi ahụ rịọrọ ikike `env`.

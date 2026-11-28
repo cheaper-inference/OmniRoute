@@ -82,18 +82,19 @@ Inhalt liefert, protokolliert `listMarketplacePlugins()` eine Warnung und greift
 
 Alle Endpunkte erfordern eine Verwaltungsauthentifizierung (`requireManagementAuth`).** Und** sind nur Loopback, — `/api/plugins` und `/api/plugins/` sind in `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) aufgeführt.
 
-| Endpunkt                         | Verfahren | Beschreibung                                                         |
-| -------------------------------- | --------- | -------------------------------------------------------------------- |
-| `/api/plugins`                   | GET       | Installierte Plugins auflisten (optionaler `?status=` Filter)        |
-| `/api/plugins`                   | POST      | Installieren Sie ein Plugin aus dem Plugin-Quellenverzeichnis        |
-| `/api/plugins/scan`              | POST      | Scannen Sie das Plugin-Verzeichnis und registrieren Sie neue Plugins |
-| `/api/plugins/marketplace`       | GET       | Marktplatz-Katalogeinträge auflisten                                 |
-| `/api/plugins/[name]`            | GET       | Erhalten Sie Details zum installierten Plugin                        |
-| `/api/plugins/[name]`            | DELETE    | Deinstallieren Sie ein Plugin                                        |
-| `/api/plugins/[name]/activate`   | POST      | Aktivieren ( + Register-Hooks laden)                                 |
-| `/api/plugins/[name]/deactivate` | POST      | Deaktivieren ( `onDeactivate` auslösen, Hooks abmelden)              |
-| `/api/plugins/[name]/config`     | GET       | Holen Sie sich das Plugin-Konfigurations- + -Konfigurationsschema    |
-| `/api/plugins/[name]/config`     | PUT       | Plugin-Konfiguration aktualisieren (gegen Schema validiert)          |
+| Endpunkt                           | Verfahren | Beschreibung                                                         |
+| ---------------------------------- | --------- | -------------------------------------------------------------------- |
+| `/api/plugins`                     | GET       | Installierte Plugins auflisten (optionaler `?status=` Filter)        |
+| `/api/plugins`                     | POST      | Installieren Sie ein Plugin aus dem Plugin-Quellenverzeichnis        |
+| `/api/plugins/scan`                | POST      | Scannen Sie das Plugin-Verzeichnis und registrieren Sie neue Plugins |
+| `/api/plugins/marketplace`         | GET       | Marktplatz-Katalogeinträge auflisten                                 |
+| `/api/plugins/marketplace/install` | POST      | Installieren Sie ein Marktplatz-Plugin mit Namen                     |
+| `/api/plugins/[name]`              | GET       | Erhalten Sie Details zum installierten Plugin                        |
+| `/api/plugins/[name]`              | DELETE    | Deinstallieren Sie ein Plugin                                        |
+| `/api/plugins/[name]/activate`     | POST      | Aktivieren ( + Register-Hooks laden)                                 |
+| `/api/plugins/[name]/deactivate`   | POST      | Deaktivieren ( `onDeactivate` auslösen, Hooks abmelden)              |
+| `/api/plugins/[name]/config`       | GET       | Holen Sie sich das Plugin-Konfigurations- + -Konfigurationsschema    |
+| `/api/plugins/[name]/config`       | PUT       | Plugin-Konfiguration aktualisieren (gegen Schema validiert)          |
 
 Der `GET /api/plugins` `status` Filter akzeptiert einen von `installed` / `active` / `inactive` / `error`. Ein ungültiger Wert gibt `400` zurück.
 
@@ -115,7 +116,7 @@ curl -X POST http://localhost:20128/api/plugins \
 
 Der `path` muss ein sein** Absolute** Pfad zu einem Verzeichnis** im Plugin-Quellenverzeichnis** : `plugin-sources` neben dem Plugin-Root, also standardmäßig `~/.omniroute/plugin-sources/` oder `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/`, wenn diese Variable gesetzt ist (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Kopieren oder klonen Sie das Plugin zunächst dorthin. Die Installation wird mit `400` abgelehnt, wenn der Pfad `..` oder ein Nullbyte enthält, außerhalb dieses Verzeichnisses liegt, über einen symbolischen Link außerhalb davon aufgelöst wird, einen symbolischen Link enthält, dessen Ziel außerhalb des Verzeichnisses liegt, oder wenn das Verzeichnis nicht existiert. Das Quellverzeichnis muss ein gültiges `plugin.json` enthalten (oder ein übergeordnetes Verzeichnis davon sein). Bei Erfolg lautet die Antwort `201` mit der installierten Plugin-Zeile.
 
-Im Gegensatz zu den anderen Plugin-Routen erfordert diese die Verwaltungsanmeldeinformationen (eine Dashboard-Sitzung oder einen API -Schlüssel mit Verwaltungsbereich), selbst wenn die Anmeldung deaktiviert ist (`requireLogin=false`): Die Installation von Code ist niemals eine anonyme Aktion.
+Im Gegensatz zu den anderen Plugin-Routen erfordert diese die Verwaltungsanmeldeinformationen (eine Dashboard-Sitzung oder einen API -Schlüssel mit Verwaltungsbereich), selbst wenn die Anmeldung deaktiviert ist (`requireLogin=false`): Die Installation von Code ist niemals eine anonyme Aktion. Das Gleiche gilt für `POST /api/plugins/marketplace/install` (body `{ "name": "<plugin>" }`).
 
 ### Durchsuchen Sie den Marktplatz
 
@@ -133,7 +134,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` validiert jeden bereitgestellten Wert anhand des `configSchema` des Plugins (im Manifest deklariert): `number` Felder berücksichtigen `min`/`max`, `select` Felder müssen mit dem deklarierten `enum` übereinstimmen. Schlüssel, die nicht im Schema vorhanden sind, werden durchgelassen.
+`PUT .../config` validiert den Body anhand des `configSchema` des Plugins (im Manifest deklariert) mit `validatePluginConfig()` von `src/lib/plugins/manifest.ts`: Jeder Schlüssel muss im Schema deklariert werden, Werte müssen mit dem deklarierten Typ übereinstimmen, `number` Felder berücksichtigen `min`/`max` und `select` Felder müssen mit dem deklarierten `enum` übereinstimmen. Jeder Verstoß gibt `400` zurück und es wird nichts gespeichert. Ein Plugin, das kein `configSchema` deklariert, hat keine konfigurierbaren Schlüssel, daher wird die Anfrage mit `400` abgelehnt („Plugin deklariert keine konfigurierbaren Schlüssel“).
 
 ## Konfiguration
 
@@ -220,7 +221,7 @@ Ein URL, der auf einer der beiden Ebenen fehlschlägt, bricht die Anfrage nicht 
 
 ### Isolation der Plugin-Ausführung
 
-> **Plugins unterliegen keiner Sandbox.** Das untergeordnete Element ist ein gewöhnlicher Node.js Prozess, der als OmniRoute Benutzer ausgeführt wird, ohne VM Kontext und ohne Node.js Berechtigungsflags, sodass der Plugin-Code jede Datei lesen und schreiben kann, die der Benutzer lesen kann, Programme ausführen und das Netzwerk erreichen kann. `requires.permissions` entscheidet nur, welche Umgebungsvariablen das Kind erhält; Die anderen Berechtigungen werden nicht erzwungen. Installieren Sie nur Plugins, denen Sie vertrauen. Die Prozessgrenze unten enthält Abstürze und Hänge; es handelt sich nicht um eine Sicherheitsgrenze.
+> **Plugins sind standardmäßig nicht in einer Sandbox untergebracht.** Das untergeordnete Element ist ein gewöhnlicher Node.js Prozess, der als OmniRoute Benutzer ausgeführt wird, ohne VM Kontext und ohne Node.js Berechtigungsflags, sodass der Plugin-Code jede Datei lesen und schreiben kann, die der Benutzer lesen kann, Programme ausführen und das Netzwerk erreichen kann. `requires.permissions` entscheidet nur, welche Umgebungsvariablen das Kind erhält; Die anderen Berechtigungen werden nicht erzwungen. Das optionale `PLUGIN_PERMISSION_MODEL_ENABLED` -Feature-Flag (standardmäßig deaktiviert) führt jedes Plugin unter dem aus diesen Berechtigungen erstellten Node.js -Berechtigungsmodell aus, mit Ausnahme von `network`, das Node.js nicht einschränken kann (siehe [`PLUGIN_SDK.md`](./PLUGIN_SDK.md#berechtigungssystem) ). Installieren Sie nur Plugins, denen Sie vertrauen. Die Prozessgrenze unten enthält Abstürze und Hänge; es handelt sich nicht um eine Sicherheitsgrenze.
 
 - **Prozessisolation** — `loadPlugin()` (`src/lib/plugins/loader.ts`) erzeugt jedes Plugin in einem separaten untergeordneten Node.js -Prozess und kommuniziert über IPC. Hook-Aufrufe haben eine Zeitüberschreitung mit `SIGTERM` → `SIGKILL` Eskalation.
 - **Env-Zulassungsliste** — das Kind erhält nur einen Satz von Umgebungsvariablen auf der Zulassungsliste; Der breitere Satz wird nur gewährt, wenn das Manifest die `env` -Berechtigung anfordert.

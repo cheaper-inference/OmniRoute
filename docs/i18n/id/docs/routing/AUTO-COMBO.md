@@ -523,6 +523,7 @@ Combo persisten dengan `strategy: "auto"` dapat menetapkan `config.routerStrateg
 - `lkgp` — penyedia terakhir yang diketahui berfungsi dengan baik diprioritaskan
 - `nadir` — meminta API keputusan [Nadir](https://getnadir.com) menentukan model mana dalam pool yang
   diperlukan prompt; harus diaktifkan secara eksplisit, dan jika gagal akan kembali ke `rules`
+- `decision` — menanyakan penentu yang dikonfigurasi (TypeSafe System One, keputusan Anda sendiri URL, atau salah satu model kombo sendiri) model mana di kumpulan yang sesuai dengan permintaan; di belakang tanda `COMBO_DECISION_ROUTER_ENABLED` yang tidak aktif secara default, gagal dibuka ke `rules`
 
 ### Detail strategi router
 
@@ -748,6 +749,60 @@ dan frontier), ketika Anda ingin mengurangi biaya akibat selalu menggunakan mode
 
 ---
 
+#### 7. `decision` — pluggable penentu memilih model
+
+`decision` bertanya a** penentu** model mana dalam kumpulan yang sesuai dengan permintaan, lalu persempit kumpulan ke model tersebut dan biarkan `rules` memilih koneksi (kuota, kesehatan, dan biaya tetap memilih akun). Pengambil keputusan diatur dalam blok keputusan kombo — `config.decision` ketika kenop router berada di bagian atas `config` (apa yang ditulis dasbor), atau `config.auto.decision` di sebelah `config.auto.routerStrategy`:
+
+| `decider`     | Siapa yang menjawab                                                                                                           | Kebutuhan                                      |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `systemone`   | TypeSafe Sistem Satu (`POST https://api.typesafe.ai/v1/systemone`), model default `jev-latest`                                | koneksi `typesafe` atau kunci env              |
+| `http`        | penentu Anda sendiri di `baseUrl`: `wire: "systemone"` (`{baseUrl}/v1/systemone`) atau `"openai-chat"` (penyelesaian obrolan) | `baseUrl` + `model`; kunci opsional            |
+| `combo-model` | salah satu model penyedia Anda, dipanggil dalam proses seperti juri fusi                                                      | `model` sebagai `provider/model` (tanpa kombo) |
+
+```json
+{
+  "strategy": "auto",
+  "config": {
+    "routerStrategy": "decision",
+    "decision": {
+      "decider": "http",
+      "baseUrl": "https://decider.example.com",
+      "wire": "openai-chat",
+      "model": "qwen-small",
+      "connectionId": "<stored connection id>",
+      "timeoutMs": 2000,
+      "minConfidence": 0.6,
+      "descriptions": { "gpt-4o-mini": "Quick drafts and short answers" }
+    }
+  }
+}
+```
+
+Bidang (divalidasi oleh skema ketat saat menyimpan dan lagi pada waktu permintaan):
+
+- `decider` — `systemone`, `http` atau `combo-model`.
+- `model` — TypeSafe model, model keputusan di URL Anda, atau `provider/model` panggilan model kombo (hingga 200 karakter).
+- `baseUrl` — `http` saja: `http(s)` URL hingga 500 karakter, tanpa kredensial, kueri, atau fragmen. URL yang menunjuk ke OmniRoute ini (loopback + `PORT`) ditolak.
+- `wire` — `http` saja: `systemone` (default) atau `openai-chat`.
+- `connectionId` — koneksi tersimpan yang kuncinya digunakan (hanya di dalam koneksi yang diizinkan dari kunci API pemanggil). Tanpanya, `systemone` membaca koneksi `typesafe` dan setiap penentu jaringan kembali ke `OMNIROUTE_DECISION_API_KEY`. Tidak ada bidang `apiKey` : kunci tidak pernah disimpan dalam kombo.
+- `timeoutMs` — bilangan bulat, 100–5000, default 2000.
+- `minConfidence` — 0–1; jawaban dengan keyakinan lebih rendah kembali ke `rules` (pengambil keputusan yang melaporkan tidak ada keyakinan dihitung sebagai 0).
+- `descriptions` — hingga 50 entri (kunci hingga 300, teks hingga 1000 karakter), dikunci berdasarkan id model atau `provider/model`; entri yang tidak disetel mendapatkan deskripsi peringkat biaya yang dihasilkan.
+
+**Bendera.** `COMBO_DECISION_ROUTER_ENABLED` (default `false`) gerbang setiap penentu. Saat tidak aktif, kombo `decision` tidak membaca kredensial, tidak membuat panggilan, dan merutekan dengan `rules`; log mengatakan `fallback (disabled)`. Kunci yang disimpan saja tidak pernah menyalakannya. Kombo tanpa blok keputusan tidak terpengaruh sama sekali.
+
+**Apa yang keluar dari kotak itu.** Hanya teks pesan pengguna terakhir (hingga 8000 karakter; chat/Claude `messages` atau Responses `input`) dan menu id model beserta deskripsinya. Jangan pernah meminta sistem, Responses `instructions`, alat, riwayat, header, atau data akun. Panggilan jaringan melewati penjaga keluar penyedia tanpa percobaan ulang, tanpa pengalihan, dan batas respons 64 KB. Panggilan `combo-model` bersifat non-streaming, bebas alat, `temperature: 0`, dengan anggaran 256 token; keputusan yang dimulai di dalam panggilan keputusan ditolak.
+
+**Perilaku kegagalan** adalah kegagalan terbuka: kegagalan apa pun ditentukan oleh keputusan `rules`, dan alasannya berbunyi `decision(<decider>): fallback (<reason>)`, dengan `<reason>` salah satu dari `disabled`, `not_configured`, `missing_credential`, `timeout`, `http_error`, `invalid_response`, `out_of_menu`, `refused`, `cooldown`, `network_error`, `recursion`, `low_confidence`, `single_option` atau `no_user_text`. Setelah batas waktu, kesalahan HTTP, atau kesalahan jaringan, titik akhir dilewati selama 30 detik. Pilihan yang berhasil berbunyi `decision(<decider>): selected <model> from <n>; confidence <c> (<rules reason>)`. Tidak ada URL, key, prompt atau upstream body yang mencapai log.
+
+Pembuat kombo menampilkan bidang ini ketika strategi router adalah `decision`, dengan deskripsi yang dihasilkan sebagai placeholder dan a** Keputusan tes** tombol yang memanggil `POST /api/combos/decision-preview` satu kali dengan pengaturan yang belum disimpan (bendera yang sama).
+
+**Kapan harus digunakan** : lalu lintas dengan tingkat kesulitan campuran yang Anda inginkan agar tingkatannya dipilih per permintaan oleh pengklasifikasi yang Anda pilih, bukan oleh Nadir secara khusus.
+
+**Alias** : `decision` (tanpa alias)
+
+---
+
 ### Strategi router khusus
 
 Anda dapat mendaftarkan implementasi `RouterStrategy` sendiri melalui API publik:
@@ -801,6 +856,7 @@ Kemudian gunakan strategi tersebut:
 | SLO ketat                 | `sla-aware` | Memfilter berdasarkan ambang p95/error/biaya |
 | Percakapan multi-giliran  | `lkgp`      | Konsistensi sesi                             |
 | Tingkat kesulitan beragam | `nadir`     | Memilih tingkat model untuk setiap prompt    |
+| Pengklasifikasi sendiri   | `decision`  | Penentu Anda memilih modelnya                |
 
 Kolom berbasis SLA:
 
