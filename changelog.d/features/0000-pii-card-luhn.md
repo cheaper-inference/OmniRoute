@@ -1,1 +1,0 @@
-- `PII_CARD_LUHN_ENABLED` (off by default): with request PII masking on, a 16-digit match is masked only if it passes the Luhn check.
