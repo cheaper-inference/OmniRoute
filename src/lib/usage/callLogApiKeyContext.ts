@@ -13,6 +13,18 @@ export interface CallLogApiKeyContext {
 
 const callLogApiKeyContext = new AsyncLocalStorage<CallLogApiKeyContext>();
 
+export function toCallLogApiKeyContext(
+  key: { id?: string | null; name?: string | null } | null | undefined,
+  credentials?: unknown
+): CallLogApiKeyContext {
+  const connectionId = (credentials as { connectionId?: unknown } | null)?.connectionId;
+  return {
+    apiKeyId: key?.id ?? null,
+    apiKeyName: key?.name ?? null,
+    connectionId: typeof connectionId === "string" ? connectionId : undefined,
+  };
+}
+
 /**
  * Bind API-key (and connection) attribution to every call log emitted by one request.
  *

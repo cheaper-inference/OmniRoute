@@ -15,8 +15,6 @@ import { errorResponse } from "../utils/error.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { saveCallLog } from "@/lib/usageDb";
-import { getCallLogApiKeyContext } from "@/lib/usage/callLogApiKeyContext";
-import { recordSpecialtyRequestUsage } from "@/lib/usage/specialtyRequestAccounting";
 import { MAX_DECISION_TIMEOUT_MS } from "../services/decision/config.ts";
 import {
   postDecisionJson,
@@ -45,6 +43,13 @@ export interface OpenAiDecisionsProxyOptions {
   credentials: OpenAiDecisionsCredentials;
   /** Test seam; production uses the guarded transport. */
   transport?: DecisionTransport;
+  recordUsage?: (usage: {
+    provider: string;
+    model: string;
+    connectionId?: string | null;
+    startTime: number;
+    tokens: { input_tokens: number; output_tokens: number };
+  }) => Promise<void>;
 }
 
 type DecisionUsage = { input_tokens?: unknown; output_tokens?: unknown };
@@ -144,9 +149,7 @@ export async function handleOpenAiDecisionsProxy(
 
   const usage = isRecord(data.usage) ? (data.usage as DecisionUsage) : null;
   logDecisionsCall(options, { status: 200, usage, startTime });
-  await recordSpecialtyRequestUsage({
-    ...getCallLogApiKeyContext(),
-    endpoint: "/v1/decisions",
+  await options.recordUsage?.({
     provider: OPENAI_DECISIONS_PROVIDER_ID,
     model: options.model.qualified,
     connectionId: options.credentials.connectionId,

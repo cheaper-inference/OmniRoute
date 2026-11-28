@@ -1,5 +1,5 @@
 import { getFalCompatibilityPreparer } from "@/lib/fal/compatibility";
-import { handleVideoGeneration } from "@omniroute/open-sse/handlers/videoGeneration.ts";
+import { runVideoRequestWithAccounting } from "@/lib/usage/videoRequestAccounting";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { runWithCallLogApiKeyContext } from "@/lib/usage/callLogApiKeyContext";
 import { createRequestMediaSink } from "@/app/api/v1/_helpers/mediaSink";
@@ -118,6 +118,7 @@ async function postHandler(request, context) {
           body,
           {
             prepareFalInput: getFalCompatibilityPreparer(),
+            generateVideo: runVideoRequestWithAccounting,
             request,
             policy,
             mediaSink,
@@ -200,7 +201,7 @@ async function postHandler(request, context) {
   }
 
   const result: MediaGenerationResultLike = await withApiKeyContext(() =>
-    handleVideoGeneration({
+    runVideoRequestWithAccounting({
       prepareFalInput: getFalCompatibilityPreparer(),
       body,
       credentials,
