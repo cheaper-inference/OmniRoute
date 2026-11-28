@@ -287,6 +287,7 @@
     "retentionOpt": "Chỉ giữ lại N bản sao lưu gần nhất",
     "passphrasePrompt": "Mật khẩu mã hóa:",
     "noPassphrase": "Cần có mật khẩu cho bản sao lưu được mã hóa.",
+    "restoreDecryptFailed": "Không thể giải mã {name} sao lưu (cụm mật khẩu sai hoặc tệp bị hỏng); không có gì thay đổi.",
     "cloudFailed": "Cảnh báo: tải lên đám mây không thành công. Bản sao lưu cục bộ đã được lưu.",
     "cloudUploaded": "Đã tải bản sao lưu lên đám mây: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Quản lý cấu hình phục hồi",
       "threshold": "Ngưỡng lỗi",
       "resetTimeout": "Thời gian chờ đặt lại tính bằng ms",
-      "baseCooldown": "Thời gian chờ cơ sở tính bằng ms"
+      "baseCooldown": "Thời gian chờ cơ sở tính bằng ms",
+      "p2cLatencyWeight": "trọng số độ trễ p2c, 0 (tắt) đến 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Khởi chạy Claude Code trỏ đến OmniRoute (cục bộ hoặc từ xa, với --profile)",
     "token": "Token mà ứng dụng Claude cần gửi (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "Không thể truy cập OmniRoute tại {port}. Hãy khởi động bằng 'omniroute serve'.",
-    "notFound": "Không tìm thấy CLI 'claude' trong PATH."
+    "notFound": "Không tìm thấy CLI 'claude' trong PATH.",
+    "toolsHelp": "Khởi chạy một công cụ mã hóa (tự động khởi động cổng, danh sách mô hình từ các nhà cung cấp được kết nối của bạn): khởi chạy đa hướng <tool> [options] [-- toolArgs...] khởi chạy đa hướng danh sách --list các công cụ có thể khởi chạy omniroute khởi chạy <tool> --help các tùy chọn để khởi chạy công cụ (--model, --all-models, ...) Không có tên công cụ, khởi chạy sẽ bắt đầu Mã Claude với các tùy chọn ở trên (không dùng nữa).",
+    "gatewayDescription": "Kiểm tra hoặc kiểm soát cổng khởi chạy đa hướng đã bắt đầu"
   },
   "run": {
     "description": "Khởi chạy một CLI được hỗ trợ thông qua OmniRoute"

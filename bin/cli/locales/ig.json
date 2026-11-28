@@ -287,6 +287,7 @@
     "retentionOpt": "Debe naanị ndabere N ikpeazụ",
     "passphrasePrompt": "Okwuntughe izochi data:",
     "noPassphrase": "A chọrọ okwuntughe maka ndabere ezoro ezo.",
+    "restoreDecryptFailed": "Enweghị ike ibelata {name} ndabere (passphrase na-ezighi ezi ma ọ bụ faịlụ mebiri emebi); ọ dịghị ihe gbanwere.",
     "cloudFailed": "Ịdọ aka ná ntị: nbulite na igwe ojii dara. Echekwara ndabere mpaghara.",
     "cloudUploaded": "Ebulitela ndabere igwe ojii: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Jikwaa nhazi nkwụsi ike",
       "threshold": "Oke ọdịda",
       "resetTimeout": "Oge nchere tupu nrụgharị na ms",
-      "baseCooldown": "Oge izu ike ndabere na ms"
+      "baseCooldown": "Oge izu ike ndabere na ms",
+      "p2cLatencyWeight": "Ibu p2c dị arọ, 0 (gbanyụọ) ruo 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Bido Claude Code ka ọ rụtụ aka na OmniRoute (mpaghara ma ọ bụ ime, site na --profile)",
     "token": "Token onye ahịa Claude kwesịrị iziga (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "Enweghị ike iru OmniRoute na {port}. Jiri 'omniroute serve' bido ya.",
-    "notFound": "Ahụghị CLI 'claude' na PATH."
+    "notFound": "Ahụghị CLI 'claude' na PATH.",
+    "toolsHelp": "Ẹkedori ngwá ọrụ nzuzo (na-akpaghị aka na-amalite ọnụ ụzọ ámá, ndepụta ihe nlereanya sitere na ndị na-enye gị ejikọrọ): omniroute launch <tool> [nhọrọ] [-- toolArgs...] omniroute launch --list list launchable tools omniroute launch <tool> --help options for a tool launch (--model, --all-models, ...) Enweghị aha ngwá ọrụ, malite na nhọrọ dị n'elu claude).",
+    "gatewayDescription": "Nyochaa ma ọ bụ jikwaa ọnụ ụzọ ámá nke mmalite ihe niile malitere"
   },
   "run": {
     "description": "Jiri OmniRoute malite ebumnuche CLI a na-akwado"

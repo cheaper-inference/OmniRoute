@@ -287,6 +287,7 @@
     "retentionOpt": "최근 N개의 백업만 유지",
     "passphrasePrompt": "암호화 암호:",
     "noPassphrase": "암호화된 백업에는 암호가 필요합니다.",
+    "restoreDecryptFailed": "백업 {name} 해독할 수 없습니다(암호가 잘못되었거나 파일이 손상됨). 아무것도 변경되지 않았습니다.",
     "cloudFailed": "경고: 클라우드 업로드에 실패했습니다. 로컬 백업은 저장되었습니다.",
     "cloudUploaded": "클라우드 백업 업로드됨: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "복원력 구성 관리",
       "threshold": "실패 임계값",
       "resetTimeout": "초기화 제한 시간(ms)",
-      "baseCooldown": "기본 쿨다운(ms)"
+      "baseCooldown": "기본 쿨다운(ms)",
+      "p2cLatencyWeight": "p2c 대기 시간 가중치, 0(해제) ~ 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "OmniRoute를 가리키도록 Claude Code 실행(로컬 또는 원격, --profile 사용)",
     "token": "Claude 클라이언트가 전송해야 하는 토큰(ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "{port}에서 OmniRoute에 연결할 수 없습니다. 'omniroute serve'로 시작하세요.",
-    "notFound": "PATH에서 'claude' CLI를 찾을 수 없습니다."
+    "notFound": "PATH에서 'claude' CLI를 찾을 수 없습니다.",
+    "toolsHelp": "코딩 도구 실행(연결된 공급자의 게이트웨이, 모델 목록 자동 시작): omniroute launch <tool> [options] [-- toolArgs...] omniroute launch --list list 실행 가능한 도구 omniroute launch <tool> --help 도구 실행 옵션(--model, --all-models, ...) 도구 이름이 없으면 launch는 위의 옵션(더 이상 사용되지 않음)으로 Claude Code를 시작합니다.",
+    "gatewayDescription": "옴니루트 출시가 시작된 게이트웨이를 검사하거나 제어합니다."
   },
   "run": {
     "description": "OmniRoute를 통해 지원되는 CLI 대상 실행"

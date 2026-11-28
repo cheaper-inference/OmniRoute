@@ -287,6 +287,7 @@
     "retentionOpt": "រក្សាទុកតែច្បាប់ចម្លងបម្រុងទុក N ចុងក្រោយ",
     "passphrasePrompt": "ឃ្លាសម្ងាត់សម្រាប់ការអ៊ិនគ្រីប៖",
     "noPassphrase": "ត្រូវការឃ្លាសម្ងាត់សម្រាប់ច្បាប់ចម្លងបម្រុងទុកដែលបានអ៊ិនគ្រីប។",
+    "restoreDecryptFailed": "{name} បម្រុងទុកមិនអាចត្រូវបានឌិគ្រីប (ពាក្យសម្ងាត់ខុសឬឯកសារខូច) ។ គ្មានអ្វីត្រូវបានផ្លាស់ប្តូរទេ។",
     "cloudFailed": "ការព្រមាន៖ ការផ្ទុកឡើងទៅពពកបានបរាជ័យ។ ច្បាប់ចម្លងបម្រុងទុកក្នុងម៉ាស៊ីនត្រូវបានរក្សាទុក។",
     "cloudUploaded": "បានផ្ទុកច្បាប់ចម្លងបម្រុងទុកឡើងទៅពពក៖ {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "គ្រប់គ្រងការកំណត់រចនាសម្ព័ន្ធភាពធន់",
       "threshold": "កម្រិតកំណត់នៃការបរាជ័យ",
       "resetTimeout": "រយៈពេលអស់ពេលសម្រាប់កំណត់ឡើងវិញ គិតជា ms",
-      "baseCooldown": "រយៈពេលសម្រាកមូលដ្ឋាន គិតជា ms"
+      "baseCooldown": "រយៈពេលសម្រាកមូលដ្ឋាន គិតជា ms",
+      "p2cLatencyWeight": "ទម្ងន់ភាពយឺតនៃ p2c, 0 (បិទ) ដល់ 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "បើកដំណើរការ Claude Code ដោយភ្ជាប់ទៅ OmniRoute (ក្នុងមូលដ្ឋាន ឬពីចម្ងាយ ជាមួយ --profile)",
     "token": "ថូខឹនដែលកម្មវិធី Claude គួរផ្ញើ (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "មិនអាចចូលដំណើរការ OmniRoute នៅ {port} បានទេ។ ចាប់ផ្ដើមវាដោយប្រើ 'omniroute serve'។",
-    "notFound": "រកមិនឃើញ CLI 'claude' នៅក្នុង PATH ទេ។"
+    "notFound": "រកមិនឃើញ CLI 'claude' នៅក្នុង PATH ទេ។",
+    "toolsHelp": "បើកដំណើរការឧបករណ៍សរសេរកូដ (ចាប់ផ្តើមផ្លូវចេញចូលដោយស្វ័យប្រវត្តិ បញ្ជីគំរូពីអ្នកផ្តល់សេវាដែលបានភ្ជាប់របស់អ្នក)៖ omniroute launch <tool> [ជម្រើស] [-- toolArgs...] omniroute launch --list list launchable tools omniroute launch <tool> --help options for a tool launch (--model, --all-models, ... ) ដោយគ្មានឈ្មោះឧបករណ៍ ការបើកដំណើរការ Codec (ខាងលើ)។",
+    "gatewayDescription": "ពិនិត្យ ឬគ្រប់គ្រងច្រកចេញចូលដែលការបើកដំណើរការ omniroute បានចាប់ផ្តើម"
   },
   "run": {
     "description": "ដំណើរការគោលដៅ CLI ដែលគាំទ្រតាមរយៈ OmniRoute"

@@ -287,6 +287,7 @@
     "retentionOpt": "Behold bare de siste N sikkerhetskopiene",
     "passphrasePrompt": "Passordfrase for kryptering:",
     "noPassphrase": "Passordfrase er påkrevd for krypterte sikkerhetskopier.",
+    "restoreDecryptFailed": "Backup {name} kunne ikke dekrypteres (feil passordfrase eller skadet fil); ingenting ble endret.",
     "cloudFailed": "Advarsel: Opplasting til skyen mislyktes. Den lokale sikkerhetskopien ble lagret.",
     "cloudUploaded": "Sikkerhetskopi lastet opp til skyen: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Administrer robusthetskonfigurasjon",
       "threshold": "Feilgrense",
       "resetTimeout": "Tidsavbrudd for tilbakestilling i ms",
-      "baseCooldown": "Grunnleggende nedkjølingsperiode i ms"
+      "baseCooldown": "Grunnleggende nedkjølingsperiode i ms",
+      "p2cLatencyWeight": "p2c latensvekt, 0 (av) til 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Start Claude Code koblet til OmniRoute (lokalt eller eksternt, med --profile)",
     "token": "Tokenet som Claude-klienten skal sende (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute er ikke tilgjengelig på {port}. Start den med 'omniroute serve'.",
-    "notFound": "'claude'-CLI-en ble ikke funnet i PATH."
+    "notFound": "'claude'-CLI-en ble ikke funnet i PATH.",
+    "toolsHelp": "Start et kodeverktøy (starter automatisk gatewayen, modellliste fra de tilkoblede leverandørene): omniroute launch <tool> [alternativer] [-- toolArgs...] omniroute launch --list list lanserbare verktøy omniroute launch <tool> --help alternativer for en verktøylansering (--model, --all-models, ...) Uten et verktøynavn med startalternativer med startalternativene ovenfor (Claudedeprec).",
+    "gatewayDescription": "Inspiser eller kontroller gatewayen som omniroute-lanseringen startet"
   },
   "run": {
     "description": "Start et støttet CLI-mål gjennom OmniRoute"

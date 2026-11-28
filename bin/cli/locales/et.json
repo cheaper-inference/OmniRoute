@@ -287,6 +287,7 @@
     "retentionOpt": "Säilita ainult viimased N varukoopiat",
     "passphrasePrompt": "Krüpteerimise salafraas:",
     "noPassphrase": "Krüpteeritud varukoopia jaoks on vajalik salafraas.",
+    "restoreDecryptFailed": "Varukoopiat {name} ei saanud dekrüpteerida (vale parool või kahjustatud fail); midagi ei muudetud.",
     "cloudFailed": "Hoiatus: pilvesalvestusse üleslaadimine ebaõnnestus. Kohalik varukoopia salvestati.",
     "cloudUploaded": "Pilve varukoopia üles laaditud: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Halda vastupidavuse seadistust",
       "threshold": "Vea lävend",
       "resetTimeout": "Lähtestamise ajalõpp millisekundites",
-      "baseCooldown": "Baasjahtumisaeg millisekundites"
+      "baseCooldown": "Baasjahtumisaeg millisekundites",
+      "p2cLatencyWeight": "p2c latentsuskaal, 0 (väljas) kuni 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Käivita Claude Code, mis suunatakse OmniRoute'i (kohalik või kaug, koos lipuga --profile)",
     "token": "Token, mille Claude klient peaks saatma (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute ei ole aadressil {port} kättesaadav. Käivita see käsuga 'omniroute serve'.",
-    "notFound": "'claude' CLI-d ei leitud PATH-ist."
+    "notFound": "'claude' CLI-d ei leitud PATH-ist.",
+    "toolsHelp": "Käivitage kodeerimistööriist (käivitab automaatselt lüüsi, mudeliloendi teie ühendatud pakkujatelt): omniroute'i käivitamine <tool> [suvandid] [-- toolArgs...] omniroute'i käivitamine --list loend käivitatavad tööriistad omniroute'i käivitamine <tool> --help suvandid tööriista käivitamiseks (--model, --all-models valikud ülaltoodud tööriistaga, käivitamine ülaltoodud tööriistaga, ...) (aegunud).",
+    "gatewayDescription": "Kontrollige või kontrollige lüüsi, mille omniroute'i käivitamine algas"
   },
   "run": {
     "description": "Käivita toetatud CLI sihtmärk OmniRoute'i kaudu"

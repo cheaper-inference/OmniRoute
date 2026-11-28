@@ -287,6 +287,7 @@
     "retentionOpt": "फक्त शेवटचे N बॅकअप ठेवा",
     "passphrasePrompt": "कूटबद्धीकरण पासफ्रेज:",
     "noPassphrase": "कूटबद्ध बॅकअपसाठी पासफ्रेज आवश्यक आहे.",
+    "restoreDecryptFailed": "बॅकअप {name} डिक्रिप्ट करता आला नाही (चुकीचा सांकेतिक वाक्यांश किंवा खराब झालेली फाइल); काहीही बदलले नाही.",
     "cloudFailed": "इशारा: क्लाउड अपलोड अयशस्वी झाले. स्थानिक बॅकअप जतन केला आहे.",
     "cloudUploaded": "क्लाउड बॅकअप अपलोड केला: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "लवचिकता कॉन्फिग व्यवस्थापित करा",
       "threshold": "अपयश मर्यादा",
       "resetTimeout": "रीसेट टाइमआउट (ms मध्ये)",
-      "baseCooldown": "मूलभूत कूलडाउन (ms मध्ये)"
+      "baseCooldown": "मूलभूत कूलडाउन (ms मध्ये)",
+      "p2cLatencyWeight": "p2c लेटन्सी वेट, 0 (बंद) ते 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "OmniRoute कडे निर्देशित केलेले Claude Code सुरू करा (स्थानिक किंवा दूरस्थ, --profile सह)",
     "token": "Claude क्लायंटने पाठवायचे टोकन (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "{port} वर OmniRoute उपलब्ध नाही. ते 'omniroute serve' वापरून सुरू करा.",
-    "notFound": "PATH मध्ये 'claude' CLI आढळले नाही."
+    "notFound": "PATH मध्ये 'claude' CLI आढळले नाही.",
+    "toolsHelp": "कोडिंग टूल लाँच करा (गेटवे ऑटो-स्टार्ट, तुमच्या कनेक्ट केलेल्या प्रदात्यांकडून मॉडेल सूची):\n  omniroute लाँच <tool> [पर्याय] [-- toolArgs...]\n  omniroute लाँच --list सूची लाँच करण्यायोग्य साधने\n  omniroute लाँच <tool> --help टूल लॉन्चसाठी पर्याय (--model, --all-models, ...)\n\nटूलच्या नावाशिवाय, लाँच वरील पर्यायांसह क्लॉड कोड सुरू होते (नापसंत).",
+    "gatewayDescription": "सर्व मार्ग प्रक्षेपण सुरू झालेल्या गेटवेची तपासणी करा किंवा नियंत्रित करा"
   },
   "run": {
     "description": "OmniRoute द्वारे समर्थित CLI लक्ष्य सुरू करा"

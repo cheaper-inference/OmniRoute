@@ -287,6 +287,7 @@
     "retentionOpt": "Yalnız son N ehtiyat nüsxəni saxla",
     "passphrasePrompt": "Şifrələmə parolu:",
     "noPassphrase": "Şifrələnmiş ehtiyat nüsxə üçün parol tələb olunur.",
+    "restoreDecryptFailed": "Yedək {name} şifrəsini açmaq mümkün olmadı (yanlış parol və ya zədələnmiş fayl); heç nə dəyişmədi.",
     "cloudFailed": "Xəbərdarlıq: buluda yükləmə uğursuz oldu. Lokal ehtiyat nüsxə saxlanıldı.",
     "cloudUploaded": "Bulud ehtiyat nüsxəsi yükləndi: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Dayanıqlılıq konfiqurasiyasını idarə et",
       "threshold": "Uğursuzluq həddi",
       "resetTimeout": "Sıfırlama taymautu, ms",
-      "baseCooldown": "Əsas gözləmə müddəti, ms"
+      "baseCooldown": "Əsas gözləmə müddəti, ms",
+      "p2cLatencyWeight": "p2c gecikmə çəkisi, 0-dan 20-yə qədər"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "OmniRoute-a yönləndirilmiş Claude Code-u işə salın (lokal və ya uzaqdan, --profile ilə)",
     "token": "Claude klientinin göndərməli olduğu token (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute {port} portunda əlçatan deyil. Onu 'omniroute serve' ilə başladın.",
-    "notFound": "'claude' CLI PATH-də tapılmadı."
+    "notFound": "'claude' CLI PATH-də tapılmadı.",
+    "toolsHelp": "Kodlaşdırma alətini işə salın (qoşulmuş provayderlərdən şlüz, model siyahısını avtomatik işə salır): omniroute launch <tool> [seçimlər] [-- toolArgs...] omniroute launch --list list launchable tools omniroute launch <tool> --help options for a tool launch (--model, --all-models a start tool name with the code with the...ude) (köhnəlmişdir).",
+    "gatewayDescription": "Hərtərəfli marşrutun işə salındığı şlüzü yoxlayın və ya idarə edin"
   },
   "run": {
     "description": "Dəstəklənən CLI hədəfini OmniRoute vasitəsilə işə salın"

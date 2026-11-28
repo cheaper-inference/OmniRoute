@@ -287,6 +287,7 @@
     "retentionOpt": "ਸਿਰਫ਼ ਆਖਰੀ N ਬੈਕਅੱਪ ਰੱਖੋ",
     "passphrasePrompt": "ਇਨਕ੍ਰਿਪਸ਼ਨ ਪਾਸਫਰੇਜ਼:",
     "noPassphrase": "ਇਨਕ੍ਰਿਪਟ ਕੀਤੇ ਬੈਕਅੱਪ ਲਈ ਪਾਸਫਰੇਜ਼ ਲਾਜ਼ਮੀ ਹੈ।",
+    "restoreDecryptFailed": "ਬੈਕਅੱਪ {name} ਡੀਕ੍ਰਿਪਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ (ਗਲਤ ਗੁਪਤਕੋਡ ਜਾਂ ਖਰਾਬ ਫਾਈਲ); ਕੁਝ ਵੀ ਨਹੀਂ ਬਦਲਿਆ ਗਿਆ।",
     "cloudFailed": "ਚੇਤਾਵਨੀ: ਕਲਾਉਡ ਅੱਪਲੋਡ ਅਸਫਲ ਰਿਹਾ। ਸਥਾਨਕ ਬੈਕਅੱਪ ਸੰਭਾਲਿਆ ਗਿਆ ਸੀ।",
     "cloudUploaded": "ਕਲਾਉਡ ਬੈਕਅੱਪ ਅੱਪਲੋਡ ਹੋਇਆ: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "ਰੈਜ਼ੀਲੀਅੰਸ ਸੰਰਚਨਾ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ",
       "threshold": "ਅਸਫਲਤਾ ਸੀਮਾ",
       "resetTimeout": "ਰੀਸੈੱਟ ਟਾਈਮਆਉਟ ms ਵਿੱਚ",
-      "baseCooldown": "ਬੇਸ ਕੂਲਡਾਊਨ ms ਵਿੱਚ"
+      "baseCooldown": "ਬੇਸ ਕੂਲਡਾਊਨ ms ਵਿੱਚ",
+      "p2cLatencyWeight": "p2c ਲੇਟੈਂਸੀ ਵੇਟ, 0 (ਬੰਦ) ਤੋਂ 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "OmniRoute ਵੱਲ ਨਿਰਦੇਸ਼ਿਤ Claude Code ਲਾਂਚ ਕਰੋ (ਲੋਕਲ ਜਾਂ ਰਿਮੋਟ, --profile ਨਾਲ)",
     "token": "ਉਹ ਟੋਕਨ ਜੋ Claude ਕਲਾਇੰਟ ਨੂੰ ਭੇਜਣਾ ਚਾਹੀਦਾ ਹੈ (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute {port} 'ਤੇ ਪਹੁੰਚਯੋਗ ਨਹੀਂ ਹੈ। ਇਸਨੂੰ 'omniroute serve' ਨਾਲ ਸ਼ੁਰੂ ਕਰੋ।",
-    "notFound": "'claude' CLI PATH ਵਿੱਚ ਨਹੀਂ ਮਿਲਿਆ।"
+    "notFound": "'claude' CLI PATH ਵਿੱਚ ਨਹੀਂ ਮਿਲਿਆ।",
+    "toolsHelp": "ਇੱਕ ਕੋਡਿੰਗ ਟੂਲ ਲਾਂਚ ਕਰੋ (ਤੁਹਾਡੇ ਕਨੈਕਟ ਕੀਤੇ ਪ੍ਰਦਾਤਾਵਾਂ ਤੋਂ ਗੇਟਵੇ, ਮਾਡਲ ਸੂਚੀ ਨੂੰ ਆਟੋ-ਸਟਾਰਟ ਕਰੋ): omniroute ਲਾਂਚ <tool> [options] [-- toolArgs...] omniroute ਲਾਂਚ --list ਸੂਚੀ ਲਾਂਚ ਕਰਨ ਯੋਗ ਟੂਲ ਇੱਕ ਟੂਲ ਲਾਂਚ ਲਈ omniroute ਲਾਂਚ <tool> --help ਵਿਕਲਪ (--model, ... ਟੂਲ ਸ਼ੁਰੂ ਕਰੋ , --all-models, ...) ਟੂਲ ਸ਼ੁਰੂ ਕਰੋ ਉੱਪਰ ਦਿੱਤੇ ਵਿਕਲਪ (ਨਾਪਸੰਦ)।",
+    "gatewayDescription": "ਉਸ ਗੇਟਵੇ ਦਾ ਮੁਆਇਨਾ ਕਰੋ ਜਾਂ ਨਿਯੰਤਰਿਤ ਕਰੋ ਜੋ ਓਮਰਾਈਟ ਲਾਂਚ ਸ਼ੁਰੂ ਹੋਇਆ ਸੀ"
   },
   "run": {
     "description": "OmniRoute ਰਾਹੀਂ ਇੱਕ ਸਮਰਥਿਤ CLI ਟਾਰਗੇਟ ਲਾਂਚ ਕਰੋ"

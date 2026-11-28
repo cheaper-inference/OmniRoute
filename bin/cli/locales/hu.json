@@ -287,6 +287,7 @@
     "retentionOpt": "Csak az utolsó N biztonsági mentés megőrzése",
     "passphrasePrompt": "Titkosítási jelmondat:",
     "noPassphrase": "Titkosított biztonsági mentéshez jelmondat szükséges.",
+    "restoreDecryptFailed": "{name} biztonsági másolatot nem sikerült visszafejteni (rossz jelszó vagy sérült fájl); semmi sem változott.",
     "cloudFailed": "Figyelmeztetés: a felhőbe való feltöltés sikertelen. A helyi biztonsági mentés mentve lett.",
     "cloudUploaded": "A felhőalapú biztonsági mentés feltöltve: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Ellenálló képességi konfiguráció kezelése",
       "threshold": "Hibaküszöb",
       "resetTimeout": "Visszaállítási időtúllépés ezredmásodpercben",
-      "baseCooldown": "Alap várakozási idő ezredmásodpercben"
+      "baseCooldown": "Alap várakozási idő ezredmásodpercben",
+      "p2cLatencyWeight": "p2c késleltetési súly, 0 (ki) és 20 között"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "A Claude Code indítása az OmniRoute használatával (helyileg vagy távolról, --profile kapcsolóval)",
     "token": "A Claude kliens által küldendő token (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "Az OmniRoute nem érhető el ezen a porton: {port}. Indítsa el az 'omniroute serve' paranccsal.",
-    "notFound": "A 'claude' CLI nem található a PATH-ban."
+    "notFound": "A 'claude' CLI nem található a PATH-ban.",
+    "toolsHelp": "Indítson el egy kódoló eszközt (automatikusan elindítja az átjárót, a csatlakoztatott szolgáltatók modelllistáját): omniroute launch <tool> [opciók] [-- toolArgs...] omniroute launch --list lista indítható eszközök omniroute launch <tool> --help opciók egy eszköz indításához (--model, --all-models opciók a Claude névvel, indítsa el a fenti eszközt, ...) (elavult).",
+    "gatewayDescription": "Vizsgálja meg vagy irányítsa az átjárót, amelyen az Omniroute elindítása elindult"
   },
   "run": {
     "description": "Támogatott CLI-cél indítása az OmniRoute-on keresztül"

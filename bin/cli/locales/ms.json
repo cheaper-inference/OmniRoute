@@ -287,6 +287,7 @@
     "retentionOpt": "Kekalkan hanya N sandaran terakhir",
     "passphrasePrompt": "Frasa laluan penyulitan:",
     "noPassphrase": "Frasa laluan diperlukan untuk sandaran yang disulitkan.",
+    "restoreDecryptFailed": "{name} sandaran tidak dapat dinyahsulit (frasa laluan yang salah atau fail rosak); tiada apa yang diubah.",
     "cloudFailed": "Amaran: muat naik ke awan gagal. Sandaran setempat telah disimpan.",
     "cloudUploaded": "Sandaran awan dimuat naik: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Urus konfigurasi daya tahan",
       "threshold": "Ambang kegagalan",
       "resetTimeout": "Tamat masa penetapan semula dalam ms",
-      "baseCooldown": "Tempoh bertenang asas dalam ms"
+      "baseCooldown": "Tempoh bertenang asas dalam ms",
+      "p2cLatencyWeight": "berat kependaman p2c, 0 (mati) hingga 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Lancarkan Claude Code yang diarahkan ke OmniRoute (setempat atau jauh, dengan --profile)",
     "token": "Token yang perlu dihantar oleh klien Claude (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute tidak dapat dicapai pada {port}. Mulakannya dengan 'omniroute serve'.",
-    "notFound": "CLI 'claude' tidak ditemukan dalam PATH."
+    "notFound": "CLI 'claude' tidak ditemukan dalam PATH.",
+    "toolsHelp": "Lancarkan alat pengekodan (auto mulakan get laluan, senarai model daripada pembekal anda yang disambungkan): omniroute launch <tool> [options] [-- toolArgs...] omniroute launch --list list launch tools omniroute launch <tool> --help options for a tool launch (--model, --all-models, ...) Tanpa nama alat, pelancaran bermula dengan pilihan Claudeprepare (Kod Claudeprete).",
+    "gatewayDescription": "Periksa atau kawal pintu masuk yang pelancaran omniroute bermula"
   },
   "run": {
     "description": "Lancarkan sasaran CLI yang disokong melalui OmniRoute"

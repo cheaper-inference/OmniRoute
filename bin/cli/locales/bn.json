@@ -287,6 +287,7 @@
     "retentionOpt": "শুধু সর্বশেষ Nটি ব্যাকআপ রাখুন",
     "passphrasePrompt": "এনক্রিপশন পাসফ্রেজ:",
     "noPassphrase": "এনক্রিপ্ট করা ব্যাকআপের জন্য পাসফ্রেজ আবশ্যক।",
+    "restoreDecryptFailed": "ব্যাকআপ {name} ডিক্রিপ্ট করা যায়নি (ভুল পাসফ্রেজ বা ক্ষতিগ্রস্ত ফাইল); কিছুই পরিবর্তন করা হয়নি।",
     "cloudFailed": "সতর্কতা: ক্লাউডে আপলোড ব্যর্থ হয়েছে। স্থানীয় ব্যাকআপ সংরক্ষিত হয়েছে।",
     "cloudUploaded": "ক্লাউড ব্যাকআপ আপলোড করা হয়েছে: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "স্থিতিস্থাপকতা কনফিগ পরিচালনা করুন",
       "threshold": "ব্যর্থতার সীমা",
       "resetTimeout": "রিসেট টাইমআউট, ms-এ",
-      "baseCooldown": "বেস কুলডাউন, ms-এ"
+      "baseCooldown": "বেস কুলডাউন, ms-এ",
+      "p2cLatencyWeight": "p2c লেটেন্সি ওজন, 0 (বন্ধ) থেকে 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "OmniRoute-এর দিকে নির্দেশিত Claude Code চালু করুন (লোকাল বা রিমোট, --profile সহ)",
     "token": "Claude ক্লায়েন্টের পাঠানোর জন্য টোকেন (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "{port}-এ OmniRoute অ্যাক্সেসযোগ্য নয়। 'omniroute serve' দিয়ে এটি চালু করুন।",
-    "notFound": "PATH-এ 'claude' CLI পাওয়া যায়নি।"
+    "notFound": "PATH-এ 'claude' CLI পাওয়া যায়নি।",
+    "toolsHelp": "একটি কোডিং টুল চালু করুন (আপনার সংযুক্ত প্রদানকারীদের থেকে গেটওয়ে, মডেল তালিকা স্বয়ংক্রিয়ভাবে শুরু করুন): omniroute লঞ্চ <tool> [বিকল্প] [-- toolArgs...] omniroute লঞ্চ --list তালিকা লঞ্চযোগ্য টুলস omniroute লঞ্চ <tool> --help অপশন একটি টুল লঞ্চের জন্য (--model, --all-models লঞ্চ সহ ক্লাউড নামে একটি টুল চালু করুন উপরের বিকল্পগুলি (অপ্রচলিত)।",
+    "gatewayDescription": "ওমনিরুট লঞ্চ শুরু হওয়া গেটওয়েটি পরিদর্শন বা নিয়ন্ত্রণ করুন"
   },
   "run": {
     "description": "OmniRoute-এর মাধ্যমে একটি সমর্থিত CLI টার্গেট চালু করুন"

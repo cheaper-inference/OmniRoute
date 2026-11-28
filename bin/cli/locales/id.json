@@ -287,6 +287,7 @@
     "retentionOpt": "Simpan hanya N cadangan terakhir",
     "passphrasePrompt": "Frasa sandi enkripsi:",
     "noPassphrase": "Frasa sandi diperlukan untuk cadangan terenkripsi.",
+    "restoreDecryptFailed": "{name} cadangan tidak dapat didekripsi (frasa sandi salah atau file rusak); tidak ada yang berubah.",
     "cloudFailed": "Peringatan: pengunggahan ke cloud gagal. Cadangan lokal telah disimpan.",
     "cloudUploaded": "Cadangan cloud telah diunggah: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Kelola konfigurasi ketahanan",
       "threshold": "Ambang batas kegagalan",
       "resetTimeout": "Batas waktu pengaturan ulang dalam ms",
-      "baseCooldown": "Cooldown dasar dalam ms"
+      "baseCooldown": "Cooldown dasar dalam ms",
+      "p2cLatencyWeight": "berat latensi p2c, 0 (mati) hingga 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Luncurkan Claude Code yang diarahkan ke OmniRoute (lokal atau jarak jauh, dengan --profile)",
     "token": "Token yang harus dikirim oleh klien Claude (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute tidak dapat dijangkau di {port}. Jalankan dengan 'omniroute serve'.",
-    "notFound": "CLI 'claude' tidak ditemukan di PATH."
+    "notFound": "CLI 'claude' tidak ditemukan di PATH.",
+    "toolsHelp": "Luncurkan alat pengkodean (memulai gateway secara otomatis, daftar model dari penyedia Anda yang terhubung): peluncuran omniroute <tool> [pilihan] [-- toolArgs...] peluncuran omniroute daftar --list alat yang dapat diluncurkan peluncuran omniroute <tool> --help opsi untuk peluncuran alat (--model, --all-models, ...) Tanpa nama alat, peluncuran dimulai Claude Code dengan opsi di atas (tidak digunakan lagi).",
+    "gatewayDescription": "Periksa atau kendalikan gateway tempat peluncuran omniroute dimulai"
   },
   "run": {
     "description": "Luncurkan target CLI yang didukung melalui OmniRoute"

@@ -99,6 +99,19 @@ curl -X POST http://localhost:20128/api/combos/test \
   -d '{}'
 ```
 
+### POST /api/combos/decision-preview
+
+Preview the decision router menu and optionally test one decision
+
+Builds the menu (unique model ids of the given steps, in order) and the generated cost-rank descriptions that the `decision` auto-router sends at request time. With `prompt`, also runs one decision with the unsaved `decision` block; that call only happens while the `COMBO_DECISION_ROUTER_ENABLED` feature flag is on (otherwise `test.status` is `skipped` with reason `disabled`) and may bill the decider. A `combo-model` decider is skipped (`live_request_only`). Requires management auth.
+
+```bash
+curl -X POST http://localhost:20128/api/combos/decision-preview \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
 ### GET /api/fallback/chains
 
 List fallback chains

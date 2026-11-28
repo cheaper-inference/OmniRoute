@@ -287,6 +287,7 @@
     "retentionOpt": "მხოლოდ ბოლო N სარეზერვო ასლის შენარჩუნება",
     "passphrasePrompt": "დაშიფვრის პაროლი:",
     "noPassphrase": "დაშიფრული სარეზერვო ასლისთვის პაროლი აუცილებელია.",
+    "restoreDecryptFailed": "სარეზერვო {name} გაშიფვრა ვერ მოხერხდა (არასწორი პაროლი ან დაზიანებული ფაილი); არაფერი შეცვლილა.",
     "cloudFailed": "გაფრთხილება: ღრუბელში ატვირთვა ვერ მოხერხდა. ადგილობრივი სარეზერვო ასლი შენახულია.",
     "cloudUploaded": "ღრუბლოვანი სარეზერვო ასლი ატვირთულია: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "მდგრადობის კონფიგურაციის მართვა",
       "threshold": "წარუმატებლობის ზღვარი",
       "resetTimeout": "ჩამოყრის მოლოდინის დრო, მწმ-ში",
-      "baseCooldown": "საბაზისო დაყოვნების დრო, მწმ-ში"
+      "baseCooldown": "საბაზისო დაყოვნების დრო, მწმ-ში",
+      "p2cLatencyWeight": "p2c ლატენტური წონა, 0 (გამორთული) 20-მდე"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Claude Code-ის გაშვება OmniRoute-ზე მითითებით (ლოკალურად ან დისტანციურად, --profile პარამეტრით)",
     "token": "ტოკენი, რომელიც Claude-ის კლიენტმა უნდა გაგზავნოს (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute მიუწვდომელია პორტზე {port}. გაუშვით ბრძანებით 'omniroute serve'.",
-    "notFound": "'claude' CLI ვერ მოიძებნა PATH-ში."
+    "notFound": "'claude' CLI ვერ მოიძებნა PATH-ში.",
+    "toolsHelp": "გაუშვით კოდირების ხელსაწყო (ავტომატურად იწყებს კარიბჭეს, მოდელების სიას თქვენი დაკავშირებული პროვაიდერებისგან): omniroute launch <tool> [options] [-- toolArgs...] omniroute start --list list launchable tools omniroute launch <tool> --help ოფციები ხელსაწყოს გაშვებისთვის (--model, --all-models, ...) started tools named, started Options with the above.",
+    "gatewayDescription": "შეამოწმეთ ან აკონტროლეთ კარიბჭე, რომელიც დაიწყო omniroute-ის გაშვება"
   },
   "run": {
     "description": "მხარდაჭერილი CLI სამიზნის გაშვება OmniRoute-ის მეშვეობით"

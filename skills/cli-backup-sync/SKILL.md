@@ -58,6 +58,7 @@ omniroute backup auto
 - `--cron <expr>`
 - `--cloud`
 - `--encrypt`
+- `--key-file <path>`
 - `--retention <n>`
 
 **Example:**
@@ -88,6 +89,7 @@ omniroute backup status
 
 - `--list`
 - `--yes`
+- `--key-file <path>`
 
 **Example:**
 

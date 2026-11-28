@@ -287,6 +287,7 @@
     "retentionOpt": "فقط N نسخهٔ پشتیبان آخر نگه داشته شود",
     "passphrasePrompt": "عبارت عبور:",
     "noPassphrase": "برای نسخهٔ پشتیبان رمزگذاریشده، عبارت عبور الزامی است.",
+    "restoreDecryptFailed": "نسخه پشتیبان {name} نمی توان رمزگشایی کرد (عبارت عبور اشتباه یا فایل آسیب دیده). چیزی تغییر نکرد",
     "cloudFailed": "هشدار: بارگذاری در فضای ابری ناموفق بود. نسخهٔ پشتیبان محلی ذخیره شد.",
     "cloudUploaded": "نسخهٔ پشتیبان ابری بارگذاری شد: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "مدیریت پیکربندی تابآوری",
       "threshold": "آستانه خرابی",
       "resetTimeout": "مهلت بازنشانی بر حسب میلیثانیه",
-      "baseCooldown": "دوره انتظار پایه بر حسب میلیثانیه"
+      "baseCooldown": "دوره انتظار پایه بر حسب میلیثانیه",
+      "p2cLatencyWeight": "وزن تأخیر p2c، 0 (خاموش) تا 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "اجرای Claude Code با اتصال به OmniRoute (محلی یا راه دور، با --profile)",
     "token": "توکنی که کلاینت Claude باید ارسال کند (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute در {port} در دسترس نیست. آن را با 'omniroute serve' راهاندازی کنید.",
-    "notFound": "CLI مربوط به 'claude' در PATH یافت نشد."
+    "notFound": "CLI مربوط به 'claude' در PATH یافت نشد.",
+    "toolsHelp": "یک ابزار کدنویسی را راه اندازی کنید (درگاه را به طور خودکار راه اندازی می کند، لیست مدل ها را از ارائه دهندگان متصل خود): راه اندازی omniroute <tool> [گزینه ها] [-- toolArgs...] راه اندازی omniroute فهرست --list ابزار راه اندازی راه اندازی omniroute راه اندازی <tool> گزینه های --help برای راه اندازی ابزار (--model، --all-models، ...) بدون نام ابزار راه اندازی شده (گزینه های راه اندازی شده در بالا، Claudeprecat).",
+    "gatewayDescription": "دروازه ای را که راه اندازی omniroute شروع کرده است، بازرسی یا کنترل کنید"
   },
   "run": {
     "description": "اجرای یک مقصد CLI پشتیبانیشده از طریق OmniRoute"

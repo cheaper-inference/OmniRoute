@@ -188,6 +188,7 @@ omniroute resilience show
 - `--threshold <n>`
 - `--reset-timeout <ms>`
 - `--base-cooldown <ms>`
+- `--p2c-latency-weight <0-20>`
 
 **Example:**
 

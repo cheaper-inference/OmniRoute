@@ -287,6 +287,7 @@
     "retentionOpt": "เก็บเฉพาะข้อมูลสำรอง N รายการล่าสุด",
     "passphrasePrompt": "วลีรหัสผ่านสำหรับการเข้ารหัส:",
     "noPassphrase": "ต้องระบุวลีรหัสผ่านสำหรับข้อมูลสำรองที่เข้ารหัส",
+    "restoreDecryptFailed": "ไม่สามารถถอดรหัส {name} สำรองได้ (ข้อความรหัสผ่านผิดหรือไฟล์เสียหาย) ไม่มีอะไรเปลี่ยนแปลง",
     "cloudFailed": "คำเตือน: การอัปโหลดไปยังคลาวด์ล้มเหลว บันทึกข้อมูลสำรองไว้ในเครื่องแล้ว",
     "cloudUploaded": "อัปโหลดข้อมูลสำรองไปยังคลาวด์แล้ว: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "จัดการการกำหนดค่าความยืดหยุ่น",
       "threshold": "เกณฑ์จำนวนครั้งที่ล้มเหลว",
       "resetTimeout": "ระยะหมดเวลาก่อนรีเซ็ต หน่วย ms",
-      "baseCooldown": "ช่วงพักพื้นฐาน หน่วย ms"
+      "baseCooldown": "ช่วงพักพื้นฐาน หน่วย ms",
+      "p2cLatencyWeight": "น้ำหนักแฝง p2c, 0 (ปิด) ถึง 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "เปิด Claude Code ที่เชื่อมต่อกับ OmniRoute (ภายในเครื่องหรือระยะไกล พร้อม --profile)",
     "token": "โทเค็นที่ไคลเอนต์ Claude ควรส่ง (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "ไม่สามารถเข้าถึง OmniRoute ที่ {port} ได้ เริ่มต้นด้วย 'omniroute serve'",
-    "notFound": "ไม่พบ CLI 'claude' ใน PATH"
+    "notFound": "ไม่พบ CLI 'claude' ใน PATH",
+    "toolsHelp": "เรียกใช้เครื่องมือเข้ารหัส (เริ่มเกตเวย์อัตโนมัติ รายการโมเดลจากผู้ให้บริการที่เชื่อมต่อของคุณ): omniroute launch <tool> [ตัวเลือก] [-- toolArgs...] omniroute launch --list list launchable tools omniroute launch <tool> --help options for a tool launch (--model, --all-models, ...) หากไม่มีชื่อเครื่องมือ การเรียกใช้จะเริ่มต้น Claude Code ด้วยตัวเลือกด้านบน (เลิกใช้แล้ว)",
+    "gatewayDescription": "ตรวจสอบหรือควบคุมเกตเวย์ที่เริ่มต้นการเปิดใช้งานทุกเส้นทาง"
   },
   "run": {
     "description": "เปิดเป้าหมาย CLI ที่รองรับผ่าน OmniRoute"

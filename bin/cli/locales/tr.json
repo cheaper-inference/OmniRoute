@@ -287,6 +287,7 @@
     "retentionOpt": "Yalnızca son N yedeği sakla",
     "passphrasePrompt": "Şifreleme parolası:",
     "noPassphrase": "Şifrelenmiş yedek için parola gereklidir.",
+    "restoreDecryptFailed": "Yedek {name} çözülemedi (yanlış parola veya hasarlı dosya); hiçbir şey değişmedi.",
     "cloudFailed": "Uyarı: Buluta yükleme başarısız oldu. Yerel yedek kaydedildi.",
     "cloudUploaded": "Bulut yedeği yüklendi: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Dayanıklılık yapılandırmasını yönet",
       "threshold": "Hata eşiği",
       "resetTimeout": "Sıfırlama zaman aşımı (ms)",
-      "baseCooldown": "Temel bekleme süresi (ms)"
+      "baseCooldown": "Temel bekleme süresi (ms)",
+      "p2cLatencyWeight": "p2c gecikme ağırlığı, 0 (kapalı) ila 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "OmniRoute'u hedefleyen Claude Code'u başlat (yerel veya uzak, --profile ile)",
     "token": "Claude istemcisinin göndermesi gereken token (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute'a {port} üzerinden erişilemiyor. 'omniroute serve' ile başlatın.",
-    "notFound": "'claude' CLI, PATH içinde bulunamadı."
+    "notFound": "'claude' CLI, PATH içinde bulunamadı.",
+    "toolsHelp": "Bir kodlama aracı başlatın (ağ geçidini otomatik olarak başlatır, bağlı sağlayıcılarınızın model listesini başlatır): omniroute launch <tool> [seçenekler] [-- toolArgs...] omniroute launch --list list başlatılabilir araçlar omniroute launch <tool> --help bir araç başlatma seçenekleri (--model, --all-models, ...) Bir araç adı olmadan, launch yukarıdaki seçeneklerle (kullanımdan kaldırıldı) Claude Code'u başlatır.",
+    "gatewayDescription": "Omniroute başlatmanın başlatıldığı ağ geçidini inceleyin veya kontrol edin"
   },
   "run": {
     "description": "Desteklenen bir CLI hedefini OmniRoute üzerinden başlat"

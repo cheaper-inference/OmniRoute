@@ -287,6 +287,7 @@
     "retentionOpt": "Պահել միայն վերջին N պահուստային պատճենները",
     "passphrasePrompt": "Գաղտնագրման անցաբառը՝",
     "noPassphrase": "Գաղտնագրված պահուստավորման համար անցաբառը պարտադիր է։",
+    "restoreDecryptFailed": "{name} կրկնօրինակը հնարավոր չէ վերծանել (սխալ անցաբառ կամ վնասված ֆայլ); ոչինչ չի փոխվել.",
     "cloudFailed": "Զգուշացում. ամպային պահոց վերբեռնումը ձախողվեց։ Տեղային պահուստային պատճենը պահպանվել է։",
     "cloudUploaded": "Ամպային պահուստային պատճենը վերբեռնվել է՝ {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Կառավարել կայունության կազմաձևը",
       "threshold": "Խափանումների շեմը",
       "resetTimeout": "Վերակայման սպասման ժամանակը՝ ms-ով",
-      "baseCooldown": "Բազային դադարի ժամանակը՝ ms-ով"
+      "baseCooldown": "Բազային դադարի ժամանակը՝ ms-ով",
+      "p2cLatencyWeight": "p2c latency քաշը, 0 (անջատված) մինչև 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Գործարկել Claude Code-ը՝ ուղղված OmniRoute-ին (տեղային կամ հեռակա՝ --profile-ով)",
     "token": "Թոքենը, որը Claude հաճախորդը պետք է ուղարկի (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute-ը հասանելի չէ {port} պորտում։ Գործարկեք այն 'omniroute serve' հրամանով։",
-    "notFound": "'claude' CLI-ն չի գտնվել PATH-ում։"
+    "notFound": "'claude' CLI-ն չի գտնվել PATH-ում։",
+    "toolsHelp": "Գործարկեք կոդավորման գործիք (ավտոմատ գործարկում է դարպասը, մոդելների ցանկը ձեր միացված մատակարարներից). omniroute launch <tool> [options] [-- toolArgs...] omniroute launch --list list launchable tools omniroute launch <tool> --help Ընտրանքներ գործիքի գործարկման համար (--model, --all-models, ...) Առանց Claude գործարկման ընտրանքների վերևում գործարկվող կոդով:",
+    "gatewayDescription": "Ստուգեք կամ վերահսկեք այն դարպասը, որը սկսել է omniroute մեկնարկը"
   },
   "run": {
     "description": "Գործարկել աջակցվող CLI թիրախը OmniRoute-ի միջոցով"

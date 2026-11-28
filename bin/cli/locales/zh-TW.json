@@ -287,6 +287,7 @@
     "retentionOpt": "僅保留最近 N 個備份",
     "passphrasePrompt": "加密密碼：",
     "noPassphrase": "加密備份需要密碼。",
+    "restoreDecryptFailed": "備份{name}無法解密（密碼錯誤或檔案損壞）；一切都沒有改變。",
     "cloudFailed": "警告：雲上傳失敗。本地備份已儲存。",
     "cloudUploaded": "雲備份已上傳：{url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "管理彈性配置",
       "threshold": "失敗閾值",
       "resetTimeout": "重置超時（毫秒）",
-      "baseCooldown": "基礎冷卻時間（毫秒）"
+      "baseCooldown": "基礎冷卻時間（毫秒）",
+      "p2cLatencyWeight": "p2c 延遲權重，0（關閉）到 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "啟動指向 OmniRoute 的 Claude Code（本機或遠端，使用 --profile）",
     "token": "Claude 用戶端應傳送的令牌（ANTHROPIC_AUTH_TOKEN）",
     "notRunning": "無法在 {port} 存取 OmniRoute。請使用「omniroute serve」啟動它。",
-    "notFound": "在 PATH 中找不到「claude」CLI。"
+    "notFound": "在 PATH 中找不到「claude」CLI。",
+    "toolsHelp": "啟動編碼工具（自動啟動網關，連接的提供者的型號清單）：omniroute launch <tool> [選項] [-- toolArgs...]omniroute launch --list list 可啟動工具omniroute launch <tool> --help工具啟動選項（--model、 --all-models，...） 如果沒有工具名稱，啟動將使用上述選項）。",
+    "gatewayDescription": "檢查或控制全路由啟動啟動的網關"
   },
   "run": {
     "description": "透過 OmniRoute 啟動受支援的 CLI 目標"

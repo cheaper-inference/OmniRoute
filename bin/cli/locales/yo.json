@@ -287,6 +287,7 @@
     "retentionOpt": "Pa àwọn afẹ́yìntì N tó kẹ́yìn nìkan mọ́",
     "passphrasePrompt": "Gbólóhùn ìkọjá ìparọ́:",
     "noPassphrase": "Gbólóhùn ìkọjá jẹ́ dandan fún afẹ́yìntì tí a parọ́.",
+    "restoreDecryptFailed": "Afẹyinti {name} ko le ṣe idinku (gbolohun ọrọ igbaniwọle ti ko tọ tabi faili ti bajẹ); ko si ohun ti a yipada.",
     "cloudFailed": "Ìkìlọ̀: gbígbé sókè sí àwọsánmà kùnà. A ti fi afẹ́yìntì agbègbè pamọ́.",
     "cloudUploaded": "A ti gbé afẹ́yìntì àwọsánmà sókè: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Ṣàkóso àtòpọ̀ ìfaradà",
       "threshold": "Ààlà ìkùnà",
       "resetTimeout": "Àkókò ìdádúró àtúntò ní ms",
-      "baseCooldown": "Àkókò ìsinmi ìpìlẹ̀ ní ms"
+      "baseCooldown": "Àkókò ìsinmi ìpìlẹ̀ ní ms",
+      "p2cLatencyWeight": "iwuwo airi p2c, 0 (pa) si 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Ṣí Claude Code tí a darí sí OmniRoute (àdúgbò tàbí jíjìnnà, pẹ̀lú --profile)",
     "token": "Token tí Claude client gbọ́dọ̀ fi ránṣẹ́ (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "A kò lè dé OmniRoute ní {port}. Bẹ̀rẹ̀ rẹ̀ pẹ̀lú 'omniroute serve'.",
-    "notFound": "A kò rí CLI 'claude' nínú PATH."
+    "notFound": "A kò rí CLI 'claude' nínú PATH.",
+    "toolsHelp": "Lọlẹ ohun elo ifaminsi (laifọwọyi bẹrẹ ẹnu-ọna, atokọ awoṣe lati ọdọ awọn olupese ti o sopọ): omniroute ifilọlẹ <tool> [awọn aṣayan] [- toolArgs...] omniroute ifilọlẹ --list atokọ awọn irinṣẹ ifilọlẹ omniroute ifilọlẹ <tool> --help awọn aṣayan fun ifilọlẹ irinṣẹ (--model, --all-models, ...) Laisi orukọ irinṣẹ kan, ifilọlẹ awọn aṣayan ti o wa loke ti Claude.",
+    "gatewayDescription": "Ṣayẹwo tabi ṣakoso ẹnu-ọna ẹnu-ọna ti omniroute ifilọlẹ bẹrẹ"
   },
   "run": {
     "description": "Ṣe ìfilọ́lẹ̀ ibi-àfojúsùn CLI tí a ṣe àtìlẹ́yìn fún nípasẹ̀ OmniRoute"

@@ -287,6 +287,7 @@
     "retentionOpt": "Ponechat pouze posledních N záloh",
     "passphrasePrompt": "Šifrovací heslo:",
     "noPassphrase": "Pro šifrovanou zálohu je vyžadováno heslo.",
+    "restoreDecryptFailed": "Záložní {name} nelze dešifrovat (nesprávná přístupová fráze nebo poškozený soubor); nic se nezměnilo.",
     "cloudFailed": "Varování: nahrání do cloudu se nezdařilo. Místní záloha byla uložena.",
     "cloudUploaded": "Cloudová záloha byla nahrána: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Spravovat konfiguraci odolnosti",
       "threshold": "Prahová hodnota selhání",
       "resetTimeout": "Časový limit resetování v ms",
-      "baseCooldown": "Základní čekací doba v ms"
+      "baseCooldown": "Základní čekací doba v ms",
+      "p2cLatencyWeight": "Váha latence p2c, 0 (vypnuto) až 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Spustit Claude Code nasměrovaný na OmniRoute (místní nebo vzdálený, s --profile)",
     "token": "Token, který má klient Claude odesílat (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute není dostupný na portu {port}. Spusťte jej pomocí 'omniroute serve'.",
-    "notFound": "CLI 'claude' nebylo v PATH nalezeno."
+    "notFound": "CLI 'claude' nebylo v PATH nalezeno.",
+    "toolsHelp": "Spusťte nástroj pro kódování (automaticky spustí bránu, seznam modelů od vašich připojených poskytovatelů): spuštění omniroute <tool> [volby] [-- toolArgs...] spuštění omniroute --list seznam spouštěcí nástroje omniroute spuštění <tool> --help možnosti pro spuštění nástroje (--model, --all-models, ...) Bez názvu nástroje se spustí možnosti spuštění Claude (Claude).",
+    "gatewayDescription": "Zkontrolujte nebo ovládejte bránu, která spustila omniroute"
   },
   "run": {
     "description": "Spustit podporovaný cílový nástroj CLI prostřednictvím OmniRoute"

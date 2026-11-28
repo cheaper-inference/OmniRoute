@@ -287,6 +287,7 @@
     "retentionOpt": "അവസാനത്തെ N ബാക്കപ്പുകൾ മാത്രം സൂക്ഷിക്കുക",
     "passphrasePrompt": "എൻക്രിപ്ഷൻ രഹസ്യവാക്യം:",
     "noPassphrase": "എൻക്രിപ്റ്റ് ചെയ്ത ബാക്കപ്പിന് രഹസ്യവാക്യം ആവശ്യമാണ്.",
+    "restoreDecryptFailed": "ബാക്കപ്പ് {name} ഡീക്രിപ്റ്റ് ചെയ്യാൻ കഴിഞ്ഞില്ല (തെറ്റായ പാസ്ഫ്രെയ്സ് അല്ലെങ്കിൽ കേടായ ഫയൽ); ഒന്നും മാറ്റിയില്ല.",
     "cloudFailed": "മുന്നറിയിപ്പ്: ക്ലൗഡ് അപ്ലോഡ് പരാജയപ്പെട്ടു. പ്രാദേശിക ബാക്കപ്പ് സംരക്ഷിച്ചു.",
     "cloudUploaded": "ക്ലൗഡ് ബാക്കപ്പ് അപ്ലോഡ് ചെയ്തു: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "റെസിലിയൻസ് കോൺഫിഗറേഷൻ നിയന്ത്രിക്കുക",
       "threshold": "പരാജയ പരിധി",
       "resetTimeout": "റീസെറ്റ് ടൈംഔട്ട് (ms)",
-      "baseCooldown": "അടിസ്ഥാന കൂൾഡൗൺ (ms)"
+      "baseCooldown": "അടിസ്ഥാന കൂൾഡൗൺ (ms)",
+      "p2cLatencyWeight": "p2c ലേറ്റൻസി ഭാരം, 0 (ഓഫ്) മുതൽ 20 വരെ"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "OmniRoute-ലേക്ക് പോയിന്റ് ചെയ്തുകൊണ്ട് Claude Code സമാരംഭിക്കുക (ലോക്കൽ അല്ലെങ്കിൽ റിമോട്ട്, --profile ഉപയോഗിച്ച്)",
     "token": "Claude ക്ലയന്റ് അയയ്ക്കേണ്ട ടോക്കൺ (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "{port}-ൽ OmniRoute ലഭ്യമല്ല. 'omniroute serve' ഉപയോഗിച്ച് അത് ആരംഭിക്കുക.",
-    "notFound": "PATH-ൽ 'claude' CLI കണ്ടെത്തിയില്ല."
+    "notFound": "PATH-ൽ 'claude' CLI കണ്ടെത്തിയില്ല.",
+    "toolsHelp": "ഒരു കോഡിംഗ് ടൂൾ സമാരംഭിക്കുക (ഗേറ്റ്വേ സ്വയമേവ ആരംഭിക്കുന്നു, നിങ്ങളുടെ ബന്ധിപ്പിച്ച ദാതാക്കളിൽ നിന്ന് മോഡൽ ലിസ്റ്റ്): omniroute launch <tool> [options] [-- toolArgs...] omniroute launch --list list launchable tools omniroute launch <tool> --help ഓപ്ഷനുകൾ ഒരു ടൂൾ ലോഞ്ചിനുള്ള ഓപ്ഷനുകൾ (--model--all-models.",
+    "gatewayDescription": "ഓമ്നിറൂട്ട് ലോഞ്ച് ആരംഭിച്ച ഗേറ്റ്വേ പരിശോധിക്കുക അല്ലെങ്കിൽ നിയന്ത്രിക്കുക"
   },
   "run": {
     "description": "OmniRoute വഴി പിന്തുണയ്ക്കുന്ന ഒരു CLI ലക്ഷ്യം സമാരംഭിക്കുക"

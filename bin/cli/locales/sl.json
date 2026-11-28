@@ -287,6 +287,7 @@
     "retentionOpt": "Ohrani samo zadnjih N varnostnih kopij",
     "passphrasePrompt": "Geselna fraza za šifriranje:",
     "noPassphrase": "Za šifrirano varnostno kopijo je zahtevana geselna fraza.",
+    "restoreDecryptFailed": "Varnostne kopije {name} ni bilo mogoče dešifrirati (napačno geslo ali poškodovana datoteka); nič se ni spremenilo.",
     "cloudFailed": "Opozorilo: nalaganje v oblak ni uspelo. Lokalna varnostna kopija je bila shranjena.",
     "cloudUploaded": "Varnostna kopija je bila naložena v oblak: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Upravljaj konfiguracijo odpornosti",
       "threshold": "Prag napak",
       "resetTimeout": "Časovna omejitev ponastavitve v ms",
-      "baseCooldown": "Osnovni čas mirovanja v ms"
+      "baseCooldown": "Osnovni čas mirovanja v ms",
+      "p2cLatencyWeight": "utež zakasnitve p2c, 0 (izklopljeno) do 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Zaženi Claude Code, usmerjen na OmniRoute (lokalno ali oddaljeno, z --profile)",
     "token": "Žeton, ki naj ga pošlje odjemalec Claude (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute ni dosegljiv na vratih {port}. Zaženite ga z ukazom 'omniroute serve'.",
-    "notFound": "V PATH ni bilo mogoče najti CLI-ja 'claude'."
+    "notFound": "V PATH ni bilo mogoče najti CLI-ja 'claude'.",
+    "toolsHelp": "Zaženite orodje za kodiranje (samodejno zažene prehod, seznam modelov vaših povezanih ponudnikov): omniroute launch <tool> [možnosti] [-- toolArgs...] omniroute launch --list seznam orodij za zagon omniroute launch <tool> --help možnosti za zagon orodja (--model, --all-models, ...) Brez imena orodja zagon zažene Claude Code z zgornjimi možnostmi (zastarelo).",
+    "gatewayDescription": "Preglejte ali nadzirajte prehod, ki ga je zagnal omniroute"
   },
   "run": {
     "description": "Zaženite podprt cilj CLI prek OmniRoute"

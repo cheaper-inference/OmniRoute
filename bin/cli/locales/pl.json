@@ -287,6 +287,7 @@
     "retentionOpt": "Zachowaj tylko ostatnie N kopii zapasowych",
     "passphrasePrompt": "Hasło szyfrowania:",
     "noPassphrase": "Hasło jest wymagane w przypadku zaszyfrowanej kopii zapasowej.",
+    "restoreDecryptFailed": "Nie można odszyfrować kopii zapasowej {name} (złe hasło lub uszkodzony plik); nic nie zostało zmienione.",
     "cloudFailed": "Ostrzeżenie: przesyłanie do chmury nie powiodło się. Lokalna kopia zapasowa została zapisana.",
     "cloudUploaded": "Kopia zapasowa przesłana do chmury: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Zarządzaj konfiguracją odporności",
       "threshold": "Próg błędów",
       "resetTimeout": "Limit czasu resetowania w ms",
-      "baseCooldown": "Bazowy czas odczekania w ms"
+      "baseCooldown": "Bazowy czas odczekania w ms",
+      "p2cLatencyWeight": "waga opóźnienia p2c, 0 (wyłączone) do 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Uruchom Claude Code skonfigurowany do pracy z OmniRoute (lokalnym lub zdalnym, z --profile)",
     "token": "Token, który klient Claude powinien wysyłać (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "OmniRoute jest nieosiągalny na porcie {port}. Uruchom go poleceniem 'omniroute serve'.",
-    "notFound": "Nie znaleziono CLI 'claude' w PATH."
+    "notFound": "Nie znaleziono CLI 'claude' w PATH.",
+    "toolsHelp": "Uruchom narzędzie kodujące (automatycznie uruchamia bramę, listę modeli od podłączonych dostawców): omniroute launch <tool> [opcje] [-- toolArgs...] omniroute launch --list list uruchamialne narzędzia omniroute launch <tool> --help opcje uruchamiania narzędzia (--model, --all-models, ...) Bez nazwy narzędzia launch uruchamia Claude Code z powyższymi opcjami (przestarzałe).",
+    "gatewayDescription": "Sprawdź lub kontroluj bramę, od której rozpoczęło się uruchamianie omniroute"
   },
   "run": {
     "description": "Uruchom obsługiwany docelowy interfejs CLI za pośrednictwem OmniRoute"

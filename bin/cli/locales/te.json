@@ -287,6 +287,7 @@
     "retentionOpt": "చివరి N బ్యాకప్లను మాత్రమే ఉంచండి",
     "passphrasePrompt": "ఎన్క్రిప్షన్ పాస్ఫ్రేజ్:",
     "noPassphrase": "ఎన్క్రిప్ట్ చేసిన బ్యాకప్కు పాస్ఫ్రేజ్ అవసరం.",
+    "restoreDecryptFailed": "బ్యాకప్ {name} డీక్రిప్ట్ చేయబడదు (తప్పు పాస్ఫ్రేజ్ లేదా దెబ్బతిన్న ఫైల్); ఏమీ మార్చబడలేదు.",
     "cloudFailed": "హెచ్చరిక: క్లౌడ్ అప్లోడ్ విఫలమైంది. స్థానిక బ్యాకప్ సేవ్ చేయబడింది.",
     "cloudUploaded": "క్లౌడ్ బ్యాకప్ అప్లోడ్ చేయబడింది: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "స్థితిస్థాపకత కాన్ఫిగ్ను నిర్వహించండి",
       "threshold": "వైఫల్య పరిమితి",
       "resetTimeout": "రీసెట్ గడువు (msలో)",
-      "baseCooldown": "ప్రాథమిక కూల్డౌన్ (msలో)"
+      "baseCooldown": "ప్రాథమిక కూల్డౌన్ (msలో)",
+      "p2cLatencyWeight": "p2c జాప్యం బరువు, 0 (ఆఫ్) నుండి 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "OmniRouteను లక్ష్యంగా చేసుకుని Claude Codeను ప్రారంభించండి (లోకల్ లేదా రిమోట్, --profileతో)",
     "token": "Claude క్లయింట్ పంపాల్సిన టోకెన్ (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "{port} వద్ద OmniRouteను చేరుకోలేకపోతున్నాము. 'omniroute serve'తో దాన్ని ప్రారంభించండి.",
-    "notFound": "PATHలో 'claude' CLI కనుగొనబడలేదు."
+    "notFound": "PATHలో 'claude' CLI కనుగొనబడలేదు.",
+    "toolsHelp": "కోడింగ్ సాధనాన్ని ప్రారంభించండి (మీ కనెక్ట్ చేయబడిన ప్రొవైడర్ల నుండి గేట్వేని స్వయంచాలకంగా ప్రారంభిస్తుంది, మోడల్ జాబితా): omniroute launch <tool> [options] [-- toolArgs...] omniroute launch --list list launchable tools omniroute launch <tool> --help ఆప్షన్లు టూల్ లాంచ్ కోసం (--model, --all-models పేరుతో కోడ్తో ప్రారంభించండి ...) పైన కోడ్ లేకుండా ప్రారంభించండి (విస్మరించబడింది).",
+    "gatewayDescription": "ఓమ్నిరూట్ లాంచ్ ప్రారంభమైన గేట్వేని తనిఖీ చేయండి లేదా నియంత్రించండి"
   },
   "run": {
     "description": "OmniRoute ద్వారా మద్దతున్న CLI లక్ష్యాన్ని ప్రారంభించండి"

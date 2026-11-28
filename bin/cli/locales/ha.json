@@ -287,6 +287,7 @@
     "retentionOpt": "Ajiye ajiyoyin madadin N na ƙarshe kawai",
     "passphrasePrompt": "Kalmar sirrin ɓoyewa:",
     "noPassphrase": "Ana buƙatar kalmar sirri don ajiyar madadin mai rufaffiyar ɓoyewa.",
+    "restoreDecryptFailed": "Ba za a iya ɓarɓare maajiyar {name} ba (ɓataccen kalmar wucewa ko fayil ɗin da ya lalace); babu abin da ya canza.",
     "cloudFailed": "Gargaɗi: lodawa zuwa girgije ya gaza. An adana ajiyar madadin a na'urar.",
     "cloudUploaded": "An loda ajiyar madadin zuwa girgije: {url}",
     "auto": {
@@ -973,7 +974,8 @@
       "description": "Sarrafa daidaitawar juriya",
       "threshold": "Iyakar gazawa",
       "resetTimeout": "Lokacin jira kafin sake saiti a ms",
-      "baseCooldown": "Asalin lokacin hucewa a ms"
+      "baseCooldown": "Asalin lokacin hucewa a ms",
+      "p2cLatencyWeight": "p2c nauyi latency, 0 (kashe) zuwa 20"
     }
   },
   "nodes": {
@@ -1283,7 +1285,9 @@
     "description": "Ƙaddamar da Claude Code da aka nuna masa OmniRoute (na gida ko na nesa, tare da --profile)",
     "token": "Token da ya kamata abokin cinikin Claude ya aika (ANTHROPIC_AUTH_TOKEN)",
     "notRunning": "Ba a iya isa ga OmniRoute a {port}. Fara shi da 'omniroute serve'.",
-    "notFound": "Ba a sami CLI na 'claude' a PATH ba."
+    "notFound": "Ba a sami CLI na 'claude' a PATH ba.",
+    "toolsHelp": "Kaddamar da kayan aikin coding (atomatik yana farawa ƙofar, jeri na samfuri daga masu samar da ku da aka haɗa): omniroute ƙaddamar <tool> [zaɓuɓɓuka] [- toolArgs...] omniroute ƙaddamar da jerin kayan aikin ƙaddamar da --list omniroute ƙaddamar da zaɓukan <tool> --help don ƙaddamar da kayan aiki (--model, --all-models, ...) Ba tare da sunan kayan aiki ba, ƙaddamar da zaɓuɓɓukan Clade a sama.",
+    "gatewayDescription": "Bincika ko sarrafa ƙofa wanda ƙaddamarwar ko'ina ta fara"
   },
   "run": {
     "description": "Ƙaddamar da manufa ta CLI mai goyan baya ta hanyar OmniRoute"
