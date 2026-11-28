@@ -368,6 +368,63 @@ test("CodexExecutor.transformRequest sends neutral instructions for bare chat re
   assert.equal(result.tools, undefined);
 });
 
+test("CodexExecutor.transformRequest restores hoisted instructions to input for translated requests", () => {
+  const executor = new CodexExecutor();
+  const prompt = "You are a coding assistant. Follow the repository rules.";
+  const result = executor.transformRequest(
+    "gpt-6.2-sol",
+    {
+      model: "gpt-6.2-sol",
+      instructions: prompt,
+      input: [
+        {
+          type: "message",
+          role: "user",
+          content: [{ type: "input_text", text: "continue" }],
+        },
+      ],
+    },
+    true,
+    { requestEndpointPath: "/responses" }
+  );
+
+  assert.equal(result.instructions, CODEX_CHAT_DEFAULT_INSTRUCTIONS);
+  assert.equal(result.input.length, 2);
+  assert.deepEqual(result.input[0], {
+    type: "message",
+    role: "developer",
+    content: [{ type: "input_text", text: prompt }],
+    status: "completed",
+  });
+  assert.equal(result.input[1].role, "user");
+});
+
+test("CodexExecutor.transformRequest keeps client instructions in place for native passthrough", () => {
+  const executor = new CodexExecutor();
+  const prompt = "You are a coding assistant. Follow the repository rules.";
+  const result = executor.transformRequest(
+    "gpt-6.2-sol",
+    {
+      _nativeCodexPassthrough: true,
+      model: "gpt-6.2-sol",
+      instructions: prompt,
+      input: [
+        {
+          type: "message",
+          role: "user",
+          content: [{ type: "input_text", text: "continue" }],
+        },
+      ],
+    },
+    true,
+    { requestEndpointPath: "/v1/responses" }
+  );
+
+  assert.equal(result.instructions, prompt);
+  assert.equal(result.input.length, 1);
+  assert.equal(result.input[0].role, "user");
+});
+
 test("CodexExecutor.transformRequest preserves compact requests and native passthrough semantics", () => {
   const executor = new CodexExecutor();
   const body = {

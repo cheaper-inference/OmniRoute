@@ -1,0 +1,1 @@
+- **fix(codex):** restore hoisted system prompts from `instructions` to `input` as a `developer` message on the translated Codex path so GPT-6.2 can cache them, while leaving native Codex passthrough unchanged ([#20649](https://github.com/cheaper-inference/OmniRoute/issues/20649)) — thanks @fidelix
