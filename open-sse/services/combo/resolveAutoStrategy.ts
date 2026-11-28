@@ -33,7 +33,7 @@ import {
   deriveRequestCompatibilityRequirements,
 } from "./comboStructure.ts";
 import { resolveOutputLimitPolicy } from "./outputLimitPolicy.ts";
-import { hasMediaRequirements } from "./mediaCompatibility.ts";
+import { hasMediaRequirements, supportsNativeVision } from "./mediaCompatibility.ts";
 import {
   calculatePromptCacheAffinityScores,
   promptCacheTargetIdentity,
@@ -341,7 +341,17 @@ export async function resolveAutoStrategyOrder(
   // Full-catalog expansion can add targets after the initial compatibility pass.
   // Recheck before scoring so unsupported transports cannot consume the retry
   // budget, and retain this pool even when candidate telemetry is unavailable.
-  if (hasMediaRequirements(deriveRequestCompatibilityRequirements(body))) {
+  const mediaRequirements = deriveRequestCompatibilityRequirements(body);
+  if (hasMediaRequirements(mediaRequirements)) {
+    if (
+      mediaRequirements.requiresVision &&
+      combo.type === "auto" &&
+      combo.id?.toLowerCase() === "auto/vision"
+    ) {
+      eligibleTargets = eligibleTargets.filter((target) =>
+        supportsNativeVision(target.providerId || target.provider, target.modelStr)
+      );
+    }
     eligibleTargets = filterTargetsByRequestCompatibility(eligibleTargets, body, log, combo.name, {
       ...resolveOutputLimitPolicy(config, settings, deps.sourceFormat, "strict"),
     });

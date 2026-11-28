@@ -12,6 +12,7 @@ import assert from "node:assert/strict";
 
 const { VisionBridgeGuardrail } = await import("../../../src/lib/guardrails/visionBridge.ts");
 const { resetGuardrailsForTests } = await import("../../../src/lib/guardrails/registry.ts");
+const { clearSelectionCache } = await import("../../../src/lib/guardrails/visionBridgeRouter.ts");
 import type { GuardrailContext } from "../../../src/lib/guardrails/base.ts";
 import type { VisionModelConfig } from "../../../src/lib/guardrails/visionBridgeHelpers.ts";
 
@@ -66,6 +67,7 @@ function baseSettings() {
 
 test.beforeEach(() => {
   resetGuardrailsForTests({ registerDefaults: false });
+  clearSelectionCache();
   visionCallCount = 0;
   credentialsMock = async () => null;
   mockSettings = baseSettings();
@@ -90,6 +92,50 @@ test("mixed-content Auto retains the full request for multimodal compatibility r
       assert.equal(messages[0].content[2], attachment);
     }
   }
+});
+
+for (const mode of ["auto", "reroute"]) {
+  test(`mode=${mode}: a matching auto/vision target leaves the Chat Completions request intact`, async () => {
+    const model = "auto/vision";
+    mockSettings.modalityBridgeVisionMode = mode;
+    mockSettings.modalityBridgeVisionModel = model;
+    mockSettings.modalityBridgeCacheEnabled = false;
+    credentialsMock = async (candidate) => candidate === "openai/gpt-4o-mini";
+
+    const payload = imagePayload({ model });
+    const original = structuredClone(payload);
+    const result = await createGuardrail().preCall(payload, createContext({ model }));
+
+    assert.equal(result.block, false);
+    assert.deepEqual(result.modifiedPayload ?? payload, original);
+    assert.equal(visionCallCount, 0);
+  });
+}
+
+test("matching auto/vision targets preserve mixed-case Responses requests", async () => {
+  const model = "Auto/Vision";
+  mockSettings.modalityBridgeVisionMode = "reroute";
+  mockSettings.modalityBridgeVisionModel = "auto/vision";
+  credentialsMock = async (candidate) => candidate === "openai/gpt-4o-mini";
+
+  const payload = {
+    model,
+    input: [
+      {
+        role: "user",
+        content: [
+          { type: "input_text", text: "What color is the cat?" },
+          { type: "input_image", image_url: "https://example.com/cat.png", detail: "high" },
+        ],
+      },
+    ],
+  };
+  const original = structuredClone(payload);
+  const result = await createGuardrail().preCall(payload, createContext({ model }));
+
+  assert.equal(result.block, false);
+  assert.deepEqual(result.modifiedPayload ?? payload, original);
+  assert.equal(visionCallCount, 0);
 });
 
 test("VB-REROUTE-AUTO: auto/best-vision resolves through the router pool and reroutes (no describe)", async () => {

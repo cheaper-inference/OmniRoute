@@ -14,11 +14,8 @@ import { resolveStoredAutoCombo } from "@/lib/combos/storedAutoCombo";
 import { isBuiltInAutoRoute } from "@omniroute/open-sse/services/autoCombo/builtinCatalog";
 import { getSettings as defaultGetSettings } from "@/lib/db/settings";
 import { getResolvedModelCapabilities } from "@/lib/modelCapabilities";
-import { getProviderNodePrefixSync } from "@/lib/db/providers/nodePrefix";
+import { hasOwnedCompatibleNodeVision } from "@/lib/providerModels/visionOverrides";
 import { isCompatibleProviderConnectionId } from "@/shared/utils/compatibleProviderId";
-import { getExactCustomModelVisionOverride } from "@/lib/db/models/customVisionOverride";
-import { getModelCompatVisionOverride } from "@/lib/db/models/compat";
-import { getSyncedAvailableModelVision } from "@/lib/db/models/syncedAvailableModelVision";
 import {
   extractImageParts,
   callVisionModel as defaultCallVisionModel,
@@ -66,33 +63,7 @@ function evaluateModelStepCapability(s: Record<string, unknown>): "vision" | "no
   // model name in a completely different provider's customModels rows.
   const internalProvider = provider && isCompatibleProviderConnectionId(provider) ? provider : null;
   if (internalProvider) {
-    const slash = targetModel.indexOf("/");
-    const prefix = slash > 0 ? targetModel.slice(0, slash) : null;
-    const ownPrefix = getProviderNodePrefixSync(internalProvider);
-    const hasOwnPrefix = Boolean(
-      prefix &&
-      (prefix === internalProvider ||
-        (ownPrefix && prefix.toLowerCase() === ownPrefix.toLowerCase()))
-    );
-    const candidates = hasOwnPrefix ? [targetModel.slice(slash + 1), targetModel] : [targetModel];
-
-    // Preserve source precedence: an explicit false from this node must win
-    // before positive discoveries and must not be overridden by a foreign
-    // public-model verdict. Slash-shaped upstream IDs stay unmodified.
-    for (const id of candidates) {
-      const custom = getExactCustomModelVisionOverride(internalProvider, id);
-      if (custom !== null) return custom ? "vision" : "non-vision";
-    }
-    for (const id of candidates) {
-      const compat = getModelCompatVisionOverride(internalProvider, [id]);
-      if (compat !== null) return compat ? "vision" : "non-vision";
-    }
-    for (const id of candidates) {
-      if (getSyncedAvailableModelVision(internalProvider, id) === true) return "vision";
-    }
-    // No exact source owned by this node confirmed vision support. Do not
-    // treat an unrelated provider's row or a name heuristic as a pass.
-    return "non-vision";
+    return hasOwnedCompatibleNodeVision(internalProvider, targetModel) ? "vision" : "non-vision";
   }
 
   const caps = getResolvedModelCapabilities({ provider, model: targetModel });
@@ -350,11 +321,8 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
       return { block: false };
     }
 
-    // 3b. Auto/ prefix — don't skip guardrail entirely. Images still need to be
-    // described or rerouted to a vision-capable model. The auto-combo resolver
-    // does NOT currently filter models by vision capability, so without the
-    // guardrail an image-bearing request assigned to a text-only model will
-    // fail upstream with "does not support images".
+    // Auto routes can contain text-only models. Resolve the scoped bridge target
+    // before deciding whether the request can keep its images.
     const isAuto = isBuiltInAutoRoute(model);
 
     // Declare before the conditional so they're available to the rest of preCall
@@ -577,6 +545,11 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
           { fixedModel: configuredModel, ...scopedRouterConfig },
           { hasUsableCredentials: scopedCheckCreds }
         );
+        // The requested vision route is already the selected destination. Let
+        // its concrete target read the original image, including on follow-ups.
+        if (model.toLowerCase() === "auto/vision" && bestModel?.toLowerCase() === "auto/vision") {
+          return { block: false, meta: { requireNativeVision: true } };
+        }
         if (bestModel && bestModel !== model) {
           const bestUsable = await scopedCheckCreds(bestModel);
           // Only block the reroute when we KNOW the target is unusable (false).

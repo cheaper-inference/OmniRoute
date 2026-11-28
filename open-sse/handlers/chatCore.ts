@@ -107,6 +107,7 @@ import { checkResourcePressureGuard } from "../utils/resourcePressure.ts";
 import { normalizeHeaders } from "../utils/headers.ts";
 import { resolveChatCoreRequestFormat } from "./chatCore/requestFormat.ts";
 import { resolveChatCoreTargetFormat } from "./chatCore/targetFormat.ts";
+import { hasUnsupportedRemoteVisionImages } from "./chatCore/nativeVisionTransport.ts";
 import { resolveOmniGlyphTransport } from "../services/compression/imageTransportPolicy.ts";
 import { usesClaudeBridge } from "./chatCore/agentRouterProtocol.ts";
 import { normalizeUpstreamRequestParams } from "./chatCore/upstreamRequestParams.ts";
@@ -501,6 +502,7 @@ async function handleChatCoreInner({
   // applied to a CLONE of `body` at the persistAttemptLogs sink (surface 1) —
   // the model-bound `body` itself is never touched.
   videoBridgeLog = undefined,
+  checkVisionUrls = false,
   fallbackAttempts = undefined,
   requestUpstreamStartTimeoutMs = undefined,
   forcedConnectionId = null, // #14116: caller's pinned/requested connection, vs credentials.connectionId below
@@ -884,6 +886,15 @@ async function handleChatCoreInner({
     nativeXaiResponsesPassthrough,
     nativeOpenAICompatibleResponsesPassthrough,
   });
+  if (checkVisionUrls && hasUnsupportedRemoteVisionImages(provider, targetFormat, body)) {
+    return createErrorResult(
+      HTTP_STATUS.BAD_REQUEST,
+      "This target requires inline image data",
+      null,
+      "unsupported_media_input",
+      "invalid_request_error"
+    );
+  }
   const nativeResponsesPassthrough =
     nativeCodexPassthrough ||
     nativeXaiResponsesPassthrough ||

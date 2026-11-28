@@ -248,10 +248,11 @@ function inspectImageIndicators(
   const imageMediaType =
     typeof mediaType === "string" && mediaType.toLowerCase().startsWith("image/");
   if (!looksLikeImage && !imageMediaType) return false;
+  const sdkImage = lowerType === "image" ? obj.image : undefined;
   pushPart(
     ctx,
     "image",
-    urlFrom(obj.image_url ?? obj.input_image) ?? "",
+    urlFrom(obj.image_url ?? obj.input_image ?? sdkImage) ?? "",
     "image_indicator",
     depth,
     path

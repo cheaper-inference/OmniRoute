@@ -22,6 +22,13 @@ const { getCircuitBreaker, STATE } = await import("../../src/shared/utils/circui
 const { clearProviderFailure } = await import("../../open-sse/services/accountFallback.ts");
 const { getDefaultTaskModelMap, resetTaskRoutingStats, setTaskRoutingConfig } =
   await import("../../open-sse/services/taskAwareRouter.ts");
+const { setExcluded } = await import("../../src/lib/db/autoCandidateOverrides.ts");
+const { setModelCapabilityOverride, removeModelCapabilityOverride } =
+  await import("../../src/lib/db/modelCapabilityOverrides.ts");
+const { replaceSyncedAvailableModelsForConnection } = await import("../../src/lib/db/models.ts");
+const { updateProviderConnection } = await import("../../src/lib/db/providers.ts");
+const { supportsNativeVision } =
+  await import("../../open-sse/services/combo/mediaCompatibility.ts");
 
 function buildOpenAIStreamResponse(text = "streamed from openai") {
   return new Response(
@@ -427,6 +434,178 @@ test("handleChat keeps the combo error when the global fallback throws", async (
   assert.equal(attempts, 2);
   assert.match(json.error.message, /primary combo failed/i);
 });
+
+for (const {
+  title,
+  provider,
+  fallbackModel,
+  supportsVision,
+  fallbackAlias,
+  connectionDefault,
+  legacyDefaultOverride,
+  stalePlaceholderVision,
+} of [
+  {
+    title: "does not dispatch to a text-only global fallback",
+    provider: "mistral",
+    fallbackModel: "codestral-latest",
+    supportsVision: false,
+  },
+  {
+    title: "allows a native vision global fallback to answer",
+    provider: "claude",
+    fallbackModel: "claude-sonnet-4-6",
+    supportsVision: true,
+  },
+  {
+    title: "does not dispatch when a bare fallback alias swaps to a text-only default",
+    provider: "mistral",
+    fallbackModel: "mistral-large-latest",
+    fallbackAlias: "legacy-vision-fallback",
+    connectionDefault: "codestral-latest",
+    legacyDefaultOverride: true,
+    supportsVision: false,
+  },
+  {
+    title: "preserves images when a bare fallback alias swaps to a native vision default",
+    provider: "mistral",
+    fallbackModel: "mistral-large-latest",
+    fallbackAlias: "legacy-vision-fallback",
+    connectionDefault: "mistral-small-latest",
+    legacyDefaultOverride: true,
+    supportsVision: true,
+  },
+  {
+    title: "preserves images when a placeholder fallback alias resolves to a native vision default",
+    provider: "mistral",
+    fallbackModel: "auto",
+    fallbackAlias: "placeholder-vision-fallback",
+    connectionDefault: "mistral-small-latest",
+    supportsVision: true,
+  },
+  {
+    title: "does not dispatch when a placeholder fallback alias resolves to a text-only default",
+    provider: "mistral",
+    fallbackModel: "auto",
+    fallbackAlias: "placeholder-vision-fallback",
+    connectionDefault: "codestral-latest",
+    supportsVision: false,
+  },
+  {
+    title: "does not dispatch an unresolved placeholder despite stale vision metadata",
+    provider: "mistral",
+    fallbackModel: "auto",
+    fallbackAlias: "placeholder-vision-fallback",
+    stalePlaceholderVision: true,
+    supportsVision: false,
+  },
+]) {
+  test(`auto/vision exhaustion ${title}`, async (t) => {
+    const model = "auto/vision";
+    const primaryModel = "gpt-4.1";
+    const imageData =
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+    const image = `data:image/png;base64,${imageData}`;
+    const primary = await seedConnection("openai");
+    const fallback = await seedConnection(provider);
+    const fallbackTarget = `${provider}/${fallbackModel}`;
+    const fallbackRequest = fallbackAlias ?? fallbackTarget;
+    if (legacyDefaultOverride) {
+      const previous = process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY;
+      t.after(() => {
+        if (previous === undefined) delete process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY;
+        else process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY = previous;
+      });
+      process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY = "true";
+    }
+    if (connectionDefault) {
+      await updateProviderConnection(fallback.id, { defaultModel: connectionDefault });
+    }
+    if (stalePlaceholderVision) {
+      assert.equal(setModelCapabilityOverride(fallbackTarget, "vision", true), true);
+      t.after(() => removeModelCapabilityOverride(fallbackTarget, "vision"));
+      assert.equal(supportsNativeVision(provider, fallbackModel), true);
+    }
+    const apiKey = await seedApiKey({
+      allowedCombos: [model],
+      allowedConnections: [primary.id, fallback.id],
+      allowedModels: [
+        `openai/${primaryModel}`,
+        fallbackTarget,
+        ...(fallbackAlias ? [fallbackAlias] : []),
+        ...(connectionDefault ? [`${provider}/${connectionDefault}`] : []),
+      ],
+    });
+    // Exclude the fallback account from Auto ranking only. The key allows explicit dispatch.
+    await replaceSyncedAvailableModelsForConnection("openai", primary.id, [{ id: primaryModel }]);
+    await setExcluded(apiKey.id, model, fallback.id, true);
+    await settingsDb.updateSettings({
+      globalFallbackModel: fallbackRequest,
+      ...(fallbackAlias && {
+        modelAliases: { [fallbackAlias]: fallbackTarget },
+      }),
+      modalityBridgeVisionEnabled: true,
+      modalityBridgeVisionMode: "auto",
+      modalityBridgeVisionModel: model,
+    });
+
+    const attempts: { model: string; content: unknown }[] = [];
+    globalThis.fetch = async (_url, init) => {
+      const body = JSON.parse(String(init?.body));
+      attempts.push({ model: body.model, content: body.messages?.[0]?.content });
+      if (body.model === primaryModel) {
+        return new Response(JSON.stringify({ error: { message: "vision upstream unavailable" } }), {
+          status: 503,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return provider === "claude"
+        ? buildClaudeResponse("Fallback answered", body.model)
+        : buildOpenAIResponse("Fallback answered", body.model);
+    };
+
+    const question = "Which shape is below the orange diamond?";
+    const content = [
+      { type: "text", text: question },
+      { type: "image_url", image_url: { url: image } },
+    ];
+    const response = await handleChat(
+      buildRequest({
+        authKey: apiKey.key,
+        body: { model, stream: false, messages: [{ role: "user", content }] },
+      })
+    );
+
+    const primaryAttempts = attempts.filter((attempt) => attempt.model === primaryModel);
+    assert.ok(primaryAttempts.length > 0, "the combo must dispatch before falling back");
+    for (const attempt of primaryAttempts) assert.deepEqual(attempt.content, content);
+
+    if (supportsVision) {
+      assert.deepEqual(attempts, [
+        ...primaryAttempts,
+        {
+          model: connectionDefault ?? fallbackModel,
+          content:
+            provider === "claude"
+              ? [
+                  { type: "text", text: question },
+                  {
+                    type: "image",
+                    source: { type: "base64", media_type: "image/png", data: imageData },
+                  },
+                ]
+              : content,
+        },
+      ]);
+      assert.equal(response.status, 200);
+      assert.equal((await response.json()).choices[0].message.content, "Fallback answered");
+    } else {
+      assert.deepEqual(attempts, primaryAttempts);
+      assert.equal(response.status, 503);
+      assert.match((await response.json()).error.message, /vision upstream unavailable/i);
+    }
+  });
+}
 
 test("handleChat returns 401 when no provider credentials exist (single-model)", async () => {
   // Upstream port decolua/9router#336 (Ibrahim Ryan): the no-credentials branch

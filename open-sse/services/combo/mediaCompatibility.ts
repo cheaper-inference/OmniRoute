@@ -1,5 +1,9 @@
 import { containsMediaKind, type MediaKind } from "../../utils/mediaParts.ts";
 import { ciTransportSupportsInput } from "../../utils/ciTransportInput.ts";
+import { getProviderNodeIdByPrefixSync } from "@/lib/db/providers/nodePrefix";
+import { hasOwnedCompatibleNodeVision } from "@/lib/providerModels/visionOverrides";
+import { isVisionBridgeForcedModel } from "@/shared/constants/visionBridgeDefaults";
+import { isCompatibleProviderConnectionId } from "@/shared/utils/compatibleProviderId";
 import {
   getInputModalities,
   getResolvedModelCapabilities,
@@ -39,6 +43,26 @@ export function hasMediaRequirements(requirements: RequestCompatibilityRequireme
     requirements.requiresFiles
   );
 }
+
+/** Require a concrete model that can receive images over its own transport. */
+export function supportsNativeVision(provider: string | null | undefined, model: string): boolean {
+  const caps = getResolvedModelCapabilities(provider ? { provider, model } : model);
+  if (
+    !caps.provider ||
+    !caps.model ||
+    isTextOnlyChatTransport(caps.provider) ||
+    isVisionBridgeForcedModel(`${caps.provider}/${caps.model}`)
+  ) {
+    return false;
+  }
+  const nodeId = isCompatibleProviderConnectionId(caps.provider)
+    ? caps.provider
+    : getProviderNodeIdByPrefixSync(caps.provider);
+  return nodeId && isCompatibleProviderConnectionId(nodeId)
+    ? hasOwnedCompatibleNodeVision(nodeId, model, { includeCapabilityOverride: true })
+    : caps.supportsVision === true;
+}
+
 /** Find required media the transport denies, preserving unknown non-CI PDF/file eligibility. */
 export function nonImageMediaFailures(
   target: Pick<ResolvedComboTarget, "provider" | "providerId" | "modelStr" | "connectionId">,

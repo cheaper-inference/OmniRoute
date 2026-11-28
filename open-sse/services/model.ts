@@ -152,6 +152,12 @@ interface ProviderConnectionLike {
   is_active?: unknown;
 }
 
+export function isConnectionDefaultPlaceholder(
+  model: string | null | undefined
+): model is null | undefined | "" | "auto" {
+  return model == null || model === "" || model === "auto";
+}
+
 /**
  * #474 — Resolve a bare model name to the selected connection's `defaultModel`.
  *
@@ -186,7 +192,7 @@ export function resolveBareModelToConnectionDefault(
   if (typeof connectionDefaultModel !== "string" || connectionDefaultModel.length === 0) {
     return fallback;
   }
-  if (fallback === null || fallback === "" || fallback === "auto") {
+  if (isConnectionDefaultPlaceholder(fallback)) {
     return connectionDefaultModel;
   }
   if (fallback === connectionDefaultModel) return fallback;

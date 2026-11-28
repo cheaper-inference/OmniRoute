@@ -79,6 +79,13 @@ Flow:
 4. Mode selector (`modalityBridgeVisionMode`, see table below) decides
    reroute vs describe. Reroute returns `modifiedPayload` with only `model`
    swapped, plus meta `{ rerouted, fromModel, toModel, imagesKept }`.
+   When a request for `auto/vision` resolves back to `auto/vision` in auto or
+   reroute mode, the selected model receives the original image. The router
+   requires native image support on the selected model and on any fallback,
+   including a model chosen by a connection default. For a remote image URL,
+   the router treats third-party Claude-format transports and MiniMax Code as
+   inline-only and can try a URL-capable fallback. Anthropic's own API can
+   receive the URL directly. Explicit describe mode still uses the caption path.
 5. Describe path: cap images at `maxImages`, compose the task-aware prompt,
    consult the describe cache, call the vision model **in parallel**
    (`Promise.allSettled`), and inject `[Image N]: <description>` text parts in

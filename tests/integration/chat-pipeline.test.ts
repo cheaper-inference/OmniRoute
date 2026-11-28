@@ -22,9 +22,13 @@ const { skillRegistry } = await import("../../src/lib/skills/registry.ts");
 const { skillExecutor } = await import("../../src/lib/skills/executor.ts");
 const { encodeSkillToolName } = await import("../../src/lib/skills/injection.ts");
 const { handleChat } = await import("../../src/sse/handlers/chat.ts");
+const { guardrailRegistry, resetGuardrailsForTests } =
+  await import("../../src/lib/guardrails/registry.ts");
+const { VisionBridgeGuardrail } = await import("../../src/lib/guardrails/visionBridge.ts");
 const providerNodeRoute = await import("../../src/app/api/provider-nodes/[id]/route.ts");
 const { initTranslators } = await import("../../open-sse/translator/index.ts");
 const { clearInflight } = await import("../../open-sse/services/requestDedup.ts");
+const { getComboTrace } = await import("../../open-sse/services/combo/decisionTrace.ts");
 const { setCliCompatProviders, CLI_FINGERPRINTS } =
   await import("../../open-sse/config/cliFingerprints.ts");
 const { BaseExecutor } = await import("../../open-sse/executors/base.ts");
@@ -699,6 +703,262 @@ test("chat pipeline persists Codex responses cache and reasoning tokens to call 
   assert.equal(callLog.tokens.cacheRead, 40);
   assert.equal(callLog.tokens.cacheWrite, 11);
   assert.equal(callLog.tokens.reasoning, 13);
+});
+
+test("auto/vision delivers the original image with a warm caption cache", async (t) => {
+  const model = "auto/vision";
+  const codexModel = "gpt-6.1-terra";
+  const codexToken = "codex-auto-vision-test-token";
+  const image =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+  const codex = await seedConnection("codex", { authType: "oauth", accessToken: codexToken });
+  const textOnly = await seedConnection("mistral", { apiKey: "mistral-auto-vision-test-key" });
+  const apiKey = await seedApiKey({
+    allowedCombos: [model],
+    allowedConnections: [codex.id, textOnly.id],
+    allowedModels: [`codex/${codexModel}`, "mistral/codestral-latest"],
+  });
+  await settingsDb.updateSettings({
+    modalityBridgeVisionEnabled: true,
+    modalityBridgeVisionMode: "describe",
+    modalityBridgeVisionModel: model,
+    modalityBridgeCacheEnabled: true,
+  });
+
+  const described: string[] = [];
+  guardrailRegistry.register(
+    new VisionBridgeGuardrail({
+      deps: {
+        callVisionModel: async (imageUrl) => {
+          described.push(imageUrl);
+          return "A grid of colored shapes.";
+        },
+      },
+    })
+  );
+  t.after(() => resetGuardrailsForTests());
+
+  const upstream = t.mock.method(globalThis, "fetch", async (url, init: RequestInit = {}) => {
+    assert.match(String(url), /\/backend-api\/codex\/responses$/);
+    assert.equal(new Headers(init.headers).get("authorization"), `Bearer ${codexToken}`);
+    return buildOpenAIResponsesSSE({ text: "Vision reply", model: codexModel });
+  });
+  const completionCalls = () =>
+    upstream.mock.calls.filter(({ arguments: [url] }) =>
+      /\/(?:chat\/completions|responses)$/.test(String(url))
+    );
+
+  async function send(question: string) {
+    const response = await handleChat(
+      buildRequest({
+        authKey: apiKey.key,
+        headers: { "x-omniroute-no-cache": "true" },
+        body: {
+          model,
+          stream: false,
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: question },
+                { type: "image_url", image_url: { url: image, detail: "high" } },
+              ],
+            },
+          ],
+        },
+      })
+    );
+    const reply = await response.json();
+    assert.equal(response.status, 200, JSON.stringify(reply));
+    assert.equal(reply.choices[0].message.content, "Vision reply");
+    const call = completionCalls().at(-1);
+    assert.ok(call, "expected an upstream dispatch");
+    const [, init] = call.arguments;
+    const body = JSON.parse(String(init.body));
+    assert.equal(body.model, codexModel);
+    return body.input.find((item: { role?: string }) => item.role === "user").content;
+  }
+
+  const opening = "What is shown in this image?";
+  assert.deepEqual(await send(opening), [
+    { type: "input_text", text: opening },
+    { type: "input_text", text: "[Image 1]: A grid of colored shapes." },
+  ]);
+  assert.deepEqual(described, [image]);
+
+  await settingsDb.updateSettings({ modalityBridgeVisionMode: "auto" });
+  const questions = [
+    opening,
+    "Which shape is below the orange diamond?",
+    "Which shape is left of the red triangle?",
+  ];
+  const dispatched = [];
+  for (const question of questions) dispatched.push(await send(question));
+  assert.deepEqual(
+    dispatched,
+    questions.map((text) => [
+      { type: "input_text", text },
+      { type: "input_image", image_url: image, detail: "high" },
+    ])
+  );
+  assert.deepEqual(described, [image], "only the forced describe control may call the captioner");
+  assert.equal(completionCalls().length, questions.length + 1);
+});
+
+test("auto/vision sends remote image URLs only to compatible transports", async (t) => {
+  const model = "auto/vision";
+  const miniMaxModel = "minimax-m3";
+  const anthropicModel = "claude-sonnet-5";
+  const imageUrl = "https://images.example.test/test.png";
+  const data =
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+  const connection = await seedConnection("opencode-go", { apiKey: "test-opencode-go-key" });
+  const apiKey = await seedApiKey({
+    allowedCombos: [model],
+    allowedConnections: [connection.id],
+    allowedModels: [`opencode-go/${miniMaxModel}`],
+  });
+  await settingsDb.updateSettings({
+    modalityBridgeVisionEnabled: true,
+    modalityBridgeVisionMode: "auto",
+    modalityBridgeVisionModel: model,
+  });
+  const describe = t.mock.fn(async () => "Unused caption");
+  guardrailRegistry.register(new VisionBridgeGuardrail({ deps: { callVisionModel: describe } }));
+  t.after(() => resetGuardrailsForTests());
+
+  const dispatches: { model: string; messages: { content: unknown[] }[] }[] = [];
+  t.mock.method(globalThis, "fetch", async (url, init: RequestInit = {}) => {
+    assert.match(
+      String(url),
+      /^https:\/\/(?:opencode\.ai\/zen\/go|api\.anthropic\.com)\/v1\/messages/
+    );
+    const body = JSON.parse(String(init.body));
+    // An Anthropic connection can issue a text-only health probe.
+    if (Array.isArray(body.messages[0]?.content)) dispatches.push(body);
+    return buildClaudeResponse("Vision reply", body.model);
+  });
+
+  function send(imageUrl: string | null, additionalImages: unknown[] = []) {
+    return handleChat(
+      buildRequest({
+        authKey: apiKey.key,
+        body: {
+          model,
+          stream: false,
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: "What is shown in this image?" },
+                ...(imageUrl ? [{ type: "image_url", image_url: { url: imageUrl } }] : []),
+                ...additionalImages,
+              ],
+            },
+          ],
+        },
+      })
+    );
+  }
+
+  async function assertRemoteRejection(response: Response) {
+    const reply = await response.json();
+    assert.equal(response.status, 400, JSON.stringify(reply));
+    assert.equal(reply.error.code, "unsupported_media_input");
+    assert.match(reply.error.message, /requires inline image data/);
+  }
+
+  await assertRemoteRejection(await send(imageUrl));
+  await assertRemoteRejection(await send(null, [{ type: "image", image: imageUrl }]));
+  await assertRemoteRejection(
+    await send(`data:image/png;base64,${data}`, [{ type: "image", image: imageUrl }])
+  );
+  await assertRemoteRejection(
+    await handleChat(
+      buildRequest({
+        url: "http://localhost/v1/messages",
+        authKey: apiKey.key,
+        body: {
+          model,
+          max_tokens: 64,
+          messages: [
+            { role: "user", content: "Check this image." },
+            {
+              role: "assistant",
+              content: [{ type: "tool_use", id: "toolu_image", name: "read", input: {} }],
+            },
+            {
+              role: "user",
+              content: [
+                {
+                  type: "tool_result",
+                  tool_use_id: "toolu_image",
+                  content: [{ type: "image", source: { type: "url", url: imageUrl } }],
+                },
+              ],
+            },
+          ],
+        },
+      })
+    )
+  );
+  await assertRemoteRejection(
+    await handleChat(
+      buildRequest({
+        url: "http://localhost/v1/responses",
+        authKey: apiKey.key,
+        body: {
+          model,
+          input: [
+            { role: "user", content: "Check this image." },
+            { type: "function_call", call_id: "call_image", name: "read", arguments: "{}" },
+            {
+              type: "function_call_output",
+              call_id: "call_image",
+              output: [{ type: "input_image", image_url: imageUrl }],
+            },
+          ],
+        },
+      })
+    )
+  );
+  assert.deepEqual(dispatches, []);
+
+  const inlineResponse = await send(`data:image/png;base64,${data}`);
+  const reply = await inlineResponse.json();
+  assert.equal(inlineResponse.status, 200, JSON.stringify(reply));
+  assert.equal(dispatches.length, 1);
+  const [dispatched] = dispatches;
+  assert.equal(dispatched.model, miniMaxModel);
+  assert.deepEqual(dispatched.messages[0].content[1], {
+    type: "image",
+    source: { type: "base64", media_type: "image/png", data },
+  });
+
+  // The previous success primes Last Known Good to try OpenCode Go first.
+  const anthropic = await seedConnection("anthropic", { apiKey: "test-anthropic-key" });
+  await apiKeysDb.updateApiKeyPermissions(apiKey.id, {
+    allowedConnections: [connection.id, anthropic.id],
+    allowedModels: [`opencode-go/${miniMaxModel}`, `anthropic/${anthropicModel}`],
+  });
+  const fallbackResponse = await send(null, [{ type: "image", image: imageUrl }]);
+  const fallbackReply = await fallbackResponse.json();
+  assert.equal(fallbackResponse.status, 200, JSON.stringify(fallbackReply));
+  const trace = getComboTrace(fallbackResponse.headers.get("x-omniroute-combo-trace") ?? "");
+  assert.deepEqual(
+    trace?.decisions
+      .filter((decision) => decision.decision === "dispatched")
+      .map((decision) => decision.target),
+    [`opencode-go/${miniMaxModel}`, `anthropic/${anthropicModel}`]
+  );
+  assert.equal(dispatches.length, 2, JSON.stringify(dispatches));
+  const fallback = dispatches[1];
+  assert.equal(fallback.model, anthropicModel);
+  assert.deepEqual(fallback.messages[0].content[1], {
+    type: "image",
+    source: { type: "url", url: imageUrl },
+  });
+  assert.equal(describe.mock.callCount(), 0);
 });
 
 test("chat pipeline applies Codex OAuth fingerprint and priority tier inside combos", async () => {

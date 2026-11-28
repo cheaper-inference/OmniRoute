@@ -10,15 +10,17 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-const { hasIdenticalModelErrorStreak, IDENTICAL_MODEL_ERROR_STREAK } = await import(
-  "../../open-sse/services/combo/comboPredicates.ts"
-);
+const { hasIdenticalModelErrorStreak, IDENTICAL_MODEL_ERROR_STREAK } =
+  await import("../../open-sse/services/combo/comboPredicates.ts");
 
-function entry(overrides: Partial<{ status: number; error: string; kind: string }> = {}) {
+function entry(
+  overrides: Partial<{ status: number; error: string; kind: string; code: string }> = {}
+) {
   return {
     model: "gemini/gemini-3.1-flash-lite",
     status: 400,
-    error: "[400]: Please ensure that function call turn comes immediately after a user turn or after a function response turn.",
+    error:
+      "[400]: Please ensure that function call turn comes immediately after a user turn or after a function response turn.",
     kind: "model",
     ...overrides,
   } as never;
@@ -28,7 +30,9 @@ test("false when fewer than the streak threshold have been attempted", () => {
   assert.equal(hasIdenticalModelErrorStreak([]), false);
   assert.equal(hasIdenticalModelErrorStreak([entry()]), false);
   assert.equal(
-    hasIdenticalModelErrorStreak(Array.from({ length: IDENTICAL_MODEL_ERROR_STREAK - 1 }, () => entry())),
+    hasIdenticalModelErrorStreak(
+      Array.from({ length: IDENTICAL_MODEL_ERROR_STREAK - 1 }, () => entry())
+    ),
     false
   );
 });
@@ -41,6 +45,13 @@ test("true once the last IDENTICAL_MODEL_ERROR_STREAK targets share status+error
 test("stays true once the streak is reached even with more matching entries after it", () => {
   const errors = Array.from({ length: IDENTICAL_MODEL_ERROR_STREAK + 2 }, () => entry());
   assert.equal(hasIdenticalModelErrorStreak(errors), true);
+});
+
+test("a selected transport's unsupported media response does not stop other candidates", () => {
+  const errors = Array.from({ length: IDENTICAL_MODEL_ERROR_STREAK }, () =>
+    entry({ code: "unsupported_media_input", error: "This target requires inline image data" })
+  );
+  assert.equal(hasIdenticalModelErrorStreak(errors), false);
 });
 
 test("false when the tail is not all the same kind (a transient provider failure mixed in)", () => {
@@ -63,7 +74,10 @@ test("false when the same status/kind repeats but with a genuinely different err
   const errors = [
     entry({ error: "[400]: missing required field 'model'" }),
     entry({ error: "[400]: unknown tool 'foo'" }),
-    entry({ error: "[400]: Please ensure that function call turn comes immediately after a user turn or after a function response turn." }),
+    entry({
+      error:
+        "[400]: Please ensure that function call turn comes immediately after a user turn or after a function response turn.",
+    }),
   ];
   assert.equal(hasIdenticalModelErrorStreak(errors), false);
 });

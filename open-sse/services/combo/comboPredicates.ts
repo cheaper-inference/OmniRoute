@@ -154,6 +154,8 @@ export function hasIdenticalModelErrorStreak(
   const tail = comboErrors.slice(-streak);
   const [first, ...rest] = tail;
   if (first.kind !== "model" || first.status !== 400) return false;
+  // Media support varies by selected transport, even when several targets decline it.
+  if (tail.some((error) => error.code === "unsupported_media_input")) return false;
   return rest.every(
     (e) => e.kind === first.kind && e.status === first.status && e.error === first.error
   );

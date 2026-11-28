@@ -15,6 +15,8 @@ const { buildAutoCandidates, expandAutoComboCandidatePool } =
   await import("../../open-sse/services/combo.ts");
 const { resolveAutoStrategyOrder } =
   await import("../../open-sse/services/combo/resolveAutoStrategy.ts");
+const { getResolvedModelCapabilities } = await import("../../src/lib/modelCapabilities.ts");
+const { DEFAULT_RESILIENCE_SETTINGS } = await import("../../src/lib/resilience/settings.ts");
 
 function resetStorage() {
   core.resetDbInstance();
@@ -301,6 +303,92 @@ test("resolveAutoStrategyOrder threads the key scope and keeps the entire fallba
     result.orderedTargets.some((entry) => entry.connectionId === openaiDenied.id),
     false
   );
+});
+
+test("built-in auto/vision filters its expanded image fallback pool", async () => {
+  const allowed = await seedConnection("openai", "vision-allowed");
+  const denied = await seedConnection("openai", "vision-denied");
+  const forcedBridge = await seedConnection("opencode-go", "vision-forced-bridge");
+  const textOnly = await seedConnection("cloudflare-playground", "vision-text-transport");
+  await modelsDb.replaceSyncedAvailableModelsForConnection("openai", allowed.id, [
+    { id: "gpt-4o", name: "GPT-4o", supportedEndpoints: ["chat"] },
+    { id: "gpt-4o-mini", name: "GPT-4o mini", supportedEndpoints: ["chat"] },
+    { id: "uncatalogued-image-check-fixture", name: "Unknown", supportedEndpoints: ["chat"] },
+  ]);
+  await modelsDb.replaceSyncedAvailableModelsForConnection("openai", denied.id, [
+    { id: "gpt-4o", name: "GPT-4o", supportedEndpoints: ["chat"] },
+  ]);
+  await modelsDb.replaceSyncedAvailableModelsForConnection("opencode-go", forcedBridge.id, [
+    {
+      id: "deepseek-v4-flash",
+      name: "DeepSeek V4 Flash",
+      supportsVision: true,
+      supportedEndpoints: ["chat"],
+    },
+  ]);
+  await modelsDb.replaceSyncedAvailableModelsForConnection("cloudflare-playground", textOnly.id, [
+    { id: "gpt-4o", name: "GPT-4o", supportsVision: true, supportedEndpoints: ["chat"] },
+  ]);
+
+  assert.equal(getResolvedModelCapabilities("opencode-go/deepseek-v4-flash").supportsVision, true);
+  assert.equal(getResolvedModelCapabilities("cfp/gpt-4o").supportsVision, false);
+  assert.equal(
+    getResolvedModelCapabilities("openai/uncatalogued-image-check-fixture").supportsVision,
+    null
+  );
+
+  const run = (
+    body: Record<string, unknown>,
+    connectionIds: string[],
+    comboId = "auto/vision",
+    orderedTargets: ReturnType<typeof target>[] = []
+  ) =>
+    resolveAutoStrategyOrder({
+      orderedTargets,
+      body,
+      combo: { id: comboId, name: "auto/vision", type: "auto", strategy: "auto", models: [] },
+      settings: null,
+      config: { compatFilterFailOpen: true },
+      resilienceSettings: DEFAULT_RESILIENCE_SETTINGS,
+      log: noopLog,
+      apiKeyAllowedConnections: connectionIds,
+      buildAutoCandidates: async () => [],
+    });
+  const url = "data:image/png;base64,dGVzdCBpbWFnZQ==";
+  const chat = {
+    messages: [{ role: "user", content: [{ type: "image_url", image_url: { url } }] }],
+  };
+  const responses = {
+    input: [{ role: "user", content: [{ type: "input_image", image_url: url }] }],
+  };
+  const scope = [allowed.id, forcedBridge.id, textOnly.id];
+  for (const body of [chat, responses]) {
+    const result = await run(body, scope);
+    assert.ok("orderedTargets" in result);
+    assert.deepEqual(
+      result.orderedTargets.map((entry) => [entry.modelStr, entry.connectionId]).sort(),
+      [
+        ["openai/gpt-4o", allowed.id],
+        ["openai/gpt-4o-mini", allowed.id],
+      ]
+    );
+  }
+
+  const exhausted = await run(chat, [forcedBridge.id, textOnly.id]);
+  assert.ok("earlyResponse" in exhausted);
+  assert.equal(exhausted.earlyResponse.status, 400);
+  assert.match((await exhausted.earlyResponse.json()).error.message, /no compatible media/i);
+
+  const otherCombo = await run(chat, [forcedBridge.id], "saved-combo-id");
+  assert.ok("orderedTargets" in otherCombo);
+  assert.equal(otherCombo.orderedTargets[0]?.modelStr, "opencode-go/deepseek-v4-flash");
+
+  const text = { messages: [{ role: "user", content: "Read this text." }] };
+  const textResult = await run(text, [forcedBridge.id], "auto/vision", [
+    target("opencode-go", "deepseek-v4-flash", forcedBridge.id),
+  ]);
+  assert.ok("orderedTargets" in textResult);
+  assert.equal(textResult.orderedTargets[0]?.modelStr, "opencode-go/deepseek-v4-flash");
 });
 
 test("restricted failClosedWhenEmpty pools never widen to the scoped catalog", async () => {

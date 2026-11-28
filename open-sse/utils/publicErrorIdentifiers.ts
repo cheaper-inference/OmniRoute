@@ -313,6 +313,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "unsupported_endpoint",
   "unsupported_feature",
   "unsupported_image_block",
+  "unsupported_media_input",
   "unsupported_media_type",
   "unsupported_role",
   "unsupported_runtime",
