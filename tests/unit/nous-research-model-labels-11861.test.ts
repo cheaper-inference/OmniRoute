@@ -24,9 +24,13 @@ test("nous-research model display names match their id's parameter size", () => 
 
   for (const model of entry.models) {
     const idSize = extractParamSize(model.id);
-    assert.ok(idSize, `nous-research model id "${model.id}" must encode a parameter size`);
-
     const nameSize = extractParamSize(model.name);
+
+    // Models without a parameter-size token (e.g. deepseek/deepseek-v4.1-flash-1017)
+    // are allowed. When either side carries one, both must agree.
+    if (!idSize && !nameSize) continue;
+
+    assert.ok(idSize, `nous-research model id "${model.id}" must encode a parameter size`);
     assert.ok(
       nameSize,
       `nous-research model "${model.id}" display name "${model.name}" must encode a parameter size`
