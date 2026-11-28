@@ -1,0 +1,1 @@
+- **fix(sse):** credential redaction reopens a channel that went quiet before another one started, so the held reasoning tail is emitted before the answer instead of after it (#21545)
