@@ -1,0 +1,1 @@
+- **fix(translator):** Codex sub-agent tasks (`agent_message`) reach Chat/Claude-format providers as a user turn instead of an assistant turn, so sub-agents no longer answer with a greeting and ignore the task

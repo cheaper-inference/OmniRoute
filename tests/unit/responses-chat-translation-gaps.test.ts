@@ -137,7 +137,7 @@ test("Responses -> Chat rejects input item types without a lossless Chat equival
   }
 });
 
-test("Responses -> Chat converts plaintext agent_message items to assistant history", () => {
+test("Responses -> Chat converts plaintext agent_message items to user turns", () => {
   const result = translate({
     input: [
       { type: "message", role: "user", content: [{ type: "input_text", text: "Run the task" }] },
@@ -152,7 +152,10 @@ test("Responses -> Chat converts plaintext agent_message items to assistant hist
 
   assert.deepEqual(result.messages, [
     { role: "user", content: [{ type: "text", text: "Run the task" }] },
-    { role: "assistant", content: [{ type: "text", text: "Task completed" }] },
+    {
+      role: "user",
+      content: [{ type: "text", text: "[Agent message from worker to parent]\nTask completed" }],
+    },
   ]);
 });
 
@@ -177,7 +180,7 @@ test("Responses -> Chat skips encrypted or mixed agent_message items", () => {
   ]);
 });
 
-test("Responses -> Chat converts string-content agent_message items to assistant history", () => {
+test("Responses -> Chat converts string-content agent_message items to user turns", () => {
   const result = translate({
     input: [
       { type: "message", role: "user", content: [{ type: "input_text", text: "Run the task" }] },
@@ -187,7 +190,10 @@ test("Responses -> Chat converts string-content agent_message items to assistant
 
   assert.deepEqual(result.messages, [
     { role: "user", content: [{ type: "text", text: "Run the task" }] },
-    { role: "assistant", content: [{ type: "text", text: "Task completed" }] },
+    {
+      role: "user",
+      content: [{ type: "text", text: "[Agent message from worker to unknown]\nTask completed" }],
+    },
   ]);
 });
 
@@ -201,7 +207,7 @@ test("Responses -> Chat converts role-based agent_message items without a type f
 
   assert.deepEqual(result.messages, [
     { role: "user", content: [{ type: "text", text: "Run the task" }] },
-    { role: "assistant", content: [{ type: "text", text: "Worker reply" }] },
+    { role: "user", content: [{ type: "text", text: "Worker reply" }] },
   ]);
 });
 
@@ -269,4 +275,29 @@ test("Responses -> Chat strips Responses-only execution and cache fields", () =>
   assert.equal(result.prompt_cache_retention, undefined);
   assert.deepEqual(result.metadata, { keep: true });
   assert.equal(result.parallel_tool_calls, true);
+});
+
+test("Responses -> Claude delivers a sub-agent NEW_TASK agent_message as a user turn", async () => {
+  const { openaiToClaudeRequest } =
+    await import("../../open-sse/translator/request/openai-to-claude.ts");
+  const chat = translate({
+    input: [
+      { type: "message", role: "user", content: [{ type: "input_text", text: "# AGENTS.md" }] },
+      {
+        type: "agent_message",
+        author: "/root",
+        recipient: "/root/child",
+        content: [{ type: "input_text", text: "Message Type: NEW_TASK\nReview the proposal" }],
+      },
+    ],
+  });
+  const claude = openaiToClaudeRequest("claude-sonnet-5-5", chat, false) as {
+    messages: Array<{ role: string; content: unknown }>;
+  };
+  assert.equal(claude.messages.at(-1)?.role, "user");
+  assert.match(
+    JSON.stringify(claude.messages.at(-1)?.content),
+    /\[Agent message from \/root to \/root\/child\].*NEW_TASK.*Review the proposal/
+  );
+  assert.ok(!claude.messages.some((m) => m.role === "assistant"));
 });
