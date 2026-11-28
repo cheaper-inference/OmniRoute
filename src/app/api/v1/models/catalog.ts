@@ -1,3 +1,4 @@
+import { visibleCodexModels } from "@/shared/constants/codexVariantVisibility";
 import { createCatalogConnectionExclusionFilter } from "@/lib/providerModels/copilotCatalogRejections";
 import { PROVIDER_MODELS, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { NOAUTH_PROVIDERS } from "@/shared/constants/providers";
@@ -1047,7 +1048,9 @@ async function buildUnifiedModelsResponseCore(
         timestamp,
         (c) => buildComboCatalogMetadata(c, getVisibleComboTargets(c))
       );
-      const quotaFinal = await applyCatalogPostFilters(request, quotaModels, postFilterContext);
+      let quotaFinal = await applyCatalogPostFilters(request, quotaModels, postFilterContext);
+      if (settings.codexHideForcedReasoningModels === true)
+        quotaFinal = visibleCodexModels(quotaFinal);
       return finalizeCatalogResponse(request, quotaFinal, () => undefined, {
         ...corsHeaders,
         ...diagnosticHeaders,
@@ -2365,6 +2368,8 @@ async function buildUnifiedModelsResponseCore(
     }
     // ?configuredOnly — hide models that have no eligible DB connection.
     finalModels = await applyCatalogPostFilters(request, finalModels, postFilterContext);
+    if (settings.codexHideForcedReasoningModels === true)
+      finalModels = visibleCodexModels(finalModels);
 
     const getDefaultContextFallback = (model: any): number | undefined => {
       if (typeof model.context_length === "number") return undefined;

@@ -6004,6 +6004,8 @@
     "sortFreeFirst": "Kostenlose zuerst",
     "showHiddenOnly": "Nur ausgeblendete",
     "filterByVisibility": "Nach Sichtbarkeit filtern",
+    "hideFixedCodexReasoning": "Modelle mit fester Reasoning-Stufe ausblenden",
+    "codexVisibilityError": "Die Modellsichtbarkeit konnte nicht geladen oder gespeichert werden.",
     "autoHideFailed": "Fehlgeschlagene Modelle automatisch ausblenden",
     "autoHideFailedHint": "Wenn aktiviert, blendet „Alle testen“ dauerhafte Fehler aus öffentlichen Katalogen wie /v1/models aus. Einzelmodelltests werden nie automatisch ausgeblendet.",
     "connected": "{count} Verbunden",
