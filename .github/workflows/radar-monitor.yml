@@ -1,0 +1,145 @@
+name: Radar Feed Monitor
+
+on:
+  schedule:
+    - cron: "37 * * * *"
+  workflow_dispatch:
+
+permissions: { contents: read }
+
+concurrency:
+  group: radar-monitor
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      result: ${{ steps.probe.outputs.result }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            scripts/ops/radar-monitor.mjs
+      - name: Resolve the highest stable release
+        id: release
+        run: |
+          set -euo pipefail
+          if ! release_sha=$(git ls-remote --heads origin 'refs/heads/release/v*' |
+            awk '$1 ~ /^[0-9a-f]+$/ && length($1) == 40 && $2 ~ /^refs\/heads\/release\/v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/ { print $2, $1 }' |
+            sort -V -k1,1 | tail -n 1 | cut -d ' ' -f2) || [[ -z "$release_sha" ]]; then
+            echo '::error title=release-ref-unavailable::No stable release branch could be resolved.'
+            exit 2
+          fi
+          printf 'sha=%s\n' "$release_sha" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ steps.release.outputs.sha }}
+          path: radar-release
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            src/lib/radar/pinnedKeys.ts
+            open-sse/config/freeModelCatalog.data.ts
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Check the signed feeds
+        id: probe
+        run: |
+          set -euo pipefail
+          if ! curated_at=$(node scripts/ops/radar-monitor.mjs --read-curated-at radar-release/open-sse/config/freeModelCatalog.data.ts); then
+            echo '::error title=curation-date-unavailable::The release catalog curation date could not be read.'
+            exit 2
+          fi
+          status=0
+          result=$(node scripts/ops/radar-monitor.mjs --url https://radar.omniroute.online \
+            --curated-at "$curated_at" --pinned-keys radar-release/src/lib/radar/pinnedKeys.ts) || status=$?
+          if (( status > 1 )); then
+            exit "$status"
+          fi
+          printf 'result=%s\n' "$result" >> "$GITHUB_OUTPUT"
+          exit "$status"
+
+  report:
+    if: >-
+      ${{ !cancelled() && needs.probe.outputs.result != '' &&
+          (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
+    needs: probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            scripts/ops/radar-monitor.mjs
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Reconcile the tracking issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPORT: ${{ needs.probe.outputs.result }}
+        run: |
+          set -euo pipefail
+          title='Radar feed unhealthy'
+          repo="repos/$GITHUB_REPOSITORY"
+          healthy=$(jq -r '.healthy' <<< "$REPORT")
+          key=$(jq -jr '.key' <<< "$REPORT" | sha256sum | cut -d ' ' -f1)
+          issue=$(gh api --paginate --slurp --method GET "$repo/issues" \
+            -f state=open -f 'creator=github-actions[bot]' -F per_page=100 |
+            jq -c --arg title "$title" \
+              '[.[][] | select(.title == $title and .pull_request == null)] | min_by(.number)')
+          number=$(jq -r '.number // empty' <<< "$issue")
+
+          comments='[]'
+          if [[ -n "$number" && "$healthy" == false ]]; then
+            comments=$(gh api --paginate --slurp --method GET "$repo/issues/$number/comments" -F per_page=100)
+          fi
+          open_issue=$(jq -c --argjson issue "$issue" '
+            def marker:
+              (. // "") | split("\n") |
+              map(capture("^<!-- radar-monitor key=(?<key>[0-9a-f]{64}) -->$").key) | last // null;
+            if $issue == null then null
+            else
+              ([.[][] | select(.user.login == "github-actions[bot]") |
+                {lastMarkerKey: (.body | marker), lastMarkerAt: .created_at} |
+                select(.lastMarkerKey != null)] | max_by(.lastMarkerAt))
+              // {lastMarkerKey: ($issue.body | marker), lastMarkerAt: $issue.created_at}
+            end
+          ' <<< "$comments")
+          action=$(jq -cn --argjson healthy "$healthy" --arg key "$key" --argjson openIssue "$open_issue" \
+            '{healthy: $healthy, key: $key, openIssue: $openIssue}' |
+            node scripts/ops/radar-monitor.mjs --decide)
+
+          case "$action" in
+            none) exit 0 ;;
+            close)
+              gh issue close "$number" --repo "$GITHUB_REPOSITORY" --comment "The Radar feed has recovered."
+              exit 0
+              ;;
+            create|comment)
+              details=$(jq -r '.feeds | to_entries[] | select(.value.ok == false) |
+                "- \(.key): \(.value.problems | join(", ")); version: \(.value.version // "unavailable"); generatedAt: \(.value.generatedAt // "unavailable")"' <<< "$REPORT")
+              printf -v body 'The scheduled Radar feed check found a problem.\n\n%s\n\n<!-- radar-monitor key=%s -->' "$details" "$key"
+              if [[ "$action" == create ]]; then
+                gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+              else
+                gh issue comment "$number" --repo "$GITHUB_REPOSITORY" --body "$body"
+              fi
+              ;;
+            *) exit 1 ;;
+          esac
