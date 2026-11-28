@@ -9,7 +9,7 @@
  * its throttle forward on success, so the next tick tries again.
  */
 
-import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
+import { getPersistedQuotaSnapshotRetentionDays } from "@/lib/db/databaseSettings";
 import { cleanupOldSnapshots } from "@/lib/db/quotaSnapshots";
 import { isWriteLockError } from "@/lib/usage/usageWriteRetry";
 
@@ -25,13 +25,12 @@ const defaultSleep = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms).unref?.());
 
 /**
- * The dashboard's retention.quotaSnapshots is the one policy. An unreadable setting falls back to
- * the built-in age, so the sweep still runs instead of stopping the tick.
+ * Only a saved quota retention replaces the sweep's built-in 90-day cutoff.
  */
 function cleanupWithConfiguredRetention(): number {
   let retentionDays: number | undefined;
   try {
-    retentionDays = getUserDatabaseSettings().retention.quotaSnapshots;
+    retentionDays = getPersistedQuotaSnapshotRetentionDays() ?? undefined;
   } catch {
     retentionDays = undefined;
   }

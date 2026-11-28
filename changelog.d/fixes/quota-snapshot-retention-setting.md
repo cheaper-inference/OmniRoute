@@ -1,1 +1,0 @@
-- **fix(quota):** The quota-cache background sweep now deletes quota snapshots by the `retention.quotaSnapshots` setting instead of a fixed 90 days, so a longer retention (up to 3650 days) is no longer cut short. If the setting cannot be read, the sweep still runs with the 90-day default.

@@ -418,6 +418,28 @@ export function getPersistedCallLogRetentionDays(): number | null {
   return resolved;
 }
 
+function readQuotaSnapshotDays(retention: unknown): number | null {
+  return isRecord(retention) ? toPersistedRetentionDays(retention.quotaSnapshots) : null;
+}
+
+export function getPersistedQuotaSnapshotRetentionDays(): number | null {
+  const rows = getDbInstance()
+    .prepare(
+      "SELECT key, value FROM key_value WHERE (namespace = 'databaseSettings' AND key IN ('retention.quotaSnapshots', 'quotaSnapshots')) OR (namespace = 'settings' AND key IN ('retention', 'databaseSettings'))"
+    )
+    .all() as Array<{ key: string; value: string }>;
+  const values = Object.fromEntries(rows.map(({ key, value }) => [key, parseStoredValue(value)]));
+  const flatDays = toPersistedRetentionDays(values.quotaSnapshots);
+  const nested = values.databaseSettings;
+  return (
+    toPersistedRetentionDays(values["retention.quotaSnapshots"]) ??
+    // Migration 046 seeds the flat key at 90 days without an operator save.
+    (flatDays === 90 ? null : flatDays) ??
+    readQuotaSnapshotDays(values.retention) ??
+    (isRecord(nested) ? readQuotaSnapshotDays(nested.retention) : null)
+  );
+}
+
 export function getUserDatabaseSettings(): UserDatabaseSettings {
   const settings = cloneDefaultSettings();
   // Until the operator saves an age, request-log rotation uses CALL_LOG_RETENTION_DAYS or 7 days
@@ -551,6 +573,13 @@ export function updateDatabaseSettings(
 
       for (const [key, value] of Object.entries(sectionValues)) {
         if (section === "retention" && key === "callLogs" && !persistCallLogAge) continue;
+        // An unrelated save must not turn an inherited age into a sweep override.
+        if (
+          section === "retention" &&
+          key === "quotaSnapshots" &&
+          updates.retention?.quotaSnapshots === undefined
+        )
+          continue;
         const stored = section === "cache" ? encryptCacheValue(key, value) : value;
         insert.run(
           DATABASE_SETTINGS_NAMESPACE,
