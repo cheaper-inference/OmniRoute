@@ -236,6 +236,16 @@ function resolveCombosOnly(
   return settings?.exposeCombosOnly === true && options.ignoreExposeCombosOnly !== true;
 }
 
+function resolveCatalogCacheVisibility(settings: Record<string, unknown> | null | undefined) {
+  return {
+    // #10831: a disabled router and hideAutoCombos both suppress auto/*, so they
+    // share one cache dimension.
+    hideAutoCombos: settings?.hideAutoCombos === true || settings?.autoRoutingEnabled === false,
+    hideNoThinkVariants: settings?.hideNoThinkVariants === true,
+    leanCatalog: settings?.leanCatalog === true,
+  };
+}
+
 /** Requests already retried once after LaunchSessionChangedError (never retried twice). */
 const launchRetriedRequests = new WeakSet<Request>();
 
@@ -321,14 +331,8 @@ export async function getUnifiedModelsResponse(
       { corsHeaders, diagnosticHeaders },
       (req) => buildCatalogPayload(req, buildFlags),
       {
-        // #10831: a disabled router hides auto/* just as hideAutoCombos does, so
-        // the two collapse into one cache dimension — the resulting catalogs are
-        // identical and do not need separate entries.
-        hideAutoCombos:
-          settingsForAuth?.hideAutoCombos === true || settingsForAuth?.autoRoutingEnabled === false,
-        hideNoThinkVariants: settingsForAuth?.hideNoThinkVariants === true,
+        ...resolveCatalogCacheVisibility(settingsForAuth),
         exposeCombosOnly: buildFlags.combosOnly,
-        leanCatalog: settingsForAuth?.leanCatalog === true,
         scheduleBackgroundRefresh: options.scheduleBackgroundRefresh,
         revealHidden: buildFlags.revealHidden,
       }
