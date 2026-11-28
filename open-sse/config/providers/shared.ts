@@ -81,6 +81,12 @@ export interface RegistryModel {
   supportsVision?: boolean;
   supportsAudio?: boolean;
   supportsVideo?: boolean;
+  /**
+   * Optional per-request input-token limit (e.g. provider ITPM cap like Groq
+   * on_demand 7000 ITPM). Used by combo pre-dispatch gates to skip targets
+   * that would deterministically reject oversized requests with 413.
+   */
+  maxInputTokens?: number;
   supportsXHighEffort?: boolean;
   maxOutputTokens?: number;
   targetFormat?: string;
