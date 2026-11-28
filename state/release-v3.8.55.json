@@ -18,11 +18,12 @@
         "labeledAt": "2026-11-28T09:44:45Z"
       }
     ],
-    "stage": "testing",
+    "stage": "landing",
     "startedAt": "2026-11-28T15:40:36.852Z",
     "attempts": 1,
     "bisect": null,
-    "lane": "hotfix"
+    "lane": "hotfix",
+    "landAttempts": 1
   },
   "baseChecks": [
     {
@@ -127,17 +128,6 @@
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-25T05:05:21.727Z",
-      "type": "checks-red",
-      "batchId": "b36",
-      "prs": [
-        21095
-      ],
-      "sha": "d81570b3206aa398b3c4f090ae31ee484b145056",
-      "detail": "Gate / CI, Unit Tests (6/8)",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45551097887"
-    },
     {
       "at": "2026-11-25T05:05:21.727Z",
       "type": "flaky-rerun",
@@ -2807,8 +2797,22 @@
       "sha": "a805b064c2c0d7293506f9d4dea3e81ca2457b9c",
       "detail": "retry 1/1: all 1 failure(s) are infrastructure (1 aggregate gate failure(s) ignored)",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46161075448"
+    },
+    {
+      "at": "2026-11-28T16:55:14.669Z",
+      "type": "checks-green",
+      "batchId": "b80-r1",
+      "prs": [
+        20844
+      ],
+      "sha": "a805b064c2c0d7293506f9d4dea3e81ca2457b9c",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46167675231"
     }
   ],
-  "updatedAt": "2026-11-28T16:44:48.543Z",
-  "batchWindow": 2
+  "updatedAt": "2026-11-28T16:55:23.790Z",
+  "batchWindow": 2,
+  "landingsWithoutVerdict": {
+    "count": 1,
+    "since": "2026-11-28T16:55:23.790Z"
+  }
 }
