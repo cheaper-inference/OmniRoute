@@ -28,7 +28,9 @@ async function readAll(response: Response): Promise<string> {
 }
 
 function lastDataPayload(body: string): Record<string, unknown> {
-  const dataLines = [...body.matchAll(/^data: (.+)$/gm)].map((m) => m[1]);
+  const dataLines = [...body.matchAll(/^data: (.+)$/gm)]
+    .map((m) => m[1])
+    .filter((payload) => payload !== "[DONE]");
   return JSON.parse(dataLines[dataLines.length - 1]);
 }
 
@@ -128,11 +130,16 @@ test("fast path is unchanged: real status and headers, no frame", async () => {
   assert.equal(result.headers.get("retry-after"), "30");
 });
 
-test("chat-format frames are untouched (no status_code added)", async () => {
+test("chat-format frames preserve string codes and expose status and Retry-After", async () => {
   const result = await withEarlyStreamKeepalive(
     slow(errorBody("rate_limit_error", "rate_limit_exceeded"), 429, { "Retry-After": "30" }),
     { thresholdMs: 20, intervalMs: 20, errorFrame: OPENAI_CHAT_ERROR_FRAME }
   );
-  const payload = lastDataPayload(await readAll(result));
+  const body = await readAll(result);
+  const payload = lastDataPayload(body);
   assert.equal("status_code" in payload, false);
+  assert.equal((payload as { error: { code: string } }).error.code, "rate_limit_exceeded");
+  assert.equal((payload as { error: { status: number } }).error.status, 429);
+  assert.equal((payload as { error: { retry_after: number } }).error.retry_after, 30);
+  assert.equal((body.match(/^data: \[DONE\]$/gm) ?? []).length, 1);
 });
