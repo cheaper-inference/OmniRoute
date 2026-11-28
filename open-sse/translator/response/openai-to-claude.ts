@@ -10,6 +10,7 @@ import {
   findToolCallSchema,
 } from "../helpers/toolCallShim.ts";
 import { appendToolCallArgumentDelta } from "../../utils/toolCallArguments.ts";
+import { chargeRetained } from "../../utils/streamRetainedBudget.ts";
 import { openAIFinishReasonToClaudeStopReason } from "../../utils/finishReason.ts";
 import {
   isInternalReasoningPlaceholder,
@@ -141,6 +142,31 @@ function stopThinkingBlock(state, results) {
     index: state.thinkingBlockIndex,
   });
   state.thinkingBlockStarted = false;
+}
+
+function emitThinkingDelta(state, results, text: string) {
+  if (!state.thinkingBlockStarted) {
+    state.thinkingBlockIndex = state.nextBlockIndex++;
+    state.thinkingBlockStarted = true;
+    results.push({
+      type: "content_block_start",
+      index: state.thinkingBlockIndex,
+      content_block: { type: "thinking", thinking: "", signature: "" },
+    });
+  }
+  results.push({
+    type: "content_block_delta",
+    index: state.thinkingBlockIndex,
+    delta: { type: "thinking_delta", thinking: text },
+  });
+}
+
+function flushDeferredThinking(state, results) {
+  const text = state.deferredClaudeThinking;
+  if (!text) return;
+  state.deferredClaudeThinking = undefined;
+  emitThinkingDelta(state, results, text);
+  stopThinkingBlock(state, results);
 }
 
 // Helper: flush any buffered Markdown boundary text before closing a text block
@@ -287,6 +313,7 @@ function flushTruncatedClaudeStream(state) {
     if (!toolInfo.startEmitted || typeof toolInfo.blockIndex !== "number") continue;
     results.push({ type: "content_block_stop", index: toolInfo.blockIndex });
   }
+  flushDeferredThinking(state, results);
   state.upstreamError = {
     status: 502,
     type: "server_error",
@@ -508,47 +535,32 @@ export function openaiToClaudeResponse(chunk, state) {
     reasoningContent =
       (typeof reasoningContent === "string" ? reasoningContent : "") + inlineThink.reasoning;
   }
-  const hasReasoning =
+  if (
     typeof reasoningContent === "string" &&
     reasoningContent !== "" &&
-    !isInternalReasoningPlaceholder(reasoningContent);
-  if (hasReasoning) {
+    !isInternalReasoningPlaceholder(reasoningContent)
+  ) {
     // Gate the thinking block EMISSION on requestedThinking, with the same
     // tri-state the non-streaming path documents (responseTranslator.ts):
     // `false` = client opted out, suppress; `true` = client opted in, relay;
     // `undefined` = legacy caller that never passed it, keep the original
-    // "always a thinking block" relay. Only an explicit opt-out suppresses —
-    // `=== true` here silently dropped reasoning for every legacy caller while
-    // the JSON path kept relaying it (#12905 follow-up). The _reasoningAccum
-    // accumulation below stays OUTSIDE the gate and always runs, so fix B still
-    // synthesizes a text block for reasoning-only opt-out responses (no 502).
-    if (state.requestedThinking !== false) {
-      stopTextBlock(state, results);
-
-      if (!state.thinkingBlockStarted) {
-        state.thinkingBlockIndex = state.nextBlockIndex++;
-        state.thinkingBlockStarted = true;
-        results.push({
-          type: "content_block_start",
-          index: state.thinkingBlockIndex,
-          content_block: { type: "thinking", thinking: "", signature: "" },
-        });
+    // "always a thinking block" relay (#12905). Opt-out turns retain reasoning
+    // for the reasoning-only text fallback below.
+    if (state.requestedThinking === false) {
+      if (chargeRetained(state, reasoningContent.length, { optional: true })) {
+        state._reasoningAccum = (state._reasoningAccum || "") + reasoningContent;
       }
-
-      results.push({
-        type: "content_block_delta",
-        index: state.thinkingBlockIndex,
-        delta: { type: "thinking_delta", thinking: reasoningContent },
-      });
+    } else if (state.toolCalls?.size) {
+      // A terminal summary may arrive before the open tool blocks finish.
+      // Claude SDKs dispatch a block when it stops, so defer thinking until
+      // after the tool's final input delta and stop.
+      if (chargeRetained(state, reasoningContent.length, { optional: true })) {
+        state.deferredClaudeThinking = (state.deferredClaudeThinking || "") + reasoningContent;
+      }
+    } else {
+      stopTextBlock(state, results);
+      emitThinkingDelta(state, results, reasoningContent);
     }
-
-    // FIX B: accumulate the reasoning text so the finish handler can synthesize
-    // a text content block when the response ends reasoning-only (no ordinary
-    // content block). Claude Code's autocompact parser extracts the summary from
-    // a TEXT content block — a thinking block alone is judged "empty response"
-    // and the compact is rejected, looping the session. When real content DOES
-    // arrive, it starts its own text block and this buffer is simply ignored.
-    state._reasoningAccum = (state._reasoningAccum || "") + reasoningContent;
   }
 
   // Refusal text is literal output, never input for XML/DSML tool-call shims.
@@ -910,6 +922,8 @@ export function openaiToClaudeResponse(chunk, state) {
         index: toolInfo.blockIndex,
       });
     }
+
+    flushDeferredThinking(state, results);
 
     // Emit any XML-extracted tool calls (from models like Dracarys that
     // emit <invoke> blocks in content instead of JSON tool_calls in delta)

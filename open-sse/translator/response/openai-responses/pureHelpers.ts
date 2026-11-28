@@ -1,6 +1,8 @@
 // Pure, stateless helpers for the OpenAI Responses <-> Chat response translator.
 // Extracted verbatim from response/openai-responses.ts (no host imports, no stream state).
 
+import { isInternalReasoningPlaceholder } from "../../../utils/reasoningPlaceholder.ts";
+
 // Minimal structural view of the tool JSON-Schema subset this module inspects. Values
 // arrive straight from request payloads, so fields stay `unknown` and every access site
 // narrows them with runtime guards — the guards below remain the source of truth.
@@ -412,14 +414,13 @@ export function extractResponsesReasoningSummaryText(item: unknown): string {
   const summary = item && typeof item === "object" ? (item as { summary?: unknown }).summary : null;
   if (!Array.isArray(summary)) return "";
   // #9500 — reasoning summary parts are discrete segments; join with "\n\n"
-  // (matches extractThinkingFromContent convention). Filter empties so an
-  // empty summary_text element does not produce a dangling separator.
+  // (matches extractThinkingFromContent convention). Filter each part before joining.
   return summary
     .map((part) => {
       const p = part as { text?: unknown } | null;
       return p && typeof p === "object" && typeof p.text === "string" ? p.text : "";
     })
-    .filter((text) => text.length > 0)
+    .filter((text) => text.length > 0 && !isInternalReasoningPlaceholder(text))
     .join("\n\n");
 }
 

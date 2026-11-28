@@ -1006,12 +1006,8 @@ function flushEvents(state) {
   return events;
 }
 
-// #5786 — remember that a reasoning delta was streamed for a given reasoning item, so
-// the terminal `response.output_item.done` snapshot for that item is NOT re-emitted
-// (which would duplicate the reasoning channel). Keyed by item_id when present, with a
-// global fallback for streams whose deltas carry no item_id.
-function markResponsesReasoningDeltaEmitted(state, itemId, outputIndex?) {
-  state.reasoningDeltaEmitted = true;
+// #5786 — track emitted reasoning so later snapshots do not repeat it.
+function markResponsesReasoningIdentity(state, itemId: string, outputIndex: unknown) {
   // GitHub Copilot rotates the encrypted reasoning item id between events, so the
   // id alone cannot pair a delta with its output_item.done. Record output_index too.
   if (typeof outputIndex === "number") {
@@ -1020,12 +1016,57 @@ function markResponsesReasoningDeltaEmitted(state, itemId, outputIndex?) {
     }
     state.reasoningOutputIndexesWithDelta.add(outputIndex);
   }
-  const id = itemId != null ? String(itemId) : "";
-  if (!id) return;
+  if (!itemId) return;
   if (!(state.reasoningItemsWithDelta instanceof Set)) {
     state.reasoningItemsWithDelta = new Set();
   }
-  state.reasoningItemsWithDelta.add(id);
+  state.reasoningItemsWithDelta.add(itemId);
+}
+
+function recordResponsesReasoningDelta(state, data, text: string) {
+  const itemId = data.item_id != null ? String(data.item_id) : "";
+  if (itemId || typeof data.output_index === "number") {
+    closeAnonymousReasoningRun(state);
+    markResponsesReasoningIdentity(state, itemId, data.output_index);
+  } else if (chargeRetained(state, text.length)) {
+    state.anonymousReasoningDelta = (state.anonymousReasoningDelta ?? "") + text;
+  }
+}
+
+interface AnonymousReasoningRuns {
+  texts: string[];
+  next: number;
+  offset: number;
+}
+
+function closeAnonymousReasoningRun(state) {
+  const text: string | undefined = state.anonymousReasoningDelta;
+  if (!text) return;
+  const runs: AnonymousReasoningRuns = (state.anonymousReasoningRuns ??= {
+    texts: [],
+    next: 0,
+    offset: 0,
+  });
+  runs.texts.push(text);
+  state.anonymousReasoningDelta = undefined;
+}
+
+function consumeAnonymousReasoningRun(state, text: string): boolean {
+  const runs: AnonymousReasoningRuns | undefined = state.anonymousReasoningRuns;
+  if (!runs) return false;
+  const run = runs.texts[runs.next];
+  if (run.startsWith(text, runs.offset)) {
+    // A single run can contain several items when upstream omits their boundaries.
+    runs.offset += text.length;
+    if (runs.offset < run.length) return true;
+  } else if (!text.startsWith(run.slice(runs.offset))) {
+    return false;
+  }
+  runs.texts[runs.next] = "";
+  runs.next++;
+  runs.offset = 0;
+  if (runs.next === runs.texts.length) state.anonymousReasoningRuns = undefined;
+  return true;
 }
 
 // #9500 — streaming separator helper. When summary_index increments mid-stream
@@ -1041,16 +1082,8 @@ function buildResponsesReasoningSummaryDelta(state, data, reasoningDelta) {
     state.reasoningSummaryIndex = new Map();
   }
   const lastIndex = itemId ? state.reasoningSummaryIndex.get(itemId) : undefined;
-  const alreadyEmittedForItem = itemId
-    ? state.reasoningItemsWithDelta instanceof Set && state.reasoningItemsWithDelta.has(itemId)
-    : Boolean(state.reasoningDeltaEmitted);
   let deltaText = reasoningDelta;
-  if (
-    summaryIndex !== null &&
-    lastIndex !== undefined &&
-    summaryIndex > lastIndex &&
-    alreadyEmittedForItem
-  ) {
+  if (summaryIndex !== null && lastIndex !== undefined && summaryIndex > lastIndex) {
     deltaText = `\n\n${reasoningDelta}`;
   }
   if (itemId && (lastIndex === undefined || summaryIndex > lastIndex)) {
@@ -1080,6 +1113,73 @@ function buildResponsesReasoningDeltaChunk(state, text) {
       },
     ],
   };
+}
+
+function consumeAnonymousReasoningSnapshot(state, text: string): boolean {
+  const snapshots: Map<string, number> | undefined = state.anonymousReasoningSnapshots;
+  const count = snapshots?.get(text) ?? 0;
+  if (count === 0) return false;
+  if (count === 1) snapshots.delete(text);
+  else snapshots.set(text, count - 1);
+  return true;
+}
+
+function recordAnonymousReasoningSnapshot(state, text: string) {
+  // Each unidentified item-done event is its own item. Match one occurrence at
+  // completion so identical text can still belong to two different items.
+  const snapshots: Map<string, number> = (state.anonymousReasoningSnapshots ??= new Map());
+  const count = snapshots.get(text) ?? 0;
+  if (count > 0 || chargeRetained(state, text.length)) snapshots.set(text, count + 1);
+}
+
+function synthesizeResponsesReasoningSnapshot(
+  state,
+  item: unknown,
+  outputIndex: unknown,
+  { replayableReasoning, fromCompleted }: { replayableReasoning?: string; fromCompleted?: boolean }
+) {
+  if (!item || typeof item !== "object" || !("type" in item) || item.type !== "reasoning") {
+    return null;
+  }
+
+  const itemId = "id" in item && item.id != null ? String(item.id) : "";
+  const emittedIds = state.reasoningItemsWithDelta;
+  const emittedIndexes = state.reasoningOutputIndexesWithDelta;
+  if (
+    (itemId && emittedIds?.has(itemId)) ||
+    (typeof outputIndex === "number" && emittedIndexes?.has(outputIndex))
+  ) {
+    // Learn the other identity now in case a later snapshot rotates or omits one.
+    markResponsesReasoningIdentity(state, itemId, outputIndex);
+    return null;
+  }
+
+  const text = replayableReasoning || getVisibleResponsesReasoningSummaryText(item);
+  return recoverUnseenReasoningSnapshot(state, itemId, outputIndex, text, fromCompleted);
+}
+
+function recoverUnseenReasoningSnapshot(
+  state,
+  itemId: string,
+  outputIndex: unknown,
+  text: string,
+  fromCompleted?: boolean
+) {
+  if (!text || isInternalReasoningPlaceholder(text)) return null;
+  if (fromCompleted && consumeAnonymousReasoningSnapshot(state, text)) {
+    markResponsesReasoningIdentity(state, itemId, outputIndex);
+    return null;
+  }
+
+  // Without an ID or index, only claim an item whose text matches the streamed
+  // prefix. Consume it once without suppressing other items in the same turn.
+  const alreadyStreamed = consumeAnonymousReasoningRun(state, text);
+  if (itemId || typeof outputIndex === "number") {
+    markResponsesReasoningIdentity(state, itemId, outputIndex);
+  } else {
+    recordAnonymousReasoningSnapshot(state, text);
+  }
+  return alreadyStreamed ? null : buildResponsesReasoningDeltaChunk(state, text);
 }
 
 /**
@@ -1338,6 +1438,7 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
   }
 
   if (eventType === "response.output_item.done" && data.item?.type === "reasoning") {
+    closeAnonymousReasoningRun(state);
     const replayableReasoning = extractReplayableResponsesReasoningText(data.item);
     if (replayableReasoning) {
       const accumulated =
@@ -1346,6 +1447,9 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
         ? `${accumulated}\n\n${replayableReasoning}`
         : replayableReasoning;
     }
+    return synthesizeResponsesReasoningSnapshot(state, data.item, data.output_index, {
+      replayableReasoning,
+    });
   }
 
   // Function call done — emit args chunk from item.arguments when no deltas were received,
@@ -1611,10 +1715,18 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
     const textByIndex = recoverTextSnapshotsByOutputIndex(state, output);
     closeResponsesTextSnapshots(state);
     if (state.finishReasonSent) return null;
-    const recovered = output.flatMap((item, index) => [
-      ...(textByIndex.get(index) ?? []),
-      ...synthesizeCompletedToolItem(state, item),
-    ]);
+    closeAnonymousReasoningRun(state);
+    const recovered = output.flatMap((item, index) => {
+      const reasoning =
+        eventType === "response.completed"
+          ? synthesizeResponsesReasoningSnapshot(state, item, index, { fromCompleted: true })
+          : null;
+      return [
+        ...(reasoning ? [reasoning] : []),
+        ...(textByIndex.get(index) ?? []),
+        ...synthesizeCompletedToolItem(state, item),
+      ];
+    });
     const finalChunk = buildFinalChunk(state);
     return recovered.length ? [...recovered, finalChunk] : finalChunk;
   }
@@ -1632,8 +1744,8 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
     eventType === "response.reasoning_text.delta"
   ) {
     const reasoningDelta = data.delta || "";
-    if (!reasoningDelta) return null;
-    markResponsesReasoningDeltaEmitted(state, data.item_id, data.output_index);
+    if (!reasoningDelta || isInternalReasoningPlaceholder(reasoningDelta)) return null;
+    recordResponsesReasoningDelta(state, data, reasoningDelta);
     return {
       id: state.chatId,
       object: "chat.completion.chunk",
@@ -1655,43 +1767,10 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
   // `delta.reasoning.summary` object is swallowed by most stream mergers.
   if (eventType === "response.reasoning_summary_text.delta") {
     const reasoningDelta = data.delta || "";
-    if (!reasoningDelta) return null;
-    markResponsesReasoningDeltaEmitted(state, data.item_id, data.output_index);
+    if (!reasoningDelta || isInternalReasoningPlaceholder(reasoningDelta)) return null;
     const deltaText = buildResponsesReasoningSummaryDelta(state, data, reasoningDelta);
+    recordResponsesReasoningDelta(state, data, deltaText);
     return buildResponsesReasoningDeltaChunk(state, deltaText);
-  }
-
-  // Some providers expose completed reasoning only on `response.output_item.done`.
-  // Synthesize one Chat reasoning delta only when no delta was already emitted.
-  if (eventType === "response.output_item.done" && data.item?.type === "reasoning") {
-    const item = data.item;
-    const itemId = item.id != null ? String(item.id) : "";
-    const emittedForItem =
-      state.reasoningItemsWithDelta instanceof Set &&
-      itemId &&
-      state.reasoningItemsWithDelta.has(itemId);
-    // Deltas were streamed but carried no item_id: fall back to the global flag and
-    // suppress synthesis to avoid duplicating that same reasoning text.
-    const emittedWithoutItemId =
-      state.reasoningDeltaEmitted &&
-      !(state.reasoningItemsWithDelta instanceof Set && state.reasoningItemsWithDelta.size > 0);
-    // Same reasoning item under a rotated id (GitHub Copilot): match by output_index.
-    const emittedForOutputIndex =
-      typeof data.output_index === "number" &&
-      state.reasoningOutputIndexesWithDelta instanceof Set &&
-      state.reasoningOutputIndexesWithDelta.has(data.output_index);
-    if (emittedForItem || emittedWithoutItemId || emittedForOutputIndex) return null;
-
-    const replayableReasoning = extractReplayableResponsesReasoningText(item);
-    if (replayableReasoning) {
-      return buildResponsesReasoningDeltaChunk(state, replayableReasoning);
-    }
-
-    // #7176/#7243: only synthesize from real upstream plaintext — never mutate
-    // `item` and never fabricate placeholder text for encrypted-only reasoning.
-    const summaryText = getVisibleResponsesReasoningSummaryText(item);
-    if (!summaryText) return null;
-    return buildResponsesReasoningDeltaChunk(state, summaryText);
   }
 
   // Ignore other events

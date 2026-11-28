@@ -1,0 +1,1 @@
+- **fix(streaming):** Preserve reasoning summaries first received at response completion and deliver late thinking after Claude tool calls finish. ([#21234](https://github.com/cheaper-inference/OmniRoute/pull/21234)) — thanks @ekinnee
