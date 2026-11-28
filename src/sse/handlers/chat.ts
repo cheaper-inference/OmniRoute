@@ -220,6 +220,7 @@ import { RequestTelemetry, recordTelemetry } from "../../shared/utils/requestTel
 import { generateRequestId } from "../../shared/utils/requestId";
 import { logAuditEvent } from "../../lib/compliance/index";
 import { enforceApiKeyPolicy } from "../../shared/utils/apiKeyPolicy";
+import { bindKeyQuotaReservation } from "../../domain/keyQuota";
 import { rejectIfMeteredBudgetExceeded } from "@/lib/usage/meteredBudgetPolicy";
 import { hasProviderQuotaBypassScope } from "../../shared/constants/apiKeyPolicyScopes";
 import { isMicrosoftDesignerWebProviderRetiredError } from "../../shared/constants/designerWebRetirement";
@@ -780,7 +781,14 @@ async function handleAdmittedChat(
 
   // Pipeline: API key policy enforcement (model restrictions + budget limits)
   telemetry.startPhase("policy");
-  const policy = await enforceApiKeyPolicy(request, modelStr, DEFER_METERED_BUDGET);
+  const policy = await enforceApiKeyPolicy(request, modelStr, {
+    ...DEFER_METERED_BUDGET,
+    reserveKeyQuota: true,
+  });
+  if (policy.keyQuotaReservation) {
+    admissionContext.holdKeyQuota(policy.keyQuotaReservation);
+    if (policy.apiKeyInfo) bindKeyQuotaReservation(policy.apiKeyInfo, policy.keyQuotaReservation);
+  }
   if (policy.rejection) {
     log.warn(
       "POLICY",

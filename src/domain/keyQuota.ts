@@ -22,30 +22,115 @@ import {
   getKeyQuotaLimits,
   getKeyQuotaStatus,
   incrementKeyQuotaCounter,
+  KEY_QUOTA_WINDOW_MS,
   loadUnpricedQuotaMonthStart,
   saveUnpricedQuotaMonthStart,
   type KeyQuotaStatus,
 } from "@/lib/db/keyQuota";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { getProcessStore } from "@/shared/utils/processSingleton";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+/** One request-per-minute slot held by a call that the gate admitted and that has not ended. */
+export interface KeyQuotaReservation {
+  readonly released: boolean;
+  /** Give the slot back. Safe to call again. */
+  release(): void;
+}
 
 export interface KeyQuotaVerdict {
   allowed: boolean;
   reason: string | null;
   dimension: "tpm" | "rpm" | "monthly" | null;
   status?: KeyQuotaStatus;
+  /** Set when the call was admitted against an rpm limit. The caller must release it. */
+  reservation?: KeyQuotaReservation;
 }
 
 export interface CheckKeyQuotaDeps {
   now?: () => number;
   monthTotalUsd?: number;
+  /** false = only look: the verdict still counts slots held by calls in flight, but takes none. */
+  reserve?: boolean;
 }
 
 export interface RecordKeyQuotaDeps {
   now?: () => number;
+  /**
+   * The reservation of the call that is recording. It is released here: from now on the
+   * recorded count carries the call. `null` = this call holds none. Omitted = release the
+   * oldest slot of the key (a plain check-then-record caller).
+   */
+  reservation?: KeyQuotaReservation | null;
+}
+
+// ---------------------------------------------------------------------------
+// rpm reservations
+// ---------------------------------------------------------------------------
+
+// The rpm counter moves only when a call records its usage, after the upstream answered. Calls
+// that arrive while others are in flight would all pass the gate. A reservation closes that gap:
+// the gate counts recorded calls + calls in flight. Process-local, like the in-memory limiter;
+// a store shared through globalThis keeps one copy when the bundler duplicates this module.
+// A reservation whose exit was missed stops counting after one rpm window, so it cannot lock a
+// key out for good.
+const heldByKey = getProcessStore(
+  "keyQuotaRpmReservations",
+  () => new Map<string, Map<KeyQuotaReservation, number>>()
+);
+const boundToKeyInfo = getProcessStore(
+  "keyQuotaReservationByKeyInfo",
+  () => new WeakMap<object, KeyQuotaReservation>()
+);
+
+function heldCount(apiKeyId: string, nowMs: number): number {
+  const slots = heldByKey.get(apiKeyId);
+  if (!slots) return 0;
+  for (const [reservation, takenAtMs] of slots) {
+    if (nowMs - takenAtMs >= KEY_QUOTA_WINDOW_MS) slots.delete(reservation);
+  }
+  if (slots.size === 0) heldByKey.delete(apiKeyId);
+  return slots.size;
+}
+
+function takeReservation(apiKeyId: string, nowMs: number): KeyQuotaReservation {
+  let released = false;
+  const reservation: KeyQuotaReservation = {
+    get released() {
+      return released;
+    },
+    release() {
+      if (released) return;
+      released = true;
+      const slots = heldByKey.get(apiKeyId);
+      slots?.delete(reservation);
+      if (slots?.size === 0) heldByKey.delete(apiKeyId);
+    },
+  };
+  const slots = heldByKey.get(apiKeyId) ?? new Map<KeyQuotaReservation, number>();
+  slots.set(reservation, nowMs);
+  heldByKey.set(apiKeyId, slots);
+  return reservation;
+}
+
+/** Slots held right now for a key (tests and diagnostics). */
+export function countKeyQuotaReservations(apiKeyId: string): number {
+  return heldCount(apiKeyId, Date.now());
+}
+
+/** Tie a call's reservation to its `apiKeyInfo`, so the usage recorder can find it. */
+export function bindKeyQuotaReservation(apiKeyInfo: object, reservation: KeyQuotaReservation) {
+  boundToKeyInfo.set(apiKeyInfo, reservation);
+}
+
+/** The reservation bound to this call's `apiKeyInfo`, or null (pass it to `recordKeyQuotaUsage`). */
+export function boundKeyQuotaReservation(
+  apiKeyInfo: object | null | undefined
+): KeyQuotaReservation | null {
+  return (apiKeyInfo && boundToKeyInfo.get(apiKeyInfo)) || null;
 }
 
 // ---------------------------------------------------------------------------
@@ -71,6 +156,10 @@ function verdict(
 
 /**
  * PRE-request quota gate. Always fail-open (B16).
+ *
+ * An admitted call against an rpm limit holds a slot (`verdict.reservation`) until its usage is
+ * recorded (`recordKeyQuotaUsage` converts it) or the caller releases it. Pass `reserve: false`
+ * to check without taking a slot.
  */
 export function checkKeyQuota(
   apiKeyId: string | null | undefined,
@@ -87,7 +176,13 @@ export function checkKeyQuota(
     });
     if (!status.enabled) return { allowed: true, reason: null, dimension: null, status };
     if (status.tpmExceeded) return verdict(false, "tpm", status);
-    if (status.rpmExceeded) return verdict(false, "rpm", status);
+    const rpmLimit = status.limits.rpmLimit;
+    if (
+      status.rpmExceeded ||
+      (rpmLimit !== null && status.counters.rpmUsed + heldCount(apiKeyId, nowMs) >= rpmLimit)
+    ) {
+      return verdict(false, "rpm", status);
+    }
     if (status.monthlyExceeded) return verdict(false, "monthly", status);
     if (isMonthClosedByUnpricedUsage(apiKeyId, status, nowMs)) {
       return verdict(
@@ -97,7 +192,8 @@ export function checkKeyQuota(
         "Monthly USD quota cannot be enforced: a model without a price was used this month"
       );
     }
-    return verdict(true, null, status);
+    if (deps.reserve === false || rpmLimit === null) return verdict(true, null, status);
+    return { ...verdict(true, null, status), reservation: takeReservation(apiKeyId, nowMs) };
   } catch {
     // B16 — fail-open: quota infra error must not block traffic.
     return { allowed: true, reason: null, dimension: null };
@@ -152,7 +248,8 @@ export function recordUnpricedKeyQuotaUsage(
 
 /**
  * POST-response consumption recorder. Fire-and-forget (B29): increments tpm by
- * billable tokens and rpm by 1. Never throws to the caller.
+ * billable tokens and rpm by 1, then releases the call's rpm reservation (the recorded
+ * count carries the call from here). Never throws to the caller.
  */
 export function recordKeyQuotaUsage(
   apiKeyId: string | null | undefined,
@@ -166,6 +263,10 @@ export function recordKeyQuotaUsage(
     incrementKeyQuotaCounter(apiKeyId, "rpm", 1, nowMs);
   } catch {
     // B29 — drift acceptable; never propagate.
+  } finally {
+    const { reservation } = deps;
+    if (reservation !== undefined) reservation?.release();
+    else heldByKey.get(apiKeyId)?.keys().next().value?.release();
   }
 }
 

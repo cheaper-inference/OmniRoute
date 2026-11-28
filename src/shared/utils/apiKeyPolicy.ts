@@ -22,7 +22,7 @@ import { getCachedComboByName, getCachedComboForModel } from "@/lib/db/readCache
 import { isDashboardSessionAuthenticated } from "./apiAuth";
 import { isAnthropicMessagesRequest } from "./anthropicErrorEnvelope";
 import { checkBudget } from "@/domain/costRules";
-import { checkKeyQuota } from "@/domain/keyQuota";
+import { checkKeyQuota, type KeyQuotaReservation } from "@/domain/keyQuota";
 import { checkTokenLimits } from "@omniroute/open-sse/services/tokenLimitCounter.ts";
 import {
   errorResponse,
@@ -463,6 +463,11 @@ export interface ApiKeyPolicyResult {
   apiKeyInfo: ApiKeyMetadata | null;
   /** If set, the request should be rejected with this Response */
   rejection: Response | null;
+  /**
+   * The key-quota rpm slot this call holds (only with `reserveKeyQuota`). The caller owns it
+   * and must release it on every way the call can end.
+   */
+  keyQuotaReservation?: KeyQuotaReservation;
 }
 
 type PolicyValidationStage =
@@ -473,6 +478,13 @@ export interface EnforceApiKeyPolicyOptions {
   directModelDispatch?: boolean;
   /** Existing fal jobs do not dispatch inference. Authorization still applies after spend limits. */
   existingFalJob?: boolean;
+  /**
+   * Hold a key-quota rpm slot for the admitted call and return it as `keyQuotaReservation`.
+   * Only a caller that releases the slot on every exit and records the call's usage may set
+   * this (chat does). Other callers get a check that counts slots held by calls in flight but
+   * takes none, so a route that never records usage cannot lock a key out.
+   */
+  reserveKeyQuota?: boolean;
   /**
    * Where the metered dollar budget is enforced for this request.
    *
@@ -861,16 +873,26 @@ function validateTokenLimit(context: PolicyContext): Response | null {
   }
 }
 
-function validateKeyQuota(context: PolicyContext): Response | null {
+function validateKeyQuota(
+  context: PolicyContext,
+  reserve: boolean
+): { rejection: Response | null; reservation?: KeyQuotaReservation } {
   const { apiKeyInfo } = context;
-  if (!apiKeyInfo.id) return null;
+  if (!apiKeyInfo.id) return { rejection: null };
   try {
-    const verdict = checkKeyQuota(apiKeyInfo.id);
-    if (verdict.allowed) return null;
-    return errorResponse(HTTP_STATUS.RATE_LIMITED, verdict.reason || "API key quota exceeded");
+    const verdict = checkKeyQuota(apiKeyInfo.id, { reserve });
+    if (verdict.allowed) return { rejection: null, reservation: verdict.reservation };
+    return {
+      rejection: errorResponse(
+        HTTP_STATUS.RATE_LIMITED,
+        verdict.reason || "API key quota exceeded"
+      ),
+    };
   } catch (error) {
     log.error("API_POLICY", "API key quota check failed. Request blocked.", { error });
-    return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "API key quota policy unavailable");
+    return {
+      rejection: errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "API key quota policy unavailable"),
+    };
   }
 }
 
@@ -1154,14 +1176,20 @@ async function runAccessValidators(
 async function runLimitValidators(
   context: PolicyContext,
   options?: EnforceApiKeyPolicyOptions
-): Promise<Response | null> {
+): Promise<{ rejection: Response | null; reservation?: KeyQuotaReservation }> {
   const budgetRejection = validateBudgetUnlessDeferred(context, options);
-  if (budgetRejection) return budgetRejection;
-  const keyQuotaRejection = validateKeyQuota(context);
-  if (keyQuotaRejection) return keyQuotaRejection;
-  const tokenRejection = validateTokenLimit(context);
-  if (tokenRejection) return tokenRejection;
-  return await validateRateLimitAndThrottle(context);
+  if (budgetRejection) return { rejection: budgetRejection };
+  const keyQuota = validateKeyQuota(context, options?.reserveKeyQuota === true);
+  if (keyQuota.rejection) return keyQuota;
+  try {
+    const rejection = validateTokenLimit(context) ?? (await validateRateLimitAndThrottle(context));
+    if (!rejection) return keyQuota;
+    keyQuota.reservation?.release();
+    return { rejection };
+  } catch (error) {
+    keyQuota.reservation?.release();
+    throw error;
+  }
 }
 
 /**
@@ -1244,8 +1272,11 @@ export async function enforceApiKeyPolicy(
   const accessRejection = await runAccessValidators(context, options);
   if (accessRejection) return { apiKey, apiKeyInfo, rejection: accessRejection };
 
-  const limitRejection = await runLimitValidators(context, options);
-  if (limitRejection) return { apiKey, apiKeyInfo, rejection: limitRejection };
-
-  return { apiKey, apiKeyInfo, rejection: null };
+  const limits = await runLimitValidators(context, options);
+  return {
+    apiKey,
+    apiKeyInfo,
+    rejection: limits.rejection,
+    keyQuotaReservation: limits.reservation,
+  };
 }
