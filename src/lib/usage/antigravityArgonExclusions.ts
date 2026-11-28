@@ -72,8 +72,14 @@ function withoutAutoManagedArgonPatterns(excluded: unknown[]): unknown[] {
  * in this repo still honour that spelling, so a value found there must not be dropped on write.
  */
 function storedExclusions(psd: Record<string, unknown>): { value: unknown; legacy: boolean } {
-  if (psd.excludedModels !== undefined) return { value: psd.excludedModels, legacy: false };
-  if (psd.excluded_models !== undefined) return { value: psd.excluded_models, legacy: true };
+  // Nullish, like `getConnectionExcludedModels`: a null canonical value means the consumer reads
+  // the legacy key, so an explicit null must not shadow a list stored there.
+  if (psd.excludedModels !== undefined && psd.excludedModels !== null) {
+    return { value: psd.excludedModels, legacy: false };
+  }
+  if (psd.excluded_models !== undefined && psd.excluded_models !== null) {
+    return { value: psd.excluded_models, legacy: true };
+  }
   return { value: undefined, legacy: false };
 }
 

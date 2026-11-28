@@ -469,6 +469,37 @@ test("markArgonEligible: the notices parameter defaults, so a direct caller can 
   assert.deepEqual(nextPsd, { hasArgon: true, excludedModels: 42 });
 });
 
+test("applyAntigravityArgonEligibilityToPsd: a null canonical value falls back to the legacy list", () => {
+  // The consumer reads `excludedModels ?? excluded_models`, so an explicit null must not shadow
+  // a list stored under the legacy spelling.
+  const psd = { hasArgon: false, excludedModels: null, excluded_models: ["claude*", "gemini-4*"] };
+  const result = applyAntigravityArgonEligibilityToPsd(psd, false);
+
+  assert.equal(result.changed, true);
+  assert.deepEqual(result.nextPsd.excludedModels, ["claude*", "*argon*"]);
+  assert.equal("excluded_models" in result.nextPsd, false);
+  assert.deepEqual(psd, {
+    hasArgon: false,
+    excludedModels: null,
+    excluded_models: ["claude*", "gemini-4*"],
+  });
+
+  // Eligible side: the legacy gemini-4* entry must come off, and the operator's claude* stays.
+  const eligible = applyAntigravityArgonEligibilityToPsd(
+    { hasArgon: true, excludedModels: null, excluded_models: ["claude*", "gemini-4*"] },
+    true
+  );
+  assert.deepEqual(eligible.nextPsd.excludedModels, ["claude*"]);
+  assert.equal("excluded_models" in eligible.nextPsd, false);
+
+  // Both spellings null is an empty list, not a fallback.
+  const empty = applyAntigravityArgonEligibilityToPsd(
+    { hasArgon: false, excludedModels: null, excluded_models: null },
+    false
+  );
+  assert.deepEqual(empty.nextPsd.excludedModels, ["*argon*"]);
+});
+
 test("applyAntigravityArgonEligibilityToPsd: a legacy excluded_models list is read, kept and retired", () => {
   // Three readers in this repo still honour the snake_case spelling, so a value stored there
   // must survive the rewrite instead of being replaced by the guard.
