@@ -21,6 +21,7 @@ import {
   promptRequiredResponse,
   readMediaGenerationBody,
   successfulMediaGenerationResponse,
+  type MediaGenerationResultLike,
 } from "@/app/api/v1/_shared/mediaGenerationRoute";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
 import { getComboByName } from "@/lib/db/combos";
@@ -106,14 +107,17 @@ async function generateMusicForConnection(
 ) {
   const endpoint = "/v1/music/generations";
   const identity = toCallLogApiKeyContext(apiKeyInfo, credentials);
-  const { result, mediaWrites } = await trackMediaWrites(identity, endpoint, () =>
-    handleMusicGeneration({
-      prepareFalInput: getFalCompatibilityPreparer(),
-      body,
-      credentials,
-      log,
-      signal: request.signal,
-    })
+  const { result, mediaWrites } = await trackMediaWrites<MediaGenerationResultLike>(
+    identity,
+    endpoint,
+    () =>
+      handleMusicGeneration({
+        prepareFalInput: getFalCompatibilityPreparer(),
+        body,
+        credentials,
+        log,
+        signal: request.signal,
+      })
   );
   if (!result.success) {
     return failedMediaGenerationResponse(result, "Music generation provider error");
