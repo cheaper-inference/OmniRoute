@@ -96,8 +96,7 @@ test("GitHub Copilot registry reflects the current supported model lineup", () =
     "claude-fable-5.1",
     "claude-opus-5",
     "claude-sonnet-5",
-    // claude-sonnet-5-5 came from the release tip (#15035) after this catalog was captured.
-    "claude-sonnet-5-5",
+    "claude-sonnet-5.5",
     "claude-opus-4.8-fast",
     "claude-opus-4.8",
     "claude-haiku-4.5",

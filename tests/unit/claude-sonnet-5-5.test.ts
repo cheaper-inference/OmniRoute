@@ -87,7 +87,7 @@ test("Claude Sonnet 5.5 is priced at the published rate", () => {
 });
 
 test("Claude Sonnet 5.5 is registered on the first-party providers", () => {
-  for (const providerId of ["claude", "anthropic", "vertex", "vertex-partner", "github"]) {
+  for (const providerId of ["claude", "anthropic", "vertex", "vertex-partner"]) {
     const ids = new Set(getModelsByProviderId(providerId).map((entry) => entry.id));
     assert.ok(ids.has(MODEL_ID), `${providerId} must expose ${MODEL_ID}`);
   }
@@ -95,4 +95,18 @@ test("Claude Sonnet 5.5 is registered on the first-party providers", () => {
   assert.deepEqual(claude?.supportedThinkingEfforts, ["low", "medium", "high", "xhigh"]);
   assert.equal(modelSupportsContext1mBeta(MODEL_ID), true);
   assert.equal(getNextFamilyFallback(`claude/${MODEL_ID}`, new Set()), "claude/claude-sonnet-5");
+});
+
+test("GitHub Copilot exposes Sonnet 5.5 with its upstream dotted model ID", () => {
+  const models = getModelsByProviderId("github");
+  const sonnet = models.find((entry) => entry.id === "claude-sonnet-5.5");
+  assert.ok(sonnet);
+  assert.equal(
+    models.some((entry) => entry.id === MODEL_ID),
+    false
+  );
+  assert.equal(sonnet.name, "Claude Sonnet 5.5");
+  assert.equal(sonnet.targetFormat, "claude");
+  assert.equal(sonnet.maxOutputTokens, 128_000);
+  assert.deepEqual(sonnet.supportedThinkingEfforts, ["low", "medium", "high", "xhigh"]);
 });
