@@ -65,9 +65,10 @@ export function getNativeGeminiThinkingSpec(model: string): {
   fixedTier?: GeminiThinkingLevel;
 } {
   const id = model.slice(model.lastIndexOf("/") + 1).toLowerCase();
-  const match = /^gemini-4-(argon|carbon|hydrogen|neon)(?:-(low|medium|high|xhigh))?$/.exec(
-    id === "gemini-4" ? "gemini-4-argon" : id
-  );
+  const match =
+    /^gemini-4-(argon|carbon|hydrogen|neon)(?:-(?:tiered-)?(low|medium|high|xhigh))?$/.exec(
+      id === "gemini-4" ? "gemini-4-argon" : id
+    );
   if (match) {
     const family = GEMINI_4_NATIVE_THINKING[match[1] as keyof typeof GEMINI_4_NATIVE_THINKING];
     const levels: readonly GeminiThinkingLevel[] = family.levels;

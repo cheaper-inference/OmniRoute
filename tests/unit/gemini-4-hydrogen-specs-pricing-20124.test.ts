@@ -61,11 +61,12 @@ test("antigravity keeps explicit gemini-4-hydrogen tiers verbatim", () => {
   }
 });
 
-test("resolveAntigravityOutputCap preserves 65,535 token ceiling for Hydrogen tiers", () => {
-  for (const tier of ["xhigh", "high", "medium", "low"]) {
+test("resolveAntigravityOutputCap preserves 262,144 token ceiling for Hydrogen tiers and 65,536 for Sonar", () => {
+  for (const tier of ["xhigh", "high", "medium", "low", "tiered-xhigh", "tiered-high"]) {
     const cap = resolveAntigravityOutputCap(`gemini-4-hydrogen-${tier}`);
-    assert.equal(cap, 65535, `gemini-4-hydrogen-${tier} output cap must be 65535, not 16384`);
+    assert.equal(cap, 262144, `gemini-4-hydrogen-${tier} output cap must be 262144, not 16384`);
   }
+  assert.equal(resolveAntigravityOutputCap("gemini-4-hydrogen-sonar"), 65536);
 });
 
 test("gemini-4-hydrogen spec matches 1M context / 65,536 default output and 4 thinking levels", () => {

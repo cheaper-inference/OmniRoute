@@ -49,7 +49,7 @@ function extractDiscoveryTokenLimits(item: Record<string, unknown>): {
   outputTokenLimit?: number;
 } {
   const limits: { inputTokenLimit?: number; outputTokenLimit?: number } = {};
-  const input = item.inputTokenLimit ?? item.contextWindow;
+  const input = item.inputTokenLimit ?? item.contextWindow ?? item.maxTokens;
   if (typeof input === "number" && Number.isFinite(input) && input > 0) {
     limits.inputTokenLimit = input;
   }
