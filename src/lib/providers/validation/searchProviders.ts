@@ -24,6 +24,13 @@ const STRICT_BAD_REQUEST_ERRORS: Record<string, string> = {
   "google-pse-search": "Google PSE validation failed. Check the API key and Search Engine ID (cx).",
 };
 
+// Providers probed at a base URL the operator can save on the connection. A 404 there means the
+// address is wrong, so the lenient < 500 policy below must not report it as a working key. (A
+// redirect already fails: the probe never follows one.) Fixed messages only.
+const STRICT_ENDPOINT_ERRORS: Record<string, string> = {
+  "google-pse-search": "Google PSE validation failed. Check the base URL.",
+};
+
 export async function validateSearchProvider(
   url: string,
   init: RequestInit,
@@ -44,6 +51,10 @@ export async function validateSearchProvider(
     const strictBadRequestError = providerId ? STRICT_BAD_REQUEST_ERRORS[providerId] : undefined;
     if (response.status === 400 && strictBadRequestError) {
       return { valid: false, error: strictBadRequestError, unsupported: false };
+    }
+    const strictEndpointError = providerId ? STRICT_ENDPOINT_ERRORS[providerId] : undefined;
+    if (response.status === 404 && strictEndpointError) {
+      return { valid: false, error: strictEndpointError, unsupported: false };
     }
     // For provider setup we only need to confirm authentication passed.
     // Search providers may return non-auth statuses for exhausted credits,
@@ -120,10 +131,14 @@ export const SEARCH_VALIDATOR_CONFIGS: Record<
     if (!cx || typeof cx !== "string") {
       throw new Error("Programmable Search Engine ID (cx) is required");
     }
+    // Probe the address the search handler calls: a base URL saved on the connection
+    // (providerSpecificData.baseUrl) replaces the default, as resolveSearchBaseUrl does at runtime.
+    const baseUrl =
+      typeof providerSpecificData?.baseUrl === "string" && providerSpecificData.baseUrl.trim()
+        ? providerSpecificData.baseUrl.trim().replace(/\/+$/, "")
+        : "https://www.googleapis.com/customsearch/v1";
     return {
-      url: `https://www.googleapis.com/customsearch/v1?key=${encodeURIComponent(apiKey)}&cx=${encodeURIComponent(
-        cx
-      )}&q=test&num=1`,
+      url: `${baseUrl}?key=${encodeURIComponent(apiKey)}&cx=${encodeURIComponent(cx)}&q=test&num=1`,
       init: {
         method: "GET",
         headers: { Accept: "application/json" },
