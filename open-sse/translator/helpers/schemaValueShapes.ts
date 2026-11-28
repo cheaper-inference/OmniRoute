@@ -29,11 +29,24 @@ export interface SchemaValueShapeOptions {
    * for a later pass to map. Default: false — it degrades to `"string"`.
    */
   keepUnknownTypeNames?: boolean;
+  /** Coerce string counts for `minContains` and `maxContains`. Default: false. */
+  coerceContainsCounts?: boolean;
 }
 
 type ShapeOptions = Required<SchemaValueShapeOptions>;
 
 const DROP = Symbol("drop");
+
+export const CONTAINS_COUNT_KEYWORDS = new Set(["minContains", "maxContains"]);
+
+export function coerceContainsCount(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  const trimmed = value.trim();
+  if (!/^\d+$/.test(trimmed)) return value;
+
+  const count = Number(trimmed);
+  return Number.isSafeInteger(count) ? count : value;
+}
 
 const JSON_SCHEMA_TYPE_NAMES = new Set([
   "string",
@@ -166,6 +179,9 @@ function coerceSchemaList(list: unknown[], options: ShapeOptions): unknown[] {
 }
 
 function coerceEntry(key: string, value: unknown, options: ShapeOptions): unknown {
+  if (options.coerceContainsCounts && CONTAINS_COUNT_KEYWORDS.has(key)) {
+    return coerceContainsCount(value);
+  }
   if (DATA_KEYWORDS.has(key) || key.startsWith("x-")) return value;
   if (key === "properties") return coerceProperties(value, options);
   if (key === "items") return coerceItems(value, options);
@@ -203,5 +219,6 @@ export function coerceSchemaValueShapes(
   return coerceSchemaNode(schema, {
     allowBooleanSchemas: options.allowBooleanSchemas ?? true,
     keepUnknownTypeNames: options.keepUnknownTypeNames ?? false,
+    coerceContainsCounts: options.coerceContainsCounts ?? false,
   });
 }

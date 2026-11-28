@@ -2,6 +2,7 @@ import {
   isDeepSeekReasoningModel,
   requiresReasoningReplay,
 } from "../../services/reasoningCache.ts";
+import { coerceContainsCount, CONTAINS_COUNT_KEYWORDS } from "./schemaValueShapes.ts";
 
 /**
  * Shared sanitizers for tool payloads that arrive from IDEs/SDKs with
@@ -77,6 +78,19 @@ function coerceNumericString(value: unknown): unknown {
   return Number.isFinite(parsed) ? parsed : value;
 }
 
+function coerceNumericConstraints(schema: JsonRecord): void {
+  for (const field of NUMERIC_SCHEMA_FIELDS) {
+    if (field in schema) {
+      schema[field] = coerceNumericString(schema[field]);
+    }
+  }
+  for (const field of CONTAINS_COUNT_KEYWORDS) {
+    if (field in schema) {
+      schema[field] = coerceContainsCount(schema[field]);
+    }
+  }
+}
+
 function mapRecordValues(record: JsonRecord): JsonRecord {
   return Object.fromEntries(
     Object.entries(record).map(([key, value]) => [key, coerceSchemaNumericFields(value)])
@@ -107,11 +121,7 @@ export function coerceSchemaNumericFields(schema: unknown): unknown {
     delete result.pattern;
   }
 
-  for (const field of NUMERIC_SCHEMA_FIELDS) {
-    if (field in result) {
-      result[field] = coerceNumericString(result[field]);
-    }
-  }
+  coerceNumericConstraints(result);
 
   if (isPlainObject(result.properties)) {
     result.properties = mapRecordValues(result.properties);
@@ -131,6 +141,9 @@ export function coerceSchemaNumericFields(schema: unknown): unknown {
 
   if (result.items !== undefined) {
     result.items = coerceSchemaNumericFields(result.items);
+  }
+  if (isPlainObject(result.contains)) {
+    result.contains = coerceSchemaNumericFields(result.contains);
   }
   if (result.additionalProperties && typeof result.additionalProperties === "object") {
     result.additionalProperties = coerceSchemaNumericFields(result.additionalProperties);
@@ -602,7 +615,7 @@ export function stripInvalidSchemaConstructs(schema: unknown): unknown {
   for (const [key, value] of Object.entries(schema)) {
     // Coerce string-encoded numeric constraints (e.g. minimum: "5") to numbers —
     // Anthropic rejects the string form. Done here so the Claude sanitizer covers
-    // every slot this function recurses into (incl. contains / propertyNames /
+    // every slot this function recurses into (incl. propertyNames /
     // additionalItems, which coerceSchemaNumericFields does not visit).
     if ((NUMERIC_SCHEMA_FIELDS as readonly string[]).includes(key)) {
       result[key] = coerceNumericString(value);
