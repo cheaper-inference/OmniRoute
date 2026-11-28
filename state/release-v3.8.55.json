@@ -3,29 +3,35 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b82",
+    "batchId": "b83",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b82-742dde8f8e1f",
-    "candidateSha": "742dde8f8e1f80d28b164391fcd33d32f0ece117",
-    "baseSha": "8c27caded3d0ad4f90a64fcee325ab1b64697901",
-    "treeSha": "a4fc74f938b633b4614e7a21652dccfcac4e3ed5",
+    "candidateRef": "omni-queue/release-v3.8.55/b83-bfb6ca369658",
+    "candidateSha": "bfb6ca36965816af704339f5f805c446131c3f2a",
+    "baseSha": "742dde8f8e1f80d28b164391fcd33d32f0ece117",
+    "treeSha": "0968e9516e5968422a932cf003bd84e6648144cb",
     "prs": [
       {
-        "n": 21489,
-        "head": "c61d88330e8bf074851559c2e779b2380b90502e",
-        "title": "fix(i18n): keep the nightly refresh alive when a few UI translations fail",
+        "n": 21350,
+        "head": "052c59c585b74e3db2a97c89ebbfe00be38e36b6",
+        "title": "fix(auth): refuse the default management password off-host by its stored hash",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-28T12:49:58Z"
+        "labeledAt": "2026-11-28T18:29:02Z"
       }
     ],
-    "stage": "landing",
-    "startedAt": "2026-11-28T18:18:09.437Z",
+    "stage": "testing",
+    "startedAt": "2026-11-28T19:38:12.213Z",
     "attempts": 0,
     "bisect": null,
-    "lane": "hotfix",
-    "landAttempts": 1
+    "lane": "hotfix"
   },
   "baseChecks": [
+    {
+      "baseSha": "742dde8f8e1f80d28b164391fcd33d32f0ece117",
+      "ref": "omni-queue/release-v3.8.55/b82-742dde8f8e1f",
+      "status": "green",
+      "startedAt": "2026-11-28T18:18:09.437Z",
+      "signatures": []
+    },
     {
       "baseSha": "8c27caded3d0ad4f90a64fcee325ab1b64697901",
       "ref": "omni-queue/release-v3.8.55/b81-8c27caded3d0",
@@ -88,13 +94,6 @@
       "status": "green",
       "startedAt": "2026-11-27T18:54:48.825Z",
       "signatures": []
-    },
-    {
-      "baseSha": "d7c69c39b9aa3fec92291fc82f6ae446ceb1d635",
-      "ref": "omni-queue/release-v3.8.55/b69-d7c69c39b9aa",
-      "status": "green",
-      "startedAt": "2026-11-27T17:34:58.069Z",
-      "signatures": []
     }
   ],
   "shadow": {
@@ -119,51 +118,15 @@
     }
   },
   "counters": {
-    "batchSeq": 82,
-    "ciRuns": 88,
-    "landedPrs": 83,
-    "landedBatches": 32,
+    "batchSeq": 83,
+    "ciRuns": 89,
+    "landedPrs": 84,
+    "landedBatches": 33,
     "redBatches": 18,
     "bisections": 6,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-25T07:29:28.955Z",
-      "type": "base-check-started",
-      "batchId": "basecheck-ae94881fcf54",
-      "prs": [
-        21168,
-        21169,
-        21172,
-        21174
-      ],
-      "sha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
-      "detail": "b37 red on a base with no verdict: testing the bare base",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45568467628"
-    },
-    {
-      "at": "2026-11-25T08:03:41.106Z",
-      "type": "checks-red",
-      "batchId": "basecheck-ae94881fcf54",
-      "sha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
-      "detail": "base-check red: Gate / Quality, Fast Quality Gates (1/4), Unit Tests (1/8)",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45572983016"
-    },
-    {
-      "at": "2026-11-25T08:03:41.469Z",
-      "type": "base-red-paused",
-      "batchId": "b37",
-      "prs": [
-        21168,
-        21169,
-        21172,
-        21174
-      ],
-      "sha": "ae94881fcf543d1ee91d6af11f18b274280e0c53",
-      "detail": "all 1 failure(s) also fail on base ae94881fcf54 (1 matched by check name only: no test-level key)",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45572983016"
-    },
     {
       "at": "2026-11-25T10:14:00.379Z",
       "type": "queue-stalled",
@@ -2792,12 +2755,43 @@
       ],
       "sha": "742dde8f8e1f80d28b164391fcd33d32f0ece117",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46181758213"
+    },
+    {
+      "at": "2026-11-28T19:35:40.069Z",
+      "type": "land-blessed",
+      "batchId": "b82",
+      "prs": [
+        21489
+      ],
+      "sha": "742dde8f8e1f80d28b164391fcd33d32f0ece117",
+      "detail": "omni-queue/land success on 1 commit(s)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46181758213"
+    },
+    {
+      "at": "2026-11-28T19:35:43.936Z",
+      "type": "landed",
+      "batchId": "b82",
+      "prs": [
+        21489
+      ],
+      "sha": "742dde8f8e1f80d28b164391fcd33d32f0ece117",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46181758213"
+    },
+    {
+      "at": "2026-11-28T19:38:16.148Z",
+      "type": "batch-started",
+      "batchId": "b83",
+      "prs": [
+        21350
+      ],
+      "sha": "bfb6ca36965816af704339f5f805c446131c3f2a",
+      "detail": "1 PR(s) on 742dde8f8e1f; lane hotfix",
+      "labeledAt": {
+        "21350": "2026-11-28T18:29:02Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46181758213"
     }
   ],
-  "updatedAt": "2026-11-28T19:35:37.112Z",
-  "batchWindow": 2,
-  "landingsWithoutVerdict": {
-    "count": 1,
-    "since": "2026-11-28T19:35:37.112Z"
-  }
+  "updatedAt": "2026-11-28T19:38:18.134Z",
+  "batchWindow": 2
 }
