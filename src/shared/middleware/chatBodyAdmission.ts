@@ -1019,19 +1019,27 @@ function parseContentLength(header: string | null): number | null {
   return Number.isSafeInteger(parsed) ? parsed : null;
 }
 
+const kAbortChain = Symbol("omniroute.admission.abortChain");
+
 function rebuildRequest(request: Request, body: Uint8Array): Request {
   const headers = new Headers(request.headers);
   // The inbound value may be absent or dishonest. Let the runtime derive the correct value.
   headers.delete("content-length");
   // The body is already decoded (decodeAdmittedBody), so the encoding must not ride along.
   headers.delete("content-encoding");
-  return new Request(request.url, {
+  const rebuilt = new Request(request.url, {
     method: request.method,
     headers,
     body,
     signal: request.signal,
     duplex: "half",
   } as RequestInit & { duplex: "half" });
+  // Undici follows an init signal through weak references, and a Request signal does not hold its
+  // controller. Downstream code usually keeps only `request.signal`, so tie both Requests to that
+  // native signal: the client abort then survives GC, and `clone()` still finds its dependents
+  // because the signal is left untouched.
+  Object.defineProperty(rebuilt.signal, kAbortChain, { value: { source: request, rebuilt } });
+  return rebuilt;
 }
 
 /**
