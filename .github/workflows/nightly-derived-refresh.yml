@@ -5,19 +5,17 @@ name: Nightly derived refresh
 # the version claims, the README SVG numbers, the facts snapshot (docs/reference/
 # derived-facts.json). `npm run release:refresh-derived` recomputes all of them in one pass; the
 # release runs it, and between releases this workflow runs it once a day on the highest
-# release/vX.Y.Z and keeps ONE pull request open with the result, so the docs never fall more
-# than a day behind the code. The counts gate lets this PR edit managed numbers because
+# release/vX.Y.Z and keeps a pull request open for each group of refreshed files. The counts
+# gate lets these PRs edit managed numbers because
 # `chore/derived-*` is a writer branch (scripts/check/lib/derivedClaimsDiff.mjs).
 #
 # This workflow skips a branch under release-freeze (Hard Rule #21).
 # When enabled, derived-refresh-autoland applies the queue label after checking the PR files,
 # current head gates, release freeze and base health.
 #
-# Branch chore/derived-refresh belongs to this robot, the same mechanism as the UI Kit upstream
-# watch (scripts/ci/ui-kit-sync-pr.sh): every run rebuilds it as ONE commit on top of the release
-# tip and pushes with --force-with-lease pinned to the SHA it read, so a commit pushed after that
-# read is never overwritten; and an open PR whose branch tip was pushed by someone else (a hand
-# fix) is left alone until it is merged or closed.
+# The robot uses chore/derived-refresh for unprotected files and chore/derived-refresh-protected
+# for protected files. Each branch gets one commit from the same release tip with a lease pinned
+# to the remote SHA. The robot leaves branches with manually pushed tips alone.
 #
 # PR token: DERIVED_REFRESH_PR_TOKEN when set (fine-grained token on this repository, Contents
 # and Pull requests: write), else I18N_REFRESH_TOKEN — the robot token the i18n mirror refresh
@@ -47,11 +45,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
-      contents: write # push chore/derived-refresh when no PR token is configured
-      pull-requests: write # find, update and retarget the refresh PR
+      contents: write # push the refresh branches when no PR token is configured
+      pull-requests: write # find, update and retarget the refresh PRs
       issues: read # release-freeze and base-red lookups
     env:
       REFRESH_BRANCH: chore/derived-refresh
+      PROTECTED_BRANCH: chore/derived-refresh-protected
       BOT_NAME: github-actions[bot]
       BOT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
     steps:
@@ -136,7 +135,7 @@ jobs:
           echo "Translation engine: \`$OMNIROUTE_TRANSLATION_ENGINE\`" >> "$GITHUB_STEP_SUMMARY"
           npm run release:refresh-derived -- --profile=nightly
 
-      - name: Commit, push and open or update the refresh PR
+      - name: Split the refreshed files and publish the PRs
         if: steps.base.outputs.skip == 'false'
         env:
           GH_TOKEN: ${{ secrets.DERIVED_REFRESH_PR_TOKEN || secrets.I18N_REFRESH_TOKEN || github.token }}
@@ -146,106 +145,56 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
-          TITLE="chore(docs): refresh derived numbers on ${BASE}"
-          # The fetched tip is the robot's own only when the bot both authored AND committed it:
-          # `git commit --amend --no-edit` on the bot commit keeps the bot as author but records
-          # the maintainer as committer, and that hand fix must be neither closed nor overwritten.
-          robot_tip() {
-            [ "$(git log -1 --format='%ae %ce' FETCH_HEAD)" = "$BOT_EMAIL $BOT_EMAIL" ]
-          }
           git add -A
-          if git diff --cached --quiet; then
-            echo "Every derived number on \`$BASE\` already matches the live code." >> "$GITHUB_STEP_SUMMARY"
-            # A refresh PR left open from an earlier run now carries values the base no longer
-            # needs (the code moved back, or the release refreshed itself): close it so it cannot
-            # be merged by mistake. A tip pushed by someone else is only reported.
-            STALE=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$REFRESH_BRANCH" --state open \
-              --json number --jq '.[0].number // empty')
-            if [ -n "$STALE" ]; then
-              git fetch -q --depth=1 origin "$REFRESH_BRANCH"
-              if robot_tip; then
-                gh pr close "$STALE" --repo "$GITHUB_REPOSITORY" \
-                  --comment "Closed by the nightly derived refresh: \`$BASE\` already matches the live code (${RUN_URL})." > /dev/null
-                echo "Closed the stale refresh PR #$STALE." >> "$GITHUB_STEP_SUMMARY"
-              else
-                echo "Refresh PR #$STALE is no longer needed but has commits pushed by hand; left open." >> "$GITHUB_STEP_SUMMARY"
-              fi
-            fi
-            exit 0
-          fi
-          CHANGED=$(git diff --cached --name-only)
-          COUNT=$(printf '%s\n' "$CHANGED" | wc -l | tr -d ' ')
+          BASE_SHA=$(git rev-parse HEAD)
+          REFRESH_TREE=$(git write-tree)
+          export BASE_SHA REFRESH_TREE
+          refresh_dir=$(mktemp -d "$RUNNER_TEMP/derived-refresh.XXXXXX")
+
+          # Treat renames as a deletion and an addition so both paths are classified.
+          git diff --cached --name-only --no-renames -z | LC_ALL=C sort -z > "$refresh_dir/all"
+          node scripts/release/derived-refresh-split.mjs --null < "$refresh_dir/all" > "$refresh_dir/protected"
+          LC_ALL=C comm -z -23 "$refresh_dir/all" "$refresh_dir/protected" > "$refresh_dir/unprotected"
+
+          cat > "$refresh_dir/main.md" <<EOF
+          ## Summary
+
+          Nightly refresh of the derived numbers on \`$BASE\`. The refresh recomputed counts, version claims, README SVG numbers, and the facts snapshot from the live code ([run]($RUN_URL)).
+
+          The robot rebuilds \`$REFRESH_BRANCH\` when its release parent or tree changes.
+
+          ## Queue admission
+
+          When enabled, \`derived-refresh-autoland\` applies the \`omni-queue\` label after these checks.
+
+          - [ ] \`Gate / CI\` and \`Gate / Quality\` passed on the current head.
+          - [ ] Every changed file belongs to a derived family or is \`README.md\` with only digits changed outside link and image targets (except same-document anchors), inline code and fenced code blocks, version numbers, and mixed alphanumeric tokens of at least 16 characters.
+          - [ ] All paths are unprotected. Protected files go to the PR from \`$PROTECTED_BRANCH\`.
+          - [ ] The latest release branch has no open base-red issue and no release freeze is open.
+          - [ ] The PR is open, ready for review and free of queue or blocking labels.
+          EOF
+
+          cat > "$refresh_dir/protected.md" <<EOF
+          ## Summary
+
+          Nightly refresh of protected files on \`$BASE\` ([run]($RUN_URL)).
+
+          This PR touches agent-instruction surfaces and requires the owner's explicit approval before merge. Autoland never applies the \`omni-queue\` label to this PR.
+
+          The robot rebuilds \`$PROTECTED_BRANCH\` when its release parent or tree changes.
+          EOF
 
           gh auth setup-git
-          OPEN_PR=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$REFRESH_BRANCH" --state open \
-            --json number,baseRefName --jq '.[0] | select(.) | "\(.number) \(.baseRefName)"')
-          REMOTE_SHA=$(git ls-remote --heads origin "$REFRESH_BRANCH" | cut -f1)
-          if [ -n "$OPEN_PR" ] && [ -n "$REMOTE_SHA" ]; then
-            git fetch -q --depth=1 origin "$REFRESH_BRANCH"
-            if ! robot_tip; then
-              echo "PR #${OPEN_PR%% *} has commits pushed by hand; not overwriting them." >> "$GITHUB_STEP_SUMMARY"
-              exit 0
-            fi
-          fi
-
-          # CI bot commit: the bot identity is the author, no Co-Authored-By trailer.
-          git switch -q -c "$REFRESH_BRANCH"
-          git -c user.name="$BOT_NAME" -c user.email="$BOT_EMAIL" commit -q -m "$TITLE" \
-            -m "npm run release:refresh-derived -- --profile=nightly on ${BASE}: ${COUNT} file(s)." \
-            -m "Run: ${RUN_URL}"
-          # One commit on top of the release tip, every run. The lease refuses to overwrite a
-          # commit somebody pushed to the branch after REMOTE_SHA was read.
-          git push -q --force-with-lease="${REFRESH_BRANCH}:${REMOTE_SHA}" origin "HEAD:refs/heads/${REFRESH_BRANCH}"
-
-          if [ "$HAS_PR_TOKEN" != "true" ]; then
-            {
-              echo "\`$REFRESH_BRANCH\` is pushed with ${COUNT} refreshed file(s), but no PR was opened:"
-              echo "neither \`DERIVED_REFRESH_PR_TOKEN\` nor \`I18N_REFRESH_TOKEN\` is set. Open it from that branch against \`$BASE\`."
-            } >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-
-          {
-            if [ -n "${BASE_RED_ISSUE:-}" ]; then printf '⚠️ base-red inherited: #%s\n\n' "$BASE_RED_ISSUE"; fi
-            echo "## Summary"
-            echo
-            echo "Nightly refresh of the derived numbers on \`$BASE\`: \`npm run release:refresh-derived -- --profile=nightly\` recomputed the provider, migration and MCP-tool counts, the version claims, the README SVG numbers and the facts snapshot from the live code (${RUN_URL})."
-            echo
-            echo "Feature PRs no longer write these values; this PR (and the release itself) does. The branch \`$REFRESH_BRANCH\` is rebuilt from \`$BASE\` on every run, so a later run replaces this commit."
-            echo
-            echo "## Files (${COUNT})"
-            echo
-            # shellcheck disable=SC2016 # the backticks are Markdown code spans, not substitutions
-            printf '%s\n' "$CHANGED" | head -200 | sed 's/^/- `/; s/$/`/'
-            echo
-            echo "## Queue admission"
-            echo
-            echo "When enabled, the \`derived-refresh-autoland\` workflow applies the \`omni-queue\` label after these checks."
-            echo
-            echo "- [ ] \`Gate / CI\` and \`Gate / Quality\` passed on the current head."
-            echo "- [ ] Every changed file belongs to a derived family and all paths are unprotected."
-            echo "- [ ] The latest release branch has no open base-red issue and no release freeze is open."
-            echo "- [ ] The PR is open, ready for review and free of queue or blocking labels."
-            # Agent-instruction surfaces are never merged without the owner's explicit approval
-            # (AGENTS.md → Review focus), even when the diff is digits only.
-            if printf '%s\n' "$CHANGED" | grep -qE '(^|/)(AGENTS|CLAUDE|GEMINI)\.md$|(^|/)llm\.txt$|^skills/.*/SKILL\.md$'; then
-              echo "- [ ] **Agent-instruction surface touched** (AGENTS.md / llm.txt / SKILL.md): needs the owner's explicit approval before merge."
-            fi
-          } > "$RUNNER_TEMP/pr-body.md"
-
-          if [ -z "$OPEN_PR" ]; then
-            URL=$(gh pr create --repo "$GITHUB_REPOSITORY" --base "$BASE" --head "$REFRESH_BRANCH" \
-              --title "$TITLE" --body-file "$RUNNER_TEMP/pr-body.md")
-            echo "Opened $URL" >> "$GITHUB_STEP_SUMMARY"
-          else
-            NUM="${OPEN_PR%% *}"
-            OLD_BASE="${OPEN_PR#* }"
-            gh pr edit "$NUM" --repo "$GITHUB_REPOSITORY" --base "$BASE" --title "$TITLE" \
-              --body-file "$RUNNER_TEMP/pr-body.md" > /dev/null
-            if [ "$OLD_BASE" != "$BASE" ]; then
-              # `gh pr edit --base` can fail silently: verify the retarget (Hard Rule #21).
-              NEW_BASE=$(gh pr view "$NUM" --repo "$GITHUB_REPOSITORY" --json baseRefName --jq .baseRefName)
-              [ "$NEW_BASE" = "$BASE" ] || { echo "::error::retarget of #$NUM to $BASE did not apply"; exit 1; }
-            fi
-            echo "Updated #$NUM" >> "$GITHUB_STEP_SUMMARY"
+          unprotected_status=0
+          protected_status=0
+          bash scripts/release/derived-refresh-publish.sh "$REFRESH_BRANCH" \
+            "chore(docs): refresh derived numbers on ${BASE}" "$refresh_dir/main.md" "$refresh_dir/unprotected" \
+            || unprotected_status=$?
+          bash scripts/release/derived-refresh-publish.sh "$PROTECTED_BRANCH" \
+            "chore(docs): refresh generated agent-instruction files on ${BASE}" "$refresh_dir/protected.md" "$refresh_dir/protected" \
+            || protected_status=$?
+          printf "Publication results: \`%s\` exited %s, \`%s\` exited %s.\n" \
+            "$REFRESH_BRANCH" "$unprotected_status" "$PROTECTED_BRANCH" "$protected_status" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$unprotected_status" -ne 0 ] || [ "$protected_status" -ne 0 ]; then
+            exit 1
           fi
