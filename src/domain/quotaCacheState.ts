@@ -56,6 +56,18 @@ export const EXHAUSTED_MAX_PARK_MS = 30 * 60 * 1000;
 
 export const ACTIVE_TTL_MS = 5 * 60 * 1000; // 5 minutes for active accounts
 
+// sub2api-43 — opt-in (QUOTA_STALE_SAMPLE_RELEASE, default off): an exhausted window with no future
+// reset time, last observed over STALE_NO_RESET_RELEASE_MS ago, reads as unknown, not as reached. A
+// paused account gets no fresh quota headers, so one old sample would otherwise pause it forever.
+const STALE_NO_RESET_RELEASE_MS = 2 * 60 * 60 * 1000;
+export function isStaleSampleWithoutReset(observedAt: number, resetAt: string | null, now: number) {
+  return (
+    resetAt === null &&
+    now - observedAt >= STALE_NO_RESET_RELEASE_MS &&
+    /^(1|true|on)$/i.test(process.env.QUOTA_STALE_SAMPLE_RELEASE?.trim() ?? "")
+  );
+}
+
 export function parseDate(value: string): number | null {
   const ms = new Date(value).getTime();
   return Number.isNaN(ms) ? null : ms;
