@@ -14,9 +14,14 @@ let _models: Record<string, RegistryModel[]> | null = null;
 // registry is mutated through the Proxy (set / deleteProperty) and by resetRegistryLookupCache().
 const _modelByIdMemo = new Map<string, RegistryModel | undefined>();
 const _scoresAsMemo = new Map<string, string | undefined>();
+// getGlobalModel memo. Keys are request model ids (client-controlled), so it is capped:
+// shortcut: clear-all when full, move to an LRU only if a deployment shows churn above the cap.
+const GLOBAL_MODEL_MEMO_MAX = 2048;
+const _globalModelMemo = new Map<string, RegistryModel | undefined>();
 export function resetRegistryLookupCache(): void {
   _modelByIdMemo.clear();
   _scoresAsMemo.clear();
+  _globalModelMemo.clear();
 }
 function initModels(): Record<string, RegistryModel[]> {
   if (!_models) _models = generateModels();
@@ -122,6 +127,14 @@ function modelRichness(m: RegistryModel): number {
 }
 
 function getGlobalModel(modelId: string): RegistryModel | undefined {
+  if (_globalModelMemo.has(modelId)) return _globalModelMemo.get(modelId);
+  const found = scanGlobalModel(modelId);
+  if (_globalModelMemo.size >= GLOBAL_MODEL_MEMO_MAX) _globalModelMemo.clear();
+  _globalModelMemo.set(modelId, found);
+  return found;
+}
+
+function scanGlobalModel(modelId: string): RegistryModel | undefined {
   // 1. Exact match — collect all, pick the richest
   let candidates: RegistryModel[] = [];
   for (const models of Object.values(PROVIDER_MODELS)) {

@@ -7,7 +7,7 @@ import {
   selectModelsForImport,
   sortModelsFreeFirst,
 } from "@/shared/utils/freeModels";
-import { FREE_MODEL_BUDGETS } from "@omniroute/open-sse/config/freeModelCatalog";
+import { FREE_MODEL_BUDGETS, grantsFreeAccess } from "@omniroute/open-sse/config/freeModelCatalog";
 
 test("providerHasFreeModels: true for a provider in the free catalog", () => {
   assert.equal(providerHasFreeModels("openrouter"), true);
@@ -58,8 +58,12 @@ test("isFreeModel: a model with no pricing and no :free suffix is NOT free", () 
 });
 
 test("isFreeModel: a model id listed in the free catalog for that provider is free", () => {
-  const sample = FREE_MODEL_BUDGETS[0];
+  // The first row that still grants free access: since the November 2026 re-audit the first row
+  // of the file (agentrouter/claude-opus-4-8) is discontinued and is no longer listed as free.
+  const sample = FREE_MODEL_BUDGETS.find((m) => grantsFreeAccess(m.freeType))!;
   assert.equal(isFreeModel(sample.provider, { id: sample.modelId }), true);
+  const retired = FREE_MODEL_BUDGETS.find((m) => m.freeType === "discontinued")!;
+  assert.equal(isFreeModel(retired.provider, { id: retired.modelId }), false);
 });
 
 test("isFreeModel: NVIDIA's retired GPT OSS 120B left the trial catalog (#18418)", () => {

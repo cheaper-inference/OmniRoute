@@ -110,14 +110,14 @@ function TestResultSummary({ result }: { result: CatalogTestResult }) {
           {label}
         </Badge>
         {latencyStr && (
-          <span className="font-mono text-[11px] tabular-nums text-text-main">{latencyStr}</span>
+          <span className="font-mono text-2xs tabular-nums text-text-main">{latencyStr}</span>
         )}
       </div>
       {ageLabel && (
         <time
           dateTime={new Date(result.testedAt).toISOString()}
           title={absoluteTime}
-          className="text-[10px] text-text-muted/80"
+          className="text-3xs text-text-muted/80"
         >
           {ageLabel}
         </time>

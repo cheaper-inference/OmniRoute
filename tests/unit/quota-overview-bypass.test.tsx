@@ -8,7 +8,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { parse } from "@formatjs/icu-messageformat-parser";
 import en from "../../src/i18n/messages/en.json";
 import zh from "../../src/i18n/messages/zh-CN.json";
-import HealthAccountTooltip from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/HealthAccountTooltip";
+import { HealthAccountCardContent } from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/HealthAccountTooltip";
 import { buildHealthAccount } from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/healthOverview";
 import { displayAccount } from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/availabilityDisplay";
 import { parseQuotaData } from "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/quotaParsing";
@@ -73,17 +73,12 @@ for (const locale of ["en", "zh-CN"])
             throw error;
           }}
         >
-          <HealthAccountTooltip
-            id="synthetic-tooltip"
-            account={account}
-            label="Synthetic account"
-            anchor={document.body}
-          />
+          <HealthAccountCardContent account={account} label="Synthetic account" />
         </NextIntlClientProvider>
       );
       expect(typeof messages.usage[row.key]).toBe("string");
       expect(screen.getByText(messages.usage[row.key])).toBeTruthy();
-      expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe("0");
+      expect(screen.getByRole("meter").getAttribute("aria-valuenow")).toBe("0");
       expect(screen.getAllByText(messages.usage.healthAvailable)).toHaveLength(2);
       // The capsule must agree with the tooltip: a bypass permits the account to
       // serve, it does not refill the plan window that the meter reports.

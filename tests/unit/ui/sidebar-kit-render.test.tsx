@@ -70,9 +70,8 @@ describe("Sidebar rendered with the kit Sidebar family", () => {
     render(<Harness />);
     const navEl = await screen.findByRole("navigation", { name: "Main navigation" });
     expect(navEl.closest("aside[data-slot=sidebar]")).not.toBeNull();
-    expect(within(navEl).getByRole("link", { name: "Home" }).getAttribute("aria-current")).toBe(
-      "page"
-    );
+    const home = within(navEl).getByRole("link", { name: /^Home\s*Dashboard overview$/ });
+    expect(home.getAttribute("aria-current")).toBe("page");
     // At /home the accordion keeps only the active (Home) section open; OmniProxy is a closed
     // disclosure button that opens on click (sidebar logic is unchanged by the kit rendering).
     const section = within(navEl).getByRole("button", { name: "OmniProxy", exact: true });
@@ -83,8 +82,56 @@ describe("Sidebar rendered with the kit Sidebar family", () => {
     expect(document.getElementById(section.getAttribute("aria-controls")!)).not.toBeNull();
     expect(screen.getByRole("searchbox")).not.toBeNull();
     expect(screen.getByRole("img", { name: "Keak OmniRoute" })).not.toBeNull();
+    expect(screen.getByRole("link", { name: /OmniRoute\s*v\d+\.\d+\.\d+/ })).not.toBeNull();
     expect(navEl.querySelector(".material-symbols-outlined")).toBeNull();
     expect(navEl.querySelectorAll("svg.oi-icon").length).toBeGreaterThan(5);
+  });
+
+  // Kit #282: a section is the kit's collapsible SidebarGroup. Its label is the trigger, the
+  // group names the region it controls, and the pin is the kit SidebarGroupAction (placed with a
+  // logical inset, so it is on the right side in RTL). No hand-made <button> is left in the row.
+  it("renders a section as the kit collapsible group, with the pin as its group action", async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+    const navEl = await screen.findByRole("navigation", { name: "Main navigation" });
+    const trigger = within(navEl).getByRole("button", { name: "OmniProxy", exact: true });
+    expect(trigger.getAttribute("data-slot")).toBe("sidebar-group-trigger");
+    const group = trigger.closest<HTMLElement>("[data-slot=sidebar-group]")!;
+    expect(group.getAttribute("data-collapsible")).toBe("true");
+    expect(group.getAttribute("data-state")).toBe("closed");
+    // The kit chevron, not a host icon turned by a class.
+    expect(trigger.querySelector("svg.ci-sidebar__group-chevron")).not.toBeNull();
+    expect(trigger.querySelector(".rotate-180")).toBeNull();
+
+    const label = group.firstElementChild as HTMLElement;
+    expect(label.getAttribute("data-slot")).toBe("sidebar-group-label");
+    expect(label.contains(trigger)).toBe(true);
+    const pin = within(group).getByRole("button", { name: "Pin section open: OmniProxy" });
+    expect(pin.getAttribute("data-slot")).toBe("sidebar-group-action");
+    expect(pin.getAttribute("data-show-on-hover")).toBe("true");
+    expect(pin.getAttribute("aria-pressed")).toBe("false");
+    // Right after the label, as the kit positions it, and outside the trigger.
+    expect(label.nextElementSibling).toBe(pin);
+
+    // Closed: the region exists (the trigger's aria-controls resolves), hidden and empty.
+    const panel = document.getElementById(trigger.getAttribute("aria-controls")!)!;
+    expect(panel.getAttribute("data-slot")).toBe("sidebar-group-content");
+    expect(panel.parentElement).toBe(group);
+    expect(panel.hidden).toBe(true);
+    expect(panel.querySelector("a")).toBeNull();
+
+    await user.click(trigger);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(group.getAttribute("data-state")).toBe("open");
+    expect(panel.hidden).toBe(false);
+    expect(within(panel).getAllByRole("link").length).toBeGreaterThan(0);
+
+    // Pinning keeps the section open and presses the action.
+    await user.click(pin);
+    const pinned = within(group).getByRole("button", { name: "Unpin section: OmniProxy" });
+    expect(pinned).toBe(pin);
+    expect(pin.getAttribute("aria-pressed")).toBe("true");
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
   });
 
   // #19066: subgroup headers ("Compression Context") were hand-made disclosure buttons; they are
@@ -101,11 +148,14 @@ describe("Sidebar rendered with the kit Sidebar family", () => {
     const panel = document.getElementById(group.getAttribute("aria-controls")!)!;
     expect(panel.getAttribute("data-slot")).toBe("disclosure-content");
     expect(panel.hidden).toBe(true);
-    expect(within(navEl).queryByRole("link", { name: "Caveman" })).toBeNull();
+    expect(
+      within(navEl).queryByRole("link", { name: /^Caveman\s*Prompt compression$/ })
+    ).toBeNull();
     await user.click(group);
     expect(group.getAttribute("aria-expanded")).toBe("true");
     expect(panel.hidden).toBe(false);
-    expect(panel.contains(within(navEl).getByRole("link", { name: "Caveman" }))).toBe(true);
+    const caveman = within(navEl).getByRole("link", { name: /^Caveman\s*Prompt compression$/ });
+    expect(panel.contains(caveman)).toBe(true);
     expect(group.closest("[data-slot=sidebar-menu-item]")).not.toBeNull();
   });
 

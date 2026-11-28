@@ -6,7 +6,6 @@ description: "Reference for 9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLing
 # Embedded Services
 
 > **Version:** v3.8.44
-> **Last updated:** 2026-10-28
 > **Audience:** Engineers adding, maintaining, or debugging embedded services (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Embedded services are locally-installed process sidecar tools that OmniRoute installs, supervises, and

@@ -1,0 +1,1 @@
+- **chore(docker):** drop the npm `minimatch` and `glob` CVEs from `.trivyignore`: Wolfi's `npm-12` already bundles the fixed releases and the Bun images ship no npm ([#21293](https://github.com/cheaper-inference/OmniRoute/pull/21293), closes #18765)

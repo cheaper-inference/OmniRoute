@@ -8,6 +8,7 @@ import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import Button from "@/shared/components/Button";
 import type { JSX } from "react";
+import Notice from "@/shared/components/Notice";
 
 // Lazy-load react-markdown to reduce initial bundle size.
 const ReactMarkdown = dynamic(() => import("react-markdown"), {
@@ -88,9 +89,9 @@ export function SkillPreviewPane({
             <Button
               variant="ghost"
               size="icon-sm"
+              tone="muted"
               onClick={onRefresh}
               disabled={loading}
-              className="text-text-muted hover:text-text-main"
               aria-label={t("refresh")}
             >
               {loading ? <Spinner decorative size="xs" /> : <Icon name="refresh" size={14} />}
@@ -99,9 +100,9 @@ export function SkillPreviewPane({
           <Button
             variant="ghost"
             size="icon-sm"
+            tone="muted"
             onClick={() => void handleCopyRawUrl()}
             disabled={!skillId}
-            className="text-text-muted hover:text-text-main"
             title={t("copyUrl")}
             aria-label={t("copyUrl")}
           >
@@ -138,13 +139,9 @@ export function SkillPreviewPane({
             <ReactMarkdown>{markdown}</ReactMarkdown>
           </div>
         ) : (
-          <div
-            className="flex items-center gap-2 rounded-lg border border-error/30 bg-error/10 p-3 text-xs text-error"
-            data-testid="skill-preview-error"
-          >
-            <Icon name="error" size={16} />
+          <Notice variant="critical" icon="error" data-testid="skill-preview-error">
             {t("previewError")}
-          </div>
+          </Notice>
         )}
       </div>
     </div>

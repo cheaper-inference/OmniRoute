@@ -15,12 +15,15 @@
  * the sorted set of real change domains a diff touches (see CHANGE_DOMAINS).
  * It is only EXPOSED (stdout `domains=<csv>` + `outputs.domains` of the
  * `changes` job in ci.yml / quality.yml); no job is gated on it yet. The legacy
- * flags above and their stdout lines stay byte-identical. Unknown paths map to
+ * flags above keep their stdout format. Unknown paths map to
  * `core` (fail-safe, same spirit as code=true).
  */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
+// The root ledger records translated documentation hashes for the docs checks.
+const DOC_TRANSLATION_LEDGER = ".i18n-state.json";
 
 /**
  * @param {string[]} files relative paths from git diff
@@ -67,7 +70,7 @@ export function classifyPaths(files) {
       continue;
     }
 
-    if (f.startsWith("docs/") || f.endsWith(".md")) {
+    if (f === DOC_TRANSLATION_LEDGER || f.startsWith("docs/") || f.endsWith(".md")) {
       docs = true;
       continue;
     }
@@ -191,7 +194,7 @@ export function classifyDomain(raw) {
     return "i18n";
   }
 
-  if (f.startsWith("docs/") || f.endsWith(".md")) return "docs";
+  if (f === DOC_TRANSLATION_LEDGER || f.startsWith("docs/") || f.endsWith(".md")) return "docs";
 
   if (
     BUILD_ROOT_FILES.has(f) ||

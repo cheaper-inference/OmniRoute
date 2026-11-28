@@ -27,6 +27,76 @@ export function formatTime(isoString: string | null | undefined) {
   }
 }
 
+const LOG_TIME_OPTIONS: Intl.DateTimeFormatOptions = {
+  hour12: false,
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+};
+
+function parseLogDate(value: string | number | Date | null | undefined): Date | null {
+  if (value === null || value === undefined || value === "") return null;
+  const d = value instanceof Date ? value : new Date(value);
+  return Number.isFinite(d.getTime()) ? d : null;
+}
+
+function toLocaleStringWithFallback(
+  d: Date,
+  locale: string | undefined,
+  options: Intl.DateTimeFormatOptions
+) {
+  try {
+    return d.toLocaleString(locale || "en-US", options);
+  } catch {
+    // An unusable locale tag throws a RangeError: keep the historical en-US output.
+    return d.toLocaleString("en-US", options);
+  }
+}
+
+/**
+ * Format a request/proxy log timestamp for a table cell (KEA-9522).
+ * - same calendar day as `now` (local time zone): `HH:MM:SS`, like formatTime
+ * - another day of the same year: `Nov 21, 07:43:42`
+ * - another year: `Nov 21, 2025, 07:43:42`
+ * Invalid input keeps formatTime's output. `now` is injectable for tests.
+ */
+export function formatLogTimestamp(
+  value: string | number | Date | null | undefined,
+  now: Date = new Date(),
+  locale?: string
+) {
+  const d = parseLogDate(value);
+  if (!d) return formatTime(typeof value === "string" ? value : null);
+  const sameYear = d.getFullYear() === now.getFullYear();
+  const sameDay = sameYear && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+  if (sameDay) return toLocaleStringWithFallback(d, locale, LOG_TIME_OPTIONS);
+  return toLocaleStringWithFallback(d, locale, {
+    month: "short",
+    day: "numeric",
+    ...(sameYear ? {} : { year: "numeric" }),
+    ...LOG_TIME_OPTIONS,
+  });
+}
+
+/**
+ * Full date + time + time zone for the hover title of a log Time cell (KEA-9522).
+ * Returns undefined for invalid input so the title attribute is omitted.
+ */
+export function formatLogTimestampTitle(
+  value: string | number | Date | null | undefined,
+  locale?: string
+) {
+  const d = parseLogDate(value);
+  if (!d) return undefined;
+  return toLocaleStringWithFallback(d, locale, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    ...LOG_TIME_OPTIONS,
+    timeZoneName: "short",
+  });
+}
+
 /**
  * Format a duration in milliseconds to a human-readable string.
  * @param {number} ms - Duration in milliseconds

@@ -7,6 +7,7 @@ import Input from "@/shared/components/Input";
 import { Card } from "@/shared/components";
 import type { SkillsProvider } from "@/lib/skills/providerSettings";
 import type { JSX } from "react";
+import Notice from "@/shared/components/Notice";
 
 interface MarketplaceSkill {
   name: string;
@@ -183,9 +184,9 @@ export function OmniMarketplaceTab({
           </Button>
         </div>
         {(skillsProvider === "skillsmp" ? mpError : shError) && (
-          <div className="p-3 rounded-lg bg-error/10 text-error text-sm mb-4">
+          <Notice variant="critical" className="mb-4">
             {skillsProvider === "skillsmp" ? mpError : shError}
-          </div>
+          </Notice>
         )}
       </Card>
 

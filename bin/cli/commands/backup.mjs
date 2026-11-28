@@ -2,22 +2,29 @@ import {
   copyFileSync,
   createReadStream,
   createWriteStream,
+  closeSync,
   existsSync,
   mkdirSync,
+  mkdtempSync,
+  openSync,
   readdirSync,
   readFileSync,
+  readSync,
+  renameSync,
+  rmSync,
   statSync,
   unlinkSync,
   writeFileSync,
 } from "node:fs";
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "node:crypto";
-import { dirname, join, extname, basename } from "node:path";
+import { tmpdir } from "node:os";
+import { dirname, join, extname, basename, resolve } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { resolveDataDir } from "../data-dir.mjs";
 import { getBaseUrl, isServerUp } from "../api.mjs";
 import { t } from "../i18n.mjs";
-import { backupSqliteFile } from "../sqlite.mjs";
+import { backupSqliteFile, withReadonlySqlite } from "../sqlite.mjs";
 import { CLI_TOKEN_HEADER, getCliToken } from "../utils/cliToken.mjs";
 
 function getBackupDir() {
@@ -56,6 +63,7 @@ export function registerBackup(program) {
     .option("--cron <expr>", t("backup.auto.cronOpt"), "0 3 * * *")
     .option("--cloud", t("backup.cloudOpt"))
     .option("--encrypt", t("backup.encryptOpt"))
+    .option("--key-file <path>", t("backup.keyFileOpt"))
     .option("--retention <n>", t("backup.retentionOpt"), parseInt)
     .action(async (opts) => {
       const exitCode = await runBackupAutoEnableCommand(opts);
@@ -95,6 +103,7 @@ export function registerRestore(program) {
     .description(t("backup.restoreDescription"))
     .option("--list", "List available backups")
     .option("--yes", "Skip confirmation")
+    .option("--key-file <path>", t("backup.keyFileOpt"))
     .action(async (backupId, opts) => {
       const exitCode = await runRestoreCommand(backupId, opts);
       if (exitCode !== 0) process.exit(exitCode);
@@ -153,15 +162,56 @@ async function encryptFile(srcPath, destPath, passphrase) {
   }
 }
 
+// Inverse of encryptFile. A wrong passphrase or a damaged file fails the GCM tag check and rejects.
+async function decryptFile(srcPath, destPath, passphrase) {
+  const header = Buffer.alloc(44); // salt(16) + iv(12) + authTag(16)
+  const fd = openSync(srcPath, "r");
+  let read;
+  try {
+    read = readSync(fd, header, 0, header.length, 0);
+  } finally {
+    closeSync(fd);
+  }
+  if (read < header.length) throw new Error("encrypted file is truncated");
+  const key = scryptSync(passphrase, header.subarray(0, 16), 32);
+  const decipher = createDecipheriv("aes-256-gcm", key, header.subarray(16, 28));
+  decipher.setAuthTag(header.subarray(28, 44));
+  await pipeline(
+    createReadStream(srcPath, { start: header.length }),
+    decipher,
+    createWriteStream(destPath)
+  );
+}
+
+// Stage the backup database next to the live one first, so a failed copy (disk full, I/O
+// error) leaves the live file and its WAL untouched. Only then drop the sidecars (a leftover WAL
+// or journal would replay the old database over the restored file) and swap the copy in.
+function installRestoredSqlite(sourcePath, destPath) {
+  const staged = `${destPath}.restore-tmp`;
+  try {
+    copyFileSync(sourcePath, staged);
+  } catch (err) {
+    try {
+      rmSync(staged, { force: true });
+    } catch {}
+    throw err;
+  }
+  for (const suffix of ["-wal", "-shm", "-journal"])
+    rmSync(`${destPath}${suffix}`, { force: true });
+  renameSync(staged, destPath);
+}
+
 async function promptPassphrase() {
   const readline = await import("node:readline");
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  return new Promise((resolve) =>
+  return new Promise((resolve) => {
+    // End of input (no TTY, closed pipe) answers with an empty passphrase instead of hanging.
+    rl.once("close", () => resolve(""));
     rl.question(t("backup.passphrasePrompt"), (ans) => {
-      rl.close();
       resolve(ans.trim());
-    })
-  );
+      rl.close();
+    });
+  });
 }
 
 async function pruneBackups(backupDir, retention) {
@@ -192,7 +242,16 @@ export async function runBackupCommand(opts = {}) {
   let passphrase = null;
   if (opts.encrypt) {
     if (opts.keyFile) {
-      passphrase = readFileSync(opts.keyFile, "utf8").trim();
+      try {
+        passphrase = readFileSync(opts.keyFile, "utf8").trim();
+      } catch (err) {
+        console.error(`Cannot read key file ${opts.keyFile}: ${err?.code || "read error"}`);
+        return 1;
+      }
+      if (!passphrase) {
+        console.error(t("backup.noPassphrase"));
+        return 1;
+      }
     } else {
       passphrase = await promptPassphrase();
       if (!passphrase) {
@@ -336,11 +395,29 @@ function getSchedulePath() {
 
 export async function runBackupAutoEnableCommand(opts = {}) {
   const schedulePath = getSchedulePath();
+  let keyFile;
+  if (opts.encrypt) {
+    // A scheduled run has no TTY, so an encrypted schedule needs a key file.
+    // Persist the absolute PATH only (never the passphrase): the server cwd
+    // differs from the CLI cwd.
+    if (!opts.keyFile) {
+      console.error("Encrypted automatic backups need --key-file <path> (no TTY on a schedule).");
+      return 1;
+    }
+    keyFile = resolve(String(opts.keyFile));
+    try {
+      if (!readFileSync(keyFile, "utf8").trim()) throw new Error("empty");
+    } catch {
+      console.error(`Key file ${keyFile} is missing, unreadable or empty.`);
+      return 1;
+    }
+  }
   const schedule = {
     enabled: true,
     cron: opts.cron || "0 3 * * *",
     cloud: !!opts.cloud,
     encrypt: !!opts.encrypt,
+    ...(keyFile ? { keyFile } : {}),
     retention: opts.retention || null,
     updatedAt: new Date().toISOString(),
   };
@@ -375,7 +452,10 @@ export async function runBackupAutoStatusCommand() {
   console.log(`  cron:      ${schedule.cron}`);
   console.log(`  cloud:     ${schedule.cloud ? "yes" : "no"}`);
   console.log(`  encrypt:   ${schedule.encrypt ? "yes" : "no"}`);
+  if (schedule.keyFile) console.log(`  key-file:  ${schedule.keyFile}`);
   console.log(`  retention: ${schedule.retention ?? "unlimited"}`);
+  if (schedule.lastRunAt) console.log(`  last run:  ${schedule.lastRunAt}`);
+  if (schedule.lastError) console.log(`  last error: ${schedule.lastError}`);
   return 0;
 }
 
@@ -433,19 +513,19 @@ export async function runRestoreCommand(backupId, opts = {}) {
   const infoPath = join(backupPath, "backup-info.json");
   const info = existsSync(infoPath) ? JSON.parse(readFileSync(infoPath, "utf8")) : null;
   const ts = info ? info.timestamp : backupId;
+  // `backup create --encrypt` writes `<name>.enc` payloads instead of plain names.
+  const encrypted = FILES_TO_BACKUP.some((f) => existsSync(join(backupPath, `${f.name}.enc`)));
 
-  // restore has no passphrase option, so it cannot read `.enc` payloads. Refuse before
-  // asking to overwrite anything. shortcut: no decryption here; add a --key-file option
-  // that decrypts every file to a temp dir first if restoring encrypted backups is needed.
-  if (
-    info?.encrypted === true ||
-    FILES_TO_BACKUP.some((f) => existsSync(join(backupPath, `${f.name}.enc`)))
-  ) {
+  // A running server holds storage.sqlite open and keeps its WAL. Restore only while it is stopped.
+  async function restoreBlockedByServer() {
+    if (!(await isServerUp())) return false;
     console.error(
-      `Backup ${backupId} is encrypted. restore cannot decrypt it; nothing was changed.`
+      `A server answers at ${getBaseUrl()}. Stop it (omniroute stop) before restore; nothing was changed.`
     );
-    return 1;
+    return true;
   }
+
+  if (await restoreBlockedByServer()) return 1;
 
   if (!opts.yes) {
     const readline = await import("node:readline");
@@ -458,17 +538,60 @@ export async function runRestoreCommand(backupId, opts = {}) {
       console.log(t("common.cancelled"));
       return 0;
     }
+    // The server can start while the prompt is open.
+    if (await restoreBlockedByServer()) return 1;
   }
 
-  console.log(t("backup.restoring", { path: backupPath }));
-
-  const dataDir = resolveDataDir();
+  // Decrypt every payload before touching live files. GCM rejects wrong keys and damaged data.
+  let sourceDir = backupPath;
+  let tempDir = null;
   try {
+    if (encrypted) {
+      let passphrase = opts.keyFile ? readFileSync(opts.keyFile, "utf8").trim() : null;
+      if (passphrase === null) passphrase = await promptPassphrase();
+      if (!passphrase) {
+        console.error(t("backup.noPassphrase"));
+        return 1;
+      }
+      tempDir = mkdtempSync(join(tmpdir(), "omniroute-restore-")); // mode 0700
+      try {
+        for (const file of FILES_TO_BACKUP) {
+          const encPath = join(backupPath, `${file.name}.enc`);
+          if (existsSync(encPath)) await decryptFile(encPath, join(tempDir, file.name), passphrase);
+        }
+      } catch {
+        console.error(t("backup.restoreDecryptFailed", { name: backupId }));
+        return 1;
+      }
+      sourceDir = tempDir;
+    }
+
+    // Check the database inside the backup before the live files are touched.
+    const backupSqlite = join(sourceDir, "storage.sqlite");
+    if (existsSync(backupSqlite)) {
+      try {
+        const row = await withReadonlySqlite(backupSqlite, (db) =>
+          db.prepare("PRAGMA integrity_check").get()
+        );
+        if (Object.values(row || {})[0] !== "ok") throw new Error("integrity check failed");
+      } catch (err) {
+        console.error(
+          `Backup ${backupId} has a damaged database (${err instanceof Error ? err.message : String(err)}); nothing was changed.`
+        );
+        return 1;
+      }
+    }
+
+    console.log(t("backup.restoring", { path: backupPath }));
+
+    const dataDir = resolveDataDir();
     let restored = 0;
     for (const file of FILES_TO_BACKUP) {
-      const sourcePath = join(backupPath, file.name);
+      const sourcePath = join(sourceDir, file.name);
       if (existsSync(sourcePath)) {
-        copyFileSync(sourcePath, join(dataDir, file.name));
+        if (file.name === "storage.sqlite")
+          installRestoredSqlite(sourcePath, join(dataDir, file.name));
+        else copyFileSync(sourcePath, join(dataDir, file.name));
         restored++;
         console.log(`\x1b[2m  Restored: ${file.name}\x1b[0m`);
       }
@@ -482,5 +605,7 @@ export async function runRestoreCommand(backupId, opts = {}) {
   } catch (err) {
     console.error(t("common.error", { message: err instanceof Error ? err.message : String(err) }));
     return 1;
+  } finally {
+    if (tempDir) rmSync(tempDir, { recursive: true, force: true });
   }
 }

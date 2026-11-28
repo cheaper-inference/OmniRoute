@@ -44,6 +44,8 @@ import { getCursorUsage } from "./usage/cursor.ts";
 import { getKimiUsage } from "./usage/kimi.ts";
 import { getCodexUsage } from "./usage/codex.ts";
 import { getClaudeUsage, getClaudePlanLabel } from "./usage/claude.ts";
+// Re-exported for the quota saturation cache, which dates Claude plan-window readings.
+export { getClaudeUsageEndpointReadAt } from "./usage/claude.ts";
 import { getKiroUsage, buildKiroUsageResult, discoverKiroProfileArn } from "./usage/kiro.ts";
 // Re-exported para os testes kiro-* (importam de services/usage).
 export { buildKiroUsageResult, discoverKiroProfileArn } from "./usage/kiro.ts";
@@ -59,6 +61,7 @@ import { getPromptQlUsage } from "./usage/promptql.ts";
 import { getHyperAgentUsage } from "./usage/hyperagent.ts";
 import { getGitHubUsage, formatGitHubQuotaSnapshot, inferGitHubPlanName } from "./usage/github.ts";
 import { getCrofUsage } from "./usage/crof.ts";
+import { getMistralUsage } from "./usage/mistral.ts";
 import { getClinepassUsage } from "./usage/clinepass.ts";
 import { getNanoGptUsage } from "./usage/nanogpt.ts";
 import { getNanUsage } from "./usage/nan.ts";
@@ -209,6 +212,8 @@ export async function getUsageForProvider(
       return await getMiniMaxUsage(apiKey || "", provider);
     case "crof":
       return await getCrofUsage(apiKey || "");
+    case "mistral":
+      return await getMistralUsage(apiKey || "");
     case "clinepass":
       // Dual-auth: OAuth WorkOS token in `accessToken`, or a BYOK key in `apiKey`.
       return await getClinepassUsage(accessToken, apiKey);

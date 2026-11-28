@@ -65,7 +65,12 @@ test("ranking excludes providers with a raw free flag but no documented free mod
 });
 
 test("ranking keeps catalog providers whose static free flag is off", async () => {
-  const cataloged = ["predibase", "publicai"];
+  // predibase left the catalog's free rows in the November 2026 re-audit (product gone); ovhcloud
+  // is catalogued free (keyless) with the static flag unset, so it covers the same case.
+  const cataloged = ["ovhcloud", "publicai"];
+  for (const id of cataloged) {
+    assert.ok(registryModelIds(id).length > 0, `${id} needs registry models to rank`);
+  }
   for (const id of cataloged) {
     assert.equal(providerHasFreeModels(id), true, `${id} must be in the free catalog`);
   }

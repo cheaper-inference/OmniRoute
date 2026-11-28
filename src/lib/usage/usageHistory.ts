@@ -38,6 +38,7 @@ import {
   getCompletedDetails,
 } from "./completedRequestDetails";
 import * as sessions from "./usageHistory/agentSessionUsage";
+import { loggableSessionTurn } from "./usageHistory/sessionTurn";
 import { shouldPersistToDisk } from "./migrations";
 import {
   attemptWrite,
@@ -258,11 +259,12 @@ function estimatePendingBytes(value: unknown, seen = new WeakSet<object>()): num
 }
 
 /**
- * Payload fields whose size counts against the pending-map byte ceiling. Stream
+ * Variable-size fields counted against the pending-map byte ceiling. Stream
  * captures are charged too: updatePendingRequestStreamChunksById stores an owned
  * snapshot and re-measures it, so removal must subtract the same field.
  */
 const PENDING_PAYLOAD_FIELDS = [
+  "providerUrl",
   "clientRequest",
   "providerRequest",
   "providerResponse",
@@ -983,7 +985,9 @@ export async function saveRequestUsage(entry: UsageEntry, options: SaveRequestUs
         frozenEntry.timestamp,
         serviceTier
       );
-      writeOptions = { ...options, agentSession };
+      // The turn transcript is stored on the session, so it only matters when there is one.
+      const sessionTurn = agentSession ? await loggableSessionTurn(frozenEntry) : null;
+      writeOptions = { ...options, agentSession, sessionTurn };
     }
     attemptWrite(frozenEntry, writeOptions);
   } catch (error) {

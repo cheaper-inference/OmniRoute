@@ -7,7 +7,6 @@ lastUpdated: 2026-06-28
 # Gamification & Leaderboard System
 
 > **Source of truth:** `src/lib/gamification/`, `src/lib/db/gamification.ts`, `src/app/api/gamification/`
-> **Last updated:** 2026-06-28 — v3.8.40
 
 OmniRoute includes a local-first gamification layer that rewards users for
 engaging with the platform — making requests, switching providers, creating
