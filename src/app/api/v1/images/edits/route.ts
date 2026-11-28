@@ -221,6 +221,7 @@ async function handleSyntxEditRequest(params: {
 
 /** Reference/prompt payload an edit dispatch needs, shared by single + combo paths. */
 interface ImageEditContext {
+  controls: EditInput["controls"];
   options?: Record<string, unknown>;
   prompt: string;
   size: string | null;
@@ -233,6 +234,10 @@ interface ImageEditContext {
   allowedConnections: string[] | null;
   request: Request;
   accounting: EditAccountingBase;
+}
+
+function usesOpenAIEditControls(config: ReturnType<typeof getImageProvider> | null) {
+  return !config || config.format === "codex-responses" || config.id === "openrouter";
 }
 
 /** A combo target that resolved to an edit-capable provider/node. */
@@ -333,6 +338,7 @@ async function dispatchImageEditTarget(
     }
     const editImage = () =>
       handleCodexImageEdit({
+        controls: ctx.controls,
         provider: parsed.provider,
         model: parsed.model,
         providerConfig,
@@ -455,6 +461,7 @@ async function dispatchImageEditTarget(
 
   if (providerConfig?.id === "openrouter") {
     return (await handleOpenRouterImageEdit({
+      controls: ctx.controls,
       provider: parsed.provider,
       model: parsed.model,
       baseUrl: providerConfig.baseUrl,
@@ -480,6 +487,7 @@ async function dispatchImageEditTarget(
     };
   }
   return (await handleOpenAIImageEdit({
+    controls: ctx.controls,
     provider: customProviderId,
     model: customModel,
     credentials: credentials as never,
@@ -554,6 +562,17 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
       HTTP_STATUS.BAD_REQUEST,
       `No image-edit-capable targets in combo "${comboName}"`
     );
+  }
+
+  // A malformed client control must not become a target-local error and trigger fallback.
+  if (
+    "error" in ctx.controls &&
+    editTargets.some(
+      ({ providerConfig }) =>
+        usesOpenAIEditControls(providerConfig) || providerConfig?.format === "adobe-firefly-image"
+    )
+  ) {
+    return errorResponse(ctx.controls.status, ctx.controls.error);
   }
 
   const orderedTargets = orderCapabilityTargets({
@@ -689,6 +708,7 @@ async function postHandler(request: Request, _context?: unknown) {
           : null;
       return executeImageEditCombo(fullModel, {
         options: input.options,
+        controls: input.controls,
         prompt,
         size,
         responseFormat,
@@ -734,6 +754,9 @@ async function postHandler(request: Request, _context?: unknown) {
 
   const parsed = parseImageModel(resolvedModel);
   const providerConfig = parsed.provider ? getImageProvider(parsed.provider) : null;
+  if ("error" in input.controls && usesOpenAIEditControls(providerConfig)) {
+    return errorResponse(input.controls.status, input.controls.error);
+  }
   const prepareFalInput = getFalCompatibilityPreparer();
   const falNative = prepareFalInput !== null;
   // Firefly nano/gpt-image, fal edit models and Antigravity Gemini image accept multiple
@@ -848,6 +871,7 @@ async function postHandler(request: Request, _context?: unknown) {
         ),
         () =>
           handleCodexImageEdit({
+            controls: input.controls,
             provider: parsed.provider,
             model: parsed.model,
             providerConfig,
@@ -1039,6 +1063,7 @@ async function postHandler(request: Request, _context?: unknown) {
       editAccounting(accounting, parsed.provider, parsed.model, credentials),
       () =>
         handleOpenRouterImageEdit({
+          controls: input.controls,
           provider: parsed.provider,
           model: parsed.model,
           baseUrl: providerConfig.baseUrl,
@@ -1192,6 +1217,7 @@ async function postHandler(request: Request, _context?: unknown) {
     ),
     () =>
       handleOpenAIImageEdit({
+        controls: input.controls,
         provider: customProviderId,
         model: customModel,
         credentials: credentials as {
