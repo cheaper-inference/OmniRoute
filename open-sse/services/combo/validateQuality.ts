@@ -21,6 +21,20 @@ import { REASONING_BUFFER_MIN_TRIGGER } from "../reasoningTokenBuffer.ts";
 import { isDeliberateEmptyResponsesTerminal } from "../../translator/helpers/responsesTerminalStatus.ts";
 import type { ComboRetryAfter } from "./types.ts";
 import {
+  asObject,
+  checkNonStreamingModelUnavailable,
+  contentBlockStartIsRealSignal,
+  createDeprecationPeekState,
+  type DeprecationPeekState,
+  evaluateDeprecationTextChunk,
+  extractFirstChoiceText,
+  extractStreamingAssistantTextAndSignal,
+  isEmptyResponsesAnnouncement,
+  isRecord,
+  type StreamingUpstreamFailure,
+} from "./deprecationPeek.ts";
+export type { StreamingUpstreamFailure } from "./deprecationPeek.ts";
+import {
   classifyPreContentReadFailure,
   safeStreamReadMessage,
   hasTransportReplayBoundary,
@@ -110,6 +124,68 @@ const EXHAUSTION_MARKER_PATTERN =
 const CONTENT_EXHAUSTION_PATTERN =
   /\b(enough\s+credits?|not\s+enough\s+credits?|please\s+top\s+up|top\s+up\s+to\s+continue|purchase\s+(more\s+)?credits?|add\s+credits?\s+to\s+continue|credit\s+balance\s+(is\s+)?(too\s+low|exhausted|empty)|recharge\s+(your|the)\s+account|out\s+of\s+funds)\b/i;
 
+interface SsePeekFrameContext {
+  sse: SseLifecycleFlags;
+  openAi: OpenAiLifecycleFlags;
+  deprecation: DeprecationPeekState;
+  preContentTransportRecovery: boolean;
+  onStructuredSse: () => void;
+  onTerminator: () => void;
+  onTransportReplayBoundary: () => void;
+  onUpstreamFailure: (failure: StreamingUpstreamFailure | null) => void;
+}
+
+function evaluateSseContentSignal(
+  parsed: Record<string, unknown>,
+  eventType: string,
+  ctx: SsePeekFrameContext
+): StreamingPeekOutcome {
+  const signal = extractStreamingAssistantTextAndSignal(parsed, eventType);
+  const claudeRealContent = applySseLifecycleEvent(eventType, parsed, ctx.sse);
+  if (ctx.sse.hasLifecycleEnd) ctx.onTerminator();
+
+  if (signal.nonTextSignal) {
+    ctx.deprecation.sawContentSignal = true;
+    ctx.deprecation.checkDone = true;
+    return "content";
+  }
+  if (signal.text) {
+    const res = evaluateDeprecationTextChunk(signal.text, ctx.deprecation);
+    if (res.failure) ctx.onUpstreamFailure(res.failure);
+    if (res.outcome) return res.outcome;
+  } else if (
+    claudeRealContent ||
+    (!isEmptyResponsesAnnouncement(parsed, eventType) &&
+      isKnownNonClaudeStreamPayload(parsed, eventType))
+  ) {
+    ctx.deprecation.sawContentSignal = true;
+    ctx.deprecation.checkDone = true;
+    return "content";
+  }
+  if (signal.hasTerminalFinish) ctx.onTerminator();
+  return null;
+}
+
+function evaluateSseFrameOutcome(
+  parsed: Record<string, unknown>,
+  eventType: string,
+  ctx: SsePeekFrameContext,
+  isTerminalUsageOnly: boolean
+): StreamingPeekOutcome {
+  ctx.onStructuredSse();
+  applyOpenAiLifecycleEvent(parsed, ctx.openAi);
+  if (ctx.openAi.hasTerminalMarker) ctx.onTerminator();
+  if (ctx.preContentTransportRecovery && hasTransportReplayBoundary(parsed, eventType)) {
+    ctx.onTransportReplayBoundary();
+  }
+  if (isStreamingUpstreamError(parsed, eventType)) {
+    ctx.onUpstreamFailure(classifyStreamingUpstreamFailure(parsed));
+    return "error";
+  }
+  if (isTerminalUsageOnly) ctx.onTerminator();
+  return evaluateSseContentSignal(parsed, eventType, ctx);
+}
+
 /**
  * Collect the small set of top-level "error envelope" strings a 200 response may
  * carry alongside (or instead of) a normal completion: the OpenAI-shape `error`
@@ -134,28 +210,6 @@ function extractEnvelopeErrorText(json: Record<string, unknown>): string | null 
   return parts.length > 0 ? parts.join(" ") : null;
 }
 
-/**
- * Issue #19278: extract the assistant text of `choices[0]` for the content-level
- * exhaustion scan — string `content` verbatim, or the joined `text` parts of a
- * multimodal content array. Returns "" for any other shape; the caller treats
- * "" as "nothing to scan".
- */
-function extractFirstChoiceText(json: Record<string, unknown>): string {
-  const choices = json.choices;
-  if (!Array.isArray(choices) || choices.length === 0) return "";
-  const firstChoice = choices[0];
-  if (!isRecord(firstChoice)) return "";
-  const message = isRecord(firstChoice.message) ? firstChoice.message : null;
-  const content = message?.content;
-  if (typeof content === "string") return content;
-  if (Array.isArray(content)) {
-    return content
-      .map((part) => (isRecord(part) && typeof part.text === "string" ? part.text : ""))
-      .join(" ");
-  }
-  return "";
-}
-
 /** Mutable lifecycle flags threaded through {@link applySseLifecycleEvent}. */
 interface SseLifecycleFlags {
   hasMessageStart: boolean;
@@ -164,22 +218,6 @@ interface SseLifecycleFlags {
   hasLifecycleEnd: boolean;
   hasMessageStop: boolean;
   stopReason: string | null;
-}
-
-/** Read `parsed.<key>` as a nested object bag, or null when absent/not an object. */
-function asObject(parsed: Record<string, unknown>, key: string): Record<string, unknown> | null {
-  const value = parsed[key];
-  return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
-}
-
-/**
- * A content_block_start is real signal only for tool_use / redacted_thinking —
- * a tool call is meaningful even before its input_json_delta arrives. text and
- * thinking blocks routinely open empty; keep peeking for a delta instead.
- */
-function contentBlockStartIsRealSignal(parsed: Record<string, unknown>): boolean {
-  const blockType = asObject(parsed, "content_block")?.type;
-  return blockType === "tool_use" || blockType === "redacted_thinking";
 }
 
 /**
@@ -290,27 +328,6 @@ function responsesApiOutputHasContent(output: unknown): boolean {
       );
     })
   );
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return !!value && typeof value === "object" && !Array.isArray(value);
-}
-
-export interface StreamingUpstreamFailure {
-  status: number;
-  type?: string;
-  code?: string;
-  message?: string;
-  requestScoped: boolean;
-  retryable: boolean;
-  /**
-   * #16438: the failure is a pre-output empty turn (the disconnect guard's synthetic
-   * "Provider returned empty content" frame or an explicit `empty_content` code). Read
-   * only when EMPTY_STREAM_SIBLING_RECOVERY_ENABLED is on; `code` keeps the wire value.
-   */
-  emptyContent?: boolean;
-  /** In-process transport read failure, never inferred from an upstream SSE payload. */
-  transportReadFailure?: boolean;
 }
 
 export interface ResponseQualityResult {
@@ -477,6 +494,25 @@ export async function validateResponseQuality(
     let upstreamFailure: StreamingUpstreamFailure | null = null;
     let sawTerminator = false;
     let transportReplayBoundary = false;
+    const deprecation = createDeprecationPeekState();
+    const sseFrameContext: SsePeekFrameContext = {
+      sse,
+      openAi,
+      deprecation,
+      preContentTransportRecovery,
+      onStructuredSse: () => {
+        sawStructuredSSE = true;
+      },
+      onTerminator: () => {
+        sawTerminator = true;
+      },
+      onTransportReplayBoundary: () => {
+        transportReplayBoundary = true;
+      },
+      onUpstreamFailure: (failure) => {
+        upstreamFailure = failure ?? upstreamFailure;
+      },
+    };
     // Set when the streaming peek loop hits an "outcome === content" verdict
     // (a content_block_* event observed). Guards the catch-block failover
     // check below so a stream that already produced content before an error
@@ -548,35 +584,20 @@ export async function validateResponseQuality(
         const parsed = consumeSseLine(line);
         if (!parsed) continue;
 
-        // A successfully parsed `data:` payload is structured SSE activity
-        // regardless of shape or content — tracked only for the generic
-        // done-branch gate below; the #1382/#7285 branches are unaffected.
-        sawStructuredSSE = true;
-
-        applyOpenAiLifecycleEvent(parsed, openAi);
-        if (openAi.hasTerminalMarker) sawTerminator = true;
-
         const eventType =
           (typeof parsed.type === "string" ? parsed.type : null) || pendingEventType || "";
         pendingEventType = "";
-        if (preContentTransportRecovery && hasTransportReplayBoundary(parsed, eventType))
-          transportReplayBoundary = true;
-
-        if (isStreamingUpstreamError(parsed, eventType)) {
-          upstreamFailure = classifyStreamingUpstreamFailure(parsed) ?? upstreamFailure;
-          return "error";
-        }
-
-        if (isTerminalUsageOnlyChunk(parsed, eventType)) sawTerminator = true;
-
-        if (isKnownNonClaudeStreamPayload(parsed, eventType)) {
+        const outcome = evaluateSseFrameOutcome(
+          parsed,
+          eventType,
+          sseFrameContext,
+          isTerminalUsageOnlyChunk(parsed, eventType)
+        );
+        if (outcome) return outcome;
+        if (deprecation.sawContentSignal && sawTerminator) {
+          deprecation.checkDone = true;
           return "content";
         }
-
-        if (applySseLifecycleEvent(eventType, parsed, sse)) {
-          return "content";
-        }
-        if (sse.hasLifecycleEnd) sawTerminator = true;
       }
       return null;
     }
@@ -678,6 +699,10 @@ export async function validateResponseQuality(
               reason,
               ...(upstreamFailure ? { upstreamFailure } : {}),
             };
+          }
+
+          if (deprecation.sawContentSignal) {
+            return { valid: true, clonedResponse: buildReplayResponse(reader) };
           }
 
           if (sse.hasMessageStart && sse.hasLifecycleEnd && !sse.hasRealContent) {
@@ -998,6 +1023,8 @@ export async function validateResponseQuality(
       };
     }
   }
+  const modelUnavailable = checkNonStreamingModelUnavailable(json);
+  if (modelUnavailable) return modelUnavailable;
 
   const choices = json?.choices;
   if (json?.object === "response") {

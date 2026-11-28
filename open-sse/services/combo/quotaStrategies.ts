@@ -66,6 +66,131 @@ import {
   isQuotaRefusalMarked,
 } from "../../../src/domain/quotaCache.ts";
 
+export type SyncedAvailableModelEntry =
+  | string
+  | { id?: unknown; name?: unknown; model?: unknown };
+
+export type SyncedAvailableModelsReader = (
+  providerId: string
+) => Promise<Record<string, SyncedAvailableModelEntry[]> | null | undefined>;
+
+let syncedAvailableModelsReader: SyncedAvailableModelsReader | null = null;
+
+export function registerSyncedAvailableModelsReader(
+  reader: SyncedAvailableModelsReader | null
+): void {
+  syncedAvailableModelsReader = reader;
+}
+
+function normalizeSyncedModelId(modelId: string): string {
+  let normalized = modelId.trim().toLowerCase();
+  if (!normalized) return "";
+  if (normalized.endsWith("[1m]")) {
+    normalized = normalized.slice(0, -4).trim();
+  }
+  const slashIdx = normalized.indexOf("/");
+  if (slashIdx !== -1) {
+    normalized = normalized.slice(slashIdx + 1).trim();
+  }
+  return normalized;
+}
+
+function extractSyncedModelEntryName(entry: unknown): string {
+  if (typeof entry === "string") return entry;
+  if (!isRecord(entry)) return "";
+  if (typeof entry.id === "string") return entry.id;
+  if (typeof entry.name === "string") return entry.name;
+  if (typeof entry.model === "string") return entry.model;
+  return "";
+}
+
+function extractSyncedModelSet(entries: unknown): Set<string> | null {
+  if (!Array.isArray(entries) || entries.length === 0) return null;
+  const set = new Set<string>();
+  for (const entry of entries) {
+    const normalized = normalizeSyncedModelId(extractSyncedModelEntryName(entry));
+    if (normalized) set.add(normalized);
+  }
+  return set.size > 0 ? set : null;
+}
+
+function getSyncedProviderKeys(provider: string): string[] {
+  return provider === "agy" || provider === "antigravity" ? ["agy", "antigravity"] : [provider];
+}
+
+async function mergeSyncedModelsFromReader(
+  key: string,
+  result: Map<string, Set<string>>
+): Promise<void> {
+  if (!syncedAvailableModelsReader) return;
+  try {
+    const byConn = await syncedAvailableModelsReader(key);
+    if (!byConn || typeof byConn !== "object") return;
+    for (const [connId, entries] of Object.entries(byConn)) {
+      if (result.has(connId)) continue;
+      const modelSet = extractSyncedModelSet(entries);
+      if (modelSet) result.set(connId, modelSet);
+    }
+  } catch {
+    // Fail open if synced model inventory cannot be read.
+  }
+}
+
+async function loadSyncedModelsByConnectionForProvider(
+  provider: string,
+  cache: Map<string, Map<string, Set<string>>>
+): Promise<Map<string, Set<string>>> {
+  const cached = cache.get(provider);
+  if (cached) return cached;
+
+  const result = new Map<string, Set<string>>();
+  cache.set(provider, result);
+  if (!syncedAvailableModelsReader) return result;
+
+  for (const key of getSyncedProviderKeys(provider)) {
+    await mergeSyncedModelsFromReader(key, result);
+  }
+  return result;
+}
+
+function resolveSyncedProviderKey(target: ResolvedComboTarget): string | null {
+  const targetProvider = getResetAwareProvider(target);
+  const rawProvider = (target.providerId || target.provider || "").toLowerCase();
+  if (rawProvider === "agy") return "agy";
+  if (targetProvider === "antigravity" || targetProvider === "agy") return targetProvider;
+  return rawProvider === "antigravity" ? "antigravity" : null;
+}
+
+async function buildSyncedModelExclusionSet(
+  target: ResolvedComboTarget,
+  connectionIds: string[],
+  poolIds: Set<unknown>,
+  syncedModelsCache: Map<string, Map<string, Set<string>>>
+): Promise<Set<string> | null> {
+  const syncedProviderKey = resolveSyncedProviderKey(target);
+  if (!syncedProviderKey) return null;
+  const syncedByConn = await loadSyncedModelsByConnectionForProvider(
+    syncedProviderKey,
+    syncedModelsCache
+  );
+  const requestedModel = normalizeSyncedModelId(
+    parseModel(target.modelStr).model || target.modelStr || ""
+  );
+  if (!requestedModel) return null;
+  const anyAdvertises = connectionIds.some(
+    (id) => poolIds.has(id) && syncedByConn.get(id)?.has(requestedModel)
+  );
+  if (!anyAdvertises) return null;
+  const excluded = new Set<string>();
+  for (const id of connectionIds) {
+    const advertised = syncedByConn.get(id);
+    if (advertised && advertised.size > 0 && !advertised.has(requestedModel)) {
+      excluded.add(id);
+    }
+  }
+  return excluded;
+}
+
 /**
  * How long a stored quota snapshot stays good enough to be counted as confident
  * headroom by the quota-weighted A pool.
@@ -199,6 +324,7 @@ export async function expandTargetsByQuotaAwareConnections(
 }> {
   const connectionCache = new Map<string, Array<Record<string, unknown>>>();
   const connectionLoadPromises = new Map<string, Promise<Array<Record<string, unknown>>>>();
+  const syncedModelsCache = new Map<string, Map<string, Set<string>>>();
   const connectionById = new Map<string, Record<string, unknown>>();
   const expandedTargets: ResolvedComboTarget[] = [];
   const exclusions: PreDispatchExclusion[] = [];
@@ -240,10 +366,18 @@ export async function expandTargetsByQuotaAwareConnections(
     }
 
     const poolIds = new Set(connections.map((connection) => connection.id));
+    const syncedExcludedIds = await buildSyncedModelExclusionSet(
+      target,
+      connectionIds,
+      poolIds,
+      syncedModelsCache
+    );
+
     for (const connectionId of connectionIds) {
       const provider = getResetAwareProvider(target);
       const connection = connectionById.get(connectionId);
       if (provider && getQuotaFetcher(provider) && !poolIds.has(connectionId)) continue;
+      if (syncedExcludedIds?.has(connectionId)) continue;
       const quotaExhausted = Boolean(
         provider &&
         isQuotaExhaustedForRequest(
