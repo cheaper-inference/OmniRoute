@@ -86,6 +86,11 @@ for (const terminated of [false, true]) {
 }
 
 const deepMetadata = "data: " + '{"a":'.repeat(10000) + "0" + "}".repeat(10000) + "\n\n";
+// The same payload split over two data lines. The normalizer joins, parses and re-serializes a
+// multi-line event, so the injected serialization failure below still has a call to hit. A
+// one-line event is forwarded as is, with no serialization to fail.
+const deepMetadataTwoLines =
+  "data: " + '{"a":'.repeat(10000) + "\ndata: 0" + "}".repeat(10000) + "\n\n";
 async function withObserverSerializationFailure(run: (hits: () => number) => void | Promise<void>) {
   const stringify = JSON.stringify;
   let hits = 0;
@@ -119,11 +124,11 @@ test("review14: controlled observer exception cannot change readiness", async ()
     const scanner = new SseOutputScanner(() => {
       observed = true;
     });
-    assert.doesNotThrow(() => assert.equal(scanner.push(deepMetadata), false));
+    assert.doesNotThrow(() => assert.equal(scanner.push(deepMetadataTwoLines), false));
     assert.equal(observed, true, "incomplete observer inspection conservatively vetoes retry");
     assert.equal(scanner.overflowedWithoutOutput(), false);
     assert.equal(scanner.flush(), false);
-    assert.doesNotThrow(() => assert.equal(scanner.push(deepMetadata), false));
+    assert.doesNotThrow(() => assert.equal(scanner.push(deepMetadataTwoLines), false));
     assert.equal(hits(), 1, "failed observer inspection stays disabled after reset/flush");
     assert.equal(scanner.push('data: {"choices":[{"delta":{"content":"answer"}}]}\n\n'), true);
   });

@@ -1,0 +1,1 @@
+- **perf(streaming):** a streamed event with one data line is no longer parsed and re-serialized by the SSE line normalizer, so each streamed chunk costs one JSON parse less. ([#19703](https://github.com/cheaper-inference/OmniRoute/pull/19703))
