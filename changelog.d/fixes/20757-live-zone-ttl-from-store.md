@@ -1,0 +1,1 @@
+- **fix(compression):** Live-zone compression cache entries start their TTL when they are stored, so a slow compression no longer causes a cache miss on the next turn ([#20757](https://github.com/cheaper-inference/OmniRoute/pull/20757)) — thanks @zerafachris
