@@ -86,19 +86,89 @@ export function OPTIONS(): Response {
   return new Response(null, { status: 204, headers: CORS });
 }
 
+type RadarCatalog = ReturnType<typeof getRadarCatalog>;
+type ServedOverlay = NonNullable<RadarCatalog["meta"]>;
+
+/**
+ * Pick the overlay this caller may see and the entries the figures are computed from.
+ *
+ * Entitlement follows the feed server's own download-time decision: the
+ * community feed is the free public catalog, so it serves everyone; the
+ * live feed is supporter-key content, so it only reaches callers this
+ * instance has authenticated — never anonymous visitors, or an exposed
+ * instance would re-publish the paid feed for free.
+ */
+function resolveServedCatalog(
+  { entries, meta }: RadarCatalog,
+  authed: boolean
+): { overlay: ServedOverlay | null; servedEntries: BudgetEntry[] | undefined } {
+  const overlayIsFresh = meta !== null && !meta.olderThanRelease;
+  const overlay = overlayIsFresh && (meta.tier !== "live" || authed) ? meta : null;
+  // The accessor has already applied local model state to the shipped catalog
+  // when the feed is stale.
+  const servedEntries = overlay || meta?.olderThanRelease ? entries.map(toBudgetEntry) : undefined;
+  return { overlay, servedEntries };
+}
+
+/**
+ * The public headline over the served entries. Release-curated counting gates are
+ * applied to the new figures; the legacy totals keep the existing overlay projection.
+ */
+function computeServedHeadline(
+  servedEntries: BudgetEntry[] | undefined
+): Pick<FreeTierSummary, "realTokens" | "socialGatedTokens"> {
+  const headline = computePublicFreeHeadline({
+    entries: servedEntries?.map((entry) => ({
+      ...entry,
+      gates: RELEASE_BY_KEY.get(`${entry.provider}:${entry.modelId}`)?.gates,
+    })),
+  });
+  return {
+    realTokens: headline.steadyRecurringTokens,
+    socialGatedTokens: headline.socialGatedRecurringTokens,
+  };
+}
+
+/** Which source answered, and the date of what was actually served. */
+function describeSource(
+  overlay: ServedOverlay | null,
+  servedAt: Date
+): Pick<FreeTierSummary, "catalogUpdatedAt" | "catalogSource" | "source" | "priceReference"> {
+  const catalogUpdatedAt = overlay ? overlay.generatedAt : FREE_CATALOG_CURATED_AT;
+  return {
+    catalogUpdatedAt,
+    catalogSource: overlay ? "radar-overlay" : "baseline",
+    source: {
+      kind: overlay ? "radar" : "release",
+      version: overlay?.version ?? null,
+      generatedAt: catalogUpdatedAt,
+      servedAt: servedAt.toISOString(),
+    },
+    priceReference: overlay?.priceReference ?? null,
+  };
+}
+
+/**
+ * #13679: usedThisMonth/remaining reveal the operator's own local usage —
+ * unlike the catalog totals, that is not meant to be public. Withhold both
+ * from unauthenticated callers instead of gating the whole route, so the
+ * intentionally-public catalog fields stay served to everyone.
+ */
+function usageFields(
+  authed: boolean,
+  steadyRecurringTokens: number
+): Pick<FreeTierSummary, "usedThisMonth" | "remaining"> {
+  if (!authed) return { usedThisMonth: null, remaining: null };
+  const usedThisMonth = sumUsageTokensThisMonth();
+  return { usedThisMonth, remaining: Math.max(0, steadyRecurringTokens - usedThisMonth) };
+}
+
 export async function GET(req: Request): Promise<Response> {
   const url = new URL(req.url);
   const excludeTosAvoid = url.searchParams.get("excludeTosAvoid") === "1";
 
   // Resolve feed age and local model state in the shared catalog accessor.
-  const { entries, meta } = getRadarCatalog();
-
-  // Entitlement follows the feed server's own download-time decision: the
-  // community feed is the free public catalog, so it serves everyone; the
-  // live feed is supporter-key content, so it only reaches callers this
-  // instance has authenticated — never anonymous visitors, or an exposed
-  // instance would re-publish the paid feed for free.
-  const overlayIsFresh = meta !== null && !meta.olderThanRelease;
+  const catalog = getRadarCatalog();
 
   // #13679: computed once and reused below to also gate the operator-specific
   // usage fields — this endpoint ships an unconditional wildcard CORS header
@@ -107,30 +177,10 @@ export async function GET(req: Request): Promise<Response> {
   // relying on Origin checks the browser CORS model doesn't actually enforce
   // for a same-origin-looking (DNS-rebinding) caller.
   const authed = await isAuthenticated(req);
-  const overlay = overlayIsFresh && (meta.tier !== "live" || authed) ? meta : null;
-
-  // The accessor has already applied local model state to the shipped catalog
-  // when the feed is stale.
-  const servedEntries = overlay || meta?.olderThanRelease ? entries.map(toBudgetEntry) : undefined;
+  const { overlay, servedEntries } = resolveServedCatalog(catalog, authed);
   const totals = computeFreeModelTotals({ excludeTosAvoid, entries: servedEntries });
-
-  // Apply release-curated counting gates to the new figures and keep the legacy
-  // totals based on the existing overlay projection.
-  const { steadyRecurringTokens: realTokens, socialGatedRecurringTokens: socialGatedTokens } =
-    computePublicFreeHeadline({
-      entries: servedEntries?.map((entry) => ({
-        ...entry,
-        gates: RELEASE_BY_KEY.get(`${entry.provider}:${entry.modelId}`)?.gates,
-      })),
-    });
   const servedAt = new Date();
-  const catalogUpdatedAt = overlay ? overlay.generatedAt : FREE_CATALOG_CURATED_AT;
 
-  // #13679: usedThisMonth/remaining reveal the operator's own local usage —
-  // unlike the catalog totals, that is not meant to be public. Withhold both
-  // from unauthenticated callers instead of gating the whole route, so the
-  // intentionally-public catalog fields stay served to everyone.
-  const usedThisMonth = authed ? sumUsageTokensThisMonth() : null;
   const body: FreeTierSummary = {
     ...totals,
     perModel: totals.perModel.map((row) => ({
@@ -138,24 +188,14 @@ export async function GET(req: Request): Promise<Response> {
       inRelease: RELEASE_BY_KEY.has(`${row.provider}:${row.modelId}`),
       routable: Object.hasOwn(REGISTRY, row.provider),
     })),
-    usedThisMonth,
-    remaining: authed ? Math.max(0, totals.steadyRecurringTokens - usedThisMonth!) : null,
-    catalogUpdatedAt,
-    catalogSource: overlay ? "radar-overlay" : "baseline",
+    ...usageFields(authed, totals.steadyRecurringTokens),
+    ...describeSource(overlay, servedAt),
     // Computed here, not in the component: deriving it client-side would pull
     // the whole provider REGISTRY into the browser bundle.
     noCredentialProviders: listNoCredentialProviders(),
-    source: {
-      kind: overlay ? "radar" : "release",
-      version: overlay?.version ?? null,
-      generatedAt: catalogUpdatedAt,
-      servedAt: servedAt.toISOString(),
-    },
     ...resolveRowSum(overlay?.rowSum, overlay ? undefined : servedEntries, servedAt),
-    realTokens,
-    socialGatedTokens,
+    ...computeServedHeadline(servedEntries),
     activePromotions: null,
-    priceReference: overlay?.priceReference ?? null,
   };
   return new Response(JSON.stringify(body), {
     status: 200,
