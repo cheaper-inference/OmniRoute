@@ -3,6 +3,7 @@ import { Agent, ProxyAgent, type Dispatcher } from "undici";
 import { decodeUserinfo } from "@/shared/utils/decodeUserinfo";
 import { getUpstreamTimeoutConfig } from "@/shared/utils/runtimeTimeouts";
 import { stripIpv6Brackets, detectIpLiteralFamily, parseProxyFamily } from "./proxyFamily.ts";
+import { RELAY_TYPES } from "./relayProxyTypes.ts";
 import { createSocksDispatcherWithFamily } from "./socksConnectorWithFamily.ts";
 import {
   createRoundRobinDispatcher,
@@ -18,19 +19,10 @@ import {
   setRetryCachedDispatcher,
 } from "./proxyDispatcherCache.ts";
 
+export { isRelayType, RELAY_TYPES } from "./relayProxyTypes.ts";
 export { __cacheProxyDispatcherForTest, clearDispatcherCache } from "./proxyDispatcherCache.ts";
 
 const SUPPORTED_PROTOCOLS = new Set(["http:", "https:", "socks5:"]);
-// Edge-relay proxy types. These do NOT go through an HTTP/SOCKS dispatcher —
-// the caller wraps the upstream URL with buildRelayHeaders() and fetches the
-// relay endpoint directly. Keep this set as the single source of truth so
-// every dispatch decision stays in sync when a new relay backend lands.
-export const RELAY_TYPES: ReadonlySet<string> = new Set(["vercel", "deno", "cloudflare"]);
-
-export function isRelayType(type: string | undefined | null): boolean {
-  return typeof type === "string" && RELAY_TYPES.has(type);
-}
-
 // Local-egress hostnames: host.docker.internal, *.internal, *.local.
 // Match the same shape the proxyFetch.ts isLocalAddress() helper uses for
 // PROXY bypass, but narrower on purpose: we only switch dispatcher options

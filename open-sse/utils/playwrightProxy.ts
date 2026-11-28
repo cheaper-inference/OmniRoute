@@ -3,7 +3,7 @@
 // them from drifting on the scheme or on credential handling.
 
 import type { LaunchOptions } from "playwright";
-import { isRelayProxyType } from "../../src/lib/db/proxies/mappers.ts";
+import { isRelayType } from "./relayProxyTypes.ts";
 
 export type PlaywrightProxy = NonNullable<LaunchOptions["proxy"]>;
 
@@ -25,9 +25,7 @@ export function isSocks5Type(record: ProxyRecordLike): boolean {
 export function isRelayProxyRecord(record: ProxyRecordLike): boolean {
   // Stored types are lower-case in practice, but the socks predicate next to
   // this one lowercases, so a mixed-case row must not slip through as http.
-  return isRelayProxyType(
-    typeof record.type === "string" ? record.type.toLowerCase() : record.type
-  );
+  return typeof record.type === "string" && isRelayType(record.type.toLowerCase());
 }
 
 /**
