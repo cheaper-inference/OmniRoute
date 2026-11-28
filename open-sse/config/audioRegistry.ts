@@ -712,6 +712,38 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     ],
   },
 
+  // Vercel AI Gateway speaks speech on its own protocol, not OpenAI's
+  // (POST /v4/ai/speech-model, model in the `ai-model-id` header, base64 JSON
+  // reply); executors/vercelGatewayTts.ts translates it. Speech reuses the
+  // provider's existing API key connections. Any gateway speech model passes
+  // through as vercel-ai-gateway/<creator>/<model> (or vag/…); the list is the
+  // current generation of the gateway catalog's speech models (GET /v1/models,
+  // type "speech", without music and sound effects).
+  "vercel-ai-gateway": {
+    id: "vercel-ai-gateway",
+    baseUrl: "https://ai-gateway.vercel.sh/v4/ai/speech-model",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "vercel-ai-gateway-speech",
+    supportedFormats: ["mp3", "wav", "opus", "aac", "flac", "pcm"],
+    models: [
+      { id: "spacexai/grok-tts", name: "Grok TTS" },
+      { id: "openai/tts-1", name: "TTS-1" },
+      { id: "openai/tts-1-hd", name: "TTS-1 HD" },
+      { id: "google/gemini-3.8-flash-tts", name: "Gemini 3.8 Flash TTS" },
+      { id: "google/gemini-3.8-flash-lite-tts", name: "Gemini 3.8 Flash-Lite TTS" },
+      { id: "elevenlabs/eleven-v4", name: "Eleven v4" },
+      { id: "elevenlabs/eleven-v4-turbo", name: "Eleven v4 Turbo" },
+      { id: "elevenlabs/eleven-v3", name: "Eleven v3" },
+      { id: "elevenlabs/eleven-multilingual-v2", name: "Eleven Multilingual v2" },
+      { id: "elevenlabs/eleven-flash-v2.5", name: "Eleven Flash v2.5" },
+      { id: "fish-audio/s2.1-pro", name: "Fish Audio S2.1 Pro" },
+      { id: "microsoft/mai-voice-2.1", name: "MAI-Voice-2.1" },
+      { id: "microsoft/mai-voice-2.1-flash", name: "MAI-Voice-2.1-Flash" },
+      { id: "mistral/voxtral-mini-tts-3", name: "Voxtral TTS 3" },
+    ],
+  },
+
   gtts: {
     id: "gtts",
     // Google Translate TTS — reverse-engineered, no API key required.

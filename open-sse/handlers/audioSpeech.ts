@@ -16,6 +16,7 @@ import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
  * - HuggingFace Inference: POST { inputs: text } to /models/{model_id}
  * - Coqui TTS: POST { text, speaker_id } → WAV audio (local, no auth)
  * - Tortoise TTS: POST { text, voice } → audio binary (local, no auth)
+ * - Vercel AI Gateway: POST { text, outputFormat } to /v4/ai/speech-model → { audio: base64 }
  */
 
 import { getSpeechProvider, parseSpeechModel } from "../config/audioRegistry.ts";
@@ -27,6 +28,7 @@ import { handleAwsPollySpeech } from "../executors/awsPollyTts.ts";
 import { GttsUpstreamError, normalizeGttsLang, synthesizeGtts } from "../executors/gtts.ts";
 import { handleFishAudioSpeech } from "../executors/fishAudioTts.ts";
 import { handleDashscopeTtsSpeech } from "../executors/dashscopeTts.ts";
+import { handleVercelGatewaySpeech } from "../executors/vercelGatewayTts.ts";
 import { errorResponse } from "../utils/error.ts";
 import { handleGrokSpeech } from "./grokMedia.ts";
 import { resolveElevenLabsVoiceId } from "./elevenLabsVoiceMap.ts";
@@ -941,7 +943,7 @@ export async function handleAudioSpeech({
   if (!providerConfig) {
     return errorResponse(
       400,
-      `No speech provider found for model "${body.model}". Use format provider/model. Available: openai, hyperbolic, deepgram, nvidia, elevenlabs, huggingface, inworld, cartesia, fishaudio, playht, kie, aws-polly, xiaomi-mimo, gtts, coqui, tortoise, qwen`
+      `No speech provider found for model "${body.model}". Use format provider/model. Available: openai, hyperbolic, deepgram, nvidia, elevenlabs, huggingface, inworld, cartesia, fishaudio, playht, kie, aws-polly, xiaomi-mimo, gtts, coqui, tortoise, qwen, vercel-ai-gateway`
     );
   }
 
@@ -1055,6 +1057,10 @@ export async function handleAudioSpeech({
 
     if (providerConfig.format === "dashscope-tts") {
       return handleDashscopeTtsSpeech(providerConfig, body, modelId, token, credentials);
+    }
+
+    if (providerConfig.format === "vercel-ai-gateway-speech") {
+      return await handleVercelGatewaySpeech(providerConfig, body, modelId, token);
     }
 
     if (providerConfig.format === "minimax-tts") {
