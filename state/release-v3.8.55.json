@@ -3,9 +3,9 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b80",
+    "batchId": "b80-r1",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b80-a805b064c2c0",
+    "candidateRef": "omni-queue/release-v3.8.55/b80-r1-a805b064c2c0",
     "candidateSha": "a805b064c2c0d7293506f9d4dea3e81ca2457b9c",
     "baseSha": "92832ebb30c2ff0d6fc7d548b815684153df8fe4",
     "treeSha": "970424c1570e4b0ee034269839bc2c093390e8eb",
@@ -19,8 +19,8 @@
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-28T14:44:09.837Z",
-    "attempts": 0,
+    "startedAt": "2026-11-28T15:40:36.852Z",
+    "attempts": 1,
     "bisect": null,
     "lane": "hotfix"
   },
@@ -119,39 +119,14 @@
   },
   "counters": {
     "batchSeq": 80,
-    "ciRuns": 85,
+    "ciRuns": 86,
     "landedPrs": 81,
     "landedBatches": 30,
-    "redBatches": 17,
+    "redBatches": 18,
     "bisections": 6,
     "culprits": 1
   },
   "history": [
-    {
-      "at": "2026-11-25T01:43:22.523Z",
-      "type": "land-rejected",
-      "batchId": "b35",
-      "prs": [
-        21095
-      ],
-      "sha": "046cba6aa30fc9e6df70098f466b6de942bfe39f",
-      "detail": "batch changed before landing: #21095 head moved to 1b7aac58720e",
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45527769509"
-    },
-    {
-      "at": "2026-11-25T04:28:56.602Z",
-      "type": "batch-started",
-      "batchId": "b36",
-      "prs": [
-        21095
-      ],
-      "sha": "d81570b3206aa398b3c4f090ae31ee484b145056",
-      "detail": "1 PR(s) on ff3e55cab2e1; window 5",
-      "labeledAt": {
-        "21095": "2026-11-25T04:16:27Z"
-      },
-      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/45547008717"
-    },
     {
       "at": "2026-11-25T05:05:21.727Z",
       "type": "checks-red",
@@ -2810,8 +2785,30 @@
         "20844": "2026-11-28T09:44:45Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46155955442"
+    },
+    {
+      "at": "2026-11-28T15:40:36.535Z",
+      "type": "checks-red",
+      "batchId": "b80",
+      "prs": [
+        20844
+      ],
+      "sha": "a805b064c2c0d7293506f9d4dea3e81ca2457b9c",
+      "detail": "Gate / Quality, Fast Quality Gates",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46161075448"
+    },
+    {
+      "at": "2026-11-28T15:40:48.599Z",
+      "type": "infra-retry",
+      "batchId": "b80-r1",
+      "prs": [
+        20844
+      ],
+      "sha": "a805b064c2c0d7293506f9d4dea3e81ca2457b9c",
+      "detail": "retry 1/1: all 1 failure(s) are infrastructure (1 aggregate gate failure(s) ignored)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/46161075448"
     }
   ],
-  "updatedAt": "2026-11-28T14:44:14.725Z",
+  "updatedAt": "2026-11-28T15:42:42.267Z",
   "batchWindow": 2
 }
