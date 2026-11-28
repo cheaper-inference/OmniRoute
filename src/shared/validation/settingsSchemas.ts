@@ -26,6 +26,7 @@ import {
 // this schema is reachable from client components (dashboard onboarding wizard), and
 // routeGuard drags in server runtime (→ ioredis) that breaks the client/CLI build.
 import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
+import { corsOriginsSchema } from "@/shared/validation/corsOrigins";
 import { isHttpUrl } from "@/shared/validation/schemas/misc";
 import {
   BANKED_RESET_ACCOUNT_SCOPES,
@@ -222,7 +223,7 @@ export const updateSettingsSchema = z.object({
   customLogoBase64: z.string().max(100000).optional(),
   customFaviconUrl: z.string().max(2000).optional(),
   customFaviconBase64: z.string().max(50000).optional(),
-  corsOrigins: z.string().max(500).optional(),
+  corsOrigins: corsOriginsSchema.optional(),
   cloudUrl: z.string().max(500).optional(),
   baseUrl: z.string().max(500).optional(),
   setupComplete: z.boolean().optional(),

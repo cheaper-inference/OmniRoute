@@ -10,6 +10,12 @@ import { isMainModule } from "../../lib/is-main-module.mjs";
 import { FETCH_DEFAULTS, createHostThrottle, fetchSource } from "./fetchSource.mjs";
 import { loadManifest, probeUrlErrors } from "./manifest.mjs";
 import { backsFindings, classifyResponse, evaluateProbe, measureText } from "./probes.mjs";
+import {
+  compareDeclaredListing,
+  declareListing,
+  loadRegistryModels,
+  observeListing,
+} from "./registry.mjs";
 import { buildReport, renderMarkdown } from "./report.mjs";
 import {
   FETCH_FAILURE_THRESHOLD,
@@ -137,6 +143,37 @@ function failureFinding(result, source) {
   };
 }
 
+function registryProbeBase(probe) {
+  const { origin, pathname } = new URL(probe.url);
+  return { ...probeResultBase(probe), scope: "registry", url: origin + pathname };
+}
+
+/** @returns {ProbeResult} */
+function registryResult(probe, source, declared, checkedAt) {
+  const listing = observeListing(probe, source, checkedAt);
+  const diff = compareDeclaredListing(declared, listing);
+  const compared = diff.status === "compared";
+  return {
+    ...registryProbeBase(probe),
+    status: compared ? "ok" : "inconclusive",
+    httpStatus: listing.httpStatus,
+    listing,
+    declared,
+    findings: [
+      {
+        provider: probe.provider,
+        probeId: probe.id,
+        severity: "info",
+        kind: compared ? "registry-diff" : "registry-inconclusive",
+        message: compared ? "Compared declared and listed target IDs" : "Listing is inconclusive",
+        details: compared
+          ? { declaredOnly: diff.declaredOnly, listedOnly: diff.listedOnly }
+          : { reason: diff.reason },
+      },
+    ],
+  };
+}
+
 /** @param {{
  *   manifest: Manifest, catalogRows: object[], catalogCuratedAt: string,
  *   replay?: {dir: string, tag: string}|null, only?: string|null, state?: DriftState,
@@ -161,16 +198,21 @@ export async function runDrift({
   const remainingMs = () => deadlineMs - (now() - startedAt);
   const liveFetch = createLiveFetch({ allowedHosts: manifest.allowedHosts, fetchImpl, now, sleep });
   const probeResults = [];
+  const registryProbes = [];
+  const readSource = (probe) =>
+    replay ? readReplay(probe, replay) : fetchWithRetry(probe, liveFetch, sleep, remainingMs);
   for (const probe of manifest.probes) {
     if (only !== null && probe.provider !== only) continue;
+    if (probe.scope === "registry") {
+      registryProbes.push(probe);
+      continue;
+    }
     if (remainingMs() <= 0) {
       probeResults.push({ ...probeResultBase(probe), status: "skipped", detail: "deadline" });
       continue;
     }
 
-    const source = replay
-      ? await readReplay(probe, replay)
-      : await fetchWithRetry(probe, liveFetch, sleep, remainingMs);
+    const source = await readSource(probe);
     const result = resultForSource(probe, source, catalogRows, state.probes[probe.id]?.textChars);
     const failed = result.status === "fetch-failed" || result.status === "invalid-response";
     const recorded = recordFetch(
@@ -185,6 +227,24 @@ export async function runDrift({
       result.findings.push(failureFinding(result, source));
     }
     probeResults.push(result);
+  }
+
+  // Let the free-tier probes use their normal time budget before taking registry observations.
+  const registryModels =
+    registryProbes.length && remainingMs() > 0
+      ? await loadRegistryModels([...new Set(registryProbes.map(({ provider }) => provider))])
+      : {};
+  for (const probe of registryProbes) {
+    if (remainingMs() <= 0) {
+      probeResults.push({ ...registryProbeBase(probe), status: "skipped", detail: "deadline" });
+      continue;
+    }
+    const declared = declareListing(
+      probe,
+      Object.hasOwn(registryModels, probe.provider) ? registryModels[probe.provider] : undefined
+    );
+    const source = await readSource(probe);
+    probeResults.push(registryResult(probe, source, declared, new Date(now()).toISOString()));
   }
 
   const report = buildReport({

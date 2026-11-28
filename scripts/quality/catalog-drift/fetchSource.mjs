@@ -9,7 +9,7 @@ export const FETCH_DEFAULTS = Object.freeze({
   deadlineMs: 12 * 60_000,
 });
 
-/** @typedef {{ ok: true, status: number, contentType: string, text: string }
+/** @typedef {{ ok: true, status: number, contentType: string, text: string, link?: string, contentRange?: string }
  *  | { ok: false, failure: "network"|"timeout"|"http"|"gone"|"too-large", status: number|null, detail: string }} SourceResult */
 
 export function createHostThrottle({
@@ -85,7 +85,16 @@ export async function fetchSource(
         reader.releaseLock();
       }
     }
-    return { ok: true, status, contentType: response.headers.get("content-type") ?? "", text };
+    const link = response.headers.get("link");
+    const contentRange = response.headers.get("content-range");
+    return {
+      ok: true,
+      status,
+      contentType: response.headers.get("content-type") ?? "",
+      text,
+      ...(link && { link }),
+      ...(contentRange && { contentRange }),
+    };
   } catch (error) {
     if (signal.aborted || error?.name === "AbortError" || error?.name === "TimeoutError") {
       return { ok: false, failure: "timeout", status: null, detail: "Request timed out" };

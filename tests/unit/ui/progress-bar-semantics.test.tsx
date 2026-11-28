@@ -1,18 +1,20 @@
 // @vitest-environment jsdom
 /**
- * UI review 2026-11-15, defect 13: the hand-made proportion and quota bars had no
- * `role="progressbar"`, so a screen reader skipped them. This pins the rendered contract of a
+ * UI review 2026-11-15, defect 13: the hand-made proportion and quota bars lacked
+ * accessible roles, so a screen reader skipped them. This pins the rendered contract of a
  * sample of the bars that stay hand-made (thin height, series colour, categorical segments) and
  * of the ones that became the kit `Progress`. The static inventory is guarded by
  * tests/unit/progress-bars-have-semantics.test.ts.
  */
 import React from "react";
 import axe from "axe-core";
-import { cleanup, render } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import messages from "../../../src/i18n/messages/en.json";
 import QuotaMiniBar from "../../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/QuotaMiniBar";
+import AntigravityQuotaGroups from "../../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/AntigravityQuotaGroups";
+import ProviderUsdCostModal from "../../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/ProviderUsdCostModal";
 import DimensionBar from "../../../src/app/(dashboard)/dashboard/costs/quota-share/components/DimensionBar";
 import StackedAllocationBar from "../../../src/app/(dashboard)/dashboard/costs/quota-share/components/StackedAllocationBar";
 import WeightTotalBar from "../../../src/app/(dashboard)/dashboard/combos/WeightTotalBar";
@@ -20,7 +22,10 @@ import { TimingWaterfall } from "../../../src/app/(dashboard)/dashboard/tools/tr
 import { WaterfallInspector } from "../../../src/app/(dashboard)/dashboard/compression/studio/WaterfallInspector";
 import type { CompressionRunModel } from "../../../src/app/(dashboard)/dashboard/compression/studio/compressionFlowModel";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 function renderWithIntl(ui: React.ReactElement) {
   return render(
@@ -46,7 +51,10 @@ function range(bar: HTMLElement) {
 
 async function expectNamedProgressbars(container: HTMLElement) {
   const results = await axe.run(container, {
-    runOnly: { type: "rule", values: ["aria-progressbar-name", "aria-valid-attr-value"] },
+    runOnly: {
+      type: "rule",
+      values: ["aria-progressbar-name", "aria-meter-name", "aria-valid-attr-value"],
+    },
   });
   expect(results.violations.map((violation) => violation.id)).toEqual([]);
 }
@@ -71,16 +79,98 @@ const RUN: CompressionRunModel = {
   ],
 };
 
-describe("hand-made bars announce themselves as progressbars", () => {
+describe("bars expose their accessible roles and values", () => {
   it("QuotaMiniBar carries the quota name and the clamped remaining value", async () => {
     const { container } = render(<QuotaMiniBar percent={142} label="Weekly" />);
-    const [bar] = bars(container);
+    const bar = screen.getByRole("meter", { name: "Weekly" });
     expect(range(bar)).toMatchObject({ name: "Weekly", min: "0", max: "100", now: "100" });
     // The drawing is the kit Progress at its thinnest size (4px), with one indicator.
     expect(bar.className).toContain("ci-progress__track");
     expect(bar.closest(".ci-progress")?.getAttribute("data-size")).toBe("xs");
     expect(bar.querySelectorAll(".ci-progress__indicator")).toHaveLength(1);
     await expectNamedProgressbars(container);
+  });
+
+  it("AntigravityQuotaGroups names each quota meter by its window", () => {
+    render(
+      <AntigravityQuotaGroups
+        groups={[
+          {
+            id: "gemini",
+            displayName: "Gemini Models",
+            windows: {
+              session: { remainingPercentage: 75 },
+              weekly: { remainingPercentage: 30 },
+            },
+          },
+        ]}
+      />
+    );
+
+    expect(screen.getByRole("meter", { name: "5 hour" }).getAttribute("aria-valuenow")).toBe("75");
+    expect(screen.getByRole("meter", { name: "Weekly" }).getAttribute("aria-valuenow")).toBe("30");
+  });
+
+  it("ProviderUsdCostModal names the relative cost meter by API key", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        Response.json({
+          provider: "codex",
+          connectionId: "test-account",
+          windowStartAt: "2026-11-19T00:00:00Z",
+          windowResetAt: null,
+          windowSource: "fallback_rolling_7d",
+          windowStartSource: "fallback_rolling_7d",
+          quotaName: null,
+          quotaUsedPercent: null,
+          quotaRemainingPercent: null,
+          totalCostUsd: 6,
+          estimatedFullQuotaUsd: null,
+          rows: [
+            {
+              apiKeyKey: "primary",
+              apiKeyId: "primary",
+              apiKeyName: "Primary key",
+              requests: 4,
+              totalTokens: 800,
+              costUsd: 4,
+              limitUsd: null,
+              limitPeriod: null,
+              limitUsedPercent: null,
+              budgetResetAt: null,
+              lastUsed: null,
+            },
+            {
+              apiKeyKey: "secondary",
+              apiKeyId: "secondary",
+              apiKeyName: "Secondary key",
+              requests: 2,
+              totalTokens: 400,
+              costUsd: 2,
+              limitUsd: null,
+              limitPeriod: null,
+              limitUsedPercent: null,
+              budgetResetAt: null,
+              lastUsed: null,
+            },
+          ],
+        })
+      )
+    );
+
+    renderWithIntl(
+      <ProviderUsdCostModal
+        isOpen
+        onClose={() => {}}
+        connection={{ id: "test-account", provider: "codex" }}
+        providerLabel="Codex"
+        accountLabel="Test account"
+      />
+    );
+
+    const meter = await screen.findByRole("meter", { name: "Secondary key" });
+    expect(range(meter)).toMatchObject({ min: "0", max: "100", now: "50", text: "$2.00" });
   });
 
   it("DimensionBar is no longer hidden and is named by its unit and window", async () => {

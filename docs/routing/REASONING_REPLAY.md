@@ -5,7 +5,6 @@ lastUpdated: 2026-06-28
 ---
 
 > **Source of truth:** `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`
-> **Last updated:** 2026-06-28 — v3.8.40
 
 OmniRoute captures assistant `reasoning_content` produced by thinking-mode models and replays it transparently on multi-turn requests when the upstream provider requires it. This eliminates the HTTP 400 errors that strict providers raise when a client's conversation history is missing the prior turn's reasoning.
 

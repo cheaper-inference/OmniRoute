@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { syncCompatibleHeaders } from "@/lib/providers/compatibleNodeHeaders";
 import {
   deleteModelAliasesForProvider,
   deleteProviderConnectionsByProvider,
@@ -73,6 +74,7 @@ async function syncNodeConnections(
     apiType?: string;
     customJsonConfig: unknown;
     quotaCheck?: Parameters<typeof applyCompatibleQuotaCheck>[1]["setting"];
+    headerUpdate?: { previous: unknown; next: Record<string, string> | null };
   }
 ) {
   const connections = await getProviderConnections({ provider: id });
@@ -88,8 +90,14 @@ async function syncNodeConnections(
         baseUrl: node.baseUrl,
         nodeName: updated.name,
         chatPath: updated.chatPath || undefined,
-        customHeaders: updated.customHeaders || undefined,
       } as JsonRecord;
+      if (node.headerUpdate) {
+        syncCompatibleHeaders(
+          providerSpecificData,
+          node.headerUpdate.previous,
+          node.headerUpdate.next
+        );
+      }
       if (updated.modelsPath) {
         providerSpecificData.modelsPath = updated.modelsPath;
       } else {
@@ -193,7 +201,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       // #2166: explicit null (not omission) so an empty submission clears a
       // previously stored custom icon.
       iconUrl: iconUrl?.trim() || null,
-      customHeaders: customHeaders || null,
+      // #21227: the Edit node modal has no header editor and omits the field; omission keeps
+      // the stored headers (updateProviderNode preserves them), only null or a value replaces them.
+      ...(customHeaders !== undefined ? { customHeaders } : {}),
       dailyQuotaResetTimezone: dailyQuotaResetTimezone?.trim() || null,
       dailyQuotaResetHour:
         dailyQuotaResetHour === 0 || dailyQuotaResetHour != null ? dailyQuotaResetHour : null,
@@ -214,6 +224,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       apiType: node.type === "openai-compatible" ? apiType : undefined,
       customJsonConfig: customJsonNode.config,
       quotaCheck,
+      headerUpdate:
+        customHeaders === undefined
+          ? undefined
+          : { previous: node.customHeaders, next: customHeaders },
     });
 
     return NextResponse.json({ node: updated });

@@ -9,7 +9,7 @@
  * forwarding the Cookie header upstream.
  *
  * Run:
- *   npx cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx \
+ *   node scripts/dev/with-env.mjs DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx \
  *     --import ./open-sse/utils/setupPolyfill.ts \
  *     --import ./tests/_setup/isolateDataDir.ts \
  *     --test --test-force-exit tests/unit/lmarena-split-cookie-4271.test.ts
