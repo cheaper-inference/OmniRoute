@@ -1,12 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { createTempDataDir } from "../_setup/tempDataDir.ts";
 
-const dataDir = mkdtempSync(join(tmpdir(), "omni-context-18582-"));
-process.env.DATA_DIR = dataDir;
-const core = await import("../../src/lib/db/core.ts");
+const { cleanup } = createTempDataDir("omni-context-18582-");
 const { closeCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
 const sync = await import("../../src/lib/modelsDevSync.ts");
 const contexts = await import("../../src/lib/db/modelContextOverrides.ts");
@@ -23,8 +19,7 @@ const input = { provider, model };
 
 test.after(async () => {
   await closeCallLogSaves();
-  core.resetDbInstance();
-  rmSync(dataDir, { recursive: true, force: true });
+  await cleanup();
 });
 
 test("#18582 context override replaces stale synced input limits in the gate and catalog", () => {
