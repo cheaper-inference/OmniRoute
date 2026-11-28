@@ -58,6 +58,14 @@ afterEach(() => {
   useEmailPrivacyStore.setState({ emailsVisible: false });
 });
 
+function renderCombosPage() {
+  render(
+    <NextIntlClientProvider locale="en" messages={messages}>
+      <CombosPage />
+    </NextIntlClientProvider>
+  );
+}
+
 async function openCreate(mode = "expert", providerOptions = providers) {
   const saved: Record<string, unknown>[] = [];
   const writes: { method: string; payload: Record<string, unknown> }[] = [];
@@ -103,11 +111,7 @@ async function openCreate(mode = "expert", providerOptions = providers) {
     });
   });
   vi.stubGlobal("fetch", fetchMock);
-  render(
-    <NextIntlClientProvider locale="en" messages={messages}>
-      <CombosPage />
-    </NextIntlClientProvider>
-  );
+  renderCombosPage();
   const buttons = await screen.findAllByRole("button", { name: /create combo/i });
   fireEvent.click(buttons[0]);
   const dialog = await screen.findByRole("dialog");
@@ -395,5 +399,71 @@ describe("Combo form searchable selectors", { timeout: 60_000 }, () => {
         .value
     ).toBe("");
     expect(writes).toEqual([]);
+  });
+});
+
+describe("Combo account labels with hidden emails", () => {
+  const label = "abc@x.com";
+  const connectionId = "1234abcd-account";
+  const model = "openai/model-4.1-mini";
+
+  function renderCombo(resultConnectionId: string | null = connectionId) {
+    const target = { model, label, connectionId: resultConnectionId };
+    const responses = new Map<string, unknown>([
+      [
+        "/api/combos",
+        {
+          combos: [
+            {
+              id: "short-email-combo",
+              name: "short-email-combo",
+              models: [{ model, providerId: "openai", label, connectionId }],
+            },
+          ],
+        },
+      ],
+      [
+        "/api/combos/test",
+        {
+          resolvedBy: model,
+          resolvedByTarget: target,
+          results: [{ ...target, status: "ok" }],
+        },
+      ],
+    ]);
+    useEmailPrivacyStore.setState({ emailsVisible: false });
+    vi.stubGlobal("fetch", async (url: string) => Response.json(responses.get(url) ?? {}));
+    renderCombosPage();
+  }
+
+  async function openTestResults() {
+    fireEvent.click(await screen.findByRole("button", { name: "Test combo", exact: true }));
+    return within(await screen.findByRole("dialog", { name: /Test Results/ }));
+  }
+
+  it("shows the abbreviated account ID on the combo card", async () => {
+    renderCombo();
+    const step = await screen.findByText(/^openai\/model-4\.1-mini · /);
+    expect(step.textContent).toBe(`${model} · acct 1234abcd`);
+  });
+
+  it("shows only the abbreviated account ID in the test result row", async () => {
+    renderCombo();
+    const results = await openTestResults();
+    expect(results.getByText(/acct 1234abcd$/).textContent).toBe("acct 1234abcd");
+  });
+
+  it("shows the healthy target's abbreviated account ID exactly once", async () => {
+    renderCombo();
+    const results = await openTestResults();
+    const summary = results.getByText(/First healthy target in combo order:/).parentElement!;
+    expect(within(summary).getByText(/1234abcd/).textContent).toBe("account 1234abcd");
+  });
+
+  it("shows dynamic account in both test labels when there is no account ID", async () => {
+    renderCombo(null);
+    const results = await openTestResults();
+    expect(results.queryAllByText(label, { exact: false })).toHaveLength(0);
+    expect(results.getAllByText("dynamic account")).toHaveLength(2);
   });
 });
