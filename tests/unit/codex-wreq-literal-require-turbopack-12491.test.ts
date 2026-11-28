@@ -29,37 +29,31 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
  * emits `64301,(e,t,r)=>{t.exports=e.x("wreq-js-3b69dd5e46bd26d3",()=>require("wreq-js-3b69dd5e46bd26d3"))}`
  * in the compiled chunk, and the build directory gained
  * `.next/node_modules/wreq-js-3b69dd5e46bd26d3 -> ../../node_modules/wreq-js`.
- * `open-sse/utils/tlsClient.ts` (see its `loadRuntimeModule()`) was already
- * hardened against exactly this by keeping the specifier a runtime variable
- * (`Reflect.apply(runtimeRequire, undefined, [moduleName])`), which Turbopack
- * cannot statically rewrite — codex.ts's own wreq-js loader (the one that feeds
- * `getCodexAppServerWebsocketTransport()` / `CodexAppServerClient.connect()`)
- * never received the same treatment.
+ * The Codex executor now delegates to wreqLoader.ts, which keeps the specifier
+ * a runtime variable (`Reflect.apply(runtimeRequire, undefined, [moduleName])`)
+ * like open-sse/utils/browserProfiles.ts.
  */
 
 const CODEX_TS_PATH = join(ROOT, "open-sse", "executors", "codex.ts");
+const WREQ_LOADER_TS_PATH = join(ROOT, "open-sse", "executors", "codex", "wreqLoader.ts");
 
-test("codex.ts must not pass a literal specifier to the wreq-js createRequire() loader", () => {
-  const source = readFileSync(CODEX_TS_PATH, "utf8");
+test("the Codex wreq-js loader must not pass a literal specifier to createRequire()'s resolver", () => {
+  const executor = readFileSync(CODEX_TS_PATH, "utf8");
+  const loader = readFileSync(WREQ_LOADER_TS_PATH, "utf8");
 
+  assert.match(executor, /\bloadCodexWreqModule\(\)/);
   assert.match(
-    source,
-    /const _wreqRequire = createRequire\(import\.meta\.url\)/,
-    "expected open-sse/executors/codex.ts to still define _wreqRequire via createRequire(import.meta.url) " +
-      "— update this test's assumptions if the loader was restructured"
+    loader,
+    /const\s+runtimeRequire\s*=\s*nodeModule\.createRequire\(/,
+    "expected wreqLoader.ts to define the runtime resolver via nodeModule.createRequire()"
   );
 
-  const literalCallPattern = /_wreqRequire\(\s*["'`]wreq-js["'`]\s*\)/;
+  const literalCallPattern = /\b(?:runtimeRequire|_wreqRequire)\s*\(\s*["'`]wreq-js["'`]\s*[,)]/;
   assert.doesNotMatch(
-    source,
+    `${executor}\n${loader}`,
     literalCallPattern,
-    'open-sse/executors/codex.ts calls _wreqRequire("wreq-js") with a LITERAL specifier. ' +
-      'Turbopack statically rewrites this into `require("wreq-js-<buildhash>")`, which only ' +
-      "resolves via a `.next/node_modules/wreq-js-<buildhash>` symlink generated at build time — " +
-      "not reachable in the standalone Docker runtime, so the Codex app-server WebSocket transport " +
-      "(and the plain Codex WS transport sharing this loader) is permanently disabled in production " +
-      "(#12491). Route the specifier through a variable the bundler cannot statically analyze, " +
-      "e.g. Reflect.apply(_wreqRequire, undefined, [moduleName]) — the exact pattern already used by " +
-      "open-sse/utils/tlsClient.ts's loadRuntimeModule()."
+    'Pass "wreq-js" through a variable via Reflect.apply(runtimeRequire, undefined, [moduleName]). ' +
+      'Turbopack rewrites a literal call to `require("wreq-js-<buildhash>")`, which needs a build-time ' +
+      "symlink that is missing from the standalone Docker runtime (#12491)."
   );
 });
