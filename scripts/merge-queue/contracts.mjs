@@ -29,6 +29,7 @@ export const FREEZE_LABEL = "release-freeze";
 
 /** Number of history events kept in the state document (oldest dropped first). */
 export const HISTORY_LIMIT = 200;
+export const ALERTED_EPISODES_LIMIT = 50;
 /** Base-check results kept in the state document (most recent first). */
 export const BASE_CHECK_LIMIT = 10;
 /**
@@ -354,6 +355,7 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {PauseInfo|null} paused
  * @property {Record<string, {since: string, attempts: number}>} [autoPauseEpisodes]
  *   automatically lifted pauses that can recur before a successful landing or manual resume
+ * @property {string[]} [alertedEpisodes]  e-mail alert keys, oldest first, at most 50
  * @property {InFlight|null} inFlight
  * @property {BaseCheck[]} baseChecks    most recent first, at most BASE_CHECK_LIMIT
  * @property {{processed: Object<string, string>}} shadow  PR number (string) → head SHA already
@@ -609,6 +611,13 @@ export function validateState(state) {
       ))
   )
     errors.push("autoPauseEpisodes");
+  if (
+    state.alertedEpisodes !== undefined &&
+    (!Array.isArray(state.alertedEpisodes) ||
+      state.alertedEpisodes.length > ALERTED_EPISODES_LIMIT ||
+      !state.alertedEpisodes.every((key) => typeof key === "string" && key.length > 0))
+  )
+    errors.push("alertedEpisodes");
   if (state.inFlight !== null) {
     const f = state.inFlight;
     if (!isRecord(f)) errors.push("inFlight");

@@ -85,8 +85,8 @@
 // path and, live, lifts the pause (`resumed`, "base repaired by #n"); one that fails like the
 // base is recorded in state.repairTried and never recomposed at that head (repairNotFixing).
 // Every other pause reason processes nothing, lanes included.
-// Every network side effect happens BEFORE the state save that records it, and every step is
-// safe to repeat when the save loses the CAS race (the next tick re-observes GitHub):
+// Network side effects before a state save are safe to repeat when the save loses the CAS race
+// (the next tick re-observes GitHub), except that an episode e-mail can be sent again:
 //   - candidate refs are unique per SHA (never force-pushed) and orphans are deleted by cleanup;
 //     the refs of the STORED in-flight work are deleted only after the save that supersedes them,
 //     and the ref of a commit a stored withdrawal names stays while the entry does;
@@ -160,12 +160,14 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
+import { ALERT_EMAIL_ENV_KEYS, buildAlert, sendAlertEmail } from "./alert.mjs";
 import * as bisectModule from "./bisect.mjs";
 import * as checksModule from "./checks.mjs";
 import * as classifyModule from "./classify.mjs";
 import * as composeModule from "./compose.mjs";
 import { DEFAULT_CONFIG_PATH, isManagedBase, loadConfig } from "./config.mjs";
 import {
+  ALERTED_EPISODES_LIMIT,
   BASE_CHECK_LIMIT,
   BASE_RED_LABEL,
   CANDIDATE_PREFIX,
@@ -259,6 +261,7 @@ export class UnmanagedBaseError extends Error {}
  * @property {(ms: number) => Promise<void>} [sleep]  landing status retry wait (injected for tests)
  * @property {(msg: string) => void} log
  * @property {string|null} runUrl
+ * @property {(mail: {subject: string, text: string, now: string}) => ReturnType<typeof sendAlertEmail>} [sendAlert]
  * @property {string} repository              owner/repo (dashboard and comment links)
  * @property {object} [modules]               optional overrides of the imported modules
  *   ({eligibility, checks, classify, compose, land, bisect, dashboard}) — tests inject fakes;
@@ -584,6 +587,31 @@ function stripUndefined(object) {
   return Object.fromEntries(Object.entries(object).filter(([, v]) => v !== undefined));
 }
 
+function pauseEmail(previous, paused, batch) {
+  if (!paused || paused.reason === "manual") return null;
+  const { reason, since } = paused;
+  if (previous?.reason === reason && previous.since === since) return null;
+  return { key: `pause:${reason}:${since}`, batch, reason };
+}
+
+// A lost CAS can repeat the e-mail if the next attempt has to make the same decision again.
+async function deliverEpisodeEmail(deps, state, episode, link, note) {
+  if (!episode || deps.config.mode !== "live" || !deps.sendAlert) return;
+  const { key, batch, reason } = episode;
+  const alerted = state.alertedEpisodes ?? [];
+  if (alerted.includes(key)) return;
+  const mail = buildAlert({ base: state.base, batch, reason, link });
+  let result;
+  try {
+    result = await deps.sendAlert({ ...mail, now: deps.now() });
+  } catch {
+    result = { sent: false, reason: "failed" };
+  }
+  if (!result.sent && result.reason === "not-configured") return;
+  if (!result.sent) note(`alert email failed${result.detail ? `: ${result.detail}` : ""}`);
+  state.alertedEpisodes = [...alerted, key].slice(-ALERTED_EPISODES_LIMIT);
+}
+
 const toMs = (raw) => {
   const ms = raw ? Date.parse(raw) : Number.NaN;
   return Number.isNaN(ms) ? null : ms;
@@ -666,6 +694,7 @@ class Tick {
     this.voiceFellBack = false;
     this.m = { ...DEFAULT_MODULES, ...(deps.modules ?? {}) };
     this.decisions = [];
+    this.episodeEmails = [];
     /** PRs whose queue label this tick removed (GitHub may still list them for a while). */
     this.touched = new Set();
     this.git = null;
@@ -987,7 +1016,13 @@ class Tick {
     if (this.violations.length) {
       throw new Error(`dry-run attempted GitHub writes: ${this.violations.join(", ")}`);
     }
-    if (!this.dryRun) await this.saveState(this.loaded.state, this.loaded.version);
+    if (!this.dryRun) {
+      const link = dashboard ? `${this.repoWeb}/issues/${dashboard}` : this.deps.runUrl;
+      for (const episode of this.episodeEmails) {
+        await deliverEpisodeEmail(this.deps, this.s, episode, link, (line) => this.note(line));
+      }
+      await this.saveState(this.loaded.state, this.loaded.version);
+    }
     await this.deleteSuperseded(loadedRefs);
     return { base: this.base, decisions: this.decisions, state: this.s };
   }
@@ -1162,7 +1197,8 @@ class Tick {
    * text (an operator's reason may quote it). A resume (applyResume, whose `resumed` event names
    * them) or the base-red auto-resume clears the pause instead.
    */
-  setPaused(paused) {
+  setPaused(paused, batch = this.s.inFlight?.batchId) {
+    this.episodeEmails.push(pauseEmail(this.s.paused, paused, batch));
     const detail = String(paused.detail ?? "");
     const named = new Set(keptNowhereCommits(detail).map((c) => c.sha));
     const carried = keptNowhereCommits(this.s.paused?.detail).filter((c) => !named.has(c.sha));
@@ -1281,6 +1317,7 @@ class Tick {
       url: this.deps.runUrl ?? undefined,
       statusContext: this.config.landing.statusContext,
     });
+    this.episodeEmails.push(pauseEmail(was, this.s.paused, this.s.history.at(-1).batchId));
     this.note(this.s.history.at(-1).detail);
     await this.tellBaseRedReplaced(was);
   }
@@ -2018,6 +2055,7 @@ class Tick {
       sha: f.candidateSha,
       detail: detail === reason ? reason : `${reason}: ${detail}`,
     });
+    this.episodeEmails.push({ key: `parked:${f.batchId}`, batch: f.batchId, reason });
     this.note(`${f.batchId}: parked ${formatPrs(f.prs)} (${reason})`);
     if (this.countBatchDiscard("parked", reason) >= 2) {
       this.pauseLanding(f, `two batches in a row parked for the same reason: ${reason}`, {
@@ -2136,7 +2174,7 @@ class Tick {
       ...(retryCause && { retryCause }),
       ...(probe === "queue-refs-protected" && { candidateRef: f.candidateRef }),
     };
-    this.setPaused(probe ? automaticPause(this.s, paused, probe) : paused);
+    this.setPaused(probe ? automaticPause(this.s, paused, probe) : paused, f.batchId);
     this.s.inFlight = null;
     this.event("error", { batchId: f.batchId, prs: merged, detail });
     this.note(`paused: ${detail}`);
@@ -2395,6 +2433,7 @@ class Tick {
         url: this.deps.runUrl ?? undefined,
         statusContext: this.config.landing.statusContext,
       });
+      this.episodeEmails.push(pauseEmail(was, this.s.paused, this.s.history.at(-1).batchId));
       this.note(this.s.history.at(-1).detail);
       if (was?.reason === "base-red" && this.s.paused?.reason === "error") {
         await this.tellBaseRedReplaced(was);
@@ -3426,13 +3465,16 @@ class Tick {
     // pause must wait for the real tip to move, not resume on the next tick.
     const stacked = this.shadowStack(batch.bisect, batch.baseSha, []);
     const pauseSha = stacked ? await this.gh.getBranchSha(this.base) : batch.baseSha;
-    this.setPaused({
-      reason: "base-red",
-      since: this.now(),
-      baseSha: pauseSha,
-      detail: detail || `${batch.batchId} failed like the bare base`,
-      issue: issue?.number ?? null,
-    });
+    this.setPaused(
+      {
+        reason: "base-red",
+        since: this.now(),
+        baseSha: pauseSha,
+        detail: detail || `${batch.batchId} failed like the bare base`,
+        issue: issue?.number ?? null,
+      },
+      batch.batchId
+    );
     this.s.inFlight = null;
     this.event("base-red-paused", {
       batchId: batch.batchId,
@@ -4424,7 +4466,7 @@ export function trackStall(state, health, { at, url, clear = true }) {
  * @param {ReturnType<typeof failedTickRecord>} [record]
  */
 export async function recordTickFailure(deps, base, detail, warn = () => {}, record = null) {
-  const saved = await updateStateWithRetry(deps.store, base, (state) => {
+  const saved = await updateStateWithRetry(deps.store, base, async (state) => {
     const at = deps.now();
     const url = deps.runUrl ?? undefined;
     let amended = state;
@@ -4434,6 +4476,8 @@ export async function recordTickFailure(deps, base, detail, warn = () => {}, rec
     } catch (error) {
       warn(`the failed tick's record was not applied: ${error.message}`);
     }
+    const episode = pauseEmail(state.paused, amended.paused, amended.history.at(-1)?.batchId);
+    await deliverEpisodeEmail(deps, amended, episode, url, warn);
     const failed = countFailedTick(
       appendEvent(amended, stripUndefined({ at, type: "error", detail, url })),
       at
@@ -5154,6 +5198,7 @@ export function createTickDeps(env, overrides = {}) {
     runUrl: env.GITHUB_RUN_ID
       ? `${serverUrl}/${repository}/actions/runs/${env.GITHUB_RUN_ID}`
       : null,
+    sendAlert: (mail) => sendAlertEmail({ ...mail, env }),
     repository,
   };
 }
@@ -5180,7 +5225,11 @@ export function assertManagedBase(config, base) {
 /** CLI entry (argv without node/script). Exit code 0 on success, 1 on error. */
 export async function main(argv = process.argv.slice(2), env = process.env) {
   const token = env.OMNI_QUEUE_TOKEN;
-  const secrets = [token, env.OMNI_QUEUE_LAND_TOKEN].filter(Boolean);
+  const secrets = [
+    token,
+    env.OMNI_QUEUE_LAND_TOKEN,
+    ...ALERT_EMAIL_ENV_KEYS.map((key) => env[key]),
+  ].filter(Boolean);
   const redact = (text) => {
     let out = String(text ?? "");
     for (const secret of secrets) out = out.split(secret).join("***");

@@ -168,6 +168,18 @@ test("state documents validate and keep a bounded history", () => {
   assert.ok(EVENT_TYPES.includes("would-land"));
 });
 
+test("state.alertedEpisodes is optional and holds at most 50 nonempty strings", () => {
+  const state = initialState("release/v3.8.54");
+  const keys = Array.from({ length: 50 }, (_, i) => `parked:b${i}`);
+  assert.deepEqual(validateState(state), []);
+  for (const alertedEpisodes of [[], keys]) {
+    assert.deepEqual(validateState({ ...state, alertedEpisodes }), []);
+  }
+  for (const alertedEpisodes of [null, "parked:b1", [""], [1], [...keys, "parked:new"]]) {
+    assert.deepEqual(validateState({ ...state, alertedEpisodes }), ["alertedEpisodes"]);
+  }
+});
+
 test("state.batchWindow: absent in older documents; a positive integer when present", () => {
   const state = initialState("release/v3.8.54", NOW);
   assert.equal(Object.hasOwn(state, "batchWindow"), false);
@@ -267,14 +279,17 @@ test("gitexec keeps the token out of argv and redacts it from errors", () => {
   }
 });
 
-test("gitexec: no git child process sees OMNI_QUEUE_TOKEN or OMNI_QUEUE_LAND_TOKEN", () => {
-  // The tick's own environment holds both tokens; git authenticates through GIT_CONFIG_* only.
-  const saved = {
-    OMNI_QUEUE_TOKEN: process.env.OMNI_QUEUE_TOKEN,
-    OMNI_QUEUE_LAND_TOKEN: process.env.OMNI_QUEUE_LAND_TOKEN,
+test("gitexec: Git and its children receive neither the tick's tokens nor its alert secrets", () => {
+  const secrets = {
+    OMNI_QUEUE_TOKEN: "ghs_app_token_in_the_tick_env",
+    OMNI_QUEUE_LAND_TOKEN: "ghp_land_token_in_the_tick_env",
+    OMNI_QUEUE_ALERT_EMAIL_TO: "alerts@example.invalid",
+    OMNI_QUEUE_SMTP_USER: "sender@example.invalid",
+    OMNI_QUEUE_SMTP_APP_PASSWORD: "fake-app-password",
   };
-  process.env.OMNI_QUEUE_TOKEN = "ghs_app_token_in_the_tick_env";
-  process.env.OMNI_QUEUE_LAND_TOKEN = "ghp_land_token_in_the_tick_env";
+  const names = Object.keys(secrets);
+  const saved = Object.fromEntries(names.map((name) => [name, process.env[name]]));
+  Object.assign(process.env, secrets);
   const dir = mkdtempSync(join(tmpdir(), "omni-queue-git-env-"));
   try {
     // A shell alias prints the environment git hands its child processes.
@@ -286,7 +301,7 @@ test("gitexec: no git child process sees OMNI_QUEUE_TOKEN or OMNI_QUEUE_LAND_TOK
       for (const lines of [dump(git), dump(git, { env: { OMNI_QUEUE_LAND_TOKEN: "per-call" } })]) {
         assert.ok(lines.length > 3, "the environment was printed");
         assert.ok(lines.some((l) => l.startsWith("GIT_TERMINAL_PROMPT=")));
-        for (const name of ["OMNI_QUEUE_TOKEN", "OMNI_QUEUE_LAND_TOKEN"]) {
+        for (const name of names) {
           assert.ok(!lines.some((l) => l.startsWith(`${name}=`)), `${name} reached git`);
         }
       }

@@ -2588,6 +2588,7 @@ async function rejectUntilParked(h, detail) {
 
 test("live merge-ff: exhausted refusals withdraw the status, park the PRs and start the next batch", async () => {
   const h = createHarness({ mode: "live" });
+  const alerts = captureEpisodeEmails(h);
   const f = await greenBatch(h, [1, 2]);
   h.addPr(3);
   const detail = requiredStatusRejection("Gate / Other");
@@ -2603,6 +2604,9 @@ test("live merge-ff: exhausted refusals withdraw the status, park the PRs and st
   assert.equal(event.batchId, f.batchId);
   assert.deepEqual(event.prs, [1, 2]);
   assert.match(event.detail, /Gate \/ Other/);
+  assert.deepEqual(state.alertedEpisodes, [`parked:${f.batchId}`]);
+  assert.equal(alerts.length, 1);
+  assert.match(alerts[0].text, new RegExp(`batch ${f.batchId} hit a problem`));
   for (const { n, head } of f.prs) {
     assert.ok(h.gh.pulls.get(n).labels.includes(h.config.label));
     assert.ok(h.gh.pulls.get(n).labels.includes(h.config.parkedLabel));
@@ -2616,6 +2620,8 @@ test("live merge-ff: exhausted refusals withdraw the status, park the PRs and st
       /did not land.*Gate \/ Other.*queue will continue.*retry.*once.*base moves/i
     );
   }
+  await h.tick();
+  assert.equal(alerts.length, 1, "the stored parked event does not send again");
 });
 
 test("live merge-ff: a parked head is selected once on a new base, then waits for a new head", async () => {
@@ -9513,4 +9519,132 @@ test("a manual pause replaces a scheduled auto pause and keeps both lanes stoppe
   assert.deepEqual(later.paused, manual.paused);
   assert.equal(later.inFlight, null);
   assert.ok(!types(later).includes("resumed"));
+});
+
+function captureEpisodeEmails(h, send = () => ({ sent: true })) {
+  const alerts = [];
+  h.deps.sendAlert = async (alert) => {
+    alerts.push(alert);
+    return send();
+  };
+  return alerts;
+}
+
+test("episode email: a live error pause alerts once using the dashboard link", async () => {
+  const h = createHarness({ mode: "live", actor: "owner", landToken: false });
+  const alerts = captureEpisodeEmails(h);
+  const batch = await greenBatch(h, [1]);
+  const { state } = await h.tick();
+  assert.equal(state.paused.reason, "error");
+  assert.deepEqual(state.alertedEpisodes, [`pause:error:${state.paused.since}`]);
+  assert.deepEqual(alerts, [
+    {
+      subject: `omni-queue on ${BASE}: error`,
+      text:
+        `omni-queue on ${BASE}: batch ${batch.batchId} hit a problem (error). ` +
+        "This is the only alert for this episode. Details and next steps: " +
+        `https://github.com/${h.deps.repository}/issues/1`,
+      now: h.clock.now(),
+    },
+  ]);
+  assert.deepEqual((await h.state()).alertedEpisodes, state.alertedEpisodes);
+  await h.tick();
+  assert.equal(alerts.length, 1);
+});
+
+test("episode email: a recurring auto pause reuses the alert until a manual resume", async () => {
+  const h = createHarness({ mode: "live" });
+  const alerts = captureEpisodeEmails(h);
+  const failLanding = async () => {
+    h.world.landError = new Error("fatal: Authentication failed");
+    return (await h.tick()).state.paused;
+  };
+  await greenBatch(h, [1]);
+  const first = await failLanding();
+
+  h.clock.advance(10);
+  const { state } = await h.tick();
+  assertAutoResumed(state, "land-credential");
+  h.runCi(state.inFlight.candidateSha);
+  const recurring = await failLanding();
+  assert.equal(recurring.since, first.since);
+  assert.equal(alerts.length, 1);
+
+  const resumed = (await h.tick({ action: "resume" })).state;
+  assert.equal(resumed.paused, null);
+  h.runCi(resumed.inFlight.candidateSha);
+  const newPause = await failLanding();
+  assert.notEqual(newPause.since, first.since);
+  assert.equal(alerts.length, 2);
+  assert.deepEqual((await h.state()).alertedEpisodes, [
+    `pause:error:${first.since}`,
+    `pause:error:${newPause.since}`,
+  ]);
+});
+
+for (const [mode, action] of [
+  ["live", "pause"],
+  ["shadow", "tick"],
+  ["live", "dry-run"],
+]) {
+  test(`episode email: ${mode} / ${action} sends nothing and keeps no alert key`, async () => {
+    const h = createHarness({ mode, infraRetries: 0 });
+    const alerts = captureEpisodeEmails(h);
+    const batch = await startBatch(h, [1]);
+    h.runCi(batch.candidateSha, { infra: true });
+    const { state } = await h.tick({ action });
+    assert.equal(state.paused.reason, action === "pause" ? "manual" : "infra");
+    assert.deepEqual(alerts, []);
+    assert.equal(state.alertedEpisodes, undefined);
+  });
+}
+
+test("episode email: a failed send notes the failure, uses the run link and keeps only the latest 50 keys", async () => {
+  const h = createHarness({ mode: "live", infraRetries: 0 });
+  const alerts = captureEpisodeEmails(h, () => ({
+    sent: false,
+    reason: "failed",
+    detail: "exit 67: denied",
+  }));
+  h.modules.dashboard.upsertDashboard = async () => {
+    throw new Error("unavailable");
+  };
+  const batch = await startBatch(h, [1]);
+  const { state: seeded, version } = await h.store.load(BASE);
+  const oldKeys = Array.from({ length: 50 }, (_, i) => `parked:old${i}`);
+  seeded.alertedEpisodes = oldKeys;
+  assert.equal((await h.store.save(BASE, seeded, version, "test seed")).ok, true);
+
+  h.runCi(batch.candidateSha, { infra: true });
+  const { decisions, state } = await h.tick();
+  assert.equal(state.paused.reason, "infra");
+  assert.ok(
+    decisions.some((line) => line.includes("alert email failed") && line.includes("exit 67"))
+  );
+  assert.deepEqual((await h.state()).alertedEpisodes, [
+    ...oldKeys.slice(1),
+    `pause:infra:${state.paused.since}`,
+  ]);
+  assert.ok(alerts[0].text.endsWith(h.deps.runUrl), alerts[0].text);
+  await h.tick();
+  assert.equal(alerts.length, 1);
+});
+
+test("episode email: a withdrawal that pauses the queue in the failed tick record alerts once", async () => {
+  const h = createHarness({ mode: "live" });
+  const alerts = captureEpisodeEmails(h);
+  const batch = await greenBatch(h, [1]);
+  await bothListsFull(h);
+  await diedAfterBlessing(h, batch, [batch.candidateSha]);
+  h.gh.getPull = brokenGetPull();
+  refuseWithdrawals(h, () => true);
+  await recordedFailingTick(h, /502/);
+
+  const state = await h.state();
+  assert.equal(state.paused.reason, "error");
+  assert.equal(alerts.length, 1);
+  assert.ok(alerts[0].text.endsWith(h.deps.runUrl), alerts[0].text);
+  assert.deepEqual(state.alertedEpisodes, [`pause:error:${state.paused.since}`]);
+  await failTick(h);
+  assert.equal(alerts.length, 1);
 });

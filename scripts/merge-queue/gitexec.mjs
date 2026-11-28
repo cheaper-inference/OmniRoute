@@ -3,13 +3,14 @@
 // - Never through a shell (execFile-style argv): PR titles, refs and SHAs are attacker-influenced.
 // - Credentials travel in the environment (GIT_CONFIG_COUNT/KEY/VALUE → http extraheader), never
 //   in argv or in the remote URL, and every error message is redacted before it is thrown. The
-//   tick's OMNI_QUEUE_TOKEN / OMNI_QUEUE_LAND_TOKEN are removed from every git child's environment.
+//   tick's GitHub tokens and e-mail secrets are removed from every git child's environment.
 // - Configuration a single command needs (the signing key of a merge commit: compose.mjs) also
 //   travels as GIT_CONFIG_* entries of that command's environment (run option `config`), never as
 //   `-c` arguments: argv is logged, the environment is not.
 // - Synchronous: one tick is a short, sequential script.
 
 import { spawnSync } from "node:child_process";
+import { ALERT_EMAIL_ENV_KEYS } from "./alert.mjs";
 
 export class GitError extends Error {
   /** @param {string[]} args @param {number|null} code @param {string} stderr */
@@ -41,10 +42,14 @@ export function authEnv(token) {
  * The tick's own credentials. Never handed to a git process: git authenticates through
  * GIT_CONFIG_* (authEnv), and no hook, helper or alias it runs needs the raw tokens.
  */
-const STRIPPED_ENV = Object.freeze(["OMNI_QUEUE_TOKEN", "OMNI_QUEUE_LAND_TOKEN"]);
+const STRIPPED_ENV = Object.freeze([
+  "OMNI_QUEUE_TOKEN",
+  "OMNI_QUEUE_LAND_TOKEN",
+  ...ALERT_EMAIL_ENV_KEYS,
+]);
 
 /** `env` without the STRIPPED_ENV variables. */
-function withoutTokens(env) {
+function withoutQueueSecrets(env) {
   const out = { ...env };
   for (const key of STRIPPED_ENV) delete out[key];
   return out;
@@ -96,7 +101,7 @@ export function createGit({ cwd, token, env = {}, identity, log = () => {} }) {
     ? [token, Buffer.from(`x-access-token:${token}`, "utf8").toString("base64")]
     : [];
   const redact = (text) => secrets.reduce((acc, s) => acc.split(s).join("***"), String(text ?? ""));
-  const baseEnv = withoutTokens({
+  const baseEnv = withoutQueueSecrets({
     ...process.env,
     GIT_TERMINAL_PROMPT: "0",
     GIT_CONFIG_NOSYSTEM: "1",
@@ -116,7 +121,7 @@ export function createGit({ cwd, token, env = {}, identity, log = () => {} }) {
   function run(args, { allowFail = false, input, env: extra, config } = {}) {
     const shown = args.map(redact);
     log(`git ${shown.join(" ")}`);
-    const env = extra ? withoutTokens({ ...baseEnv, ...extra }) : baseEnv;
+    const env = extra ? withoutQueueSecrets({ ...baseEnv, ...extra }) : baseEnv;
     const res = spawnSync("git", args, {
       cwd,
       env: withConfigEntries(env, config),
